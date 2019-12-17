@@ -17,3 +17,7 @@ doc/latex/*
 
 # ignore zipped files
 *.zip
+
+# ignore files that will be created upon complilation
+src/myconfig.h
+
