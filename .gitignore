@@ -1,0 +1,13 @@
+# ignore all files in thamestests; it is more like a scratch directory anyway
+thamestests/
+
+# ignore spreadsheets used for calculations
+*.xls
+*.xlsx
+
+# ignore contents of bin directory but not bin itself
+bin/*
+
+# ignore contents of doc directories
+doc/html/*
+doc/latex/*
