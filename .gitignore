@@ -11,3 +11,9 @@ bin/*
 # ignore contents of doc directories
 doc/html/*
 doc/latex/*
+
+# ignore compiled libraries
+*.a
+
+# ignore zipped files
+*.zip
