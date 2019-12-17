@@ -2191,6 +2191,9 @@ void TNode::GEM_to_MT(
    p_pe = CNode->pe;
    p_Eh = CNode->Eh;
 
+   cout << "GEM OUTPUT: Total SYSTEM volume = " << p_Vs
+        << ", Total SYSTEM mass = " << p_Ms << endl;
+
   for( ii=0; ii<CSD->nICb; ii++ )
   {
     p_rMB[ii] = CNode->rMB[ii];
@@ -2212,6 +2215,8 @@ void TNode::GEM_to_MT(
     p_vPS[ii] = CNode->vPS[ii];
     p_mPS[ii] = CNode->mPS[ii];
     p_xPA[ii] = CNode->xPA[ii];
+    cout << "GEM OUTPUT: Phase name " << CSD->PHNL[ii] << ", volume = "
+         << p_vPS[ii] << ", mass = " << p_mPS[ii] << endl;
   }
   for( ii=0; ii<CSD->nPSb*CSD->nICb; ii++ )
     p_bPS[ii] = CNode->bPS[ii];

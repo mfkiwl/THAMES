@@ -343,7 +343,20 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
 
   setPhasestoich();
   setVphasestoich();
-  setPhasemass();
+
+  ///
+  /// Normally we can call setPhasemass() to read in the GEM phase masses
+  /// from the GEM CSD, but this first time we have to do it manually
+  /// because the units are converted from kg to g and this will mess
+  /// up the assignment of the ophasemass_ values, which would still be
+  /// in kg if we called the setPhasemass() function.
+  ///
+  
+  for (register long int i = 0; i < phasenum_; i++) {
+      phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+      ophasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+  }
+
   setPhasevolume();
   setPhasemolarmass();
 
@@ -1310,44 +1323,59 @@ int ChemicalSystem::calculateState (double time,
     setPhasevolume();
     setPhasemolarmass();
   
+    cout << "%%%%%%%%%% Printing GEM Masses and Volumes in this Step %%%%%%%" << endl;
+    for (register long int myid = 0; myid < phasenum_; myid++) {
+        cout << "Mass and volume of GEM phase " << node_->pCSD()->PHNL[myid] << " = "
+            << phasemass_[myid] << " g and " << phasevolume_[myid] << " m3" << endl;
+    }
+    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
     for (register unsigned int i = 1; i < micphasenum_; i++) {
-        cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
-        cout.flush();
+        // cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
+        // cout.flush();
         if (!isKineticphase(i)) {
             micphasemass_[i] = micphasevolume_[i] = 0.0;
             for (register unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
-                cout << "    Is a THERMO phase composed of "
-                     << phasename_[micphasemembers_[i][j]]
-                     << " having mass = " << phasemass_[micphasemembers_[i][j]]
-                     << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
-                cout.flush();
+                // cout << "    Is a THERMO phase composed of "
+                //      << phasename_[micphasemembers_[i][j]]
+                //      << " having mass = " << phasemass_[micphasemembers_[i][j]]
+                //      << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
+                // cout.flush();
                 mictotvolume_ += phasevolume_[micphasemembers_[i][j]];
                 micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
                 micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
             }
         } else if (isKineticphase(i)) {
-            cout << "    Is a KINETIC phase composed of "
-                 << phasename_[micphasemembers_[i][0]]
-                 << "  having mass = " << micphasemass_[i]
-                 << "  and volume = " << micphasevolume_[i] << endl;
-            cout.flush();
+            // cout << "    Is a KINETIC phase composed of "
+            //      << phasename_[micphasemembers_[i][0]]
+            //     << "  having mass = " << micphasemass_[i]
+            //      << "  and volume = " << micphasevolume_[i] << endl;
+            // cout.flush();
 
             ///
-            /// micphasemass and micphasevolume need to be set elsewhere???
+            /// micphasemass and micphasevolume for kinetic phases are
+            /// already set in KineticModel::calculateKineticStep
             ///
 
             mictotvolume_ += micphasevolume_[i];
         } else {
             micphasevolume_[i] = mictotinitvolume_ * micphasevolfrac_[i];
-            cout << "micphasevolfrac_[DAMAGE] is: " << micphasevolfrac_[i] << endl;
-            cout << "    Is a DAMAGE phase having volume = "
-                 << micphasevolume_[i] << endl;
-            cout.flush();
+            // cout << "micphasevolfrac_[DAMAGE] is: " << micphasevolfrac_[i] << endl;
+            // cout << "    Is a DAMAGE phase having volume = "
+            //      << micphasevolume_[i] << endl;
+            // cout.flush();
         }
     }
 
+    cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
+    for (register unsigned int i = 1; i < micphasenum_; i++) {
+        cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
+            << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
+    }
+    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+
+
     if (isfirst) mictotinitvolume_ = mictotvolume_;
-    cout << "isfirst = " << isfirst << endl;
+    cout << "isfirst = " << isfirst << ", mictotinitvolume_ = " << mictotinitvolume_ << endl;
 
     // Now we take care of the void volume separately
     cout << "now use water to keep total volume constantly." << endl;

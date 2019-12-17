@@ -726,11 +726,15 @@ void Controller::calculateState (double time,
     }
 
     out4 << setprecision(5) << time << " ";
+    cout << "Writing Phases file at time = " << time << endl;
     for (register int i = 0; i < chemsys_->getDCnum(); i++) {
       if (chemsys_->getDCmolarmass(i) > 0.0) {
         cc = chemsys_->getDCclasscode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
             out4 << (chemsys_->getDCmoles(i)*(chemsys_->getDCmolarmass(i))) << " ";
+            cout << "    DC = " << chemsys_->getDCname(i)
+                << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
+                << chemsys_->getDCmolarmass(i) << endl;
         }
       } else {
         string msg = "Divide by zero error for DC " + chemsys_->getDCname(i);
@@ -747,11 +751,9 @@ void Controller::calculateState (double time,
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
-    cout << "Writing microstructure phase quantities..." << endl;
+    cout << "Writing microstructure phase quantities at time " << time << endl;
     out5 << setprecision(5) << time << " ";
     for (register int i = 0; i < chemsys_->getMicphasenum(); i++) {
-      //cout << "    " << chemsys_->getMicphasename(i) << " = "
-      // << chemsys_->getMicphasevolfrac(i) << endl;
       out5 << (chemsys_->getMicphasevolfrac(i)) << " ";
     }   
     out5 << endl;

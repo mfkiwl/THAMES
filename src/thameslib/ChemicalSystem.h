@@ -3997,7 +3997,7 @@ void setPhasestoich (const unsigned int pidx,
 @brief Renormalizes phase stoichiometries per mole of oxygen in the phase.
 
 This is a poorly worded function because it does not return anything.
-simply renormalizes the GEM phase stoichiometries by the number of moles
+It simply renormalizes the GEM phase stoichiometries by the number of moles
 of oxygen in that phase.
 
 @todo Find out why it is useful to normalize by moles of oxygen here but not for the 1D array

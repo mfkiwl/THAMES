@@ -100,7 +100,7 @@
   <xs:complexType name="gemphase_datatype">
     <xs:sequence>
       <xs:element name="gemphasename" type="stringtype"/>
-      <xs:element name="gemdcname" type="stringtype"/>
+      <xs:element maxOccurs="unbounded" name="gemdcname" type="stringtype"/>
     </xs:sequence>
   </xs:complexType>
 

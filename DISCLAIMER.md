@@ -11,8 +11,8 @@ acknowledgment, such as an appropriate citation in a publication, if the
 software is used.
 
 The U.S. Department of Commerce makes no warranty, expressed or implied, to
-users of MicroChar, and accepts no responsibility for its use. Users of
-MicroChar assume sole responsibility under Federal law for determining the
+users of THAMES, and accepts no responsibility for its use. Users of
+THAMES assume sole responsibility under Federal law for determining the
 appropriateness of its use in any particular application; for any conclusions
 drawn from the results of its use; and for any actions taken or not taken as
 a result of analyses performed using these tools. All results should be
@@ -28,5 +28,5 @@ during their hydration or subsequent deterioratation by groundwater leaching
 or external sulfate attack. It has been developed from the best knowledge and
 understanding currently available, but has some limitations that must be
 understood and considered by the user. THAMES is intended for use by persons
-competent in the  eld of cement-based materials and having some familiarity
+competent in the field of cement-based materials and having some familiarity
 with computers.
