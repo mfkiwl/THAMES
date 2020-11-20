@@ -19,5 +19,6 @@ doc/latex/*
 *.zip
 
 # ignore files that will be created upon complilation
-src/myconfig.h
+src/version.h
+src/thameslib/myconfig.h
 
