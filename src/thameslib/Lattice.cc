@@ -1645,6 +1645,9 @@ void Lattice::writeLattice (double curtime, const string &root)
 
     out.close();
     
+    // The next block is implemented only if we are dealing with sulfate attack
+    if (sattack_time_ != 1.0e10) {
+    
     ofname = root;
     ofname = ofname + "." + timestr + "." + tempstr + ".img.damage";
 
@@ -1682,6 +1685,7 @@ void Lattice::writeLattice (double curtime, const string &root)
     }
 
     out1.close();
+} //The above block is implemented only if we are dealing with sulfate attack
 }
 
 void Lattice::writeDamageLattice (double curtime, const string &root)
