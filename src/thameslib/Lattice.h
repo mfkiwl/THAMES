@@ -777,9 +777,11 @@ to do that, and then actually causing the switches in phase id to happen at thos
 The interfaces and lists of dissolution and growth sites are updated accordingly, too.
 
 @param time is is the simulation time [days]
+@param simtype is the type of simulation (hydration, leaching, etc)
 @param isfirst is true if this is the first microstructure update, false otherwise
 */
 void changeMicrostructure (double time,
+                           const int simtype,
                            bool isfirst);
     
 /**
@@ -790,7 +792,9 @@ The microstructure output file will indicate the phase id at each site.
 @param curtime is the current time in days
 @param root is the root name of the output file to create
 */
-void writeLattice (double curtime, const string &root);
+void writeLattice (double curtime,
+                   const int simtype,
+                   const string &root);
     
 /**
 @brief Write the 3D microstructure to a file.
@@ -809,7 +813,9 @@ void writeDamageLattice (double curtime, const string &root);
 @param curtime is the current time in days
 @param root is the root name of the png output file to create
 */
-void writeLatticePNG (double curtime, const string &root);
+void writeLatticePNG (double curtime,
+                      const int simtype,
+                      const string &root);
     
 /**
 @brief Write the 3D microstructure to a png file that can be immediately rendered.

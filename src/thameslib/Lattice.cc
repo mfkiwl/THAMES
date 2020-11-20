@@ -1104,6 +1104,7 @@ unsigned long int Lattice::getIndex (int ix,
 }
 
 void Lattice::changeMicrostructure (double time,
+                                    const int simtype,
                                     bool isfirst)
 {
     register unsigned int i,ii;
@@ -1243,7 +1244,7 @@ void Lattice::changeMicrostructure (double time,
     /// sulfate attack during this simulation.
     ///
 
-    if (sattack_time_ != 1.0e10) {
+    if (simtype == SULFATE_ATTACK) {
         
         ///
         ///  Normalize to get volume fractions and compute number
@@ -1602,7 +1603,7 @@ void Lattice::changeMicrostructure (double time,
     return;
 }
 
-void Lattice::writeLattice (double curtime, const string &root)
+void Lattice::writeLattice (double curtime, const int simtype, const string &root)
 {
     register unsigned int i,j,k;
     string ofname(root);
@@ -1646,46 +1647,46 @@ void Lattice::writeLattice (double curtime, const string &root)
     out.close();
     
     // The next block is implemented only if we are dealing with sulfate attack
-    if (sattack_time_ != 1.0e10) {
+    if (simtype == SULFATE_ATTACK) {
     
-    ofname = root;
-    ofname = ofname + "." + timestr + "." + tempstr + ".img.damage";
+        ofname = root;
+        ofname = ofname + "." + timestr + "." + tempstr + ".img.damage";
 
-    ofstream out1(ofname.c_str());
-    try {
-        if (!out1.is_open()) {
-            throw FileException("Lattice","writeLattice",ofname,"Could not open");
-        }
-    }
-    catch (FileException fex) {
-        fex.printException();
-        exit(1);
-    }
-
-    // Write image header information first
-
-    out1 << VERSIONSTRING << " " << version_ << endl;
-    out1 << XSIZESTRING << " " << xdim_ << endl;
-    out1 << YSIZESTRING << " " << ydim_ << endl;
-    out1 << ZSIZESTRING << " " << zdim_ << endl;
-    out1 << IMGRESSTRING << " " << resolution_ << endl;
- 
-    int DAMAGEID = chemsys_->getMicid("DAMAGE"); 
-    for (k = 0; k < zdim_; k++) {
-        for (j = 0; j < ydim_; j++) {
-            for (i = 0; i < xdim_; i++) {
-               int index = getIndex(i,j,k);
-               if (site_[index].IsDamage()) {
-                 out1 << DAMAGEID << endl;
-               } else {
-                 out1 << site_[index].getPhaseId() << endl;
-               }
+        ofstream out1(ofname.c_str());
+        try {
+            if (!out1.is_open()) {
+                throw FileException("Lattice","writeLattice",ofname,"Could not open");
             }
         }
-    }
+        catch (FileException fex) {
+            fex.printException();
+            exit(1);
+        }
 
-    out1.close();
-} //The above block is implemented only if we are dealing with sulfate attack
+        // Write image header information first
+
+        out1 << VERSIONSTRING << " " << version_ << endl;
+        out1 << XSIZESTRING << " " << xdim_ << endl;
+        out1 << YSIZESTRING << " " << ydim_ << endl;
+        out1 << ZSIZESTRING << " " << zdim_ << endl;
+        out1 << IMGRESSTRING << " " << resolution_ << endl;
+ 
+        int DAMAGEID = chemsys_->getMicid("DAMAGE"); 
+        for (k = 0; k < zdim_; k++) {
+            for (j = 0; j < ydim_; j++) {
+                for (i = 0; i < xdim_; i++) {
+                   int index = getIndex(i,j,k);
+                   if (site_[index].IsDamage()) {
+                     out1 << DAMAGEID << endl;
+                   } else {
+                     out1 << site_[index].getPhaseId() << endl;
+                   }
+                }
+            }
+        }
+
+        out1.close();
+    } //The above block is implemented only if we are dealing with sulfate attack
 }
 
 void Lattice::writeDamageLattice (double curtime, const string &root)
@@ -1734,7 +1735,7 @@ void Lattice::writeDamageLattice (double curtime, const string &root)
     out.close();
 }
 
-void Lattice::writeLatticePNG (double curtime, const string &root)
+void Lattice::writeLatticePNG (double curtime, const int simtype, const string &root)
 {
     register unsigned int i,j,k;
     string ofname(root);

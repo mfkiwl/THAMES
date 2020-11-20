@@ -76,6 +76,8 @@ Solution *solut_;                   /**< Pointer to the `Solution` object */
 vector<double> time_;               /**< List of simulation times for each iteration */
 double statfreq_;                   /**< Frequency to output statistics */
 	
+int sim_type_;                       /**< Hydration, leaching, or sulfate attack for now */
+
 private:
     
 double sattack_time_;               /**< Simulation time at which to begin sulfate attack,
@@ -103,6 +105,7 @@ auxiliary objects be defined already, including
 @param cs is a pointer to the already-instantiated `ChemicalSystem` object
 @param solut is a pointer to the already-instantiated `Solution` object
 @param thmstr is a pointer to the already-instantiated `ThermalStrain` object
+@param simtype is the type of simulation to run
 @param parfilename is the name of the input parameter file
 @param jobname is the root name to give to all output files
 */
@@ -111,6 +114,7 @@ Controller (Lattice *msh,
             ChemicalSystem *cs,
             Solution *solut,
             ThermalStrain *thmstr,
+            const int simtype,
             const string &parfilename,
             const string &jobname);
     
@@ -183,6 +187,26 @@ void setSattack_time (const double sattacktime)
 double getSattack_time (void) const
 {
     return sattack_time_;
+}
+                                                  
+/**
+@brief Set the simulation type
+
+@param simtype is the simulation type
+*/
+void setSim_type (const double simtype)
+{
+    sim_type_ = simtype;
+}
+
+/**
+@brief Get the simulation type.
+
+@return the simulation type
+*/
+double getSim_type (void) const
+{
+    return sim_type_;
 }
                                                   
 };      // End of Controller class

@@ -23,7 +23,7 @@ int main (void)
     strainenergy.clear();
     strainenergy.resize(156,0.0); 
    
-    int choice;
+    int choice,simtype;
     string buff = "";
     ChemicalSystem *ChemSys;
     Solution *Solut;
@@ -57,6 +57,7 @@ int main (void)
         inittime = localtime(&lt);
         cout << asctime(inittime);
         clock_t starttime = clock();
+        simtype = choice;
         
         //
         // User must provide the name of the GEM chemical system definition (CSD) file
@@ -283,6 +284,7 @@ int main (void)
                                 ChemSys,
                                 Solut,
                                 ThermalStrainSolver,
+                                simtype,
                                 par_filename,
                                 jobroot);
         }

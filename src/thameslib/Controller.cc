@@ -10,12 +10,14 @@ Controller::Controller (Lattice *msh,
                         ChemicalSystem *cs,
                         Solution *solut,
                         ThermalStrain *thmstr,
+                        const int simtype,
                         const string &parfilename,
                         const string &jobname)
     :lattice_(msh),
      kineticmodel_(km),
      chemsys_(cs),
      solut_(solut),
+     sim_type_(simtype),
      thermalstr_(thmstr),
      jobroot_(jobname)
 {
@@ -345,12 +347,14 @@ void Controller::doCycle (const string &statfilename,
     ///
 
     cout << "Going into Lattice::changeMicrostructure" << endl;
-    lattice_->changeMicrostructure(time_[i],isfirst);
+    lattice_->changeMicrostructure(time_[i],sim_type_,isfirst);
 
     if ((time_[i] >= output_time[time_index]) && (time_index < output_time.size())) {
-        cout << "Writing lattice now... time_[" << i << "] = " << time_[i] << ", output_time[" << time_index << "] = " << output_time[time_index] << endl;
-        lattice_->writeLattice(time_[i],jobroot_);
-        lattice_->writeLatticePNG(time_[i],jobroot_);
+        cout << "Writing lattice now... time_[" << i << "] = "
+             << time_[i] << ", output_time[" << time_index << "] = "
+             << output_time[time_index] << endl;
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
+        lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
         // lattice_->CheckPoint(jobroot_);
         time_index++;
         cout << "...Done!" << endl;
@@ -390,8 +394,8 @@ void Controller::doCycle (const string &statfilename,
         damagecount_ = 0;  
         double poreintroduce = 0.5;
     
-        lattice_->writeLattice(time_[i],jobroot_);
-        lattice_->writeLatticePNG(time_[i],jobroot_);
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
+        lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
         string ofname(jobroot_);
         ostringstream ostr1,ostr2;
         ostr1 << (int)(time_[i] * 100);
