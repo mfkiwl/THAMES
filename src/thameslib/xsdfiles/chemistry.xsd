@@ -128,6 +128,7 @@
         <xs:element name="wcRatio" type="positiveDoubletype"/>
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
+        <xs:element name="saturated" type="integertype"/>
         <xs:element maxOccurs="unbounded" name="phase" type="phasetype"/>
       </xs:sequence>
     </xs:complexType>

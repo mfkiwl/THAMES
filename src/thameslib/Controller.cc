@@ -21,7 +21,7 @@ Controller::Controller (Lattice *msh,
      thermalstr_(thmstr),
      jobroot_(jobname)
 {
-  register unsigned int i;
+  unsigned int i;
   double tvalue,pvalue;
   string buff;
   vector<double> phases;
@@ -62,86 +62,87 @@ Controller::Controller (Lattice *msh,
   ///
  
   try {
-    string outfilename = jobroot_ + "_Solution.dat";
+    string outfilename = jobroot_ + "_Solution.csv";
     ofstream out(outfilename.c_str(),ios::app);
     if (!out) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
     char cc;
-    out << "Time(d) ";
-    for (register int i = 0; i < chemsys_->getDCnum(); i++) {
+    out << "Time(d)";
+    for (int i = 0; i < chemsys_->getDCnum(); i++) {
         cc = chemsys_->getDCclasscode(i); 
         if (cc == 'S' || cc == 'T' || cc == 'W') {
-            out << chemsys_->getDCname(i) << " ";
+            out << "," << chemsys_->getDCname(i);
         }
     }  
     out << endl;
     out.close();
 
-    outfilename = jobroot_ + "_Phases.dat";
+    outfilename = jobroot_ + "_Phases.csv";
     ofstream out1(outfilename.c_str(),ios::app);
     if (!out1) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
 
-    out1 << "Time(d) ";
-    for (register int i = 0; i < chemsys_->getDCnum(); i++) {
+    out1 << "Time(d)";
+    for (int i = 0; i < chemsys_->getDCnum(); i++) {
         cc = chemsys_->getDCclasscode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-            out1 << chemsys_->getDCname(i) << " ";
+            out1 << "," << chemsys_->getDCname(i);
         }
     }   
     out1 << endl;
     out1.close();
 
-    outfilename = jobroot_ + "_Microstructure.dat";
+    outfilename = jobroot_ + "_Microstructure.csv";
     ofstream out2(outfilename.c_str(),ios::app);
     if (!out2) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
 
-    out2 << "Time(d) ";
-    for (register int i = 0; i < chemsys_->getMicphasenum(); i++) {
-        out2 << chemsys_->getMicphasename(i) << " ";
+    out2 << "Time(d)";
+    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
+        out2 << "," << chemsys_->getMicphasename(i);
     }   
     out2 << endl;
     out2.close();
 
-    outfilename = jobroot_ + "_pH.dat";
+    outfilename = jobroot_ + "_pH.csv";
     ofstream out3(outfilename.c_str(),ios::app);
     if (!out3) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
-    out3 << "Time(d) pH values" << endl;
+    out3 << "Time(d),pH" << endl;
     out3.close();
 
-    outfilename = jobroot_ + "_CSH.dat";
+    outfilename = jobroot_ + "_CSH.csv";
     ofstream out4(outfilename.c_str(),ios::app);
     if (!out4) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
-    for (register int i = 0; i < chemsys_->getICnum(); i++){
-        out4 << chemsys_->getICname(i) << " ";
+    out4 << "Time(d)";
+    for (int i = 0; i < chemsys_->getICnum(); i++){
+        out4 << "," << chemsys_->getICname(i);
     }
-    out4 << "Time(d) Ca/Si Ratio" << endl;
+    out4 << ",Ca/Si" << endl;
     out4.close();
 
-    outfilename = jobroot_ + "_CSratio_solid.dat";
+    outfilename = jobroot_ + "_CSratio_solid.csv";
     ofstream out5(outfilename.c_str(),ios::app);
     if(!out5) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
-    out5 << "Time(d) C/S in solid" << endl;
+    out5 << "Time(d),C/S in solid" << endl;
     out5.close();
     
-    outfilename = jobroot_ + "_icmoles.dat";
+    outfilename = jobroot_ + "_icmoles.csv";
     ofstream out6(outfilename.c_str(),ios::app);
     if(!out6) {
         throw FileException("Controller","Controller",outfilename,"Could not append"); 
     }
-    out6 << "Time(d) ";
-    for (register int i = 0; i < chemsys_->getICnum(); i++){
-        out6 << chemsys_->getICname(i) << " ";
+    out6 << "Time(d)";
+    for (int i = 0; i < chemsys_->getICnum(); i++){
+        out6 << "," << chemsys_->getICname(i);
     }
     out6 << endl;
     out6.close();
@@ -177,7 +178,7 @@ Controller::Controller (Lattice *msh,
 void Controller::doCycle (const string &statfilename,
                           int choice)
 {    
-  register unsigned int i;
+  unsigned int i;
   int time_index;
   vector<double> output_time;
   double next_stat_time = statfreq_;
@@ -324,14 +325,18 @@ void Controller::doCycle (const string &statfilename,
     cout << "Time = " << time_[i] << endl;
     cout << "Next output time = " << output_time[time_index] << endl;
 
-    cout << "TTTTT " << endl;
-    time_t lt10 = time('\0');
+    time_t lt10 = time(NULL);
     struct tm *time10;
     time10 = localtime(&lt10);
     cout << asctime(time10);
 
     timestep = (i > 0) ? (time_[i] - time_[i-1]) : (time_[i]);
     bool isfirst = (i == 0) ? true : false;
+
+    // if (isfirst) {
+    //     cout << "Going into Controller::initializeState" << endl;
+    //     initializeState(time_[i]);
+    // }
 
     ///
     /// This is the main step of the cycle; the calculateState method
@@ -579,18 +584,52 @@ void Controller::doCycle (const string &statfilename,
   return;
 }
 
+void Controller::initializeState (double time)
+{
+
+    // Set up the amount of water in the system
+    kineticmodel_->initializeMoles();      
+
+    // Set the temperature
+    double T = chemsys_->getT();
+    lattice_->setTemperature(T);
+
+    ///
+    /// Now that the method is done determining the change in moles of each IC,
+    /// launch a thermodynamic calculation to determine new equilibrium state
+    /// 
+    /// The `ChemicalSystem` object provides an interface for these calculations
+    /// 
+
+    cout << "Going to launch thermodynamic calculation now... ";
+    cout.flush();
+    try {
+        chemsys_->calculateState(time,true);
+    }
+    catch (GEMException gex) {
+        gex.printException();
+        exit(1);
+    }
+    cout << "Done!" << endl;
+    cout.flush();
+    
+  return;
+}
+
 void Controller::calculateState (double time,
                                  double dt,
                                  bool isfirst) 
 {
   try {
 
-    if (isfirst) {        
-      // kineticmodel_->initializeMoles();      
-      double T = chemsys_->getT();
-      lattice_->setTemperature(T);
+    if (isfirst) {
+
+        kineticmodel_->initializeMoles();
+        double T = chemsys_->getT();
+        lattice_->setTemperature(T);
+
     }
-        
+
     ///
     /// We must pass some vectors to the `calculateKineticStep` method that
     /// will hold the amounts of impurity elements released from the clinker
@@ -602,11 +641,9 @@ void Controller::calculateState (double time,
     impurityrelease.clear();
     impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
        
-    /*
-    cout << "Before KineticModel::calculateKineticStep, print out
-            ICmoles for solution..." << endl;
+    cout << "Before KineticModel::calculateKineticStep, print out "
+         << "ICmoles for solution..." << endl;
     solut_->getICmoles();
-    */
  
     ///
     /// Get the number of moles of each IC dissolved from kinetically controlled phases
@@ -637,7 +674,7 @@ void Controller::calculateState (double time,
       ///
 
       double water_v0 = chemsys_->getNode()->DC_V0(chemsys_->getMic2DC(WATERID,0),
-                                                    chemsys_->getP(),chemsys_->getT());
+                                                chemsys_->getP(),chemsys_->getT());
       double addwatermol = addwatervol / water_v0;
 
       cout << "molar volume of water is: " << water_v0 << endl;
@@ -661,11 +698,17 @@ void Controller::calculateState (double time,
     /// launch a thermodynamic calculation to determine new equilibrium state
     /// 
     /// The `ChemicalSystem` object provides an interface for these calculations
-    ///
+    /// 
 
     cout << "Going to launch thermodynamic calculation now... ";
     cout.flush();
-    chemsys_->calculateState(time,isfirst);
+    try {
+        chemsys_->calculateState(time,isfirst);
+    }
+    catch (GEMException gex) {
+        gex.printException();
+        exit(1);
+    }
     cout << "Done!" << endl;
     cout.flush();
     
@@ -686,7 +729,6 @@ void Controller::calculateState (double time,
       ofstream out2(csfilename.c_str(),ios::app);
       chemsys_->writeChemSys(out2);
       out2.close();
-      //return;
     }
         
     ///
@@ -704,38 +746,38 @@ void Controller::calculateState (double time,
     // Output to files the solution composition data, phase data, DC data,
     // microstructure data, pH, and C-S-H composition and Ca/Si ratio
 
-    string outfilename = jobroot_ + "_Solution.dat";
+    string outfilename = jobroot_ + "_Solution.csv";
     ofstream out3(outfilename.c_str(),ios::app);
     if (!out3) {
       throw FileException("Controller","calculateState",
                          outfilename,"Could not append");
     }
 
-    out3 << setprecision(5) << time << " ";
+    out3 << setprecision(5) << time;
     char cc;
-    for (register int i = 0; i < chemsys_->getDCnum(); i++) {
+    for (int i = 0; i < chemsys_->getDCnum(); i++) {
       cc = chemsys_->getDCclasscode(i); 
       if (cc == 'S' || cc == 'T' || cc == 'W') {
-        out3 << (chemsys_->getNode())->Get_cDC((long int) i) << " ";
+        out3 << "," << (chemsys_->getNode())->Get_cDC((long int) i);
       }
     }   
     out3 << endl;
     out3.close();
         
-    outfilename = jobroot_ + "_Phases.dat";
+    outfilename = jobroot_ + "_Phases.csv";
     ofstream out4(outfilename.c_str(),ios::app);
     if (!out4) {
       throw FileException("Controller","calculateState",
                         outfilename,"Could not append");
     }
 
-    out4 << setprecision(5) << time << " ";
+    out4 << setprecision(5) << time;
     cout << "Writing Phases file at time = " << time << endl;
-    for (register int i = 0; i < chemsys_->getDCnum(); i++) {
+    for (int i = 0; i < chemsys_->getDCnum(); i++) {
       if (chemsys_->getDCmolarmass(i) > 0.0) {
         cc = chemsys_->getDCclasscode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-            out4 << (chemsys_->getDCmoles(i)*(chemsys_->getDCmolarmass(i))) << " ";
+            out4 << "," << (chemsys_->getDCmoles(i)*(chemsys_->getDCmolarmass(i)));
             cout << "    DC = " << chemsys_->getDCname(i)
                 << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
                 << chemsys_->getDCmolarmass(i) << endl;
@@ -749,43 +791,60 @@ void Controller::calculateState (double time,
     out4 << endl;
     out4.close();
         
-    outfilename = jobroot_ + "_Microstructure.dat";
+    outfilename = jobroot_ + "_Microstructure.csv";
     ofstream out5(outfilename.c_str(),ios::app);
     if (!out5) {
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
     cout << "Writing microstructure phase quantities at time " << time << endl;
-    out5 << setprecision(5) << time << " ";
-    for (register int i = 0; i < chemsys_->getMicphasenum(); i++) {
-      out5 << (chemsys_->getMicphasevolfrac(i)) << " ";
+    out5 << setprecision(5) << time;
+    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
+      out5 << "," << (chemsys_->getMicphasevolfrac(i));
     }   
     out5 << endl;
     out5.close();
         
-    outfilename = jobroot_ + "_pH.dat";
+    outfilename = jobroot_ + "_pH.csv";
     ofstream out6(outfilename.c_str(),ios::app);
     if (!out6) {
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
-    cout << "Writing pH values..." << endl;
-    out6 << setprecision(5) << time << " ";
-    out6 << (chemsys_->getPH()) << endl;
+    cout << "Writing pH values...";
+    cout.flush();
+    out6 << setprecision(5) << time;
+    out6 << "," << (chemsys_->getPH()) << endl;
+    cout << "Done!" << endl;
+    cout.flush();
     out6.close();
         
+    cout << "Call to chemsys_setPhasestoich() ... " << endl;
+    cout.flush();
     chemsys_->setPhasestoich();
-    double *CSHcomp = chemsys_->getPhasestoich(chemsys_->getPhaseid("Tob_jen_ss"));
+    cout << "Done!" << endl;
+    cout << "Call to chemsys_getPhasestoich() ... " << endl;
+    cout.flush();
+    double *CSHcomp;
+    try {
+        CSHcomp = chemsys_->getPhasestoich(chemsys_->getPhaseid("CSHQ"));
+    }
+    catch (EOBException eex) {
+        eex.printException();
+        exit(1);
+    }
+    cout << "Done!" << endl;
+    cout.flush();
     double Ca_moles = 0.0, Si_moles = 0.0, Ca_Si_Ratio = 0.0;
-    outfilename = jobroot_ + "_CSH.dat";
+    outfilename = jobroot_ + "_CSH.csv";
     ofstream out7(outfilename.c_str(),ios::app);
     if(!out7){
       throw FileException("Controller","calculateState",
                         outfilename,"Could not append");
     }
-    out7 << setprecision(5) << time << " ";
-    for (register unsigned int i = 0; i < chemsys_->getICnum(); i++){
-      out7 << CSHcomp[i] << " ";
+    out7 << setprecision(5) << time;
+    for (unsigned int i = 0; i < chemsys_->getICnum(); i++){
+      out7 << "," << CSHcomp[i];
       if (chemsys_->getICname(i) == "Ca"){
         Ca_moles = CSHcomp[i];
       }
@@ -796,7 +855,7 @@ void Controller::calculateState (double time,
     if (Ca_moles < 1.0e-16) Ca_moles = 1.0e-16;
     if (Si_moles < 1.0e-16) Si_moles = 1.0e-16;
     Ca_Si_Ratio = Ca_moles/Si_moles;
-    out7 << Ca_Si_Ratio << endl;
+    out7 << "," << Ca_Si_Ratio << endl;
     out7.close();
         
     chemsys_->setPhasestoich();
@@ -804,13 +863,13 @@ void Controller::calculateState (double time,
     int ICindex;
     Ca_moles = Si_moles = 0.0;
     double C_S_ratio = 0.0;
-    outfilename = jobroot_ + "_CSratio_solid.dat";
+    outfilename = jobroot_ + "_CSratio_solid.csv";
     ofstream out8(outfilename.c_str(),ios::app);
     if(!out8){
       throw FileException("Controller","calculateState",
                         outfilename,"Could not append");
     }
-    out8 << setprecision(5) << time << " ";
+    out8 << setprecision(5) << time;
     for (int i = 0; i < chemsys_->getPhasenum(); i++) {
       cc = chemsys_->getPhaseclasscode(i);
       if (cc == 's'){
@@ -823,20 +882,21 @@ void Controller::calculateState (double time,
     } 
     if (Si_moles != 0) {
       C_S_ratio = Ca_moles/Si_moles;
-      out8 << C_S_ratio <<endl;
+      out8 << "," << C_S_ratio << endl;
     }else{
-      out8 << "Si_moles is ZERO" << endl;
+      out8 << ",Si_moles is ZERO" << endl;
     }
+    out8.close();
         
-    outfilename = jobroot_ + "_icmoles.dat";
+    outfilename = jobroot_ + "_icmoles.csv";
     ofstream out9(outfilename.c_str(),ios::app);
     if(!out9){
       throw FileException("Controller","calculateState",
                         outfilename,"Could not append");
     }
-    out9 << setprecision(5) << time << " ";
+    out9 << setprecision(5) << time;
     for (int i = 0; i < chemsys_->getICnum(); i++) {
-      out9 << chemsys_->getICmoles(i) << " " ;
+      out9 << "," << chemsys_->getICmoles(i);
     }
     out9 << endl;
     out9.close();

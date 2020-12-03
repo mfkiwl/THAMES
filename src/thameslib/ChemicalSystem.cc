@@ -17,7 +17,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
 
   double *icmolarmass,*dcmolarmass;
   char *cc;
-  register unsigned int ii,jj;
+  unsigned int ii,jj;
   int k;
   bool found = false;
     
@@ -297,17 +297,20 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   }
   string string1;
   for (i = 0; i < ICnum_; i++) {
-    string1.assign((node_->pCSD())->ICNL[i]);
+    string1.assign(node_->xCH_to_IC_name(i));
     ICname_.push_back(string1);
     ICidlookup_.insert(make_pair(string1,i));
   }
   for (i = 0; i < DCnum_; i++) {
-    string1.assign((node_->pCSD())->DCNL[i]);
+    cout << "DC id " << i << " name is " << node_->xCH_to_DC_name(i) << endl;
+    cout.flush();
+    string1.assign(node_->xCH_to_DC_name(i));
+
     DCname_.push_back(string1);
     DCidlookup_.insert(make_pair(string1,i));
   }
   for (i = 0; i < phasenum_; i++) {
-    string1.assign((node_->pCSD())->PHNL[i]);
+    string1.assign(node_->xCH_to_Ph_name(i));
     phasename_.push_back(string1);
     phaseidlookup_.insert(make_pair(string1,i));
   }
@@ -352,7 +355,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   /// in kg if we called the setPhasemass() function.
   ///
   
-  for (register long int i = 0; i < phasenum_; i++) {
+  for (long int i = 0; i < phasenum_; i++) {
       phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
       ophasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
   }
@@ -419,7 +422,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   ///
 
   mictotinitvolume_ = 0.0;
-  for (register unsigned int i = 0; i < micphasenum_; i++) {
+  for (unsigned int i = 0; i < micphasenum_; i++) {
     mic2phase_.insert(make_pair((int)i,micphasemembers_[i]));
     mic2DC_.insert(make_pair((int)i,micDCmembers_[i]));
   }
@@ -482,7 +485,7 @@ vector<double> ChemicalSystem::getSolution ()
   vector<double> tempicmoles;
   tempicmoles.clear();
   tempicmoles.resize(ICnum_,0.0);
-  for (register unsigned int i = 0; i < DCnum_; i++) {
+  for (unsigned int i = 0; i < DCnum_; i++) {
     char cc = getDCclasscode(i);
     if (cc == 'S' || cc == 'T') {
       double moles = node_->Get_cDC(i) * watermass * 1.0e-3;
@@ -550,7 +553,9 @@ void ChemicalSystem::parseDoc (const string &docname)
     ///
 
     cur = cur->xmlChildrenNode;
-    int testnumentries;
+    int testnumentries = 0;
+    int satstate = 1;
+    saturated_ = true;
     while (cur != NULL) {
         cout << "Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"numentries"))) {
@@ -559,6 +564,12 @@ void ChemicalSystem::parseDoc (const string &docname)
             from_string(testnumentries,st);
             cout << "Num entries in interface xml file is " << testnumentries << endl;
             xmlFree(key);
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"saturated"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(satstate,st);
+            if (satstate == 0) saturated_ = false;
+            cout << "System saturation state: " << saturated_ << endl;
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
             cout << "Preparing to parse a phase from interface xml file..." << endl;
             parsePhase(doc, cur, testnumentries, phasedata);
@@ -1032,7 +1043,7 @@ void ChemicalSystem::getGEMPhasestoich ()
     double *arout = new double[ICnum_];
     for (long int i = 0; i < phasenum_; i++) {
         arout = node_->Ph_BC(i,arout);
-        for (register unsigned int j = 0; j < ICnum_; j++) {
+        for (unsigned int j = 0; j < ICnum_; j++) {
             phasestoich_[(i * ICnum_) + j] = arout[j];
         }
     }
@@ -1048,7 +1059,7 @@ void ChemicalSystem::getGEMVphasestoich ()
     vplace.resize(ICnum_,0.0);
     vphasestoich_.resize(phasenum_,vplace);
     int indexval,oval;
-    for (register unsigned int i = 0; i < phasenum_; i++) {
+    for (unsigned int i = 0; i < phasenum_; i++) {
         if (phasename_[i] == "aq_gen") {
 
             ///
@@ -1057,13 +1068,13 @@ void ChemicalSystem::getGEMVphasestoich ()
 
             oval = (i * ICnum_) + getICid("O");
             if (phasestoich_[oval] > 0.0) {
-                for (register unsigned int j = 0; j < ICnum_; j++) {
+                for (unsigned int j = 0; j < ICnum_; j++) {
                     indexval = (i * ICnum_) + j;
                     vphasestoich_[i][j] = (phasestoich_[indexval]/phasestoich_[oval]);
                 }
             }
         } else {
-            for (register unsigned int j = 0; j < ICnum_; j++) {
+            for (unsigned int j = 0; j < ICnum_; j++) {
                 indexval = (i * ICnum_) + j;
                 vphasestoich_[i][j] = (phasestoich_[indexval]/minval);
             }
@@ -1073,7 +1084,7 @@ void ChemicalSystem::getGEMVphasestoich ()
 
 void ChemicalSystem::writeDb (ostream &stream)
 {
-    register unsigned int i;
+    unsigned int i;
 
     ///
     /// Make the header
@@ -1119,7 +1130,7 @@ void ChemicalSystem::writeMember (const unsigned int i,
 
 void ChemicalSystem::writeChemSys ()
 {
-    register unsigned int j;
+    unsigned int j;
 
     ///
     /// First we will list details for the ICs
@@ -1130,27 +1141,27 @@ void ChemicalSystem::writeChemSys ()
     out << "Report on the Material Database" << endl;
     out << "-------------------------------" << endl << endl;
     out << "List of Independent Components:" << endl << endl;
-    for(register unsigned int i = 0; i < ICnum_; i++) {
+    for(unsigned int i = 0; i < ICnum_; i++) {
         out << i << ")            Name: " << ICname_[i] << endl;
         out << "        classcode: " << ICclasscode_[i] << endl;
         out << "       molar mass: " << ICmolarmass_[i] << endl << endl;
     }
 
     out << "List of Dependent Components:" << endl << endl;
-    for(register unsigned int i = 0; i < DCnum_; i++) {
+    for(unsigned int i = 0; i < DCnum_; i++) {
         out << i << ")            Name: " << DCname_[i] << endl;
         out << "        classcode: " << DCclasscode_[i] << endl;
         out << "       molar mass: " << DCmolarmass_[i] << endl << endl;
     }
 
     out << "List of Phases:" << endl << endl;
-    for(register unsigned int i = 0; i < phasenum_; i++) {
+    for(unsigned int i = 0; i < phasenum_; i++) {
         out << i << ")            Name: " << phasename_[i] << endl;
         out << "        classcode: " << phaseclasscode_[i] << endl;
     }
 
     out << "List of Microstructure Phases:" << endl << endl;
-    for(register unsigned int i = 0; i < micphasenum_; i++) {
+    for(unsigned int i = 0; i < micphasenum_; i++) {
         out << i << ")       Name: " << micphasename_[i] << endl;
         out << "               id: " << micid_[i] << endl;
         out << "    random growth: " << randomgrowth_[i] << endl;
@@ -1175,7 +1186,7 @@ void ChemicalSystem::writeChemSys ()
 
 void ChemicalSystem::writeChemSys (ostream &out)
 {
-    register unsigned int j;
+    unsigned int j;
 
     ///
     /// First we will list details for the ICs
@@ -1184,27 +1195,27 @@ void ChemicalSystem::writeChemSys (ostream &out)
     out << "Report on the Material Database" << endl;
     out << "-------------------------------" << endl << endl;
     out << "List of Independent Components:" << endl << endl;
-    for(register unsigned int i = 0; i < ICnum_; i++) {
+    for(unsigned int i = 0; i < ICnum_; i++) {
         out << i << ")            Name: " << ICname_[i] << endl;
         out << "        classcode: " << ICclasscode_[i] << endl;
         out << "       molar mass: " << ICmolarmass_[i] << endl << endl;
     }
 
     out << "List of Dependent Components:" << endl << endl;
-    for(register unsigned int i = 0; i < DCnum_; i++) {
+    for(unsigned int i = 0; i < DCnum_; i++) {
         out << i << ")            Name: " << DCname_[i] << endl;
         out << "        classcode: " << DCclasscode_[i] << endl;
         out << "       molar mass: " << DCmolarmass_[i] << endl << endl;
     }
 
     out << "List of Phases:" << endl << endl;
-    for(register unsigned int i = 0; i < phasenum_; i++) {
+    for(unsigned int i = 0; i < phasenum_; i++) {
         out << i << ")            Name: " << phasename_[i] << endl;
         out << "        classcode: " << phaseclasscode_[i] << endl;
     }
 
     out << "List of Microstructure Phases:" << endl << endl;
-    for(register unsigned int i = 0; i < micphasenum_; i++) {
+    for(unsigned int i = 0; i < micphasenum_; i++) {
         out << i << ")       Name: " << micphasename_[i] << endl;
         out << "               id: " << micid_[i] << endl;
         out << "    random growth: " << randomgrowth_[i] << endl;
@@ -1324,22 +1335,22 @@ int ChemicalSystem::calculateState (double time,
     setPhasemolarmass();
   
     cout << "%%%%%%%%%% Printing GEM Masses and Volumes in this Step %%%%%%%" << endl;
-    for (register long int myid = 0; myid < phasenum_; myid++) {
+    for (long int myid = 0; myid < phasenum_; myid++) {
         cout << "Mass and volume of GEM phase " << node_->pCSD()->PHNL[myid] << " = "
             << phasemass_[myid] << " g and " << phasevolume_[myid] << " m3" << endl;
     }
     cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-    for (register unsigned int i = 1; i < micphasenum_; i++) {
-        // cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
-        // cout.flush();
+    for (unsigned int i = 1; i < micphasenum_; i++) {
+        cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
+        cout.flush();
         if (!isKineticphase(i)) {
             micphasemass_[i] = micphasevolume_[i] = 0.0;
-            for (register unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
-                // cout << "    Is a THERMO phase composed of "
-                //      << phasename_[micphasemembers_[i][j]]
-                //      << " having mass = " << phasemass_[micphasemembers_[i][j]]
-                //      << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
-                // cout.flush();
+            for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
+                cout << "    Is a THERMO phase composed of "
+                     << phasename_[micphasemembers_[i][j]]
+                     << " having mass = " << phasemass_[micphasemembers_[i][j]]
+                     << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
+                cout.flush();
                 mictotvolume_ += phasevolume_[micphasemembers_[i][j]];
                 micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
                 micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
@@ -1367,56 +1378,69 @@ int ChemicalSystem::calculateState (double time,
     }
 
     cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
-    for (register unsigned int i = 1; i < micphasenum_; i++) {
+    for (unsigned int i = 1; i < micphasenum_; i++) {
         cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
             << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
     }
     cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 
 
+    // JWB THIS PART CAN BE CHANGED TO CHOOSE SATURATED OR SEALED CONDITIONS
+   
     if (isfirst) mictotinitvolume_ = mictotvolume_;
     cout << "isfirst = " << isfirst << ", mictotinitvolume_ = " << mictotinitvolume_ << endl;
 
-    // Now we take care of the void volume separately
-    cout << "now use water to keep total volume constantly." << endl;
+    if (saturated_) {
+
+        // Now we take care of the void volume separately
+        cout << "Now use water to saturate the porosity." << endl;
   
-    if (mictotinitvolume_ > mictotvolume_) {
-        micphasevolume_[1] += mictotinitvolume_ - mictotvolume_;
-        double water_molarv, water_molesincr;
-        for (register int i = 0; i < micphasenum_; i++) {
-            if (micphasename_[i] == "H2O") {
-                water_molarv = node_->DC_V0(getMic2DC(i,0), P_, T_);
-                water_molesincr = (mictotinitvolume_ - mictotvolume_) / water_molarv;
-                cout << "water_molarv = " << water_molarv << endl;
-                cout << "volume increase of water is: "
-                     << (mictotinitvolume_ - mictotvolume_) << endl;
-                cout << "water_molesincr = " << water_molesincr << endl;
+        if (mictotinitvolume_ > mictotvolume_) {
+            micphasevolume_[1] += mictotinitvolume_ - mictotvolume_;
+            double water_molarv, water_molesincr;
+            for (int i = 0; i < micphasenum_; i++) {
+                if (micphasename_[i] == "H2O") {
+                    water_molarv = node_->DC_V0(getMic2DC(i,0), P_, T_);
+                    water_molesincr = (mictotinitvolume_ - mictotvolume_) / water_molarv;
+                    cout << "water_molarv = " << water_molarv << endl;
+                    cout << "volume increase of water is: "
+                         << (mictotinitvolume_ - mictotvolume_) << endl;
+                    cout << "water_molesincr = " << water_molesincr << endl;
+                }
             }
+            for (int i = 0; i < ICnum_; i++) {
+                if (ICname_[i] == "H") ICmoles_[i] += water_molesincr * 2.0;
+                if (ICname_[i] == "O") ICmoles_[i] += water_molesincr;
+            }
+            mictotvolume_ += mictotinitvolume_ - mictotvolume_;
         }
-        for (register int i = 0; i < ICnum_; i++) {
-            if (ICname_[i] == "H") ICmoles_[i] += water_molesincr * 2.0;
-            if (ICname_[i] == "O") ICmoles_[i] += water_molesincr;
+    } else {
+
+        // Now create void space due to self-desiccation
+        cout << "Now creating empty porosity." << endl;
+  
+        if (mictotinitvolume_ > mictotvolume_) {
+            micphasevolume_[0] += mictotinitvolume_ - mictotvolume_;
         }
-        mictotvolume_ += mictotinitvolume_ - mictotvolume_;
     }
 
     ///
     /// Manually adjust volume for CSH
     ///
 
+    /// 2020-12-02 JWB this may need to be fixed for cemdata18
+    //
+
     int CSHID = getMicid("CSH");
-    int CSHgemphaseid = micphasemembers_[CSHID][0];
-    vector<int> CSHgemDCid = getPhaseDCmembers(CSHgemphaseid);
+    double correction_factor = 1.4;
+    vector<int> CSHgemphaseids = micphasemembers_[CSHID];
     double CSH_corrV = 0.0;
-    for (int i = 0; i < CSHgemDCid.size();i++) {
-        double v = 0.0;
-        if (CSHgemDCid[i] == 79) {
-            cout << "correcting the volume for " << DCname_[79] << endl;
-            v = DCmoles_[79] * 0.0001128;
-        } else {
-            v = DCmoles_[CSHgemDCid[i]] * node_->DC_V0(CSHgemDCid[i],P_,T_);
+    for (int j = 0; j < CSHgemphaseids.size(); j++) {
+        vector<int> CSHgemDCid = getPhaseDCmembers(CSHgemphaseids[j]);
+        for (int i = 0; i < CSHgemDCid.size(); i++) {
+            double v = DCmoles_[CSHgemDCid[i]] * node_->DC_V0(CSHgemDCid[i],P_,T_);
+            CSH_corrV += (v * correction_factor);
         }
-        CSH_corrV += v;
     }
     cout << "before correction, the volume of CSH is: " << micphasevolume_[CSHID]
          << endl;
@@ -1431,10 +1455,7 @@ int ChemicalSystem::calculateState (double time,
     micphasevolume_[0] = 0.0;
     cout << "total volume of the microstructure is: " << mictotvolume_ << endl;
     if (mictotvolume_ > 0.0) {
-        for (register unsigned int i = 0; i < micphasenum_; i++) {
-            /*
-            micphasevolfrac_[i] = micphasevolume_[i] / mictotvolume_;
-            */
+        for (unsigned int i = 0; i < micphasenum_; i++) {
             micphasevolfrac_[i] = micphasevolume_[i] / mictotinitvolume_;
             cout << "    " << micphasename_[i] << "  V = " << micphasevolume_[i] << ", Vt = "
                  << mictotvolume_ << ", and volume fraction = " << micphasevolfrac_[i] << endl;

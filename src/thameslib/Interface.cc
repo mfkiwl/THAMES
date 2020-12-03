@@ -40,8 +40,8 @@ Interface::Interface (ChemicalSystem *csys,
                       vector<Site *> dv,
                       unsigned int pid)
 {
-    register unsigned long int j;
-    register unsigned int i;
+    unsigned long int j;
+    unsigned int i;
     int afty;
 
     vector<Site *>::iterator beginLocation,endLocation;
@@ -183,7 +183,7 @@ bool Interface::addGrowthSite (Site *loc)
 {
     bool answer = false;
     bool found = false;
-    register unsigned int i;
+    unsigned int i;
     vector<Isite>::iterator p,q,start,end;
     start = growth_sites_.begin();
     end = growth_sites_.end();
@@ -218,7 +218,7 @@ bool Interface::addDissolutionSite (Site *loc)
 {
     bool answer = false;
     bool found = false;
-    register unsigned int i;
+    unsigned int i;
     vector<Isite>::iterator p,q,start,end;
     start = dissolution_sites_.begin();
     end = dissolution_sites_.end();
@@ -252,7 +252,7 @@ bool Interface::addDissolutionSite (Site *loc)
 bool Interface::sortGrowthSites (vector<Site> &ste,
                                  unsigned int pid)
 {
-    register unsigned int i,j;
+    unsigned int i,j;
     int afty;
     Site gs;
 
@@ -310,7 +310,7 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
 bool Interface::sortDissolutionSites (vector<Site> &ste,
                                       unsigned int pid)
 {
-    register unsigned int i,j;
+    unsigned int i,j;
     int afty;
     Site ds;
 
@@ -396,7 +396,7 @@ bool Interface::removeDissolutionSite (Site *loc,
         p = dissolution_sites_.begin();
         cout << "Success!" << endl;
         cout.flush();
-        for (register int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
+        for (int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
             if (dissolution_sites_[i].getId() == loc->getId()) {
                 p += i;
                 dissolution_sites_.erase(p);
@@ -409,7 +409,7 @@ bool Interface::removeDissolutionSite (Site *loc,
         bool found = false;
         vector<Isite>::iterator p;
         p = dissolution_sites_.begin();
-        for (register int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
+        for (int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
             if (dissolution_sites_[i].getId() == loc->getId()) {
                 p += i;
                 dissolution_sites_.erase(p);

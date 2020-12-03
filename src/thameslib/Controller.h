@@ -137,6 +137,14 @@ void doCycle (const string &statfilename,
               int choice);
 
 /**
+@brief Initialize the state of the system (called by doCycle).
+
+This method calculates the water needed in the system and sets the IC moles
+@param time is the simulation time [days]
+*/
+void initializeState (double time);
+ 
+/**
 @brief Calculate the state of the system (called by doCycle).
 
 This method calculates the change in state of the system during a cycle, including

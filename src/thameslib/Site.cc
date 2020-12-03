@@ -52,7 +52,7 @@ Site::Site (unsigned int xp,
 void Site::calcWmc(void)
 {
     wmc_ = chemsys_->getPorosity(getPhaseId());
-    for (register unsigned int i = 0; i < nb_.size(); i++) {
+    for (unsigned int i = 0; i < nb_.size(); i++) {
         wmc_ += chemsys_->getPorosity(nb_[i]->getPhaseId());
     }
 }

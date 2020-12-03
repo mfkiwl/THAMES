@@ -52,7 +52,7 @@ int main (void)
 
     } else {
         
-        time_t lt = time('\0');
+        time_t lt = time(NULL);
         struct tm *inittime;
         inittime = localtime(&lt);
         cout << asctime(inittime);
@@ -322,7 +322,7 @@ int main (void)
         // Simulation is finished.  Record and output the timing data.
         //
 
-        time_t lt1 = time('\0');
+        time_t lt1 = time(NULL);
         struct tm *inittime1;
         inittime1 = localtime(&lt1);
         cout << asctime(inittime1);

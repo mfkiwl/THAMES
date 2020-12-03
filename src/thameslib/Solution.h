@@ -16,8 +16,8 @@
 #include <map>
 #include <algorithm>
 
-#include "GEM3K/node.h"
-#include "GEM3K/io_arrays.h"
+#include <GEMS3K/node.h>
+#include <GEMS3K/io_arrays.h>
 
 #include "global.h"
 

@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 2.6)
 
 project (ThamesLibrary_project)
 
-add_subdirectory(GEM3K)
-
-set (EXTRA_LIBS ${EXTRA_LIBS} gem3k)
-
 file (GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/thameslib/*.cc")
 
 #find_package (LibXml2)
@@ -25,6 +21,7 @@ message ("THAMES lib directory, CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 add_library (thameslib STATIC ${SOURCES})
 
-target_link_libraries(thameslib ${EXTRA_LIBS})
+# target_link_libraries(thameslib ${EXTRA_LIBS})
+target_link_libraries(thameslib)
 
 install (TARGETS thameslib DESTINATION ${CMAKE_SOURCE_DIR}/lib)

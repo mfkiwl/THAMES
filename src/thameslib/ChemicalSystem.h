@@ -31,8 +31,8 @@ possible.
 #include <fstream>
 #include <vector>
 #include <map>
-#include "GEM3K/node.h"
-#include "GEM3K/io_arrays.h"
+#include <GEMS3K/node.h>
+#include <GEMS3K/io_arrays.h>
 #include "myconfig.h"
 #include <iomanip>
 #include <algorithm>
@@ -380,6 +380,15 @@ long int nodehandle_;                   /**< integer flag used to identify a nod
 long int nodestatus_;                   /**< integer flag used to identify node's status */
 long int iterdone_;                     /**< number of iterations performed in the most
                                                 recent GEM calculation on the node */
+
+/**
+@brief Whether or not the system is saturated with moisture.
+
+If this variable is nonzero, then the porosity imbibes water from an external
+reservoir as it is consumed by reactions.  If it is set to zero,then the water
+is not replaced and the capillary porosity begins to desiccate.
+*/
+bool saturated_;
 
 /**
 @brief Time to begin sulfate solution exposure, in days.
@@ -1157,7 +1166,7 @@ void setMic2DC (const int micid,
         mic2DC_.insert(make_pair(micid,dumvec));
     } else {
         bool found = false;
-        for (register unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
+        for (unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
             if ((p->second)[i] == dcid) found = true;
         }
         if (!found) (p->second).push_back(dcid);
@@ -1183,7 +1192,7 @@ void setMic2phase (const int micid,
         mic2phase_.insert(make_pair(micid,dumvec));
     } else {
         bool found = false;
-        for (register unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
+        for (unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
             if ((p->second)[i] == phaseid) found = true;
         }
         if (!found) (p->second).push_back(phaseid);
@@ -1365,7 +1374,7 @@ void setKineticphase (const unsigned int idx)
         msg = "kineticphase_";
         throw EOBException("ChemicalSystem","setKineticphase",msg,phasenum_,idx);
     }
-    for (register unsigned int i = 0; (i < kineticphase_.size() && !found); i++) {
+    for (unsigned int i = 0; (i < kineticphase_.size() && !found); i++) {
         if (kineticphase_[i] == idx) found = true;
     }
     if (!found) kineticphase_.push_back(idx);
@@ -1403,7 +1412,7 @@ void setThermophase (const unsigned int idx)
         msg = "thermophase_";
         throw EOBException("ChemicalSystem","setThermophase",msg,phasenum_,idx);
     }
-    for (register unsigned int i = 0; (i < thermophase_.size() && !found); i++) {
+    for (unsigned int i = 0; (i < thermophase_.size() && !found); i++) {
         if (thermophase_[i] == idx) found = true;
     }
     if (!found) thermophase_.push_back(idx);
@@ -1823,7 +1832,7 @@ bool isGrowthtemplate (const unsigned int gphaseid,
                        int gtmpid)
 {
     bool answer = false;
-    for (register unsigned int i = 0;
+    for (unsigned int i = 0;
             (i < growthtemplate_[gphaseid].size()) && (!answer); i++) {
         if (growthtemplate_[gphaseid][i] == gtmpid) answer = true;
     }
@@ -2705,7 +2714,7 @@ void writeICmoles ()
 {
     cout << endl;
     cout << "Vector of Independent Components:" << endl;
-    for (register unsigned int i = 0; i < ICnum_; i++) {
+    for (unsigned int i = 0; i < ICnum_; i++) {
         cout << "    " << ICname_[i] << ": " << ICmoles_[i] << " mol" << endl;
     }
     cout << endl;
@@ -2762,7 +2771,7 @@ void writeDCmoles()
 {
     cout << endl;
     cout << "Vector of Dependent Components:" << endl;
-    for (register unsigned int i = 0; i < DCnum_; i++) {
+    for (unsigned int i = 0; i < DCnum_; i++) {
         cout << "    " << DCname_[i] << ": " << DCmoles_[i] << " mol" << endl;
     }
     cout << endl;
@@ -2822,7 +2831,7 @@ This is just a simple copying of the `phasemoles_` vector to `ophasemoles_`.
 */
 void setOphasemoles ()
 {
-    for (register int idx = 0; idx < phasenum_; idx++)
+    for (int idx = 0; idx < phasenum_; idx++)
        ophasemoles_[idx] = phasemoles_[idx];
 }
 
@@ -2880,7 +2889,7 @@ void writePhasemoles ()
 {
     cout << endl;
     cout << "Vector of Phases:" << endl;
-    for (register unsigned int i = 0; i < phasenum_; i++) {
+    for (unsigned int i = 0; i < phasenum_; i++) {
         cout << "    " << phasename_[i] << ": "
              << phasemoles_[i] << " mol" << endl;
     }
@@ -2913,7 +2922,7 @@ void setPhasemass (const unsigned int idx,
 void setPhasemass ()
 {
     setOphasemass();
-    for (register long int i = 0; i < phasenum_; i++) {
+    for (long int i = 0; i < phasenum_; i++) {
         phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
     }
 }
@@ -2985,7 +2994,7 @@ void setOphasemass (const unsigned int idx,
 */
 void setOphasemass ()
 {
-    for (register long int i = 0; i < phasenum_; i++) {
+    for (long int i = 0; i < phasenum_; i++) {
         ophasemass_[i] = phasemass_[i];
     }
 }
@@ -3060,7 +3069,7 @@ void setPhasevolume (const unsigned int idx,
 void setPhasevolume ()
 {
     setOphasevolume();
-    for (register long int i = 0; i < phasenum_; i++) {
+    for (long int i = 0; i < phasenum_; i++) {
         phasevolume_[i] = (double)(node_->Ph_Volume(i));
         //cout << "phasevolume_[" << i << "] = " <<phasevolume_[i] << endl;
     }
@@ -3136,7 +3145,7 @@ void setOphasevolume (const unsigned int idx,
 */
 void setOphasevolume ()
 {
-    for (register long int i = 0; i < phasenum_; i++) {
+    for (long int i = 0; i < phasenum_; i++) {
         ophasevolume_[i] = phasevolume_[i];
     }
 }
@@ -3437,7 +3446,7 @@ void writeMicphases ()
     cout << "Microstructure phase quantities:" << endl;
     cout << "Name     Mass (g)     Volume (m3)     Volume Fraction" << endl;
     cout << "----     --------     -----------     ---------------" << endl;
-    for (register unsigned int i = 1; i < micphasename_.size(); i++) {
+    for (unsigned int i = 1; i < micphasename_.size(); i++) {
         cout << micphasename_[i] << "     " << micphasemass_[i] << "     "
              << micphasevolume_[i] << "     " << micphasevolfrac_[i] << endl;
     }
@@ -3828,9 +3837,9 @@ void setPhasemolarmass ()
     double pmm;
     phasemolarmass_.clear();
     phasemolarmass_.resize(phasenum_,0.0);
-    for (register unsigned int pidx = 0; pidx < vphasestoich_.size(); pidx++) {
+    for (unsigned int pidx = 0; pidx < vphasestoich_.size(); pidx++) {
         pmm = 0.0;
-        for (register unsigned int icidx = 0; icidx < vphasestoich_[pidx].size(); icidx++) {
+        for (unsigned int icidx = 0; icidx < vphasestoich_[pidx].size(); icidx++) {
             pmm += ((vphasestoich_[pidx][icidx]) * getICmolarmass(icidx));
         }
         phasemolarmass_[pidx] = pmm;
@@ -5038,6 +5047,28 @@ void setNode (TNode *np)
 TNode *getNode ()
 {
     return node_;
+}
+
+/**
+@brief Set the flag for the saturation state.
+
+@param satstate is the flag value
+*/
+void setSaturated(const bool satstate)
+{
+    saturated_ = satstate;
+}
+
+/**
+@brief Get the saturation state flag.
+
+@note NOT USED.
+
+@return the saturation state flag
+*/
+bool isSaturated () const
+{
+    return saturated_;
 }
 
 /**

@@ -74,8 +74,8 @@ template<class X> static void shuffle(vector<X> &v, int ntimes=1)
 {
     X tmp;
     int j;
-    register int ii;
-    register unsigned int i;
+    int ii;
+    unsigned int i;
          
     for (ii = 0; ii < ntimes; ii++) {
         for (i = 0; i < v.size(); i++) {

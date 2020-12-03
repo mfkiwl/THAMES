@@ -18,6 +18,9 @@ doc/latex/*
 # ignore zipped files
 *.zip
 
+# ignore swap files
+.*.swp
+
 # ignore files that will be created upon complilation
 src/version.h
 src/thameslib/myconfig.h

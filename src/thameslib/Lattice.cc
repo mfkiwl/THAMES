@@ -25,8 +25,8 @@ Lattice::Lattice (ChemicalSystem *cs,
                   const string &fname)
 : siteneighbors_(18),chemsys_(cs),solut_(solut)
 {
-  register unsigned int i,j,k;
-  register unsigned long int ii;
+  unsigned int i,j,k;
+  unsigned long int ii;
   string buff;
   int xn,yn,zn;
   unsigned int idn;
@@ -412,8 +412,8 @@ void Lattice::addSite (const unsigned int x,
 
 void Lattice::findInterfaces ()
 {
-    register unsigned int i,kk;
-    register unsigned long int k;
+    unsigned int i,kk;
+    unsigned long int k;
     vector<Site *> gsite,dsite;
     
     ///
@@ -497,7 +497,7 @@ long int Lattice::growPhase (unsigned int phaseid,
                              long int numtoadd)
 {
     unsigned int pid;
-    register unsigned long int i,j;
+    unsigned long int i,j;
     double dwmcval;
     Site *ste,*stenb;
 
@@ -619,7 +619,7 @@ long int Lattice::dissolvePhase (unsigned int phaseid,
         exit(1);
     }
     
-    register unsigned long int i;
+    unsigned long int i;
     vector<Isite> isite = interface_[phaseid].getDissolutionSites();
     cout << "size of interface_[" << phaseid << "] is " << isite.size() << endl; 
     try {
@@ -665,7 +665,7 @@ long int Lattice::dissolvePhase (unsigned int phaseid,
                   - chemsys_->getPorosity(pid);
           ste->dWmc(dwmcval);
       
-          register unsigned long int j;
+          unsigned long int j;
           for (j = 0; j < ste->nbSize(1); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
@@ -728,7 +728,7 @@ void Lattice::addDissolutionSite (Site *ste,
     try {
         interface_.at(pid).addDissolutionSite(ste);
         vector<unsigned int> plist = ste->getGrowthPhases();
-        for (register unsigned int i = 0; i < plist.size(); i++) {
+        for (unsigned int i = 0; i < plist.size(); i++) {
             interface_.at(plist[i]).removeGrowthSite(ste);
         }
         ste->setDissolutionSite(pid);
@@ -787,7 +787,7 @@ void Lattice::removeGrowthSite (Site *ste,
 
 long int Lattice::emptyPorosity (long int numsites)
 {
-    register unsigned long int i,j;
+    unsigned long int i,j;
     long int numemptied = 0;
     unsigned int cntpore,cntmax;
     bool placed;
@@ -857,7 +857,7 @@ long int Lattice::emptyPorosity (long int numsites)
 
 long int Lattice::fillPorosity (long int numsites)
 {
-    register unsigned long int i,j;
+    unsigned long int i,j;
     long int numfilled = 0;
     unsigned int cntpore,cntmin;
     bool placed;
@@ -938,7 +938,7 @@ int Lattice::countBox (int boxsize,
     string msg;
     int boxhalf = boxsize / 2;
     int nfound = 0;
-    register int ix,iy,iz,hx,hy,hz;
+    int ix,iy,iz,hx,hy,hz;
 
     try {
         int qxlo = site_[siteid].getX() - boxhalf;
@@ -1031,11 +1031,11 @@ vector<unsigned long int> Lattice::getNeighborhood (const unsigned long int site
         return nh;
     }
     
-    for (register int k = -size; k <= size; k++) {
+    for (int k = -size; k <= size; k++) {
         zp = zc + k;
-        for (register int j = -size; j <= size; j++) {
+        for (int j = -size; j <= size; j++) {
             yp = yc + j;
-            for (register int i = -size; i <= size; i++) {
+            for (int i = -size; i <= size; i++) {
                 xp = xc + i;
                 dist = (double)((xc - xp) * (xc - xp));
                 dist += (double)((yc - yp) * (yc - yp));
@@ -1107,7 +1107,7 @@ void Lattice::changeMicrostructure (double time,
                                     const int simtype,
                                     bool isfirst)
 {
-    register unsigned int i,ii;
+    unsigned int i,ii;
     long int numadded, numadded_actual;
     unsigned int tpid;
     unsigned long int cursites,newsites;
@@ -1472,7 +1472,7 @@ void Lattice::changeMicrostructure (double time,
 	                    cout.flush();
                         if (thresh < 1) {
     	                    double g = 0.0;
-    	                    for (register int k = 0; k < site_.size(); k++) {
+    	                    for (int k = 0; k < site_.size(); k++) {
     	                        if (site_[k].getPhaseId() == WATERID) {
     	                            g = rg_->Ran3();
     	                            if (g < thresh) addGrowthSite(&site_[k],pid.at(i));
@@ -1605,7 +1605,7 @@ void Lattice::changeMicrostructure (double time,
 
 void Lattice::writeLattice (double curtime, const int simtype, const string &root)
 {
-    register unsigned int i,j,k;
+    unsigned int i,j,k;
     string ofname(root);
     ostringstream ostr1,ostr2;
     ostr1 << (int)((curtime * 100.0) + 0.5);  // hundredths of a day
@@ -1691,7 +1691,7 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
 
 void Lattice::writeDamageLattice (double curtime, const string &root)
 {
-    register unsigned int i,j,k;
+    unsigned int i,j,k;
     string ofname(root);
     ostringstream ostr1,ostr2;
     ostr1 << (int)((curtime * 100.0) + 0.5);	// hundredths of a day
@@ -1737,7 +1737,7 @@ void Lattice::writeDamageLattice (double curtime, const string &root)
 
 void Lattice::writeLatticePNG (double curtime, const int simtype, const string &root)
 {
-    register unsigned int i,j,k;
+    unsigned int i,j,k;
     string ofname(root);
     string ofbasename(root);
     string ofpngname(root);
@@ -1852,7 +1852,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
 
 void Lattice::writeDamageLatticePNG (double curtime, const string &root)
 {
-    register unsigned int i,j,k;
+    unsigned int i,j,k;
     string ofname(root);
     string ofbasename(root);
     string ofpngname(root);
@@ -1967,7 +1967,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
 
 void Lattice::makeMovie (const string &root)
 {
-    register unsigned int i,j,k;
+    unsigned int i,j,k;
     string ofname(root);
     string ofbasename(root);
     string ofgifname(root);

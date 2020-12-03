@@ -190,19 +190,19 @@ Solution::Solution (const string &GEMfilename,
 
     string string1;
     for (int i = 0; i < ICnum_; i++) {
-        string1.assign((node_->pCSD())->ICNL[i]);
+        string1.assign(node_->xCH_to_IC_name(i));
         ICname_.push_back(string1);
     }
  
     string1.clear();  // This command may be unnecessary
     for (int i = 0; i < DCnum_; i++) {
-        string1.assign((node_->pCSD())->DCNL[i]);
+        string1.assign(node_->xCH_to_DC_name(i));
         DCname_.push_back(string1);
     }
  
     string1.clear();  // This command may be unnecessary
     for (int i = 0; i < phasenum_; i++) {
-        string1.assign((node_->pCSD())->PHNL[i]);
+        string1.assign(node_->xCH_to_Ph_name(i));
         phasename_.push_back(string1);
     }
 }
