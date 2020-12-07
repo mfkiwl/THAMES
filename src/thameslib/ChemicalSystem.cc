@@ -101,7 +101,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
 
   char *cGEMfilename = (char*)GEMfilename.c_str();
   char *cGEMdbrname = (char*)GEMdbrname.c_str();
-  cout << "Trying to read chemical system definition file " << cGEMfilename << endl;
+  cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file " << cGEMfilename << endl;
   try {
     gemflag = node_->GEM_init(cGEMfilename);
     if (gemflag == 1) {
@@ -207,23 +207,23 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
  
   try {
     (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
-    cout << "ChemicalSystem::Constructor: Entering GEM_run with node status = "
+    cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
          << nodestatus_ << endl;
     cout.flush();
     nodestatus_ = node_->GEM_run(false);
-    cout << "ChemicalSystem::Constructor: Exited GEM_run with node status = "
+    cout << "ChemicalSystem::Constructor: Exited GEM_run (1) with node status = "
          << nodestatus_ << endl;
     cout.flush();
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         exmsg = "ERROR:    Call to GEM_run failed...";
         throw GEMException("ChemicalSystem","ChemicalSystem",exmsg);
     }
-    cout << "ChemicalSystem::Constructor: Entering GEM_restore_MT... " << endl;
+    cout << "ChemicalSystem::Constructor: Entering GEM_restore_MT (1) ... " << endl;
     cout.flush();
     node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
         &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
     cout << "Done!" << endl;
-    cout << "ChemicalSystem::Constructor: Entering GEM_to_MT... " << endl;
+    cout << "ChemicalSystem::Constructor: Entering GEM_to_MT (1) ... " << endl;
     cout.flush();
     node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
         Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
@@ -1254,18 +1254,19 @@ int ChemicalSystem::calculateState (double time,
     }
  
     nodestatus_ = NEED_GEM_SIA;
-    cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT... " << endl;
+    cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... " << endl;
     cout.flush();
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
           ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
           DCmoles_,DCactivitycoeff_);
     cout << "Done!" << endl;
     
-    cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT... ";
+    cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT (2)... ";
     cout.flush();
     node_->GEM_set_MT(time,1.0);
     cout << "Done!" << endl
-         << "    Going into ChemicalSystem::calculateState::GEM_run(true)... ";
+         << "    Going into ChemicalSystem::calculateState::GEM_run() (2), with isfirst "
+         << isfirst << endl;
     cout.flush();
     writeICmoles();
 
@@ -1274,10 +1275,8 @@ int ChemicalSystem::calculateState (double time,
     */
 
     if (isfirst) {
-        cout << "going into GEM_run(false)" << endl;
         nodestatus_ = node_->GEM_run(false);
     } else {
-        cout << "going into GEM_run(true)" << endl;
         nodestatus_ = node_->GEM_run(true);
     }
 
@@ -1310,7 +1309,7 @@ int ChemicalSystem::calculateState (double time,
             }
             throw GEMException("ChemicalSystem","calculateState",msg);
         } else {
-            cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT... ";
+            cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT (2)... ";
             cout.flush();
             node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
                     Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
@@ -1340,21 +1339,52 @@ int ChemicalSystem::calculateState (double time,
             << phasemass_[myid] << " g and " << phasevolume_[myid] << " m3" << endl;
     }
     cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+
+    double cshcorrection_factor = 1.4;
     for (unsigned int i = 1; i < micphasenum_; i++) {
         cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
         cout.flush();
         if (!isKineticphase(i)) {
             micphasemass_[i] = micphasevolume_[i] = 0.0;
-            for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
-                cout << "    Is a THERMO phase composed of "
-                     << phasename_[micphasemembers_[i][j]]
-                     << " having mass = " << phasemass_[micphasemembers_[i][j]]
-                     << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
-                cout.flush();
-                mictotvolume_ += phasevolume_[micphasemembers_[i][j]];
-                micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
-                micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
+            if (i != getMicid("CSH")) {
+                for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
+                    cout << "    Is a THERMO phase composed of "
+                         << phasename_[micphasemembers_[i][j]]
+                         << " having mass = " << phasemass_[micphasemembers_[i][j]]
+                         << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
+                    cout.flush();
+                    mictotvolume_ += phasevolume_[micphasemembers_[i][j]];
+                    micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
+                    micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
+                }
+            } else {
+
+            ///
+            /// Manually adjust volume for CSH
+            ///
+
+            /// 2020-12-02 JWB this may need to be fixed for cemdata18
+            //
+
+                double correction_factor = 1.0;
+                int CSHID = getMicid("CSH");
+                vector<int> CSHgemphaseids = micphasemembers_[CSHID];
+                double CSH_corrV = 0.0;
+                for (int j = 0; j < CSHgemphaseids.size(); j++) {
+                    vector<int> CSHgemDCid = getPhaseDCmembers(CSHgemphaseids[j]);
+                    for (int i = 0; i < CSHgemDCid.size(); i++) {
+                        double v = DCmoles_[CSHgemDCid[i]] * node_->DC_V0(CSHgemDCid[i],P_,T_);
+                        CSH_corrV += (v * correction_factor);
+                    }
+                }
+                cout << "before correction, the volume of CSH is: " << micphasevolume_[CSHID]
+                     << endl;
+                cout << "after correction, the volume of CSH is: " << CSH_corrV << endl;
+                // micphasevolume_[1] = micphasevolume_[1] - (CSH_corrV - micphasevolume_[CSHID]);
+                micphasevolume_[CSHID] = CSH_corrV;  
+                mictotvolume_ += micphasevolume_[CSHID];
             }
+
         } else if (isKineticphase(i)) {
             // cout << "    Is a KINETIC phase composed of "
             //      << phasename_[micphasemembers_[i][0]]
@@ -1376,14 +1406,6 @@ int ChemicalSystem::calculateState (double time,
             // cout.flush();
         }
     }
-
-    cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
-    for (unsigned int i = 1; i < micphasenum_; i++) {
-        cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
-            << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
-    }
-    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-
 
     // JWB THIS PART CAN BE CHANGED TO CHOOSE SATURATED OR SEALED CONDITIONS
    
@@ -1420,39 +1442,22 @@ int ChemicalSystem::calculateState (double time,
         cout << "Now creating empty porosity." << endl;
   
         if (mictotinitvolume_ > mictotvolume_) {
-            micphasevolume_[0] += mictotinitvolume_ - mictotvolume_;
+            micphasevolume_[0] = mictotinitvolume_ - mictotvolume_;
         }
     }
 
-    ///
-    /// Manually adjust volume for CSH
-    ///
-
-    /// 2020-12-02 JWB this may need to be fixed for cemdata18
-    //
-
-    int CSHID = getMicid("CSH");
-    double correction_factor = 1.4;
-    vector<int> CSHgemphaseids = micphasemembers_[CSHID];
-    double CSH_corrV = 0.0;
-    for (int j = 0; j < CSHgemphaseids.size(); j++) {
-        vector<int> CSHgemDCid = getPhaseDCmembers(CSHgemphaseids[j]);
-        for (int i = 0; i < CSHgemDCid.size(); i++) {
-            double v = DCmoles_[CSHgemDCid[i]] * node_->DC_V0(CSHgemDCid[i],P_,T_);
-            CSH_corrV += (v * correction_factor);
-        }
+    cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
+    for (unsigned int i = 1; i < micphasenum_; i++) {
+        cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
+            << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
     }
-    cout << "before correction, the volume of CSH is: " << micphasevolume_[CSHID]
-         << endl;
-    cout << "after correction, the volume of CSH is: " << CSH_corrV << endl;
-    micphasevolume_[1] = micphasevolume_[1] - (CSH_corrV - micphasevolume_[CSHID]);
-    micphasevolume_[CSHID] = CSH_corrV;  
+    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+
 
     ///
     /// End of manual adjustment  
     ///
 
-    micphasevolume_[0] = 0.0;
     cout << "total volume of the microstructure is: " << mictotvolume_ << endl;
     if (mictotvolume_ > 0.0) {
         for (unsigned int i = 0; i < micphasenum_; i++) {

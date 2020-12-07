@@ -29,7 +29,7 @@ Solution::Solution (const string &GEMfilename,
 
     char *cGEMfilename = (char*)GEMfilename.c_str();
     char *cGEMdbrname = (char*)GEMdbrname.c_str();
-    cout << "Trying to read chemical system definition file " << cGEMfilename << endl;
+    cout << "Solution:: Going into GEM_init to read chemical system definition file " << cGEMfilename << endl;
 
     ///
     /// A new GEM3K node is allocated, completely separate from the one
@@ -119,7 +119,7 @@ Solution::Solution (const string &GEMfilename,
     ///
 
     (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
-    cout << "Solution::Constructor: Entering GEM_run with node status = "
+    cout << "Solution::Constructor: Entering GEM_run (1) with node status = "
          << nodestatus_ << endl;
     cout << "NodeStatusCH is: " << (node_->pCNode())->NodeStatusCH << endl;
     cout.flush();
@@ -137,7 +137,7 @@ Solution::Solution (const string &GEMfilename,
             cout << "ERROR: Call to GEM_run failed..." << endl;
             exit(1);
         }
-        cout << "Solution::Constructor: Entering GEM_restore_MT..." << endl;
+        cout << "Solution::Constructor: Entering GEM_restore_MT (1) ..." << endl;
         cout.flush();
 
         node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
@@ -145,7 +145,7 @@ Solution::Solution (const string &GEMfilename,
 
         cout << "Done!" << endl;
         cout << "T_ is: " << T_ << endl;
-        cout << "Solution::Constructor: Entering GEM_to_MT..." << endl;
+        cout << "Solution::Constructor: Entering GEM_to_MT (1)..." << endl;
         cout.flush();
         node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
             Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
@@ -173,7 +173,7 @@ Solution::Solution (const string &GEMfilename,
         exit(0);
     }
 
-    cout << "Solution::Constructor: Entering GEM_read_dbr..." << endl;
+    cout << "Solution::Constructor: Entering GEM_read_dbr (1)..." << endl;
     cout.flush();
 
     nodestatus_ =  node_->GEM_read_dbr(cGEMdbrname);
@@ -249,7 +249,7 @@ void Solution::calculateState (bool isfirst)
     ///
 
     nodestatus_ = NEED_GEM_SIA;
-    cout << "    Going into Solution::calculateState::GEM_from_MT..." << endl;
+    cout << "    Going into Solution::calculateState::GEM_from_MT (2) ..." << endl;
     cout.flush();
  
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
@@ -261,8 +261,15 @@ void Solution::calculateState (bool isfirst)
     /// Execute GEM calculation
     ///
 
-    cout << "    Going into Solution::calculateState::GEM_set_MT..." << endl;
+    cout << "    Going into Solution::calculateState::GEM_run (2) with isfirst = " << isfirst << endl;
     cout.flush();
+    cout << "    But first let's print the IC moles:" << endl;
+    for (int i = 0; i < ICnum_; i++) {
+        cout << ICname_[i] << ": " << ICmoles_[i] << " mol" << endl;
+    }
+    cout << endl;
+    cout.flush();
+
     if (isfirst) {
         nodestatus_ = node_->GEM_run(false);
     } else {
@@ -305,7 +312,7 @@ void Solution::calculateState (bool isfirst)
 
     } else {
 
-        cout << "    Going into Solution::calculateState::GEM_to_MT...";
+        cout << "    Going into Solution::calculateState::GEM_to_MT (2)...";
         cout.flush();
         node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
                 Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],

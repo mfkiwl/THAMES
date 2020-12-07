@@ -857,6 +857,47 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         if (isfirst) {
             
+            // Set the proper amount of water for the total solid mass
+            // and the water-solid ratio
+            
+            cout << "***INITIALIZING MOLES OF INDEPENDENT COMPONENTS" << endl;
+            // Determine total intial solid mass
+            double totsolidmass = 0.0;
+            vector<double> initsolidmass = getInitscaledmass();
+            for (int i = 0; i < initsolidmass.size(); i++) {
+                totsolidmass += initsolidmass[i];
+            }
+            double watermass = totsolidmass * getWcratio();
+            int waterid = chemsys_->getDCid("H2O@");
+            double watermolarmass = chemsys_->getDCmolarmass(waterid);
+            double watermoles = watermass / watermolarmass;
+            cout << "*** Initial solid mass = " << totsolidmass << endl;
+            cout << "*** w/s ratio = " << getWcratio() << endl;
+            cout << "*** Initial water mass = " << watermass << endl;
+            cout << "*** Initial water moles = " << watermoles << endl;
+            cout << "***" << endl;
+
+            if (watermass <= 0.0) {
+                throw FloatException("Controller","calculateState","Divide by zero error");
+            }
+            for (int i = 0; i < icmoles.size(); i++) {
+                if (icname[i] == "H") {
+                    cout << "previous IC moles for H is: " << icmoles[i] << endl;
+                    icmoles[i] = (2.0 * watermoles);
+                    solut_->setICmoles(i,(2.0 * watermoles));
+                    cout << "new ICmoles for H is: " << icmoles[i] << endl;
+                }
+                if (icname[i] == "O") {
+                    cout << "previous IC moles for O is: " << icmoles[i] << endl;
+                    icmoles[i] = watermoles;
+                    solut_->setICmoles(i,(watermoles));
+                    cout << "new ICmoles for O is: " << icmoles[i] << endl;
+               }
+            }
+            double wmv = chemsys_->getNode()->DC_V0(chemsys_->getDCid("H2O@"),chemsys_->getP(),chemsys_->getT());
+            chemsys_->setPhasemass(chemsys_->getPhaseid("aq_gen"),watermass);
+            chemsys_->setPhasevolume(chemsys_->getPhaseid("aq_gen"),wmv/watermoles);
+
             cout << "Looping over soluble minerals.  ";
             cout << "Here is the list of them:" << endl;
             for (int i = 0; i < solublephase_.size(); i++) {
@@ -908,6 +949,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 cout.flush();
             }
 
+            /**
             cout << "Looping over phases existing in the initial microstructure, " 
                  << "but are not contained in the thermodynamic database of GEM3K."
                  << " Here is the list of them: " << endl;
@@ -926,6 +968,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 if (icname[ii] == "S") icmoles[ii] += mass_NA2SO4 / molarmass_NA2SO4
                                                   + mass_K2SO4 / molarmass_K2SO4;
             }
+            **/
 
         }
 
@@ -969,7 +1012,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
                                          chemsys_->getICid("O")) << endl;
                 cout.flush();
-                if (phmass > 0.0 && Rd > 0.0 && icmol > 0.0) {
+                if (dphmass > 0.0 && Rd > 0.0 && icmol > 0.0) {
                     // phase volume will be in m3, so transform to cm3
                     denom = 1.0 + (1.0e6 * chemsys_->getPhasevolume("aq_gen")
                                            / dphmass / Rd);

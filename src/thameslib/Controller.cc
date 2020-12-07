@@ -343,7 +343,7 @@ void Controller::doCycle (const string &statfilename,
     /// runs all fo the major steps of a computational cycle
     ///
 
-    cout << "Going into Controller::calculateState" << endl;
+    cout << "Going into Controller::calculateState with isfirst = " << isfirst << endl;
     calculateState(time_[i],timestep,isfirst);
 
     ///
@@ -624,7 +624,6 @@ void Controller::calculateState (double time,
 
     if (isfirst) {
 
-        kineticmodel_->initializeMoles();
         double T = chemsys_->getT();
         lattice_->setTemperature(T);
 
@@ -674,7 +673,7 @@ void Controller::calculateState (double time,
       ///
 
       double water_v0 = chemsys_->getNode()->DC_V0(chemsys_->getMic2DC(WATERID,0),
-                                                chemsys_->getP(),chemsys_->getT());
+                                            chemsys_->getP(),chemsys_->getT());
       double addwatermol = addwatervol / water_v0;
 
       cout << "molar volume of water is: " << water_v0 << endl;
@@ -700,7 +699,7 @@ void Controller::calculateState (double time,
     /// The `ChemicalSystem` object provides an interface for these calculations
     /// 
 
-    cout << "Going to launch thermodynamic calculation now... ";
+    cout << "Going to launch thermodynamic calculation now with isfirst = " << isfirst << endl;;
     cout.flush();
     try {
         chemsys_->calculateState(time,isfirst);
@@ -772,7 +771,7 @@ void Controller::calculateState (double time,
     }
 
     out4 << setprecision(5) << time;
-    cout << "Writing Phases file at time = " << time << endl;
+    cout << "Writing Phase volumes file at time = " << time << endl;
     for (int i = 0; i < chemsys_->getDCnum(); i++) {
       if (chemsys_->getDCmolarmass(i) > 0.0) {
         cc = chemsys_->getDCclasscode(i); 
@@ -797,7 +796,7 @@ void Controller::calculateState (double time,
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
-    cout << "Writing microstructure phase quantities at time " << time << endl;
+    cout << "Writing microstructure volume fractions at time " << time << endl;
     out5 << setprecision(5) << time;
     for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
       out5 << "," << (chemsys_->getMicphasevolfrac(i));

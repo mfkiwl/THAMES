@@ -844,10 +844,23 @@ long int Lattice::emptyPorosity (long int numsites)
     ///
 
     if (emptysite.size() < numsites) numsites = emptysite.size();
-    for (i = 0; i < numsites; i++) {
-        setPhaseId(emptysite[i].getId(),VOIDID);
-	count_[VOIDID] += 1.0;
-        numemptied++;
+    numemptied = 0;
+    try {
+        while (numemptied < numsites) {
+            setPhaseId(emptysite[numemptied].getId(),VOIDID);
+	        count_[VOIDID] += 1.0;
+            numemptied++;
+        }
+    }
+    catch (EOBException eex) {
+        eex.printException();
+        cout << "Current value of numemptied = " << numemptied;
+        cout.flush();
+        cout << " and emptysite[" << numemptied << "].getId() = ";
+        cout.flush();
+        cout << emptysite[numemptied].getId() << endl;
+        cout.flush();
+        exit(1);
     }
 
     emptysite.clear();

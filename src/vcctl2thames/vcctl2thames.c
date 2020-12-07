@@ -78,47 +78,41 @@ int main(int argc, char *argv[])
                     case C4AF:
                         val = 5;
                         break;
-                    case CAS2:
+                    case K2SO4:
                         val = 6;
                         break;
-                    case K2SO4:
+                    case GYPSUM:
                         val = 7;
                         break;
-                    case NA2SO4:
+                    case HEMIHYD:
                         val = 8;
                         break;
-                    case GYPSUM:
-                        val = 9;
-                        break;
-                    case HEMIHYD:
-                        val = 10;
-                        break;
                     case ANHYDRITE:
-                        val = 10;
+                        val = 8;
                         break;
                     case CACO3:
-                        val = 11;
+                        val = 9;
                         break;
                     case CH:
-                        val = 12;
+                        val = 10;
                         break;
                     case CSH:
-                        val = 13;
+                        val = 11;
                         break;
                     case AFMC:
-                        val = 14;
+                        val = 13;
                         break;
                     case AFM:
-                        val = 15;
+                        val = 14;
                         break;
                     case ETTR:
-                        val = 16;
+                        val = 15;
                         break;
                     case BRUCITE:
-                        val = 17;
+                        val = 16;
                         break;
                     case FREELIME:
-                        val = 18;
+                        val = 9;
                         break;
                     default:
                         val = 0;

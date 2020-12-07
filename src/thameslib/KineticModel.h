@@ -537,8 +537,6 @@ void setWcratio (double wcr)
 /**
 @brief Get the w/c mass ratio of the system used by the kinetic model equations.
 
-@note NOT USED.
-
 @return the w/c mass ratio
 */
 double getWcratio () const

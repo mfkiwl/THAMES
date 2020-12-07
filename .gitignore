@@ -1,6 +1,9 @@
 # ignore all files in thamestests; it is more like a scratch directory anyway
 thamestests/
 
+# ignore all object files
+*.o
+
 # ignore spreadsheets used for calculations
 *.xls
 *.xlsx

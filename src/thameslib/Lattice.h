@@ -672,15 +672,14 @@ ChemicalSystem* getChemsys () const
 void setPhaseId (Site *s,
                  const unsigned int i)
 {
+    string msg;
     try {
           count_.at(s->getPhaseId())--;        
           s->setPhaseId(i);
     }
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","setPhaseId","count_",
-                        count_.size(),i);
-        ex.printException();
-        exit(1);
+        msg = "Site does not exist?";
+        throw EOBException("Lattice","setPhaseId",msg,count_.size(),i);
     }
     return;
 }
@@ -694,6 +693,7 @@ void setPhaseId (Site *s,
 void setPhaseId (const long int sitenum,
                  const unsigned int i)
 {
+    string msg;
     try {
         if (i == chemsys_->getMicid("DAMAGE")) {
           site_.at(sitenum).setPhaseId(i);
@@ -704,10 +704,8 @@ void setPhaseId (const long int sitenum,
         }
     }
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","setPhaseId","count_",
-                        count_.size(),i);
-        ex.printException();
-        exit(1);
+        msg = "Site does not exist?";
+        throw EOBException("Lattice","setPhaseId",msg,count_.size(),i);
     }
 }
 
