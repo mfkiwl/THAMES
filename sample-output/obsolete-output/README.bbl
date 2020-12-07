@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+
+\bibitem{Bullard11a}
+Bullard JW, Lothenbach B, Stutzman PE, Snyder KA (2011) Coupling thermodynamics
+  and digital image models to simulate hydration and microstructure development
+  of portland cement pastes. \emph{J Mater Res} 26(4):609--622.
+
+\bibitem{Kulik13}
+Kulik DA, Wagner T, Dmytrieva SV, Kosakowski G, Hingerl FF, Chudnenko KV,
+  Berner UR (2013) {GEM-Selektor} geochemical modeling package: Revised
+  algorithm and {GEMS3K} numerical kernel for coupled simulation codes.
+  \emph{Comput Geosci} 17(1):1--24.
+
+\bibitem{Lothenbach06}
+Lothenbach B, Winnefeld F (2006) Thermodynamic modelling of the hydration of
+  {P}ortland cement. \emph{Cem Concr Res} 36:209--226.
+
+\bibitem{Parrot84}
+Parrot LJ, Killoh DC (1984) Prediction of cement hydration. \emph{Br Ceram
+  Proc} 35:41--53.
+
+\end{thebibliography}

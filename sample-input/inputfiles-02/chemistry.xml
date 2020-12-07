@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
-xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
-  <numentries>20</numentries>
-  <blaine>408.0</blaine>
+    xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
+  <numentries>18</numentries>
+  <blaine>403.2</blaine>
   <refblaine>385.0</refblaine>
   <wcRatio>0.45</wcRatio>
   <temperature>298.15</temperature>
   <reftemperature>296.15</reftemperature>
+  <saturated>1</saturated>
   <phase>
     <thamesname>Void</thamesname>
     <id>0</id>
@@ -51,9 +52,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
       <growthtemplate>2</growthtemplate>
-      <growthtemplate>12</growthtemplate>
-      <growthtemplate>19</growthtemplate>
-      <growthtemplate>20</growthtemplate>
+      <growthtemplate>10</growthtemplate>
       <affinity>
         <affinityphaseid>2</affinityphaseid>
         <affinityvalue>1</affinityvalue>
@@ -68,7 +67,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>57.58</scaledmass>
+      <scaledmass>66.202</scaledmass>
       <k1>1.5</k1>
       <k2>0.05</k2>
       <k3>1.1</k3>
@@ -88,7 +87,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <thamesname>C2S</thamesname>
     <gemphase_data>
       <gemphasename>Belite</gemphasename>
-      <gemdcname>C2S-beta</gemdcname>
+      <gemdcname>C2S</gemdcname>
     </gemphase_data>
     <id>3</id>
     <interface_data>
@@ -108,7 +107,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>16.59</scaledmass>
+      <scaledmass>17.309</scaledmass>
       <k1>0.5</k1>
       <k2>0.02</k2>
       <k3>0.70</k3>
@@ -134,12 +133,12 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
       <growthtemplate>4</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <growthtemplate>12</growthtemplate>
       <growthtemplate>13</growthtemplate>
       <growthtemplate>14</growthtemplate>
       <growthtemplate>15</growthtemplate>
       <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
       <affinity>
         <affinityphaseid>4</affinityphaseid>
         <affinityvalue>1</affinityvalue>
@@ -154,7 +153,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>8.45</scaledmass>
+      <scaledmass>5.575</scaledmass>
       <k1>1.0</k1>
       <k2>0.04</k2>
       <k3>1.0</k3>
@@ -194,7 +193,7 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>7.40</scaledmass>
+      <scaledmass>7.860</scaledmass>
       <k1>0.37</k1>
       <k2>0.015</k2>
       <k3>0.4</k3>
@@ -211,29 +210,56 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </display_data>
   </phase>
   <phase>
-    <thamesname>GYPSUM</thamesname>
+    <thamesname>K2SO4</thamesname>
     <gemphase_data>
-    <gemphasename>Gypsum</gemphasename>
-    <gemdcname>Gp</gemdcname>
+    <gemphasename>arcanite</gemphasename>
+    <gemdcname>K2SO4</gemdcname>
     </gemphase_data>
-    <id>8</id>
+    <id>6</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>14</growthtemplate>
-      <growthtemplate>15</growthtemplate>
-      <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
+      <growthtemplate>6</growthtemplate>
       <affinity>
-        <affinityphaseid>8</affinityphaseid>
+        <affinityphaseid>6</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>soluble</type>
-      <scaledmass>0.0</scaledmass>
+      <scaledmass>0.317</scaledmass>
+    </kinetic_data>
+    <display_data>
+      <red>255.0</red>
+      <green>0.0</green>
+      <blue>0.0</blue>
+      <gray>110.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>GYPSUM</thamesname>
+    <gemphase_data>
+    <gemphasename>Gypsum</gemphasename>
+    <gemdcname>Gp</gemdcname>
+    </gemphase_data>
+    <id>7</id>
+    <interface_data>
+      <randomgrowth>0.0</randomgrowth>
+      <growthtemplate>6</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <growthtemplate>12</growthtemplate>
+      <growthtemplate>13</growthtemplate>
+      <growthtemplate>14</growthtemplate>
+      <growthtemplate>15</growthtemplate>
+      <affinity>
+        <affinityphaseid>6</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+    </interface_data>
+    <porosity>0.0</porosity>
+    <kinetic_data>
+      <type>soluble</type>
+      <scaledmass>0.400</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -252,24 +278,24 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <gemphasename>Anhydrite</gemphasename>
     <gemdcname>Anh</gemdcname>
     </gemphase_data>
-    <id>9</id>
+    <id>8</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>9</growthtemplate>
+      <growthtemplate>7</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <growthtemplate>13</growthtemplate>
       <growthtemplate>14</growthtemplate>
       <growthtemplate>15</growthtemplate>
       <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
       <affinity>
-        <affinityphaseid>9</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>soluble</type>
-      <scaledmass>2.58</scaledmass>
+      <scaledmass>2.654</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -279,28 +305,28 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </display_data>
   </phase>
   <phase>
-    <thamesname>CACO3</thamesname>
+    <thamesname>DOLOMITE</thamesname>
     <gemphase_data>
-    <gemphasename>Calcite</gemphasename>
-    <gemdcname>Cal</gemdcname>
+    <gemphasename>Dolomite-dis</gemphasename>
+    <gemdcname>Dis-Dol</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>Aragonite</gemphasename>
-    <gemdcname>Arg</gemdcname>
+    <gemphasename>Dolomite-ord</gemphasename>
+    <gemdcname>Ord-Dol</gemdcname>
     </gemphase_data>
-    <id>10</id>
+    <id>9</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>10</growthtemplate>
+      <growthtemplate>8</growthtemplate>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>8</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>thermo</type>
-      <scaledmass>1.16</scaledmass>
+      <scaledmass>0.491</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -315,17 +341,17 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <gemphasename>Portlandite</gemphasename>
     <gemdcname>Portlandite</gemdcname>
     </gemphase_data>
-    <id>11</id>
+    <id>10</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
-      <growthtemplate>11</growthtemplate>
-      <growthtemplate>12</growthtemplate>
+      <growthtemplate>9</growthtemplate>
+      <growthtemplate>10</growthtemplate>
       <affinity>
-        <affinityphaseid>11</affinityphaseid>
+        <affinityphaseid>9</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>12</affinityphaseid>
+        <affinityphaseid>10</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -348,17 +374,21 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
   <phase>
     <thamesname>CSH</thamesname>
     <gemphase_data>
-    <gemphasename>Tob_jen_ss</gemphasename>
-    <gemdcname>Tob-II</gemdcname>
-    <gemdcname>Jennite</gemdcname>
+    <gemphasename>CSHQ</gemphasename>
+    <gemdcname>CSHQ-JenD</gemdcname>
+    <gemdcname>CSHQ-JenH</gemdcname>
+    <gemdcname>CSHQ-TobD</gemdcname>
+    <gemdcname>CSHQ-TobH</gemdcname>
+    <gemdcname>KSiOH</gemdcname>
+    <gemdcname>NaSiOH</gemdcname>
     </gemphase_data>
-    <id>12</id>
+    <id>11</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>2</growthtemplate>
       <growthtemplate>1</growthtemplate>
-      <growthtemplate>11</growthtemplate>
-      <growthtemplate>12</growthtemplate>
+      <growthtemplate>9</growthtemplate>
+      <growthtemplate>10</growthtemplate>
       <affinity>
         <affinityphaseid>2</affinityphaseid>
         <affinityvalue>4</affinityvalue>
@@ -389,30 +419,119 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </display_data>
   </phase>
   <phase>
+    <thamesname>AFM</thamesname>
+    <gemphase_data>
+    <gemphasename>C2AH75</gemphasename>
+    <gemdcname>C2AH7.5</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C3AH6</gemphasename>
+    <gemdcname>C3AH6</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4AH11</gemphasename>
+    <gemdcname>C4AH11</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4AH13</gemphasename>
+    <gemdcname>C4AH13</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4AH19</gemphasename>
+    <gemdcname>C4AH19</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>CAH10</gemphasename>
+    <gemdcname>CAH10</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C3FH6</gemphasename>
+    <gemdcname>C3FH6</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4FH13</gemphasename>
+    <gemdcname>C4FH13</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>SO4_OH_AFm</gemphasename>
+    <gemdcname>C4AH13</gemdcname>
+    <gemdcname>monosulphate12</gemdcname>
+    </gemphase_data>
+    <id>12</id>
+    <interface_data>
+      <randomgrowth>0.6</randomgrowth>
+      <growthtemplate>4</growthtemplate>
+      <growthtemplate>14</growthtemplate>
+      <growthtemplate>13</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <affinity>
+        <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>13</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>2</affinityphaseid>
+        <affinityvalue>-10</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>3</affinityphaseid>
+        <affinityvalue>-10</affinityvalue>
+      </affinity>
+    </interface_data>
+    <porosity>0.0</porosity>
+    <display_data>
+      <red>128.0</red>
+      <green>128.0</green>
+      <blue>0.0</blue>
+      <gray>140.0</gray>
+    </display_data>
+  </phase>
+  <phase>
     <thamesname>AFMC</thamesname>
     <gemphase_data>
-    <gemphasename>hemicarbonate</gemphasename>
+    <gemphasename>C4AcH9</gemphasename>
+    <gemdcname>monocarbonate9</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4Ac0.5H105</gemphasename>
+    <gemdcname>hemicarbonat10.5</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4Ac0.5H12</gemphasename>
     <gemdcname>hemicarbonate</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4Ac0.5H9</gemphasename>
+    <gemdcname>hemicarbonate9</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4AcH11</gemphasename>
+    <gemdcname>monocarbonate</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4Fc05H10</gemphasename>
     <gemdcname>Fe-hemicarbonate</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>monocarbonate</gemphasename>
-    <gemdcname>monocarbonate</gemdcname>
+    <gemphasename>C4FcH12</gemphasename>
     <gemdcname>Femonocarbonate</gemdcname>
     </gemphase_data>
     <id>13</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>4</growthtemplate>
-      <growthtemplate>15</growthtemplate>
       <growthtemplate>14</growthtemplate>
-      <growthtemplate>18</growthtemplate>
+      <growthtemplate>13</growthtemplate>
+      <growthtemplate>11</growthtemplate>
       <affinity>
-        <affinityphaseid>15</affinityphaseid>
+        <affinityphaseid>14</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>14</affinityphaseid>
+        <affinityphaseid>13</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -435,34 +554,40 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
   <phase>
     <thamesname>MONOSULPH</thamesname>
     <gemphase_data>
-    <gemphasename>monosulphate</gemphasename>
-    <gemdcname>monosulphate</gemdcname>
-    <gemdcname>Fe-monosulphate</gemdcname>
+    <gemphasename>C4AsH105</gemphasename>
+    <gemdcname>monosulphate10.5</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>SO4_OH_AFm</gemphasename>
-    <gemdcname>1C4AH13</gemdcname>
-    <gemdcname>1monosulphate</gemdcname>
+    <gemphasename>C4AsH12</gemphasename>
+    <gemdcname>monosulphate12</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>OH_SO4_AFm</gemphasename>
-    <gemdcname>2C4AH13</gemdcname>
-    <gemdcname>2monosulphate</gemdcname>
+    <gemphasename>C4AsH14</gemphasename>
+    <gemdcname>monosulphate14</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C4AsH9</gemphasename>
+    <gemdcname>monosulphate9</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>monosulph-AlFe</gemphasename>
+    <gemdcname>monosulphate1205</gemdcname>
+    <gemdcname>Fe-monosulph05</gemdcname>
     </gemphase_data>
     <id>14</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>4</growthtemplate>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>9</growthtemplate>
+      <growthtemplate>6</growthtemplate>
+      <growthtemplate>7</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <growthtemplate>12</growthtemplate>
       <growthtemplate>13</growthtemplate>
       <growthtemplate>14</growthtemplate>
       <growthtemplate>15</growthtemplate>
       <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
       <affinity>
-        <affinityphaseid>14</affinityphaseid>
+        <affinityphaseid>13</affinityphaseid>
         <affinityvalue>10</affinityvalue>
       </affinity>
       <affinity>
@@ -485,47 +610,46 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
   <phase>
     <thamesname>ETTR</thamesname>
     <gemphase_data>
-    <gemphasename>ettringite-Al</gemphasename>
+    <gemphasename>ettringite</gemphasename>
     <gemdcname>ettringite</gemdcname>
-    <gemdcname>Fe-ettringite</gemdcname>
+    <gemdcname>ettringite30</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>ettringite-Fe</gemphasename>
-    <gemdcname>1ettringite</gemdcname>
-    <gemdcname>1Fe-ettringite</gemdcname>
+    <gemphasename>C6AsH13</gemphasename>
+    <gemdcname>ettringite13</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>C6AsH9</gemphasename>
+    <gemdcname>ettringite9</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+    <gemphasename>ettringite-AlFe</gemphasename>
+    <gemdcname>ettringite05</gemdcname>
+    <gemdcname>Fe-ettringite05</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>SO4_CO3_AFt</gemphasename>
-    <gemdcname>tricarboalu</gemdcname>
-    <gemdcname>2ettringite</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>CO3_SO4_AFt</gemphasename>
-    <gemdcname>1tricarboalu</gemdcname>
-    <gemdcname>3ettringite</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>ettringite</gemphasename>
-    <gemdcname>4ettringite</gemdcname>
+    <gemdcname>tricarboalu03</gemdcname>
+    <gemdcname>ettringite03_ss</gemdcname>
     </gemphase_data>
     <id>15</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>4</growthtemplate>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>9</growthtemplate>
+      <growthtemplate>6</growthtemplate>
+      <growthtemplate>7</growthtemplate>
+      <growthtemplate>11</growthtemplate>
+      <growthtemplate>12</growthtemplate>
       <growthtemplate>13</growthtemplate>
       <growthtemplate>14</growthtemplate>
       <growthtemplate>15</growthtemplate>
       <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
       <affinity>
         <affinityphaseid>1</affinityphaseid>
         <affinityvalue>2</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>15</affinityphaseid>
+        <affinityphaseid>14</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -555,17 +679,17 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>4</growthtemplate>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>9</growthtemplate>
-      <growthtemplate>14</growthtemplate>
+      <growthtemplate>6</growthtemplate>
+      <growthtemplate>7</growthtemplate>
       <growthtemplate>15</growthtemplate>
-      <growthtemplate>18</growthtemplate>
+      <growthtemplate>14</growthtemplate>
+      <growthtemplate>11</growthtemplate>
       <affinity>
         <affinityphaseid>1</affinityphaseid>
         <affinityvalue>2</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>16</affinityphaseid>
+        <affinityphaseid>15</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -590,21 +714,21 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     <gemphase_data>
     <gemphasename>OH-hydrotalcite</gemphasename>
     <gemdcname>hydrotalcite</gemdcname>
-    <gemdcname>Fe-hydrotalcite</gemdcname>
     </gemphase_data>
     <gemphase_data>
-    <gemphasename>CO3-hydrotalcite</gemphasename>
-    <gemdcname>CO3-hydrotalcite</gemdcname>
+    <gemphasename>hydrotalc-pyro</gemphasename>
+    <gemdcname>Mg3AlC0.5OH</gemdcname>
+    <gemdcname>Mg3FeC0.5OH</gemdcname>
     </gemphase_data>
     <id>17</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <growthtemplate>4</growthtemplate>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>9</growthtemplate>
+      <growthtemplate>6</growthtemplate>
+      <growthtemplate>7</growthtemplate>
+      <growthtemplate>13</growthtemplate>
       <growthtemplate>14</growthtemplate>
-      <growthtemplate>15</growthtemplate>
-      <growthtemplate>18</growthtemplate>
+      <growthtemplate>11</growthtemplate>
       <affinity>
         <affinityphaseid>1</affinityphaseid>
         <affinityvalue>2</affinityvalue>
@@ -631,121 +755,13 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </display_data>
   </phase>
   <phase>
-    <thamesname>AFM</thamesname>
-    <gemphase_data>
-    <gemphasename>C2AFH8</gemphasename>
-    <gemdcname>C2AH8</gemdcname>
-    <gemdcname>C2FH8</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>C3AFH6</gemphasename>
-    <gemdcname>C3AH6</gemdcname>
-    <gemdcname>C3FH6</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>C4AFH13</gemphasename>
-    <gemdcname>C4AH13</gemdcname>
-    <gemdcname>C4FH13</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>CAH10</gemphasename>
-    <gemdcname>CAH10</gemdcname>
-    </gemphase_data>
+    <thamesname>DAMAGE</thamesname>
     <id>18</id>
     <interface_data>
-      <randomgrowth>0.6</randomgrowth>
-      <growthtemplate>4</growthtemplate>
-      <growthtemplate>8</growthtemplate>
-      <growthtemplate>9</growthtemplate>
-      <growthtemplate>13</growthtemplate>
-      <growthtemplate>14</growthtemplate>
-      <growthtemplate>15</growthtemplate>
+      <randomgrowth>0.0</randomgrowth>
       <growthtemplate>16</growthtemplate>
-      <growthtemplate>17</growthtemplate>
-      <growthtemplate>18</growthtemplate>
       <affinity>
-        <affinityphaseid>15</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>18</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>14</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>2</affinityphaseid>
-        <affinityvalue>-10</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>3</affinityphaseid>
-        <affinityvalue>-10</affinityvalue>
-      </affinity>
-    </interface_data>
-    <porosity>0.0</porosity>
-    <display_data>
-      <red>128.0</red>
-      <green>128.0</green>
-      <blue>0.0</blue>
-      <gray>122.0</gray>
-    </display_data>
-  </phase>
-  <phase>
-    <thamesname>LIME</thamesname>
-    <gemphase_data>
-    <gemphasename>lime</gemphasename>
-    <gemdcname>Lim</gemdcname>
-    </gemphase_data>
-    <id>19</id>
-    <interface_data>
-      <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>2</growthtemplate>
-      <affinity>
-        <affinityphaseid>2</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-    </interface_data>
-    <porosity>0.0</porosity>
-    <kinetic_data>
-      <type>soluble</type>
-      <scaledmass>0.0</scaledmass>
-    </kinetic_data>
-    <display_data>
-      <red>0.0</red>
-      <green>128.0</green>
-      <blue>0.0</blue>
-      <gray>220.0</gray>
-    </display_data>
-  </phase>
-  <phase>
-    <thamesname>PERICLASE</thamesname>
-    <id>20</id>
-    <interface_data>
-      <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>2</growthtemplate>
-      <affinity>
-        <affinityphaseid>2</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-    </interface_data>
-    <porosity>0.0</porosity>
-    <display_data>
-      <red>255.0</red>
-      <green>128.0</green>
-      <blue>128.0</blue>
-      <gray>220.0</gray>
-    </display_data>
-  </phase>
-  <phase>
-    <thamesname>DAMAGE</thamesname>
-    <id>21</id>
-    <interface_data>
-      <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>20</growthtemplate>
-      <affinity>
-        <affinityphaseid>20</affinityphaseid>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
@@ -758,13 +774,3 @@ xs:noNamespaceSchemaLocation="/Users/bullard/thames_wd/chemistry.xsd">
     </display_data>
   </phase>
 </chemistry_data>
-
-
-
-
-
-
-
-
-
-

@@ -1,0 +1,1501 @@
+Report on the Material Database
+-------------------------------
+
+List of Independent Components:
+
+0)            Name: Al
+        classcode: e
+       molar mass: 26.9815
+
+1)            Name: C
+        classcode: e
+       molar mass: 12.0108
+
+2)            Name: Ca
+        classcode: e
+       molar mass: 40.078
+
+3)            Name: Fe
+        classcode: e
+       molar mass: 55.845
+
+4)            Name: H
+        classcode: h
+       molar mass: 1.00795
+
+5)            Name: K
+        classcode: e
+       molar mass: 39.0983
+
+6)            Name: Mg
+        classcode: e
+       molar mass: 24.305
+
+7)            Name: Na
+        classcode: e
+       molar mass: 22.9898
+
+8)            Name: Nit
+        classcode: a
+       molar mass: 14.0067
+
+9)            Name: O
+        classcode: o
+       molar mass: 15.9994
+
+10)            Name: S
+        classcode: e
+       molar mass: 32.067
+
+11)            Name: Si
+        classcode: e
+       molar mass: 28.0855
+
+12)            Name: Zz
+        classcode: z
+       molar mass: 0
+
+List of Dependent Components:
+
+0)            Name: Al(SO4)+
+        classcode: S
+       molar mass: 123.046
+
+1)            Name: Al(SO4)2-
+        classcode: S
+       molar mass: 219.111
+
+2)            Name: Al+3
+        classcode: S
+       molar mass: 26.9815
+
+3)            Name: AlO+
+        classcode: S
+       molar mass: 42.9809
+
+4)            Name: AlO2-
+        classcode: S
+       molar mass: 58.9803
+
+5)            Name: AlO2H@
+        classcode: S
+       molar mass: 59.9883
+
+6)            Name: AlOH+2
+        classcode: S
+       molar mass: 43.9889
+
+7)            Name: AlHSiO3+2
+        classcode: S
+       molar mass: 104.073
+
+8)            Name: AlSiO5-3
+        classcode: S
+       molar mass: 135.064
+
+9)            Name: Ca(CO3)@
+        classcode: S
+       molar mass: 100.087
+
+10)            Name: Ca(HCO3)+
+        classcode: S
+       molar mass: 101.095
+
+11)            Name: Ca(SO4)@
+        classcode: S
+       molar mass: 136.143
+
+12)            Name: Ca+2
+        classcode: S
+       molar mass: 40.078
+
+13)            Name: CaOH+
+        classcode: S
+       molar mass: 57.0853
+
+14)            Name: Ca(HSiO3)+
+        classcode: S
+       molar mass: 117.17
+
+15)            Name: CaSiO3@
+        classcode: S
+       molar mass: 116.162
+
+16)            Name: Fe(CO3)@
+        classcode: S
+       molar mass: 115.854
+
+17)            Name: Fe(HCO3)+
+        classcode: S
+       molar mass: 116.862
+
+18)            Name: Fe(HSO4)+
+        classcode: S
+       molar mass: 152.918
+
+19)            Name: Fe(SO4)@
+        classcode: S
+       molar mass: 151.91
+
+20)            Name: Fe+2
+        classcode: S
+       molar mass: 55.845
+
+21)            Name: FeOH+
+        classcode: S
+       molar mass: 72.8524
+
+22)            Name: Fe(HSO4)+2
+        classcode: S
+       molar mass: 152.918
+
+23)            Name: Fe(SO4)+
+        classcode: S
+       molar mass: 151.91
+
+24)            Name: Fe(SO4)2-
+        classcode: S
+       molar mass: 247.974
+
+25)            Name: Fe+3
+        classcode: S
+       molar mass: 55.845
+
+26)            Name: Fe2(OH)2+4
+        classcode: S
+       molar mass: 145.705
+
+27)            Name: Fe3(OH)4+5
+        classcode: S
+       molar mass: 235.564
+
+28)            Name: FeO+
+        classcode: S
+       molar mass: 71.8444
+
+29)            Name: FeO2-
+        classcode: S
+       molar mass: 87.8438
+
+30)            Name: FeO2H@
+        classcode: S
+       molar mass: 88.8518
+
+31)            Name: FeOH+2
+        classcode: S
+       molar mass: 72.8524
+
+32)            Name: FeHSiO3+2
+        classcode: S
+       molar mass: 132.937
+
+33)            Name: K(SO4)-
+        classcode: S
+       molar mass: 135.163
+
+34)            Name: K+
+        classcode: S
+       molar mass: 39.0983
+
+35)            Name: KOH@
+        classcode: S
+       molar mass: 56.1057
+
+36)            Name: Mg(CO3)@
+        classcode: S
+       molar mass: 84.314
+
+37)            Name: Mg(HCO3)+
+        classcode: S
+       molar mass: 85.322
+
+38)            Name: Mg+2
+        classcode: S
+       molar mass: 24.305
+
+39)            Name: MgOH+
+        classcode: S
+       molar mass: 41.3124
+
+40)            Name: MgSO4@
+        classcode: S
+       molar mass: 120.37
+
+41)            Name: Mg(HSiO3)+
+        classcode: S
+       molar mass: 101.397
+
+42)            Name: MgSiO3@
+        classcode: S
+       molar mass: 100.389
+
+43)            Name: Na(CO3)-
+        classcode: S
+       molar mass: 82.9988
+
+44)            Name: Na(HCO3)@
+        classcode: S
+       molar mass: 84.0068
+
+45)            Name: Na(SO4)-
+        classcode: S
+       molar mass: 119.054
+
+46)            Name: Na+
+        classcode: S
+       molar mass: 22.9898
+
+47)            Name: NaOH@
+        classcode: S
+       molar mass: 39.9971
+
+48)            Name: HSiO3-
+        classcode: S
+       molar mass: 77.0917
+
+49)            Name: Si4O10-4
+        classcode: S
+       molar mass: 272.336
+
+50)            Name: SiO2@
+        classcode: S
+       molar mass: 60.0843
+
+51)            Name: SiO3-2
+        classcode: S
+       molar mass: 76.0837
+
+52)            Name: CO2@
+        classcode: S
+       molar mass: 44.0096
+
+53)            Name: CO3-2
+        classcode: S
+       molar mass: 60.009
+
+54)            Name: HCO3-
+        classcode: S
+       molar mass: 61.017
+
+55)            Name: CH4@
+        classcode: S
+       molar mass: 16.0426
+
+56)            Name: H2@
+        classcode: S
+       molar mass: 2.0159
+
+57)            Name: N2@
+        classcode: S
+       molar mass: 28.0134
+
+58)            Name: O2@
+        classcode: S
+       molar mass: 31.9988
+
+59)            Name: S2O3-2
+        classcode: S
+       molar mass: 112.132
+
+60)            Name: HSO3-
+        classcode: S
+       molar mass: 81.0732
+
+61)            Name: SO3-2
+        classcode: S
+       molar mass: 80.0652
+
+62)            Name: HSO4-
+        classcode: S
+       molar mass: 97.0726
+
+63)            Name: SO4-2
+        classcode: S
+       molar mass: 96.0646
+
+64)            Name: H2S@
+        classcode: S
+       molar mass: 34.0829
+
+65)            Name: HS-
+        classcode: S
+       molar mass: 33.075
+
+66)            Name: S-2
+        classcode: S
+       molar mass: 32.067
+
+67)            Name: OH-
+        classcode: S
+       molar mass: 17.0074
+
+68)            Name: H+
+        classcode: T
+       molar mass: 1.00795
+
+69)            Name: H2O@
+        classcode: W
+       molar mass: 18.0153
+
+70)            Name: CO2
+        classcode: G
+       molar mass: 44.0096
+
+71)            Name: CH4
+        classcode: G
+       molar mass: 16.0426
+
+72)            Name: H2
+        classcode: G
+       molar mass: 2.0159
+
+73)            Name: N2
+        classcode: G
+       molar mass: 28.0134
+
+74)            Name: O2
+        classcode: G
+       molar mass: 31.9988
+
+75)            Name: H2S
+        classcode: G
+       molar mass: 34.0829
+
+76)            Name: H2O
+        classcode: G
+       molar mass: 18.0153
+
+77)            Name: C3AFS0.84H4.32
+        classcode: I
+       molar mass: 427.354
+
+78)            Name: C3FS0.84H4.32
+        classcode: I
+       molar mass: 456.217
+
+79)            Name: CSHQ-JenD
+        classcode: I
+       molar mass: 169.213
+
+80)            Name: CSHQ-JenH
+        classcode: I
+       molar mass: 173.886
+
+81)            Name: CSHQ-TobD
+        classcode: I
+       molar mass: 119.821
+
+82)            Name: CSHQ-TobH
+        classcode: I
+       molar mass: 124.494
+
+83)            Name: KSiOH
+        classcode: I
+       molar mass: 43.6727
+
+84)            Name: NaSiOH
+        classcode: I
+       molar mass: 35.6185
+
+85)            Name: ettringite05
+        classcode: M
+       molar mass: 627.555
+
+86)            Name: Fe-ettringite05
+        classcode: J
+       molar mass: 656.419
+
+87)            Name: monosulphate1205
+        classcode: M
+       molar mass: 311.26
+
+88)            Name: Fe-monosulph05
+        classcode: J
+       molar mass: 340.123
+
+89)            Name: straetlingite
+        classcode: I
+       molar mass: 418.323
+
+90)            Name: straetlingite7
+        classcode: I
+       molar mass: 400.307
+
+91)            Name: ettringite
+        classcode: I
+       molar mass: 1255.11
+
+92)            Name: ettringite30
+        classcode: I
+       molar mass: 1219.08
+
+93)            Name: C4AH13
+        classcode: J
+       molar mass: 560.47
+
+94)            Name: monosulphate12
+        classcode: M
+       molar mass: 622.52
+
+95)            Name: tricarboalu03
+        classcode: J
+       molar mass: 382.315
+
+96)            Name: ettringite03_ss
+        classcode: M
+       molar mass: 418.37
+
+97)            Name: Mg3AlC0.5OH
+        classcode: I
+       molar mass: 310.998
+
+98)            Name: Mg3FeC0.5OH
+        classcode: I
+       molar mass: 339.862
+
+99)            Name: M075SH
+        classcode: I
+       molar mass: 225.663
+
+100)            Name: M15SH
+        classcode: I
+       molar mass: 165.579
+
+101)            Name: AlOHam
+        classcode: O
+       molar mass: 78.0036
+
+102)            Name: AlOHmic
+        classcode: O
+       molar mass: 78.0036
+
+103)            Name: Gbs
+        classcode: O
+       molar mass: 78.0036
+
+104)            Name: Kln
+        classcode: O
+       molar mass: 258.16
+
+105)            Name: Gr
+        classcode: O
+       molar mass: 12.0108
+
+106)            Name: C12A7
+        classcode: O
+       molar mass: 1386.66
+
+107)            Name: C2S
+        classcode: O
+       molar mass: 172.239
+
+108)            Name: C3A
+        classcode: O
+       molar mass: 270.193
+
+109)            Name: C3S
+        classcode: O
+       molar mass: 228.316
+
+110)            Name: C4AF
+        classcode: O
+       molar mass: 485.959
+
+111)            Name: CA
+        classcode: O
+       molar mass: 158.039
+
+112)            Name: CA2
+        classcode: O
+       molar mass: 260
+
+113)            Name: C2AH7.5
+        classcode: O
+       molar mass: 349.231
+
+114)            Name: C3AH6
+        classcode: O
+       molar mass: 378.285
+
+115)            Name: C4AH11
+        classcode: O
+       molar mass: 524.439
+
+116)            Name: C4AH13-1
+        classcode: O
+       molar mass: 560.47
+
+117)            Name: C4AH19
+        classcode: O
+       molar mass: 668.562
+
+118)            Name: CAH10
+        classcode: O
+       molar mass: 338.192
+
+119)            Name: monosulphate10.5
+        classcode: O
+       molar mass: 595.497
+
+120)            Name: monosulphate12-1
+        classcode: O
+       molar mass: 622.52
+
+121)            Name: monosulphate14
+        classcode: O
+       molar mass: 658.55
+
+122)            Name: monosulphate16
+        classcode: O
+       molar mass: 694.581
+
+123)            Name: monosulphate9
+        classcode: O
+       molar mass: 568.474
+
+124)            Name: chabazite
+        classcode: O
+       molar mass: 506.468
+
+125)            Name: zeoliteP_Ca
+        classcode: O
+       molar mass: 359.276
+
+126)            Name: straetlingite5.5
+        classcode: O
+       molar mass: 373.285
+
+127)            Name: monocarbonate9
+        classcode: O
+       molar mass: 532.418
+
+128)            Name: hemicarbonat10.5
+        classcode: O
+       molar mass: 537.436
+
+129)            Name: hemicarbonate
+        classcode: O
+       molar mass: 564.459
+
+130)            Name: hemicarbonate9
+        classcode: O
+       molar mass: 510.413
+
+131)            Name: monocarbonate
+        classcode: O
+       molar mass: 568.449
+
+132)            Name: ettringite13
+        classcode: O
+       molar mass: 912.82
+
+133)            Name: ettringite9
+        classcode: O
+       molar mass: 840.759
+
+134)            Name: Arg
+        classcode: O
+       molar mass: 100.087
+
+135)            Name: Cal
+        classcode: O
+       molar mass: 100.087
+
+136)            Name: C3FH6
+        classcode: O
+       molar mass: 436.012
+
+137)            Name: C4FH13
+        classcode: O
+       molar mass: 618.197
+
+138)            Name: C3FS0.84H4.32-1
+        classcode: O
+       molar mass: 456.217
+
+139)            Name: C3FS1.34H3.32
+        classcode: O
+       molar mass: 468.244
+
+140)            Name: Fe-hemicarbonate
+        classcode: O
+       molar mass: 586.156
+
+141)            Name: Femonocarbonate
+        classcode: O
+       molar mass: 644.191
+
+142)            Name: Dis-Dol
+        classcode: O
+       molar mass: 184.401
+
+143)            Name: Ord-Dol
+        classcode: O
+       molar mass: 184.401
+
+144)            Name: Lim
+        classcode: O
+       molar mass: 56.0774
+
+145)            Name: Portlandite
+        classcode: O
+       molar mass: 74.0927
+
+146)            Name: Anh
+        classcode: O
+       molar mass: 136.143
+
+147)            Name: Gp
+        classcode: O
+       molar mass: 172.173
+
+148)            Name: hemihydrate
+        classcode: O
+       molar mass: 145.15
+
+149)            Name: thaumasite
+        classcode: O
+       molar mass: 622.621
+
+150)            Name: Fe
+        classcode: O
+       molar mass: 55.845
+
+151)            Name: FeCO3(pr)
+        classcode: O
+       molar mass: 115.854
+
+152)            Name: Sd
+        classcode: O
+       molar mass: 115.854
+
+153)            Name: Hem
+        classcode: O
+       molar mass: 159.688
+
+154)            Name: Mag
+        classcode: O
+       molar mass: 231.533
+
+155)            Name: Fe(OH)3(am)
+        classcode: O
+       molar mass: 106.867
+
+156)            Name: FeOOHmic
+        classcode: O
+       molar mass: 88.8518
+
+157)            Name: Gt
+        classcode: O
+       molar mass: 88.8518
+
+158)            Name: Py
+        classcode: O
+       molar mass: 119.979
+
+159)            Name: Tro
+        classcode: O
+       molar mass: 87.912
+
+160)            Name: Melanterite
+        classcode: O
+       molar mass: 278.017
+
+161)            Name: K2SO4
+        classcode: O
+       molar mass: 174.261
+
+162)            Name: syngenite
+        classcode: O
+       molar mass: 328.419
+
+163)            Name: K2O
+        classcode: O
+       molar mass: 94.196
+
+164)            Name: hydrotalcite
+        classcode: O
+       molar mass: 443.332
+
+165)            Name: Mgs
+        classcode: O
+       molar mass: 84.314
+
+166)            Name: Brc
+        classcode: O
+       molar mass: 58.3197
+
+167)            Name: Na2SO4
+        classcode: O
+       molar mass: 142.044
+
+168)            Name: natrolite
+        classcode: O
+       molar mass: 380.224
+
+169)            Name: zeoliteX
+        classcode: O
+       molar mass: 425.846
+
+170)            Name: zeoliteY
+        classcode: O
+       molar mass: 548.4
+
+171)            Name: Na2O
+        classcode: O
+       molar mass: 61.979
+
+172)            Name: Sulfur
+        classcode: O
+       molar mass: 32.067
+
+173)            Name: Qtz
+        classcode: O
+       molar mass: 60.0843
+
+174)            Name: Amor-Sl
+        classcode: O
+       molar mass: 60.0843
+
+List of Phases:
+
+0)            Name: aq_gen
+        classcode: a
+1)            Name: gas_gen
+        classcode: g
+2)            Name: C3(AF)S0.84H
+        classcode: s
+3)            Name: CSHQ
+        classcode: s
+4)            Name: ettringite-AlFe
+        classcode: s
+5)            Name: monosulph-AlFe
+        classcode: s
+6)            Name: straetlingite
+        classcode: s
+7)            Name: ettringite
+        classcode: s
+8)            Name: SO4_OH_AFm
+        classcode: s
+9)            Name: SO4_CO3_AFt
+        classcode: s
+10)            Name: hydrotalc-pyro
+        classcode: s
+11)            Name: MSH
+        classcode: s
+12)            Name: Al(OH)3am
+        classcode: s
+13)            Name: Al(OH)3mic
+        classcode: s
+14)            Name: Gibbsite
+        classcode: s
+15)            Name: Kaolinite
+        classcode: s
+16)            Name: Graphite
+        classcode: s
+17)            Name: Mayenite
+        classcode: s
+18)            Name: Belite
+        classcode: s
+19)            Name: Aluminate
+        classcode: s
+20)            Name: Alite
+        classcode: s
+21)            Name: Ferrite
+        classcode: s
+22)            Name: CA
+        classcode: s
+23)            Name: CA2
+        classcode: s
+24)            Name: C2AH75
+        classcode: s
+25)            Name: C3AH6
+        classcode: s
+26)            Name: C4AH11
+        classcode: s
+27)            Name: C4AH13
+        classcode: s
+28)            Name: C4AH19
+        classcode: s
+29)            Name: CAH10
+        classcode: s
+30)            Name: C4AsH105
+        classcode: s
+31)            Name: C4AsH12
+        classcode: s
+32)            Name: C4AsH14
+        classcode: s
+33)            Name: C4AsH16
+        classcode: s
+34)            Name: C4AsH9
+        classcode: s
+35)            Name: Chabazite
+        classcode: s
+36)            Name: ZeoliteP
+        classcode: s
+37)            Name: C2ASH55
+        classcode: s
+38)            Name: C4AcH9
+        classcode: s
+39)            Name: C4Ac0.5H105
+        classcode: s
+40)            Name: C4Ac0.5H12
+        classcode: s
+41)            Name: C4Ac0.5H9
+        classcode: s
+42)            Name: C4AcH11
+        classcode: s
+43)            Name: C6AsH13
+        classcode: s
+44)            Name: C6AsH9
+        classcode: s
+45)            Name: Aragonite
+        classcode: s
+46)            Name: Calcite
+        classcode: s
+47)            Name: C3FH6
+        classcode: s
+48)            Name: C4FH13
+        classcode: s
+49)            Name: C3FS0.84H4.32
+        classcode: s
+50)            Name: C3FS1.34H3.32
+        classcode: s
+51)            Name: C4Fc05H10
+        classcode: s
+52)            Name: C4FcH12
+        classcode: s
+53)            Name: Dolomite-dis
+        classcode: s
+54)            Name: Dolomite-ord
+        classcode: s
+55)            Name: lime
+        classcode: s
+56)            Name: Portlandite
+        classcode: s
+57)            Name: Anhydrite
+        classcode: s
+58)            Name: Gypsum
+        classcode: s
+59)            Name: hemihydrate
+        classcode: s
+60)            Name: thaumasite
+        classcode: s
+61)            Name: Iron
+        classcode: s
+62)            Name: Fe-carbonate
+        classcode: s
+63)            Name: Siderite
+        classcode: s
+64)            Name: Hematite
+        classcode: s
+65)            Name: Magnetite
+        classcode: s
+66)            Name: Ferrihydrite-am
+        classcode: s
+67)            Name: Ferrihydrite-mc
+        classcode: s
+68)            Name: Goethite
+        classcode: s
+69)            Name: Pyrite
+        classcode: s
+70)            Name: Troilite
+        classcode: s
+71)            Name: Melanterite
+        classcode: s
+72)            Name: arcanite
+        classcode: s
+73)            Name: syngenite
+        classcode: s
+74)            Name: K-oxide
+        classcode: s
+75)            Name: OH-hydrotalcite
+        classcode: s
+76)            Name: Magnesite
+        classcode: s
+77)            Name: Brucite
+        classcode: s
+78)            Name: thenardite
+        classcode: s
+79)            Name: Natrolite
+        classcode: s
+80)            Name: ZeoliteX
+        classcode: s
+81)            Name: ZeoliteY
+        classcode: s
+82)            Name: Na-oxide
+        classcode: s
+83)            Name: Sulphur
+        classcode: s
+84)            Name: Quartz
+        classcode: s
+85)            Name: Silica-amorph
+        classcode: s
+List of Microstructure Phases:
+
+0)       Name: Void
+               id: 0
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 0
+         porosity: 1
+              k2o: 0
+             na2o: 0
+              mgo: 0
+              so3: 0
+1)       Name: H2O
+               id: 1
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 1
+         porosity: 1
+              k2o: 0
+             na2o: 0
+              mgo: 0
+              so3: 0
+2)       Name: C3S
+               id: 2
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 1
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 2
+        growthtemplate: 10
+         porosity: 0
+              k2o: 0.00087
+             na2o: 0
+              mgo: 0.00861
+              so3: 0.007942
+3)       Name: C2S
+               id: 3
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 1
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 3
+         porosity: 0
+              k2o: 0.01152
+             na2o: 0
+              mgo: 0.0038
+              so3: 0.010528
+4)       Name: C3A
+               id: 4
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 1
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 11
+        growthtemplate: 12
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 15
+        growthtemplate: 16
+         porosity: 0
+              k2o: 0.00979
+             na2o: 0
+              mgo: 0.01091
+              so3: 0
+5)       Name: C4AF
+               id: 5
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 1
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 5
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+6)       Name: K2SO4
+               id: 6
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 1
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 6
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+7)       Name: GYPSUM
+               id: 7
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 1
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 6
+        growthtemplate: 11
+        growthtemplate: 12
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 15
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+8)       Name: HEMIANH
+               id: 8
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 1
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 7
+        growthtemplate: 11
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 15
+        growthtemplate: 16
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+9)       Name: DOLOMITE
+               id: 9
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 1
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 8
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+10)       Name: CH
+               id: 10
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 1
+        affinity to 10: 1
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 9
+        growthtemplate: 10
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+11)       Name: CSH
+               id: 11
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 2
+        affinity to 2: 4
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 2
+        growthtemplate: 1
+        growthtemplate: 9
+        growthtemplate: 10
+         porosity: 0.5
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+12)       Name: AFM
+               id: 12
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 1
+        affinity to 14: 1
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 14
+        growthtemplate: 13
+        growthtemplate: 11
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+13)       Name: AFMC
+               id: 13
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 1
+        affinity to 14: 1
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 14
+        growthtemplate: 13
+        growthtemplate: 11
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+14)       Name: MONOSULPH
+               id: 14
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 10
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 6
+        growthtemplate: 7
+        growthtemplate: 11
+        growthtemplate: 12
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 15
+        growthtemplate: 16
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+15)       Name: ETTR
+               id: 15
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 2
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 1
+        affinity to 15: 0
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 6
+        growthtemplate: 7
+        growthtemplate: 11
+        growthtemplate: 12
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 15
+        growthtemplate: 16
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+16)       Name: BRUCITE
+               id: 16
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 2
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 1
+        affinity to 16: 0
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 6
+        growthtemplate: 7
+        growthtemplate: 15
+        growthtemplate: 14
+        growthtemplate: 11
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+17)       Name: HYDROTALC
+               id: 17
+    random growth: 0.6
+        affinity to 0: 0
+        affinity to 1: 2
+        affinity to 2: -10
+        affinity to 3: -10
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 1
+        affinity to 17: 0
+        growthtemplate: 4
+        growthtemplate: 6
+        growthtemplate: 7
+        growthtemplate: 13
+        growthtemplate: 14
+        growthtemplate: 11
+         porosity: 0
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
+18)       Name: DAMAGE
+               id: 18
+    random growth: 0
+        affinity to 0: 0
+        affinity to 1: 0
+        affinity to 2: 0
+        affinity to 3: 0
+        affinity to 4: 0
+        affinity to 5: 0
+        affinity to 6: 0
+        affinity to 7: 0
+        affinity to 8: 0
+        affinity to 9: 0
+        affinity to 10: 0
+        affinity to 11: 0
+        affinity to 12: 0
+        affinity to 13: 0
+        affinity to 14: 0
+        affinity to 15: 0
+        affinity to 16: 1
+        affinity to 17: 0
+        growthtemplate: 16
+         porosity: 1
+              k2o: 0.00272
+             na2o: 0
+              mgo: 0.02292
+              so3: 0
