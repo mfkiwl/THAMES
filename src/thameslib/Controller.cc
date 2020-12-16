@@ -616,7 +616,8 @@ void Controller::initializeState (double time)
   return;
 }
 
-void Controller::calculateState (double time,
+void Controller::calculateState (int choice,
+                                 double time,
                                  double dt,
                                  bool isfirst) 
 {
@@ -719,9 +720,11 @@ void Controller::calculateState (double time,
     /// @todo Is these needed even without sulfate attack?
     ///
 
-    int ettrid = chemsys_->getPhaseid("ettringite");
-    double ettrSI = solut_->getSI(ettrid);
-    lattice_->setEttrSI(ettrSI);    
+    if (choice == SULFATE_ATTACK) {
+        int ettrid = chemsys_->getPhaseid("ettringite");
+        double ettrSI = solut_->getSI(ettrid);
+        lattice_->setEttrSI(ettrSI);    
+    }
     
     if (isfirst) {        
       string csfilename("ChemSysOutput.dat");
