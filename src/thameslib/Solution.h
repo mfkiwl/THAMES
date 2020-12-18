@@ -339,11 +339,11 @@ TNode *getNode ()
 @brief Calculate the site strain based on local crystallization pressure.
 
 The calculation of local crystallization pressure happens in this method,
-based on the saturation index of ettringite.  Therefore, the method is
+based on the saturation index of the phase.  Therefore, the method is
 currently restricted to problems of sulfate attack, and it probably can
 be generalized somewhat.
 
-Assuming that the saturation index \f$\beta\f$ is known for ettringite,
+Assuming that the saturation index \f$\beta\f$ is known for the phase,
 then the crystallization pressure should be the difference in the Laplace pressure
 between the large pore entrance, \f$r_{cp}\f$, and the size of the average gel
 pore, \f$r_{gp}\f$.  This pressure difference is
@@ -405,13 +405,13 @@ atmospheric pressure.
 
 @todo Consider renaming this function to calcCrystallizationStrain.
 
-@param ettrSI is the saturation index of the growing crystal
+@param SI is the saturation index of the growing crystal
 @param porevolfrac is the local porosity
 @param Kp is the effective bulk modulus of the porous body
 @param Ks is the effective shear modulus of the porous body
 @return the calculated crystallization strain
 */
-double calculateCrystrain (double ettrSI,
+double calculateCrystrain (double SI,
                            double porevolfrac,
                            double Kp,
                            double Ks);

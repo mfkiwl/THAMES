@@ -157,13 +157,11 @@ This method calculates the change in state of the system during a cycle, includi
     - Updating the microstructure
     - Outputting the microstructure phase volume fractions and other data
 
-@param choice is the kind fo simulation being performed
 @param time is the simulation time [days]
 @param dt is the change in simulation time used by the kinetic model [days]
 @param isfirst is true iff this is the first state calculation (initialization)
 */
-void calculateState (int choice,
-                     double time,
+void calculateState (double time,
                      double dt,
                      bool isfirst);
  

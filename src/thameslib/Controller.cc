@@ -345,6 +345,10 @@ void Controller::doCycle (const string &statfilename,
 
     cout << "Going into Controller::calculateState with isfirst = " << isfirst << endl;
     calculateState(time_[i],timestep,isfirst);
+    cout << "*Returned from Controller::calculateState(" << time_[i] << ","
+         << timestep << "," << isfirst << ")" << endl;
+    cout << "*called by Controller::doCycle" << endl;
+    cout.flush();
 
     ///
     /// Once the change in state is determined, propagate the consequences
@@ -352,6 +356,7 @@ void Controller::doCycle (const string &statfilename,
     ///
 
     cout << "Going into Lattice::changeMicrostructure" << endl;
+    cout.flush();
     lattice_->changeMicrostructure(time_[i],sim_type_,isfirst);
 
     if ((time_[i] >= output_time[time_index]) && (time_index < output_time.size())) {
@@ -605,6 +610,9 @@ void Controller::initializeState (double time)
     cout.flush();
     try {
         chemsys_->calculateState(time,true);
+        cout << "*Returned from ChemicalSystem::calculateState" << endl;
+        cout << "*called by function Controller::initializeState" << endl;
+        cout.flush();
     }
     catch (GEMException gex) {
         gex.printException();
@@ -616,8 +624,7 @@ void Controller::initializeState (double time)
   return;
 }
 
-void Controller::calculateState (int choice,
-                                 double time,
+void Controller::calculateState (double time,
                                  double dt,
                                  bool isfirst) 
 {
@@ -704,6 +711,9 @@ void Controller::calculateState (int choice,
     cout.flush();
     try {
         chemsys_->calculateState(time,isfirst);
+        cout << "*Returned from ChemicalSystem::calculateState" << endl;
+        cout << "*called by function Controller::calculateState" << endl;
+        cout.flush();
     }
     catch (GEMException gex) {
         gex.printException();
@@ -713,17 +723,56 @@ void Controller::calculateState (int choice,
     cout.flush();
     
     ///
-    /// The thermodynamic calculation returns the saturation index of AFt,
-    /// which is needed for calculations of crystallization pressure during
-    /// sulfate attack.  Assign this to the lattice
-    ///
-    /// @todo Is these needed even without sulfate attack?
+    /// The thermodynamic calculation returns the saturation index of phases,
+    /// which is needed for calculations of driving force for dissolution
+    /// or growth.  Assign this to the lattice in case crystallization pressures
+    /// should be calculated.
     ///
 
-    if (choice == SULFATE_ATTACK) {
-        int ettrid = chemsys_->getPhaseid("ettringite");
-        double ettrSI = solut_->getSI(ettrid);
-        lattice_->setEttrSI(ettrSI);    
+    /// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    /// JWB Thermo2mic is only good for certain kinetic phases, not
+    ///  all of them.... we need to reconcile this.  It might be better
+    ///  to make every phase have a thermodynamic analog, and it
+    ///  might be better to do the following loop over all the
+    ///  MICROSTRUCTURE phases, not the GEMS phases
+    ///  
+    /// @todo fix up the following loop
+    /// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    try {
+        double aveSI = 0.0;
+        double moles = 0.0;
+        vector<int> micphasemembers;
+        for (int i = 0; i < chemsys_->getMicphasenum(); ++i) {
+            int newmicid = chemsys_->getMicid(chemsys_->getMicphasename(i));
+            cout << "Mic phase " << chemsys_->getMicphasename(i)
+                 << " is associated with GEMS phases ";
+            cout.flush();
+            aveSI = moles = 0.0;
+            micphasemembers = chemsys_->getMicphasemembers(newmicid);
+            for (int ii = 0; ii < micphasemembers.size(); ++ii) {
+                int newpid = micphasemembers[ii];
+                if (ii == 0) {
+                    cout << chemsys_->getPhasename(newpid);
+                } else {
+                    cout << " , " << chemsys_->getPhasename(newpid);
+                }
+                aveSI += (solut_->getSI(newpid) * chemsys_->getPhasemoles(newpid));
+                moles += chemsys_->getPhasemoles(newpid);
+            }
+            if (moles > 0.0) {
+                aveSI = aveSI / moles;
+            } else {
+                aveSI = aveSI / (double)(micphasemembers.size());
+            }
+            cout << endl;
+            cout.flush();
+            lattice_->setSI(newmicid,aveSI);    
+        }
+    }
+    catch (EOBException eex) {
+        eex.printException();
+        exit(1);
     }
     
     if (isfirst) {        

@@ -34,6 +34,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   micphasenum_ = phasenum_ = solutionphasenum_ = 0;
   micimpuritynum_ = 4;
   micphasename_.clear();
+  stressphasename_.clear();
+  porousphasename_.clear();
   micid_.clear();
   DCname_.clear();
   phasename_.clear();
@@ -435,40 +437,15 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   setSI();
   vector<double> SIforsystem = getSI();
 
-  /*
-  cout << "print out SI for each phase based on whole system: " << endl;
-  for (int j = 0; j < phasenum_; j++) {
-    cout << phasename_[j] << ": " << SIforsystem[j] << endl;
-  }
-  */
-
   ///
   /// Set up all the information for the composition of the aqueous solution
   ///
 
   vector<double> solutionICmoles = getSolution();
 
-  /*
-  cout << "print out moles in solution: " << endl;
-  */
- 
   solut_->setICmoles(solutionICmoles);
   solut_->calculateState(true);
   vector<double> solutionSI = solut_->getSI();
-
-  /*
-  cout << "print out SI for each phase based on solution: " << endl;
-  for (int j = 0; j < phasenum_; j++) {
-    cout << phasename_[j] << ": " << solutionSI[j] << endl;
-  }
-  cout << "print out concentration in solution: " << endl;
-  for (int j = 0; j < DCnum_; j++) {
-    char dd = getDCclasscode(j);
-    if (dd == 'S' || dd == 'T' || dd == 'W') {
-      cout << (solut_->getNode())->Get_cDC(j) << endl;
-    }
-  }
-  */
 }
 
 vector<double> ChemicalSystem::getSolution ()
@@ -600,6 +577,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     phasedata.gemdcname.clear();
     phasedata.gemphaseid.clear();
     phasedata.gemdcid.clear();
+    phasedata.stresscalc = 0;
+    phasedata.weak = 0;
 
     cur = cur->xmlChildrenNode;
 
@@ -634,6 +613,30 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
             cout << "    Phase porosity = " << phasedata.porosity << endl;
             xmlFree(key);
         }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
+            cout << "    Will stress calculation be done for  phase? ";
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(phasedata.stresscalc,st);
+            if (phasedata.stresscalc > 0) {
+                cout << " YES " << endl;
+            } else {
+                cout << " NO " << endl;
+            }
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"weak"))) {
+            cout << "    Can this phase be damaged by stress? ";
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(phasedata.weak,st);
+            if (phasedata.weak > 0) {
+                cout << " YES " << endl;
+            } else {
+                cout << " NO " << endl;
+            }
+            xmlFree(key);
+        }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"display_data"))) {
             cout << "    Parsing display data..." << endl;
             parseDisplaydata(doc, cur, phasedata);
@@ -652,6 +655,18 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         cur = cur->next;
     }
 
+    if (phasedata.stresscalc > 0) {
+        stressphasename_.push_back(phasedata.thamesname);
+        stressphaseid_.push_back(phasedata.id);
+    }
+    if (phasedata.weak > 0) {
+        weakphasename_.push_back(phasedata.thamesname);
+        weakphaseid_.push_back(phasedata.id);
+    }
+    if (phasedata.porosity < 1.0 && phasedata.porosity > 0.0) {
+        porousphasename_.push_back(phasedata.thamesname);
+        porousphaseid_.push_back(phasedata.id);
+    }
     micphasename_.push_back(phasedata.thamesname);
     micid_.push_back(phasedata.id);
     micidlookup_.insert(make_pair(phasedata.thamesname,phasedata.id));
@@ -1473,7 +1488,7 @@ int ChemicalSystem::calculateState (double time,
     setPhasestoich();
    
     ///
-    /// Calculate driving force for ettringite growth
+    /// Calculate driving force for growth or dissolution
     ///
 
     double *soluticmoles;
@@ -1509,6 +1524,9 @@ int ChemicalSystem::calculateState (double time,
     /*
     solut_->calculateState(false);
     */
+
+    cout << "Leaving ChemicalSystem::calculateState now" << endl;
+    cout.flush();
 
     return status;
 }

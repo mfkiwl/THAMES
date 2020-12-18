@@ -67,7 +67,7 @@ vector<Interface> interface_;               /**< List of the different interface
 vector<double> volumefraction_;             /**< Array of volume fractions of each 
                                                     microstructure phase */
 vector<double> count_;                      /**< Number of sites of each different type */
-double ettrSI_;                             /**< Current saturation index of AFt phase,
+vector<double> SI_;                         /**< Current saturation index of AFt phase,
                                                     used only for sulfate attack simulation */
 map<int,vector<double> > expansion_;        /**< Map of expansion strain of each voxel */
 map<int,vector<int> > expansion_coordin_;   /**< Map of coordinates of sites with 
@@ -885,37 +885,51 @@ vector<double> getExpansion (int index)
 }
 
 /**
-@brief Get the saturation index of ettringite.
+@brief Get the saturation index of a phase.
 
 The saturation index is the ratio of the activity product for the assumed
 dissolution reaction in the GEM database to the equilibrium value of that
 activity product (<i>i.e.</i>, the equilibrium constant).
 
-@todo Change the function name to something like getEttringiteSI.
 @note NOT USED.
 
-@return the saturation index of ettringite.
+@param idx is the microstructure phase id
+@return the saturation index of that phase
 */
-double getEttrSI ()
+double getSI (int idx)
 {
-    return ettrSI_;
+    try {
+        return ((double)(SI_.at(idx)));
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("Lattice","getSI","SI_",
+                        SI_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
 }
 
 /**
-@brief Set the saturation index of ettringite.
+@brief Set the saturation index of a phase.
 
 The saturation index is the ratio of the activity product for the assumed
 dissolution reaction in the GEM database to the equilibrium value of that
 activity product (<i>i.e.</i>, the equilibrium constant).
 
-@todo Change the function name to something like setEttringiteSI.
-
-@param val is the saturation index of ettringite.
+@param idx is the microstructure phase id
+@param val is the saturation index.
 */
-void setEttrSI (double val)
+void setSI (const int idx, const double val)
 {
-    ettrSI_ = val;
-    return;
+    try {
+        SI_.at(idx) = val;
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("Lattice","setSI","SI_",
+                        SI_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
 }
 
 /**
@@ -1025,6 +1039,8 @@ so that the new stress field can be calculated by the ThermalStrain FE model obj
 
 @todo Consider breaking this method into smaller pieces for maintenance and
 readability.
+
+@todo Generalize this for any phase transformation.
 
 @param alphaseid is the microstructure phase id of the Al-bearing phase to dissolve
 @param netsitesAlphaseid is the number of Al-bearing sites to dissolve

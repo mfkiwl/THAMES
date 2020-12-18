@@ -336,7 +336,7 @@ void Solution::calculateState (bool isfirst)
 
 }
 
-double Solution::calculateCrystrain (double ettrSI,
+double Solution::calculateCrystrain (double SI,
                                      double porevolfrac,
                                      double Kp,
                                      double Ks)
@@ -352,7 +352,7 @@ double Solution::calculateCrystrain (double ettrSI,
     /// which means that \f$\beta > 1\f$.
     ///
 
-    if (ettrSI > 1.0) {
+    if (SI > 1.0) {
 
         ///
         /// Estimate the hydrostatic pressure in the pore solution as 1 atmosphere
@@ -388,7 +388,7 @@ double Solution::calculateCrystrain (double ettrSI,
         double gamma = 1.0e-4; // N/mm
   
         ///
-        /// Stress-free molar volume of the growing crystal, assumed to be ettringite
+        /// Stress-free molar volume of the growing crystal
         /// Units of molar volume for this calcualtion is mm<sup>3</sup>/mol.
         ///
         /// @note This could be loaded up directly from the GEM CSD, rather than
@@ -403,14 +403,14 @@ double Solution::calculateCrystrain (double ettrSI,
 
         double Rg = 8.314e3; // gas constant; N.mm/mol.K
   
-        cout << "SI for ettringite is: " << ettrSI << endl; 
+        cout << "SI for this phase is: " << SI << endl; 
 
         ///
         /// Calculate the crystal mean curvature in equilibrium with the
         /// solution with this saturation index (Thompson-Freundlich effect)
         ///
 
-        double kcr = Rg * T_ * log(ettrSI) / (Vc * gamma);
+        double kcr = Rg * T_ * log(SI) / (Vc * gamma);
 
         ///
         /// If the portion of the crystal near the wall is a hemispherical cap,

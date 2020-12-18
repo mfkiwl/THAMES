@@ -131,7 +131,9 @@ Lattice::Lattice (ChemicalSystem *cs,
     count_.clear();
     count_.resize(chemsys_->getMicphasenum(),0);
 
-    ettrSI_ = 0.0;
+    SI_.clear();
+    SI_.resize(chemsys_->getMicphasenum(),1.0);
+
     expansion_.clear();
     expansion_coordin_.clear();
 
@@ -1258,7 +1260,7 @@ void Lattice::changeMicrostructure (double time,
     ///
 
     if (simtype == SULFATE_ATTACK) {
-        
+
         ///
         ///  Normalize to get volume fractions and compute number
         ///  of sites of each phase needed
@@ -1273,89 +1275,91 @@ void Lattice::changeMicrostructure (double time,
         pid.clear();
         pid.resize(chemsys_->getMicphasenum(),0);
 
+        vector<int> growing;
+        vector<vector<int> > shrinking;
+        vector<vector<double> > volratios;
+        growing.clear();
+        shrinking.clear();
+        volratios.clear();
+        vector<int> idummy;
+        idummy.clear();
+        vector<double> ddummy;
+        ddummy.clear();
+
         try {
-            int CSHID = 0, ETTRID = 0;
-            int MONOID = 0, AFMCID = 0, HYDROTID = 0;
-            CSHID = chemsys_->getMicid("CSH");
-            ETTRID = chemsys_->getMicid("ETTR");
-            MONOID = chemsys_->getMicid("MONOSULPH");
-            AFMCID = chemsys_->getMicid("AFMC");
-            HYDROTID = chemsys_->getMicid("HYDROTALC");
-            for (i = 0; i < vfrac_next.size(); i++) {
-                cursites = (unsigned long int)count_.at(i);
-                newsites = (unsigned long int)((numsites_
-                    * vfrac_next.at(i)) + 0.5);
-                tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
-                netsites.at(i) = tnetsites;
-                pid.at(i) = i;
-                if (i == ETTRID && isfirst) {
-                  netsites.at(i) = 0;
-                  count_.at(i) = newsites;
-                }        
-                if (netsites.at(i) != 0) cout << "****netsites["
+            // Hard wiring for sulfate attack here
+            // @todo Generalize to other phases
+            
+            growing.push_back(chemsys_->getMicid("ETTR"));
+            shrinking.resize(growing.size(),idummy);
+            volratios.resize(growing.size(),ddummy);
+            for (i = 0; i < growing.size(); ++i) {
+                shrinking[i].push_back(chemsys_->getMicid("MONOSULPH"));
+                volratios[i].push_back(2.288);
+                shrinking[i].push_back(chemsys_->getMicid("AFMC"));
+                volratios[i].push_back(2.699);
+                shrinking[i].push_back(chemsys_->getMicid("HYDROTALC"));
+                volratios[i].push_back(3.211);
+            }
+
+            for (int ii = 0; ii < growing.size(); ++ii) {
+                for (i = 0; i < vfrac_next.size(); i++) {
+                    cursites = (unsigned long int)count_.at(i);
+                    newsites = (unsigned long int)((numsites_
+                        * vfrac_next.at(i)) + 0.5);
+                    tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
+                    netsites.at(i) = tnetsites;
+                    pid.at(i) = i;
+                    if (i == growing[ii] && isfirst) {
+                      netsites.at(i) = 0;
+                      count_.at(i) = newsites;
+                    }        
+                    if (netsites.at(i) != 0) cout << "****netsites["
                                               << phasenames.at(i)
                                               << "] in this state = "
                                               << netsites.at(i)
                                               << endl;
-              }
+                  }
             
-              ///
-              /// Next block gets executed only if we are now simulating
-              /// sulfate attack.
-              ///
+                  ///
+                  /// Next block gets executed only if we are now simulating
+                  /// sulfate attack.
+                  ///
 
-              if (time_ >= sattack_time_) {
-                  cout << "start to transform aluminum phases into ETTR at time_ = " 
+                  if (time_ >= sattack_time_) {
+                      cout << "start to crystal-pressure transform at time_ = " 
                        << time_ << endl;
 
-                  ///
-                  /// The relevant stress-free molar volume ratios for sulfate
-                  /// attack phase transformations.
-                  ///
+                      ///
+                      /// The relevant stress-free molar volume ratios for sulfate
+                      /// attack phase transformations.
+                      ///
 
-                  double ETTRMONO = 2.288;
-                  double ETTRAFMC = 2.699;
-                  double ETTRHYDROT = 3.211;
-                  vector<int> numchanged;
-                  numchanged.clear();
-                  numchanged.resize(2,0);
-                  if ((netsites.at(MONOID) < 0) && (netsites.at(ETTRID) > 0)) {
-                      numchanged = transform(MONOID,
-                                             netsites.at(MONOID),
-                                             ETTRID,
-                                             netsites.at(ETTRID),
-                                             ETTRMONO);
+                      vector<int> numchanged;
+                      numchanged.clear();
+                      int growid = growing[ii];
+                      for (int iii = 0; iii < shrinking[ii].size(); ++iii) {
+                          numchanged.resize(2,0);
+                          int shrinkid = shrinking[ii][iii];
+                          double volrat = volratios[ii][iii];
+                          if ((netsites.at(shrinkid) < 0) && (netsites.at(growid) > 0)) {
+                              numchanged = transform(shrinkid,
+                                                     netsites.at(shrinkid),
+                                                     growid,
+                                                     netsites.at(growid),
+                                                     volrat);
 
-                      cout << "numchanged[0] is " << numchanged[0] << endl;
-                      cout << "numchanged[1] is " << numchanged[1] << endl;
-                      netsites.at(MONOID) += numchanged[0];
-                      netsites.at(ETTRID) -= numchanged[1];
-                      cout << "netsites.at(" << MONOID << ") is: "
-                           << netsites.at(MONOID) << endl;
-                      cout << "netsites.at(" << ETTRID << ") is: "
-                           << netsites.at(ETTRID) << endl;
+                              netsites.at(shrinkid) += numchanged[0];
+                              netsites.at(growid) -= numchanged[1];
+                              cout << "netsites.at(" << shrinkid << ") is: "
+                                   << netsites.at(shrinkid) << endl;
+                              cout << "netsites.at(" << growid << ") is: "
+                                   << netsites.at(growid) << endl;
+                          }
+
+                      }
                   }
-
-                  if ((netsites.at(AFMCID) < 0) && (netsites.at(ETTRID) > 0)) {
-                      numchanged = transform(AFMCID,
-                                             netsites.at(AFMCID),
-                                             ETTRID,
-                                             netsites.at(ETTRID),
-                                             ETTRAFMC);
-                      netsites.at(AFMCID) += numchanged[0];
-                      netsites.at(ETTRID) -= numchanged[1];
-                  }
-
-                  if ((netsites.at(HYDROTID) < 0) && (netsites.at(ETTRID) > 0)) {
-                      numchanged = transform(HYDROTID,
-                                             netsites.at(HYDROTID),
-                                             ETTRID,
-                                             netsites.at(ETTRID),
-                                             ETTRHYDROT);
-                      netsites.at(HYDROTID) += numchanged[0];
-                      netsites.at(ETTRID) -= numchanged[1];
-                  }
-              }
+            }
         }
 
         catch (out_of_range &oor) {
@@ -2102,10 +2106,10 @@ void Lattice::makeMovie (const string &root)
     system(buff.c_str());
 }
 
-vector<int> Lattice::transform (int alphaseid,
-                                int netsitesAlphaseid,
-                                int ettrid,
-                                int netsitesEttrid,
+vector<int> Lattice::transform (int shrinkingid,
+                                int netsites_shrinkingid,
+                                int growingid,
+                                int netsites_growingid,
                                 double volumeratio)
 {
     ///
@@ -2123,8 +2127,8 @@ vector<int> Lattice::transform (int alphaseid,
     coordin.resize(3,0);
 
     vector<Isite> diss;
-    diss = interface_[alphaseid].getDissolutionSites();
-    cout << "The number of sites of phase " << alphaseid << " to dissolve is: "
+    diss = interface_[shrinkingid].getDissolutionSites();
+    cout << "The number of sites of phase " << shrinkingid << " to dissolve is: "
          << diss.size() << endl;
 
     Site *ste;
@@ -2137,48 +2141,43 @@ vector<int> Lattice::transform (int alphaseid,
     /// @remark Is this task biased by site position?  Has the list of sites been randomized?
     ///
 
-    if (diss.size() < (-netsitesAlphaseid)) {
+    if (diss.size() < (-netsites_shrinkingid)) {
         for (int ii = 0; ii < numsites_; ii++) {
             ste = &site_[ii];
-            if (ste->getPhaseId() == alphaseid) {
-                addDissolutionSite(ste,alphaseid);
+            if (ste->getPhaseId() == shrinkingid) {
+                addDissolutionSite(ste,shrinkingid);
             }
         }
     }
 
-    diss = interface_[alphaseid].getDissolutionSites();
-    cout << "New size of diss of phase " << alphaseid << " is: " << diss.size() << endl;
+    diss = interface_[shrinkingid].getDissolutionSites();
+    cout << "New size of diss of phase " << shrinkingid << " is: " << diss.size() << endl;
 
-    double ettrform = 0.0;
+    double alreadygrown = 0.0;
     int numtransform = 0;
     int max = (int) volumeratio;
     
-    int CSHID = chemsys_->getMicid("CSH");
-    int ETTRID = chemsys_->getMicid("ETTR");
-    int HYDROTID = chemsys_->getMicid("HYDROTALC");
-    cout << "CSHID = " << CSHID << "  ETTRID = " << ETTRID
-         << " HYDROTID = " << HYDROTID << endl;    
-
-    for (int ii = (diss.size() - 1); ii > 0 && ettrform < netsitesEttrid  
-             && numtransform < (-netsitesAlphaseid); ii--) {
+    for (int ii = (diss.size() - 1); ii > 0 && alreadygrown < netsites_growingid  
+             && numtransform < (-netsites_shrinkingid); ii--) {
         ste = &site_[diss[ii].getId()];
 
         expval.clear();
         
-        vector<Site *> cshneighbor, waterneighbor;
-        cshneighbor.clear();
+        vector<Site *> porousneighbor, waterneighbor;
+        porousneighbor.clear();
         waterneighbor.clear();
         for (int j = 0; j < ste->nbSize(1); j++) {
             Site *stenb;
             stenb = ste->nb(j);
             if (stenb->getPhaseId() == WATERID) {
               waterneighbor.push_back(stenb);
-            } else if (stenb->getPhaseId() == CSHID) {
-              cshneighbor.push_back(stenb);
+            } else if (chemsys_->isPorous(stenb->getPhaseId())) {
+              porousneighbor.push_back(stenb);
             }
         }
         cout << "Having " << waterneighbor.size() << " water pixels and "
-             << cshneighbor.size() << " CSH pixels in the neighborhood." << endl;             
+             << porousneighbor.size() << " porous voxels in the neighborhood."
+             << endl;             
 
         if ((waterneighbor.size() + 1) <= max) { // count the site itself
 
@@ -2190,16 +2189,16 @@ vector<int> Lattice::transform (int alphaseid,
             string fname(jobroot_ + "_alsubvol.dat");
             vector<unsigned long int> alnb = writeSubVolume(fname, ste, 1);
             ste->setDamage();  
-            int numWater, numCSH;
-            numWater = numCSH = 0;
+            int numWater, numPorous;
+            numWater = numPorous = 0;
             for (int nb = 0; nb < alnb.size(); nb++) {
               Site *alstenb = &site_[alnb[nb]];
               if (alstenb->getPhaseId() == WATERID) {
                 numWater++;
-              } else if (alstenb->getPhaseId() == CSHID) {
-                numCSH++;
+              } else if (chemsys_->isPorous(alstenb->getPhaseId())) {
+                numPorous++;
                 alstenb->setDamage();
-              } else if (alstenb->getPhaseId() == ETTRID || alstenb->getPhaseId() == HYDROTID) {
+              } else if (chemsys_->isWeak(alstenb->getPhaseId())) {
                 alstenb->setDamage();
               }
             }
@@ -2223,16 +2222,21 @@ vector<int> Lattice::transform (int alphaseid,
             ///
             /// 3. Calculate crystallization strain in this sub volume;
             ///    porevolfrac is the volume fraction of pore space occupied by crystal
+            ///    
+            ///    @todo generalize porous phase porosities in the block below instead of 0.25
             ///
 
             double porevolfrac = 0.0;
-            if (numWater != 0 || numCSH != 0) {
-              porevolfrac = (double)(volumeratio) / (numWater + numCSH * 0.25);
+            if (numWater != 0 || numPorous != 0) {
+              porevolfrac = (double)(volumeratio) / (numWater + (numPorous * 0.25));
             } else {
               porevolfrac = 1.0;
             } 
-            cout << "ettrSI_ = " << ettrSI_ << endl;
-            double exp = solut_->calculateCrystrain(ettrSI_,
+
+            //  This is hard-wired right now
+            //  @todo generalize crystallization pressure to more phases
+           
+            double exp = solut_->calculateCrystrain(SI_[growingid],
                                                     porevolfrac,
                                                     subbulk,
                                                     subsolidbulk);
@@ -2240,32 +2244,32 @@ vector<int> Lattice::transform (int alphaseid,
             ///
             /// 4. Apply expansion strain on each voxel in this sub volume
             ///
-
+     
             applyExp(alnb, exp);
 
-            setPhaseId(ste, ettrid);
+            setPhaseId(ste, growingid);
 
             ///
             /// The Al-bearing phase has dissolved, so remove it from the
             /// list of dissolution sites of this phase
             ///
 
-            removeDissolutionSite(ste, alphaseid);
+            removeDissolutionSite(ste, shrinkingid);
             numtransform++;
-            ettrform++;
-            count_.at(ettrid)++;
+            alreadygrown++;
+            count_.at(growingid)++;
             
             for (int i = 0; i < waterneighbor.size(); i++) {
-                setPhaseId(waterneighbor[i], ettrid);
+                setPhaseId(waterneighbor[i], growingid);
 
                 ///
                 /// Ettringite has grown here, so remove this site from the
                 /// list of growth sites of this phase
                 ///
 
-                removeGrowthSite(waterneighbor[i], ettrid);
-                count_.at(ettrid)++;
-                ettrform++;
+                removeGrowthSite(waterneighbor[i], growingid);
+                count_.at(growingid)++;
+                alreadygrown++;
 
                 ///
                 /// Weighted mean curvature (wmc) is changed by the difference
@@ -2274,7 +2278,7 @@ vector<int> Lattice::transform (int alphaseid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemsys_->getPorosity(ettrid)
+                double dwmcval = chemsys_->getPorosity(growingid)
                                 - chemsys_->getPorosity(WATERID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
@@ -2283,8 +2287,8 @@ vector<int> Lattice::transform (int alphaseid,
             }
 
             dWaterchange(volumeratio - (waterneighbor.size() + 1));
-            ettrform += (volumeratio - (waterneighbor.size() + 1));
-            count_.at(ettrid) += (volumeratio - (waterneighbor.size() + 1));
+            alreadygrown += (volumeratio - (waterneighbor.size() + 1));
+            count_.at(growingid) += (volumeratio - (waterneighbor.size() + 1));
 
         } else {
 
@@ -2293,27 +2297,27 @@ vector<int> Lattice::transform (int alphaseid,
             /// free space for local ettringite growth.
             ///
 
-            setPhaseId(ste, ettrid);
+            setPhaseId(ste, growingid);
 
             ///
             /// The Al-bearing phase has dissolved, so remove it from the
             /// list of dissolution sites of this phase
             ///
 
-            removeDissolutionSite(ste, alphaseid);
+            removeDissolutionSite(ste, shrinkingid);
             numtransform++;
-            ettrform++;
-            count_.at(ettrid)++;
+            alreadygrown++;
+            count_.at(growingid)++;
             double thresh = 0.0, g = 0.0;
             thresh = volumeratio - max;
             g = rg_->Ran3();
 
             int upperindex = (g < thresh) ? max : max - 1;
             for (int i = 0; i < upperindex; i++) {
-                setPhaseId(waterneighbor[i], ettrid);
-                removeGrowthSite(waterneighbor[i], ettrid);
-                ettrform++;
-                count_.at(ettrid)++;
+                setPhaseId(waterneighbor[i], growingid);
+                removeGrowthSite(waterneighbor[i], growingid);
+                alreadygrown++;
+                count_.at(growingid)++;
 
                 ///
                 /// Weighted mean curvature (wmc) is changed by the difference
@@ -2322,7 +2326,7 @@ vector<int> Lattice::transform (int alphaseid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemsys_->getPorosity(ettrid)
+                double dwmcval = chemsys_->getPorosity(growingid)
                                  - chemsys_->getPorosity(WATERID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
@@ -2334,19 +2338,19 @@ vector<int> Lattice::transform (int alphaseid,
     }       // End of loop over all ettringite sites to form
 
     /*
-    netsites.at(alphaseid) += (long int) numtransform;
-    netsites.at(ettrid) -= (long int) ettrform;	
+    netsites.at(shrinkingid) += (long int) numtransform;
+    netsites.at(growingid) -= (long int) alreadygrown;	
     */
 
-    cout << "The number of aluminum phase " << alphaseid
+    cout << "The number of aluminum phase " << shrinkingid
          << " transformed into ETTR is: " << numtransform << endl;
 
     vector<int> numchanged;
     numchanged.clear();
     numchanged.resize(2,0);
     numchanged[0] = numtransform;
-    numchanged[1] = (long int)ettrform;
-    cout << "The number of ettrform is: " << ettrform << endl;
+    numchanged[1] = (long int)alreadygrown;
+    cout << "The number of alreadygrown is: " << alreadygrown << endl;
 
     return numchanged;
 }
