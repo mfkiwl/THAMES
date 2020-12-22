@@ -26,7 +26,7 @@ Lattice::Lattice (ChemicalSystem *cs,
 : siteneighbors_(18),chemsys_(cs),solut_(solut)
 {
   unsigned int i,j,k;
-  unsigned long int ii;
+  unsigned int ii;
   string buff;
   int xn,yn,zn;
   unsigned int idn;
@@ -105,7 +105,7 @@ Lattice::Lattice (ChemicalSystem *cs,
   cout.flush();
   cout << "    zdim_ = " << zdim_ << endl;
   cout.flush();
-  numsites_ = (unsigned long int)(xdim_ * ydim_ * zdim_);
+  numsites_ = (unsigned int)(xdim_ * ydim_ * zdim_);
   cout << "    numsites_ = " << numsites_ << endl;
   cout.flush();
   cout << "    resolution_ = " << resolution_ << endl;
@@ -415,7 +415,7 @@ void Lattice::addSite (const unsigned int x,
 void Lattice::findInterfaces ()
 {
     unsigned int i,kk;
-    unsigned long int k;
+    unsigned int k;
     vector<Site *> gsite,dsite;
     
     ///
@@ -461,8 +461,8 @@ void Lattice::findInterfaces ()
 
           ///
           /// We are dealing with a phase that may need to
-          /// homogeneously nucleate.  Therefore, identify the
-          /// eligible nucleation sites for that phase
+          /// nucleate.  Identify the eligible nucleation
+          //  sites for that phase
           ///
 
           double thresh = (0.5 / pow(resolution_,3.0));
@@ -495,11 +495,11 @@ void Lattice::findInterfaces ()
     return;
 }
 
-long int Lattice::growPhase (unsigned int phaseid,
-                             long int numtoadd)
+int Lattice::growPhase (unsigned int phaseid,
+                        int numtoadd)
 {
     unsigned int pid;
-    unsigned long int i,j;
+    unsigned int i,j;
     double dwmcval;
     Site *ste,*stenb;
 
@@ -517,7 +517,7 @@ long int Lattice::growPhase (unsigned int phaseid,
 
     vector<Isite> isite = interface_[phaseid].getGrowthSites();
     cout << "size of interface_[" << phaseid << "] is " << isite.size() << endl; 
-    long int numleft,numchange = 0;
+    int numleft,numchange = 0;
 
     ///
     /// We need to go through the interface list in
@@ -602,8 +602,8 @@ long int Lattice::growPhase (unsigned int phaseid,
 }
 
 
-long int Lattice::dissolvePhase (unsigned int phaseid,
-                                 long int numtotake)
+int Lattice::dissolvePhase (unsigned int phaseid,
+                            int numtotake)
 {
     unsigned int pid;
     double dwmcval;
@@ -621,7 +621,7 @@ long int Lattice::dissolvePhase (unsigned int phaseid,
         exit(1);
     }
     
-    unsigned long int i;
+    unsigned int i;
     vector<Isite> isite = interface_[phaseid].getDissolutionSites();
     cout << "size of interface_[" << phaseid << "] is " << isite.size() << endl; 
     try {
@@ -643,8 +643,8 @@ long int Lattice::dissolvePhase (unsigned int phaseid,
          << " needs to dissolve at " << numtotake
          << " sites" << endl;
     
-    long int numleft = numtotake;
-    long int numchange = 0;
+    int numleft = numtotake;
+    int numchange = 0;
     while ((numleft > 0) && (isite.size() > 1)) {
   
       try {
@@ -667,7 +667,7 @@ long int Lattice::dissolvePhase (unsigned int phaseid,
                   - chemsys_->getPorosity(pid);
           ste->dWmc(dwmcval);
       
-          unsigned long int j;
+          unsigned int j;
           for (j = 0; j < ste->nbSize(1); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
@@ -787,14 +787,13 @@ void Lattice::removeGrowthSite (Site *ste,
     }
 }
 
-long int Lattice::emptyPorosity (long int numsites)
+int Lattice::emptyPorosity (int numsites)
 {
-    unsigned long int i,j;
-    long int numemptied = 0;
+    unsigned int i,j;
+    int numemptied = 0;
+    int maxsearchsize = 10;
     unsigned int cntpore,cntmax;
     bool placed;
-    vector<Isite> emptysite;
-    Isite isiteobj(0,0);
 
     if (numsites == 0) return (0);
     if (numsites < 0) {
@@ -803,14 +802,6 @@ long int Lattice::emptyPorosity (long int numsites)
         numemptied = fillPorosity(-numsites);
         return(-numemptied);
     }
-    emptysite.clear();
-    /*
-    emptysite.resize(numsites,isiteobj);
-    */
-    vector<Isite>::iterator p = emptysite.begin();
-    vector<Isite>::iterator start,end;
-    cntmax = 0;
-
     
     ///
     /// Finding all potential VOID sites.
@@ -818,39 +809,33 @@ long int Lattice::emptyPorosity (long int numsites)
     /// @todo Consider removing some of the standard output, or setting a flag for it.
     ///
 
-    cout << "Finding all potential void sites ... ";
-    for (i = 0; i < site_.size(); i++) {
-      if (site_[i].getPhaseId() == WATERID) {
-        cntpore = countBox(7,i);
-        if (cntpore > cntmax) cntmax = cntpore;
-        isiteobj.setId(i);
-        isiteobj.setAffinity(-cntpore);
-        emptysite.push_back(isiteobj);
-      }
-    }
-    cout << "OK, found " << emptysite.size()
-         << " potential void sites." << endl;
-    
-    ///
-    /// Sort the emptysite vector by the affinity as defined here.
-    ///
+    cout << "Finding and sorting all potential void sites ... ";
+    list<Sitesize> distlist = findDomainSizeDistribution(WATERID,maxsearchsize,0);
+    list<Sitesize>::iterator it;
 
-    cout << "Now sorting the void sites... ";
-    start = emptysite.begin();
-    end = emptysite.end();
-    sort(start,end,affinitySort);
-    cout << "OK!" << endl;
+    cout << "OK, found " << distlist.size()
+         << " potential void sites." << endl;
     
     ///
     /// We want to empty the sites with the largest pore count
     ///
 
-    if (emptysite.size() < numsites) numsites = emptysite.size();
+    if (distlist.size() < numsites) {
+        string msg = "Ran out of water in the system";
+        EOBException ex("Lattice","emptysite",msg,distlist.size(),numsites);
+        ex.printException();
+        exit(1);
+    }
+
     numemptied = 0;
+    it = distlist.begin();
+    int siteid;
     try {
         while (numemptied < numsites) {
-            setPhaseId(emptysite[numemptied].getId(),VOIDID);
+            siteid = (*it).siteid;
+            setPhaseId(site_[siteid].getId(),VOIDID);
 	        count_[VOIDID] += 1.0;
+	        count_[WATERID] -= 1.0;
             numemptied++;
         }
     }
@@ -858,26 +843,19 @@ long int Lattice::emptyPorosity (long int numsites)
         eex.printException();
         cout << "Current value of numemptied = " << numemptied;
         cout.flush();
-        cout << " and emptysite[" << numemptied << "].getId() = ";
-        cout.flush();
-        cout << emptysite[numemptied].getId() << endl;
-        cout.flush();
         exit(1);
     }
 
-    emptysite.clear();
-    
     return(numemptied);
 }
 
-long int Lattice::fillPorosity (long int numsites)
+int Lattice::fillPorosity (int numsites)
 {
-    unsigned long int i,j;
-    long int numfilled = 0;
+    unsigned int i,j;
+    int numfilled = 0;
+    int maxsearchsize = 10;
     unsigned int cntpore,cntmin;
     bool placed;
-    vector<Isite> fillsite;
-    Isite isiteobj(0,0);
 
     cout << "In fillPorosity (" << numsites << ")" << endl;
     cout.flush();
@@ -886,69 +864,45 @@ long int Lattice::fillPorosity (long int numsites)
         numfilled = emptyPorosity(-numsites);
         return(numfilled);
     }
-    fillsite.clear();
-    /*
-    fillsite.resize(numsites,isiteobj);
-    */
-    vector<Isite>::iterator p = fillsite.begin();
-    vector<Isite>::iterator start,end;
-    cntmin = 10000000;
 
     ///
-    /// Finding all potential WATERID sites
+    /// Finding all potential VOID sites.
+    ///
+    /// @todo Consider removing some of the standard output, or setting a flag for it.
     ///
 
-    cout << "Finding all potential growth sites ... ";
-    for (i = 0; i < site_.size(); i++) {
-        if (site_[i].getPhaseId() == VOIDID) {
-            cntpore = countBox(7,i);
-            if (cntpore < cntmin) cntmin = cntpore;
-            isiteobj.setId(i);
-            isiteobj.setAffinity(cntpore);
-            fillsite.push_back(isiteobj);
-        }
-    }
-
-    cout << "OK, found " << fillsite.size()
-         << " potential water sites." << endl;
-    cout << "Now sorting the water sites... ";
-
-    ///
-    /// Sort the fillsite vector by the affinity as defined here
-    ///
-
-    start = fillsite.begin();
-    end = fillsite.end();
-    sort(start,end,affinitySort);
-    cout << "OK!" << endl;
+    cout << "Finding and sorting all potential water sites ... ";
+    list<Sitesize> distlist = findDomainSizeDistribution(VOIDID,maxsearchsize,1);
+    list<Sitesize>::iterator it;
 
     ///
     /// We want to fill the sites with the smallest pore count
     ///
 
-    if (fillsite.size() < numsites) numsites = fillsite.size();
-    cout << "Setting the water sites in order from smallest to largest... ";
-    cout.flush();
-    for (i = 0; i < numsites; i++) {
-        cout << "Setting site " << i << " with id "
-             << fillsite[i].getId() << " and pore count "
-             << -fillsite[i].getAffinity() << "... ";
-        cout.flush();
-        setPhaseId(fillsite[i].getId(),WATERID);
-	count_[WATERID] += 1.0;
-        numfilled++;
-        cout << "Done.  Numfilled = " << numfilled << endl;
-        cout.flush();
+    numfilled = 0;
+    it = distlist.begin();
+    int siteid;
+    try {
+        while (numfilled < numsites) {
+            siteid = (*it).siteid;
+            setPhaseId(site_[siteid].getId(),VOIDID);
+	        count_[WATERID] += 1.0;
+	        count_[VOIDID] -= 1.0;
+            numfilled++;
+        }
     }
-    cout << "Done." << endl;
-    cout.flush();
+    catch (EOBException eex) {
+        eex.printException();
+        cout << "Current value of numfilled = " << numfilled;
+        cout.flush();
+        exit(1);
+    }
 
-    fillsite.clear();
     return(numfilled);
 }
 
 int Lattice::countBox (int boxsize,
-                       unsigned long int siteid)
+                       unsigned int siteid)
 {
     string msg;
     int boxhalf = boxsize / 2;
@@ -1028,13 +982,13 @@ void Lattice::setResolution (const double res)
     return;
 }
 
-vector<unsigned long int> Lattice::getNeighborhood (const unsigned long int sitenum,
-                                                    const int size)
+vector<unsigned int> Lattice::getNeighborhood (const unsigned int sitenum,
+                                               const int size)
 {
     int xp,yp,zp;
     double dist;
 
-    vector<unsigned long int> nh;
+    vector<unsigned int> nh;
     nh.clear();
 
     unsigned int xc = site_[sitenum].getX();
@@ -1068,7 +1022,7 @@ vector<unsigned long int> Lattice::getNeighborhood (const unsigned long int site
     return nh;
 }
 
-unsigned long int Lattice::getIndex (int ix,
+unsigned int Lattice::getIndex (int ix,
                                      int iy,
                                      int iz) const
 {
@@ -1114,7 +1068,7 @@ unsigned long int Lattice::getIndex (int ix,
         }
    }
 
-   return (unsigned long int)(ix + (xdim_ * iy)
+   return (unsigned int)(ix + (xdim_ * iy)
            + ((xdim_ * ydim_) * iz)); 
 }
 
@@ -1123,13 +1077,13 @@ void Lattice::changeMicrostructure (double time,
                                     bool isfirst)
 {
     unsigned int i,ii;
-    long int numadded, numadded_actual;
+    int numadded, numadded_actual;
     unsigned int tpid;
-    unsigned long int cursites,newsites;
-    long int tnetsites;
+    unsigned int cursites,newsites;
+    int tnetsites;
     double td,tvol,tmass;
     vector<double> vol,vfrac_next;
-    vector<long int> netsites;
+    vector<int> netsites;
     vector<unsigned int> pid;
     vector<string> phasenames;
 
@@ -1194,10 +1148,10 @@ void Lattice::changeMicrostructure (double time,
       }
       in1.close();
     }
-    */
 
     cout << "expansion_.size() = " << expansion_.size() << " at the beginning of " 
          << time << endl;
+    */
 
     ///
     /// Zero out the amount of water to add to the microstructure.
@@ -1242,7 +1196,7 @@ void Lattice::changeMicrostructure (double time,
           cout << "****Volume fraction[" << phasenames.at(i)
                << "] in next state should be = " << vfrac_next.at(i);
           cout << ", or "
-               << (long int)((double)(numsites_ * vfrac_next.at(i)))
+               << (int)((double)(numsites_ * vfrac_next.at(i)))
                << " sites" << endl;
         }
       }
@@ -1304,8 +1258,8 @@ void Lattice::changeMicrostructure (double time,
 
             for (int ii = 0; ii < growing.size(); ++ii) {
                 for (i = 0; i < vfrac_next.size(); i++) {
-                    cursites = (unsigned long int)count_.at(i);
-                    newsites = (unsigned long int)((numsites_
+                    cursites = (unsigned int)count_.at(i);
+                    newsites = (unsigned int)((numsites_
                         * vfrac_next.at(i)) + 0.5);
                     tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
                     netsites.at(i) = tnetsites;
@@ -1385,8 +1339,8 @@ void Lattice::changeMicrostructure (double time,
 
         try {
             for (i = 0; i < vfrac_next.size(); i++) {
-                cursites = (long int)count_.at(i);
-                newsites = (unsigned long int)((numsites_
+                cursites = (int)count_.at(i);
+                newsites = (unsigned int)((numsites_
                              * vfrac_next.at(i)) + 0.5);
                 tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
                 netsites.at(i) = tnetsites;
@@ -1529,7 +1483,7 @@ void Lattice::changeMicrostructure (double time,
 
     cout << "Now emptying the necessary pore volume:  "
          << netsites[VOIDID] << " sites affected." << endl;
-    long int numempty = emptyPorosity(netsites[VOIDID]);
+    int numempty = emptyPorosity(netsites[VOIDID]);
     cout << "Number actually emptied was:  " << numempty << endl;
 
     ///
@@ -1554,7 +1508,7 @@ void Lattice::changeMicrostructure (double time,
     }
 
     cout << "*******************************" << endl;
-    long int numfill = fillPorosity(1000000);
+    int numfill = fillPorosity(1000000);
 
     /// 
     /// Report on target and actual mass fractions
@@ -1609,7 +1563,6 @@ void Lattice::changeMicrostructure (double time,
     out1.close();
     */
 
-    ///
     ///  This is a local variable and the value is never used.
     ///
     ///  @todo Why not eliminate this line completely?
@@ -1810,7 +1763,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
 
     unsigned int slice = xdim_/2;
     unsigned int nd,ixx,valout;
-    long unsigned int sitenum;
+    unsigned int sitenum;
     for (k = 0; k < zdim_; k++) {
         for (j = 0; j < ydim_; j++) {
            if (deptheffect_) {
@@ -1925,7 +1878,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
 
     unsigned int slice = xdim_/2;
     unsigned int nd,ixx,valout;
-    long unsigned int sitenum;
+    unsigned int sitenum;
     for (k = 0; k < zdim_; k++) {
         for (j = 0; j < ydim_; j++) {
            done = false;
@@ -2045,7 +1998,7 @@ void Lattice::makeMovie (const string &root)
 
         unsigned int slice = i;
         unsigned int nd,ixx,valout;
-        long unsigned int sitenum;
+        unsigned int sitenum;
         for (k = 0; k < zdim_; k++) {
             for (j = 0; j < ydim_; j++) {
                done = false;
@@ -2187,7 +2140,7 @@ vector<int> Lattice::transform (int shrinkingid,
             ///
 
             string fname(jobroot_ + "_alsubvol.dat");
-            vector<unsigned long int> alnb = writeSubVolume(fname, ste, 1);
+            vector<unsigned int> alnb = writeSubVolume(fname, ste, 1);
             ste->setDamage();  
             int numWater, numPorous;
             numWater = numPorous = 0;
@@ -2338,8 +2291,8 @@ vector<int> Lattice::transform (int shrinkingid,
     }       // End of loop over all ettringite sites to form
 
     /*
-    netsites.at(shrinkingid) += (long int) numtransform;
-    netsites.at(growingid) -= (long int) alreadygrown;	
+    netsites.at(shrinkingid) += (int) numtransform;
+    netsites.at(growingid) -= (int) alreadygrown;	
     */
 
     cout << "The number of aluminum phase " << shrinkingid
@@ -2349,15 +2302,15 @@ vector<int> Lattice::transform (int shrinkingid,
     numchanged.clear();
     numchanged.resize(2,0);
     numchanged[0] = numtransform;
-    numchanged[1] = (long int)alreadygrown;
+    numchanged[1] = (int)alreadygrown;
     cout << "The number of alreadygrown is: " << alreadygrown << endl;
 
     return numchanged;
 }
 
-vector<unsigned long int> Lattice::writeSubVolume (string fname,
-                                                   Site *centerste,
-                                                   int size)
+vector<unsigned int> Lattice::writeSubVolume (string fname,
+                                              Site *centerste,
+                                              int size)
 {
     ofstream out(fname.c_str());
     
@@ -2367,7 +2320,7 @@ vector<unsigned long int> Lattice::writeSubVolume (string fname,
     out << "Z_Size: 3" << endl;
     out << "Image_Resolution: 1" << endl;
 
-    vector<unsigned long int> alnb = getNeighborhood(centerste->getId(),size);
+    vector<unsigned int> alnb = getNeighborhood(centerste->getId(),size);
 
     for (int j = 0; j < alnb.size(); j++) {
       int phaseid = site_[alnb[j]].getPhaseId();
@@ -2378,7 +2331,7 @@ vector<unsigned long int> Lattice::writeSubVolume (string fname,
     return alnb;
 }
 
-void Lattice::applyExp (vector<unsigned long int> alnb,
+void Lattice::applyExp (vector<unsigned int> alnb,
                         double exp)
 {
     Site *ste;
@@ -2457,3 +2410,91 @@ double Lattice::getSurfaceArea (int phaseid)
 
     return surfacearea_;
 }
+
+list<Sitesize> Lattice::findDomainSizeDistribution(int phaseid,
+                                                   int maxsize,
+                                                   int sortorder = 0)
+{
+    list<Sitesize> distlist;
+    list<Sitesize>::iterator it;
+    bool found = false;
+
+    Sitesize ss;
+    int domainsize = 0;
+    for (int i = 0; i < site_.size(); i++) {
+        if (site_[i].getPhaseId() == phaseid) {
+            domainsize = findDomainSize(i,maxsize);
+            ss.siteid = i;
+            ss.nsize = domainsize;
+            it = distlist.begin();
+            if (distlist.empty()) {
+                distlist.push_back(ss);
+            } else {
+                found = false;
+                while (it != distlist.end() && !found) {
+                    if (sortorder == 0) {
+                        if (ss.nsize < (*it).nsize) {
+                            ++it;
+                        } else {
+                            distlist.insert(it,ss);
+                            found = true;
+                        }
+                    } else {
+                        if (ss.nsize > (*it).nsize) {
+                            ++it;
+                        } else {
+                            distlist.insert(it,ss);
+                            found = true;
+                        }
+                    }
+                }
+                if (!found) {
+                    distlist.push_back(ss);
+                }
+            }
+        }
+
+    }
+
+    return(distlist);
+}
+
+int Lattice::findDomainSize(int siteid, int maxsize) 
+{
+
+    int boxhalf = maxsize / 2;
+    int nfound = 0;
+
+    int phaseid = (site_[siteid]).getPhaseId();
+    int qx = (site_[siteid]).getX();
+    int qy = (site_[siteid]).getY();
+    int qz = (site_[siteid]).getZ();
+
+    int qxlo = qx - boxhalf;
+    int qxhi = qx + boxhalf;
+    int qylo = qy - boxhalf;
+    int qyhi = qy + boxhalf;
+    int qzlo = qz - boxhalf;
+    int qzhi = qz + boxhalf;
+
+    /***
+    *    Count the number of requisite sites in the
+    *    3-D cube box using whatever boundaries are specified
+    ***/
+
+    for (int ix = qxlo; ix <= qxhi; ix++) {
+        for (int iy = qylo; iy <= qyhi; iy++) {
+            for (int iz = qzlo; iz <= qzhi; iz++) {
+
+                /// Count if phase id only
+
+                if (site_[getIndex(ix,iy,iz)].getPhaseId() == phaseid) {
+                    nfound++;
+                }
+            }
+        }
+    }
+
+    return nfound;
+}   
+

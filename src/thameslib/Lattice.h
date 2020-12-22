@@ -12,6 +12,7 @@ exists, hydrates, and possibly deteriorates.
 #define LATTICEH
 
 #include <vector>
+#include <list>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -38,6 +39,15 @@ const string XSIZESTRING("X_Size:");
 const string YSIZESTRING("Y_Size:");
 const string ZSIZESTRING("Z_Size:");
 
+/**
+@struct Sitesize
+@brief Structure to catalog site domain sizes
+*/
+struct Sitesize {
+	int siteid;                            /**< ID of the site in the site_ vector */
+    int nsize;                             /**< Size of the domain of the phase at that size */
+};
+
 using namespace std;
 
 /**
@@ -57,7 +67,7 @@ unsigned int zdim_;                         /**< Number of sites in the z dimens
 double resolution_;                         /**< Voxel edge length [micrometers] */
 RanGen *rg_;                                /**< Pointer to random number generator object */
 vector<Site> site_;                         /**< 1D list of Site objects (site = voxel) */
-unsigned long int numsites_;                /**< Total number of sites */
+unsigned int numsites_;                     /**< Total number of sites */
 const unsigned int siteneighbors_;          /**< Number of neighbor sites to a given site */
 ChemicalSystem *chemsys_;                   /**< Pointer to simulation's ChemicalSystem */
 Solution *solut_;                           /**< Pointer to the simulation's Solution */
@@ -137,7 +147,7 @@ since this is the class that allocated the memory for that object.
 void setXDim (const unsigned int x)
 {
     xdim_ = x;
-    numsites_ = (long int)(xdim_ * ydim_ * zdim_);
+    numsites_ = (xdim_ * ydim_ * zdim_);
 }
 
 /**
@@ -158,7 +168,7 @@ unsigned int getXDim () const
 void setYDim (const unsigned int y)
 {
     ydim_ = y;
-    numsites_ = (long int)(xdim_ * ydim_ * zdim_);
+    numsites_ = (xdim_ * ydim_ * zdim_);
 }
 
 /**
@@ -179,7 +189,7 @@ unsigned int getYDim () const
 void setZDim (const unsigned int z)
 {
     zdim_ = z;
-    numsites_ = (long int)(xdim_ * ydim_ * zdim_);
+    numsites_ = (xdim_ * ydim_ * zdim_);
 }
 
 /**
@@ -201,7 +211,7 @@ save having to compute it multiple times.
 
 @return the total number of lattice sites
 */
-unsigned long int getNumsites () const
+unsigned int getNumsites () const
 {
     return numsites_;
 }
@@ -408,7 +418,7 @@ void addSite (const unsigned int xp,
 @param i is the index of the site in the class's `site_` array
 @return the x coordinate
 */
-unsigned int getX (const unsigned long int i) const
+unsigned int getX (const unsigned int i) const
 {
     try {
         if (i >= site_.size()) {
@@ -429,7 +439,7 @@ unsigned int getX (const unsigned long int i) const
 @param i is the index of the site in the class's `site_` array
 @return the y coordinate
 */
-unsigned int getY (const unsigned long int i) const
+unsigned int getY (const unsigned int i) const
 {
     try {
         if (i >= site_.size()) {
@@ -450,7 +460,7 @@ unsigned int getY (const unsigned long int i) const
 @param i is the index of the site in the class's `site_` array
 @return the x coordinate
 */
-unsigned int getZ (const unsigned long int i) const
+unsigned int getZ (const unsigned int i) const
 {
     try {
         if (i >= site_.size()) {
@@ -473,9 +483,9 @@ unsigned int getZ (const unsigned long int i) const
 @param iz is the x coordinate of the site
 @return the index of the site in the `site_` array
 */
-unsigned long int getIndex (int ix,
-                            int iy,
-                            int iz) const;
+unsigned int getIndex (int ix,
+                       int iy,
+                       int iz) const;
     
 /**
 @brief Get the collection of site indices neighboring a given site.
@@ -484,7 +494,7 @@ unsigned long int getIndex (int ix,
 @param size is the maximum distance defining the neighborhood [sites]
 @return a list of site indices for all neighbors within the maximum distance
 */
-vector<unsigned long int> getNeighborhood (const unsigned long int sitenum,
+vector<unsigned int> getNeighborhood (const unsigned int sitenum,
                                            const int size);
     
 
@@ -578,8 +588,8 @@ updated to account for the new local geometry.
 @param numtoadd is the number of sites to switch to this phase
 @return the actual number of sites that were changed
 */
-long int growPhase (unsigned int phaseid,
-                    long int numtoadd);
+int growPhase (unsigned int phaseid,
+               int numtoadd);
     
 /**
 @brief Remove a prescribed number of sites of a given phase from the microstructure.
@@ -594,8 +604,8 @@ sites are updated to account for the new local geometry.
 @param numtoadd is the number of sites to switch from this phase
 @return the actual number of sites that were changed
 */
-long int dissolvePhase (unsigned int phaseid,
-                        long int numtoadd);
+int dissolvePhase (unsigned int phaseid,
+                   int numtoadd);
     
 /**
 @brief Remove the water from a prescribed number of solution-filled sites.
@@ -608,7 +618,7 @@ is the list visited and the prescribed number of sites switched to void.
 @param numsites is the number of sites to switch to void
 @return the actual number of sites that were changed
 */
-long int emptyPorosity (long int numsites);
+int emptyPorosity (int numsites);
     
 /**
 @brief Add water to a prescribed number of empty pore sites.
@@ -621,7 +631,7 @@ is the list visited and the prescribed number of sites switched to void.
 @param numsites is the number of sites to switch from void to water
 @return the actual number of sites that were changed
 */
-long int fillPorosity(long int numsites);
+int fillPorosity(int numsites);
     
 /**
 @brief Count the number of solution sites within a box centered on a given site.
@@ -631,7 +641,7 @@ long int fillPorosity(long int numsites);
 @return the number of solution-filled sites in the box neighborhood
 */
 int countBox(int boxsize,
-             unsigned long int siteid);
+             unsigned int siteid);
     
 /**
 @brief Check whether a linear coordinate is outside the lattice boundaries.
@@ -690,7 +700,7 @@ void setPhaseId (Site *s,
 @param sitenum is the index of the site in the `site_` array
 @param i is the phase index to set at that site
 */
-void setPhaseId (const long int sitenum,
+void setPhaseId (const int sitenum,
                  const unsigned int i)
 {
     string msg;
@@ -715,7 +725,7 @@ void setPhaseId (const long int sitenum,
 @param sitenum is the index of the site in the `site_` array
 @return the microstructure phase id at the site
 */
-int getPhaseId (const long int sitenum)
+int getPhaseId (const int sitenum)
 {
     try {
         Site *ste;
@@ -1073,9 +1083,9 @@ void setFEsolver (AppliedStrain *AppliedStrainSolver)
 @param size is the extent of the subvolume in each direction away from the center site
 @return a list of the site indices belonging to the subvolume that was written
 */
-vector<unsigned long int> writeSubVolume (string fname,
-                                          Site *centerste,
-                                          int size);
+vector<unsigned int> writeSubVolume (string fname,
+                                     Site *centerste,
+                                     int size);
 
 /**
 @brief Assign isotropic expansion strain at a set of prescribed sites.
@@ -1089,7 +1099,7 @@ list of expansion sites, then the site will be added to that list.
 @param alnb is the collection of site indices to which strain will be assigned
 @param exp is the isotropic expansion strain to set
 */
-void applyExp (vector<unsigned long int> alnb,
+void applyExp (vector<unsigned int> alnb,
                double exp);
 
 /**
@@ -1099,6 +1109,25 @@ void applyExp (vector<unsigned long int> alnb,
 @return the estimated surface area [site face units]
 */
 double getSurfaceArea (int phaseid);
+
+/**
+@brief Get the sorted distribution of domain sizes
+
+@param phaseid is the id of the phase to query
+@param maxisze is the maxmimum linear size of interest
+@param sortorder is 0 if sorting in descending order, nonzero otherwise
+@return an STL list of the site ids according to the distribution
+*/
+list<Sitesize> findDomainSizeDistribution(int phaseid, int maxsize, int sortorder);
+
+/**
+@brief Estimate the <i>linear size</i> of a domain 
+
+@param siteid is the id of the microstructure phase
+@param maxsize is the maxmimum linear size of interest
+@return the edge length of the maximum cube that contains the same phase
+*/
+int findDomainSize(int siteid, int maxsize);
 
 };      // End of Lattice class
 #endif

@@ -4142,8 +4142,6 @@ double getMicphasemassdissolved (const unsigned int idx)
 /**
 @brief Set the volume of void space in the microstructure.
 
-@note NOT USED.
-
 @param val is the volume of void space to assign to the microstructure
 */
 void setMicvoidvolume (const double val)

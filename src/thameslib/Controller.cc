@@ -729,16 +729,6 @@ void Controller::calculateState (double time,
     /// should be calculated.
     ///
 
-    /// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    /// JWB Thermo2mic is only good for certain kinetic phases, not
-    ///  all of them.... we need to reconcile this.  It might be better
-    ///  to make every phase have a thermodynamic analog, and it
-    ///  might be better to do the following loop over all the
-    ///  MICROSTRUCTURE phases, not the GEMS phases
-    ///  
-    /// @todo fix up the following loop
-    /// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    
     try {
         double aveSI = 0.0;
         double moles = 0.0;

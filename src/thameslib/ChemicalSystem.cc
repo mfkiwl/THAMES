@@ -1381,7 +1381,7 @@ int ChemicalSystem::calculateState (double time,
             /// 2020-12-02 JWB this may need to be fixed for cemdata18
             //
 
-                double correction_factor = 1.0;
+                double correction_factor = 1.27;
                 int CSHID = getMicid("CSH");
                 vector<int> CSHgemphaseids = micphasemembers_[CSHID];
                 double CSH_corrV = 0.0;
@@ -1395,7 +1395,7 @@ int ChemicalSystem::calculateState (double time,
                 cout << "before correction, the volume of CSH is: " << micphasevolume_[CSHID]
                      << endl;
                 cout << "after correction, the volume of CSH is: " << CSH_corrV << endl;
-                // micphasevolume_[1] = micphasevolume_[1] - (CSH_corrV - micphasevolume_[CSHID]);
+                micphasevolume_[1] -= (CSH_corrV - micphasevolume_[CSHID]);
                 micphasevolume_[CSHID] = CSH_corrV;  
                 mictotvolume_ += micphasevolume_[CSHID];
             }
@@ -1422,14 +1422,11 @@ int ChemicalSystem::calculateState (double time,
         }
     }
 
-    // JWB THIS PART CAN BE CHANGED TO CHOOSE SATURATED OR SEALED CONDITIONS
-   
     if (isfirst) mictotinitvolume_ = mictotvolume_;
     cout << "isfirst = " << isfirst << ", mictotinitvolume_ = " << mictotinitvolume_ << endl;
 
-    if (saturated_) {
+    if (saturated_) {   // System is saturated
 
-        // Now we take care of the void volume separately
         cout << "Now use water to saturate the porosity." << endl;
   
         if (mictotinitvolume_ > mictotvolume_) {
@@ -1451,18 +1448,27 @@ int ChemicalSystem::calculateState (double time,
             }
             mictotvolume_ += mictotinitvolume_ - mictotvolume_;
         }
-    } else {
+
+    } else {  // System is sealed
 
         // Now create void space due to self-desiccation
         cout << "Now creating empty porosity." << endl;
   
-        if (mictotinitvolume_ > mictotvolume_) {
-            micphasevolume_[0] = mictotinitvolume_ - mictotvolume_;
+        double spaceforwater = micphasevolume_[1] + micphasevolume_[0]
+                        + (0.27 * micphasevolume_[getMicid("CSH")]);
+        double watervolume = phasevolume_[micphasemembers_[1][0]];
+        double extravoidneeded = (spaceforwater - watervolume)
+                                       - micphasevolume_[VOIDID];
+        if (spaceforwater > watervolume) {
+            micphasevolume_[VOIDID] = spaceforwater - watervolume;
+            micphasevolfrac_[VOIDID] = micphasevolume_[VOIDID] / mictotinitvolume_;
+        } else {
+            micphasevolume_[VOIDID] = micphasevolfrac_[VOIDID] = 0.0;
         }
     }
 
     cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
-    for (unsigned int i = 1; i < micphasenum_; i++) {
+    for (unsigned int i = 0; i < micphasenum_; i++) {
         cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
             << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
     }
