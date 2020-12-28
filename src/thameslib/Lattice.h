@@ -76,7 +76,10 @@ vector<Interface> interface_;               /**< List of the different interface
                                                     in the microstructure */
 vector<double> volumefraction_;             /**< Array of volume fractions of each 
                                                     microstructure phase */
-vector<double> count_;                      /**< Number of sites of each different type */
+/**
+@note Changed count_ from type double to type int
+*/
+vector<int> count_;                         /**< Number of sites of each different type */
 vector<double> SI_;                         /**< Current saturation index of AFt phase,
                                                     used only for sulfate attack simulation */
 map<int,vector<double> > expansion_;        /**< Map of expansion strain of each voxel */
@@ -94,7 +97,8 @@ double leach_time_;                         /**< Simulation time at which to beg
                                                     simulation of leaching [days] */
 double surfacearea_;                        /**< Total surface area [m<sup>2</sup>] */
 
-bool deptheffect_;                          /**< Whether or not PNG images should have depth effect */
+bool deptheffect_;                          /**< Whether or not PNG images should have
+                                                    depth effect */
 
 public:
     
@@ -784,13 +788,21 @@ add and subtract from the lattice, determining which site locations will be used
 to do that, and then actually causing the switches in phase id to happen at those sites.
 The interfaces and lists of dissolution and growth sites are updated accordingly, too.
 
+@note Water is assumed to be chemically reactive only if it is in capillary
+porosity (microstructure id WATERID).  If the capillary water is exhausted then
+some reaction can still happen with water in nanoporosity, but for now we assume
+that the nanopore water is chemically unreactive and cannot be removed.
+
+@todo Generalize to allow water in nanopores to be chemically reactive
+
 @param time is is the simulation time [days]
 @param simtype is the type of simulation (hydration, leaching, etc)
 @param isfirst is true if this is the first microstructure update, false otherwise
+@param capwater is true if there is any capillary pore water in the system.
 */
 void changeMicrostructure (double time,
                            const int simtype,
-                           bool isfirst);
+                           bool isfirst, bool &capwater);
     
 /**
 @brief Write the 3D microstructure to a file.
@@ -1027,8 +1039,6 @@ void setWaterchange (double waterchangeval)
 
 /**
 @brief Increment the number of sites of water that must be added after a time step.
-
-@note NOT USED.
 
 @param the extra number of sites of water that must be added [site units]
 */

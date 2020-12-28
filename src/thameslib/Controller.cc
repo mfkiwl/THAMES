@@ -78,7 +78,7 @@ Controller::Controller (Lattice *msh,
     out << endl;
     out.close();
 
-    outfilename = jobroot_ + "_Phases.csv";
+    outfilename = jobroot_ + "_DCVolumes.csv";
     ofstream out1(outfilename.c_str(),ios::app);
     if (!out1) {
         throw FileException("Controller","Controller",outfilename,"Could not append");
@@ -318,9 +318,10 @@ void Controller::doCycle (const string &statfilename,
   ///
 
   double timestep = 0.0;
+  bool capwater = true;      // True if some capillary water is available
   time_index = 0;
 
-  for (i = 0; i < time_.size(); i++) {
+  for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
     cout << "Time = " << time_[i] << endl;
     cout << "Next output time = " << output_time[time_index] << endl;
@@ -333,6 +334,14 @@ void Controller::doCycle (const string &statfilename,
     timestep = (i > 0) ? (time_[i] - time_[i-1]) : (time_[i]);
     bool isfirst = (i == 0) ? true : false;
 
+    /// 
+    /// Assume that only capillary pore water is chemically reactive,
+    /// while water in nanopores is chemically inert.
+    ///
+    /// @todo the following is a kluge to force the simulation to
+    /// stop when the capillary pore water is exhausted.
+    ///
+   
     // if (isfirst) {
     //     cout << "Going into Controller::initializeState" << endl;
     //     initializeState(time_[i]);
@@ -357,8 +366,16 @@ void Controller::doCycle (const string &statfilename,
 
     cout << "Going into Lattice::changeMicrostructure" << endl;
     cout.flush();
-    lattice_->changeMicrostructure(time_[i],sim_type_,isfirst);
 
+    lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
+
+    ///
+    /// Check if there is any capillary pore water remaining.  If not then
+    /// we ASSUME hydration has stopped.
+    ///
+    /// @todo Generalize this idea to allow nanopore water to react by taking
+    /// into account its lower chemical potential.
+   
     if ((time_[i] >= output_time[time_index]) && (time_index < output_time.size())) {
         cout << "Writing lattice now... time_[" << i << "] = "
              << time_[i] << ", output_time[" << time_index << "] = "
@@ -373,6 +390,14 @@ void Controller::doCycle (const string &statfilename,
     ///
     /// The following block executes only for sulfate attack simulations
     ///
+
+    if (!capwater) {  // We will stop hydration
+        cout << "WARNING: System is out of capillary pore water." << endl;
+        cout << "         This version of code assumes that only capillary" << endl;
+        cout << "         water is chemically reactive, so the system is" << endl;
+        cout << "         is assumed to be incapable of further hydration." << endl;
+        cout.flush();
+    } 
 
     if (time_[i] >= sattack_time_) {
    
@@ -805,7 +830,7 @@ void Controller::calculateState (double time,
     out3 << endl;
     out3.close();
         
-    outfilename = jobroot_ + "_Phases.csv";
+    outfilename = jobroot_ + "_DCVolumes.csv";
     ofstream out4(outfilename.c_str(),ios::app);
     if (!out4) {
       throw FileException("Controller","calculateState",
@@ -813,12 +838,14 @@ void Controller::calculateState (double time,
     }
 
     out4 << setprecision(5) << time;
-    cout << "Writing Phase volumes file at time = " << time << endl;
+    cout << "Writing DC volumes file at time = " << time << endl;
     for (int i = 0; i < chemsys_->getDCnum(); i++) {
       if (chemsys_->getDCmolarmass(i) > 0.0) {
         cc = chemsys_->getDCclasscode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-            out4 << "," << (chemsys_->getDCmoles(i)*(chemsys_->getDCmolarmass(i)));
+            string dcname = chemsys_->getDCname(i);
+            double V0 = chemsys_->getDCmoles(dcname) * chemsys_->getDCmolarvolume(dcname);
+            out4 << "," << V0;
             cout << "    DC = " << chemsys_->getDCname(i)
                 << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
                 << chemsys_->getDCmolarmass(i) << endl;

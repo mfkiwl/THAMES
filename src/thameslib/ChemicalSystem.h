@@ -203,8 +203,9 @@ vector<double> randomgrowth_;             /**< One real number for each microstr
                                           that indicates the tendency for growth in random
                                           directions (ballistic or diffusion-limited
                                           aggregation) as opposed to compact growth */
-vector<double> ICmolarmass_;              /**< One molar mass for each IC [g/mol] */
+vector<double> ICmolarmass_;              /**< One molar mass for each IC [g/mm3ol] */
 vector<double> DCmolarmass_;              /**< One molar mass for each DC [g/mol] */
+vector<double> DCmolarvolume_;            /**< One molar volume for each DC [m3] */
 vector<double> phasemolarmass_;           /**< One molar mass for each GEM phase [g/mol] */
 vector<vector<int> > growthtemplate_;   /**< A list of the phases on which a given phase
                                                 is allowed to grow; one list for each phase */
@@ -3301,6 +3302,24 @@ double getDCmoles (const unsigned int idx)
 }
 
 /**
+@brief Get the number of moles of an dependent component (DC) in the system.
+
+@param str is the GEM DC name to query
+@return the number of moles assigned to that DC
+*/
+double getDCmoles (const string &str)
+{
+    int idx = getDCid(str);
+    if (idx < DCnum_) {
+        return DCmoles_[idx];
+    } else {
+        EOBException ex("ChemicalSystem","getDCmoles","DCmoles_",DCnum_,idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
 @brief Output the number of moles of every independent component (IC) in the system.
 
 */
@@ -4484,6 +4503,79 @@ double getDCmolarmass (const string &str)
 vector<double> getDCmolarmass () const
 {
     return DCmolarmass_;
+}
+
+/**
+@brief Set the molar volumes of dependent components (DC) [m3].
+*/
+void setDCmolarvolume (void)
+{
+    long int i;
+    try {
+        DCmolarvolume_.resize(DCnum_,0.0);
+        for (i = 0; i < DCnum_; i++) {
+            DCmolarvolume_[i] = (double)(node_->DC_V0(i,P_,T_));
+        }
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","setDCmolarvolume",
+                           "DCmolarvolume_",DCmolarvolume_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+    return;
+}
+
+/**
+@brief Get the molar volume of a particular dependent component (DC), by id [m3].
+
+@param dcidx is the id of the DC
+@return the molar volume of that DC, [m3]
+*/
+double getDCmolarvolume (const unsigned int dcidx)
+{
+    try {
+        return DCmolarvolume_.at(dcidx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","getDCmolarvolume",
+                           "DCmolarvolume_",DCmolarvolume_.size(),dcidx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the molar volume of a particular dependent component (DC), by name [m3].
+
+@param str is the name of the DC
+@return the molar volume of that DC, [m3]
+*/
+double getDCmolarvolume (const string &str)
+{
+    string msg;
+    try {
+        double V0 = getDCmolarvolume(getDCid(str));
+        return V0;
+    }
+    catch (out_of_range &oor) {
+        msg = "Name " + str + " does not have a valid phase id";
+        EOBException ex("ChemicalSystem","getDCmolarvolume",msg,DCmolarvolume_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the molar volumes of all dependent components (DC) [m3].
+
+@note Used only in this class's copy constructor.
+
+@return the vector of DC molar volumes [m3]
+*/
+vector<double> getDCmolarvolume () const
+{
+    return DCmolarvolume_;
 }
 
 /**
@@ -5912,12 +6004,12 @@ void writeChemSys (ostream &out);
 One of the main purposes of the [[ChemicalSystem]] class is to calculate changes
 to the state from one time increment to another.  This is accomplished
 by changing the chemical system definition to alter the quantitities
-of one or more independent components (IC), and then call GEMIPM2K
+of one or more independent components (IC), and then call GEM3K
 to calculate the new assemblage of DCs and phases that minimizes the
 Gibbs free energy subject to the IC quantities in the system.
 
 As a result, we need methods that will allow one to change the quantities
-of ICs and then to call GEMIPM2K functions that will calculate the new
+of ICs and then to call GEM3K functions that will calculate the new
 state and return the values of the quantities of the DCs and phases.
 
 The method returns the GEM-IPM TNode status, which can be:
@@ -5932,8 +6024,11 @@ The method returns the GEM-IPM TNode status, which can be:
     - 6 = OK after GEM calculation with no-simplex (smart) IA
     - 7 = Bad (not fully trustful) result after GEM calculation with no-simplex (smart) IA
     - 8 = Failure (no result) in GEM calculation with no-simplex (smart) IA
-    - 9 = Terminal error has occurred in GEMIPM2K (e.g., memory corruption).
+    - 9 = Terminal error has occurred in GEM (e.g., memory corruption).
             Restart is required.
+
+@todo Water in CSH gel porosity has a lower chemical potential than in bulk; could
+modify chemical potentials to capture lower reactivity when only gel water remains.
 
 @param time is the simulated time associated with this state [days]
 @param isfirst is true if this is the first state calculation, false otherwise

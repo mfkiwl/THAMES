@@ -333,7 +333,7 @@ Lattice::Lattice (ChemicalSystem *cs,
     for (i = 0; i < numsites_; i++) {
       in >> pid;
       site_[i].setPhaseId(pid);
-      count_[pid] += 1.0;
+      count_[pid] += 1;
     }
     
     ///
@@ -554,7 +554,7 @@ int Lattice::growPhase (unsigned int phaseid,
           dwmcval = chemsys_->getPorosity(phaseid)
                   - chemsys_->getPorosity(pid);
           setPhaseId(ste,phaseid);
-          count_[phaseid] ++;
+          count_[phaseid] += 1;
           ste->dWmc(dwmcval);
 
           ///
@@ -654,7 +654,7 @@ int Lattice::dissolvePhase (unsigned int phaseid,
           removeDissolutionSite(ste,pid);
       
           setPhaseId(ste,WATERID);
-          count_[WATERID] += 1.0;
+          count_[WATERID] += 1;
       
           ///
           /// Weighted mean curvature (wmc) is changed by the difference
@@ -834,8 +834,8 @@ int Lattice::emptyPorosity (int numsites)
         while (numemptied < numsites) {
             siteid = (*it).siteid;
             setPhaseId(site_[siteid].getId(),VOIDID);
-	        count_[VOIDID] += 1.0;
-	        count_[WATERID] -= 1.0;
+	        count_[VOIDID] += 1;
+	        count_[WATERID] -= 1;
             numemptied++;
         }
     }
@@ -886,8 +886,8 @@ int Lattice::fillPorosity (int numsites)
         while (numfilled < numsites) {
             siteid = (*it).siteid;
             setPhaseId(site_[siteid].getId(),VOIDID);
-	        count_[WATERID] += 1.0;
-	        count_[VOIDID] -= 1.0;
+	        count_[WATERID] += 1;
+	        count_[VOIDID] -= 1;
             numfilled++;
         }
     }
@@ -1074,13 +1074,13 @@ unsigned int Lattice::getIndex (int ix,
 
 void Lattice::changeMicrostructure (double time,
                                     const int simtype,
-                                    bool isfirst)
+                                    bool isfirst,
+                                    bool &capwater)
 {
     unsigned int i,ii;
     int numadded, numadded_actual;
     unsigned int tpid;
-    unsigned int cursites,newsites;
-    int tnetsites;
+    int cursites,newsites,tnetsites;
     double td,tvol,tmass;
     vector<double> vol,vfrac_next;
     vector<int> netsites;
@@ -1170,8 +1170,29 @@ void Lattice::changeMicrostructure (double time,
     vfrac_next = chemsys_->getMicphasevolfrac();
     phasenames = chemsys_->getMicphasename();
 
+    /// JWB: 2020 Dec 22  Do manual adjustment of certain microstructure
+    /// phase voxels in a cement paste, accounting for gel porosity, etc.
+    /// This is VERY rough right now.
+    /// Solid microstructure phase adjustments are always traded with
+    /// adjustment to saturated capillary pore volume to keep the total
+    /// volume constant.
+    //
+    /// If this works, then ...
+    ///
+    /// @todo make a new attribute for microstructure phases which is
+    ///       a multiplicative factor on the phase volume fraction.
+    ///
+   
     cout << "In Lattice::changeMicrostructure... new volume fractions are..." << endl;
     try {
+        double ovf = 0.0;
+        for (i = 0; i < vfrac_next.size(); i++) {
+            if (phasenames.at(i) == "CSH") {
+                ovf = vfrac_next.at(i);
+                vfrac_next.at(i) *= 1.27;
+                vfrac_next.at(WATERID) -= (0.27 * vfrac_next.at(i));
+            }
+        }
         for (i = 0; i < vfrac_next.size(); i++) {
             cout << phasenames.at(i) << " = " << vfrac_next.at(i) << endl;
         }
@@ -1192,13 +1213,11 @@ void Lattice::changeMicrostructure (double time,
     cout << "Calculating volume of each phase to be added..." << endl;
     try {
       for (i = 0; i < vfrac_next.size(); i++) {
-        if (vfrac_next.at(i) > 0.0) {
           cout << "****Volume fraction[" << phasenames.at(i)
                << "] in next state should be = " << vfrac_next.at(i);
           cout << ", or "
                << (int)((double)(numsites_ * vfrac_next.at(i)))
                << " sites" << endl;
-        }
       }
     }
     catch (out_of_range &oor) {
@@ -1258,10 +1277,10 @@ void Lattice::changeMicrostructure (double time,
 
             for (int ii = 0; ii < growing.size(); ++ii) {
                 for (i = 0; i < vfrac_next.size(); i++) {
-                    cursites = (unsigned int)count_.at(i);
-                    newsites = (unsigned int)((numsites_
-                        * vfrac_next.at(i)) + 0.5);
-                    tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
+                    cursites = (int)(count_.at(i) + 0.5);
+                    newsites = (int)((numsites_ * vfrac_next.at(i)) + 0.5);
+                    tnetsites = 0;
+                    if (i != WATERID && i != VOIDID) tnetsites = (newsites - cursites);
                     netsites.at(i) = tnetsites;
                     pid.at(i) = i;
                     if (i == growing[ii] && isfirst) {
@@ -1339,16 +1358,19 @@ void Lattice::changeMicrostructure (double time,
 
         try {
             for (i = 0; i < vfrac_next.size(); i++) {
-                cursites = (int)count_.at(i);
-                newsites = (unsigned int)((numsites_
+                cursites = (int)(count_.at(i) + 0.5);
+                newsites = (int)((numsites_
                              * vfrac_next.at(i)) + 0.5);
-                tnetsites = (i != WATERID) ? (newsites - cursites) : 0;
+                tnetsites = 0;
+                if (i != WATERID && i != VOIDID) tnetsites = (newsites - cursites);
                 netsites.at(i) = tnetsites;
                 pid.at(i) = i;
                 if (netsites.at(i) != 0) cout << "***netsites["
                                               << phasenames.at(i)
                                               << "] in this state = "
                                               << netsites.at(i)
+                                              << "; cursites = " << cursites
+                                              << " and newsites = " << newsites
                                               << endl;
             }
         }
@@ -1361,7 +1383,9 @@ void Lattice::changeMicrostructure (double time,
         }
     }
     
-    cout << "Sorting non-pore sites..." << endl;
+    cout << "Sorting non-pore sites... netsites[VOIDID] = netsites["
+         << VOIDID << "] = " << netsites[VOIDID] << endl;
+    cout.flush();
 
     ///
     /// Sort netsites in ascending order, except we will handle
@@ -1391,7 +1415,8 @@ void Lattice::changeMicrostructure (double time,
 
     Interface ifc;
     vector<Isite> gs,ds;
-    cout << "Getting change vectors for non-pore phases..." << endl;
+    cout << "Getting change vectors for non-pore phases... netsites[VOIDID] = "
+         << netsites[VOIDID] << endl;
 
     ///
     /// The next loop starts at 2 because we exclude void and water phases
@@ -1479,7 +1504,7 @@ void Lattice::changeMicrostructure (double time,
         ex.printException();
         exit(1);
     }
-    cout << "time_ in the Lattice.nw is: " << time_ << endl;
+    cout << "time_ in the Lattice is: " << time_ << endl;
 
     cout << "Now emptying the necessary pore volume:  "
          << netsites[VOIDID] << " sites affected." << endl;
@@ -1506,9 +1531,6 @@ void Lattice::changeMicrostructure (double time,
         ex.printException();
         exit(1);
     }
-
-    cout << "*******************************" << endl;
-    int numfill = fillPorosity(1000000);
 
     /// 
     /// Report on target and actual mass fractions
@@ -1570,6 +1592,8 @@ void Lattice::changeMicrostructure (double time,
 
     double surfa = getSurfaceArea(chemsys_->getMicid("CSH"));
     
+    if (vfrac_next[WATERID] <= 0.0) capwater = false;
+
     return;
 }
 
@@ -2241,7 +2265,7 @@ vector<int> Lattice::transform (int shrinkingid,
 
             dWaterchange(volumeratio - (waterneighbor.size() + 1));
             alreadygrown += (volumeratio - (waterneighbor.size() + 1));
-            count_.at(growingid) += (volumeratio - (waterneighbor.size() + 1));
+            count_.at(growingid) += (int)(volumeratio - (waterneighbor.size() + 1) + 0.5);
 
         } else {
 

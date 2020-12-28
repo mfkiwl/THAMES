@@ -71,6 +71,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   phaseclasscode_.clear();
   ICmolarmass_.clear();
   DCmolarmass_.clear();
+  DCmolarvolume_.clear();
   phasemolarmass_.clear();
   pH_ = 7.0;
   pe_ = 1.0;
@@ -297,6 +298,9 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     DCmolarmass_[i] = (1000.0 * (double)(*dcmolarmass));  // converts to g per mol
     dcmolarmass++;
   }
+
+  DCmolarvolume_.resize(DCnum_,0.0);
+
   string string1;
   for (i = 0; i < ICnum_; i++) {
     string1.assign(node_->xCH_to_IC_name(i));
@@ -912,6 +916,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     DCmoles_ = obj.getDCmoles();
     ICmolarmass_ = obj.getICmolarmass();
     DCmolarmass_ = obj.getDCmolarmass();
+    DCmolarvolume_ = obj.getDCmolarvolume();
     growthtemplate_ = obj.getGrowthtemplate();
     affinity_ = obj.getAffinity();
     micphasemembers_ = obj.getMicphasemembers();
@@ -1265,7 +1270,6 @@ int ChemicalSystem::calculateState (double time,
     oDCmoles.resize(DCnum_,0.0);
   
     for (int i = 0; i < DCnum_; i++) {
-      oDCmoles[i] = DCmoles_[i];
     }
  
     nodestatus_ = NEED_GEM_SIA;
@@ -1298,6 +1302,7 @@ int ChemicalSystem::calculateState (double time,
     cout << "Done!  nodestatus is " << nodestatus_ << endl;
     cout.flush();
     
+
     if (nodestatus_ == ERR_GEM_AIA || nodestatus_ == ERR_GEM_SIA
         || nodestatus_ == T_ERROR_GEM) {
         switch (nodestatus_) {
@@ -1343,6 +1348,7 @@ int ChemicalSystem::calculateState (double time,
 
     mictotvolume_ = 0.0;
     setPhasestoich();
+    setDCmolarvolume();
     setVphasestoich();
     setPhasemass();
     setPhasevolume();
@@ -1355,57 +1361,37 @@ int ChemicalSystem::calculateState (double time,
     }
     cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 
-    double cshcorrection_factor = 1.4;
+    /// JWB: 2020 December 22
+    /// Testing a change to the way we handle CSH molar volume adjustments
+    /// Will let GEMS (thermodynamics) determine volumes of CSH and water
+    /// Will adjust volume FRACTIONS of CSH and capillary porosity in the lattice part
+    ///
+    
     for (unsigned int i = 1; i < micphasenum_; i++) {
         cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
         cout.flush();
         if (!isKineticphase(i)) {
             micphasemass_[i] = micphasevolume_[i] = 0.0;
-            if (i != getMicid("CSH")) {
-                for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
-                    cout << "    Is a THERMO phase composed of "
-                         << phasename_[micphasemembers_[i][j]]
-                         << " having mass = " << phasemass_[micphasemembers_[i][j]]
-                         << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
-                    cout.flush();
-                    mictotvolume_ += phasevolume_[micphasemembers_[i][j]];
-                    micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
-                    micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
-                }
-            } else {
-
-            ///
-            /// Manually adjust volume for CSH
-            ///
-
-            /// 2020-12-02 JWB this may need to be fixed for cemdata18
-            //
-
-                double correction_factor = 1.27;
-                int CSHID = getMicid("CSH");
-                vector<int> CSHgemphaseids = micphasemembers_[CSHID];
-                double CSH_corrV = 0.0;
-                for (int j = 0; j < CSHgemphaseids.size(); j++) {
-                    vector<int> CSHgemDCid = getPhaseDCmembers(CSHgemphaseids[j]);
-                    for (int i = 0; i < CSHgemDCid.size(); i++) {
-                        double v = DCmoles_[CSHgemDCid[i]] * node_->DC_V0(CSHgemDCid[i],P_,T_);
-                        CSH_corrV += (v * correction_factor);
-                    }
-                }
-                cout << "before correction, the volume of CSH is: " << micphasevolume_[CSHID]
-                     << endl;
-                cout << "after correction, the volume of CSH is: " << CSH_corrV << endl;
-                micphasevolume_[1] -= (CSH_corrV - micphasevolume_[CSHID]);
-                micphasevolume_[CSHID] = CSH_corrV;  
-                mictotvolume_ += micphasevolume_[CSHID];
+            for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
+                cout << "    Is NOT a KINETIC phase: is composed of "
+                     << phasename_[micphasemembers_[i][j]]
+                     << " having mass = " << phasemass_[micphasemembers_[i][j]]
+                     << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
+                cout.flush();
+                micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
+                micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
             }
+            mictotvolume_ += micphasevolume_[i];
 
-        } else if (isKineticphase(i)) {
-            // cout << "    Is a KINETIC phase composed of "
-            //      << phasename_[micphasemembers_[i][0]]
-            //     << "  having mass = " << micphasemass_[i]
-            //      << "  and volume = " << micphasevolume_[i] << endl;
-            // cout.flush();
+      /// End of test JWB: 2020 December 22
+      ///
+
+        } else {
+            cout << "    IS a KINETIC phase: is composed of "
+                 << phasename_[micphasemembers_[i][0]]
+                << "  having mass = " << micphasemass_[i]
+                 << "  and volume = " << micphasevolume_[i] << endl;
+            cout.flush();
 
             ///
             /// micphasemass and micphasevolume for kinetic phases are
@@ -1413,12 +1399,6 @@ int ChemicalSystem::calculateState (double time,
             ///
 
             mictotvolume_ += micphasevolume_[i];
-        } else {
-            micphasevolume_[i] = mictotinitvolume_ * micphasevolfrac_[i];
-            // cout << "micphasevolfrac_[DAMAGE] is: " << micphasevolfrac_[i] << endl;
-            // cout << "    Is a DAMAGE phase having volume = "
-            //      << micphasevolume_[i] << endl;
-            // cout.flush();
         }
     }
 
@@ -1454,14 +1434,16 @@ int ChemicalSystem::calculateState (double time,
         // Now create void space due to self-desiccation
         cout << "Now creating empty porosity." << endl;
   
-        double spaceforwater = micphasevolume_[1] + micphasevolume_[0]
+        double spaceforwater = micphasevolume_[WATERID] + micphasevolume_[VOIDID]
                         + (0.27 * micphasevolume_[getMicid("CSH")]);
         double watervolume = phasevolume_[micphasemembers_[1][0]];
         double extravoidneeded = (spaceforwater - watervolume)
                                        - micphasevolume_[VOIDID];
         if (spaceforwater > watervolume) {
             micphasevolume_[VOIDID] = spaceforwater - watervolume;
+            micphasevolume_[WATERID] -= extravoidneeded;
             micphasevolfrac_[VOIDID] = micphasevolume_[VOIDID] / mictotinitvolume_;
+            micphasevolfrac_[WATERID] = micphasevolume_[WATERID] / mictotinitvolume_;
         } else {
             micphasevolume_[VOIDID] = micphasevolfrac_[VOIDID] = 0.0;
         }
@@ -1480,13 +1462,19 @@ int ChemicalSystem::calculateState (double time,
     ///
 
     cout << "total volume of the microstructure is: " << mictotvolume_ << endl;
+    double sumvolfrac = 0.0;
     if (mictotvolume_ > 0.0) {
         for (unsigned int i = 0; i < micphasenum_; i++) {
             micphasevolfrac_[i] = micphasevolume_[i] / mictotinitvolume_;
+            sumvolfrac += micphasevolfrac_[i];
             cout << "    " << micphasename_[i] << "  V = " << micphasevolume_[i] << ", Vt = "
                  << mictotvolume_ << ", and volume fraction = " << micphasevolfrac_[i] << endl;
             cout.flush();
         }
+        
+        /// Enforce volume fraction conservation by adjusting VOIDID if necessary
+        micphasevolfrac_[VOIDID] += (1.0 - sumvolfrac);
+
     } else {
         throw DataException("ChemicalSystem","calculateState","mictotvolume_ is NOT positive");
     }
