@@ -657,13 +657,13 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         solut_icmoles = chemsys_->getSolution();
 
-        if (hyd_time < leach_time_ && hyd_time <sattack_time_) { 
-          cout << "Looping over clinker minerals.  ";
-          cout << "Here is the list of them:" << endl;
-          for (int i = 0; i < kineticphase_.size(); i++) {
-            cout << name_[kineticphase_[i]] << endl;
-          }
-          cout.flush();
+        if (hyd_time < leach_time_ && hyd_time < sattack_time_) { 
+          cout << "Looping over clinker minerals.  " << endl;
+          // cout << "Here is the list of them:" << endl;
+          // for (int i = 0; i < kineticphase_.size(); i++) {
+          //  cout << name_[kineticphase_[i]] << endl;
+          // }
+          // cout.flush();
 
           vector<double> impurityrelease;
           impurityrelease.clear();
@@ -675,14 +675,14 @@ void KineticModel::calculateKineticStep (const double timestep,
                    (pow(((critDOH_[kpid] * wcratio_) - DOH),4.0)));
 
             arrhenius = exp((Ea_[kpid]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
-            cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-            cout << "Calculating Arrhenius effect:" << endl;
-            cout << "    GASCONSTANT = " << GASCONSTANT << endl;
-            cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
-            cout << "    refT_ = " << refT_ << endl;
-            cout << "    T = " << T << endl;
-            cout << "    arrhenius factor = " << arrhenius << endl;
-            cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+            // cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+            // cout << "Calculating Arrhenius effect:" << endl;
+            // cout << "    GASCONSTANT = " << GASCONSTANT << endl;
+            // cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
+            // cout << "    refT_ = " << refT_ << endl;
+            // cout << "    T = " << T << endl;
+            // cout << "    arrhenius factor = " << arrhenius << endl;
+            // cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
 
             if (initscaledmass_[kpid] > 0.0) {
               DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
@@ -696,19 +696,19 @@ void KineticModel::calculateKineticStep (const double timestep,
         
               if (DOH < 1.0) {
                 if (fabs(n1_[kpid]) > 0.0) {
-                  cout << "k1_[" << kpid << "] = " << k1_[kpid]
-                       << ", n1_[" << kpid << "] = " << n1_[kpid]
-                       << ", DOH = " << DOH << ", blainefactor_ = "
-                       << blainefactor_ << endl;
+                  // cout << "k1_[" << kpid << "] = " << k1_[kpid]
+                  //      << ", n1_[" << kpid << "] = " << n1_[kpid]
+                  //      << ", DOH = " << DOH << ", blainefactor_ = "
+                  //      << blainefactor_ << endl;
                   ngrate = (k1_[kpid]/n1_[kpid]) * (1.0 - DOH)
                          * pow((-log(1.0 - DOH)),(1.0 - n1_[kpid]));
                   ngrate *= (blainefactor_);  // only used for the N+G rate
               
                   if (ngrate < 1.0e-10) ngrate = 1.0e-10;
-                    cout << name_[kpid] << ": k1 = " << k1_[kpid] << ", n1 = "
-                         << n1_[kpid] << ", blainefactor = "
-                         << blainefactor_ << ", ngrate = " << ngrate << endl;
-                    cout.flush();
+                    // cout << name_[kpid] << ": k1 = " << k1_[kpid] << ", n1 = "
+                    //      << n1_[kpid] << ", blainefactor = "
+                    //      << blainefactor_ << ", ngrate = " << ngrate << endl;
+                    // cout.flush();
                 } else {
                   throw FloatException("KineticModel","calculateKineticStep",
                                  "n1_ = 0.0");
@@ -721,9 +721,9 @@ void KineticModel::calculateKineticStep (const double timestep,
             if (DOH < 1.0) {
               hsrate = k3_[kpid] * pow((1.0 - DOH),n3_[kpid]);
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
-              cout << name_[kpid] << ": k3 = " << k3_[kpid] << ", n3 = "
-                   << n3_[kpid] << ", hsrate = " << hsrate << endl;
-              cout.flush();
+              // cout << name_[kpid] << ": k3 = " << k3_[kpid] << ", n3 = "
+              //      << n3_[kpid] << ", hsrate = " << hsrate << endl;
+              // cout.flush();
             } else {
                throw DataException("KinetiModel","calculateKineticStep",
                             "DOH >= 1.0");
@@ -733,9 +733,9 @@ void KineticModel::calculateKineticStep (const double timestep,
               diffrate = (k2_[kpid] * pow((1.0 - DOH),(2.0/3.0))) /
                          (1.0 - pow((1.0 - DOH),(1.0/3.0)));
               if (diffrate < 1.0e-10) diffrate = 1.0e-10;
-              cout << name_[kpid] << ": k2 = " << k2_[kpid] << ", diffrate = "
-                   << hsrate << endl;
-              cout.flush();
+              // cout << name_[kpid] << ": k2 = " << k2_[kpid] << ", diffrate = "
+              //      << hsrate << endl;
+              // cout.flush();
             } else {
               throw DataException("KinetiModel","calculateKineticStep",
                             "DOH >= 1.0");
@@ -744,38 +744,38 @@ void KineticModel::calculateKineticStep (const double timestep,
 
             rate = (ngrate < hsrate) ? ngrate : hsrate;
             if (diffrate < rate) rate = diffrate;
-            cout << name_[kpid] << ": Minimum rate before thermal correction = "
-                 << rate << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": Minimum rate before thermal correction = "
+            //      << rate << endl;
+            // cout.flush();
             rate *= (wcfactor * arrhenius);
-            cout << name_[kpid] << ": Minimum rate after thermal correction = "
-                 << rate << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": Minimum rate after thermal correction = "
+            //      << rate << endl;
+            // cout.flush();
 
-            cout << name_[kpid] << ": Old DOH = " << DOH << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": Old DOH = " << DOH << endl;
+            // cout.flush();
             newDOH = DOH + (rate * timestep);
-            cout << name_[kpid] << ": New DOH = " << newDOH << endl;
-            cout.flush();
-            cout << name_[kpid] << ": Original mass = "
-                 << initscaledmass_[kpid] << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": New DOH = " << newDOH << endl;
+            // cout.flush();
+            // cout << name_[kpid] << ": Original mass = "
+            //      << initscaledmass_[kpid] << endl;
+            // cout.flush();
             scaledmass_[kpid] = initscaledmass_[kpid] * (1.0 - newDOH);
-            cout << name_[kpid] << ": New mass = "
-                 << scaledmass_[kpid] << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": New mass = "
+            //      << scaledmass_[kpid] << endl;
+            // cout.flush();
             massdissolved = (newDOH - DOH) * initscaledmass_[kpid];
             chemsys_->setMicphasemass(chemsys_->getKinetic2mic(kpid),
                               scaledmass_[kpid]);
             chemsys_->setMicphasemassdissolved(chemsys_->getKinetic2mic(kpid),
                                         massdissolved);
-            cout << name_[kpid] << ": Mass dissolved = "
-                 << massdissolved << endl;
-            cout.flush();
-            cout << name_[kpid] << ": DC molar mass of "
-                 << chemsys_->getDCname(chemsysDCid_[kpid])
-                 << " = " << chemsys_->getDCmolarmass(chemsysDCid_[kpid]) << endl;
-            cout.flush();
+            // cout << name_[kpid] << ": Mass dissolved = "
+            //      << massdissolved << endl;
+            // cout.flush();
+            // cout << name_[kpid] << ": DC molar mass of "
+            //      << chemsys_->getDCname(chemsysDCid_[kpid])
+            //      << " = " << chemsys_->getDCmolarmass(chemsysDCid_[kpid]) << endl;
+            // cout.flush();
       
 
             impurityrelease[0] = (massdissolved * chemsys_->getK2o(chemsys_->getKinetic2mic(kpid)));
@@ -841,10 +841,10 @@ void KineticModel::calculateKineticStep (const double timestep,
                 molarmass += chemsys_->getICmolarmass(icn);
                 icmoles[ii] += (impurityrelease[2]/molarmass);
               }
-              cout << name_[kpid] << ":     Total dissolved "
-                   << icname[ii] << " = " << icmoles[ii] << " mol "
-                   << endl;
-              cout.flush();
+              // cout << name_[kpid] << ":     Total dissolved "
+              //      << icname[ii] << " = " << icmoles[ii] << " mol "
+              //      << endl;
+              // cout.flush();
     
             }
 

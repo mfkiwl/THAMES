@@ -805,6 +805,30 @@ void changeMicrostructure (double time,
                            bool isfirst, bool &capwater);
     
 /**
+@brief Adjust volume fractions of microstructure phases
+
+The volume fractions passed to this function are those coming directly
+from the chemical system.  But the chemical system does not account for
+occluded porosity that may be associated with a solid phase at length
+scales smaller than the lattice spatial resolution.  This method fixes
+those volume fractions, paying special attention to the water distribution.
+
+@note Water is assumed to be chemically reactive only if it is in capillary
+porosity (microstructure id WATERID).  If the capillary water is exhausted then
+some reaction can still happen with water in nanoporosity, but for now we assume
+that the nanopore water is chemically unreactive and cannot be removed.
+
+@todo Generalize to allow water in nanopores to be chemically reactive
+
+@param phasenames is a vector of the microstructure phase names
+@param vol is a vector of the pre-adjusted microstructure volumes
+@param vfrac is a vector of the pre-adjusted microstructure volume fractions
+*/
+void adjustMicrostructureVolumeFractions (vector<string> phasenames,
+                                          vector<double> &vol,
+                                          vector<double> &vfrac);
+    
+/**
 @brief Write the 3D microstructure to a file.
 
 The microstructure output file will indicate the phase id at each site.
@@ -1124,11 +1148,15 @@ double getSurfaceArea (int phaseid);
 @brief Get the sorted distribution of domain sizes
 
 @param phaseid is the id of the phase to query
+@param numsites is the maximum number of sites to store and sort
 @param maxisze is the maxmimum linear size of interest
 @param sortorder is 0 if sorting in descending order, nonzero otherwise
 @return an STL list of the site ids according to the distribution
 */
-list<Sitesize> findDomainSizeDistribution(int phaseid, int maxsize, int sortorder);
+list<Sitesize> findDomainSizeDistribution(int phaseid,
+                                          const int numsites,
+                                          int maxsize,
+                                          int sortorder);
 
 /**
 @brief Estimate the <i>linear size</i> of a domain 

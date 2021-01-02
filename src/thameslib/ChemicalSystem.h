@@ -2658,7 +2658,7 @@ void setPorosity (const unsigned int idx,
 }
 
 /**
-@brief Get the internal porosity of a microstructure phases.
+@brief Get the internal porosity of a microstructure phase.
 
 A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
 at the microstructure scale, so these phases are given a property of their average
@@ -2675,6 +2675,28 @@ needs to be checked to see what the convention ensures compatibility with that l
 */
 double getPorosity (const unsigned int idx)
 {
+    try {
+        return porosity_.at(idx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","getPorosity","porosity_",porosity_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the internal porosity of a microstructure phase.
+
+@warning Each version of the GEMIPM library
+needs to be checked to see what the convention ensures compatibility with that library.
+
+@param str is the name of the microstructure phase with internal porosity
+@return the volume fraction of the phase occupied by pores at the scale of one micrometer
+*/
+double getPorosity (const string &str)
+{
+    int idx = getMicid(str);
     try {
         return porosity_.at(idx);
     }
@@ -3984,9 +4006,7 @@ void setMicphasevolume (const unsigned int idx,
 /**
 @brief Get the volumes of all microstructure phases.
 
-@note Used only in this class's copy constructor.
-
-@return a pointer to the list of volumes of every microstructure phase
+@return a vector of volumes of every microstructure phase
 */
 vector<double> getMicphasevolume () const
 {
@@ -5911,8 +5931,6 @@ void setSaturated(const bool satstate)
 
 /**
 @brief Get the saturation state flag.
-
-@note NOT USED.
 
 @return the saturation state flag
 */

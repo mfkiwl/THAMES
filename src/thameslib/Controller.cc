@@ -26,6 +26,7 @@ Controller::Controller (Lattice *msh,
   string buff;
   vector<double> phases;
   const string imgfreqstr = "Image_frequency:";
+  const string outtimestr = "OutTime:";
   const string calctimestr = "CalcTime:";
 
   ///
@@ -180,7 +181,6 @@ void Controller::doCycle (const string &statfilename,
 {    
   unsigned int i;
   int time_index;
-  vector<double> output_time;
   double next_stat_time = statfreq_;
     
   ///
@@ -207,101 +207,6 @@ void Controller::doCycle (const string &statfilename,
   lattice_->setSattack_time(sattack_time_);
   lattice_->setLeach_time(leach_time_);
     
-  ///
-  /// Manually generate the list of times to write the lattice state
-  ///
-  /// @todo Find out why this is being done manually instead of being read from input
-  ///
- 
-  output_time.clear();
-
-  /*
-  output_time.push_back(1.0);
-  output_time.push_back(1.5);
-  output_time.push_back(2.0);
-  output_time.push_back(2.5);
-  output_time.push_back(3.0);
-  output_time.push_back(3.5);
-  output_time.push_back(4.0);
-  output_time.push_back(5.0);
-  output_time.push_back(6.0);
-  output_time.push_back(7.0);
-  output_time.push_back(9.0);
-  */
-  output_time.push_back(11.0);
-  output_time.push_back(14.0);
-  output_time.push_back(18.0);
-  output_time.push_back(23.0);
-  output_time.push_back(28.0);
-  output_time.push_back(40.0);
-  output_time.push_back(56.0);
-  output_time.push_back(90.0);
-  output_time.push_back(100.0);
-  output_time.push_back(101.0);
-  output_time.push_back(102.0);
-  output_time.push_back(103.0);
-  output_time.push_back(104.0);
-  output_time.push_back(105.0);
-  output_time.push_back(106.0);
-  output_time.push_back(107.0);
-  output_time.push_back(108.0);
-  output_time.push_back(109.0);
-  output_time.push_back(110.0);
-  output_time.push_back(111.0);
-  output_time.push_back(112.0);
-  output_time.push_back(113.0);
-  output_time.push_back(114.0);
-  output_time.push_back(115.0);
-  output_time.push_back(116.0);
-  output_time.push_back(117.0);
-  output_time.push_back(118.0);
-  output_time.push_back(119.0);
-  output_time.push_back(120.0);
-  output_time.push_back(121.0);
-  output_time.push_back(122.0);
-  output_time.push_back(123.0);
-  output_time.push_back(124.0);
-  output_time.push_back(125.0);
-  output_time.push_back(126.0);
-  output_time.push_back(127.0);
-  output_time.push_back(128.0);
-  output_time.push_back(129.0);
-  output_time.push_back(130.0);
-  output_time.push_back(131.0);
-  output_time.push_back(132.0);
-  output_time.push_back(133.0);
-  output_time.push_back(134.0);
-  output_time.push_back(135.0);
-  output_time.push_back(136.0);
-  output_time.push_back(137.0);
-  output_time.push_back(138.0);
-  output_time.push_back(139.0);
-  output_time.push_back(140.0);
-  output_time.push_back(141.0);
-  output_time.push_back(142.0);
-  output_time.push_back(143.0);
-  output_time.push_back(144.0);
-  output_time.push_back(145.0);
-  output_time.push_back(147.0);
-  output_time.push_back(150.0);
-  output_time.push_back(160.0);
-  output_time.push_back(170.0);
-  output_time.push_back(180.0);
-  output_time.push_back(190.0);
-  output_time.push_back(200.0);
-  output_time.push_back(210.0);
-  output_time.push_back(220.0);
-  output_time.push_back(230.0);
-  output_time.push_back(240.0);
-  output_time.push_back(250.0);
-  output_time.push_back(260.0);
-  output_time.push_back(270.0);
-  output_time.push_back(280.0);
-  output_time.push_back(290.0);
-  output_time.push_back(300.0);
-  output_time.push_back(365.0);
-  output_time.push_back(730.0);
-    
   // Initialize the list of all interfaces in the lattice
 
   cout << "Going into Lattice::FindInterfaces..." << endl;
@@ -324,7 +229,7 @@ void Controller::doCycle (const string &statfilename,
   for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
     cout << "Time = " << time_[i] << endl;
-    cout << "Next output time = " << output_time[time_index] << endl;
+    cout << "Next output time = " << output_time_[time_index] << endl;
 
     time_t lt10 = time(NULL);
     struct tm *time10;
@@ -376,10 +281,10 @@ void Controller::doCycle (const string &statfilename,
     /// @todo Generalize this idea to allow nanopore water to react by taking
     /// into account its lower chemical potential.
    
-    if ((time_[i] >= output_time[time_index]) && (time_index < output_time.size())) {
+    if ((time_[i] >= output_time_[time_index]) && (time_index < output_time_.size())) {
         cout << "Writing lattice now... time_[" << i << "] = "
-             << time_[i] << ", output_time[" << time_index << "] = "
-             << output_time[time_index] << endl;
+             << time_[i] << ", output_time_[" << time_index << "] = "
+             << output_time_[time_index] << endl;
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
         // lattice_->CheckPoint(jobroot_);
@@ -1009,9 +914,9 @@ void Controller::parseDoc (const string &docname)
 
     // check if the xml file is valid
     try {
-        string curexsd = xsd_files_path;
-        curexsd += "/parameters.xsd";
-        if(!is_xml_valid(doc,curexsd.c_str())) {
+        string paramxsd = xsd_files_path;
+        paramxsd += "/parameters.xsd";
+        if(!is_xml_valid(doc,paramxsd.c_str())) {
             cout << "XML file is NOT valid" << endl;
             throw FileException("Controller","parseDoc",
                                 docname,"XML not valid");
@@ -1039,6 +944,13 @@ void Controller::parseDoc (const string &docname)
                   string st((char *)key);
                   from_string(testtime,st);
                   time_.push_back(testtime);
+                  xmlFree(key);
+                }
+                if ((!xmlStrcmp(cur->name, (const xmlChar *)"outtime"))) {
+                  key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+                  string st((char *)key);
+                  from_string(testtime,st);
+                  output_time_.push_back(testtime);
                   //cout << "Next calc time = " << testtime << endl;
                   xmlFree(key);
                 }

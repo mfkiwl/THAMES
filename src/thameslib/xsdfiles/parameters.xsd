@@ -18,7 +18,7 @@
   <xs:complexType>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="calctime" type="positiveDoubletype"/>
-      <xs:element name="image_frequency" type="positiveDoubletype"/>
+      <xs:element maxOccurs="unbounded" name="outtime" type="positiveDoubletype"/>
     </xs:sequence>
   </xs:complexType>
 </xs:element>

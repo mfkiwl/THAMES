@@ -60,6 +60,7 @@ const int INVALID_INPUT = 4;
 // Special phase ids that are important and must always be the same value
 const int VOIDID = 0;
 const int WATERID = 1;
+const int FIRST_SOLID = WATERID + 1;
 const int C3SID = 2;
 const int C2SID = 3;
 const int C3AID = 4;

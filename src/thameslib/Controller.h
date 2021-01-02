@@ -74,6 +74,7 @@ double imgfreq_;                    /**< Frequency to output microstructure imag
 ChemicalSystem *chemsys_;           /**< Pointer to `ChemicalSystem` object */
 Solution *solut_;                   /**< Pointer to the `Solution` object */
 vector<double> time_;               /**< List of simulation times for each iteration */
+vector<double> output_time_;        /**< List of times to output image */
 double statfreq_;                   /**< Frequency to output statistics */
 	
 int sim_type_;                       /**< Hydration, leaching, or sulfate attack for now */

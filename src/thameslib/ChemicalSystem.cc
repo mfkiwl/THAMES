@@ -1407,10 +1407,9 @@ int ChemicalSystem::calculateState (double time,
 
     if (saturated_) {   // System is saturated
 
-        cout << "Now use water to saturate the porosity." << endl;
+        cout << "Use water to saturate the porosity." << endl;
   
         if (mictotinitvolume_ > mictotvolume_) {
-            micphasevolume_[1] += mictotinitvolume_ - mictotvolume_;
             double water_molarv, water_molesincr;
             for (int i = 0; i < micphasenum_; i++) {
                 if (micphasename_[i] == "H2O") {
@@ -1426,59 +1425,14 @@ int ChemicalSystem::calculateState (double time,
                 if (ICname_[i] == "H") ICmoles_[i] += water_molesincr * 2.0;
                 if (ICname_[i] == "O") ICmoles_[i] += water_molesincr;
             }
-            mictotvolume_ += mictotinitvolume_ - mictotvolume_;
         }
 
-    } else {  // System is sealed
-
-        // Now create void space due to self-desiccation
-        cout << "Now creating empty porosity." << endl;
-  
-        double spaceforwater = micphasevolume_[WATERID] + micphasevolume_[VOIDID]
-                        + (0.27 * micphasevolume_[getMicid("CSH")]);
-        double watervolume = phasevolume_[micphasemembers_[1][0]];
-        double extravoidneeded = (spaceforwater - watervolume)
-                                       - micphasevolume_[VOIDID];
-        if (spaceforwater > watervolume) {
-            micphasevolume_[VOIDID] = spaceforwater - watervolume;
-            micphasevolume_[WATERID] -= extravoidneeded;
-            micphasevolfrac_[VOIDID] = micphasevolume_[VOIDID] / mictotinitvolume_;
-            micphasevolfrac_[WATERID] = micphasevolume_[WATERID] / mictotinitvolume_;
-        } else {
-            micphasevolume_[VOIDID] = micphasevolfrac_[VOIDID] = 0.0;
-        }
     }
 
-    cout << "%%%%%%%%%% Printing MICROSTRUCTURE Masses and Volumes in this Step %%%%%%%" << endl;
-    for (unsigned int i = 0; i < micphasenum_; i++) {
-        cout << "Mass and volume of MICROSTRUCTURE phase " << micphasename_[i] << " = "
-            << micphasemass_[i] << " g and " << micphasevolume_[i] << " m3" << endl;
-    }
-    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+    cout << "GEM volume change = "
+         << 100.0 * (mictotvolume_ - mictotinitvolume_)/(mictotinitvolume_) << " %" << endl;
+    cout.flush();
 
-
-    ///
-    /// End of manual adjustment  
-    ///
-
-    cout << "total volume of the microstructure is: " << mictotvolume_ << endl;
-    double sumvolfrac = 0.0;
-    if (mictotvolume_ > 0.0) {
-        for (unsigned int i = 0; i < micphasenum_; i++) {
-            micphasevolfrac_[i] = micphasevolume_[i] / mictotinitvolume_;
-            sumvolfrac += micphasevolfrac_[i];
-            cout << "    " << micphasename_[i] << "  V = " << micphasevolume_[i] << ", Vt = "
-                 << mictotvolume_ << ", and volume fraction = " << micphasevolfrac_[i] << endl;
-            cout.flush();
-        }
-        
-        /// Enforce volume fraction conservation by adjusting VOIDID if necessary
-        micphasevolfrac_[VOIDID] += (1.0 - sumvolfrac);
-
-    } else {
-        throw DataException("ChemicalSystem","calculateState","mictotvolume_ is NOT positive");
-    }
-  
     setPhasestoich();
    
     ///

@@ -791,7 +791,7 @@ int Lattice::emptyPorosity (int numsites)
 {
     unsigned int i,j;
     int numemptied = 0;
-    int maxsearchsize = 10;
+    int maxsearchsize = 3;
     unsigned int cntpore,cntmax;
     bool placed;
 
@@ -810,11 +810,13 @@ int Lattice::emptyPorosity (int numsites)
     ///
 
     cout << "Finding and sorting all potential void sites ... ";
-    list<Sitesize> distlist = findDomainSizeDistribution(WATERID,maxsearchsize,0);
+    cout.flush();
+    list<Sitesize> distlist = findDomainSizeDistribution(WATERID,numsites,maxsearchsize,0);
     list<Sitesize>::iterator it;
 
     cout << "OK, found " << distlist.size()
          << " potential void sites." << endl;
+    cout.flush();
     
     ///
     /// We want to empty the sites with the largest pore count
@@ -831,12 +833,13 @@ int Lattice::emptyPorosity (int numsites)
     it = distlist.begin();
     int siteid;
     try {
-        while (numemptied < numsites) {
+        while (it != distlist.end()) {
             siteid = (*it).siteid;
             setPhaseId(site_[siteid].getId(),VOIDID);
 	        count_[VOIDID] += 1;
 	        count_[WATERID] -= 1;
             numemptied++;
+            it++;
         }
     }
     catch (EOBException eex) {
@@ -872,7 +875,7 @@ int Lattice::fillPorosity (int numsites)
     ///
 
     cout << "Finding and sorting all potential water sites ... ";
-    list<Sitesize> distlist = findDomainSizeDistribution(VOIDID,maxsearchsize,1);
+    list<Sitesize> distlist = findDomainSizeDistribution(VOIDID,numsites,maxsearchsize,1);
     list<Sitesize>::iterator it;
 
     ///
@@ -883,12 +886,13 @@ int Lattice::fillPorosity (int numsites)
     it = distlist.begin();
     int siteid;
     try {
-        while (numfilled < numsites) {
+        while (it != distlist.end()) {
             siteid = (*it).siteid;
-            setPhaseId(site_[siteid].getId(),VOIDID);
+            setPhaseId(site_[siteid].getId(),WATERID);
 	        count_[WATERID] += 1;
 	        count_[VOIDID] -= 1;
             numfilled++;
+            it++;
         }
     }
     catch (EOBException eex) {
@@ -1081,8 +1085,9 @@ void Lattice::changeMicrostructure (double time,
     int numadded, numadded_actual;
     unsigned int tpid;
     int cursites,newsites,tnetsites;
+    int wcursites,wnewsites;
     double td,tvol,tmass;
-    vector<double> vol,vfrac_next;
+    vector<double> vol_next,vfrac_next;
     vector<int> netsites;
     vector<unsigned int> pid;
     vector<string> phasenames;
@@ -1167,7 +1172,8 @@ void Lattice::changeMicrostructure (double time,
     /// just load them up here from the ChemicalSystem object.
     ///
 
-    vfrac_next = chemsys_->getMicphasevolfrac();
+    vol_next = chemsys_->getMicphasevolume();
+    vfrac_next.resize(vol_next.size(),0.0);
     phasenames = chemsys_->getMicphasename();
 
     /// JWB: 2020 Dec 22  Do manual adjustment of certain microstructure
@@ -1183,28 +1189,7 @@ void Lattice::changeMicrostructure (double time,
     ///       a multiplicative factor on the phase volume fraction.
     ///
    
-    cout << "In Lattice::changeMicrostructure... new volume fractions are..." << endl;
-    try {
-        double ovf = 0.0;
-        for (i = 0; i < vfrac_next.size(); i++) {
-            if (phasenames.at(i) == "CSH") {
-                ovf = vfrac_next.at(i);
-                vfrac_next.at(i) *= 1.27;
-                vfrac_next.at(WATERID) -= (0.27 * vfrac_next.at(i));
-            }
-        }
-        for (i = 0; i < vfrac_next.size(); i++) {
-            cout << phasenames.at(i) << " = " << vfrac_next.at(i) << endl;
-        }
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","changeMicrostructure","phasenames",
-                        phasenames.size(),i);
-        ex.printException();
-        exit(1);
-    }
-    vol.clear();
-    tvol = 0.0;
+    adjustMicrostructureVolumeFractions(phasenames,vol_next,vfrac_next);
 
     ///
     /// Calculate number of sites of each phase in next state
@@ -1357,12 +1342,12 @@ void Lattice::changeMicrostructure (double time,
         pid.resize(chemsys_->getMicphasenum(),0);
 
         try {
-            for (i = 0; i < vfrac_next.size(); i++) {
+            for (i = FIRST_SOLID; i < vfrac_next.size(); i++) {
                 cursites = (int)(count_.at(i) + 0.5);
                 newsites = (int)((numsites_
                              * vfrac_next.at(i)) + 0.5);
                 tnetsites = 0;
-                if (i != WATERID && i != VOIDID) tnetsites = (newsites - cursites);
+                tnetsites = (newsites - cursites);
                 netsites.at(i) = tnetsites;
                 pid.at(i) = i;
                 if (netsites.at(i) != 0) cout << "***netsites["
@@ -1393,7 +1378,7 @@ void Lattice::changeMicrostructure (double time,
     ///
 
     try {
-        for (i = WATERID; i < netsites.size(); i++) {
+        for (i = FIRST_SOLID; i < netsites.size(); i++) {
             for (ii = i; ii < netsites.size(); ii++) {
                 if (netsites[ii] < netsites[i]) {
                     tnetsites = netsites[i];
@@ -1419,12 +1404,12 @@ void Lattice::changeMicrostructure (double time,
          << netsites[VOIDID] << endl;
 
     ///
-    /// The next loop starts at 2 because we exclude void and water phases
+    /// The next loop starts at FIRST_SOLID because we exclude void and water phases
     ///
     /// @todo Consider making the starting index more general
     ///
 
-    for (i = 2; i < interface_.size(); i++) {
+    for (i = FIRST_SOLID; i < interface_.size(); i++) {
         ifc = interface_[i];
         gs = ifc.getGrowthSites();
         ds = ifc.getDissolutionSites();
@@ -1432,7 +1417,7 @@ void Lattice::changeMicrostructure (double time,
 
     cout << "Switching phase id values..." << endl;
     try {
-        for (i = WATERID; i < netsites.size(); i++) {
+        for (i = FIRST_SOLID; i < netsites.size(); i++) {
             numadded = 0;
             numadded_actual = 0;
 	  
@@ -1506,31 +1491,38 @@ void Lattice::changeMicrostructure (double time,
     }
     cout << "time_ in the Lattice is: " << time_ << endl;
 
-    cout << "Now emptying the necessary pore volume:  "
-         << netsites[VOIDID] << " sites affected." << endl;
-    int numempty = emptyPorosity(netsites[VOIDID]);
+    cout << "Now emptying the necessary pore volume:  " << endl;
+
+    cursites = (int)(count_.at(VOIDID) + 0.5);
+    newsites = (int)((numsites_
+                 * vfrac_next.at(VOIDID)) + 0.5);
+    wcursites = (int)(count_.at(WATERID) + 0.5);
+    wnewsites = (int)(wcursites - (newsites-cursites));
+    cout << "***netsites["
+         << phasenames.at(VOIDID)
+         << "] in this state = "
+         << (newsites - cursites)
+         << "; cursites = " << cursites
+         << " and newsites = " << newsites
+         << endl;
+    cout << "***netsites["
+         << phasenames.at(WATERID)
+         << "] in this state = "
+         << (wnewsites - wcursites)
+         << "; cursites = " << wcursites
+         << " and newsites = " << wnewsites
+         << endl << endl;
+
+    // When creating void from water, we should
+    // update the target volume fraction of water even though
+    // it is not used in any further calculations at this point
+ 
+    cout << "Target volume fraction of water WAS " << vfrac_next.at(WATERID) << endl;
+    vfrac_next.at(WATERID) -= ((double)(newsites - cursites)/(double)(numsites_));
+    cout << "But WILL BE " << vfrac_next.at(WATERID) << " after creating void space" << endl;
+
+    int numempty = emptyPorosity(newsites - cursites);
     cout << "Number actually emptied was:  " << numempty << endl;
-
-    ///
-    /// Report on target and actual mass fractions
-    ///
-
-    cout << "*******************************" << endl;
-    try {
-        for (i = 0; i < vfrac_next.size(); i++) {
-            volumefraction_.at(i) = ((double)(count_.at(i)))/((double)(site_.size()));
-            cout << "Phase " << i << " Target volume fraction was "
-                 << vfrac_next[i] << " and actual is "
-                 << volumefraction_.at(i) << endl;
-        }
-    }
-
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","changeMicrostructure",
-                    "volumefraction_ or count_",volumefraction_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 
     /// 
     /// Report on target and actual mass fractions
@@ -1554,11 +1546,9 @@ void Lattice::changeMicrostructure (double time,
     }
     cout << "*******************************" << endl;
     
-    for (i = 0; i < interface_.size(); i++) {
-      if (i != VOIDID && i != WATERID) {
+    for (i = FIRST_SOLID; i < interface_.size(); i++) {
         interface_[i].sortGrowthSites(site_,i);
         interface_[i].sortDissolutionSites(site_,i);
-      }
     }
 
     /*
@@ -1592,7 +1582,133 @@ void Lattice::changeMicrostructure (double time,
 
     double surfa = getSurfaceArea(chemsys_->getMicid("CSH"));
     
-    if (vfrac_next[WATERID] <= 0.0) capwater = false;
+    if (volumefraction_[WATERID] <= 0.0) capwater = false;
+
+    return;
+}
+
+void Lattice::adjustMicrostructureVolumeFractions (vector<string> name,
+                                                   vector<double> &vol,
+                                                   vector<double> &vfrac)
+{
+    int i = 0;
+    double cap_watervolume = 0.0;
+    double cap_spacevolume = 0.0;
+    double cap_voidvolume = 0.0;
+    double gel_watervolume = 0.0;
+    double tot_watervolume = 0.0;
+
+    try {
+        
+        // Initialize the volume fractions
+        
+        vfrac.clear();
+        vfrac.resize(vol.size(),0.0);
+
+        // Find the total system volume according to GEMS
+        
+        double GEM_thinks_totmicvol = chemsys_->getMictotvolume();
+        double GEM_thinks_totmicinitvol = chemsys_->getMictotinitvolume();
+
+        double GEM_micvols_addto = 0.0;
+
+        for (i = 0; i < vol.size(); ++i) {
+            GEM_micvols_addto += vol.at(i);
+        }
+
+        if (GEM_micvols_addto <= 0.0) {
+            throw DataException("Lattice",
+                                "adjustMicrostructureVolumeFractions",
+                                "totvolume is NOT positive");
+        }
+
+        // Adjust the volume of CSH to
+        // account for its saturated gel porosity
+           
+        int cshid = chemsys_->getMicid("CSH");
+
+        tot_watervolume = vol.at(WATERID);
+        cap_voidvolume = vol.at(VOIDID);
+
+        gel_watervolume = (chemsys_->getPorosity(cshid)) * vol.at(cshid);
+        cap_watervolume = tot_watervolume - gel_watervolume;
+        vol.at(cshid) += gel_watervolume;
+
+        // The capillary SPACE volume is the saturated + unsaturated capillary volume
+        cap_spacevolume = cap_watervolume + cap_voidvolume;
+
+        double spaceforwater = cap_spacevolume + gel_watervolume;
+
+        if (!(chemsys_->isSaturated())) {   // System is sealed
+
+            // Create void space due to self-desiccation
+            cout << "Now deciding how much empty porosity should be made" << endl;
+            cout << "%%%%%" << endl;
+            cout << "Current microstructure water site fraction = "
+                 << ((double)(count_.at(WATERID))) / ((double)(site_.size())) << endl;
+            cout << "Current GEM water volume fraction = "
+                 << (tot_watervolume / GEM_thinks_totmicvol) << endl;
+            cout << "Current GEM water volume = " << tot_watervolume << endl;
+            cout << "   This is divided between 1. " << gel_watervolume << " in gel pores" << endl;
+            cout << "                           2. " << cap_watervolume
+                                                     << " in capillary pores" << endl;
+            cout << "                          (3. Plus " << cap_voidvolume <<
+                                                       " void space)" << endl;
+
+            double volchange = GEM_thinks_totmicvol - GEM_thinks_totmicinitvol;
+            if (volchange < 0) {
+                vol.at(VOIDID) = -volchange;
+                vol.at(WATERID) = cap_watervolume;
+            } else {
+                vol.at(VOIDID) = 0.0;
+                vol.at(WATERID) = cap_watervolume;
+            }
+        } else {
+            vol.at(VOIDID) = 0.0;
+            vol.at(WATERID) = cap_watervolume;
+        }
+
+        double totvolume = GEM_thinks_totmicvol;
+        cout << "Total volume increases from " << totvolume;
+        totvolume += vol.at(VOIDID);
+        cout << " to " << totvolume << endl;
+
+        cout << "%%%%%" << endl;
+
+        // Calculate the volume fractions
+          
+        double sumvolfrac = 0.0;
+        for (int i = 0; i < vol.size(); ++i) {
+            if (i != WATERID) {
+                vfrac.at(i) = (vol.at(i) / totvolume);
+                sumvolfrac += vfrac.at(i);
+            }
+        }
+        vfrac.at(WATERID) = 1.0 - sumvolfrac;
+
+        ///
+        /// End of manual adjustment  
+        ///
+
+        cout << "Total microstructure volume now needs to be: " << totvolume << endl;
+        for (i = 0; i < vol.size(); i++) {
+            cout << "    " << name.at(i) << "  V needs to be = " << vol.at(i) << ", Vtot = "
+                     << totvolume << ", and volume fraction needs to be = " << vfrac.at(i) << endl;
+        }
+        cout.flush();
+        
+    }
+
+    catch (DataException dex) {
+        dex.printException();
+        exit(1);
+    }
+
+    catch (out_of_range &oor) {
+      EOBException ex("Lattice","adjustMicrostructureVolumeFractions","name",name.size(),i);
+      ex.printException();
+      exit(1);
+    }
 
     return;
 }
@@ -1602,7 +1718,7 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
     unsigned int i,j,k;
     string ofname(root);
     ostringstream ostr1,ostr2;
-    ostr1 << (int)((curtime * 100.0) + 0.5);  // hundredths of a day
+    ostr1 << setfill('0') << setw(6) << (int)((curtime * 24.0 * 60.0) + 0.5);	// minutes
     ostr2 << setprecision(3) << temperature_;
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
@@ -1752,7 +1868,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
     ///
 
     ostringstream ostr1,ostr2;
-    ostr1 << (int)((curtime * 100.0) + 0.5);	// hundredths of a day
+    ostr1 << setfill('0') << setw(6) << (int)((curtime * 24.0 * 60.0) + 0.5);	// minutes
     ostr2 << setprecision(3) << temperature_;
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
@@ -2436,6 +2552,7 @@ double Lattice::getSurfaceArea (int phaseid)
 }
 
 list<Sitesize> Lattice::findDomainSizeDistribution(int phaseid,
+                                                   const int numsites,
                                                    int maxsize,
                                                    int sortorder = 0)
 {
@@ -2455,27 +2572,32 @@ list<Sitesize> Lattice::findDomainSizeDistribution(int phaseid,
                 distlist.push_back(ss);
             } else {
                 found = false;
-                while (it != distlist.end() && !found) {
-                    if (sortorder == 0) {
-                        if (ss.nsize < (*it).nsize) {
-                            ++it;
-                        } else {
+                if (sortorder == 0) {
+                    it = distlist.begin();
+                    while (it != distlist.end() && !found) {
+                        if (ss.nsize >= (*it).nsize) {
                             distlist.insert(it,ss);
                             found = true;
+                        } else {
+                            it++;
                         }
-                    } else {
-                        if (ss.nsize > (*it).nsize) {
-                            ++it;
-                        } else {
+                    }
+                } else {
+                    it = distlist.begin();
+                    while (it != distlist.end() && !found) {
+                        if (ss.nsize <= (*it).nsize) {
                             distlist.insert(it,ss);
                             found = true;
+                        } else {
+                            it++;
                         }
                     }
                 }
-                if (!found) {
+                if (!found && (distlist.size() < numsites)) {
                     distlist.push_back(ss);
                 }
             }
+            if (distlist.size() > numsites) distlist.pop_back();
         }
 
     }
