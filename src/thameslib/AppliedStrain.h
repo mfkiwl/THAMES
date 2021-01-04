@@ -98,13 +98,15 @@ It simply initializes the class variables to zero.
 @param dim is the total number of elements
 @param nphase is the number of phases
 @param npoints is the number of microstructures (usually 1)
+@param verbose is true if we want verbose output
 */
 AppliedStrain (int nx,
                int ny,
                int nz,
                int dim,
                int nphase,
-               int npoints);
+               int npoints,
+               const bool verbose = false);
 	
 /**
 @brief Destructor.

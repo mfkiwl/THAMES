@@ -97,6 +97,7 @@ THAMES are contained in library files.
 #include <vector>
 #include <string>
 #include <ctime>
+#include <getopt.h>
 #include "thameslib/Controller.h"
 #include "thameslib/ChemicalSystem.h"
 #include "thameslib/Solution.h"
@@ -109,6 +110,16 @@ THAMES are contained in library files.
 #include "thameslib/StrainEnergy.h"
 
 /**
+@brief Flag for verbose output
+*/
+bool VERBOSE;
+
+/**
+@brief Flag for debug output
+*/
+bool DEBUG;
+
+/**
 @brief The vector of component elastic energies.
 
 The strainenergy vector is passed to the GEM3K library to modify the
@@ -119,13 +130,29 @@ of phase transformation misfit strain.
 vector<double> strainenergy;
 
 /**
+@brief Print a help message for invoking the command
+
+*/
+void printHelp (void);
+
+/**
+@brief Parse command line arguments
+
+This functions uses the GNU getopt_long functionality
+
+@param argc is the number of command line arguments
+@param argv is the array of the command line arguments
+*/
+void checkargs (int argc, char **argv);
+
+/**
 @brief Write the formatted report file listing job properties and input.
 
 Almost all the actual formatted output is done by the ChemicalSystem object
 through its `writeChemSys` method.
 
 @param jobRoot is the root name of the THAMES simulation
-@param itmie is the start time of the job
+@param itime is the start time of the job
 @param mfname is name of the initial microstructure image file
 @param parfilename is the name of the input parameter file
 @param csname is the name of the GEM chemical system definition (CSD) file

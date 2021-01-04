@@ -450,6 +450,8 @@ product.  This variable stores the current SI for each solid phase in the GEM CS
 */
 vector<double> SI_;
 
+bool verbose_;                          /**< Whether to produce verbose output */
+
 public:
 
 /**
@@ -463,11 +465,13 @@ all the information read from the GEM input files.
 @param GEMdbrname is the name of the GEM data bridge file
 @param Interfacefilename is the name of the file containing information about how
             to relate GEM phases to microstructure phases
+@param verbose is true if producing verbose output
 */
 ChemicalSystem (Solution *Solut,
                 const string &GEMfilename,
                 const string &GEMdbrname,
-                const string &Interfacefilename);
+                const string &Interfacefilename,
+                const bool verbose = false);
     
 /**
 @brief Copy constructor.
@@ -3682,7 +3686,9 @@ void setPhasevolume ()
     setOphasevolume();
     for (long int i = 0; i < phasenum_; i++) {
         phasevolume_[i] = (double)(node_->Ph_Volume(i));
-        //cout << "phasevolume_[" << i << "] = " <<phasevolume_[i] << endl;
+        if (verbose_) {
+            cout << "phasevolume_[" << i << "] = " << phasevolume_[i] << endl;
+        }
     }
 }
 
@@ -4055,8 +4061,10 @@ void setMicphasemass (const unsigned int idx,
     micphasemass_[idx] = val;
     double v0 = node_->DC_V0(getMic2DC(idx,0),P_,T_);
     double dcmm = getDCmolarmass(getMic2DC(idx,0));
-    cout << "    " << micphasename_[idx] << ": v0 = "
-         << v0 << ", dcmm = " << dcmm << endl;
+    if (verbose_) {
+        cout << "    " << micphasename_[idx] << ": v0 = "
+             << v0 << ", dcmm = " << dcmm << endl;
+    }
     if (dcmm < 1.0e-9) {
         FloatException fex("ChemicalSystem","setMicphasemass",
                            "Divide by zero (dcmm)");
@@ -6115,8 +6123,10 @@ void setSI ()
     Falp = (node_->ppmm())->Falp;
     
     for (int i = 0; i < phasenum_; i++) {
-        cout << "logSI for " << phasename_[i] << " is: "
-             << Falp[i] << endl;
+        if (verbose_) {
+            cout << "logSI for " << phasename_[i] << " is: "
+                 << Falp[i] << endl;
+        }
         double si = pow(10,Falp[i]);
         SI_.push_back(si);
     }
@@ -6170,6 +6180,26 @@ double getSI (const string &str)
 */
 vector<double> getSolution ();
 
-};      // End of ChemicalSystem class
+/**
+@brief Set the verbose flag
 
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
+
+};      // End of ChemicalSystem class
 #endif

@@ -38,7 +38,8 @@ Interface::Interface (ChemicalSystem *csys,
                       RanGen *rg,
                       vector<Site *> gv,
                       vector<Site *> dv,
-                      unsigned int pid)
+                      unsigned int pid,
+                      bool verbose)
 {
     unsigned long int j;
     unsigned int i;
@@ -47,6 +48,7 @@ Interface::Interface (ChemicalSystem *csys,
     vector<Site *>::iterator beginLocation,endLocation;
     vector<Isite>::iterator start,end;
 
+    verbose_ = verbose;
     rg_ = rg;
     phaseid_ = pid;
     chemsys_ = csys;
@@ -377,10 +379,9 @@ bool Interface::removeGrowthSite (Site *loc)
     return found;
 }
 
-bool Interface::removeDissolutionSite (Site *loc,
-                                       bool verbose = false)
+bool Interface::removeDissolutionSite (Site *loc)
 {
-     if (verbose) {
+     if (verbose_) {
         cout << "Removing dissolution site " << loc->getId()
              << ", size is " << dissolution_sites_.size()
              << endl;

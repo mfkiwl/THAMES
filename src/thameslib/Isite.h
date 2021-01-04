@@ -27,6 +27,7 @@ private:
     
     unsigned long int id_;      /**< The id of the corresponding Site */
     int affinity_;              /**< The affinity for growth of a phase at the site */
+    bool verbose_;              /**< Flag for whether to produce verbose output */
 
 public:
     
@@ -44,7 +45,8 @@ Isite ();
 @param aftyval is the prescribed value of the affinity to set
 */
 Isite (unsigned long int idval,
-       int aftyval);
+       int aftyval,
+       const bool verbose = false);
 
 /**
 @brief Copy constructor.
@@ -95,6 +97,27 @@ int getAffinity () const
 void setAffinity (int num)
 {
     affinity_ = num;
+}
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
 }
 
 };  // End of the Isite class

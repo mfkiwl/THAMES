@@ -91,6 +91,8 @@ protected:
     vector<vector<double> > h_;         /**< Auxiliary conjugate gradient variable */
     vector<vector<double> > Ah_;        /**< Local stiffness matrix */
 
+    bool verbose_;                      /**< Whether of not to produce verbose output */
+
     /**
     @brief Array of elastic moduli tensors of each phase.
 
@@ -200,13 +202,15 @@ public:
 @param nz is the number of elements in the z direction
 @param dim is the total number of elements in the system (plus two?)
 @param npoints is the number of microstructures to process
+@param verbose is true if one wants verbose output
 */
 ElasticModel (int nx,
               int ny,
               int nz,
               int dim,
               int nphase,
-              int npoints);
+              int npoints,
+              const bool verbose = false);
 
 /**
 @brief Set up the elastic modulus variables.
@@ -356,6 +360,7 @@ double getStress (int i)
             break;
         default:
             cout << "i (" << i << ") is not a recognized stress component" << endl;
+            cerr << "i (" << i << ") is not a recognized stress component" << endl;
             break;
     }
 
@@ -395,6 +400,7 @@ double getStrain (int i)
             break;
         default:
             cout << "i (" << i << ") is not a recognized strain component" << endl;
+            cerr << "i (" << i << ") is not a recognized strain component" << endl;
             break;
     }
 
@@ -435,7 +441,7 @@ virtual void femat (int nx,
                     int ns,
                     int nphase)
 {
-    cout << "virtual function 'femat' in base class." << endl;	
+    if (verbose_) cout << "virtual function 'femat' in base class." << endl;	
     return;
 }
 
@@ -456,7 +462,7 @@ virtual long int dembx (int ns,
                         int ldemb,
                         int kkk)
 {
-    cout << "virtual function 'dembx' in base class." << endl;
+    if (verbose_) cout << "virtual function 'dembx' in base class." << endl;
     return 0;
 }
 
@@ -479,7 +485,7 @@ virtual double energy (int nx,
                        int nz,
                        int ns)
 {
-    cout << "virtual function 'energy' in base class." << endl;
+    if (verbose_) cout << "virtual function 'energy' in base class." << endl;
     return 0.0;
 }
 
@@ -499,7 +505,7 @@ virtual void stress (int nx,
                      int nz,
                      int ns)
 {
-    cout << "virtual function 'stress' in base class." << endl;
+    if (verbose_) cout << "virtual function 'stress' in base class." << endl;
     return;
 }
 
@@ -515,7 +521,7 @@ will be customized for each of the derived classes.
 virtual void relax (double time,
                     int kmax)
 {
-    cout << "virtual function 'relax' in base class." << endl;
+    if (verbose_) cout << "virtual function 'relax' in base class." << endl;
     return;
 }
 
@@ -543,7 +549,7 @@ virtual void Calc (double time,
                    double eyz,
                    double exy)
 {
-    cout << "virtual function 'thrMic' in base class." << endl;
+    if (verbose_) cout << "virtual function 'thrMic' in base class." << endl;
     return;
 }
 
@@ -628,6 +634,27 @@ void setPhasemodfname (string phasemod_fname)
 string getPhasemodfname (void)
 {
     return phasemod_fname_;
+}
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
 }
 
 };      // End of ElasticModel class

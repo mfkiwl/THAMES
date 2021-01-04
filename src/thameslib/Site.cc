@@ -24,7 +24,8 @@ Site::Site (unsigned int xp,
             unsigned int ys,
             unsigned int zs,
             unsigned int neigh,
-            ChemicalSystem *csys)
+            ChemicalSystem *csys,
+            const bool verbose)
 {    
     x_ = y_ = z_ = 0;
     id_ = 0;
@@ -34,6 +35,8 @@ Site::Site (unsigned int xp,
     x_ = xp;
     y_ = yp;
     z_ = zp;
+
+    verbose_ = verbose;
 
     dissolution_.clear();
     growth_.clear();

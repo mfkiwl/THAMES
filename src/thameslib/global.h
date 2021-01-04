@@ -6,11 +6,6 @@
 #ifndef GLOBALH
 #define GLOBALH
 
-/*
-#define DEBUG
-#define VERBOSE
-*/
-
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
 
@@ -111,7 +106,6 @@ const double COLORSATVAL = 255.0;
 // Flags for data formats (NOT USED)
 const int GEMSFORMAT = 0;
 const int EXTERNALFORMAT = 0;
-
 
 #include "Exceptions.h"
 #include <stdexcept>

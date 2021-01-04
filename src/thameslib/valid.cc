@@ -67,9 +67,6 @@ int is_xml_valid (const xmlDocPtr doc,
     // Force the return value to be non-negative on success */
     //
 
-    std::cout << " force the return value to be non-negative on success "
-              << is_valid << std::endl;
-
     return is_valid ? 1 : 0;
 }
 

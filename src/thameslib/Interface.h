@@ -58,6 +58,7 @@ private:
                                                 adjacent growth */
     vector<Isite> dissolution_sites_;   /**< The list of sites eligible for self-dissolution */
     RanGen *rg_;                        /**< The random number generator object */
+    bool verbose_;                      /**< Flag for verbose output */
 
 public:
     
@@ -83,12 +84,14 @@ Interface (RanGen *rg);
 @param gv is the list of pointers to growth sites adjacent to the interface for this phase
 @param dv is the list of pointers to dissolution sites of this interface
 @param pid is the integer id of the phase associated with this interface
+@param verbose is true if verbose output should be produced
 */
 Interface (ChemicalSystem *csys,
            RanGen *rg,
            vector<Site *> gv,
            vector<Site *> dv,
-           unsigned int pid);
+           unsigned int pid,
+           const bool verbose = false);
     
 /**
 @brief Destructor for the Interface class.
@@ -204,10 +207,30 @@ bool removeGrowthSite(Site *loc);
 to the interface.
 
 @param loc is a pointer to the site to remove from the list of growth sites
-@param verbose will generate more output to standard out if set to true
 @return true if the site was removed successfully, false otherwise
 */
-bool removeDissolutionSite(Site *loc, bool verbose);
+bool removeDissolutionSite(Site *loc);
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
 
 };      // End of Interface class
 

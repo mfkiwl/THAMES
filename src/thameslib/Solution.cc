@@ -9,7 +9,8 @@
 using namespace std;
 
 Solution::Solution (const string &GEMfilename,
-                    const string &GEMdbrname)
+                    const string &GEMdbrname,
+                    const bool verbose)
 {
     pH_ = 7.0;
     pe_ = 1.0;
@@ -21,6 +22,8 @@ Solution::Solution (const string &GEMfilename,
     ionicstrength_ = 0.0;
     nodestatus_ = nodehandle_ = iterdone_ = 0;
 
+    verbose_ = verbose;
+
     ICnum_ = DCnum_ = phasenum_ = solutionphasenum_ = 0;
     ICname_.clear();
     DCname_.clear();
@@ -29,7 +32,10 @@ Solution::Solution (const string &GEMfilename,
 
     char *cGEMfilename = (char*)GEMfilename.c_str();
     char *cGEMdbrname = (char*)GEMdbrname.c_str();
-    cout << "Solution:: Going into GEM_init to read chemical system definition file " << cGEMfilename << endl;
+    if (verbose_) {
+        cout << "Solution:: Going into GEM_init to read chemical system definition file "
+             << cGEMfilename << endl;
+    }
 
     ///
     /// A new GEM3K node is allocated, completely separate from the one
@@ -45,11 +51,11 @@ Solution::Solution (const string &GEMfilename,
     long int gemflag = 0;
     gemflag = node_->GEM_init(cGEMfilename);
     if (gemflag == 1) {
-        cout << "Bad return from GEM_init: " << GEMfilename << " missing or corrupt." << endl;
+        cerr << "Bad return from GEM_init: " << GEMfilename << " missing or corrupt." << endl;
         exit(0);
     }
     if (gemflag == -1) {
-        cout << "Bad return from GEM_init: internal memory allocation error." << endl;
+        cerr << "Bad return from GEM_init: internal memory allocation error." << endl;
         exit(0);
     }
 
@@ -58,13 +64,13 @@ Solution::Solution (const string &GEMfilename,
     ///
 
     ICnum_ = (unsigned int)((node_->pCSD())->nIC);
-    cout << "ICnum_ is: " << ICnum_ << endl;
+    if (verbose_) cout << "ICnum_ is: " << ICnum_ << endl;
     DCnum_ = (unsigned int)((node_->pCSD())->nDC);
-    cout << "DCnum_ is: " << DCnum_ << endl;
+    if (verbose_) cout << "DCnum_ is: " << DCnum_ << endl;
     phasenum_ = (unsigned int)((node_->pCSD())->nPH);
-    cout << "phasenum_ is: " << phasenum_ << endl;
+    if (verbose_) cout << "phasenum_ is: " << phasenum_ << endl;
     solutionphasenum_ = (unsigned int)((node_->pCSD())->nPS);
-    cout << "solutionphasenum_ is: " << solutionphasenum_ << endl;
+    if (verbose_) cout << "solutionphasenum_ is: " << solutionphasenum_ << endl;
 
     ///
     /// Attempt to allocate memory for the various arrays
@@ -119,10 +125,12 @@ Solution::Solution (const string &GEMfilename,
     ///
 
     (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
-    cout << "Solution::Constructor: Entering GEM_run (1) with node status = "
-         << nodestatus_ << endl;
-    cout << "NodeStatusCH is: " << (node_->pCNode())->NodeStatusCH << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Solution::Constructor: Entering GEM_run (1) with node status = "
+             << nodestatus_ << endl;
+        cout << "NodeStatusCH is: " << (node_->pCNode())->NodeStatusCH << endl;
+        cout.flush();
+    }
 
     ///
     /// Attempt to run GEM
@@ -130,23 +138,29 @@ Solution::Solution (const string &GEMfilename,
 
     try {
         nodestatus_ = node_->GEM_run(false);
-        cout << "Solution::Constructor: Exited GEM_run with node status = "
-             << nodestatus_ << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "Solution::Constructor: Exited GEM_run with node status = "
+                 << nodestatus_ << endl;
+            cout.flush();
+        }
         if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
-            cout << "ERROR: Call to GEM_run failed..." << endl;
+            cerr << "ERROR: Call to GEM_run failed..." << endl;
             exit(1);
         }
-        cout << "Solution::Constructor: Entering GEM_restore_MT (1) ..." << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "Solution::Constructor: Entering GEM_restore_MT (1) ..." << endl;
+            cout.flush();
+        }
 
         node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
           &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
 
-        cout << "Done!" << endl;
-        cout << "T_ is: " << T_ << endl;
-        cout << "Solution::Constructor: Entering GEM_to_MT (1)..." << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "Done!" << endl;
+            cout << "T_ is: " << T_ << endl;
+            cout << "Solution::Constructor: Entering GEM_to_MT (1)..." << endl;
+            cout.flush();
+        }
         node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
             Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
             &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
@@ -173,16 +187,20 @@ Solution::Solution (const string &GEMfilename,
         exit(0);
     }
 
-    cout << "Solution::Constructor: Entering GEM_read_dbr (1)..." << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Solution::Constructor: Entering GEM_read_dbr (1)..." << endl;
+        cout.flush();
+    }
 
     nodestatus_ =  node_->GEM_read_dbr(cGEMdbrname);
     if (nodestatus_ != 0) {
         cout << "ERROR: Call to GEM_read_dbr failed..." << endl;
         exit(1);
     }
-    cout << "Done!" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
 
     ///
     /// Transfer phase names from GEM3K to member variables
@@ -249,26 +267,31 @@ void Solution::calculateState (bool isfirst)
     ///
 
     nodestatus_ = NEED_GEM_SIA;
-    cout << "    Going into Solution::calculateState::GEM_from_MT (2) ..." << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "    Going into Solution::calculateState::GEM_from_MT (2) ..." << endl;
+        cout.flush();
+    }
  
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
            ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
            DCmoles_,DCactivitycoeff_);
-    cout << "Done!" << endl;
+    if (verbose_) {
+        cout << "Done!" << endl;
   
+        cout << "    Going into Solution::calculateState::GEM_run (2) with isfirst = "
+             << isfirst << endl;
+        cout.flush();
+        cout << "    But first let's print the IC moles:" << endl;
+        for (int i = 0; i < ICnum_; i++) {
+            cout << ICname_[i] << ": " << ICmoles_[i] << " mol" << endl;
+        }
+        cout << endl;
+        cout.flush();
+    }
+
     ///
     /// Execute GEM calculation
     ///
-
-    cout << "    Going into Solution::calculateState::GEM_run (2) with isfirst = " << isfirst << endl;
-    cout.flush();
-    cout << "    But first let's print the IC moles:" << endl;
-    for (int i = 0; i < ICnum_; i++) {
-        cout << ICname_[i] << ": " << ICmoles_[i] << " mol" << endl;
-    }
-    cout << endl;
-    cout.flush();
 
     if (isfirst) {
         nodestatus_ = node_->GEM_run(false);
@@ -276,8 +299,10 @@ void Solution::calculateState (bool isfirst)
         nodestatus_ = node_->GEM_run(true);
     }
 
-    cout << "Done! nodestatus is " << nodestatus_ << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done! nodestatus is " << nodestatus_ << endl;
+        cout.flush();
+    }
 
     ///
     /// Get the GEM data back from the GEM3K library, assuming that it ran
@@ -312,16 +337,20 @@ void Solution::calculateState (bool isfirst)
 
     } else {
 
-        cout << "    Going into Solution::calculateState::GEM_to_MT (2)...";
-        cout.flush();
+        if (verbose_) {
+            cout << "    Going into Solution::calculateState::GEM_to_MT (2)...";
+            cout.flush();
+        }
         node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
                 Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
                 &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
                 &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
                 &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-        cout << "Done!" << endl;
-        cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
-        cout.flush();    
+        if (verbose_) {
+            cout << "Done!" << endl;
+            cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
+            cout.flush();    
+        }
     }
 
   ///
@@ -403,7 +432,7 @@ double Solution::calculateCrystrain (double SI,
 
         double Rg = 8.314e3; // gas constant; N.mm/mol.K
   
-        cout << "SI for this phase is: " << SI << endl; 
+        if (verbose_) cout << "SI for this phase is: " << SI << endl; 
 
         ///
         /// Calculate the crystal mean curvature in equilibrium with the
@@ -434,7 +463,7 @@ double Solution::calculateCrystrain (double SI,
 
         crystrain_ = (1.0 / (3.0 * Kp) - 1.0 / (3.0 * Ks)) * (porevolfrac * pa + pl);
 
-        cout << "crystrain is: " << crystrain_ << endl;
+        if (verbose_) cout << "crystrain is: " << crystrain_ << endl;
   
     }
 

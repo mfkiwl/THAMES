@@ -77,6 +77,8 @@ double expstrain_;                  /**< Assigned expansion strain by phase
                                             constrained transformation or an
                                             applied load */
 
+bool verbose_;                      /**< Flag to determine verbose output */
+
 public:
     
 /**
@@ -104,6 +106,7 @@ for the lattice.
 @param zs is the number of sites in the z dimension of the lattice
 @param neigh is the number of adjacent sites to be considered as neighbors
 @param csys is a pointer to the simulation's ChemicalSystem object
+@param verbose is true if verbose output should be produced
 */
 Site (unsigned int xp,
       unsigned int yp,
@@ -112,7 +115,8 @@ Site (unsigned int xp,
       unsigned int ys,
       unsigned int zs,
       unsigned int neigh,
-      ChemicalSystem *csys);
+      ChemicalSystem *csys,
+      const bool verbose = false);
     
 /**
 @brief Get a pointer to a given site in the site's neighborhood.
@@ -431,6 +435,8 @@ void setStrfreevolume (double vol)
     if (vol < 0) {
         cout << "in the setStrfreevolume function...volume should not be negative."
              << endl;
+        cerr << "in the setStrfreevolume function...volume should not be negative."
+             << endl;
         exit(1);
     } else {
         strfreevolume_ = vol;
@@ -469,6 +475,8 @@ void setTruevolume (double vol)
 {
     if (vol < 0) {
         cout << "in the setTruevolume function...volume should not be negative." 
+             << endl;
+        cerr << "in the setTruevolume function...volume should not be negative." 
              << endl;
         exit(1);
     } else {
@@ -518,6 +526,27 @@ This kind of function is used to provide a comparison for sorting a list of Site
 friend bool operator<(const Site &s1, const Site &s2)
 {
     return (s1.getWmc() < s2.getWmc());
+}
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
 }
 
 };      // End of the Site class

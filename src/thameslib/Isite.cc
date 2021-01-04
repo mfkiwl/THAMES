@@ -11,17 +11,21 @@ Isite::Isite ()
 {
     affinity_ = 0;
     id_ = 0;
+    verbose_ = false;
 }
 
 Isite::Isite (unsigned long int idval,
-              int aftyval)
+              int aftyval,
+              const bool verbose)
 {
     id_ = idval;
     affinity_ = aftyval;
+    verbose_ = verbose;
 }
 
 Isite::Isite (const Isite &obj)
 {
     id_ = obj.id_;
     affinity_ = obj.affinity_;
+    verbose_ = obj.verbose_;
 }

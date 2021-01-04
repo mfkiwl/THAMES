@@ -12,14 +12,16 @@ Controller::Controller (Lattice *msh,
                         ThermalStrain *thmstr,
                         const int simtype,
                         const string &parfilename,
-                        const string &jobname)
+                        const string &jobname,
+                        const bool verbose)
     :lattice_(msh),
      kineticmodel_(km),
      chemsys_(cs),
      solut_(solut),
      sim_type_(simtype),
      thermalstr_(thmstr),
-     jobroot_(jobname)
+     jobroot_(jobname),
+     verbose_(verbose)
 {
   unsigned int i;
   double tvalue,pvalue;
@@ -209,9 +211,9 @@ void Controller::doCycle (const string &statfilename,
     
   // Initialize the list of all interfaces in the lattice
 
-  cout << "Going into Lattice::FindInterfaces..." << endl;
+  if (verbose_) cout << "Going into Lattice::FindInterfaces..." << endl;
   lattice_->findInterfaces();
-  cout << "...Done!" << endl;
+  if (verbose_) cout << "...Done!" << endl;
     
   ///
   /// The next for loop is the main computation cycle loop, iterating over
@@ -257,20 +259,25 @@ void Controller::doCycle (const string &statfilename,
     /// runs all fo the major steps of a computational cycle
     ///
 
-    cout << "Going into Controller::calculateState with isfirst = " << isfirst << endl;
+    if (verbose_) cout << "Going into Controller::calculateState with isfirst = "
+                       << isfirst << endl;
     calculateState(time_[i],timestep,isfirst);
-    cout << "*Returned from Controller::calculateState(" << time_[i] << ","
-         << timestep << "," << isfirst << ")" << endl;
-    cout << "*called by Controller::doCycle" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "*Returned from Controller::calculateState(" << time_[i] << ","
+             << timestep << "," << isfirst << ")" << endl;
+        cout << "*called by Controller::doCycle" << endl;
+        cout.flush();
+    }
 
     ///
     /// Once the change in state is determined, propagate the consequences
     /// to the 3D microstructure
     ///
 
-    cout << "Going into Lattice::changeMicrostructure" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Going into Lattice::changeMicrostructure" << endl;
+        cout.flush();
+    }
 
     lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
 
@@ -282,14 +289,16 @@ void Controller::doCycle (const string &statfilename,
     /// into account its lower chemical potential.
    
     if ((time_[i] >= output_time_[time_index]) && (time_index < output_time_.size())) {
-        cout << "Writing lattice now... time_[" << i << "] = "
-             << time_[i] << ", output_time_[" << time_index << "] = "
-             << output_time_[time_index] << endl;
+        if (verbose_) {
+            cout << "Writing lattice now... time_[" << i << "] = "
+                 << time_[i] << ", output_time_[" << time_index << "] = "
+                 << output_time_[time_index] << endl;
+        }
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
         // lattice_->CheckPoint(jobroot_);
         time_index++;
-        cout << "...Done!" << endl;
+        if (verbose_) cout << "...Done!" << endl;
     }
     
     ///
@@ -311,7 +320,7 @@ void Controller::doCycle (const string &statfilename,
       
       ifstream instopexp("stopexp.dat");
       if (!instopexp) {
-        cout << "keep expanding." << endl;
+        if (verbose_) cout << "keep expanding." << endl;
       } else {
         expansion.clear();
         cout << "expansion has been stopped due to the percolation of damage." << endl;
@@ -326,10 +335,12 @@ void Controller::doCycle (const string &statfilename,
       expansion.clear();
       */
 
-      cout << "In Controller, expansion.size() = " << expansion.size() << endl;
+      if (verbose_) cout << "In Controller, expansion.size() = " << expansion.size() << endl;
       if (expansion.size() > 1) {
-        cout << "time_ is: " << time_[i] << ". expansion.size() is: " << expansion.size()
-             << " now create new microstructure..." << endl; 
+          if (verbose_) {
+              cout << "time_ is: " << time_[i] << ". expansion.size() is: " << expansion.size()
+                   << " now create new microstructure..." << endl; 
+          }
     
         damagecount_ = 0;  
         double poreintroduce = 0.5;
@@ -381,7 +392,7 @@ void Controller::doCycle (const string &statfilename,
         /// and then write the displacement field
         ///
  
-        cout << "Entering ThermalStrain calculation..." << endl;
+        if (verbose_) cout << "Entering ThermalStrain calculation..." << endl;
         thermalstr_->Calc(time_[i],ofname,0.0,0.0,0.0,0.0,0.0,0.0);
         //thermalstr_ -> writeStress(jobroot_,time_[i],0); //write strxx
         //thermalstr_ -> writeStrainEngy(jobroot_,time_[i]);
@@ -452,9 +463,9 @@ void Controller::doCycle (const string &statfilename,
             if ((strxx >= thermalstr_->getTstrength(index)) 
               || (stryy >= thermalstr_->getTstrength(index)) 
               || (strzz >= thermalstr_->getTstrength(index))) {
-              //cout << "Phase " << pid << " is damaged." << endl;
+              // if (verbose_) cout << "Phase " << pid << " is damaged." << endl;
               if (!ste->IsDamage()) {
-                //cout << " it has not been damaged before." << endl;
+                // if (verbose_) cout << " it has not been damaged before." << endl;
                 ste->setDamage();
                 damagecount_++;
                 //lattice_->dWaterchange(poreintroduce);
@@ -536,20 +547,27 @@ void Controller::initializeState (double time)
     /// The `ChemicalSystem` object provides an interface for these calculations
     /// 
 
-    cout << "Going to launch thermodynamic calculation now... ";
-    cout.flush();
+    if (verbose_) {
+        cout << "Going to launch thermodynamic calculation now... ";
+        cout.flush();
+    }
     try {
         chemsys_->calculateState(time,true);
-        cout << "*Returned from ChemicalSystem::calculateState" << endl;
-        cout << "*called by function Controller::initializeState" << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "*Returned from ChemicalSystem::calculateState" << endl;
+            cout << "*called by function Controller::initializeState" << endl;
+            cout.flush();
+        }
     }
     catch (GEMException gex) {
         gex.printException();
         exit(1);
     }
-    cout << "Done!" << endl;
-    cout.flush();
+
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
     
   return;
 }
@@ -578,8 +596,10 @@ void Controller::calculateState (double time,
     impurityrelease.clear();
     impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
        
-    cout << "Before KineticModel::calculateKineticStep, print out "
-         << "ICmoles for solution..." << endl;
+    if (verbose_) {
+        cout << "Before KineticModel::calculateKineticStep, print out "
+             << "ICmoles for solution..." << endl;
+    }
     solut_->getICmoles();
  
     ///
@@ -587,11 +607,9 @@ void Controller::calculateState (double time,
     ///
 
     double T = lattice_->getTemperature();
-    cout << "Going into KineticModel::calculateKineticStep now... " << endl;
-    cout.flush();
+    if (verbose_) cout << "Going into KineticModel::calculateKineticStep now... " << endl;
     kineticmodel_->calculateKineticStep(dt,T,isfirst);
-    cout << "Done!" << endl;
-    cout.flush();
+    if (verbose_) cout << "Done!" << endl;
 
     ///
     /// The next block only operates for sulfate attack iterations
@@ -600,8 +618,8 @@ void Controller::calculateState (double time,
 
     if (time >= sattack_time_) {            
 
-      cout << "waterchange_ in Lattice is: "
-           << lattice_->getWaterchange() << endl;
+      if (verbose_) cout << "waterchange_ in Lattice is: "
+                         << lattice_->getWaterchange() << endl;
 
       double addwatervol = lattice_->getWaterchange()
           / lattice_->getNumsites() * chemsys_->getMictotinitvolume();
@@ -614,18 +632,20 @@ void Controller::calculateState (double time,
                                             chemsys_->getP(),chemsys_->getT());
       double addwatermol = addwatervol / water_v0;
 
-      cout << "molar volume of water is: " << water_v0 << endl;
-      cout << "the moles of water added into the system are: " << addwatermol << endl;
+      if (verbose_) {
+          cout << "Molar volume of water is: " << water_v0 << endl;
+          cout << "The moles of water added into the system are: " << addwatermol << endl;
+      }
       for (int i = 0; i < chemsys_->getICnum(); i++) {
         if (chemsys_->getICname(i) == "H") {
-          cout << "previous IC moles for H is: " << chemsys_->getICmoles(i) << endl;
+          if (verbose_) cout << "previous IC moles for H is: " << chemsys_->getICmoles(i) << endl;
           chemsys_->setICmoles(i,(chemsys_->getICmoles(i) + 2 * addwatermol));
-          cout << "new ICmoles for H is: " << chemsys_->getICmoles(i) << endl;
+          if (verbose_) cout << "new ICmoles for H is: " << chemsys_->getICmoles(i) << endl;
         }
         if (chemsys_->getICname(i) == "O") {
-          cout << "previous IC moles for O is: " << chemsys_->getICmoles(i) << endl;
+          if (verbose_) cout << "previous IC moles for O is: " << chemsys_->getICmoles(i) << endl;
           chemsys_->setICmoles(i,(chemsys_->getICmoles(i) + addwatermol));
-          cout << "new ICmoles for O is: " << chemsys_->getICmoles(i) << endl;
+          if (verbose_) cout << "new ICmoles for O is: " << chemsys_->getICmoles(i) << endl;
         }
       }
     }
@@ -637,20 +657,25 @@ void Controller::calculateState (double time,
     /// The `ChemicalSystem` object provides an interface for these calculations
     /// 
 
-    cout << "Going to launch thermodynamic calculation now with isfirst = " << isfirst << endl;;
-    cout.flush();
+    if (verbose_) cout << "Going to launch thermodynamic calculation now with isfirst = "
+                       << isfirst << endl;;
     try {
         chemsys_->calculateState(time,isfirst);
-        cout << "*Returned from ChemicalSystem::calculateState" << endl;
-        cout << "*called by function Controller::calculateState" << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "*Returned from ChemicalSystem::calculateState" << endl;
+            cout << "*called by function Controller::calculateState" << endl;
+            cout.flush();
+        }
     }
     catch (GEMException gex) {
         gex.printException();
         exit(1);
     }
-    cout << "Done!" << endl;
-    cout.flush();
+
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
     
     ///
     /// The thermodynamic calculation returns the saturation index of phases,
@@ -665,17 +690,21 @@ void Controller::calculateState (double time,
         vector<int> micphasemembers;
         for (int i = 0; i < chemsys_->getMicphasenum(); ++i) {
             int newmicid = chemsys_->getMicid(chemsys_->getMicphasename(i));
-            cout << "Mic phase " << chemsys_->getMicphasename(i)
-                 << " is associated with GEMS phases ";
-            cout.flush();
+            if (verbose_) {
+                cout << "Mic phase " << chemsys_->getMicphasename(i)
+                     << " is associated with GEMS phases ";
+                cout.flush();
+            }
             aveSI = moles = 0.0;
             micphasemembers = chemsys_->getMicphasemembers(newmicid);
             for (int ii = 0; ii < micphasemembers.size(); ++ii) {
                 int newpid = micphasemembers[ii];
-                if (ii == 0) {
-                    cout << chemsys_->getPhasename(newpid);
-                } else {
-                    cout << " , " << chemsys_->getPhasename(newpid);
+                if (verbose_) {
+                    if (ii == 0) {
+                        cout << chemsys_->getPhasename(newpid);
+                    } else {
+                        cout << " , " << chemsys_->getPhasename(newpid);
+                    }
                 }
                 aveSI += (solut_->getSI(newpid) * chemsys_->getPhasemoles(newpid));
                 moles += chemsys_->getPhasemoles(newpid);
@@ -685,8 +714,10 @@ void Controller::calculateState (double time,
             } else {
                 aveSI = aveSI / (double)(micphasemembers.size());
             }
-            cout << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << endl;
+                cout.flush();
+            }
             lattice_->setSI(newmicid,aveSI);    
         }
     }
@@ -708,11 +739,15 @@ void Controller::calculateState (double time,
     /// @todo Find out what this is and why it needs to be done
     ///
 
-    cout << "About to enter setKineticDCmoles..." << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "About to enter setKineticDCmoles..." << endl;
+        cout.flush();
+    }
     kineticmodel_->setKineticDCmoles();
-    cout << "Finished with setKineticDCmoles..." << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Finished with setKineticDCmoles..." << endl;
+        cout.flush();
+    }
         
     // Output to files the solution composition data, phase data, DC data,
     // microstructure data, pH, and C-S-H composition and Ca/Si ratio
@@ -743,7 +778,7 @@ void Controller::calculateState (double time,
     }
 
     out4 << setprecision(5) << time;
-    cout << "Writing DC volumes file at time = " << time << endl;
+    if (verbose_) cout << "Writing DC volumes file at time = " << time << endl;
     for (int i = 0; i < chemsys_->getDCnum(); i++) {
       if (chemsys_->getDCmolarmass(i) > 0.0) {
         cc = chemsys_->getDCclasscode(i); 
@@ -751,9 +786,11 @@ void Controller::calculateState (double time,
             string dcname = chemsys_->getDCname(i);
             double V0 = chemsys_->getDCmoles(dcname) * chemsys_->getDCmolarvolume(dcname);
             out4 << "," << V0;
-            cout << "    DC = " << chemsys_->getDCname(i)
-                << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
-                << chemsys_->getDCmolarmass(i) << endl;
+            if (verbose_) {
+                cout << "    DC = " << chemsys_->getDCname(i)
+                    << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
+                    << chemsys_->getDCmolarmass(i) << endl;
+            }
         }
       } else {
         string msg = "Divide by zero error for DC " + chemsys_->getDCname(i);
@@ -770,7 +807,7 @@ void Controller::calculateState (double time,
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
-    cout << "Writing microstructure volume fractions at time " << time << endl;
+    if (verbose_) cout << "Writing microstructure volume fractions at time " << time << endl;
     out5 << setprecision(5) << time;
     for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
       out5 << "," << (chemsys_->getMicphasevolfrac(i));
@@ -784,20 +821,28 @@ void Controller::calculateState (double time,
       throw FileException("Controller","calculateState",outfilename,
                         "Could not append");
     }
-    cout << "Writing pH values...";
-    cout.flush();
+    if (verbose_) {
+        cout << "Writing pH values...";
+        cout.flush();
+    }
     out6 << setprecision(5) << time;
     out6 << "," << (chemsys_->getPH()) << endl;
-    cout << "Done!" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
     out6.close();
         
-    cout << "Call to chemsys_setPhasestoich() ... " << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Call to chemsys_setPhasestoich() ... " << endl;
+        cout.flush();
+    }
     chemsys_->setPhasestoich();
-    cout << "Done!" << endl;
-    cout << "Call to chemsys_getPhasestoich() ... " << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "Call to chemsys_getPhasestoich() ... " << endl;
+        cout.flush();
+    }
     double *CSHcomp;
     try {
         CSHcomp = chemsys_->getPhasestoich(chemsys_->getPhaseid("CSHQ"));
@@ -806,8 +851,10 @@ void Controller::calculateState (double time,
         eex.printException();
         exit(1);
     }
-    cout << "Done!" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
     double Ca_moles = 0.0, Si_moles = 0.0, Ca_Si_Ratio = 0.0;
     outfilename = jobroot_ + "_CSH.csv";
     ofstream out7(outfilename.c_str(),ios::app);
@@ -936,9 +983,7 @@ void Controller::parseDoc (const string &docname)
 
 
             cur = cur->xmlChildrenNode;
-            //cout <<" cur = " << cur->name << endl;
             while (cur != NULL) {
-                //cout << " cur = " << cur->name << endl;
                 if ((!xmlStrcmp(cur->name, (const xmlChar *)"calctime"))) {
                   key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                   string st((char *)key);
@@ -951,14 +996,12 @@ void Controller::parseDoc (const string &docname)
                   string st((char *)key);
                   from_string(testtime,st);
                   output_time_.push_back(testtime);
-                  //cout << "Next calc time = " << testtime << endl;
                   xmlFree(key);
                 }
                 if ((!xmlStrcmp(cur->name, (const xmlChar *)"image_frequency"))) {
                   key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                   string st((char *)key);
                   from_string(imgfreq_,st);
-                  cout << "Image frequency is " << imgfreq_ << endl;
                   xmlFree(key);
                 }
 

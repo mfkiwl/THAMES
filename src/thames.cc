@@ -13,7 +13,7 @@ int* RanGen::seed_;
 
 @return 0 on successful completion, non-zero otherwise
 */
-int main (void)
+int main (int argc, char *argv[])
 {
     //
     // Set up the strainenergy vector.  We allow no more than 156 phases,
@@ -114,7 +114,7 @@ int main (void)
     // phase data
     //
 
-    cout << "What is the name of the phase interface file? " << endl;
+    cout << "What is the name of the microstructure phase definition file? " << endl;
     cin >> buff;
     const string pi_filename(buff);
     const string cement_filename(buff);
@@ -125,7 +125,7 @@ int main (void)
     //
 
     try {
-        ChemSys = new ChemicalSystem(Solut,geminput_filename,geminput_dbrname,pi_filename);
+        ChemSys = new ChemicalSystem(Solut,geminput_filename,geminput_dbrname,pi_filename,VERBOSE);
     }
     catch (bad_alloc &ba) {
         cout << "Bad memory allocation in ChemicalSystem constructor: "
@@ -155,7 +155,7 @@ int main (void)
     //
 
     try {
-        Mic = new Lattice(ChemSys, Solut, mic_filename);
+        Mic = new Lattice(ChemSys, Solut, mic_filename,VERBOSE);
         cout << "Lattice creation done... " << endl;
         cout << "X size of lattice is " << Mic->getXDim() << endl;
         cout << "Y size of lattice is " << Mic->getYDim() << endl;
@@ -194,7 +194,7 @@ int main (void)
                                                   Mic->getYDim(),
                                                   Mic->getZDim(),
                                                   (Mic->getNumsites() + 2),
-                                                  ChemSys->getMicphasenum(),1);
+                                                  ChemSys->getMicphasenum(),1,VERBOSE);
           cout << "ThermalStrain object creation done... " << endl;
           ThermalStrainSolver->setPhasemodfname(phasemod_fname);
       }
@@ -216,7 +216,7 @@ int main (void)
       //
 
       try {
-          AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,ChemSys->getMicphasenum(),1);
+          AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,ChemSys->getMicphasenum(),1,VERBOSE);
           AppliedStrainSolver->setPhasemodfname(phasemod_fname);
       }
       catch (bad_alloc &ba) {
@@ -234,15 +234,17 @@ int main (void)
 
     string jobroot,par_filename,statfilename;
     Controller *Ctrl;
-    cout << "About to enter KineticModel constructor" << endl;
-    cout.flush();
+    if (VERBOSE) {
+        cout << "About to enter KineticModel constructor" << endl;
+        cout.flush();
+    }
 
     //
     // Create the KineticModel object
     //
 
     try {
-        KMod = new KineticModel(ChemSys, Solut, Mic, cement_filename);
+        KMod = new KineticModel(ChemSys, Solut, Mic, cement_filename,VERBOSE);
     }
     catch (bad_alloc &ba) {
         cout << "Bad memory allocation in KineticModel constructor: "
@@ -258,8 +260,10 @@ int main (void)
         exit(1);
     }
 
-    cout << "Finished constructing KineticModel KMod" << endl;
-    cout.flush();
+    if (VERBOSE) {
+        cout << "Finished constructing KineticModel KMod" << endl;
+        cout.flush();
+    }
     cout << "What is the name of the simulation parameter file? " << endl;
     buff = "";
     cin >> par_filename;
@@ -286,7 +290,7 @@ int main (void)
                             ThermalStrainSolver,
                             simtype,
                             par_filename,
-                            jobroot);
+                            jobroot,VERBOSE);
     }
     catch (bad_alloc &ba) {
       cout << "Bad memory allocation in Controller constructor: "
@@ -314,8 +318,10 @@ int main (void)
     // Launch the main controller to run the simulation
     //
 
-    cout << "Going into Controller::doCycle now" << endl;
-    cout.flush();
+    if (VERBOSE) {
+        cout << "Going into Controller::doCycle now" << endl;
+        cout.flush();
+    }
     Ctrl->doCycle(statfilename,choice);
         
     // 
@@ -337,29 +343,80 @@ int main (void)
     // Delete the dynamically allocated memory
     //
 
-    cout << "About to delete Ctrl pointer... ";
-    cout.flush();
-    delete Ctrl;
-    cout << "Done!" << endl;
-    cout.flush();
+    if (VERBOSE) {
+        cout << "About to delete Ctrl pointer... ";
+        cout.flush();
+        delete Ctrl;
+        cout << "Done!" << endl;
+        cout.flush();
 
-    cout << "About to delete KMod pointer... ";
-    cout.flush();
-    delete KMod;
-    cout << "Done!" << endl;
+        cout << "About to delete KMod pointer... ";
+        cout.flush();
+        delete KMod;
+        cout << "Done!" << endl;
 
-    cout << "About to delete Mic pointer... ";
-    cout.flush();
-    delete Mic;
-    cout << "Done!" << endl;
+        cout << "About to delete Mic pointer... ";
+        cout.flush();
+        delete Mic;
+        cout << "Done!" << endl;
 
-    cout << "About to delete ChemSys pointer... ";
-    cout.flush();
-    delete ChemSys;
-    cout << "Done!" << endl;
-    cout.flush();
+        cout << "About to delete ChemSys pointer... ";
+        cout.flush();
+        delete ChemSys;
+        cout << "Done!" << endl;
+        cout.flush();
+    } else {
+        delete Ctrl;
+        delete KMod;
+        delete Mic;
+        delete ChemSys;
+    }
 
     return 0;
+}
+
+void printHelp (void)
+{
+    cout << endl;
+    cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
+    cout << "        --verbose [-v]      Produce verbose output" << endl;
+    cout << "        --help [-h]         Print this help message" << endl;
+    cout << endl;
+
+    return;
+}
+
+void checkargs (int argc, char **argv)
+{
+
+    // Many of the variables here are defined in the getopts.h system header file
+    // Can define more options here if we want
+    const char* const short_opts = "vh";
+    const option long_opts[] = {
+        {"verbose", no_argument, nullptr, 'v'},
+        {"help",    no_argument, nullptr, 'h'},
+        {nullptr,   no_argument, nullptr,  0}
+    };
+
+    while (true) {
+
+        const auto opt = getopt_long(argc, argv, short_opts, long_opts, nullptr);
+
+        if (-1 == opt)
+            break;  // breaks out of this while loop
+
+        switch (opt) {
+            case 'v':
+                VERBOSE = true;      // Verbose defined in thameslib global.h
+                cout << "**Will produce verbose output**" << endl;
+                break;
+            case 'h': // -h or --help
+            case '?': // Unrecognized option
+            default:
+                printHelp ();
+                break;
+        }
+    }
 }
 
 void writeReport (const string &jobroot,

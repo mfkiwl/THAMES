@@ -8,7 +8,8 @@
 ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const string &GEMfilename,
                                 const string &GEMdbrname,
-                                const string &Interfacefilename) : solut_(Solut)
+                                const string &Interfacefilename,
+                                const bool verbose) : solut_(Solut)
 {
   unsigned int i,j;
   double *amat;
@@ -31,6 +32,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
   ///  are set to be consistent with neutral water at STP
   ///
  
+  verbose_ = verbose;
   micphasenum_ = phasenum_ = solutionphasenum_ = 0;
   micimpuritynum_ = 4;
   micphasename_.clear();
@@ -104,7 +106,10 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
 
   char *cGEMfilename = (char*)GEMfilename.c_str();
   char *cGEMdbrname = (char*)GEMdbrname.c_str();
-  cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file " << cGEMfilename << endl;
+  if (verbose_) {
+      cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
+           << cGEMfilename << endl;
+  }
   try {
     gemflag = node_->GEM_init(cGEMfilename);
     if (gemflag == 1) {
@@ -210,54 +215,41 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
  
   try {
     (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
-    cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
-         << nodestatus_ << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
+             << nodestatus_ << endl;
+        cout.flush();
+    }
     nodestatus_ = node_->GEM_run(false);
-    cout << "ChemicalSystem::Constructor: Exited GEM_run (1) with node status = "
-         << nodestatus_ << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "ChemicalSystem::Constructor: Exited GEM_run (1) with node status = "
+             << nodestatus_ << endl;
+        cout.flush();
+    }
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         exmsg = "ERROR:    Call to GEM_run failed...";
         throw GEMException("ChemicalSystem","ChemicalSystem",exmsg);
     }
-    cout << "ChemicalSystem::Constructor: Entering GEM_restore_MT (1) ... " << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "ChemicalSystem::Constructor: Entering GEM_restore_MT (1) ... " << endl;
+        cout.flush();
+    }
     node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
         &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
-    cout << "Done!" << endl;
-    cout << "ChemicalSystem::Constructor: Entering GEM_to_MT (1) ... " << endl;
-    cout.flush();
-    node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
-        Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
-        &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
-        &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
-        &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-    cout << "Done!" << endl;
-
-    /*
-    // reset IC moles according to prievous time step
-    ifstream in10("initicmoles.dat");
-    double icbuff;
-    for (int i = 0; i < ICnum_; i++) {
-      in10 >> icbuff;
-      ICmoles_[i] = icbuff;
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "ChemicalSystem::Constructor: Entering GEM_to_MT (1) ... " << endl;
+        cout.flush();
     }
-    in10.close();
-
-    nodestatus_ = NEED_GEM_AIA;
-    node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
-          ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
-          DCmoles_,DCactivitycoeff_);
-    nodestatus_ = node_->GEM_run(false);
     node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
         Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
         &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
         &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
         &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-    cout << "Done!" << endl;
-    */  
-	
+    if (verbose_) {
+        cout << "Done!" << endl;
+    }
+
   }
   catch (GEMException e) {
     e.printException();
@@ -308,8 +300,10 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ICidlookup_.insert(make_pair(string1,i));
   }
   for (i = 0; i < DCnum_; i++) {
-    cout << "DC id " << i << " name is " << node_->xCH_to_DC_name(i) << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "DC id " << i << " name is " << node_->xCH_to_DC_name(i) << endl;
+        cout.flush();
+    }
     string1.assign(node_->xCH_to_DC_name(i));
 
     DCname_.push_back(string1);
@@ -321,13 +315,13 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     phaseidlookup_.insert(make_pair(string1,i));
   }
 
-  /*
-  cout << "To initialize phasevolume_ and phasemass_, set DCupperlimit to be normal: " 
-       << endl;
-  for (int i = 0; i < DCnum_; i++) {
-    cout << DCname_[i] << ": " << DCupperlimit_[i] << endl;
+  if (verbose_) {
+      cout << "To initialize phasevolume_ and phasemass_, set DCupperlimit to be normal: " 
+           << endl;
+      for (int i = 0; i < DCnum_; i++) {
+        cout << DCname_[i] << ": " << DCupperlimit_[i] << endl;
+      }
   }
-  */
 
   ///
   /// Set up the stoichiometry matrix for dependent components (DCs) in terms
@@ -410,8 +404,10 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       micphasevolfrac_.resize(micphasenum_,0.0);
       micphasevolume_.resize(micphasenum_,0.0);
       micphasemass_.resize(micphasenum_,0.0);
-      cout << " Setting micphasemass size to " << micphasenum_ << endl;
-      cout.flush();
+      if (verbose_) {
+          cout << " Setting micphasemass size to " << micphasenum_ << endl;
+          cout.flush();
+      }
       micphasemassdissolved_.resize(micphasenum_,0.0);
     } else {
       msg = "Not an XML file";
@@ -462,7 +458,9 @@ vector<double> ChemicalSystem::getSolution ()
   double watermass = DCmoles_[getDCid("H2O@")] 
                  * DCmolarmass_[getDCid("H2O@")];
 
-  cout << "water mass at the end of hydration is: " << watermass << endl;
+  if (verbose_) {
+      cout << "water mass at the end of hydration is: " << watermass << endl;
+  }
   vector<double> tempicmoles;
   tempicmoles.clear();
   tempicmoles.resize(ICnum_,0.0);
@@ -502,11 +500,13 @@ void ChemicalSystem::parseDoc (const string &docname)
 
     string rxcsd = xsd_files_path;
     rxcsd+="/chemistry.xsd";
-    cout << "Chemistry xsd file is at " << rxcsd << endl;
+    if (verbose_) {
+        cout << "Chemistry xsd file is at " << rxcsd << endl;
+    }
     if(!is_xml_valid(doc,rxcsd.c_str())) {
         cout << "Chemistry xml is NOT valid" <<endl;
         cout.flush();
-    } else {
+    } else if (verbose_) {
         cout << "Chemistry xml IS valid" << endl;
         cout.flush();
     }
@@ -538,23 +538,27 @@ void ChemicalSystem::parseDoc (const string &docname)
     int satstate = 1;
     saturated_ = true;
     while (cur != NULL) {
-        cout << "Key name = " << cur->name << endl;
+        if (verbose_) {
+            cout << "Key name = " << cur->name << endl;
+        }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"numentries"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(testnumentries,st);
-            cout << "Num entries in interface xml file is " << testnumentries << endl;
+            if (verbose_) cout << "Num entries in interface xml file is "
+                               << testnumentries << endl;
             xmlFree(key);
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"saturated"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(satstate,st);
             if (satstate == 0) saturated_ = false;
-            cout << "System saturation state: " << saturated_ << endl;
+            if (verbose_) cout << "System saturation state: " << saturated_ << endl;
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-            cout << "Preparing to parse a phase from interface xml file..." << endl;
+            if (verbose_) cout << "Preparing to parse a phase from interface xml file..."
+                               << endl;
             parsePhase(doc, cur, testnumentries, phasedata);
-            cout << "Done with phase parse." << endl;
+            if (verbose_) cout << "Done with phase parse." << endl;
         }
         cur = cur->next;
     }
@@ -571,7 +575,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     xmlChar *key;
     int proposedgemphaseid,proposedgemdcid;
 
-    cout << "In function ChemicalSystem::parsePhase" << endl;
+    if (verbose_) cout << "In function ChemicalSystem::parsePhase" << endl;
+
     phasedata.gtmplt.clear();
     phasedata.atmpvec.clear();
     phasedata.atmpvec.resize(numentries,0);
@@ -587,74 +592,78 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
-        cout << "    Key name = " << cur->name << endl;
+        if (verbose_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"id"))) {
-            cout << "    Trying to get phase id" << endl;
+            if (verbose_) cout << "    Trying to get phase id" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.id,st);
-            cout << "    Phase id = " << phasedata.id << endl;
+            if (verbose_) cout << "    Phase id = " << phasedata.id << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
-            cout << "    Trying to get phase name" << endl;
+            if (verbose_) cout << "    Trying to get phase name" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             phasedata.thamesname = st;
-            cout << "    Phase name = " << phasedata.thamesname << endl;
+            if (verbose_) cout << "    Phase name = " << phasedata.thamesname << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphase_data"))) {
-            cout << "    Parsing gemphase_data..." << endl;
+            if (verbose_) cout << "    Parsing gemphase_data..." << endl;
             parseGEMphasedata(doc, cur, phasedata);
-            cout << "    Done parsing gemphase_data." << endl;
+            if (verbose_) cout << "    Done parsing gemphase_data." << endl;
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"porosity"))) {
-            cout << "    Trying to get porosity" << endl;
+            if (verbose_) cout << "    Trying to get porosity" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.porosity,st);
-            cout << "    Phase porosity = " << phasedata.porosity << endl;
+            if (verbose_) cout << "    Phase porosity = " << phasedata.porosity << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
-            cout << "    Will stress calculation be done for  phase? ";
+            if (verbose_) cout << "    Will stress calculation be done for  phase? ";
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.stresscalc,st);
-            if (phasedata.stresscalc > 0) {
-                cout << " YES " << endl;
-            } else {
-                cout << " NO " << endl;
+            if (verbose_) {
+                if (phasedata.stresscalc > 0) {
+                    cout << " YES " << endl;
+                } else {
+                    cout << " NO " << endl;
+                }
             }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"weak"))) {
-            cout << "    Can this phase be damaged by stress? ";
+            if (verbose_) cout << "    Can this phase be damaged by stress? ";
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.weak,st);
-            if (phasedata.weak > 0) {
-                cout << " YES " << endl;
-            } else {
-                cout << " NO " << endl;
+            if (verbose_) {
+                if (phasedata.weak > 0) {
+                    cout << " YES " << endl;
+                } else {
+                    cout << " NO " << endl;
+                }
             }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"display_data"))) {
-            cout << "    Parsing display data..." << endl;
+            if (verbose_) cout << "    Parsing display data..." << endl;
             parseDisplaydata(doc, cur, phasedata);
-            cout << "    Done parsing display data." << endl;
+            if (verbose_) cout << "    Done parsing display data." << endl;
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"impurity_data"))) {
-            cout << "    Parsing impurity data..." << endl;
+            if (verbose_) cout << "    Parsing impurity data..." << endl;
             parseImpuritydata(doc, cur, phasedata);
-            cout << "    Done parsing impurity data." << endl;
+            if (verbose_) cout << "    Done parsing impurity data." << endl;
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
-            cout << "    Parsing interface data..." << endl;
+            if (verbose_) cout << "    Parsing interface data..." << endl;
             parseInterfacedata(doc, cur, phasedata);
-            cout << "    Done parsing interface data." << endl;
+            if (verbose_) cout << "    Done parsing interface data." << endl;
         }
         cur = cur->next;
     }
@@ -707,19 +716,19 @@ void ChemicalSystem::parseGEMphasedata (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemphasename"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phasedata.gemphasename.push_back((char *)key);
-            cout << "    GEM phase name = " << (char *)key << endl;
+            if (verbose_) cout << "    GEM phase name = " << (char *)key << endl;
             gemphaseid = getPhaseid((char *)key);
-            cout << "    GEM phase id = " << gemphaseid << endl;
+            if (verbose_) cout << "    GEM phase id = " << gemphaseid << endl;
             phasedata.gemphaseid.push_back(gemphaseid);
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdcname"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phasedata.gemdcname.push_back((char *)key);
-            cout << "    GEM DC name = " << (char *)key << endl;
+            if (verbose_) cout << "    GEM DC name = " << (char *)key << endl;
             int dcid = getDCid((char *)key);
             phasedata.gemdcid.push_back(dcid);
-            cout << "    GEM DC id = " << dcid << endl;
+            if (verbose_) cout << "    GEM DC id = " << dcid << endl;
             phasedata.gemphasedcmembers.push_back(dcid);
             xmlFree(key);
         }
@@ -744,28 +753,28 @@ void ChemicalSystem::parseDisplaydata (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(red,st);
-            cout << "        red = " << red << endl;
+            if (verbose_) cout << "        red = " << red << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"green"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(green,st);
-            cout << "        green = " << green << endl;
+            if (verbose_) cout << "        green = " << green << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"blue"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(blue,st);
-            cout << "        blue = " << blue << endl;
+            if (verbose_) cout << "        blue = " << blue << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"gray"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.gray,st);
-            cout << "        gray = " << phasedata.gray << endl;
+            if (verbose_) cout << "        gray = " << phasedata.gray << endl;
             xmlFree(key);
         }
         cur = cur->next;
@@ -792,28 +801,28 @@ void ChemicalSystem::parseImpuritydata (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.k2o,st);
-            cout << "        k2ocoeff = " << phasedata.k2o << endl;
+            if (verbose_) cout << "        k2ocoeff = " << phasedata.k2o << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"na2ocoeff"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.na2o,st);
-            cout << "        na2ocoeff = " << phasedata.na2o << endl;
+            if (verbose_) cout << "        na2ocoeff = " << phasedata.na2o << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"mgocoeff"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.mgo,st);
-            cout << "        mgocoeff = " << phasedata.mgo << endl;
+            if (verbose_) cout << "        mgocoeff = " << phasedata.mgo << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"so3coeff"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.so3,st);
-            cout << "        so3coeff = " << phasedata.so3 << endl;
+            if (verbose_) cout << "        so3coeff = " << phasedata.so3 << endl;
             xmlFree(key);
         }
         cur = cur->next;
@@ -836,7 +845,7 @@ void ChemicalSystem::parseInterfacedata (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phasedata.randomgrowth,st);
-            cout << "        randomgrowth = " << phasedata.randomgrowth << endl;
+            if (verbose_) cout << "        randomgrowth = " << phasedata.randomgrowth << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"growthtemplate"))) {
@@ -844,13 +853,13 @@ void ChemicalSystem::parseInterfacedata (xmlDocPtr doc,
             string st((char *)key);
             from_string(testtemplate,st);
             phasedata.gtmplt.push_back(testtemplate);
-            cout << "        growth template = " << testtemplate << endl;
+            if (verbose_) cout << "        growth template = " << testtemplate << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinity"))) {
-            cout << "        Parsing affinity data..." << endl;
+            if (verbose_) cout << "        Parsing affinity data..." << endl;
             parseAffinitydata(doc,cur,phasedata);
-            cout << "        Done parsing affinity data." << endl;
+            if (verbose_) cout << "        Done parsing affinity data." << endl;
         }
         cur = cur->next;
 
@@ -871,14 +880,14 @@ void ChemicalSystem::parseAffinitydata (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(testaftyid,st);
-            cout << "            affinity id = " << testaftyid << endl;
+            if (verbose_) cout << "            affinity id = " << testaftyid << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(testaftyval,st);
-            cout << "            affinity value = " << testaftyval << endl;
+            if (verbose_) cout << "            affinity value = " << testaftyval << endl;
             xmlFree(key);
         }
         cur = cur->next;
@@ -983,6 +992,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     micphasemassdissolved_ = obj.getMicphasemassdissolved();
     micvoidvolume_ = obj.getMicvoidvolume();
     micvoidvolfrac_ = obj.getMicvoidvolfrac();
+    verbose_ = obj.getVerbose();
 }
 
 ChemicalSystem::~ChemicalSystem ()
@@ -1188,7 +1198,7 @@ void ChemicalSystem::writeChemSys ()
         for (j = 0; j < affinity_[i].size(); j++) {
             out << "        affinity to " << j << ": " << affinity_[i][j] << endl;
         }
-        cout << "the size of growthtemplate_[" << i << "] = "
+        if (verbose_) cout << "the size of growthtemplate_[" << i << "] = "
              << growthtemplate_[i].size() << endl;
         for (j = 0; j < growthtemplate_[i].size(); j++) {
             out << "        growthtemplate: " << growthtemplate_[i][j] << endl;
@@ -1273,21 +1283,24 @@ int ChemicalSystem::calculateState (double time,
     }
  
     nodestatus_ = NEED_GEM_SIA;
-    cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... " << endl;
-    cout.flush();
+    if (verbose_) cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... "
+                       << endl;
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
           ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
           DCmoles_,DCactivitycoeff_);
-    cout << "Done!" << endl;
-    
-    cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT (2)... ";
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT (2)... ";
+        cout.flush();
+    }
     node_->GEM_set_MT(time,1.0);
-    cout << "Done!" << endl
-         << "    Going into ChemicalSystem::calculateState::GEM_run() (2), with isfirst "
-         << isfirst << endl;
-    cout.flush();
-    writeICmoles();
+    if (verbose_) {
+        cout << "Done!" << endl
+             << "    Going into ChemicalSystem::calculateState::GEM_run() (2), with isfirst "
+             << isfirst << endl;
+        cout.flush();
+        writeICmoles();
+    }
 
     /*
     writeDCmoles();
@@ -1299,8 +1312,10 @@ int ChemicalSystem::calculateState (double time,
         nodestatus_ = node_->GEM_run(true);
     }
 
-    cout << "Done!  nodestatus is " << nodestatus_ << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Done!  nodestatus is " << nodestatus_ << endl;
+        cout.flush();
+    }
     
 
     if (nodestatus_ == ERR_GEM_AIA || nodestatus_ == ERR_GEM_SIA
@@ -1329,16 +1344,20 @@ int ChemicalSystem::calculateState (double time,
             }
             throw GEMException("ChemicalSystem","calculateState",msg);
         } else {
-            cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT (2)... ";
-            cout.flush();
+            if (verbose_) {
+                cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT (2)... ";
+                cout.flush();
+            }
             node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
                     Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
                     &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&solutphasemoles_[0],
                     &solutphasevolume_[0],&solutphasemass_[0],&solutphasestoich_[0],
                     &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-            cout << "Done!" << endl;
-            cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "Done!" << endl;
+                cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
+                cout.flush();
+            }
       }
     }
 
@@ -1354,12 +1373,14 @@ int ChemicalSystem::calculateState (double time,
     setPhasevolume();
     setPhasemolarmass();
   
-    cout << "%%%%%%%%%% Printing GEM Masses and Volumes in this Step %%%%%%%" << endl;
-    for (long int myid = 0; myid < phasenum_; myid++) {
-        cout << "Mass and volume of GEM phase " << node_->pCSD()->PHNL[myid] << " = "
-            << phasemass_[myid] << " g and " << phasevolume_[myid] << " m3" << endl;
+    if (verbose_) {
+        cout << "%%%%%%%%%% Printing GEM Masses and Volumes in this Step %%%%%%%" << endl;
+        for (long int myid = 0; myid < phasenum_; myid++) {
+            cout << "Mass and volume of GEM phase " << node_->pCSD()->PHNL[myid] << " = "
+                << phasemass_[myid] << " g and " << phasevolume_[myid] << " m3" << endl;
+        }
+        cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
     }
-    cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
 
     /// JWB: 2020 December 22
     /// Testing a change to the way we handle CSH molar volume adjustments
@@ -1368,16 +1389,20 @@ int ChemicalSystem::calculateState (double time,
     ///
     
     for (unsigned int i = 1; i < micphasenum_; i++) {
-        cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "Setting micphase amounts for " << i << " = " << micphasename_[i] << endl;
+            cout.flush();
+        }
         if (!isKineticphase(i)) {
             micphasemass_[i] = micphasevolume_[i] = 0.0;
             for (unsigned int j = 0; j < micphasemembers_[i].size(); j++) {
-                cout << "    Is NOT a KINETIC phase: is composed of "
-                     << phasename_[micphasemembers_[i][j]]
-                     << " having mass = " << phasemass_[micphasemembers_[i][j]]
-                     << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
-                cout.flush();
+                if (verbose_) {
+                    cout << "    Is NOT a KINETIC phase: is composed of "
+                         << phasename_[micphasemembers_[i][j]]
+                         << " having mass = " << phasemass_[micphasemembers_[i][j]]
+                         << " and volume = " << phasevolume_[micphasemembers_[i][j]] << endl;
+                    cout.flush();
+                }
                 micphasemass_[i] += phasemass_[micphasemembers_[i][j]];
                 micphasevolume_[i] += phasevolume_[micphasemembers_[i][j]];
             }
@@ -1387,11 +1412,13 @@ int ChemicalSystem::calculateState (double time,
       ///
 
         } else {
-            cout << "    IS a KINETIC phase: is composed of "
-                 << phasename_[micphasemembers_[i][0]]
-                << "  having mass = " << micphasemass_[i]
-                 << "  and volume = " << micphasevolume_[i] << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    IS a KINETIC phase: is composed of "
+                     << phasename_[micphasemembers_[i][0]]
+                     << "  having mass = " << micphasemass_[i]
+                     << "  and volume = " << micphasevolume_[i] << endl;
+                cout.flush();
+            }
 
             ///
             /// micphasemass and micphasevolume for kinetic phases are
@@ -1403,11 +1430,13 @@ int ChemicalSystem::calculateState (double time,
     }
 
     if (isfirst) mictotinitvolume_ = mictotvolume_;
-    cout << "isfirst = " << isfirst << ", mictotinitvolume_ = " << mictotinitvolume_ << endl;
+    if (verbose_) cout << "isfirst = " << isfirst
+                       << ", mictotinitvolume_ = " << mictotinitvolume_
+                       << endl;
 
     if (saturated_) {   // System is saturated
 
-        cout << "Use water to saturate the porosity." << endl;
+        if (verbose_) cout << "Use water to saturate the porosity." << endl;
   
         if (mictotinitvolume_ > mictotvolume_) {
             double water_molarv, water_molesincr;
@@ -1415,10 +1444,12 @@ int ChemicalSystem::calculateState (double time,
                 if (micphasename_[i] == "H2O") {
                     water_molarv = node_->DC_V0(getMic2DC(i,0), P_, T_);
                     water_molesincr = (mictotinitvolume_ - mictotvolume_) / water_molarv;
-                    cout << "water_molarv = " << water_molarv << endl;
-                    cout << "volume increase of water is: "
-                         << (mictotinitvolume_ - mictotvolume_) << endl;
-                    cout << "water_molesincr = " << water_molesincr << endl;
+                    if (verbose_) {
+                        cout << "water_molarv = " << water_molarv << endl;
+                        cout << "volume increase of water is: "
+                             << (mictotinitvolume_ - mictotvolume_) << endl;
+                        cout << "water_molesincr = " << water_molesincr << endl;
+                    }
                 }
             }
             for (int i = 0; i < ICnum_; i++) {
@@ -1429,9 +1460,11 @@ int ChemicalSystem::calculateState (double time,
 
     }
 
-    cout << "GEM volume change = "
-         << 100.0 * (mictotvolume_ - mictotinitvolume_)/(mictotinitvolume_) << " %" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "GEM volume change = "
+             << 100.0 * (mictotvolume_ - mictotinitvolume_)/(mictotinitvolume_) << " %" << endl;
+        cout.flush();
+    }
 
     setPhasestoich();
    
@@ -1463,18 +1496,20 @@ int ChemicalSystem::calculateState (double time,
     ///
 
     vector<double> solutICmoles = getSolution();
-    cout << "Now update solution IC moles...";
+    if (verbose_) cout << "Now update solution IC moles...";
     for (int i = 0; i < ICnum_; i++) {
         solut_->setICmoles(i, solutICmoles[i]);
     } 
-    cout << "Done." << endl;
+    if (verbose_) cout << "Done." << endl;
 
     /*
     solut_->calculateState(false);
     */
 
-    cout << "Leaving ChemicalSystem::calculateState now" << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "Leaving ChemicalSystem::calculateState now" << endl;
+        cout.flush();
+    }
 
     return status;
 }

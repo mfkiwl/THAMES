@@ -99,6 +99,7 @@ double surfacearea_;                        /**< Total surface area [m<sup>2</su
 
 bool deptheffect_;                          /**< Whether or not PNG images should have
                                                     depth effect */
+bool verbose_;                              /**< Flag to determine verbose output */
 
 public:
     
@@ -132,7 +133,8 @@ the voxel phase assignments can be made at each site.
 */
 Lattice (ChemicalSystem *cs,
         Solution *solut,
-        const string &fname);
+        const string &fname,
+        const bool verbose = false);
     
 /**
 @brief Destructor.
@@ -688,8 +690,11 @@ void setPhaseId (Site *s,
 {
     string msg;
     try {
-          count_.at(s->getPhaseId())--;        
-          s->setPhaseId(i);
+        if (i != chemsys_->getMicid("DAMAGE")) {
+            count_.at(s->getPhaseId())--;        
+        }
+        s->setPhaseId(i);
+        count_.at(i)++;
     }
     catch (out_of_range &oor) {
         msg = "Site does not exist?";
@@ -709,13 +714,11 @@ void setPhaseId (const int sitenum,
 {
     string msg;
     try {
-        if (i == chemsys_->getMicid("DAMAGE")) {
-          site_.at(sitenum).setPhaseId(i);
-          count_.at(i) += 1;
-        } else {
+        if (i != chemsys_->getMicid("DAMAGE")) {
           count_.at(site_.at(sitenum).getPhaseId())--;
-          site_.at(sitenum).setPhaseId(i);
         }
+        site_.at(sitenum).setPhaseId(i);
+        count_.at(i)++;
     }
     catch (out_of_range &oor) {
         msg = "Site does not exist?";
@@ -802,10 +805,11 @@ that the nanopore water is chemically unreactive and cannot be removed.
 */
 void changeMicrostructure (double time,
                            const int simtype,
-                           bool isfirst, bool &capwater);
+                           bool isfirst,
+                           bool &capwater);
     
 /**
-@brief Adjust volume fractions of microstructure phases
+@brief Adjust GEMS calculated volumes of microstructure phases
 
 The volume fractions passed to this function are those coming directly
 from the chemical system.  But the chemical system does not account for
@@ -822,11 +826,20 @@ that the nanopore water is chemically unreactive and cannot be removed.
 
 @param phasenames is a vector of the microstructure phase names
 @param vol is a vector of the pre-adjusted microstructure volumes
-@param vfrac is a vector of the pre-adjusted microstructure volume fractions
 */
-void adjustMicrostructureVolumeFractions (vector<string> phasenames,
-                                          vector<double> &vol,
-                                          vector<double> &vfrac);
+void adjustMicrostructureVolumes (vector<string> phasenames,
+                                  vector<double> &vol);
+    
+/**
+@brief Calculate microstructure volume fractions
+
+@param names is a vector of the adjusted microstructure volumes
+@param vol is a vector of the adjusted microstructure volumes
+@param vfrac will hold the microstructure volume fractions
+*/
+void adjustMicrostructureVolFracs (vector<string> &names,
+                                   const vector<double> vol,
+                                   vector<double> &vfrac);
     
 /**
 @brief Write the 3D microstructure to a file.
@@ -1166,6 +1179,27 @@ list<Sitesize> findDomainSizeDistribution(int phaseid,
 @return the edge length of the maximum cube that contains the same phase
 */
 int findDomainSize(int siteid, int maxsize);
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
 
 };      // End of Lattice class
 #endif

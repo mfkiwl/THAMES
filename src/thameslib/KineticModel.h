@@ -243,6 +243,8 @@ vector<double> critDOH_;        /**< List of critical degrees of hydration for w
                                         effect in the Parrot and Killoh model */
 vector<double> doh_;            /**< Degree of hydration of each kinetic (clinker) phase */
 
+bool verbose_;                  /**< Flag for verbose output */
+
 public:
     
 /**
@@ -265,11 +267,13 @@ various other objects for the simulation are allocated and constructed.
 @param solut is a pointer to the aqeuous solution object for the simulation
 @param lattic is a pointer to the Lattice object holding the microstructure
 @param fname is the name of the XML file with the input for the kinetic model
+@param verbose is true if verbose output should be produced
 */
 KineticModel (ChemicalSystem *cs,
               Solution *solut,
               Lattice *lattic,
-              const string &fname);
+              const string &fname,
+              const bool verbose = false);
      
 /**
 @brief Master method controlling the parsing of XML input to the kinetic model.
@@ -1246,6 +1250,27 @@ This method loops over the <i>kinetically</i> controlled phases in the kinetic
 model, and sets the number of moles of each DC component of that phase to zero.
 */
 void zeroKineticDCmoles ();
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
 
 };      // End of KineticModel class
 

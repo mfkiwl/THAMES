@@ -13,10 +13,13 @@ ThermalStrain::ThermalStrain (int nx,
                               int nz,
                               int dim,
                               int nphase,
-                              int npoints)
+                              int npoints,
+                              const bool verbose)
     : ElasticModel(nx,ny,nz,dim,nphase,npoints) 
 { 
-    cout << "constructor 'THERMAL3D' in derived class 'THERMAL3D'." << endl;
+    verbose_ = verbose;
+
+    if (verbose_) cout << "constructor 'THERMAL3D' in derived class 'THERMAL3D'." << endl;
 
     isfirst_ = true;
 		
@@ -27,7 +30,7 @@ ThermalStrain::ThermalStrain (int nx,
     boxsize_ = 27;
     boxnum_ = (int)pow((double)((int)(boxsize_ / 2) * 2 + 1),(double)(3));
     localgtest_ = 1.0e-30 * boxnum_;
-    cout << "localgtest_ is: " << localgtest_ << endl;    
+    if (verbose_) cout << "localgtest_ is: " << localgtest_ << endl;    
 
     eigen_.clear();
     eigen_.resize(ns_);
@@ -1628,11 +1631,13 @@ void ThermalStrain::constfunc (int ns,
             if (j == 0) jj = j + mj;
             if (j == 1) jj = j + mj + 2;
             zcon_[i][mi][j][mj] = pp[ii][jj];
-            cout << "i, mi, j, mj, zcon_[" << i << "][" 
-                 << mi << "][" << j << "][" << mj << "]"
-                 << i << " " << mi << " " << j << " "
-                 << mj << " " << zcon_[i][mi][j][mj]
-                 << endl;
+            if (verbose_) {
+                cout << "i, mi, j, mj, zcon_[" << i << "][" 
+                     << mi << "][" << j << "][" << mj << "]"
+                     << i << " " << mi << " " << j << " "
+                     << mj << " " << zcon_[i][mi][j][mj]
+                     << endl;
+            }
           }
         }
       }
@@ -2067,7 +2072,7 @@ void ThermalStrain::relax (double time,
         gg_ += gb_[m][m3] * gb_[m][m3];
       }
     }
-    cout << "In the global relax, gg_ is: " << gg_ << endl;
+    if (verbose_) cout << "In the global relax, gg_ is: " << gg_ << endl;
     
     /*
     string outfilename = "displacement.dat";
@@ -2091,7 +2096,7 @@ void ThermalStrain::relax (double time,
       /// Call dembx to implement conjugate gradient routine.             
       ///
 
-      cout << "Going into dembx, call no. " << kkk << endl;
+      if (verbose_) cout << "Going into dembx, call no. " << kkk << endl;
       Lstep = dembx(ns_,gg_,ldemb,kkk); 
       ltot += Lstep;
 
@@ -2108,9 +2113,11 @@ void ThermalStrain::relax (double time,
       iskip = 1;
       femat(nx_,ny_,nz_,ns_,nphase_,iskip);
       utot = energy(nx_,ny_,nz_,ns_);
-      cout << " energy = " << utot << " gg_ = " << gg_ 
-           << " ltot = " << ltot << endl;
-      cout.flush();
+      if (verbose_) {
+          cout << " energy = " << utot << " gg_ = " << gg_ 
+               << " ltot = " << ltot << endl;
+          cout.flush();
+      }
 	  
       ///
       /// If relaxation process is finished, jump out of loop.                       
@@ -2124,6 +2131,26 @@ void ThermalStrain::relax (double time,
         ///
 
         stress(nx_,ny_,nz_,ns_);
+        if (verbose_) {
+            cout << " stresses: xx, yy, zz, xz, yz, xy " << strxx_ << " "
+                 << stryy_ << " " << strzz_ << " " << strxz_ << " "
+                 << stryz_ << " " << strxy_ << endl;
+            cout << " strains: xx, yy, zz, xz, yz, xy " << sxx_ << " "
+                 << syy_ << " " << szz_ << " " << sxz_ << " "
+                 << syz_ << " " << sxy_ << endl;
+        
+            cout << " macrostrains in same order "
+                 << u_[ns_][0] << " " << u_[ns_][1] << " " << u_[ns_][2] << " "
+                 << u_[ns_+1][0] << " " << u_[ns_+1][1] << " " << u_[ns_+1][2] << " "
+                 << endl;
+            cout << "avg = " << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
+        }
+      } else {
+        break; 
+      }
+    }
+    stress(nx_,ny_,nz_,ns_);
+    if (verbose_) {
         cout << " stresses: xx, yy, zz, xz, yz, xy " << strxx_ << " "
              << stryy_ << " " << strzz_ << " " << strxz_ << " "
              << stryz_ << " " << strxy_ << endl;
@@ -2136,23 +2163,7 @@ void ThermalStrain::relax (double time,
              << u_[ns_+1][0] << " " << u_[ns_+1][1] << " " << u_[ns_+1][2] << " "
              << endl;
         cout << "avg = " << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
-      } else {
-        break; 
-      }
     }
-    stress(nx_,ny_,nz_,ns_);
-    cout << " stresses: xx, yy, zz, xz, yz, xy " << strxx_ << " "
-         << stryy_ << " " << strzz_ << " " << strxz_ << " "
-         << stryz_ << " " << strxy_ << endl;
-    cout << " strains: xx, yy, zz, xz, yz, xy " << sxx_ << " "
-         << syy_ << " " << szz_ << " " << sxz_ << " "
-         << syz_ << " " << sxy_ << endl;
-        
-    cout << " macrostrains in same order "
-         << u_[ns_][0] << " " << u_[ns_][1] << " " << u_[ns_][2] << " "
-         << u_[ns_+1][0] << " " << u_[ns_+1][1] << " " << u_[ns_+1][2] << " "
-         << endl;
-    cout << "avg = " << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
     ostringstream ostr2;
     ostr2 << ltot;
     string step(ostr2.str());
@@ -2161,7 +2172,7 @@ void ThermalStrain::relax (double time,
     writeStrainEngy(time,step); 
     */
 
-    ofstream outstr("macrstrains.dat");
+    ofstream outstr("macrostrains.dat");
     outstr << u_[ns_][0];
     outstr.close();
    	
@@ -2479,15 +2490,15 @@ void ThermalStrain::Calc (double time,
 
     assig(ns_,nphase_);
 
-    /*
-    for (int i = 0; i < nphase_; i++) {
-        cout << " Phase " << i << " bulk = " << phasemod_[i][0] << " shear = " 
-             << phasemod_[i][1] << endl;
-    }
-    */
+    if (verbose_) {
+        for (int i = 0; i < nphase_; i++) {
+            cout << " Phase " << i << " bulk = " << phasemod_[i][0] << " shear = " 
+                 << phasemod_[i][1] << endl;
+        }
   
-    for (int i = 0; i < nphase_; i++) {
-      cout << " Volume fraction of phase " << i << "  is " << prob_[i] << endl;
+        for (int i = 0; i < nphase_; i++) {
+          cout << " Volume fraction of phase " << i << "  is " << prob_[i] << endl;
+        }
     }
 	 
     ///
@@ -2512,8 +2523,10 @@ void ThermalStrain::Calc (double time,
     */
   
     if (isfirst_) {
-      cout << " This is the first time Calc to be called, so u_ should be initialized."
-           << endl;
+      if (verbose_) {
+          cout << "This is the first time Calc to be called, "
+               << "so u_ should be initialized." << endl;
+      }
 
       ///
       /// @note Set applied strains. Actual shear strain applied in is `exy_`, `exz_`,
@@ -2527,10 +2540,12 @@ void ThermalStrain::Calc (double time,
       u_[ns_+1][0] = exz;
       u_[ns_+1][1] = eyz;
       u_[ns_+1][2] = exy;
-      cout << "Applied engineering strains" << endl;
-      cout << " exx,   eyy,   ezz,   exz,   eyz,   exy" << endl;
-      cout << exx << "   " << eyy << "   " << ezz << "   "
-           << exz << "   " << eyz << "   " << exy << endl;
+      if (verbose_) {
+          cout << "Applied engineering strains" << endl;
+          cout << " exx,   eyy,   ezz,   exz,   eyz,   exy" << endl;
+          cout << exx << "   " << eyy << "   " << ezz << "   "
+               << exz << "   " << eyz << "   " << exy << endl;
+      }
 	  
       ///
       /// Apply homogeneous macroscopic strain as the initial condition             
@@ -2551,7 +2566,7 @@ void ThermalStrain::Calc (double time,
         }
       }
       if (time > 0) {
-        cout << "read displacement.dat file to initialized u_" << endl;
+        if (verbose_) cout << "read displacement.dat file to initialized u_" << endl;
         ifstream in("displacement.dat");
         if (!in) {
           cout << "hasn't find displacement.dat file." << endl;
@@ -2609,8 +2624,10 @@ void ThermalStrain::Calc (double time,
         gg_ += gb_[m][m3] * gb_[m][m3];
       }
     }
-    cout << "energy = " << utot << " gg_ = " << gg_ << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "energy = " << utot << " gg_ = " << gg_ << endl;
+        cout.flush();
+    }
 
     for (int m1 = 0; m1 < 3; m1++) {
       for (int m = 0; m < (ns_+2); m++) {
@@ -2668,7 +2685,7 @@ void ThermalStrain::Calc (double time,
     ///
 
     for (int count = 0; count < 0; count++) {
-      cout << "boxsize_ is: " << boxsize_ << endl;
+      if (verbose_) cout << "boxsize_ is: " << boxsize_ << endl;
       for (map<int, vector<int> >:: iterator it = exp_.begin();
            it != exp_.end(); it++) {
         localgg_ = 0.0;
@@ -2711,7 +2728,7 @@ void ThermalStrain::Calc (double time,
             }
           }
         }
-        cout << "localgg_ is: " << localgg_ << endl;
+        if (verbose_) cout << "localgg_ is: " << localgg_ << endl;
         localRelax(boxsize_,expcor[0],expcor[1],expcor[2],expindex);
       }
     }                                                           
@@ -2740,8 +2757,11 @@ void ThermalStrain::localRelax (int boxsize,
                                 int z,
                                 int index)
 {
-    cout << "in the localRelax..." << endl;
-    cout << "x, y, z and index are: " << x << " " << y << " " << z << " " << index << endl;
+    if (verbose_) {
+        cout << "in the localRelax..." << endl;
+        cout << "x, y, z and index are: " << x << " " << y << " " << z << " " << index << endl;
+    }
+
     int localldemb = 60, ltot = 0;
     int iskip;
     double utot;
@@ -2751,9 +2771,11 @@ void ThermalStrain::localRelax (int boxsize,
     
     Lstep = localDembx(boxsize,x,y,z,localldemb,0);
     ltot += Lstep;
-    cout << " localgg_ = " << localgg_ << " local relaxation steps ltot = "
-         << ltot << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << " localgg_ = " << localgg_ << " local relaxation steps ltot = "
+             << ltot << endl;
+        cout.flush();
+    }
 
     return;     
 }
@@ -3073,12 +3095,12 @@ int ThermalStrain::localDembx (int boxsize,
           }
         }
       }
-      cout << "localgg_ is: " << localgg_ << endl;
+      if (verbose_) cout << "localgg_ is: " << localgg_ << endl;
       if (localgg_ < localgtest_) {
         return Lstep;
       } else {
         gamma = localgg_ / gglast;
-        cout << "gamma = " << gamma << endl;
+        if (verbose_) cout << "gamma = " << gamma << endl;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int k = zlo; k <= zhi; k++) { 
             for (int j = ylo; j <= yhi; j++) {

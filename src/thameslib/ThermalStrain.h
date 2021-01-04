@@ -193,13 +193,15 @@ by the user, and sets the maximum number of phases that can be handled.
 @param dim is the total number of mesh elements
 @param nphase is the maximum number of phases in the system
 @param npoints is the number of microstructures to process
+@param verbose is true if verbose output should be produced
 */
 ThermalStrain (int nx,
                int ny,
                int nz,
                int dim,
                int nphase,
-               int npoints);  
+               int npoints,
+               const bool verbose = false);  
     
 /**
 @brief Destructor.
@@ -524,6 +526,8 @@ double getEleStress (int i,
     if((i >= ns_) || (i < 0) || (j < 0) || (j >= 6)) {
         cout << "i should be between 0 and ns_, "
              << "and j should be between 0 and 6." << endl;
+        cerr << "i should be between 0 and ns_, "
+             << "and j should be between 0 and 6." << endl;
         exit(1); 
     } else {
         return elestress_[i][j];
@@ -544,6 +548,8 @@ double getEleStrain (int i,
 {
     if((i >= ns_) || (i < 0) || (j < 0) || (j >= 6)) {
         cout << "i should be between 0 and ns_, "
+             << "and j should be between 0 and 6." << endl;
+        cerr << "i should be between 0 and ns_, "
              << "and j should be between 0 and 6." << endl;
         exit(1); 
     } else {

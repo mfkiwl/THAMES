@@ -87,6 +87,8 @@ double leach_time_;                 /**< Simulation time at which to begin leach
                                             in days */
 long int damagecount_;              /**< Number of pixels in the lattice that are damaged */
 
+bool verbose_;                      /**< Flag for verbose output */
+
 public:
     
 /**
@@ -109,6 +111,7 @@ auxiliary objects be defined already, including
 @param simtype is the type of simulation to run
 @param parfilename is the name of the input parameter file
 @param jobname is the root name to give to all output files
+@param verbose is true if verbose output should be produced
 */
 Controller (Lattice *msh,
             KineticModel *km,
@@ -117,7 +120,8 @@ Controller (Lattice *msh,
             ThermalStrain *thmstr,
             const int simtype,
             const string &parfilename,
-            const string &jobname);
+            const string &jobname,
+            const bool verbose = false);
     
 /**
 @brief Run a computational iteration.
@@ -218,5 +222,26 @@ double getSim_type (void) const
     return sim_type_;
 }
                                                   
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
+
 };      // End of Controller class
 #endif

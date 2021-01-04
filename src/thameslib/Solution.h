@@ -117,6 +117,8 @@ vector<double> SI_;
 
 double crystrain_;                  /**< Assigned strain from FE model */
 
+bool verbose_;                      /**< Flag to determine verbose output */
+
 public:
 
 /**
@@ -126,10 +128,13 @@ The class members can all be assigned by reading GEM3K input files,
 which are passed to the constructor.
 
 @param GEMfilename is the name of the GEM DCH file
-@param GEMdbrname is the name fo the GEM DBR (data bridge) file
+@param GEMdbrname is the name of the GEM DBR (data bridge) file
+@param verbose is true if verbose output should be produced
 */
+
 Solution (const string &GEMfilename,
-          const string &GEMdbrname);
+          const string &GEMdbrname,
+          const bool verbose = false);
 
 /**
 @brief Destructor.
@@ -172,6 +177,7 @@ double getPhasevolume (const unsigned int idx)
 {
   if (idx >= phasenum_) {
       cout << "idx beyonds the range of phasenum_" << endl;
+      cerr << "idx beyonds the range of phasenum_" << endl;
       exit(1);
   }
   return phasevolume_[idx];
@@ -197,6 +203,7 @@ string &getPhasename (const unsigned int idx)
 {
     if (idx >= phasename_.size()) {
         cout << "idx beyonds the range of phasename_" << endl;
+        cerr << "idx beyonds the range of phasename_" << endl;
         exit(1);
     }
     return (string &)phasename_[idx];
@@ -240,6 +247,7 @@ void setICmoles (const unsigned int idx,
 {
     if (idx >= ICnum_) {
         cout << "index beyond the range of ICnum, so exit the program." << endl;
+        cerr << "index beyond the range of ICnum, so exit the program." << endl;
         exit(1);
     } else {
         ICmoles_[idx] = val;
@@ -294,8 +302,10 @@ void setSI ()
     Falp = (node_->ppmm())->Falp;
     
     for (int i = 0; i < phasenum_; i++) {
-        cout << "log10(SI) for " << phasename_[i] << " is: "
-             << Falp[i] << endl;
+        if (verbose_) {
+            cout << "log10(SI) for " << phasename_[i] << " is: "
+                 << Falp[i] << endl;
+        }
         double si = pow(10,Falp[i]);
         SI_.push_back(si);
     }
@@ -415,6 +425,27 @@ double calculateCrystrain (double SI,
                            double porevolfrac,
                            double Kp,
                            double Ks);
+
+/**
+@brief Set the verbose flag
+
+@param isverbose is true if verbose output should be produced
+*/
+void setVerbose (const bool isverbose)
+{
+    verbose_ = isverbose;
+    return;
+}
+
+/**
+@brief Get the verbose flag
+
+@return the verbose flag
+*/
+bool getVerbose () const
+{
+    return verbose_;
+}
 
 };      // End of the Solution class
 

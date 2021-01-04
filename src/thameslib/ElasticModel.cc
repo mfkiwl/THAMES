@@ -10,20 +10,23 @@ ElasticModel::ElasticModel (int nx,
                             int nz,
                             int dim,
                             int nphase,
-                            int npoints) 
+                            int npoints,
+                            const bool verbose) 
 {
     ///
     /// Assign the dimensions of the finite element (FE) mesh
     ///
+
+    verbose_ = verbose;
 
     nx_ = nx;
     ny_ = ny;
     nz_ = nz;
     ns_ = nx_ * ny_ * nz_;
 
-    cout << "nx_ = " << nx_ << " ny_ = " << ny_
-         << " nz_ = " << nz_ << " ns_ = " << ns_
-         << endl;
+    if (verbose_) cout << "nx_ = " << nx_ << " ny_ = " << ny_
+                       << " nz_ = " << nz_ << " ns_ = " << ns_
+                       << endl;
 
     ///
     /// Initialize the prescribed stresses and strains
@@ -189,7 +192,7 @@ ElasticModel::ElasticModel (int nx,
 
 void ElasticModel::BuildNeighbor () 
 {
-    cout << "now in the BuildNeighbor function." << endl;
+    if (verbose_) cout << "now in the BuildNeighbor function." << endl;
 
     ///
     /// First construct the 27 neighbor table in terms of delta i, delta j, and    
@@ -269,7 +272,7 @@ void ElasticModel::BuildNeighbor ()
       }
     }
 
-    cout << "after building the neighbors." << endl;
+    if (verbose_) cout << "after building the neighbors." << endl;
     return;
 }
 
@@ -285,6 +288,7 @@ void ElasticModel::ElasModul (string phasemod_fname,
     ifstream in(phasemod_fname.c_str());
     if(!in) {
       cout << "can't open the file: " << phasemod_fname << endl;
+      cerr << "can't open the file: " << phasemod_fname << endl;
       exit(1);
     } else {
       string buff;
@@ -437,6 +441,7 @@ void ElasticModel::ppixel (string fname,
     if (!in) {
 
       cout << "can't open the file: " << fname << endl;
+      cerr << "can't open the file: " << fname << endl;
       exit(1);
 
     } else {
@@ -709,7 +714,7 @@ void ElasticModel::writeStress (string &root,
                                 int index)
 {
     if (index >= 0 && index < 6) {
-      cout << "writing ppm file..." << endl;
+      if (verbose_) cout << "writing ppm file..." << endl;
       double min,max;
       min = max = 0.0;
 
@@ -773,8 +778,10 @@ void ElasticModel::writeStress (string &root,
           if (max < elestress_[m][index]) max = elestress_[m][index];
         }
       }
-      cout << "minimum stress-" << index << " is: " << min << endl;
-      cout << "maximum stress-" << index << " is: " << max << endl;
+      if (verbose_) {
+          cout << "minimum stress-" << index << " is: " << min << endl;
+          cout << "maximum stress-" << index << " is: " << max << endl;
+      }
       for (int k = 0; k < nz_; k++) {
         for (int j = 0; j < nz_; j++) {
           int m = nx_ * ny_ * k + nx_ * j + slice;
@@ -808,7 +815,7 @@ void ElasticModel::writeStrain (string &root,
                                 int index)
 {
     if (index >= 0 && index < 6) {
-      cout << "writing ppm file..." << endl;
+      if (verbose_) cout << "writing ppm file..." << endl;
       double min,max;
       min = max = 0.0;
 
@@ -872,8 +879,8 @@ void ElasticModel::writeStrain (string &root,
           if (max < elestrain_[m][index]) max = elestrain_[m][index];
         }
       }
-      cout << "minimum strain-" << index << " is: " << min << endl;
-      cout << "maximum strain-" << index << " is: " << max << endl;
+      if (verbose_) cout << "minimum strain-" << index << " is: " << min << endl;
+      if (verbose_) cout << "maximum strain-" << index << " is: " << max << endl;
       for (int k = 0; k < nz_; k++) {
         for (int j = 0; j < nz_; j++) {
           int m = nx_ * ny_ * k + nx_ * j + slice;
@@ -905,7 +912,7 @@ void ElasticModel::writeStrain (string &root,
 void ElasticModel::writeDisp (string &root,
                               double time)
 {
-  cout << "writing displacement file..." << endl;
+  if (verbose_) cout << "writing displacement file..." << endl;
 
   ///
   /// Specify the file name and open the output stream
@@ -940,7 +947,7 @@ void ElasticModel::writeDisp (string &root,
 void ElasticModel::writeStrainEngy (string &root,
                                     double time)
 {
-    cout << "writing ppm file..." << endl;
+    if (verbose_) cout << "writing ppm file..." << endl;
     double min,max;
     min = max = 0.0;
 
@@ -986,8 +993,10 @@ void ElasticModel::writeStrainEngy (string &root,
         if (max < strainengy_[m]) max = strainengy_[m];
       }
     }
-    cout << "minimum strainengy is: " << min << endl;
-    cout << "maximum strainengy is: " << max << endl;
+    if (verbose_) {
+        cout << "minimum strainengy is: " << min << endl;
+        cout << "maximum strainengy is: " << max << endl;
+    }
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
         int m = nx_ * ny_ * k + nx_ * j + slice;

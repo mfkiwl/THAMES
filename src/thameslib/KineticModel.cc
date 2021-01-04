@@ -81,7 +81,8 @@ KineticModel::KineticModel ()
 KineticModel::KineticModel (ChemicalSystem *cs,
                             Solution *solut,
                             Lattice *lattice,
-                            const string &fname)
+                            const string &fname,
+                            const bool verbose)
 :chemsys_(cs),solut_(solut),lattice_(lattice)
 {
     const string PHASENUM = "phasenum";
@@ -111,6 +112,10 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     const string SCALEDMASS = "scaledMass";
     const string CRITDOH = "criticalDOH";
     
+    // Set the verbose flag
+   
+    verbose_ = verbose;
+
     ///
     /// Default value for Blaine fineness in PK model is 385 m<sup>2</sup>/kg
     ///
@@ -189,7 +194,7 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     foundxml = fname.find(xmlext);
     try {
       if (foundxml != string::npos) {
-          cout << "KineticModel data file is an XML file" <<endl;
+          if (verbose_) cout << "KineticModel data file is an XML file" <<endl;
           parseDoc(fname);
       } else {
           throw FileException("KineticModel","KineticModel",fname,
@@ -234,7 +239,7 @@ void KineticModel::parseDoc (const string &docname)
     try {
         string rxcsd = xsd_files_path;
         rxcsd+="/chemistry.xsd";
-        cout << "Chemistry xsd file is at " << rxcsd << endl;
+        if (verbose_) cout << "Chemistry xsd file is at " << rxcsd << endl;
         if(!is_xml_valid(doc,rxcsd.c_str())) {
             throw FileException("KineticModel","KineticModel",docname,
                                 "xml NOT VALID");
@@ -256,45 +261,45 @@ void KineticModel::parseDoc (const string &docname)
         cur = cur->xmlChildrenNode;
         int testnumentries;
         while (cur != NULL) {
-            cout << "Key name = " << cur->name << endl;
+            if (verbose_) cout << "Key name = " << cur->name << endl;
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"blaine"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(blaine_,st);
-                cout << "Blaine value in interface xml file is "
-                     << blaine_ << endl;
+                if (verbose_) cout << "Blaine value in interface xml file is "
+                                   << blaine_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"refblaine"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(refblaine_,st);
-                cout << "Reference Blaine value in interface xml file is "
-                     << refblaine_ << endl;
+                if (verbose_) cout << "Reference Blaine value in interface xml file is "
+                                   << refblaine_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"wcRatio"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(wcratio_,st);
-                cout << "wcRatio value in interface xml file is "
-                     << wcratio_ << endl;
+                if (verbose_) cout << "wcRatio value in interface xml file is "
+                                   << wcratio_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"temperature"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(temperature_,st);
-                cout << "Temperature in interface xml file is "
-                     << temperature_ << endl;
+                if (verbose_) cout << "Temperature in interface xml file is "
+                                   << temperature_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"reftemperature"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(refT_,st);
-                cout << "Reference temperature value in interface xml file is "
-                     << refT_ << endl;
+                if (verbose_) cout << "Reference temperature value in interface xml file is "
+                                   << refT_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-                cout << "Preparing to parse a phase from interface xml file..."
-                     << endl;
+                if (verbose_) cout << "Preparing to parse a phase from interface xml file..."
+                                   << endl;
 
                 /// Each phase is a more complicated grouping of data that
                 /// has a separate method for parsing.
@@ -326,26 +331,25 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     bool kineticfound = false;
 
 
-    cout << "In function KineticModel::parsePhase" << endl;
+    if (verbose_) cout << "In function KineticModel::parsePhase" << endl;
     kdata.rdid.clear();
     kdata.rdval.clear();
 
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
-        cout << "    Key name = " << cur->name << endl;
+        if (verbose_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
             cout << "    Trying to get phase name" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string testname((char *)key);
             kdata.name = testname;
             kdata.micid = chemsys_->getMicid(testname);
-            cout << "    Phase name = " << kdata.name << endl;
-            cout.flush();
+            if (verbose_) cout << "    Phase name = " << kdata.name << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"kinetic_data"))) {
-            cout << "    Parsing kinetic data..." << endl;
+            if (verbose_) cout << "    Parsing kinetic data..." << endl;
             numentry += 1;
             kineticfound = true;
             kdata.gemphaseid = chemsys_->getMic2phase(kdata.micid,0);
@@ -357,7 +361,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             ///
 
             parseKineticData(doc, cur, kdata);
-            cout << "    Done parsing kinetic data." << endl;
+            if (verbose_) cout << "    Done parsing kinetic data." << endl;
         }
         cur = cur->next;
     }
@@ -368,55 +372,71 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             kineticphase_.push_back(numentry);
             chemsys_->setKineticphase(kdata.micid);
             chemsys_->setMic2kinetic(kdata.micid,numentry);
-            cout << "    Setting Mic2kinetic(" << kdata.micid << ","
-                 << numentry << ")... ";
-            cout.flush();
-            cout << "Done!" << endl;
-            cout.flush();
-            cout << "    Setting k1_[" << numentry << "] = "
-                 << kdata.k1 << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Setting Mic2kinetic(" << kdata.micid << ","
+                     << numentry << ")... ";
+                cout.flush();
+                cout << "Done!" << endl;
+                cout.flush();
+                cout << "    Setting k1_[" << numentry << "] = "
+                     << kdata.k1 << endl;
+                cout.flush();
+            }
             k1_.push_back(kdata.k1);
-            cout << "    Okay, k1_[" << numentry << "] = "
-                 << k1_[numentry] << endl;
-            cout << "    Setting k2_[" << numentry << "] = "
-                 << kdata.k2 << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Okay, k1_[" << numentry << "] = "
+                     << k1_[numentry] << endl;
+                cout << "    Setting k2_[" << numentry << "] = "
+                     << kdata.k2 << endl;
+                cout.flush();
+            }
             k2_.push_back(kdata.k2);
-            cout << "    Okay, k2_[" << numentry << "] = "
-                 << k2_[numentry] << endl;
-            cout << "    Setting k3_[" << numentry << "] = "
-                 << kdata.k3 << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Okay, k2_[" << numentry << "] = "
+                     << k2_[numentry] << endl;
+                cout << "    Setting k3_[" << numentry << "] = "
+                     << kdata.k3 << endl;
+                cout.flush();
+            }
             k3_.push_back(kdata.k3);
-            cout << "    Okay, k3_[" << numentry << "] = "
-                 << k3_[numentry] << endl;
-            cout << "    Setting n1_[" << numentry << "] = "
-                 << kdata.n1 << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Okay, k3_[" << numentry << "] = "
+                     << k3_[numentry] << endl;
+                cout << "    Setting n1_[" << numentry << "] = "
+                     << kdata.n1 << endl;
+                cout.flush();
+            }
             n1_.push_back(kdata.n1);
-            cout << "    Okay, n1_[" << numentry << "] = "
-                 << n1_[numentry] << endl;
-            cout << "    Setting n3_[" << numentry << "] = "
-                 << kdata.n3 << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Okay, n1_[" << numentry << "] = "
+                     << n1_[numentry] << endl;
+                cout << "    Setting n3_[" << numentry << "] = "
+                     << kdata.n3 << endl;
+                cout.flush();
+            }
             n3_.push_back(kdata.n3);
-            cout << "    Okay, n3_[" << numentry << "] = "
-                 << n3_[numentry] << endl;
-            cout << "    Setting Ea_[" << numentry << "] = "
-                 << kdata.Ea << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "    Okay, n3_[" << numentry << "] = "
+                     << n3_[numentry] << endl;
+                cout << "    Setting Ea_[" << numentry << "] = "
+                     << kdata.Ea << endl;
+                cout.flush();
+            }
             Ea_.push_back(kdata.Ea);
 
         } else if (kdata.type == "soluble") {
 
-            cout << "This is a soluble phase, adding "
-                 << numentry << " to the list ";
-            cout << "of soluble phases" << endl;
+            if (verbose_) {
+                cout << "This is a soluble phase, adding "
+                     << numentry << " to the list ";
+                cout << "of soluble phases" << endl;
+            }
             solublephase_.push_back(numentry);
-            cout << "    Setting Mic2kinetic(" << kdata.micid << ","
-                 << numentry << ")... ";
-            cout.flush();
+            if (verbose_) {
+                cout << "    Setting Mic2kinetic(" << kdata.micid << ","
+                     << numentry << ")... ";
+                cout.flush();
+            }
 
             ///
             /// There is some discrepancy about whether an instantly
@@ -430,43 +450,61 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
         } else {
 
-            cout << "This is a thermo phase, adding "
-                 << numentry << " to the list ";
-            cout << "of thermo phases" << endl;
+            if (verbose_) {
+                cout << "This is a thermo phase, adding "
+                     << numentry << " to the list ";
+                cout << "of thermo phases" << endl;
+            }
             thermophase_.push_back(numentry);
             chemsys_->setThermophase(kdata.micid);
             chemsys_->setMic2thermo(kdata.micid,numentry);
         }
     
-        cout << "    Setting initscaledmass_[" << numentry << "] = "
-             << kdata.scaledmass << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting initscaledmass_[" << numentry << "] = "
+                 << kdata.scaledmass << endl;
+            cout.flush();
+        }
         initscaledmass_.push_back(kdata.scaledmass);
-        cout << "    Setting scaledmass_[" << numentry << "] = "
-             << kdata.scaledmass << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting scaledmass_[" << numentry << "] = "
+                 << kdata.scaledmass << endl;
+            cout.flush();
+        }
         scaledmass_.push_back(kdata.scaledmass);
-        cout << "    Setting name_[" << numentry << "] = "
-             << kdata.name << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting name_[" << numentry << "] = "
+                 << kdata.name << endl;
+            cout.flush();
+        }
         name_.push_back(kdata.name);
-        cout << "    Setting Micphasemass, micid = "
-             << kdata.micid << ", mass = " << kdata.scaledmass << endl;
+        if (verbose_) {
+            cout << "    Setting Micphasemass, micid = "
+                 << kdata.micid << ", mass = " << kdata.scaledmass << endl;
+        }
         chemsys_->setMicphasemass(kdata.micid,kdata.scaledmass);
-        cout << "    Setting Micphasemassdissolved, micid = "
-             << kdata.micid << endl;
+        if (verbose_) {
+            cout << "    Setting Micphasemassdissolved, micid = "
+                 << kdata.micid << endl;
+        }
         chemsys_->setMicphasemassdissolved(kdata.micid,0.0);
-        cout << "    Setting chemsysDCid_[" << numentry << "] = "
-             << kdata.gemdcid << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting chemsysDCid_[" << numentry << "] = "
+                 << kdata.gemdcid << endl;
+            cout.flush();
+        }
         chemsysDCid_.push_back(kdata.gemdcid);
-        cout << "    Setting chemsysphaseid_[" << numentry << "] = "
-             << kdata.gemphaseid << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting chemsysphaseid_[" << numentry << "] = "
+                 << kdata.gemphaseid << endl;
+            cout.flush();
+        }
         chemsysphaseid_.push_back(kdata.gemphaseid);
-        cout << "    Setting critDOH_[" << numentry << "] = "
-             << kdata.critdoh << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "    Setting critDOH_[" << numentry << "] = "
+                 << kdata.critdoh << endl;
+            cout.flush();
+        }
 
         critDOH_.push_back(kdata.critdoh);
         RdICid_.push_back(kdata.rdid);
@@ -488,67 +526,67 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             kdata.type = st;
-            cout << "        type = " << kdata.type << endl;
+            if (verbose_) cout << "        type = " << kdata.type << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"scaledmass"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.scaledmass,st);
-            cout << "        scaledmass = " << kdata.scaledmass << endl;
+            if (verbose_) cout << "        scaledmass = " << kdata.scaledmass << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k1,st);
-            cout << "        k1 = " << kdata.k1 << endl;
+            if (verbose_) cout << "        k1 = " << kdata.k1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k2,st);
-            cout << "        k2 = " << kdata.k2 << endl;
+            if (verbose_) cout << "        k2 = " << kdata.k2 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k3,st);
-            cout << "        k3 = " << kdata.k3 << endl;
+            if (verbose_) cout << "        k3 = " << kdata.k3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n1,st);
-            cout << "        n1 = " << kdata.n1 << endl;
+            if (verbose_) cout << "        n1 = " << kdata.n1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n3,st);
-            cout << "        n3 = " << kdata.n3 << endl;
+            if (verbose_) cout << "        n3 = " << kdata.n3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.Ea,st);
-            cout << "        Ea = " << kdata.Ea << endl;
+            if (verbose_) cout << "        Ea = " << kdata.Ea << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.critdoh,st);
-            cout << "        critdoh = " << kdata.critdoh << endl;
+            if (verbose_) cout << "        critdoh = " << kdata.critdoh << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-            cout << "    Parsing Rd data..." << endl;
+            if (verbose_) cout << "    Parsing Rd data..." << endl;
 
             ///
             /// The data about partitioning of impurities among the clinker
@@ -557,7 +595,7 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             ///
 
             parseRdData(doc, cur, kdata);
-            cout << "    Done parsing Rd data." << endl;
+            if (verbose_) cout << "    Done parsing Rd data." << endl;
         }
         cur = cur->next;
     }
@@ -575,13 +613,13 @@ void KineticModel::parseRdData(xmlDocPtr doc,
     double rdval;
 
     while (cur != NULL) {
-        cout << "    Key name = " << cur->name << endl;
+        if (verbose_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             rdid = chemsys_->getICid(st);
             kdata.rdid.push_back(rdid);
-            cout << "            rdid = " << rdid << endl;
+            if (verbose_) cout << "            rdid = " << rdid << endl;
             xmlFree(key);
         }
 
@@ -590,7 +628,7 @@ void KineticModel::parseRdData(xmlDocPtr doc,
             string st((char *)key);
             from_string(rdval,st);
             kdata.rdval.push_back(rdval);
-            cout << "            rdval = " << rdval << endl;
+            if (verbose_) cout << "            rdval = " << rdval << endl;
             xmlFree(key);
         }
         cur = cur->next;
@@ -621,7 +659,7 @@ void KineticModel::calculateKineticStep (const double timestep,
 
     static double hyd_time = 0.0;
     hyd_time = hyd_time + timestep;
-    cout << "hyd_time = " << hyd_time << endl;
+    if (verbose_) cout << "hyd_time = " << hyd_time << endl;
 
     try {
         static int conc_index = 0;     
@@ -658,12 +696,14 @@ void KineticModel::calculateKineticStep (const double timestep,
         solut_icmoles = chemsys_->getSolution();
 
         if (hyd_time < leach_time_ && hyd_time < sattack_time_) { 
-          cout << "Looping over clinker minerals.  " << endl;
+          if (verbose_) {
+             cout << "Looping over clinker minerals.  " << endl;
           // cout << "Here is the list of them:" << endl;
           // for (int i = 0; i < kineticphase_.size(); i++) {
           //  cout << name_[kineticphase_[i]] << endl;
           // }
-          // cout.flush();
+             cout.flush();
+          }
 
           vector<double> impurityrelease;
           impurityrelease.clear();
@@ -675,14 +715,16 @@ void KineticModel::calculateKineticStep (const double timestep,
                    (pow(((critDOH_[kpid] * wcratio_) - DOH),4.0)));
 
             arrhenius = exp((Ea_[kpid]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
-            // cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-            // cout << "Calculating Arrhenius effect:" << endl;
-            // cout << "    GASCONSTANT = " << GASCONSTANT << endl;
-            // cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
-            // cout << "    refT_ = " << refT_ << endl;
-            // cout << "    T = " << T << endl;
-            // cout << "    arrhenius factor = " << arrhenius << endl;
-            // cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+            if (verbose_) {
+                cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+                cout << "Calculating Arrhenius effect:" << endl;
+                cout << "    GASCONSTANT = " << GASCONSTANT << endl;
+                cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
+                cout << "    refT_ = " << refT_ << endl;
+                cout << "    T = " << T << endl;
+                cout << "    arrhenius factor = " << arrhenius << endl;
+                cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+            }
 
             if (initscaledmass_[kpid] > 0.0) {
               DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
@@ -696,19 +738,11 @@ void KineticModel::calculateKineticStep (const double timestep,
         
               if (DOH < 1.0) {
                 if (fabs(n1_[kpid]) > 0.0) {
-                  // cout << "k1_[" << kpid << "] = " << k1_[kpid]
-                  //      << ", n1_[" << kpid << "] = " << n1_[kpid]
-                  //      << ", DOH = " << DOH << ", blainefactor_ = "
-                  //      << blainefactor_ << endl;
                   ngrate = (k1_[kpid]/n1_[kpid]) * (1.0 - DOH)
                          * pow((-log(1.0 - DOH)),(1.0 - n1_[kpid]));
                   ngrate *= (blainefactor_);  // only used for the N+G rate
               
                   if (ngrate < 1.0e-10) ngrate = 1.0e-10;
-                    // cout << name_[kpid] << ": k1 = " << k1_[kpid] << ", n1 = "
-                    //      << n1_[kpid] << ", blainefactor = "
-                    //      << blainefactor_ << ", ngrate = " << ngrate << endl;
-                    // cout.flush();
                 } else {
                   throw FloatException("KineticModel","calculateKineticStep",
                                  "n1_ = 0.0");
@@ -721,9 +755,6 @@ void KineticModel::calculateKineticStep (const double timestep,
             if (DOH < 1.0) {
               hsrate = k3_[kpid] * pow((1.0 - DOH),n3_[kpid]);
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
-              // cout << name_[kpid] << ": k3 = " << k3_[kpid] << ", n3 = "
-              //      << n3_[kpid] << ", hsrate = " << hsrate << endl;
-              // cout.flush();
             } else {
                throw DataException("KinetiModel","calculateKineticStep",
                             "DOH >= 1.0");
@@ -733,9 +764,6 @@ void KineticModel::calculateKineticStep (const double timestep,
               diffrate = (k2_[kpid] * pow((1.0 - DOH),(2.0/3.0))) /
                          (1.0 - pow((1.0 - DOH),(1.0/3.0)));
               if (diffrate < 1.0e-10) diffrate = 1.0e-10;
-              // cout << name_[kpid] << ": k2 = " << k2_[kpid] << ", diffrate = "
-              //      << hsrate << endl;
-              // cout.flush();
             } else {
               throw DataException("KinetiModel","calculateKineticStep",
                             "DOH >= 1.0");
@@ -744,39 +772,14 @@ void KineticModel::calculateKineticStep (const double timestep,
 
             rate = (ngrate < hsrate) ? ngrate : hsrate;
             if (diffrate < rate) rate = diffrate;
-            // cout << name_[kpid] << ": Minimum rate before thermal correction = "
-            //      << rate << endl;
-            // cout.flush();
             rate *= (wcfactor * arrhenius);
-            // cout << name_[kpid] << ": Minimum rate after thermal correction = "
-            //      << rate << endl;
-            // cout.flush();
-
-            // cout << name_[kpid] << ": Old DOH = " << DOH << endl;
-            // cout.flush();
             newDOH = DOH + (rate * timestep);
-            // cout << name_[kpid] << ": New DOH = " << newDOH << endl;
-            // cout.flush();
-            // cout << name_[kpid] << ": Original mass = "
-            //      << initscaledmass_[kpid] << endl;
-            // cout.flush();
             scaledmass_[kpid] = initscaledmass_[kpid] * (1.0 - newDOH);
-            // cout << name_[kpid] << ": New mass = "
-            //      << scaledmass_[kpid] << endl;
-            // cout.flush();
             massdissolved = (newDOH - DOH) * initscaledmass_[kpid];
             chemsys_->setMicphasemass(chemsys_->getKinetic2mic(kpid),
                               scaledmass_[kpid]);
             chemsys_->setMicphasemassdissolved(chemsys_->getKinetic2mic(kpid),
                                         massdissolved);
-            // cout << name_[kpid] << ": Mass dissolved = "
-            //      << massdissolved << endl;
-            // cout.flush();
-            // cout << name_[kpid] << ": DC molar mass of "
-            //      << chemsys_->getDCname(chemsysDCid_[kpid])
-            //      << " = " << chemsys_->getDCmolarmass(chemsysDCid_[kpid]) << endl;
-            // cout.flush();
-      
 
             impurityrelease[0] = (massdissolved * chemsys_->getK2o(chemsys_->getKinetic2mic(kpid)));
             impurityrelease[1] = (massdissolved * chemsys_->getNa2o(chemsys_->getKinetic2mic(kpid)));
@@ -841,10 +844,6 @@ void KineticModel::calculateKineticStep (const double timestep,
                 molarmass += chemsys_->getICmolarmass(icn);
                 icmoles[ii] += (impurityrelease[2]/molarmass);
               }
-              // cout << name_[kpid] << ":     Total dissolved "
-              //      << icname[ii] << " = " << icmoles[ii] << " mol "
-              //      << endl;
-              // cout.flush();
     
             }
 
@@ -860,7 +859,6 @@ void KineticModel::calculateKineticStep (const double timestep,
             // Set the proper amount of water for the total solid mass
             // and the water-solid ratio
             
-            cout << "***INITIALIZING MOLES OF INDEPENDENT COMPONENTS" << endl;
             // Determine total intial solid mass
             double totsolidmass = 0.0;
             vector<double> initsolidmass = getInitscaledmass();
@@ -882,28 +880,32 @@ void KineticModel::calculateKineticStep (const double timestep,
             }
             for (int i = 0; i < icmoles.size(); i++) {
                 if (icname[i] == "H") {
-                    cout << "previous IC moles for H is: " << icmoles[i] << endl;
+                    if (verbose_) cout << "previous IC moles for H is: " << icmoles[i] << endl;
                     icmoles[i] = (2.0 * watermoles);
                     solut_->setICmoles(i,(2.0 * watermoles));
-                    cout << "new ICmoles for H is: " << icmoles[i] << endl;
+                    if (verbose_) cout << "new ICmoles for H is: " << icmoles[i] << endl;
                 }
                 if (icname[i] == "O") {
-                    cout << "previous IC moles for O is: " << icmoles[i] << endl;
+                    if (verbose_) cout << "previous IC moles for O is: " << icmoles[i] << endl;
                     icmoles[i] = watermoles;
                     solut_->setICmoles(i,(watermoles));
-                    cout << "new ICmoles for O is: " << icmoles[i] << endl;
+                    if (verbose_) cout << "new ICmoles for O is: " << icmoles[i] << endl;
                }
             }
-            double wmv = chemsys_->getNode()->DC_V0(chemsys_->getDCid("H2O@"),chemsys_->getP(),chemsys_->getT());
+            double wmv = chemsys_->getNode()->DC_V0(chemsys_->getDCid("H2O@"),
+                                                    chemsys_->getP(),
+                                                    chemsys_->getT());
             chemsys_->setPhasemass(chemsys_->getPhaseid("aq_gen"),watermass);
             chemsys_->setPhasevolume(chemsys_->getPhaseid("aq_gen"),wmv/watermoles);
 
-            cout << "Looping over soluble minerals.  ";
-            cout << "Here is the list of them:" << endl;
-            for (int i = 0; i < solublephase_.size(); i++) {
-                cout << name_[solublephase_[i]] << endl;
+            if (verbose_) {
+                cout << "Looping over soluble minerals.  ";
+                cout << "Here is the list of them:" << endl;
+                for (int i = 0; i < solublephase_.size(); i++) {
+                    cout << name_[solublephase_[i]] << endl;
+                }
+                cout.flush();
             }
-            cout.flush();
             for (int i = 0; i < solublephase_.size(); i++) {
                 spid = solublephase_[i];
                 massdissolved = scaledmass_[spid];
@@ -912,63 +914,50 @@ void KineticModel::calculateKineticStep (const double timestep,
                                       scaledmass_[spid]);
                 chemsys_->setMicphasemassdissolved(chemsys_->getThermo2mic(spid),
                                    massdissolved);
-                cout << name_[spid] << ": Mass dissolved = "
-                     << massdissolved << endl;
-                cout.flush();
-                cout << name_[spid] << ": DC molar mass of "
-                     << chemsys_->getDCname(chemsysDCid_[spid])
-                     << " = " << chemsys_->getDCmolarmass(chemsysDCid_[spid])
-                     << endl;
-                cout.flush();
+                if (verbose_) {
+                    cout << name_[spid] << ": Mass dissolved = "
+                         << massdissolved << endl;
+                    cout.flush();
+                    cout << name_[spid] << ": DC molar mass of "
+                         << chemsys_->getDCname(chemsysDCid_[spid])
+                         << " = " << chemsys_->getDCmolarmass(chemsysDCid_[spid])
+                         << endl;
+                    cout.flush();
+                }
                 for (int ii = 0; ii < icmoles.size(); ii++) {
                     icmoles[ii] += ((massdissolved
                            / chemsys_->getDCmolarmass(chemsysDCid_[spid]))
                            * chemsys_->getDCstoich(chemsysDCid_[spid],ii));
-                    cout << name_[spid] << ":     Total dissolved "
-                         << icname[ii] << " = " << icmoles[ii] << " mol "
-                         << endl;
+                    if (verbose_) {
+                        cout << name_[spid] << ":     Total dissolved "
+                             << icname[ii] << " = " << icmoles[ii] << " mol "
+                             << endl;
+                    }
+                }
+                if (verbose_) cout.flush();
+
+            }
+
+            if (verbose_) {
+                cout << "Looping over thermo minerals.  Here is the list of them:" << endl;
+                for (int i = 0; i < thermophase_.size(); i++) {
+                    cout << name_[thermophase_[i]] << endl;
                 }
                 cout.flush();
-
             }
-
-            cout << "Looping over thermo minerals.  Here is the list of them:" << endl;
-            for (int i = 0; i < thermophase_.size(); i++) {
-                cout << name_[thermophase_[i]] << endl;
-            }
-            cout.flush();
             for (int i = 0; i < thermophase_.size(); i++) {
                 tpid = thermophase_[i];
                 for (int ii = 0; ii < icmoles.size(); ii++) {
                     icmoles[ii] += ((scaledmass_[tpid]
                                 / chemsys_->getDCmolarmass(chemsysDCid_[tpid]))
                                 * chemsys_->getDCstoich(chemsysDCid_[tpid],ii));
-                    cout << name_[tpid] << ":     Total IC " << icname[ii] << " = "
-                         << icmoles[ii] << " mol " << endl;
+                    if (verbose_) {
+                        cout << name_[tpid] << ":     Total IC " << icname[ii] << " = "
+                             << icmoles[ii] << " mol " << endl;
+                        cout.flush();
+                    }
                 }
-                cout.flush();
             }
-
-            /**
-            cout << "Looping over phases existing in the initial microstructure, " 
-                 << "but are not contained in the thermodynamic database of GEM3K."
-                 << " Here is the list of them: " << endl;
-            cout << "K2SO4" << endl;
-            cout << "NA2SO4" << endl;
-            cout << "PERICLASE" << endl; // MgO
-            double mass_K2SO4 = 1.62, mass_NA2SO4 = 0.59, mass_PER = 3.24;
-            double molarmass_K2SO4 = 174.2612, molarmass_NA2SO4 = 142.0442, molarmass_PER = 40.3044;
-            for (int ii = 0; ii < icmoles.size(); ii++) {
-                if (icname[ii] == "Na") icmoles[ii] += mass_NA2SO4 / molarmass_NA2SO4 * 2.0;
-                if (icname[ii] == "K") icmoles[ii] += mass_K2SO4 / molarmass_K2SO4 * 2.0;
-                if (icname[ii] == "Mg") icmoles[ii] += mass_PER / molarmass_PER;
-                if (icname[ii] == "O") icmoles[ii] += mass_NA2SO4 / molarmass_NA2SO4 * 4.0
-                                                  + mass_K2SO4 / molarmass_K2SO4 * 4.0
-                                                  + mass_PER / molarmass_PER;
-                if (icname[ii] == "S") icmoles[ii] += mass_NA2SO4 / molarmass_NA2SO4
-                                                  + mass_K2SO4 / molarmass_K2SO4;
-            }
-            **/
 
         }
 
@@ -976,73 +965,82 @@ void KineticModel::calculateKineticStep (const double timestep,
         double icmol,icstoich;
         double phmass,dphmass,partitionedmoles,denom;
         double partitionedmoles_K = 0.0, partitionedmoles_Na = 0.0;
-        cout << "Aqueous mass = " << chemsys_->getPhasemass("aq_gen") << endl;
+        if (verbose_) cout << "Aqueous mass = " << chemsys_->getPhasemass("aq_gen") << endl;
         for (int i = 0; i < thermophase_.size(); i++) {
             tpid = thermophase_[i];
-            cout << "Partitioning alkali for phase " << name_[tpid] << ": ";
+            if (verbose_) cout << "Partitioning alkali for phase " << name_[tpid] << ": ";
             phaselist = chemsys_->getMic2phase(chemsys_->getThermo2mic(tpid));
             // List of all phases making up this microstructure phase
             // Compute the mass of each phase and sum to get phase mass
             phmass = dphmass = 0.0;
             for (int j = 0; j < phaselist.size(); j++) {
                 // Mass will be in g, not kg
-                cout << endl;
-                cout << "phasename: " << chemsys_->getPhasename(phaselist[j]);
-                cout << endl;
-                cout << "phasemass: " << chemsys_->getPhasemass(phaselist[j]);
-                cout << endl;
+                if (verbose_) {
+                    cout << endl;
+                    cout << "phasename: " << chemsys_->getPhasename(phaselist[j]) << endl;
+                    cout << "phasemass: " << chemsys_->getPhasemass(phaselist[j]) << endl;
+                }
                 dphmass += (double)(chemsys_->getPhasemass(phaselist[j])
                                   - chemsys_->getOphasemass(phaselist[j]));
                 phmass += (double)(chemsys_->getPhasemass(phaselist[j]));
             }
-            cout << "Mass is " << phmass << "; mass increment is "
-                 << dphmass << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "Mass is " << phmass << "; mass increment is "
+                     << dphmass << endl;
+                cout.flush();
+            }
             for (int j = 0; j < RdICid_[tpid].size(); j++) {
                 icid = RdICid_[tpid][j];
                 Rd = Rd_[tpid][j];
                 icmol = chemsys_->getVphasestoich("aq_gen",icid);
-                cout << " Partitioning IC "
-                     << chemsys_->getICname(icid) << " with aqueous moles = ";
-                cout << icmol << endl;
-                cout << " Partitioning IC " << chemsys_->getICname(icid);
-                cout << " with actual aqueous moles = ";
-                cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),icid) << endl;
-                cout << "moles of 'O' in the solution: ";
-                cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
-                                         chemsys_->getICid("O")) << endl;
-                cout.flush();
+                if (verbose_) {
+                    cout << " Partitioning IC "
+                         << chemsys_->getICname(icid) << " with aqueous moles = ";
+                    cout << icmol << endl;
+                    cout << " Partitioning IC " << chemsys_->getICname(icid);
+                    cout << " with actual aqueous moles = ";
+                    cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),icid) << endl;
+                    cout << "moles of 'O' in the solution: ";
+                    cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
+                                                     chemsys_->getICid("O")) << endl;
+                    cout.flush();
+                }
                 if (dphmass > 0.0 && Rd > 0.0 && icmol > 0.0) {
                     // phase volume will be in m3, so transform to cm3
                     denom = 1.0 + (1.0e6 * chemsys_->getPhasevolume("aq_gen")
                                            / dphmass / Rd);
                     partitionedmoles = (icmol/denom);
             
-                    cout << "; denom = " << denom << "; partitioned = "
-                         << partitionedmoles;
-                    cout.flush();
-                    // be careful whether partitionedmoles is the nomalized ones?
+                    // be careful whether partitionedmoles is the normalized ones?
                     icmol -= (partitionedmoles);
                     if (icid == chemsys_->getICid("Na")) {
                         partitionedmoles_Na = partitionedmoles * 
                                       chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
                                       chemsys_->getICid("O"));
-                        cout << "partitionedmoles for Na: " << partitionedmoles << endl;
-                        cout << "actually removed Na: " << partitionedmoles_Na << " moles" << endl;
+                        if (verbose_) {
+                            cout << "partitionedmoles for Na: " << partitionedmoles << endl;
+                            cout << "actually removed Na: " << partitionedmoles_Na
+                                 << " moles" << endl;
+                        }
                         icmoles[icid] = icmoles[icid] - partitionedmoles_Na;
                     }
                     if (icid == chemsys_->getICid("K")) {
                         partitionedmoles_K = partitionedmoles * 
                         chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
                                          chemsys_->getICid("O"));
-                        cout << "partitionedmoles for K: " << partitionedmoles << endl;
-                        cout << "actually removed K: " << partitionedmoles_K << " moles" << endl;
+                        if (verbose_) {
+                            cout << "partitionedmoles for K: " << partitionedmoles << endl;
+                            cout << "actually removed K: " << partitionedmoles_K
+                                 << " moles" << endl;
+                        }
                         icmoles[icid] = icmoles[icid] - partitionedmoles_K;
                     }
                     if (icmol < 1.0e-16) icmol = 1.0e-16;
-                    cout << "; new conc = " << icmol / chemsys_->getPhasemass("aq_gen")
-                          * 1000.0 << " molal" << endl;
-                    cout.flush();
+                    if (verbose_) {
+                        cout << "; new conc = " << icmol / chemsys_->getPhasemass("aq_gen")
+                              * 1000.0 << " molal" << endl;
+                        cout.flush();
+                    }
                 }
             }
         }
@@ -1053,7 +1051,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             /// This is the block for simulating leaching kinetics
             ///
 
-            cout << " begin to leach at time = " << hyd_time << endl;
+            if (verbose_) cout << " begin to leach at time = " << hyd_time << endl;
             double removed_K = 0.0, removed_Na = 0.0, removed_Ca = 0.0, removed_S = 0.0;
             double removed_O = 0.0, removed_H = 0.0;
             int Kid = chemsys_->getDCid("K+");
@@ -1085,7 +1083,8 @@ void KineticModel::calculateKineticStep (const double timestep,
             // Ca2_aq = 0.0005 * water_mass * 1.0e-3;
 
             double targetconc = 0.0005;		
-            cout << "set target calcium concentration to be: " << targetconc << endl;
+            if (verbose_) cout << "set target calcium concentration to be: "
+                               << targetconc << endl;
     
             if ((chemsys_->getNode())->Get_cDC((long int) Caid) > (targetconc + 0.0001)) {
                 Ca2_aq = 1.0e-7 * water_mass * 1.0e-3;
@@ -1093,7 +1092,8 @@ void KineticModel::calculateKineticStep (const double timestep,
                 Ca2_aq = targetconc * water_mass * 1.0e-3;
             }
 	
-            cout << "molar mass of water is: " << chemsys_->getDCmolarmass("H2O@") << endl;
+            if (verbose_) cout << "molar mass of water is: "
+                               << chemsys_->getDCmolarmass("H2O@") << endl;
 	
             removed_K = K1_aq - K2_aq;
             removed_Na = Na1_aq - Na2_aq;
@@ -1107,29 +1107,29 @@ void KineticModel::calculateKineticStep (const double timestep,
             for (int ii=0; ii < icmoles.size(); ii++) {
                 if (icname[ii] == "K") {
                     icmoles[ii] = icmoles[ii] - removed_K;
-                    cout << "removed " << removed_K << "moles of K." << endl;
+                    if (verbose_) cout << "removed " << removed_K << "moles of K." << endl;
                 }
                 if (icname[ii] == "Na") {
                     icmoles[ii] = icmoles[ii] - removed_Na;
-             	    cout << "removed " << removed_Na << "moles of Na." << endl;
+             	    if (verbose_) cout << "removed " << removed_Na << "moles of Na." << endl;
                 }
                 if (icname[ii] == "Ca") {
                     icmoles[ii] = icmoles[ii] - removed_Ca;
-             	    cout << "removed " << removed_Ca << "moles of Ca." << endl;
+             	    if (verbose_) cout << "removed " << removed_Ca << "moles of Ca." << endl;
                 }
                 if (icname[ii] == "S") {
                     icmoles[ii] = icmoles[ii] - removed_S;
-                    cout << "removed " << removed_S << "moles of S." << endl;
+                    if (verbose_) cout << "removed " << removed_S << "moles of S." << endl;
                 }
                 if (icname[ii] == "O") {
                     removed_O = removed_Na + removed_K + 2 * removed_Ca + 4 * removed_S;
                     icmoles[ii] = icmoles[ii] - removed_O;
-             	    cout << "removed " << removed_O << "moles of O." << endl;
+             	    if (verbose_) cout << "removed " << removed_O << "moles of O." << endl;
                 }
                 if (icname[ii] == "H") {
                     removed_H = removed_Na + removed_K + 2 * removed_Ca;
                     icmoles[ii] = icmoles[ii] - removed_H;
-             	    cout << "removed " << removed_H << "moles of H." << endl;
+             	    if (verbose_) cout << "removed " << removed_H << "moles of H." << endl;
                 }
             }
 
@@ -1137,7 +1137,7 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         for (int ii = 0; ii < icmoles.size(); ii++) {
             chemsys_->setICmoles(ii,icmoles[ii]);
-            cout << "ICmoles of " << icname[ii] << " is: " << icmoles[ii] << endl;
+            if (verbose_) cout << "ICmoles of " << icname[ii] << " is: " << icmoles[ii] << endl;
         }
 
         if (hyd_time >= sattack_time_ && hyd_time < leach_time_) {
@@ -1184,26 +1184,21 @@ void KineticModel::calculateKineticStep (const double timestep,
             double concbuff = 0.0;
             in >> concbuff;
             double Na_target = concbuff;
-            cout << "Na_target = " << Na_target << endl;
+            if (verbose_) cout << "Na_target = " << Na_target << endl;
             in >> concbuff;
             double S_target = concbuff;
-            cout << "S_target = " << S_target << endl;
+            if (verbose_) cout << "S_target = " << S_target << endl;
             in >> concbuff;
             double Ca_target = concbuff;
-            cout << "Ca_target = " << Ca_target << endl;
+            if (verbose_) cout << "Ca_target = " << Ca_target << endl;
             in >> concbuff;
             double Ca1_target = concbuff;
-            cout << "Ca1_target = " << Ca1_target << endl;
+            if (verbose_) cout << "Ca1_target = " << Ca1_target << endl;
             in >> concbuff;
             double K_target = concbuff;
-            cout << "K_target = " << K_target << endl;
+            if (verbose_) cout << "K_target = " << K_target << endl;
             in >> concbuff;
 
-            //double H_target = concbuff;
-            //cout << "H_target = " << H_target << endl;
-            //double OH_target = concbuff;
-            //cout << "OH_target = " << OH_target << endl;
-            //
             in.close();    
 
             //double Na_target = 0.15313262, S_target = 0.00196016;
@@ -1282,32 +1277,32 @@ void KineticModel::calculateKineticStep (const double timestep,
                 if (icname[ii] == "Na") {
                     icmoles[ii] = icmoles[ii] + add_Na;
                     solut_icmoles[ii] = solut_icmoles[ii] + add_Na;
-                    cout << "added " << add_Na << " moles of Na." << endl;
+                    if (verbose_) cout << "added " << add_Na << " moles of Na." << endl;
                 }
                 if (icname[ii] == "S") {
                     icmoles[ii] = icmoles[ii] + add_S;
                     solut_icmoles[ii] = solut_icmoles[ii] + add_S;
-                    cout << "added " << add_S << " moles of S." << endl;
+                    if (verbose_) cout << "added " << add_S << " moles of S." << endl;
                 }
                 if (icname[ii] == "K") {
                     icmoles[ii] = icmoles[ii] - remove_K;
                     solut_icmoles[ii] = solut_icmoles[ii] - remove_K;
-                    cout << "removed " << remove_K << " moles of K." << endl;
+                    if (verbose_) cout << "removed " << remove_K << " moles of K." << endl;
                 }
                 if (icname[ii] == "Ca") {
                     icmoles[ii] = icmoles[ii] - remove_Ca;
                     solut_icmoles[ii] = solut_icmoles[ii] - remove_Ca;
-                    cout << "removed " << remove_Ca << " moles of Ca." << endl;
+                    if (verbose_) cout << "removed " << remove_Ca << " moles of Ca." << endl;
                 }
                 if (icname[ii] == "O") {
                     icmoles[ii] = icmoles[ii] + add_O - remove_O;
                     solut_icmoles[ii] = solut_icmoles[ii] + add_O - remove_O;
-                    cout << "added " << (add_O - remove_O) << " moles of O." << endl;
+                    if (verbose_) cout << "added " << (add_O - remove_O) << " moles of O." << endl;
                 }
                 if (icname[ii] == "H") {
                     icmoles[ii] = icmoles[ii] + add_H - remove_H;
                     solut_icmoles[ii] = solut_icmoles[ii] + add_H - remove_H;
-                    cout << "added " << (add_H - remove_H) << " moles of H." << endl;
+                    if (verbose_) cout << "added " << (add_H - remove_H) << " moles of H." << endl;
                 }
             }
    
@@ -1362,11 +1357,13 @@ void KineticModel::calculatePhaseChange (const int pid,
     /// Should the next block be only for verbose output
     ///
 
-    cout << "Micphase " << chemsys_->getMicphasename(pid) << " contains phases: "
-         << endl;
-    for (int i = 0; i < phaseindex.size(); i++) {
-      cout << chemsys_->getPhasename(i) << endl;
-    }    
+    if (verbose_) {
+        cout << "Micphase " << chemsys_->getMicphasename(pid) << " contains phases: "
+             << endl;
+        for (int i = 0; i < phaseindex.size(); i++) {
+            cout << chemsys_->getPhasename(i) << endl;
+        }    
+    }
 
     double phasemoles = 0.0;
     double *phasemolesarray = chemsys_->getPhasemoles();
@@ -1388,8 +1385,8 @@ void KineticModel::calculatePhaseChange (const int pid,
       vector<int> dcindex;
       dcindex.clear();
       dcindex = chemsys_->getPhaseDCmembers(phaseindex[i]);
-      cout << "Phase " << chemsys_->getPhasename(phaseindex[i]) 
-           << " contains DC members: " << endl;
+      if (verbose_) cout << "Phase " << chemsys_->getPhasename(phaseindex[i]) 
+                         << " contains DC members: " << endl;
       for (int j = 0; j < dcindex.size(); j++) {
         chemsys_->getDCname(dcindex[j]);
       }
@@ -1428,7 +1425,6 @@ void KineticModel::calculatePhaseChange (const int pid,
 
 void KineticModel::initializeMoles () 
 {
-    cout << "INITIALIZING MOLES OF INDEPENDENT COMPONENTS" << endl;
     int icnum = chemsys_->getICnum();
     vector<double> icmoles;
     icmoles.clear();
@@ -1450,9 +1446,11 @@ void KineticModel::initializeMoles ()
         for (int ii = 0; ii < icnum; ii++) {
             icmoles[ii] += ((watermass/chemsys_->getDCmolarmass(waterid)
                            * chemsys_->getDCstoich(waterid,ii)));
-            cout << "H2O@ :     Total contributed " << icname[ii] << " = "
-                 << icmoles[ii] << " mol " << endl;
-            cout.flush();
+            if (verbose_) {
+                cout << "H2O@ :     Total contributed " << icname[ii] << " = "
+                     << icmoles[ii] << " mol " << endl;
+                cout.flush();
+            }
         }
         for (int ii = 0; ii < icnum; ii++) {
             chemsys_->setICmoles(ii,icmoles[ii]);
@@ -1474,13 +1472,15 @@ void KineticModel::initializeMoles ()
         chemsys_->setDCmoles(waterid,watermass
                              / chemsys_->getDCmolarmass(waterid));
 
-        cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-        cout << "REPORTING DC MOLES:" << endl;
-        for (int i = 0; i < dcmoles.size(); i++) {
-            cout << dcname[i] << ": " << chemsys_->getDCmoles(i) << " mol" << endl;
+        if (verbose_) {
+            cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+            cout << "REPORTING DC MOLES:" << endl;
+            for (int i = 0; i < dcmoles.size(); i++) {
+                cout << dcname[i] << ": " << chemsys_->getDCmoles(i) << " mol" << endl;
+            }
+            cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+            cout.flush();
         }
-        cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-        cout.flush();
     }
     catch (EOBException eex) {
         eex.printException();
@@ -1501,8 +1501,11 @@ void KineticModel::initializeMoles ()
 
 void KineticModel::setKineticDCmoles ()
 {
-    cout << "    In setKineticDCmoles..." << endl;
-    cout.flush();
+    if (verbose_) {
+        cout << "    In setKineticDCmoles..." << endl;
+        cout.flush();
+    }
+
     int kpid,csid;
 
     try {
@@ -1510,10 +1513,12 @@ void KineticModel::setKineticDCmoles ()
         double watermoles = chemsys_->getDCmoles(waterid);
         double watermm = chemsys_->getDCmolarmass(waterid);
         double watermass = watermoles * watermm;
-        cout << "        "
-             << chemsys_->getDCname(waterid) << ": Mass = " << watermass
-             << ", Molar mass = " << watermm
-             << endl;
+        if (verbose_) {
+            cout << "        "
+                 << chemsys_->getDCname(waterid) << ": Mass = " << watermass
+                 << ", Molar mass = " << watermm
+                 << endl;
+        }
         for (int i = 0; i < kineticphase_.size(); i++) {
             kpid = kineticphase_[i];
             csid = chemsysDCid_[kpid];
@@ -1521,10 +1526,12 @@ void KineticModel::setKineticDCmoles ()
                 throw FloatException("KineticModel","setKineticDCmoles",
                                      "Divide by zero error");
             }
-            cout << "        Clinker phase "
-                 << name_[kpid] << ": Mass = " << scaledmass_[kpid]
-                 << ", Molar mass = " << chemsys_->getDCmolarmass(csid)
-                 << endl;
+            if (verbose_) {
+                cout << "        Clinker phase "
+                     << name_[kpid] << ": Mass = " << scaledmass_[kpid]
+                     << ", Molar mass = " << chemsys_->getDCmolarmass(csid)
+                     << endl;
+            }
             chemsys_->setDCmoles(csid,(scaledmass_[kpid]
                                  / chemsys_->getDCmolarmass(csid)));
         }
