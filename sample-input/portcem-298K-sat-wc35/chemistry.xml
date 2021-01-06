@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
     xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
+  <!--The number of possible phases in the microstructure not counting Void-->
   <numentries>18</numentries>
+  <!--The Blaine fineness of the powder, cm2/kg-->
   <blaine>403.2</blaine>
+  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <refblaine>385.0</refblaine>
+  <!--Water-solid mass ratio-->
   <wcRatio>0.35</wcRatio>
+  <!--Temperature in K-->
   <temperature>298.15</temperature>
+  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <reftemperature>296.15</reftemperature>
+  <!--Set to 1 for saturated, 0 for sealed-->
   <saturated>1</saturated>
+  <!--Void phase should always be present and first in the list-->
   <phase>
     <thamesname>Void</thamesname>
+    <!--Unique integer id for microstructure phase-->
     <id>0</id>
+    <!--Interface data not used for void phase-->
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
       <growthtemplate>0</growthtemplate>
     </interface_data>
+    <!--Internal fraction of non-solid space-->
     <porosity>1.0</porosity>
+    <!--Display rgb colors, 0 to 255-->
     <display_data>
         <red>0.0</red>
         <green>0.0</green>
@@ -23,13 +35,16 @@
         <gray>0.0</gray>
     </display_data>
   </phase>
+  <!--Water phase should always be present and  in the list-->
   <phase>
     <thamesname>H2O</thamesname>
+    <!--Which GEM phase(s) and DC(s) are linked to this microstructure phase?-->
     <gemphase_data>
     <gemphasename>aq_gen</gemphasename>
     <gemdcname>H2O@</gemdcname>
     </gemphase_data>
     <id>1</id>
+    <!--Interface data not used for void phase-->
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
       <growthtemplate>1</growthtemplate>
@@ -49,31 +64,48 @@
     <gemdcname>C3S</gemdcname>
     </gemphase_data>
     <id>2</id>
+    <!--Solid phases have meaningful interface data-->
     <interface_data>
+        <!--randomgrowth between 0 and 1, 1 is totally random attachment
+            or detachment, 0 means interface mean curvature governs the
+        attachment and detachment points-->
       <randomgrowth>0.0</randomgrowth>
+      <!--growthtemplate(s) are the microstructure id where this phase wants to form
+      an interface-->
       <growthtemplate>2</growthtemplate>
       <growthtemplate>10</growthtemplate>
+      <!--Affinity is the relative strength of the attraction between this phase
+          and a template phase.  If a template is not listed, it takes the default
+          value of 0.  Positive numbers indicate attraction and negative numbers
+      mean repulsion-->
       <affinity>
         <affinityphaseid>2</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
     <porosity>0.0</porosity>
+    <!--We can specify minority impurity concentrations in a solid phase, which
+    will be released in proportion during dissolution-->
     <impurity_data>
-      <k2ocoeff>0.00087</k2ocoeff>
-      <na2ocoeff>0.0</na2ocoeff>
-      <mgocoeff>0.00861</mgocoeff>
-      <so3coeff>0.007942</so3coeff>
+        <k2ocoeff>0.00087</k2ocoeff>  <!--K2O mole fraction-->
+        <na2ocoeff>0.0</na2ocoeff>    <!--Na2O mole fraction-->
+        <mgocoeff>0.00861</mgocoeff>    <!--MgO mole fraction-->
+        <so3coeff>0.007942</so3coeff>   <!--SO3 mole fraction-->
     </impurity_data>
     <kinetic_data>
+      <!--Type is whether the phase is controlled by kinetics or thermodynamics-->
       <type>kinetic</type>
+      <!--Percentage of this phase on a total solids mass basis-->
       <scaledmass>66.202</scaledmass>
+      <!--k1, k2, k3, n1, n3 are Parrott and Killoh parameters. Do not change-->
       <k1>1.5</k1>
       <k2>0.05</k2>
       <k3>1.1</k3>
       <n1>0.7</n1>
       <n3>3.3</n3>
+      <!--Ea is the apparent activation energy for dissolution-->
       <Ea>41570.0</Ea>
+      <!--critdoh is another P&K parameter-->
       <critdoh>2.0</critdoh>
     </kinetic_data>
     <display_data>

@@ -19,7 +19,6 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage[version=4]{mhchem}
-\usepackage{lipsum}
 \usepackage{parskip}
 
 \usepackage{listings}
@@ -453,6 +452,33 @@ definition file (\verb!chemistry.xml!).
     \ce{CaCO3} & 33 & Str{\"{a}}tlingite & 30 & Brucite & 35 \\ \bottomrule
 \end{tabular}
 \end{table}
+}
+
+\normalsize{}
+\subsection{Calculation and Output Times}
+The file for specifying calculation times and output times
+is an XML file, the schema of which is given in the \verb!parameters.xsd! file.
+Each calculation time is specified (in days) with a line like this:
+
+\small{
+\begin{lstlisting}
+<calctime>0.001331</calctime>
+\end{lstlisting}
+}
+
+Generally, it is a good idea to have a lot of calculation times using closely
+spaced time intervals, especially at early times.  This is needed to prevent the
+kinetic changes during any time interval from being so large that the thermodynamic
+equilibrium calculations cannot converge.
+
+After all the calculation times have been specified, the user can specify any
+number of simulation times (in days) at which to output a 3D microstructure image.
+The syntax for this is
+
+\small{
+\begin{lstlisting}
+<outtime>28.0</outtime>
+\end{lstlisting}
 }
 
 \end{document}
