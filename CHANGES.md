@@ -4,6 +4,7 @@
 
 -----------------------------------------------------------------------------
 
+Jan  5 20:14:32 2021 - Added a guide for preparing input files
 Jan  4 16:40:34 2021 - Added verbose option, plus better control over output images
 Jan  1 20:28:16 2021 - Better handling of void production under sealed conditions
 Dec 28 15:38:15 2020 - Simulation should stop if capillary pore water is exhausted

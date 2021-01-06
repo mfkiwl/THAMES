@@ -971,7 +971,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     /*
     node_ = obj.getNode();
     */
-    T_ = obj.getT();
+    T_ = obj.getTemperature();
     P_ = obj.getP();
     Vs_ = obj.getVs();
     Ms_ = obj.getMs();

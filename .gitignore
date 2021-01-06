@@ -4,6 +4,9 @@ thamestests/
 # ignore all object files
 *.o
 
+#ignore the Mac OS X superfluous files
+.DS_Store
+
 # ignore spreadsheets used for calculations
 *.xls
 *.xlsx
@@ -14,6 +17,12 @@ bin/*
 # ignore contents of doc directories
 doc/html/*
 doc/latex/*
+
+#ignore LaTeX intermediate files
+*.aux
+*.log
+*.toc
+*.out
 
 # ignore compiled libraries
 *.a

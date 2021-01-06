@@ -894,7 +894,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             }
             double wmv = chemsys_->getNode()->DC_V0(chemsys_->getDCid("H2O@"),
                                                     chemsys_->getP(),
-                                                    chemsys_->getT());
+                                                    chemsys_->getTemperature());
             chemsys_->setPhasemass(chemsys_->getPhaseid("aq_gen"),watermass);
             chemsys_->setPhasevolume(chemsys_->getPhaseid("aq_gen"),wmv/watermoles);
 

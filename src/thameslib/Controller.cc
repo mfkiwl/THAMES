@@ -350,7 +350,7 @@ void Controller::doCycle (const string &statfilename,
         string ofname(jobroot_);
         ostringstream ostr1,ostr2;
         ostr1 << (int)(time_[i] * 100);
-        ostr2 << setprecision(3) << chemsys_->getT();
+        ostr2 << setprecision(3) << chemsys_->getTemperature();
         string timestr(ostr1.str());
         string tempstr(ostr2.str());
         ofname = ofname + "." + timestr + "." + tempstr + ".img";
@@ -537,7 +537,7 @@ void Controller::initializeState (double time)
     kineticmodel_->initializeMoles();      
 
     // Set the temperature
-    double T = chemsys_->getT();
+    double T = chemsys_->getTemperature();
     lattice_->setTemperature(T);
 
     ///
@@ -580,7 +580,7 @@ void Controller::calculateState (double time,
 
     if (isfirst) {
 
-        double T = chemsys_->getT();
+        double T = chemsys_->getTemperature();
         lattice_->setTemperature(T);
 
     }
@@ -629,7 +629,7 @@ void Controller::calculateState (double time,
       ///
 
       double water_v0 = chemsys_->getNode()->DC_V0(chemsys_->getMic2DC(WATERID,0),
-                                            chemsys_->getP(),chemsys_->getT());
+                                            chemsys_->getP(),chemsys_->getTemperature());
       double addwatermol = addwatervol / water_v0;
 
       if (verbose_) {

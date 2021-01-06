@@ -5572,11 +5572,9 @@ vector<char> getPhaseclasscode () const
 /**
 @brief Set the system temperature [K].
 
-@note NOT USED.
-
 @param val is the absolute temperature [K]
 */
-void setT (const double val)
+void setTemperature (const double val)
 {
     T_ = val;
 }
@@ -5586,7 +5584,7 @@ void setT (const double val)
 
 @return the absolute temperature [K]
 */
-double getT () const
+double getTemperature () const
 {
     return T_;
 }
