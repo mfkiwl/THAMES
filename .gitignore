@@ -36,4 +36,5 @@ doc/latex/*
 # ignore files that will be created upon complilation
 src/version.h
 src/thameslib/myconfig.h
+src/vcctl2thames/vcctl2thames.h
 

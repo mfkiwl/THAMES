@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 project (thames)
 
-set (THAMES_VERSION 2.0)
+set (THAMES_VERSION 2.5)
 set (THAMES_VERSION_MAJOR 2)
-set (THAMES_VERSION_MINOR 0)
+set (THAMES_VERSION_MINOR 5)
 
 set (thames_XSDFILES_DIR "${CMAKE_SOURCE_DIR}/src/thameslib/xsdfiles")
 
@@ -17,6 +17,11 @@ configure_file (
 configure_file (
     "${CMAKE_SOURCE_DIR}/src/thameslib/myconfig.h.in"
     "${CMAKE_SOURCE_DIR}/src/thameslib/myconfig.h"
+    )
+
+configure_file (
+    "${CMAKE_SOURCE_DIR}/src/vcctl2thames/vcctl2thames.h.in"
+    "${CMAKE_SOURCE_DIR}/src/vcctl2thames/vcctl2thames.h"
     )
 
 # look for doxygen capability
@@ -94,9 +99,9 @@ set (CMAKE_CXX_FLAGS "-O2 -std=c++17 -DIPMGEMPLUGIN ${THAMES_INCLUDE_PATH} ${XML
 message ("Top level CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 add_subdirectory (${CMAKE_SOURCE_DIR}/src/thameslib)
+add_subdirectory (${CMAKE_SOURCE_DIR}/src/vcctl2thames)
 
 file (GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc")
-
 
 #set (EXTRA_LIBS ${EXTRA_LIBS} z)
 #set (EXTRA_LIBS ${EXTRA_LIBS} m)

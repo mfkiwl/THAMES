@@ -1,6 +1,6 @@
 \documentclass{article}
 \usepackage{amsmath,amstext,amssymb}
-\usepackage[ttscale=0.75]{libertine}
+\usepackage[ttscale=0.7]{libertine}
 \usepackage[libertine]{newtxmath}
 \usepackage{siunitx}
 \usepackage{inconsolata}
@@ -109,8 +109,8 @@ following five new files:
 Next, use GEM-Selektor to clone the system you just made in the previous step, and then
 edit its recipe to place an upper kinetic limit of \SI{1e-16}{\mole} on \textsc{every
 solid dependent component} (DC) \textit{except} for those  you already have stated in your
-recipe.  starting phases.a recipe for the system of interest, whether it be a portland
-cement or other geochemical system.  The purpose of this system is to enable the calculation
+recipe.
+The purpose of this system is to enable the calculation
 of saturation indices of the aqueous solution with respect to the solid dependent components.
 The saturation indices play a central role in determining the driving force for dissolution
 and precipitation kinetics.
@@ -261,7 +261,7 @@ microstructure phases.  The first two phases should always be \verb!Void! and
     \end{lstlisting}
 }
 
-\normalsize{ }
+
 Following those two microstructure phases, the other phases may have other data fields
 such as parameters for kinetic modeling, their relative abundance, and perhaps
 multiple GEM phases.  An example for a dissolving portland cement component is
@@ -393,6 +393,86 @@ should be the final phase in the list.
 }
 
 \normalsize{ }
+\subsubsection{Rules for linking GEM phases with microstructure phases}
+A microstructure phase can be associated with zero, one, or multiple GEM phases;
+the user must decide which GEM phase or phases
+should be associated with a given microstructure phase.  In some cases the choice
+will be obvious, such as identifying \verb!aq_gen! as the saturated pore
+liquid in the microstructure.  But in other cases it may be useful or efficient to
+group two or more GEM phases into a single microstructure phase.  One example
+might be to collect all of the GEM phases associated with carboaluminates, of which
+there are many, into a single microstructure phase called \verb!AFm_c! or something
+like that, as shown in this example:
+
+\scriptsize{
+    \begin{lstlisting}
+  <phase>
+    <thamesname>MONOSULPH</thamesname>
+    <gemphase_data>
+        <gemphasename>C4AsH105</gemphasename>
+        <gemdcname>monosulphate10.5</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+        <gemphasename>C4AsH12</gemphasename>
+        <gemdcname>monosulphate12</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+        <gemphasename>C4AsH14</gemphasename>
+        <gemdcname>monosulphate14</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+        <gemphasename>C4AsH9</gemphasename>
+        <gemdcname>monosulphate9</gemdcname>
+    </gemphase_data>
+    <gemphase_data>
+        <gemphasename>monosulph-AlFe</gemphasename>
+        <gemdcname>monosulphate1205</gemdcname>
+        <gemdcname>Fe-monosulph05</gemdcname>
+    </gemphase_data>
+    <id>13</id>
+    <interface_data>
+      <randomgrowth>0.6</randomgrowth>
+    \end{lstlisting}
+
+    \textit{etc.}
+
+    \begin{lstlisting}
+    </phase>
+    \end{lstlisting}
+}
+
+\normalsize{ }
+Whatever choices are made, both the GEM phase name and the names of all
+the DC components for that phase must be placed within \verb!<gemphase_data>! field,
+and there must be one of these fields for each GEM phase that you wish to link
+to the microstructure phase.  In addition, the \verb!gemphasename! must exactly match
+one of the \verb!<PHNL>! entries in the \verb!-dch.dat! file, and
+\textit{all} of the DCs associated with that phase must immediately follow that
+phase as shown in this example.  Determine which GEM DCs are associated
+with a given phase by consulting the \verb!<nDCinPH>! field of the \verb!-dch.dat! file.
+
+To illustrate, Figure~\ref{fig:dchfile} shows a portion of a real \verb!-dch.dat! file.
+In the figure, there are \textit{nine} phases listed in the \verb!<PHNL>! field and
+26 DCs listed in the \verb!<DCNL>! field.  The numbers in the \verb!<nDCinPH>! field
+relate the two.  Notice that there are \textit{nine} numbers in \verb!<nDCinPH>!, one
+for each phase. The ordering of the numbers is the same as the ordering of phase
+names in the \verb!<PHNL>! field.  So there are 13 DCs in the first phase, which
+is \verb!<aq_gen>!.  In addition, those 13 DCs are the \textit{first} 13 DCs in the
+\verb!<DCNL>! list.  Moving on, we see that there are three DCs in the next phase, which
+is \verb!gas_gen!, and those three DCs are the next three after the first 13 in the
+\verb!<DCNL>! list, namely \verb!'H2'!, \verb!'O2'!, and \verb!'H2O'! (the last being
+the water vapor molecule, not liquid water which is \verb!H2O@!\footnote{In GEMS, the
+\makeatletter\texttt{`@'}\makeatother\ symbol is reserved to designate
+a zero-charge liquid solvent or
+a zero-charge dissolved component.  Gas molecules do not have this symbol even though
+they also have zero charge.}
+
+\begin{figure}
+    \centering\includegraphics[width=0.7\textwidth]{Figures/dchfile.png}
+    \caption{\label{fig:dchfile} Portion of a DCH input file showing the definitions
+    of GEM phases and DCs.}
+\end{figure}
+
 \subsubsection{Microstructure initial 3D arrangement}
 The microstructure representation is a digitized 3D image with \verb!X_Size! voxels
 in the $x$ direction, \verb!Y_Size! in the $y$ direction, and \verb!Z_Size!
@@ -466,6 +546,7 @@ Each calculation time is specified (in days) with a line like this:
 \end{lstlisting}
 }
 
+\normalsize{ }
 Generally, it is a good idea to have a lot of calculation times using closely
 spaced time intervals, especially at early times.  This is needed to prevent the
 kinetic changes during any time interval from being so large that the thermodynamic
