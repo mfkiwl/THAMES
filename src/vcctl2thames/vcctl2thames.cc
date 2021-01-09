@@ -84,6 +84,7 @@ void checkargs (int argc, char **argv)
             case '?': // Unrecognized option
             default:
                 printHelp ();
+                exit(0);
                 break;
         }
     }

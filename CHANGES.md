@@ -4,6 +4,7 @@
 
 -----------------------------------------------------------------------------
 
+Jan  8 20:54:08 2021 - Improved vcctl2thames program and integrated within cmake
 Jan  5 20:14:32 2021 - Added a guide for preparing input files
 Jan  4 16:40:34 2021 - Added verbose option, plus better control over output images
 Jan  1 20:28:16 2021 - Better handling of void production under sealed conditions
