@@ -225,13 +225,8 @@ microstructure phases.  The first two phases should always be \verb!Void! and
     <id>0</id>                               <!--ID used in microstructure file-->
     <interface_data>                         <!--Not used for Void phase-->
       <randomgrowth>0.0</randomgrowth>       
-      <growthtemplate>0</growthtemplate>
-      <affinity>                             <!--Not used for Void phase-->
-        <affinityphaseid>0</affinityphaseid>
-        <affinityvalue>4</affinityvalue>
-      </affinity>
     </interface_data>
-    <porosity>1.0</porosity>                 <!--Internal fraction of non-solid-->
+    <porosity>0.0</porosity>                 <!--Internal fraction of sat pore space-->
     <display_data>                           <!--Display rgb colors, 0 to 255-->
         <red>0.0</red>
         <green>0.0</green>
@@ -248,7 +243,6 @@ microstructure phases.  The first two phases should always be \verb!Void! and
     <id>1</id>                               <!--ID used in microstructure file-->
     <interface_data>                         <!--Not used for H2O phase-->
       <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>1</growthtemplate>
     </interface_data>
     <porosity>1.0</porosity>                 <!--Internal fraction of non-solid-->
     <display_data>                           <!--Display rgb colors, 0 to 255-->
@@ -278,10 +272,8 @@ given below:
     <id>2</id>                               <!--ID used in microstructure file-->
     <interface_data>
       <randomgrowth>0.0</randomgrowth>       <!--Zero means no randomness-->
-      <growthtemplate>2</growthtemplate>     <!--Where this phase likes to grow-->
-      <growthtemplate>4</growthtemplate>     <!--Can specify more than one-->
       <affinity>
-        <affinityphaseid>2</affinityphaseid> <!--Same as one of the template ids-->
+        <affinityphaseid>2</affinityphaseid> <!--Phase interaction with this phase-->
         <affinityvalue>1</affinityvalue>     <!--More positive means more attraction,
                                                   can be negative for repulsion-->
       </affinity>
@@ -314,6 +306,14 @@ given below:
     \end{lstlisting}
 }
 
+\fbox{
+\begin{minipage}{0.9\textwidth}
+    \textbf{NOTE}: The \verb!<id>! values \textsc{must} be in order, starting
+    with zero for void and one for water, and then proceeding without
+    skipping any numbers.
+\end{minipage}
+}
+
 \normalsize{ }
 An example of a phase that is controlled by thermodynamics rather than
 kinetics is \ce{C-S-H}:
@@ -334,18 +334,18 @@ kinetics is \ce{C-S-H}:
     <id>4</id>                               <!--ID used in microstructure file-->
     <interface_data>
       <randomgrowth>0.6</randomgrowth>       <!--Grows in a fairly random manner-->
-      <growthtemplate>2</growthtemplate>     <!--Where this phase likes to grow-->
-      <growthtemplate>1</growthtemplate>     <!--Can be more than one-->
-      <growthtemplate>3</growthtemplate>
-      <growthtemplate>4</growthtemplate>
       <affinity>
         <affinityphaseid>2</affinityphaseid> <!--Same as one of the templates above-->
         <affinityvalue>4</affinityvalue>     <!--More positive means more attraction,
                                                   can be negative for repulsion-->
       </affinity>
       <affinity>
-        <affinityphaseid>1</affinityphaseid>
-        <affinityvalue>2</affinityvalue>
+        <growthtemplate>3</growthtemplate>
+        <affinityvalue>1</affinityvalue> 
+      </affinity>
+      <affinity>
+        <growthtemplate>4</growthtemplate>
+        <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
     <porosity>0.27</porosity>
@@ -364,6 +364,13 @@ kinetics is \ce{C-S-H}:
     \end{lstlisting}
 }
 
+\fbox{
+\begin{minipage}{0.9\textwidth}
+    \textbf{NOTE}: Every solid phase \textsc{must} have an \verb!<affinity>! for
+    itself, with an \verb!<affinityvalue>! greater than zero.
+\end{minipage}
+}
+
 \normalsize{ }
 Finally, a phase called \verb!DAMAGE! must \textsc{always} be present, and
 should be the final phase in the list.
@@ -375,11 +382,6 @@ should be the final phase in the list.
     <id>5</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
-      <growthtemplate>16</growthtemplate>
-      <affinity>
-        <affinityphaseid>16</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
     </interface_data>
     <porosity>1.0</porosity>
     <display_data>

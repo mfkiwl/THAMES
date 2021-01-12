@@ -82,7 +82,8 @@ KineticModel::KineticModel (ChemicalSystem *cs,
                             Solution *solut,
                             Lattice *lattice,
                             const string &fname,
-                            const bool verbose)
+                            const bool verbose,
+                            const bool warning)
 :chemsys_(cs),solut_(solut),lattice_(lattice)
 {
     const string PHASENUM = "phasenum";
@@ -112,9 +113,10 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     const string SCALEDMASS = "scaledMass";
     const string CRITDOH = "criticalDOH";
     
-    // Set the verbose flag
+    // Set the verbose and warning flags
    
     verbose_ = verbose;
+    warning_ = warning;
 
     ///
     /// Default value for Blaine fineness in PK model is 385 m<sup>2</sup>/kg
@@ -340,7 +342,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     while (cur != NULL) {
         if (verbose_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
-            cout << "    Trying to get phase name" << endl;
+            if (verbose_) cout << "    Trying to get phase name" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string testname((char *)key);
             kdata.name = testname;

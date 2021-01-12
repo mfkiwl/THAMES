@@ -11,13 +11,15 @@ ElasticModel::ElasticModel (int nx,
                             int dim,
                             int nphase,
                             int npoints,
-                            const bool verbose) 
+                            const bool verbose,
+                            const bool warning) 
 {
     ///
     /// Assign the dimensions of the finite element (FE) mesh
     ///
 
     verbose_ = verbose;
+    warning_ = warning;
 
     nx_ = nx;
     ny_ = ny;

@@ -100,6 +100,7 @@ double surfacearea_;                        /**< Total surface area [m<sup>2</su
 bool deptheffect_;                          /**< Whether or not PNG images should have
                                                     depth effect */
 bool verbose_;                              /**< Flag to determine verbose output */
+bool warning_;                              /**< Flag to determine warning message output */
 
 public:
     
@@ -130,11 +131,14 @@ the voxel phase assignments can be made at each site.
 @param cs is a pointer to the ChemicalSystem object for the simulation
 @param solut is a pointer to the Solution object for the simulation
 @param fname is the name of the file containing the microstructure data
+@param verbose is true if all messages are to be printed
+@param warning is true if warning messages are to be printed
 */
 Lattice (ChemicalSystem *cs,
         Solution *solut,
         const string &fname,
-        const bool verbose = false);
+        const bool verbose = false,
+        const bool warning = true);
     
 /**
 @brief Destructor.
@@ -565,7 +569,7 @@ void dWmc(int index,
             throw EOBException("Lattice","dWmc","site_",
                            site_.size(),(unsigned int)index);
         }
-        site_[index].setDamage();
+        site_[index].setWmc(site_[index].getWmc() + dwmcval);
     }
     catch (EOBException ex) {
         ex.printException();
@@ -579,7 +583,7 @@ void dWmc(int index,
 @brief Master method to locate the interfaces for each phase in the microstructure.
 
 */
-void findInterfaces ();
+void findInterfaces (void);
     
 /**
 @brief Add a prescribed number of sites of a given phase to the microstructure.
@@ -1199,6 +1203,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the warning flag
+
+@param iswarning is true if warning output should be produced
+*/
+void setWarning (const bool iswarning)
+{
+    warning_ = iswarning;
+    return;
+}
+
+/**
+@brief Get the warning flag
+
+@return the warning flag
+*/
+bool getWarning () const
+{
+    return warning_;
 }
 
 };      // End of Lattice class

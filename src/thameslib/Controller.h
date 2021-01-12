@@ -88,6 +88,7 @@ double leach_time_;                 /**< Simulation time at which to begin leach
 long int damagecount_;              /**< Number of pixels in the lattice that are damaged */
 
 bool verbose_;                      /**< Flag for verbose output */
+bool warning_;                      /**< Flag for warning output */
 
 public:
     
@@ -112,6 +113,7 @@ auxiliary objects be defined already, including
 @param parfilename is the name of the input parameter file
 @param jobname is the root name to give to all output files
 @param verbose is true if verbose output should be produced
+@param warning is true if warning output should be produced
 */
 Controller (Lattice *msh,
             KineticModel *km,
@@ -121,7 +123,8 @@ Controller (Lattice *msh,
             const int simtype,
             const string &parfilename,
             const string &jobname,
-            const bool verbose = false);
+            const bool verbose = false,
+            const bool warning = true);
     
 /**
 @brief Run a computational iteration.
@@ -241,6 +244,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the warning flag
+
+@param iswarning is true if warning output should be produced
+*/
+void setWarning (const bool iswarning)
+{
+    warning_ = iswarning;
+    return;
+}
+
+/**
+@brief Get the warning flag
+
+@return the warning flag
+*/
+bool getWarning () const
+{
+    return warning_;
 }
 
 };      // End of Controller class

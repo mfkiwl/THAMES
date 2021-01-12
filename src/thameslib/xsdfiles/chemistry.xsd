@@ -52,7 +52,6 @@
   <xs:complexType mixed="true" name="interface_datatype">
     <xs:sequence>
       <xs:element name="randomgrowth" type="doubletype"/>
-      <xs:element maxOccurs="unbounded" name="growthtemplate" type="integertype"/>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="affinity" type="affinitytype"/>
     </xs:sequence>
   </xs:complexType>

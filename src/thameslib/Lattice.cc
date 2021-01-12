@@ -24,7 +24,8 @@ Lattice::Lattice (ChemicalSystem *cs,
 Lattice::Lattice (ChemicalSystem *cs,
                   Solution *solut,
                   const string &fname,
-                  const bool verbose)
+                  const bool verbose,
+                  const bool warning)
 : siteneighbors_(18),chemsys_(cs),solut_(solut)
 {
   unsigned int i,j,k;
@@ -45,6 +46,7 @@ Lattice::Lattice (ChemicalSystem *cs,
   deptheffect_ = false;
     
   verbose_ = verbose;
+  warning_ = warning;
 
   ///
   /// Open the microstructure input file and process it
@@ -425,7 +427,7 @@ void Lattice::addSite (const unsigned int x,
     site_.push_back(Site(x,y,z,xdim_,ydim_,zdim_,siteneighbors_,chemsys_));
 }
 
-void Lattice::findInterfaces ()
+void Lattice::findInterfaces (void)
 {
     unsigned int i,kk;
     unsigned int k;
@@ -446,7 +448,7 @@ void Lattice::findInterfaces ()
         gsite.clear();
         dsite.clear();
         for (k = 0; k < site_.size(); k++) {
-          if (site_[k].getWmc() > 0) {
+          if (site_[k].getWmc() > 0) {  // Is there some water nearby?
             if ((site_[k].getPhaseId() == i)) {
               dsite.push_back(&site_[k]);
               site_[k].setDissolutionSite(i);
@@ -456,6 +458,12 @@ void Lattice::findInterfaces ()
                   site_[k].nb(kk)->setGrowthSite(i);
                 }
               }
+              
+              /// @note There is no reason to make the phase
+              /// itself be a template for itself, nor water be
+              /// a growth template for any phase, because we already
+              /// tested for those above.
+       
             } else if (chemsys_->isGrowthtemplate(i,site_[k].getPhaseId())) {
               for (kk = 0; kk < site_[k].nbSize(1); kk++) {
                 if ((site_[k].nb(kk))->getPhaseId() == WATERID) {
@@ -694,14 +702,14 @@ int Lattice::dissolvePhase (unsigned int phaseid,
           for (j = 0; j < ste->nbSize(1); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
-            if ((stenb->getPhaseId() != WATERID)
-                && (stenb->getPhaseId() != VOIDID)) {
-              int nbpid;
-              nbpid = stenb->getPhaseId();
+            int nbpid = stenb->getPhaseId();
+            if ((nbpid != WATERID)
+                && (nbpid != VOIDID)) {
 
               ///
               /// Now that the site has been dissolved, it is eligible for growth
-              /// later on, so we add it to the list of growth sites.
+              /// later on, so we add it to the list of growth sites for certain
+              /// phases.
               ///
 
               addDissolutionSite(stenb,nbpid);
@@ -1526,10 +1534,13 @@ void Lattice::changeMicrostructure (double time,
             }
         
             if (numadded_actual*numadded_actual != netsites[i]*netsites[i]) {
-                cout << "WARNING: Needed to switch on "
-                     << netsites[i] << " of phase " << pid.at(i) << endl;
-                cout << "         But actually did "
-                     << numadded << " switches" << endl;
+                if (warning_) {
+                    cout << "WARNING: Needed to switch on "
+                         << netsites[i] << " of phase " << pid.at(i) << endl;
+                    cout << "         But actually did "
+                         << numadded << " switches" << endl;
+                    cout.flush();
+                }
             }
         }
     }

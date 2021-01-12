@@ -13,7 +13,8 @@ Controller::Controller (Lattice *msh,
                         const int simtype,
                         const string &parfilename,
                         const string &jobname,
-                        const bool verbose)
+                        const bool verbose,
+                        const bool warning)
     :lattice_(msh),
      kineticmodel_(km),
      chemsys_(cs),
@@ -21,7 +22,8 @@ Controller::Controller (Lattice *msh,
      sim_type_(simtype),
      thermalstr_(thmstr),
      jobroot_(jobname),
-     verbose_(verbose)
+     verbose_(verbose),
+     warning_(warning)
 {
   unsigned int i;
   double tvalue,pvalue;
@@ -301,17 +303,19 @@ void Controller::doCycle (const string &statfilename,
         if (verbose_) cout << "...Done!" << endl;
     }
     
+    if (!capwater) {  // We will stop hydration
+        if (warning_) {
+            cout << "WARNING: System is out of capillary pore water." << endl;
+            cout << "         This version of code assumes that only capillary" << endl;
+            cout << "         water is chemically reactive, so the system is" << endl;
+            cout << "         is assumed to be incapable of further hydration." << endl;
+            cout.flush();
+        }
+    } 
+
     ///
     /// The following block executes only for sulfate attack simulations
     ///
-
-    if (!capwater) {  // We will stop hydration
-        cout << "WARNING: System is out of capillary pore water." << endl;
-        cout << "         This version of code assumes that only capillary" << endl;
-        cout << "         water is chemically reactive, so the system is" << endl;
-        cout << "         is assumed to be incapable of further hydration." << endl;
-        cout.flush();
-    } 
 
     if (time_[i] >= sattack_time_) {
    

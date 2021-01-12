@@ -92,6 +92,7 @@ protected:
     vector<vector<double> > Ah_;        /**< Local stiffness matrix */
 
     bool verbose_;                      /**< Whether of not to produce verbose output */
+    bool warning_;                      /**< Whether of not to produce warning output */
 
     /**
     @brief Array of elastic moduli tensors of each phase.
@@ -203,6 +204,7 @@ public:
 @param dim is the total number of elements in the system (plus two?)
 @param npoints is the number of microstructures to process
 @param verbose is true if one wants verbose output
+@param warning is false if suppressing warning messages
 */
 ElasticModel (int nx,
               int ny,
@@ -210,7 +212,8 @@ ElasticModel (int nx,
               int dim,
               int nphase,
               int npoints,
-              const bool verbose = false);
+              const bool verbose = false,
+              const bool warning = true);
 
 /**
 @brief Set up the elastic modulus variables.
@@ -655,6 +658,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the warning flag
+
+@param iswarning is true if warning output should be produced
+*/
+void setWarning (const bool iswarning)
+{
+    warning_ = iswarning;
+    return;
+}
+
+/**
+@brief Get the warning flag
+
+@return the warning flag
+*/
+bool getWarning () const
+{
+    return warning_;
 }
 
 };      // End of ElasticModel class

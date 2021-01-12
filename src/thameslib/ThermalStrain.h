@@ -194,6 +194,7 @@ by the user, and sets the maximum number of phases that can be handled.
 @param nphase is the maximum number of phases in the system
 @param npoints is the number of microstructures to process
 @param verbose is true if verbose output should be produced
+@param warning is false if warning messages should be suppressed
 */
 ThermalStrain (int nx,
                int ny,
@@ -201,7 +202,8 @@ ThermalStrain (int nx,
                int dim,
                int nphase,
                int npoints,
-               const bool verbose = false);  
+               const bool verbose = false,
+               const bool warning = true);  
     
 /**
 @brief Destructor.

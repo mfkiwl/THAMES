@@ -396,6 +396,14 @@ xsi:noNamespaceSchemaLocation="/Users/bullard/thames_wd/parameters.xsd">
 <calctime>	598	</calctime>
 <calctime>	600	</calctime>
 
-
-  <image_frequency>1.0</image_frequency>
+<outtime> 0.1 </outtime>
+<outtime> 1.0 </outtime>
+<outtime> 3.0 </outtime>
+<outtime> 7.0 </outtime>
+<outtime> 14.0 </outtime>
+<outtime> 28.0 </outtime>
+<outtime> 56.0 </outtime>
+<outtime> 128.0 </outtime>
+<outtime> 256.0 </outtime>
+<outtime> 365.0 </outtime>
 </simulation_parameters>

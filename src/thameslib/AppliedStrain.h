@@ -99,6 +99,7 @@ It simply initializes the class variables to zero.
 @param nphase is the number of phases
 @param npoints is the number of microstructures (usually 1)
 @param verbose is true if we want verbose output
+@param warning is false if we want to suppress warning output
 */
 AppliedStrain (int nx,
                int ny,
@@ -106,7 +107,8 @@ AppliedStrain (int nx,
                int dim,
                int nphase,
                int npoints,
-               const bool verbose = false);
+               const bool verbose = false,
+               const bool warning = true);
 	
 /**
 @brief Destructor.

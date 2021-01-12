@@ -80,7 +80,7 @@ Most of the members have self-evident meanings:
        the THAMES phase, given by their GEM phase id number
     - `gemdcid` is the id of the dependent component in the GEM data base
     - `gtmplt` is a vector of the growth templates for the phase
-    - `atmpvec` the vector for the effect of pressure on the thermodynamic parameters ???
+    - `atmpvec` the vector of affinities of a phase for another phase
     - `colors` is the rgb colors for displaying the phase in visualizations
 */
 
@@ -451,6 +451,7 @@ product.  This variable stores the current SI for each solid phase in the GEM CS
 vector<double> SI_;
 
 bool verbose_;                          /**< Whether to produce verbose output */
+bool warning_;                          /**< Whether to produce warning output */
 
 public:
 
@@ -466,12 +467,14 @@ all the information read from the GEM input files.
 @param Interfacefilename is the name of the file containing information about how
             to relate GEM phases to microstructure phases
 @param verbose is true if producing verbose output
+@param warning is true if producing verbose output
 */
 ChemicalSystem (Solution *Solut,
                 const string &GEMfilename,
                 const string &GEMdbrname,
                 const string &Interfacefilename,
-                const bool verbose = false);
+                const bool verbose = false,
+                const bool warning = true);
     
 /**
 @brief Copy constructor.
@@ -2093,77 +2096,40 @@ vector<double> getRandomgrowth () const
 }
 
 /**
-@brief Set the list of all microstructure phases on which a given microstructure phase can grow.
+@brief Construct the growth template based on affinity values
 
-Any phase can grow on its own surface, and we also allow phases to grow on the
-surface of other phases, mimicking hetergeneous nucleation and growth.
+This function determines the templates of a phase.  A phase is considered
+a template only if the affinity value is greater than zero.
 
-@note NOT USED.
-
-@param idx is the microstructure phase id
-@param gtvec is the list of all microstructure phases that can template growth of that phase
+@param idx is the vector of all affinities
+@return the ordered vector of those phases that have positive affinities
 */
-void setGrowthtemplate (const unsigned int idx,
-                        vector<int> gtvec)
+vector<int> calcGrowthtemplate (vector<int> affty)
 {
+    vector<int> posaffty;
+    posaffty.clear();
     string msg;
+    int i;
     try {
-        growthtemplate_.at(idx) = gtvec;
+        for (i = 0; i < affty.size(); ++i) {
+            if (affty.at(i) > 0) posaffty.push_back(i); 
+        }
+        return posaffty;
     }
     catch (out_of_range &oor) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","setGrowthtemplate",msg,growthtemplate_.size(),idx);
+        msg = "affty index is out of range";
+        EOBException ex("ChemicalSystem","calcGrowthtemplate",msg,affty.size(),i);
         ex.printException();
         exit(1);
     }
-    return;
-}
-
-/**
-@brief Set the list of all microstructure phases on which a given microstructure phase can grow.
-
-Any phase can grow on its own surface, and we also allow phases to grow on the
-surface of other phases, mimicking hetergeneous nucleation and growth.
-This function seeks a requested template for growth of a phase, and sets the affinity
-of the growing phase for that template phase.  A high affinity for a template mimics
-a low energy barrier for heterogeneous nucleation.
-
-@note NOT USED.
-
-@param idx is the microstructure phase id
-@param jdx is the sought template microstructure phase id
-@param val is the affinity value to set for that template, an integer
-*/
-void setGrowthtemplate (const unsigned int idx,
-                        const unsigned int jdx,
-                        const int val)
-{
-    string msg;
-    if (idx >= growthtemplate_.size()) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","setGrowthtemplate",msg,growthtemplate_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-    if (jdx >= growthtemplate_[idx].size()) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","setGrowthtemplate",
-                            msg,growthtemplate_[idx].size(),jdx);
-        ex.printException();
-        exit(1);
-    }
-    growthtemplate_[idx][jdx] = val;
-    return;
 }
 
 /**
 @brief Get the list of all microstructure phases on which a given microstructure phase can grow.
 
 Any phase can grow on its own surface, and we also allow phases to grow on the
-surface of other phases, mimicking hetergeneous nucleation and growth.
-This function seeks a requested template for growth of a phase, and sets the affinity
-of the growing phase for that template phase.  A high affinity for a template mimics
-a low energy barrier for heterogeneous nucleation.
+surface of other phases, mimicking heterogeneous nucleation and growth.
+This function seeks a requested template for growth of a phase.
 
 @param idx is the microstructure phase id
 @return the list of all templates for growth of that phase
@@ -2359,10 +2325,10 @@ vector<int> getAffinity (const unsigned int idx)
 @brief Get the affinitiy for growth of a microstructure phase on one of its templates.
 
 A given phase, whether hydration product or product of chemical degradation,
-will generally grow in a compact form by make the growth potential highest
+will generally grow in a compact form by making the growth potential highest
 at sites with low mean curvature and lowest at point with high mean curvature.
 The growth sites are ordered from lowest to highest mean curvature when the
-random growth parameter is set to zero.  Higer values of random growth parameter
+random growth parameter is set to zero.  Higher values of random growth parameter
 cause more severe shuffling of the ordered list of growth sites.
 
 @param idx is the microstructure phase id of which the affinity is sought
@@ -2664,7 +2630,12 @@ void setPorosity (const unsigned int idx,
 /**
 @brief Get the internal porosity of a microstructure phase.
 
-A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
+This function is used, for two main purposes: (1) Calculating local mean curvature
+by the template method, and (2) adjusting water content an apparent molar volume
+of a microstructure phase.
+
+Water or aqueous solution has a porosity of 1. In addition,
+a few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
 at the microstructure scale, so these phases are given a property of their average
 internal porosity on a scale of one micrometer.  This has important implications
 when converting mass fractions of a phase to volume fractions within a microstructure,
@@ -6197,6 +6168,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the warning flag
+
+@param isvsarning is true if warning messages should be produced
+*/
+void setWarning (const bool iswarning)
+{
+    warning_ = iswarning;
+    return;
+}
+
+/**
+@brief Get the warning flag
+
+@return the warning flag
+*/
+bool getWarning () const
+{
+    return warning_;
 }
 
 };      // End of ChemicalSystem class

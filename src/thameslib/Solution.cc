@@ -261,6 +261,7 @@ Solution::~Solution ()
 void Solution::calculateState (bool isfirst)
 {
     int status = 0;
+    string msg;
 
     ///
     /// Load GEM data to the GEM3K library
@@ -314,26 +315,33 @@ void Solution::calculateState (bool isfirst)
 
         switch (nodestatus_) {
             case ERR_GEM_AIA:
-              cout << "Flag nodestatus_ = ERR_GEM_AIA";
+              msg = "Flag nodestatus_ = ERR_GEM_AIA";
+              if (isfirst) msg += ", isfirst is true";
               break;
             case ERR_GEM_SIA:
-              cout << "Flag nodestatus_ = ERR_GEM_SIA";
+              msg =  "Flag nodestatus_ = ERR_GEM_SIA";
+              if (isfirst) msg += ", isfirst is true";
               break;
             case T_ERROR_GEM:
-              cout << "Flag nodestatus_ = T_ERROR_GEM";
+              msg  = "Flag nodestatus_ = T_ERROR_GEM";
+              if (isfirst) msg += ", isfirst is true";
               break;
         } 
+        throw GEMException("Solution","calculateState",msg);
 
     } else if (nodestatus_ == BAD_GEM_AIA || nodestatus_ == BAD_GEM_SIA) {
   
         switch (nodestatus_) {
             case BAD_GEM_AIA:
-              cout << "Flag nodestatus_ = BAD_GEM_AIA";
+              msg = "Flag nodestatus_ = BAD_GEM_AIA";
+              if (isfirst) msg += ", isfirst is true";
               break;
             case BAD_GEM_SIA:
-              cout << "Flag nodestatus_ = BAD_GEM_SIA";
+              msg = "Flag nodestatus_ = BAD_GEM_SIA";
+              if (isfirst) msg += ", isfirst is true";
               break;
         }
+        throw GEMException("Solution","calculateState",msg);
 
     } else {
 

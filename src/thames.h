@@ -120,6 +120,11 @@ bool VERBOSE;
 bool DEBUG;
 
 /**
+@brief Flag for warning message output
+*/
+bool WARNING;
+
+/**
 @brief The vector of component elastic energies.
 
 The strainenergy vector is passed to the GEM3K library to modify the

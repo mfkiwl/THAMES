@@ -13,10 +13,12 @@ AppliedStrain::AppliedStrain (int nx,
                               int dim,
                               int nphase,
                               int npoints,
-                              const bool verbose) 
+                              const bool verbose,
+                              const bool warning) 
     : ElasticModel (nx,ny,nz,dim,nphase,npoints) 
 {
     verbose_ = verbose;
+    warning_ = warning;
     if (verbose_) {
         cout << "constructor AppliedStrain in derived class AppliedStrain." << endl;
     }

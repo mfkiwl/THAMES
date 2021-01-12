@@ -125,7 +125,11 @@ int main (int argc, char *argv[])
     //
 
     try {
-        ChemSys = new ChemicalSystem(Solut,geminput_filename,geminput_dbrname,pi_filename,VERBOSE);
+        ChemSys = new ChemicalSystem(Solut,
+                                     geminput_filename,
+                                     geminput_dbrname,
+                                     pi_filename,
+                                     VERBOSE,WARNING);
     }
     catch (bad_alloc &ba) {
         cout << "Bad memory allocation in ChemicalSystem constructor: "
@@ -155,7 +159,10 @@ int main (int argc, char *argv[])
     //
 
     try {
-        Mic = new Lattice(ChemSys, Solut, mic_filename,VERBOSE);
+        Mic = new Lattice(ChemSys,
+                          Solut,
+                          mic_filename,
+                          VERBOSE,WARNING);
         cout << "Lattice creation done... " << endl;
         cout << "X size of lattice is " << Mic->getXDim() << endl;
         cout << "Y size of lattice is " << Mic->getYDim() << endl;
@@ -194,7 +201,8 @@ int main (int argc, char *argv[])
                                                   Mic->getYDim(),
                                                   Mic->getZDim(),
                                                   (Mic->getNumsites() + 2),
-                                                  ChemSys->getMicphasenum(),1,VERBOSE);
+                                                  ChemSys->getMicphasenum(),1,
+                                                  VERBOSE,WARNING);
           cout << "ThermalStrain object creation done... " << endl;
           ThermalStrainSolver->setPhasemodfname(phasemod_fname);
       }
@@ -216,7 +224,9 @@ int main (int argc, char *argv[])
       //
 
       try {
-          AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,ChemSys->getMicphasenum(),1,VERBOSE);
+          AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,
+                                                  ChemSys->getMicphasenum(),1,
+                                                  VERBOSE,WARNING);
           AppliedStrainSolver->setPhasemodfname(phasemod_fname);
       }
       catch (bad_alloc &ba) {
@@ -244,7 +254,8 @@ int main (int argc, char *argv[])
     //
 
     try {
-        KMod = new KineticModel(ChemSys, Solut, Mic, cement_filename,VERBOSE);
+        KMod = new KineticModel(ChemSys, Solut, Mic, cement_filename,
+                                VERBOSE,WARNING);
     }
     catch (bad_alloc &ba) {
         cout << "Bad memory allocation in KineticModel constructor: "
@@ -290,7 +301,8 @@ int main (int argc, char *argv[])
                             ThermalStrainSolver,
                             simtype,
                             par_filename,
-                            jobroot,VERBOSE);
+                            jobroot,
+                            VERBOSE,WARNING);
     }
     catch (bad_alloc &ba) {
       cout << "Bad memory allocation in Controller constructor: "
@@ -380,6 +392,7 @@ void printHelp (void)
     cout << endl;
     cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
     cout << "        --verbose [-v]      Produce verbose output" << endl;
+    cout << "        --suppress [-s]     Suppress warning messages" << endl;
     cout << "        --help [-h]         Print this help message" << endl;
     cout << endl;
 
@@ -391,12 +404,18 @@ void checkargs (int argc, char **argv)
 
     // Many of the variables here are defined in the getopts.h system header file
     // Can define more options here if we want
-    const char* const short_opts = "vh";
+    
+    const char* const short_opts = "vsh";
     const option long_opts[] = {
         {"verbose", no_argument, nullptr, 'v'},
+        {"suppress", no_argument, nullptr, 's'},
         {"help",    no_argument, nullptr, 'h'},
         {nullptr,   no_argument, nullptr,  0}
     };
+
+    VERBOSE = false;
+    WARNING = true;
+    DEBUG = false;
 
     while (true) {
 
@@ -409,6 +428,10 @@ void checkargs (int argc, char **argv)
             case 'v':
                 VERBOSE = true;      // Verbose defined in thameslib global.h
                 cout << "**Will produce verbose output**" << endl;
+                break;
+            case 's':
+                WARNING = false;      // Verbose defined in thameslib global.h
+                cout << "**Will suppress warning messages**" << endl;
                 break;
             case 'h': // -h or --help
             case '?': // Unrecognized option
@@ -431,7 +454,7 @@ void writeReport (const string &jobroot,
     string jfilename = jobroot + ".report";
     ofstream out(jfilename.c_str(),ios::app);
     if (!out.is_open()) {
-        cout << "WARNING:  Could not open report file" << endl;
+        if (WARNING) cout << "WARNING:  Could not open report file" << endl;
         return;
     }
 

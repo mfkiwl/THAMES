@@ -244,6 +244,7 @@ vector<double> critDOH_;        /**< List of critical degrees of hydration for w
 vector<double> doh_;            /**< Degree of hydration of each kinetic (clinker) phase */
 
 bool verbose_;                  /**< Flag for verbose output */
+bool warning_;                  /**< Flag for warnining output */
 
 public:
     
@@ -268,12 +269,14 @@ various other objects for the simulation are allocated and constructed.
 @param lattic is a pointer to the Lattice object holding the microstructure
 @param fname is the name of the XML file with the input for the kinetic model
 @param verbose is true if verbose output should be produced
+@param warning is false if suppressing warning output
 */
 KineticModel (ChemicalSystem *cs,
               Solution *solut,
               Lattice *lattic,
               const string &fname,
-              const bool verbose = false);
+              const bool verbose = false,
+              const bool warnining = true);
      
 /**
 @brief Master method controlling the parsing of XML input to the kinetic model.
@@ -1270,6 +1273,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the warning flag
+
+@param iswarning is true if verbose output should be produced
+*/
+void setWarning (const bool iswarning)
+{
+    warning_ = iswarning;
+    return;
+}
+
+/**
+@brief Get the warning flag
+
+@return the warning flag
+*/
+bool getWarning () const
+{
+    return warning_;
 }
 
 };      // End of KineticModel class

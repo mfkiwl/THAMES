@@ -4,7 +4,7 @@ project (thames)
 
 set (THAMES_VERSION 2.5)
 set (THAMES_VERSION_MAJOR 2)
-set (THAMES_VERSION_MINOR 5)
+set (THAMES_VERSION_MINOR 5.1)
 
 set (thames_XSDFILES_DIR "${CMAKE_SOURCE_DIR}/src/thameslib/xsdfiles")
 
