@@ -4,6 +4,7 @@
 
 -----------------------------------------------------------------------------
 
+Jan 14 19:33:52 2021 - Can now specifiy initial solution composition in input file
 Jan 11 19:03:08 2021 - Removed growthtemplate functionality from input
 Jan  8 20:54:08 2021 - Improved vcctl2thames program and integrated within cmake
 Jan  5 20:14:32 2021 - Added a guide for preparing input files

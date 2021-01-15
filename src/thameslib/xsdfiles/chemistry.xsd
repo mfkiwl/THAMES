@@ -42,6 +42,19 @@
   </xs:simpleType>
 
   <!-- definition of complex types -->
+  <xs:complexType name="iccomptype">
+    <xs:sequence>
+      <xs:element name="name" type="stringtype"/>
+      <xs:element name="conc" type="doubletype"/>
+    </xs:sequence>
+  </xs:complexType>
+   
+  <xs:complexType name="solutioncomptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="affinitytype">
     <xs:sequence>
       <xs:element name="affinityphaseid" type="integertype"/>
@@ -130,6 +143,7 @@
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
         <xs:element name="saturated" type="integertype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="solution" type="solutioncomptype"/>
         <xs:element maxOccurs="unbounded" name="phase" type="phasetype"/>
       </xs:sequence>
     </xs:complexType>

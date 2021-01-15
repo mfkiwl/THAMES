@@ -213,7 +213,41 @@ temperature, moisture conditions, and water-solids ratio.
 \end{minipage}
 }
 
-After these initial entries, the remainder of this XML file describes the various
+After these initial entries, one can insert an \textbf{optional} section to
+specify the initial concentration of solute components, which can be handy for
+simulating additives or adjustments to the pH.  The following code shows how
+to specify an initial solution with a \ce{H2SO4} concentration of \SI{1.0}{\mol\per\kilogram}.
+
+\scriptsize{
+\begin{lstlisting}
+  <solution>
+    <ICcomp>
+    <name>H</name>      <!-- Must be an IC already defined in GEM CSD -->
+    <conc>2.0</conc>    <!-- Must be given in molal units, mol/kgw -->
+    </ICcomp>
+    <ICcomp>
+      <name>S</name>
+      <conc>1.0</conc>
+    </ICcomp>
+    <ICcomp>
+      <name>O</name>
+      <conc>4.0</conc>
+    </ICcomp>
+  </solution>
+\end{lstlisting}
+}
+
+\normalsize{ }
+\fbox{
+\begin{minipage}{0.9\textwidth}
+    \textbf{WARNING}:  Composition can be specified using \textbf{only} independent
+    components (ICs) that are already defined in your GEM input files described earlier.
+    One cannot specify dependent components in the current version, and the concentration
+    units must be molal units.
+\end{minipage}
+}
+
+The remainder of this XML file describes the various
 microstructure phases.  The first two phases should always be \verb!Void! and
 \verb!H2O!, as shown below:
 
@@ -255,7 +289,7 @@ microstructure phases.  The first two phases should always be \verb!Void! and
     \end{lstlisting}
 }
 
-
+\normalsize{ }
 Following those two microstructure phases, the other phases may have other data fields
 such as parameters for kinetic modeling, their relative abundance, and perhaps
 multiple GEM phases.  An example for a dissolving portland cement component is
@@ -306,15 +340,15 @@ given below:
     \end{lstlisting}
 }
 
+\normalsize{ }
 \fbox{
 \begin{minipage}{0.9\textwidth}
-    \textbf{NOTE}: The \verb!<id>! values \textsc{must} be in order, starting
+    \textbf{NOTE}: The \texttt{<id>}values \textsc{must} be in order, starting
     with zero for void and one for water, and then proceeding without
     skipping any numbers.
 \end{minipage}
 }
 
-\normalsize{ }
 An example of a phase that is controlled by thermodynamics rather than
 kinetics is \ce{C-S-H}:
 
@@ -340,11 +374,11 @@ kinetics is \ce{C-S-H}:
                                                   can be negative for repulsion-->
       </affinity>
       <affinity>
-        <growthtemplate>3</growthtemplate>
+        <affinityphaseid>3</affinityphaseid>
         <affinityvalue>1</affinityvalue> 
       </affinity>
       <affinity>
-        <growthtemplate>4</growthtemplate>
+        <affinityphaseid>4</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
@@ -364,14 +398,14 @@ kinetics is \ce{C-S-H}:
     \end{lstlisting}
 }
 
+\normalsize{ }
 \fbox{
 \begin{minipage}{0.9\textwidth}
-    \textbf{NOTE}: Every solid phase \textsc{must} have an \verb!<affinity>! for
-    itself, with an \verb!<affinityvalue>! greater than zero.
+    \textbf{NOTE}: Every solid phase \textsc{must} have an \texttt{<affinity>} for
+itself, with an \texttt{<affinityvalue>} greater than zero.
 \end{minipage}
 }
 
-\normalsize{ }
 Finally, a phase called \verb!DAMAGE! must \textsc{always} be present, and
 should be the final phase in the list.
 

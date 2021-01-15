@@ -700,10 +700,6 @@ void KineticModel::calculateKineticStep (const double timestep,
         if (hyd_time < leach_time_ && hyd_time < sattack_time_) { 
           if (verbose_) {
              cout << "Looping over clinker minerals.  " << endl;
-          // cout << "Here is the list of them:" << endl;
-          // for (int i = 0; i < kineticphase_.size(); i++) {
-          //  cout << name_[kineticphase_[i]] << endl;
-          // }
              cout.flush();
           }
 
@@ -794,29 +790,37 @@ void KineticModel::calculateKineticStep (const double timestep,
                           * chemsys_->getDCstoich(chemsysDCid_[kpid],ii));
               if (icname[ii] == "O") {
                 // Dissolved K2O in this clinker phase
-                icn = "K";
-                molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                icn = "O";
-                molarmass += chemsys_->getICmolarmass(icn);
-                icmoles[ii] += (impurityrelease[0]/molarmass);
+                if (chemsys_->isIC("K")) {
+                    icn = "K";
+                    molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                    icn = "O";
+                    molarmass += chemsys_->getICmolarmass(icn);
+                    icmoles[ii] += (impurityrelease[0]/molarmass);
+                }
                 // Dissolved Na2O in this clinker phase
-                icn = "Na";
-                molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                icn = "O";
-                molarmass += chemsys_->getICmolarmass(icn);
-                icmoles[ii] += (impurityrelease[1]/molarmass);
+                if (chemsys_->isIC("Na")) {
+                    icn = "Na";
+                    molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                    icn = "O";
+                    molarmass += chemsys_->getICmolarmass(icn);
+                    icmoles[ii] += (impurityrelease[1]/molarmass);
+                }
                 // Dissolved MgO in this clinker phase
-                icn = "Mg";
-                molarmass = chemsys_->getICmolarmass(icn);
-                icn = "O";
-                molarmass += chemsys_->getICmolarmass(icn);
-                icmoles[ii] += (impurityrelease[2]/molarmass);
+                if (chemsys_->isIC("Mg")) {
+                    icn = "Mg";
+                    molarmass = chemsys_->getICmolarmass(icn);
+                    icn = "O";
+                    molarmass += chemsys_->getICmolarmass(icn);
+                    icmoles[ii] += (impurityrelease[2]/molarmass);
+                }
                 // Dissolved SO3  in this clinker phase
-                icn = "S";
-                molarmass = chemsys_->getICmolarmass(icn);
-                icn = "O";
-                molarmass += (3.0 * chemsys_->getICmolarmass(icn));
-                icmoles[ii] += (3.0 * (impurityrelease[3]/molarmass));
+                if (chemsys_->isIC("S")) {
+                    icn = "S";
+                    molarmass = chemsys_->getICmolarmass(icn);
+                    icn = "O";
+                    molarmass += (3.0 * chemsys_->getICmolarmass(icn));
+                    icmoles[ii] += (3.0 * (impurityrelease[3]/molarmass));
+                }
               } else if (icname[ii] == "S") {
                 // Dissolved SO3  in this clinker phase
                 icn = "S";
@@ -856,7 +860,7 @@ void KineticModel::calculateKineticStep (const double timestep,
           }
         }	
 
-        if (isfirst) {
+        if (isfirst) {  // Beginning of special first-time setup tasks
             
             // Set the proper amount of water for the total solid mass
             // and the water-solid ratio
@@ -871,11 +875,13 @@ void KineticModel::calculateKineticStep (const double timestep,
             int waterid = chemsys_->getDCid("H2O@");
             double watermolarmass = chemsys_->getDCmolarmass(waterid);
             double watermoles = watermass / watermolarmass;
-            cout << "*** Initial solid mass = " << totsolidmass << endl;
-            cout << "*** w/s ratio = " << getWcratio() << endl;
-            cout << "*** Initial water mass = " << watermass << endl;
-            cout << "*** Initial water moles = " << watermoles << endl;
-            cout << "***" << endl;
+            if (verbose_) {
+                cout << "*** Initial solid mass = " << totsolidmass << endl;
+                cout << "*** w/s ratio = " << getWcratio() << endl;
+                cout << "*** Initial water mass = " << watermass << endl;
+                cout << "*** Initial water moles = " << watermoles << endl;
+                cout << "***" << endl;
+            }
 
             if (watermass <= 0.0) {
                 throw FloatException("Controller","calculateState","Divide by zero error");
@@ -961,7 +967,30 @@ void KineticModel::calculateKineticStep (const double timestep,
                 }
             }
 
-        }
+            // Modify initial pore solution composition if desired
+            // input units are mol/kgw
+            // watermass is in units of grams, not kg
+            
+            // icmoles[chemsys_->getICid("K")] += (1.00 * watermass * 0.001);
+            // icmoles[chemsys_->getICid("O")] += (1.00 * watermass * 0.001);
+            // icmoles[chemsys_->getICid("H")] += (1.00 * watermass * 0.001);
+
+            double kgwatermass = watermass / 1000.0;
+            
+            map<int,double> iscomp = chemsys_->getInitialSolutionComp();
+            map<int,double>::iterator p = iscomp.begin();
+
+            while (p != iscomp.end()) {
+                if (verbose_) {
+                    cout << "--->Adding " << p->second << " mol/kgw of "
+                         << icname[p->first] << " to initial solution." << endl;
+                    cout.flush();
+                }
+                icmoles[p->first] += (p->second * kgwatermass);
+                p++;
+            }
+
+        }   // End of special first-time tasks
 
         vector<int> phaselist;
         double icmol,icstoich;

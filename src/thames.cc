@@ -13,12 +13,14 @@ int* RanGen::seed_;
 
 @return 0 on successful completion, non-zero otherwise
 */
-int main (int argc, char *argv[])
+int main (int argc, char **argv)
 {
     //
     // Set up the strainenergy vector.  We allow no more than 156 phases,
     // but this can be changed below.
     //
+
+    checkargs(argc,argv);
 
     strainenergy.clear();
     strainenergy.resize(156,0.0); 

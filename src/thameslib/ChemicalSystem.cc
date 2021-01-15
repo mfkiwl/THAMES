@@ -562,6 +562,23 @@ void ChemicalSystem::parseDoc (const string &docname)
             from_string(satstate,st);
             if (satstate == 0) saturated_ = false;
             if (verbose_) cout << "System saturation state: " << saturated_ << endl;
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"solution"))) {
+            if (verbose_) cout << "Preparing to parse the initial solution composition..."
+                               << endl;
+            parseSolutionComp(doc, cur);
+            if (verbose_) {
+                cout << "Done with solution parse." << endl;
+                cout << "There are " << initial_solution_composition_.size()
+                     << " solute components:" << endl;
+                map<int,double>::iterator p = initial_solution_composition_.begin();
+                while (p != initial_solution_composition_.end()) {
+                    cout << "[" << getICname(p->first) << "] = " << p->second << " mol/kgw"
+                         << endl;
+                    cout.flush();
+                    p++;
+                }
+            }
+
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
             if (verbose_) cout << "Preparing to parse a phase from interface xml file..."
                                << endl;
@@ -574,6 +591,96 @@ void ChemicalSystem::parseDoc (const string &docname)
     xmlFreeDoc(doc);
     return;
 }
+
+void ChemicalSystem::parseSolutionComp (xmlDocPtr doc,
+                                        xmlNodePtr cur)
+{
+    if (verbose_) cout << "In function ChemicalSystem::parseSolutionComp" << endl;
+
+    // Clear the associative map to initialize it
+    
+    initial_solution_composition_.clear();
+
+    string icname;
+    int icid;
+    double icconc;
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if (verbose_) cout << "    Key name = " << cur->name << endl;
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+            if (verbose_) cout << "Preparing to parse an IC in the solution ..."
+                               << endl;
+            parseICinSolution(doc, cur);
+            if (verbose_) cout << "Done with IC parse." << endl;
+        }
+        cur = cur->next;
+    }
+
+    return;
+}
+
+void ChemicalSystem::parseICinSolution (xmlDocPtr doc,
+                                        xmlNodePtr cur)
+{
+    if (verbose_) cout << "    In function ChemicalSystem::parseICinSolution" << endl;
+
+    xmlChar *key;
+    int icid = -1;
+    string icname;
+    double icconc = -1.0;
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if (verbose_) cout << "    Key name = " << cur->name << endl;
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"name"))) {
+            if (verbose_) cout << "    Trying to get IC name" << endl;
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            from_string(icname,(char *)key);
+            icid = getICid(icname);
+            if (verbose_) {
+                cout << "    IC name = " << icname << ", id = " << icid << endl;
+            }
+            if (icconc > 0.0 && icid > 0) {
+                if (verbose_) {
+                    cout << "Inserting pair into map now for " << icname
+                         << " = " << icconc << endl;
+                }
+                initial_solution_composition_.insert(make_pair(icid,icconc));
+                icid = -1;
+                icconc = -1.0;
+                icname = "Unknown";
+            }
+
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
+            if (verbose_) cout << "    Trying to get concentration" << endl;
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(icconc,st);
+            if (verbose_) cout << "    concentration = " << icconc << "mol/kgw" << endl;
+            xmlFree(key);
+            if (icconc > 0.0 && icid > 0) {
+                if (verbose_) {
+                    cout << "Inserting pair into map now for " << icname
+                         << " = " << icconc << endl;
+                }
+                initial_solution_composition_.insert(make_pair(icid,icconc));
+                icid = -1;
+                icconc = -1.0;
+                icname = "Unknown";
+            }
+        }
+
+        cur = cur->next;
+    }
+
+    return;
+}
+
 
 void ChemicalSystem::parsePhase (xmlDocPtr doc,
                                  xmlNodePtr cur,

@@ -220,6 +220,15 @@ map<int,vector<int> > phaseDCmembers_;   /**< A list of all the CSD DC ids that 
                                                 associated with a given CSD phase */
 
 /**
+@brief Initial solution composition
+
+This is a map of key-value pairs.  The key is the integer value of an independent
+component (IC), and the value is the concentration of that IC in molal units
+[mol/kgw].
+*/
+map<int,double> initial_solution_composition_;
+
+/**
 @brief Volume fraction of each GEM CSD phase associated with a THAMES phase.
 
 @warning This variable may not be used
@@ -494,6 +503,38 @@ ChemicalSystem (const ChemicalSystem &obj);
 @param docname is the name of the XML document to parse
 */
 void parseDoc (const string &docname);
+
+/**
+@brief Parse input about the initial solution composition from an XML document.
+
+The initial solution composition, if given, is parsed by this function.
+The composition will be held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the initial solution [mol/kgw]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseSolutionComp (xmlDocPtr doc,
+                        xmlNodePtr cur);
+
+/**
+@brief Parse input about an individual IC in the intitial solution
+
+The initial solution composition, if given, is parsed one IC at
+a time by the parent function parseSolutionComp.  Each IC is
+parsed one at a time by this function.  The composition will be
+held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the initial solution [mol/kgw]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseICinSolution (xmlDocPtr doc,
+                        xmlNodePtr cur);
 
 /**
 @brief Parse input about a microstructure phase from an XML document.
@@ -1276,6 +1317,22 @@ vector<int> getMicid () const
 }
 
 /**
+@brief Find out if an IC exists in the system
+
+@param icname is the name of the proposed IC
+@return true if the IC is recognized
+*/
+bool isIC (const string &icname)
+{
+    string msg;
+    map<string,int>::iterator p = ICidlookup_.find(icname);
+    if (p != ICidlookup_.end()) {
+        return true;
+    }
+    return false;
+}
+
+/**
 @brief Get the integer id of an independent component (IC) by its name.
 
 @param icname is the name of the IC
@@ -1283,16 +1340,30 @@ vector<int> getMicid () const
 */
 unsigned int getICid (const string &icname)
 {
-    string msg;
     map<string,int>::iterator p = ICidlookup_.find(icname);
     if (p != ICidlookup_.end()) {
         return p->second;
     } else {
-        msg = "Could not find ICidlookup_ match to " + icname;
-        EOBException ex("ChemicalSystem","getICid",msg,ICidlookup_.size(),0);
-        ex.printException();
-        exit(1);
+        if (warning_) {
+            cout << "WARNING: Could not find ICidlookup_ match to " << icname << endl;
+        }
+        return (ICnum_ + 9999);   // nonsense number should be detected
     }
+}
+
+/**
+@brief Find out if an DC exists in the system
+
+@param dcname is the name of the proposed DC
+@return true if the DC is recognized
+*/
+bool isDC (const string &dcname)
+{
+    map<string,int>::iterator p = DCidlookup_.find(dcname);
+    if (p != DCidlookup_.end()) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -1303,16 +1374,30 @@ unsigned int getICid (const string &icname)
 */
 unsigned int getDCid (const string &dcname)
 {
-    string msg;
     map<string,int>::iterator p = DCidlookup_.find(dcname);
     if (p != DCidlookup_.end()) {
         return p->second;
     } else {
-        msg = "Could not find DCidlookup_ match to " + dcname;
-        EOBException ex("ChemicalSystem","getDCid",msg,DCidlookup_.size(),0);
-        ex.printException();
-        exit(1);
+        if (warning_) {
+            cout << "Could not find DCidlookup_ match to " << dcname << endl;
+        }
+        return (DCnum_ + 9999);
     }
+}
+
+/**
+@brief Find out if a GEM phase exists in the system
+
+@param phasename is the name of the proposed phase 
+@return true if the GEM phase is recognized
+*/
+bool isGEMPhase (const string &phasename)
+{
+    map<string,int>::iterator p = phaseidlookup_.find(phasename);
+    if (p != phaseidlookup_.end()) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -1323,15 +1408,14 @@ unsigned int getDCid (const string &dcname)
 */
 unsigned int getPhaseid (const string &phasename)
 {
-    string msg;
     map<string,int>::iterator p = phaseidlookup_.find(phasename);
     if (p != phaseidlookup_.end()) {
         return p->second;
     } else {
-        msg = "Could not find phaseidlookup_ match to " + phasename;
-        EOBException ex("ChemicalSystem","getPhaseid",msg,phaseidlookup_.size(),0);
-        ex.printException();
-        exit(1);
+        if (warning_) {
+            cout <<  "Could not find phaseidlookup_ match to " << phasename << endl;
+        }
+        return (phasenum_ + 9999);
     }
 }
 
@@ -6143,12 +6227,25 @@ double getSI (const string &str)
 }
 
 /**
-@brief Get the list of IC moles in the aqueous solution.
+@brief Get the current list of IC moles in the aqueous solution.
 
 @return the vector of moles of each IC in the aqueous solution
 */
 vector<double> getSolution ();
 
+/**
+@brief Get the initial solution composition other than water
+
+This function returns the map of molal concentrations of each IC in
+the initial solution [mol/kgw].
+
+@return the initial solute concentration map
+*/
+map<int,double> getInitialSolutionComp(void)
+{
+    return initial_solution_composition_;
+}
+ 
 /**
 @brief Set the verbose flag
 
