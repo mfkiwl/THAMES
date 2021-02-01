@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #include <GEMS3K/node.h>
-#include <GEMS3K/io_arrays.h>
+// #include <GEMS3K/io_arrays.h>
 
 #include "global.h"
 
@@ -48,6 +48,8 @@ class Solution {
 private:
 
 TNode *node_;                       /**< Pointer to the GEM3K Tnode object */
+
+bool jsonformat_;                   /**< True if GEM input data files are in JSON format */
 
 double T_;                          /**< System-wide temperature [K] */
 double P_;                          /**< System-wide pressure [Pa] */
@@ -142,6 +144,27 @@ Solution (const string &GEMfilename,
 A destructor is needed to free the memory allocated by the constructor.
 */
 ~Solution ();
+
+/**
+@brief Determine whether GEM input data files are in JSON format
+
+@param masterFileName is the lst name containing the others
+@return true if JSON is indicated, false otherwise
+*/
+bool isInputFormatJSON(const char *masterFileName);
+
+/**
+@brief Get the name of the three JSON input files for GEMS data
+
+@param masterFileName is the lst name containing the others
+@param dchname is the name of the DCH data file
+@param ipmname is the name of the IPM data file
+@param dbrname is the name of the DBR data file
+*/
+void getJSONFiles(const char *masterFileName,
+                  string &dchname,
+                  string &ipmname,
+                  string &dbrname);
 
 /**
 @brief Calculate the thermodynanmic equilibrium state of the solution.
@@ -425,6 +448,27 @@ double calculateCrystrain (double SI,
                            double porevolfrac,
                            double Kp,
                            double Ks);
+
+/**
+@brief Set the jsonformat_ flag
+
+@param jsonformat is true if input files are in JSON format
+*/
+void setJsonformat (const bool jsonformat)
+{
+    jsonformat_ = jsonformat;
+    return;
+}
+
+/**
+@brief Get the jsonformat_ flag
+
+@return the jsonformat flag
+*/
+bool getJsonformat () const
+{
+    return jsonformat_;
+}
 
 /**
 @brief Set the verbose flag

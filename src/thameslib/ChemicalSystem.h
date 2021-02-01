@@ -32,7 +32,7 @@ possible.
 #include <vector>
 #include <map>
 #include <GEMS3K/node.h>
-#include <GEMS3K/io_arrays.h>
+// #include <GEMS3K/io_arrays.h>
 #include "myconfig.h"
 #include <iomanip>
 #include <typeinfo>
@@ -147,6 +147,8 @@ that GEM data into THAMES data that are used to create and change microstructure
 */
 
 class ChemicalSystem {
+
+bool jsonformat_;                       /**< True if input GEM data files are JSON format */
 
 Solution *solut_;                       /**< Pointer to a Solution object for the system */
 unsigned int micphasenum_;              /**< Total number of material components that the
@@ -497,6 +499,27 @@ ChemicalSystem (const ChemicalSystem &obj);
 */
 ~ChemicalSystem ();
     
+/**
+@brief Determine whether GEM input data files are in JSON format
+
+@param masterFileName is the lst name containing the others
+@return true if JSON is indicated, false otherwise
+*/
+bool isInputFormatJSON(const char *masterFileName);
+
+/**
+@brief Get the name of the three JSON input files for GEMS data
+
+@param masterFileName is the lst name containing the others
+@param dchname is the name of the DCH data file
+@param ipmname is the name of the IPM data file
+@param dbrname is the name of the DBR data file
+*/
+void getJSONFiles(const char *masterFileName,
+                  string &dchname,
+                  string &ipmname,
+                  string &dbrname);
+
 /**
 @brief Master function for parsing an input file in XML format.
 
@@ -6246,6 +6269,28 @@ map<int,double> getInitialSolutionComp(void)
     return initial_solution_composition_;
 }
  
+/**
+@brief Set the jsonformat_ flag
+
+@param jsonformat is true if input files are in JSON format
+*/
+void setJsonformat (const bool jsonformat)
+{
+    jsonformat_ = jsonformat;
+    return;
+}
+
+/**
+@brief Get the jsonformat_ flag
+
+@return the jsonformat flag
+*/
+bool getJsonformat () const
+{
+    return jsonformat_;
+}
+
+
 /**
 @brief Set the verbose flag
 

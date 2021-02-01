@@ -86,7 +86,7 @@ int main (int argc, char **argv)
     //
 
     try {
-        Solut = new Solution(geminput_filename_solution,geminput_dbrname_solution);
+        Solut = new Solution(geminput_filename_solution,geminput_dbrname_solution,VERBOSE);
     }
     catch (bad_alloc &ba) {
         cout << "Bad memory allocation in Solution constructor: " << ba.what() << endl;
@@ -137,6 +137,12 @@ int main (int argc, char **argv)
         cout << "Bad memory allocation in ChemicalSystem constructor: "
              << ba.what() << endl;
         delete Solut;
+        exit(1);
+    }
+    catch (GEMException ex) {
+        ex.printException();
+        delete Solut;
+        exit(1);
     }
         
     //
@@ -320,6 +326,19 @@ int main (int argc, char **argv)
       delete AppliedStrainSolver;
       exit(1);
     }
+    catch (FileException fex) {
+      fex.printException();
+      delete KMod;
+      if (choice == SULFATE_ATTACK) {
+          delete AppliedStrainSolver;
+          delete ThermalStrainSolver;
+      }
+      delete Mic;
+      delete ChemSys;
+      delete ThermalStrainSolver;
+      delete AppliedStrainSolver;
+      exit(1);
+    }
         
     //
     // Write a formatted output of the simulation parameters for later reference
@@ -336,7 +355,24 @@ int main (int argc, char **argv)
         cout << "Going into Controller::doCycle now" << endl;
         cout.flush();
     }
-    Ctrl->doCycle(statfilename,choice);
+
+    try {
+        Ctrl->doCycle(statfilename,choice);
+    }
+    catch (GEMException gex) {
+      gex.printException();
+      delete KMod;
+      if (choice == SULFATE_ATTACK) {
+          delete AppliedStrainSolver;
+          delete ThermalStrainSolver;
+      }
+      delete Mic;
+      delete ChemSys;
+      delete ThermalStrainSolver;
+      delete AppliedStrainSolver;
+      delete Ctrl;
+      exit(1);
+    }
         
     // 
     // Simulation is finished.  Record and output the timing data.

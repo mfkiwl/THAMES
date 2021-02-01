@@ -53,14 +53,8 @@ Lattice::Lattice (ChemicalSystem *cs,
   ///
 
   ifstream in(fname.c_str());
-  try {
-    if (!in) {
-        throw FileException("Lattice","Lattice",fname,"Could not open");
-    }
-  }
-  catch (FileException fex) {
-    fex.printException();
-    exit(1);
+  if (!in) {
+      throw FileException("Lattice","Lattice",fname,"Could not open");
   }
     
   in >> buff;

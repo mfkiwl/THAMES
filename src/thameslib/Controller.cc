@@ -153,8 +153,7 @@ Controller::Controller (Lattice *msh,
     out6.close();
   }
   catch (FileException fex) {
-    fex.printException();
-    exit(1);
+    throw fex;
   }
     
   ///
@@ -176,7 +175,7 @@ Controller::Controller (Lattice *msh,
     }
   }
   catch (FileException fex) {
-    fex.printException();
+    throw fex;
   }
 }
 
@@ -263,7 +262,13 @@ void Controller::doCycle (const string &statfilename,
 
     if (verbose_) cout << "Going into Controller::calculateState with isfirst = "
                        << isfirst << endl;
-    calculateState(time_[i],timestep,isfirst);
+    try {
+        calculateState(time_[i],timestep,isfirst);
+    }
+    catch (GEMException gex) {
+        throw gex;
+    }
+
     if (verbose_) {
         cout << "*Returned from Controller::calculateState(" << time_[i] << ","
              << timestep << "," << isfirst << ")" << endl;
@@ -281,6 +286,12 @@ void Controller::doCycle (const string &statfilename,
         cout.flush();
     }
 
+    ///
+    /// Next function can encounter EOB exceptions within but they
+    /// are caught there and the program will then exit from within
+    /// this function rather than throwing an exception itself
+    ////
+    
     lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
 
     ///
@@ -564,8 +575,7 @@ void Controller::initializeState (double time)
         }
     }
     catch (GEMException gex) {
-        gex.printException();
-        exit(1);
+        throw gex;
     }
 
     if (verbose_) {

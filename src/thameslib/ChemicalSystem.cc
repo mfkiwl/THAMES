@@ -12,108 +12,142 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const bool verbose,
                                 const bool warning) : solut_(Solut)
 {
-  unsigned int i,j;
-  double *amat;
-  string exmsg;
-  long int gemflag = 0;
+    unsigned int i,j;
+    double *amat;
+    string exmsg;
+    long int gemflag = 0;
 
-  double *icmolarmass,*dcmolarmass;
-  char *cc;
-  unsigned int ii,jj;
-  int k;
-  bool found = false;
+    double *icmolarmass,*dcmolarmass;
+    char *cc;
+    unsigned int ii,jj;
+    int k;
+    bool found = false;
     
-  ///  The constructor initializes all the members to default values,
-  ///  then launches the initial thermodynamic calculation, and sets
-  ///  up the correspondences between GEM CSD phases and microstructure
-  ///  phases.
-  ///
-  ///  All members are initialized to default values first, and all
-  ///  vectors and maps are cleared.  The thermodynamic variables
-  ///  are set to be consistent with neutral water at STP
-  ///
+    ///  The constructor initializes all the members to default values,
+    ///  then launches the initial thermodynamic calculation, and sets
+    ///  up the correspondences between GEM CSD phases and microstructure
+    ///  phases.
+    ///
+    ///  All members are initialized to default values first, and all
+    ///  vectors and maps are cleared.  The thermodynamic variables
+    ///  are set to be consistent with neutral water at STP
+    ///
  
-  verbose_ = verbose;
-  warning_ = warning;
-  micphasenum_ = phasenum_ = solutionphasenum_ = 0;
-  micimpuritynum_ = 4;
-  micphasename_.clear();
-  stressphasename_.clear();
-  porousphasename_.clear();
-  micid_.clear();
-  DCname_.clear();
-  phasename_.clear();
-  ICnum_ = DCnum_ = phasenum_ = 0;
-  micphasemembers_.clear();
-  micphasemembersvolfrac_.clear();
-  micDCmembers_.clear();
-  randomgrowth_.clear();
-  growthtemplate_.clear();
-  affinity_.clear();
-  porosity_.clear();
-  k2o_.clear();
-  na2o_.clear();
-  mgo_.clear();
-  so3_.clear();
-  color_.clear();
-  vphasestoich_.clear();
-  micidlookup_.clear();
-  ICidlookup_.clear();
-  DCidlookup_.clear();
-  phaseidlookup_.clear();
-  mic2phase_.clear();
-  mic2DC_.clear();
-  mic2kinetic_.clear();
-  kinetic2mic_.clear();
-  mic2thermo_.clear();
-  thermo2mic_.clear();
-  kineticphase_.clear();
-  thermophase_.clear();
-  DCstoich_.clear();
-  ICclasscode_.clear();
-  DCclasscode_.clear();
-  phaseclasscode_.clear();
-  ICmolarmass_.clear();
-  DCmolarmass_.clear();
-  DCmolarvolume_.clear();
-  phasemolarmass_.clear();
-  pH_ = 7.0;
-  pe_ = 1.0;
-  Eh_ = 0.0;
-  T_ = 298.0;
-  P_ = 101325.0;
-  Vs_ = Ms_ = 1.0;
-  Gs_ = Ms_ = 0.0;
-  nodestatus_ = nodehandle_ = iterdone_ = 0;
-  sattack_time_ = 1.0e10;
-  leach_time_ = 1.0e10; 
-  ICname_.clear();
-  DCname_.clear();
-  phasename_.clear();
-  ICidlookup_.clear();
-  DCidlookup_.clear();
-  phaseidlookup_.clear();
-  micphasevolfrac_.clear();
-  micphasevolume_.clear();
-  micphasemass_.clear();
-  micphasemassdissolved_.clear();
-  SI_.clear();
-    
-  node_ = new TNode();
+    verbose_ = verbose;
+    jsonformat_ = false;
+    warning_ = warning;
+    micphasenum_ = phasenum_ = solutionphasenum_ = 0;
+    micimpuritynum_ = 4;
+    micphasename_.clear();
+    stressphasename_.clear();
+    porousphasename_.clear();
+    micid_.clear();
+    DCname_.clear();
+    phasename_.clear();
+    ICnum_ = DCnum_ = phasenum_ = 0;
+    micphasemembers_.clear();
+    micphasemembersvolfrac_.clear();
+    micDCmembers_.clear();
+    randomgrowth_.clear();
+    growthtemplate_.clear();
+    affinity_.clear();
+    porosity_.clear();
+    k2o_.clear();
+    na2o_.clear();
+    mgo_.clear();
+    so3_.clear();
+    color_.clear();
+    vphasestoich_.clear();
+    micidlookup_.clear();
+    ICidlookup_.clear();
+    DCidlookup_.clear();
+    phaseidlookup_.clear();
+    mic2phase_.clear();
+    mic2DC_.clear();
+    mic2kinetic_.clear();
+    kinetic2mic_.clear();
+    mic2thermo_.clear();
+    thermo2mic_.clear();
+    kineticphase_.clear();
+    thermophase_.clear();
+    DCstoich_.clear();
+    ICclasscode_.clear();
+    DCclasscode_.clear();
+    phaseclasscode_.clear();
+    Eh_ = 0.0;
+    T_ = 298.0;             // Default temperature [K]
+    P_ = 101325.0;          // Default pressure in [Pa]
+    Vs_ = Ms_ = 1.0;
+    Gs_ = Ms_ = 0.0;
+    nodestatus_ = nodehandle_ = iterdone_ = 0;
+    sattack_time_ = 1.0e10;
+    leach_time_ = 1.0e10; 
+    ICname_.clear();
+    DCname_.clear();
+    phasename_.clear();
+    ICidlookup_.clear();
+    DCidlookup_.clear();
+    phaseidlookup_.clear();
+    micphasevolfrac_.clear();
+    micphasevolume_.clear();
+    micphasemass_.clear();
+    micphasemassdissolved_.clear();
+    SI_.clear();
+      
+    node_ = new TNode();
    
-  ///
-  /// Initialize the thermodynamic system for both hydrates and solution 
-  /// in order to initialize phasevolume_ 
-  ///
+    ///
+    /// Initialize the thermodynamic system for both hydrates and solution 
+    /// in order to initialize phasevolume_ 
+    ///
 
-  char *cGEMfilename = (char*)GEMfilename.c_str();
-  char *cGEMdbrname = (char*)GEMdbrname.c_str();
-  if (verbose_) {
-      cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
-           << cGEMfilename << endl;
-  }
-  try {
-    gemflag = node_->GEM_init(cGEMfilename);
+    char *cGEMfilename = (char*)GEMfilename.c_str();
+    char *cGEMdbrname = (char*)GEMdbrname.c_str();
+    if (verbose_) {
+        cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
+             << cGEMfilename << endl;
+    }
+
+    /// Find out if the input data are in json format or in key-value format
+    
+    try {
+        string json_dch = "";
+        string json_ipm = "";
+        string json_dbr = "";
+        jsonformat_ = isInputFormatJSON(cGEMfilename);
+
+        ///
+        /// GEM_init initializes the IPM and DCH data structures
+        /// This function will read the IPM, DCH, and one or more DBRs
+        /// The argument is type const char *, and is the name of the
+        /// data.lst file with the names of the IPM,
+        /// DCH, and root DBR file.
+        /// 
+        /// Return values are :
+        ///    0 if successful, and the node_ object will hold the data
+        ///    1 if input file(s) were not found or are corrupt
+        ///   -1 if internal memory allocation error occurred
+        /// 
+
+        if (jsonformat_) {
+            if (verbose) {
+                cout << "Detected JSON input file format for ChemicalSystem GEM data files" << endl;
+                cout.flush();
+            }
+            getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
+            gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
+        } else {
+            if (verbose) {
+                cout << "Detected key-value input file format for ChemicalSystem GEM data files" << endl;
+                cout.flush();
+            }
+            gemflag = node_->GEM_init(cGEMfilename);
+        }
+    }
+    catch (FileException fex) {
+        throw fex;
+    }
+
     if (gemflag == 1) {
         exmsg = "Bad return from GEM_init: " + GEMfilename + " missing or corrupt";
         throw GEMException("ChemicalSystem","ChemicalSystem",exmsg);
@@ -122,100 +156,107 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
         exmsg = "Bad return from GEM_init: internal memory allocation error";
         throw GEMException("ChemicalSystem","ChemicalSystem",exmsg);
     }
-  }
-  catch (GEMException e) {
-    e.printException();
-    exit(0);
-  }
     
-  /// 
-  /// Determine the number of possible ICs, DCs, and phases from the
-  /// GEM CSD input that was read by GEM-IPM during initialization
-  ///
+    /// 
+    /// Determine the number of possible ICs, DCs, and phases from the
+    /// GEM CSD input that was read by GEM-IPM during initialization
+    ///
   
-  ICnum_ = (unsigned int)((node_->pCSD())->nIC);
-  DCnum_ = (unsigned int)((node_->pCSD())->nDC);
-  phasenum_ = (unsigned int)((node_->pCSD())->nPH);
-  solutionphasenum_ = (unsigned int)((node_->pCSD())->nPS);
+    ICnum_ = (unsigned int)((node_->pCSD())->nIC);
+    DCnum_ = (unsigned int)((node_->pCSD())->nDC);
+    phasenum_ = (unsigned int)((node_->pCSD())->nPH);
+    solutionphasenum_ = (unsigned int)((node_->pCSD())->nPS);
     
-  ///
-  /// Knowing the dimensions, allocate the memory for all the arrays that
-  /// must be created to store thermodynamic calculation results and communicate
-  /// them to the microstructure
-  ///
+    ///
+    /// Knowing the dimensions, allocate the memory for all the arrays that
+    /// must be created to store thermodynamic calculation results and communicate
+    /// them to the microstructure
+    ///
 
-  try {
-    exmsg = "ICmoles_";
-    ICmoles_ = new double [ICnum_];
-    exmsg = "ICresiduals_";
-    ICresiduals_ = new double [ICnum_];
-    exmsg = "ICchempot_";
-    ICchempot_ = new double [ICnum_];
-    exmsg = "DCmoles_";
-    DCmoles_ = new double [DCnum_];
-    exmsg = "DCactivitycoeff_";
-    DCactivitycoeff_ = new double [DCnum_];
-    exmsg = "phasemoles_";
-    phasemoles_ = new double [phasenum_];
-    exmsg = "solutphasemoles_";
-    solutphasemoles_ = new double [phasenum_];
-    exmsg = "ophasemoles_";
-    ophasemoles_ = new double [phasenum_];
-    exmsg = "phasevolume_";
-    phasevolume_ = new double [phasenum_];
-    exmsg = "solutphasevolume_";
-    solutphasevolume_ = new double [phasenum_];
-    exmsg = "ophasevolume_";
-    ophasevolume_ = new double [phasenum_];
-    exmsg = "phasemass_";
-    phasemass_ = new double [phasenum_];
-    exmsg = "solutphasemass_";
-    solutphasemass_ = new double [phasenum_];
-    exmsg = "ophasemass_";
-    ophasemass_ = new double [phasenum_];
-    exmsg = "surfacearea_";
-    surfacearea_ = new double [phasenum_];
-    exmsg = "carrier_";
-    carrier_ = new double [solutionphasenum_];
-    exmsg = "DCupperlimit_";
-    DCupperlimit_ = new double [DCnum_];
-    exmsg = "DClowerlimit_";
-    DClowerlimit_ = new double [DCnum_];
-    exmsg = "phasestoich_";
-    phasestoich_ = new double [phasenum_ * ICnum_];
-    exmsg = "solidstoich_";
-    solidstoich_ = new double [ICnum_];
-    exmsg = "solutphasestoich_";
-    solutphasestoich_ = new double [phasenum_ * ICnum_];
-    exmsg = "solutsolidstoich_";
-    solutsolidstoich_ = new double [ICnum_];
-  }
-  catch (bad_alloc& ba) {
-    cout << endl << "Bad_alloc Exception Thrown:" << endl;
-    cout << "    Details:" << endl;
-    cout << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
-    cout << "    Error in allocating memory for array " << exmsg << endl;
-    cerr << endl << "Bad_alloc Exception Thrown:" << endl;
-    cerr << "    Details:" << endl;
-    cerr << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
-    cerr << "    Error in allocating memory for array " << exmsg << endl;
-    exit(0);
-  }
+    try {
+      exmsg = "ICmoles_";
+      ICmoles_ = new double [ICnum_];
+      exmsg = "ICresiduals_";
+      ICresiduals_ = new double [ICnum_];
+      exmsg = "ICchempot_";
+      ICchempot_ = new double [ICnum_];
+      exmsg = "DCmoles_";
+      DCmoles_ = new double [DCnum_];
+      exmsg = "DCactivitycoeff_";
+      DCactivitycoeff_ = new double [DCnum_];
+      exmsg = "phasemoles_";
+      phasemoles_ = new double [phasenum_];
+      exmsg = "solutphasemoles_";
+      solutphasemoles_ = new double [phasenum_];
+      exmsg = "ophasemoles_";
+      ophasemoles_ = new double [phasenum_];
+      exmsg = "phasevolume_";
+      phasevolume_ = new double [phasenum_];
+      exmsg = "solutphasevolume_";
+      solutphasevolume_ = new double [phasenum_];
+      exmsg = "ophasevolume_";
+      ophasevolume_ = new double [phasenum_];
+      exmsg = "phasemass_";
+      phasemass_ = new double [phasenum_];
+      exmsg = "solutphasemass_";
+      solutphasemass_ = new double [phasenum_];
+      exmsg = "ophasemass_";
+      ophasemass_ = new double [phasenum_];
+      exmsg = "surfacearea_";
+      surfacearea_ = new double [phasenum_];
+      exmsg = "carrier_";
+      carrier_ = new double [solutionphasenum_];
+      exmsg = "DCupperlimit_";
+      DCupperlimit_ = new double [DCnum_];
+      exmsg = "DClowerlimit_";
+      DClowerlimit_ = new double [DCnum_];
+      exmsg = "phasestoich_";
+      phasestoich_ = new double [phasenum_ * ICnum_];
+      exmsg = "solidstoich_";
+      solidstoich_ = new double [ICnum_];
+      exmsg = "solutphasestoich_";
+      solutphasestoich_ = new double [phasenum_ * ICnum_];
+      exmsg = "solutsolidstoich_";
+      solutsolidstoich_ = new double [ICnum_];
+    }
+    catch (bad_alloc& ba) {
+      cout << endl << "Bad_alloc Exception Thrown:" << endl;
+      cout << "    Details:" << endl;
+      cout << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
+      cout << "    Error in allocating memory for array " << exmsg << endl;
+      cerr << endl << "Bad_alloc Exception Thrown:" << endl;
+      cerr << "    Details:" << endl;
+      cerr << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
+      cerr << "    Error in allocating memory for array " << exmsg << endl;
+      exit(0);
+    }
     
-  ///
-  /// Ask to run with automatic initial approximation.
-  ///
-  /// This starts the thermodynamic calculation and returns the results, including
-  /// the ionic strength, pH, IC chemical potentials, DC moles, phase moles, phase
-  /// volumes, and other results of the calculation.  All of these parameters
-  /// are loaded into the THAMES vectors that keep track of these things, since,
-  /// they were passed to the GEM calculation by reference.
-  /// 
-  /// Refer to GEM-IPM documentation for details about different ways to run the
-  /// thermodynamic calculations
-  ///
- 
-  try {
+    ///
+    /// Attempt to run GEM with automatic initial approximation (AIA)
+    ///
+    /// This starts the thermodynamic calculation and returns the results, including
+    /// the ionic strength, pH, IC chemical potentials, DC moles, phase moles, phase
+    /// volumes, and other results of the calculation.  All of these parameters
+    /// are loaded into the THAMES vectors that keep track of these things, since,
+    /// they were passed to the GEM calculation by reference.
+    /// 
+    /// The argument is false if we wamt to use activity coefficients and speciation
+    /// from a previous GEM_run, but is true if we want to use the activity coefficients
+    /// and speciation stored in a DBR memory structure read from a DBR file
+    ///
+    /// Possible return values for nodestatus_:
+    ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
+    ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
+    ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
+    ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
+    ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+    ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
+    ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
+    ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
+    ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
+    ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
+    ///
+
     (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
     if (verbose_) {
         cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
@@ -224,25 +265,86 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     }
     nodestatus_ = node_->GEM_run(false);
     if (verbose_) {
-        cout << "ChemicalSystem::Constructor: Exited GEM_run (1) with node status = "
-             << nodestatus_ << endl;
-        cout.flush();
+      cout << "Done! nodestatus is " << nodestatus_ << endl;
+      cout.flush();
     }
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
-        exmsg = "ERROR:    Call to GEM_run failed...";
-        throw GEMException("ChemicalSystem","ChemicalSystem",exmsg);
+        bool dothrow = false;
+        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "       nodestatus_ = ";
+        switch (nodestatus_) {
+            case NEED_GEM_AIA:
+                exmsg = " Need GEM calc with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_AIA:
+                exmsg = " Untrustworthy result with auto initial approx (AIA)",
+                dothrow = true;
+                break;
+            case ERR_GEM_AIA:
+                exmsg = " Failed result with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case NEED_GEM_SIA:
+                exmsg =  " Need GEM calc with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_SIA:
+                exmsg = " Untrustworthy result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case ERR_GEM_SIA:
+                exmsg =  " Failed result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case T_ERROR_GEM:
+                exmsg = " Terminal GEM error; need restart";
+                dothrow = true;
+                break;
+            case NO_GEM_SOLVER:
+                exmsg =  " No GEM recalculation needed for node";
+                dothrow = false;
+                break;
+        }
+        if (dothrow) {
+            throw GEMException("Solution","calculateState",exmsg);
+        }
     }
+
     if (verbose_) {
         cout << "ChemicalSystem::Constructor: Entering GEM_restore_MT (1) ... " << endl;
         cout.flush();
     }
+
+    ///
+    /// Next call passes (copies) the GEMS3K input data from the DBR structure.
+    /// This is useful after the GEM_init and GEM_run() calls to initialize the
+    /// arrays that keep the chemical data for all the nodes (one node in most cases)
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+    
+
     node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
         &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
+
     if (verbose_) {
         cout << "Done!" << endl;
         cout << "ChemicalSystem::Constructor: Entering GEM_to_MT (1) ... " << endl;
         cout.flush();
     }
+
+    ///
+    /// Next call retrieves the GEMIPM chemical speciation calculation
+    /// results from the DBR structure instance into memory provided by
+    /// the THAMES code.  The dimensions and ordering of the arrays must
+    /// correspond to those in currently existing DCH memory structure
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+
     node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
         Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
         &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
@@ -251,209 +353,246 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     if (verbose_) {
         cout << "Done!" << endl;
     }
-
-  }
-  catch (GEMException e) {
-    e.printException();
-    exit(0);
-  }
-  catch (long int flag) {
-    cout << endl << "GEM Exception Thrown:" << endl;
-    cout << "Offending Function ChemicalSystem::ChemicalSystem" << endl;
-    cerr << endl << "GEM Exception Thrown:" << endl;
-    cerr << "Offending Function ChemicalSystem::ChemicalSystem" << endl;
-    if (flag < 0) {
-        cout << "Details:  Unkown internal error in TNode::GEM_read_dbr" << endl;
-        cerr << "Details:  Unkown internal error in TNode::GEM_read_dbr" << endl;
-    } else {
-        cout << "Details:  Check ipmlog.txt file for error details" << endl;
-        cerr << "Details:  Check ipmlog.txt file for error details" << endl;
-    }
-    exit(0);
-  }
-
-	
-  /// The results of the thermodynamic calculation are now known, and
-  /// the constructor can cast them into appropriate units and set up
-  /// the data structure to make correspondences between GEM and microstructure
-  ///
-  /// Convert all IC and DC molar masses from kg/mol to g/mol
-  ///
- 
-  ICmolarmass_.resize(ICnum_,0.0);
-  icmolarmass = (node_->pCSD())->ICmm;
-  for (i = 0; i < ICnum_; i++) {
-    ICmolarmass_[i] = (1000.0 * (double)(*icmolarmass));  // converts to g per mol
-    icmolarmass++;
-  }
-  DCmolarmass_.resize(DCnum_,0.0);
-  dcmolarmass = (node_->pCSD())->DCmm;
-  for (i = 0; i < DCnum_; i++) {
-    DCmolarmass_[i] = (1000.0 * (double)(*dcmolarmass));  // converts to g per mol
-    dcmolarmass++;
-  }
-
-  DCmolarvolume_.resize(DCnum_,0.0);
-
-  string string1;
-  for (i = 0; i < ICnum_; i++) {
-    string1.assign(node_->xCH_to_IC_name(i));
-    ICname_.push_back(string1);
-    ICidlookup_.insert(make_pair(string1,i));
-  }
-  for (i = 0; i < DCnum_; i++) {
-    if (verbose_) {
-        cout << "DC id " << i << " name is " << node_->xCH_to_DC_name(i) << endl;
-        cout.flush();
-    }
-    string1.assign(node_->xCH_to_DC_name(i));
-
-    DCname_.push_back(string1);
-    DCidlookup_.insert(make_pair(string1,i));
-  }
-  for (i = 0; i < phasenum_; i++) {
-    string1.assign(node_->xCH_to_Ph_name(i));
-    phasename_.push_back(string1);
-    phaseidlookup_.insert(make_pair(string1,i));
-  }
-
-  if (verbose_) {
-      cout << "To initialize phasevolume_ and phasemass_, set DCupperlimit to be normal: " 
-           << endl;
-      for (int i = 0; i < DCnum_; i++) {
-        cout << DCname_[i] << ": " << DCupperlimit_[i] << endl;
-      }
-  }
-
-  ///
-  /// Set up the stoichiometry matrix for dependent components (DCs) in terms
-  /// of independent components (ICs).  This is the GEM CSD A matrix
-  ///
- 
-  vector<double> scplaceholder;
-  scplaceholder.clear();
-  scplaceholder.resize(ICnum_,0);
-  DCstoich_.resize(DCnum_,scplaceholder);
-  amat = (node_->pCSD())->A;
-  for (i = 0; i < DCnum_; i++) {
-    for (j = 0; j < ICnum_; j++) {
-      DCstoich_[i][j] = (double)(*amat);
-      amat++;
-    } 
-  }
-
-  ///
-  /// Set up the stoichiometry and molar masses of the GEM CSD phases
-  ///
-
-  setPhasestoich();
-  setVphasestoich();
-
-  ///
-  /// Normally we can call setPhasemass() to read in the GEM phase masses
-  /// from the GEM CSD, but this first time we have to do it manually
-  /// because the units are converted from kg to g and this will mess
-  /// up the assignment of the ophasemass_ values, which would still be
-  /// in kg if we called the setPhasemass() function.
-  ///
   
-  for (long int i = 0; i < phasenum_; i++) {
-      phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
-      ophasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
-  }
-
-  setPhasevolume();
-  setPhasemolarmass();
-
-  ///
-  /// Set up the class codes for ICs, DCs, and phases, based on the type of
-  /// component they are.  Refer to the documentation for these individual members
-  /// for more detailed information about allowable values of the class codes
-  ///
-
-  ICclasscode_.resize(ICnum_,' ');
-  cc = (node_->pCSD())->ccIC;
-  for (i = 0; i < ICnum_; i++) {
-    ICclasscode_[i] = *cc;
-    cc++;
-  }
-
-  DCclasscode_.resize(DCnum_,' ');
-  cc = (node_->pCSD())->ccDC;
-  for (i = 0; i < DCnum_; i++) {
-    DCclasscode_[i] = *cc;
-    cc++;
-  }
-
-  phaseclasscode_.resize(phasenum_,' ');
-  cc = (node_->pCSD())->ccPH;
-  for (i = 0; i < phasenum_; i++) {
-    phaseclasscode_[i] = *cc;
-    cc++;
-  }
-
-  ///
-  /// Begin parsing the chemistry input XML file
-  ///
-
-  string msg;
-  string xmlext = ".xml";
-  size_t foundxml = Interfacefilename.find(xmlext);
-  try {
-    if (foundxml != string::npos) {
-      parseDoc(Interfacefilename);
-        
-      micphasevolfrac_.resize(micphasenum_,0.0);
-      micphasevolume_.resize(micphasenum_,0.0);
-      micphasemass_.resize(micphasenum_,0.0);
+    /// The results of the thermodynamic calculation are now known, and
+    /// the constructor can cast them into appropriate units and set up
+    /// the data structure to make correspondences between GEM and microstructure
+    ///
+    /// Convert all IC and DC molar masses from kg/mol to g/mol
+    ///
+   
+    ICmolarmass_.resize(ICnum_,0.0);
+    icmolarmass = (node_->pCSD())->ICmm;
+    for (i = 0; i < ICnum_; i++) {
+      ICmolarmass_[i] = (1000.0 * (double)(*icmolarmass));  // converts to g per mol
+      icmolarmass++;
+    }
+    DCmolarmass_.resize(DCnum_,0.0);
+    dcmolarmass = (node_->pCSD())->DCmm;
+    for (i = 0; i < DCnum_; i++) {
+      DCmolarmass_[i] = (1000.0 * (double)(*dcmolarmass));  // converts to g per mol
+      dcmolarmass++;
+    }
+  
+    DCmolarvolume_.resize(DCnum_,0.0);
+  
+    string string1;
+    for (i = 0; i < ICnum_; i++) {
+      string1.assign(node_->xCH_to_IC_name(i));
+      ICname_.push_back(string1);
+      ICidlookup_.insert(make_pair(string1,i));
+    }
+    for (i = 0; i < DCnum_; i++) {
       if (verbose_) {
-          cout << " Setting micphasemass size to " << micphasenum_ << endl;
+          cout << "DC id " << i << " name is " << node_->xCH_to_DC_name(i) << endl;
           cout.flush();
       }
-      micphasemassdissolved_.resize(micphasenum_,0.0);
-    } else {
-      msg = "Not an XML file";
-      throw FileException("ChemicalSystem","ChemicalSystem",Interfacefilename,msg);
+      string1.assign(node_->xCH_to_DC_name(i));
+  
+      DCname_.push_back(string1);
+      DCidlookup_.insert(make_pair(string1,i));
     }
-  }
-  catch (FileException e) {
-    e.printException();
-    exit(0);
-  }
+    for (i = 0; i < phasenum_; i++) {
+      string1.assign(node_->xCH_to_Ph_name(i));
+      phasename_.push_back(string1);
+      phaseidlookup_.insert(make_pair(string1,i));
+    }
+
+    if (verbose_) {
+        cout << "To initialize phasevolume_ and phasemass_, set DCupperlimit to be normal: " 
+             << endl;
+        for (int i = 0; i < DCnum_; i++) {
+          cout << DCname_[i] << ": " << DCupperlimit_[i] << endl;
+        }
+    }
+
+    ///
+    /// Set up the stoichiometry matrix for dependent components (DCs) in terms
+    /// of independent components (ICs).  This is the GEM CSD A matrix
+    ///
+ 
+    vector<double> scplaceholder;
+    scplaceholder.clear();
+    scplaceholder.resize(ICnum_,0);
+    DCstoich_.resize(DCnum_,scplaceholder);
+    amat = (node_->pCSD())->A;
+    for (i = 0; i < DCnum_; i++) {
+      for (j = 0; j < ICnum_; j++) {
+        DCstoich_[i][j] = (double)(*amat);
+        amat++;
+      } 
+    }
+  
+    ///
+    /// Set up the stoichiometry and molar masses of the GEM CSD phases
+    ///
+
+    setPhasestoich();
+    setVphasestoich();
+
+    ///
+    /// Normally we can call setPhasemass() to read in the GEM phase masses
+    /// from the GEM CSD, but this first time we have to do it manually
+    /// because the units are converted from kg to g and this will mess
+    /// up the assignment of the ophasemass_ values, which would still be
+    /// in kg if we called the setPhasemass() function.
+    ///
+  
+    for (long int i = 0; i < phasenum_; i++) {
+        phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+        ophasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+    }
+
+    setPhasevolume();
+    setPhasemolarmass();
+
+    ///
+    /// Set up the class codes for ICs, DCs, and phases, based on the type of
+    /// component they are.  Refer to the documentation for these individual members
+    /// for more detailed information about allowable values of the class codes
+    ///
+
+    ICclasscode_.resize(ICnum_,' ');
+    cc = (node_->pCSD())->ccIC;
+    for (i = 0; i < ICnum_; i++) {
+      ICclasscode_[i] = *cc;
+      cc++;
+    }
+
+    DCclasscode_.resize(DCnum_,' ');
+    cc = (node_->pCSD())->ccDC;
+    for (i = 0; i < DCnum_; i++) {
+      DCclasscode_[i] = *cc;
+      cc++;
+    }
+
+    phaseclasscode_.resize(phasenum_,' ');
+    cc = (node_->pCSD())->ccPH;
+    for (i = 0; i < phasenum_; i++) {
+      phaseclasscode_[i] = *cc;
+      cc++;
+    }
+
+    ///
+    /// Begin parsing the chemistry input XML file
+    ///
+
+    string msg;
+    string xmlext = ".xml";
+    size_t foundxml = Interfacefilename.find(xmlext);
+    try {
+      if (foundxml != string::npos) {
+        parseDoc(Interfacefilename);
+          
+        micphasevolfrac_.resize(micphasenum_,0.0);
+        micphasevolume_.resize(micphasenum_,0.0);
+        micphasemass_.resize(micphasenum_,0.0);
+        if (verbose_) {
+            cout << " Setting micphasemass size to " << micphasenum_ << endl;
+            cout.flush();
+        }
+        micphasemassdissolved_.resize(micphasenum_,0.0);
+      } else {
+        msg = "Not an XML file";
+        throw FileException("ChemicalSystem","ChemicalSystem",Interfacefilename,msg);
+      }
+    }
+    catch (FileException e) {
+      throw e;
+    }
     
-  ///
-  /// Set up the main map that correlates microstructure phases with GEM CSD phases
-  ///
+    ///
+    /// Set up the main map that correlates microstructure phases with GEM CSD phases
+    ///
 
-  mictotinitvolume_ = 0.0;
-  for (unsigned int i = 0; i < micphasenum_; i++) {
-    mic2phase_.insert(make_pair((int)i,micphasemembers_[i]));
-    mic2DC_.insert(make_pair((int)i,micDCmembers_[i]));
-  }
+    mictotinitvolume_ = 0.0;
+    for (unsigned int i = 0; i < micphasenum_; i++) {
+      mic2phase_.insert(make_pair((int)i,micphasemembers_[i]));
+      mic2DC_.insert(make_pair((int)i,micDCmembers_[i]));
+    }
 
-  ///
-  /// Set up the vector of saturation indices for each GEM phase.
-  /// This determines the driving force for growth and is also used in calculations
-  /// of the crystallization pressure during external sulfate attack
+    ///
+    /// Set up the vector of saturation indices for each GEM phase.
+    /// This determines the driving force for growth and is also used in calculations
+    /// of the crystallization pressure during external sulfate attack
 
-  setSI();
-  vector<double> SIforsystem = getSI();
+    setSI();
+    vector<double> SIforsystem = getSI();
 
-  ///
-  /// Set up all the information for the composition of the aqueous solution
-  ///
+    ///
+    /// Set up all the information for the composition of the aqueous solution
+    ///
 
-  vector<double> solutionICmoles = getSolution();
+    vector<double> solutionICmoles = getSolution();
 
-  solut_->setICmoles(solutionICmoles);
-  try {
-      solut_->calculateState(true);
-  }
-  catch (GEMException gex) {
-      gex.printException();
-      cout << endl;
-  }
-  vector<double> solutionSI = solut_->getSI();
+    solut_->setICmoles(solutionICmoles);
+    try {
+        solut_->calculateState(true);
+    }
+    catch (GEMException gex) {
+        gex.printException();
+        cout << endl;
+    }
+    vector<double> solutionSI = solut_->getSI();
+}
+
+bool ChemicalSystem::isInputFormatJSON (const char *masterFileName)
+{
+    ifstream in(masterFileName);
+    if (!in) {
+        throw FileException("Solution","isInputFormatJSON",masterFileName,"Could not open");
+    }
+
+    string filetypeflag;
+    if (in.peek() != EOF) {
+        in >> filetypeflag;
+    } else {
+        throw FileException("Solution","isInputFormatJSON",masterFileName,"Bad or corrupt format");
+    }
+    in.close();
+    if (filetypeflag == "-j") {
+        return true;
+    }
+    return false;
+}
+
+void ChemicalSystem::getJSONFiles (const char *masterFileName,
+                             string &dchname,
+                             string &ipmname,
+                             string &dbrname)
+{
+    ifstream in(masterFileName);
+    if (!in) {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Could not open");
+    }
+
+    string filetypeflag;
+    if (in.peek() != EOF) {
+        in >> filetypeflag;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> dchname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> ipmname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> dbrname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+
+    /// Assuming that all the file names were read correctly, strip their quote marks
+    
+    dchname.erase(remove(dchname.begin(),dchname.end(),'"'),dchname.end());
+    ipmname.erase(remove(ipmname.begin(),ipmname.end(),'"'),ipmname.end());
+    dbrname.erase(remove(dbrname.begin(),dbrname.end(),'"'),dbrname.end());
 }
 
 vector<double> ChemicalSystem::getSolution ()
@@ -1399,15 +1538,47 @@ int ChemicalSystem::calculateState (double time,
     nodestatus_ = NEED_GEM_SIA;
     if (verbose_) cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... "
                        << endl;
+    ///
+    /// Next function loads the input data for the THAMES node into the
+    /// instance of the DBR structure.  This call precedes the GEM_run call
+    ///
+    /// This function returns nothing and appears to be incapable of throwing
+    /// an exception.
+    ///
+    /// @todo Check carefully if this function can throw an exception
+    ///
+    /// @note MT in the function name stands for "mass transport", which is
+    /// the generic designation given to the code that couples to GEMS, THAMES
+    /// in this case.
+    ///
+
+
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
           ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
           DCmoles_,DCactivitycoeff_);
+
     if (verbose_) {
         cout << "Done!" << endl;
         cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT (2)... ";
         cout.flush();
     }
-    node_->GEM_set_MT(time,1.0);
+
+    /// For passing the current THAMES time and time step into the working instance
+    /// of the DBR structure.
+    ///
+    /// This function returns nothing and appears to be incapable of throwing an exception
+    ///
+    ///
+    /// @todo Check carefully if this function can throw an exception
+    ///
+    /// @note This function call seems to be optional.  It is not needed for
+    /// the GEM data structures or calculations, but mostly for debugging purposes.
+    ///
+    /// @note This function used to be called GEM_set_MT in older versions of GEMS3K
+    ///
+    
+    node_->GEM_from_MT_time(time,1.0);
+
     if (verbose_) {
         cout << "Done!" << endl
              << "    Going into ChemicalSystem::calculateState::GEM_run() (2), with isfirst "
@@ -1420,6 +1591,32 @@ int ChemicalSystem::calculateState (double time,
     writeDCmoles();
     */
 
+    ///
+    /// Attempt to run GEM with automatic initial approximation (AIA)
+    ///
+    /// This starts the thermodynamic calculation and returns the results, including
+    /// the ionic strength, pH, IC chemical potentials, DC moles, phase moles, phase
+    /// volumes, and other results of the calculation.  All of these parameters
+    /// are loaded into the THAMES vectors that keep track of these things, since,
+    /// they were passed to the GEM calculation by reference.
+    /// 
+    /// The argument is false if we wamt to use activity coefficients and speciation
+    /// from a previous GEM_run, but is true if we want to use the activity coefficients
+    /// and speciation stored in a DBR memory structure read from a DBR file
+    ///
+    /// Possible return values for nodestatus_:
+    ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
+    ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
+    ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
+    ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
+    ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+    ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
+    ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
+    ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
+    ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
+    ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
+    ///
+
     if (isfirst) {
         nodestatus_ = node_->GEM_run(false);
     } else {
@@ -1430,54 +1627,75 @@ int ChemicalSystem::calculateState (double time,
         cout << "Done!  nodestatus is " << nodestatus_ << endl;
         cout.flush();
     }
-    
 
-    if (nodestatus_ == ERR_GEM_AIA || nodestatus_ == ERR_GEM_SIA
-        || nodestatus_ == T_ERROR_GEM) {
+    if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
+        bool dothrow = false;
+        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "       nodestatus_ = ";
         switch (nodestatus_) {
+            case NEED_GEM_AIA:
+                msg = " Need GEM calc with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_AIA:
+                msg = " Untrustworthy result with auto initial approx (AIA)",
+                dothrow = true;
+                break;
             case ERR_GEM_AIA:
-                msg = "Flag nodestatus_ = ERR_GEM_AIA";
-                if (isfirst) msg += ", isfirst is true";
+                msg = " Failed result with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case NEED_GEM_SIA:
+                msg =  " Need GEM calc with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_SIA:
+                msg = " Untrustworthy result with smart initial approx (SIA)";
+                dothrow = true;
                 break;
             case ERR_GEM_SIA:
-                msg = "Flag nodestatus_ = ERR_GEM_SIA";
-                if (isfirst) msg += ", isfirst is true";
+                msg =  " Failed result with smart initial approx (SIA)";
+                dothrow = true;
                 break;
             case T_ERROR_GEM:
-                msg = "Flag nodestatus_ = T_ERROR_GEM";
-                if (isfirst) msg += ", isfirst is true";
+                msg = " Terminal GEM error; need restart";
+                dothrow = true;
+                break;
+            case NO_GEM_SOLVER:
+                msg =  " No GEM recalculation needed for node";
+                dothrow = false;
                 break;
         }
-        throw GEMException("ChemicalSystem","calculateState",msg);
-    } else {
-        if (nodestatus_ == BAD_GEM_AIA || nodestatus_ == BAD_GEM_SIA) {
-            switch (nodestatus_) {
-                case BAD_GEM_AIA:
-                    msg = "Flag nodestatus_ = BAD_GEM_AIA";
-                    if (isfirst) msg += ", isfirst is true";
-                    break;
-                case BAD_GEM_SIA:
-                    msg = "Flag nodestatus_ = BAD_GEM_SIA";
-                    if (isfirst) msg += ", isfirst is true";
-                    break;
-            }
-            throw GEMException("ChemicalSystem","calculateState",msg);
-        } else {
-            if (verbose_) {
-                cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT (2)... ";
-                cout.flush();
-            }
-            node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
-                    Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
-                    &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&solutphasemoles_[0],
-                    &solutphasevolume_[0],&solutphasemass_[0],&solutphasestoich_[0],
-                    &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-            if (verbose_) {
-                cout << "Done!" << endl;
-                cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
-                cout.flush();
-            }
-      }
+        if (dothrow) {
+            throw GEMException("Solution","calculateState",msg);
+        }
+    }
+
+    if (verbose_) {
+        cout << "    Going into ChemicalSystem::calculateState::GEM_to_MT (2)... ";
+        cout.flush();
+    }
+
+    ///
+    /// Next call retrieves the GEMIPM chemical speciation calculation
+    /// results from the DBR structure instance into memory provided by
+    /// the THAMES code.  The dimensions and ordering of the arrays must
+    /// correspond to those in currently existing DCH memory structure
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+
+    node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
+            Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
+            &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&solutphasemoles_[0],
+            &solutphasevolume_[0],&solutphasemass_[0],&solutphasestoich_[0],
+            &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
+
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
+        cout.flush();
     }
 
     /*
@@ -1632,8 +1850,7 @@ int ChemicalSystem::calculateState (double time,
                                         // time in the constructor.
     }
     catch (GEMException gex) {
-        gex.printException();
-        cout << endl;
+        throw gex;
     }
 
     if (verbose_) {

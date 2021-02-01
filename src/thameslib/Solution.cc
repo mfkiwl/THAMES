@@ -23,6 +23,7 @@ Solution::Solution (const string &GEMfilename,
     nodestatus_ = nodehandle_ = iterdone_ = 0;
 
     verbose_ = verbose;
+    jsonformat_ = false;
 
     ICnum_ = DCnum_ = phasenum_ = solutionphasenum_ = 0;
     ICname_.clear();
@@ -32,6 +33,7 @@ Solution::Solution (const string &GEMfilename,
 
     char *cGEMfilename = (char*)GEMfilename.c_str();
     char *cGEMdbrname = (char*)GEMdbrname.c_str();
+    long int gemflag = 0;
     if (verbose_) {
         cout << "Solution:: Going into GEM_init to read chemical system definition file "
              << cGEMfilename << endl;
@@ -48,13 +50,51 @@ Solution::Solution (const string &GEMfilename,
     /// Use GEM3K to open and process the chemical system definition (CSD) file
     ///
 
-    long int gemflag = 0;
-    gemflag = node_->GEM_init(cGEMfilename);
+    /// Find out if the input data are in json format or in key-value format
+    
+    try {
+        string json_dch = "";
+        string json_ipm = "";
+        string json_dbr = "";
+        jsonformat_ = isInputFormatJSON(cGEMfilename);
+
+        ///
+        /// GEM_init initializes the IPM and DCH data structures
+        /// This function will read the IPM, DCH, and one or more DBRs
+        /// The argument is type const char *, and is the name of the
+        /// data.lst file with the names of the IPM,
+        /// DCH, and root DBR file.
+        /// 
+        /// Return values are :
+        ///    0 if successful, and the node_ object will hold the data
+        ///    1 if input file(s) were not found or are corrupt
+        ///   -1 if internal memory allocation error occurred
+        /// 
+   
+        if (jsonformat_) {
+            if (verbose) {
+                cout << "Detected JSON input file format for Solution GEM data files" << endl;
+                cout.flush();
+            }
+            string json_dch,json_ipm,json_dbr;
+            getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
+            gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
+        } else {
+            if (verbose) {
+                cout << "Detected key-value input file format for Solution GEM data files" << endl;
+                cout.flush();
+            }
+            gemflag = node_->GEM_init(cGEMfilename);
+        }
+    }
+    catch (FileException fex) {
+        throw fex;
+    }
+
     if (gemflag == 1) {
         cerr << "Bad return from GEM_init: " << GEMfilename << " missing or corrupt." << endl;
         exit(0);
-    }
-    if (gemflag == -1) {
+    } else if (gemflag == -1) {
         cerr << "Bad return from GEM_init: internal memory allocation error." << endl;
         exit(0);
     }
@@ -110,15 +150,14 @@ Solution::Solution (const string &GEMfilename,
     catch (bad_alloc& ba) {
         cout << endl << "Bad_alloc Exception Thrown:" << endl;
         cout << "    Details:" << endl;
-        cout << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
+        cout << "    Offending function Solution::Solution" << endl;
         cout << "    Error in allocating memory for array " << exmsg << endl;
         cerr << endl << "Bad_alloc Exception Thrown:" << endl;
         cerr << "    Details:" << endl;
-        cerr << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
+        cerr << "    Offending function Solution::Solution" << endl;
         cerr << "    Error in allocating memory for array " << exmsg << endl;
         exit(0);
     }
-
 
     ///
     /// Initialize GEM
@@ -135,67 +174,164 @@ Solution::Solution (const string &GEMfilename,
     ///
     /// Attempt to run GEM
     ///
-
-    try {
-        nodestatus_ = node_->GEM_run(false);
-        if (verbose_) {
-            cout << "Solution::Constructor: Exited GEM_run with node status = "
-                 << nodestatus_ << endl;
-            cout.flush();
-        }
-        if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
-            cerr << "ERROR: Call to GEM_run failed..." << endl;
-            exit(1);
-        }
-        if (verbose_) {
-            cout << "Solution::Constructor: Entering GEM_restore_MT (1) ..." << endl;
-            cout.flush();
-        }
-
-        node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
-          &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
-
-        if (verbose_) {
-            cout << "Done!" << endl;
-            cout << "T_ is: " << T_ << endl;
-            cout << "Solution::Constructor: Entering GEM_to_MT (1)..." << endl;
-            cout.flush();
-        }
-        node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
-            Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
-            &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
-            &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
-            &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-        cout << "Done!" << endl;
+    /// The argument is false if we want to use activity coefficients and speciation
+    /// from a previous GEM_run, but is true if we want to use the activity coefficients
+    /// and speciation stored in a DBR memory structure read from a DBR file
+    ///
+    /// Possible return values for nodestatus_:
+    ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
+    ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
+    ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
+    ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
+    ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+    ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
+    ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
+    ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
+    ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
+    ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
+    ///
+    
+    nodestatus_ = node_->GEM_run(false);
+    if (verbose_) {
+        cout << "Solution::Constructor: Exited GEM_run with node status = "
+             << nodestatus_ << endl;
+        cout.flush();
     }
-    catch (GEMException e) {
-        e.printException();
-        exit(0);
-    }
-    catch (long int flag) {
-        cout << endl << "GEM Exception Thrown:" << endl;
-        cout << "Offending Function ChemicalSystem::ChemicalSystem" << endl;
-        cerr << endl << "GEM Exception Thrown:" << endl;
-        cerr << "Offending Function ChemicalSystem::ChemicalSystem" << endl;
-        if (flag < 0) {
-            cout << "Details:  Unkown internal error in TNode::GEM_read_dbr" << endl;
-            cerr << "Details:  Unkown internal error in TNode::GEM_read_dbr" << endl;
-        } else {
-            cout << "Details:  Check ipmlog.txt file for error details" << endl;
-            cerr << "Details:  Check ipmlog.txt file for error details" << endl;
+    if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
+        bool dothrow = false;
+        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "       nodestatus_ = ";
+        switch (nodestatus_) {
+            case NEED_GEM_AIA:
+                exmsg = " Need GEM calc with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_AIA:
+                exmsg = " Untrustworthy result with auto initial approx (AIA)",
+                dothrow = true;
+                break;
+            case ERR_GEM_AIA:
+                exmsg = " Failed result with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case NEED_GEM_SIA:
+                exmsg =  " Need GEM calc with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_SIA:
+                exmsg = " Untrustworthy result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case ERR_GEM_SIA:
+                exmsg =  " Failed result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case T_ERROR_GEM:
+                exmsg = " Terminal GEM error; need restart";
+                dothrow = true;
+                break;
+            case NO_GEM_SOLVER:
+                exmsg =  " No GEM recalculation needed for node";
+                dothrow = false;
+                break;
         }
-        exit(0);
+        if (dothrow) {
+            throw GEMException("Solution","calculateState",exmsg);
+        }
     }
 
     if (verbose_) {
+        cout << "Solution::Constructor: Entering GEM_restore_MT (1) ..." << endl;
+        cout.flush();
+    }
+
+    ///
+    /// Next call passes (copies) the GEMS3K input data from the DBR structure.
+    /// This is useful after the GEM_init and GEM_run() calls to initialize the
+    /// arrays that keep the chemical data for all the nodes (one node in most cases)
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+    
+    node_->GEM_restore_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,&ICmoles_[0],
+          &DCupperlimit_[0],&DClowerlimit_[0],&surfacearea_[0]);
+
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "T_ is: " << T_ << endl;
+        cout << "Solution::Constructor: Entering GEM_to_MT (1)..." << endl;
+        cout.flush();
+    }
+
+    ///
+    /// Next call retrieves the GEMIPM chemical speciation calculation
+    /// results from the DBR structure instance into memory provided by
+    /// the THAMES code.  The dimensions and ordering of the arrays must
+    /// correspond to those in currently existing DCH memory structure
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+    
+    node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
+        Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
+        &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
+        &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
+        &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
+
+    if (verbose_) {
+        cout << "Done!" << endl;
         cout << "Solution::Constructor: Entering GEM_read_dbr (1)..." << endl;
         cout.flush();
     }
 
-    nodestatus_ =  node_->GEM_read_dbr(cGEMdbrname);
-    if (nodestatus_ != 0) {
-        cout << "ERROR: Call to GEM_read_dbr failed..." << endl;
-        exit(1);
+    ///
+    /// The next function reads the DBR file with input system compsition,
+    /// temperature, pressure, etc.  The DBR file must be compatible with
+    /// the currently loaded IPM and DCH files.  It will return one of nine
+    /// codes (see above for the GEM_init function comment for their meaning).
+    ///
+    /// @note the function arguments for GEM_read_dbr depend on whether the
+    ///  input was given in JSON format or not, so we need two possible different
+    ///  ways of calling it.  Seems weird, but that is the way the GEM library
+    ///  is written as of ver. 3.8
+    ///
+   
+    GEMS3KGenerator::IOModes type_f = GEMS3KGenerator::f_key_value;
+    bool check_dch_compatibility = true;
+
+    if (jsonformat_) {
+        if (verbose_) {
+            cout << "JSON GEM DBR file name is " << GEMdbrname << endl;
+            cout.flush();
+        }
+        nodestatus_ =  node_->GEM_read_dbr(GEMdbrname,check_dch_compatibility);
+    } else {
+        if (verbose_) {
+            cout << "Key-value GEM DBR file name is " << GEMdbrname << endl;
+            cout.flush();
+        }
+        nodestatus_ =  node_->GEM_read_dbr(cGEMdbrname,type_f);
+    }
+    switch (nodestatus_) {
+        case 1:     // JSON string is empty or corrupt
+            cout << "ERROR: Call to GEM_read_dbr failed with nodestatus_ = "
+                 << nodestatus_ << ", JSON string empty or corrupt" << endl;
+            exit(1);
+            break;
+        case 2:     // DBR is incompatibile with DCH/IPM
+            cout << "ERROR: Call to GEM_read_dbr failed with nodestatus_ = "
+                 << nodestatus_ << ", DBR incompatible with DCH/IPM" << endl;
+            exit(1);
+            break;
+        case -1:     // Memory allocation error
+            cout << "ERROR: Call to GEM_read_dbr failed with nodestatus_ = "
+                 << nodestatus_ << ", memory allocation error" << endl;
+            exit(1);
+            break;
+        default:     // Okay
+            break;
     }
     if (verbose_) {
         cout << "Done!" << endl;
@@ -258,6 +394,65 @@ Solution::~Solution ()
     delete node_;
 }
 
+bool Solution::isInputFormatJSON (const char *masterFileName)
+{
+    ifstream in(masterFileName);
+    if (!in) {
+        throw FileException("Solution","isInputFormatJSON",masterFileName,"Could not open");
+    }
+
+    string filetypeflag;
+    if (in.peek() != EOF) {
+        in >> filetypeflag;
+    } else {
+        throw FileException("Solution","isInputFormatJSON",masterFileName,"Bad or corrupt format");
+    }
+    in.close();
+    if (filetypeflag == "-j") {
+        return true;
+    }
+    return false;
+}
+
+void Solution::getJSONFiles (const char *masterFileName,
+                             string &dchname,
+                             string &ipmname,
+                             string &dbrname)
+{
+    ifstream in(masterFileName);
+    if (!in) {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Could not open");
+    }
+
+    string filetypeflag;
+    if (in.peek() != EOF) {
+        in >> filetypeflag;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> dchname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> ipmname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+    if (in.peek() != EOF) {
+        in >> dbrname;
+    } else {
+        throw FileException("Solution","getJSONFiles",masterFileName,"Bad or corrupt format");
+    }
+
+    /// Assuming that all the file names were read correctly, strip their quote marks
+    
+    dchname.erase(remove(dchname.begin(),dchname.end(),'"'),dchname.end());
+    ipmname.erase(remove(ipmname.begin(),ipmname.end(),'"'),ipmname.end());
+    dbrname.erase(remove(dbrname.begin(),dbrname.end(),'"'),dbrname.end());
+}
+
 void Solution::calculateState (bool isfirst)
 {
     int status = 0;
@@ -273,9 +468,24 @@ void Solution::calculateState (bool isfirst)
         cout.flush();
     }
  
+    ///
+    /// Next function loads the input data for the THAMES node into the
+    /// instance of the DBR structure.  This call precedes the GEM_run call
+    ///
+    /// This function returns nothing and appears to be incapable of throwing
+    /// an exception.
+    ///
+    /// @todo Check carefully if this function can throw and exception
+    ///
+    /// @note MT in the function name stands for "mass transport", which is
+    /// the generic designation given to the code that couples to GEMS, THAMES
+    /// in this case.
+    ///
+
     node_->GEM_from_MT(nodehandle_,nodestatus_,T_,P_,Vs_,Ms_,
            ICmoles_,DCupperlimit_,DClowerlimit_,surfacearea_,
            DCmoles_,DCactivitycoeff_);
+
     if (verbose_) {
         cout << "Done!" << endl;
   
@@ -291,9 +501,25 @@ void Solution::calculateState (bool isfirst)
     }
 
     ///
-    /// Execute GEM calculation
+    /// Attempt to run a GEM calculation
     ///
-
+    /// The argument is false if we wamt to use activity coefficients and speciation
+    /// from a previous GEM_run, but is true if we want to use the activity coefficients
+    /// and speciation stored in a DBR memory structure read from a DBR file
+    ///
+    /// Possible return values for nodestatus_:
+    ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
+    ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
+    ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
+    ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
+    ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+    ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
+    ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
+    ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
+    ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
+    ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
+    ///
+    
     if (isfirst) {
         nodestatus_ = node_->GEM_run(false);
     } else {
@@ -304,72 +530,90 @@ void Solution::calculateState (bool isfirst)
         cout << "Done! nodestatus is " << nodestatus_ << endl;
         cout.flush();
     }
+    if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
+        bool dothrow = false;
+        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "       nodestatus_ = ";
+        switch (nodestatus_) {
+            case NEED_GEM_AIA:
+                msg = " Need GEM calc with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_AIA:
+                msg = " Untrustworthy result with auto initial approx (AIA)",
+                dothrow = true;
+                break;
+            case ERR_GEM_AIA:
+                msg = " Failed result with auto initial approx (AIA)";
+                dothrow = true;
+                break;
+            case NEED_GEM_SIA:
+                msg =  " Need GEM calc with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case BAD_GEM_SIA:
+                msg = " Untrustworthy result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case ERR_GEM_SIA:
+                msg =  " Failed result with smart initial approx (SIA)";
+                dothrow = true;
+                break;
+            case T_ERROR_GEM:
+                msg = " Terminal GEM error; need restart";
+                dothrow = true;
+                break;
+            case NO_GEM_SOLVER:
+                msg =  " No GEM recalculation needed for node";
+                dothrow = false;
+                break;
+        }
+        if (dothrow) {
+            throw GEMException("Solution","calculateState",msg);
+        }
+    }
 
     ///
     /// Get the GEM data back from the GEM3K library, assuming that it ran
     /// without error.  Check for the errors first.
     ///
 
-    if (nodestatus_ == ERR_GEM_AIA || nodestatus_ == ERR_GEM_SIA
-       || nodestatus_ == T_ERROR_GEM) {
-
-        switch (nodestatus_) {
-            case ERR_GEM_AIA:
-              msg = "Flag nodestatus_ = ERR_GEM_AIA";
-              if (isfirst) msg += ", isfirst is true";
-              break;
-            case ERR_GEM_SIA:
-              msg =  "Flag nodestatus_ = ERR_GEM_SIA";
-              if (isfirst) msg += ", isfirst is true";
-              break;
-            case T_ERROR_GEM:
-              msg  = "Flag nodestatus_ = T_ERROR_GEM";
-              if (isfirst) msg += ", isfirst is true";
-              break;
-        } 
-        throw GEMException("Solution","calculateState",msg);
-
-    } else if (nodestatus_ == BAD_GEM_AIA || nodestatus_ == BAD_GEM_SIA) {
-  
-        switch (nodestatus_) {
-            case BAD_GEM_AIA:
-              msg = "Flag nodestatus_ = BAD_GEM_AIA";
-              if (isfirst) msg += ", isfirst is true";
-              break;
-            case BAD_GEM_SIA:
-              msg = "Flag nodestatus_ = BAD_GEM_SIA";
-              if (isfirst) msg += ", isfirst is true";
-              break;
-        }
-        throw GEMException("Solution","calculateState",msg);
-
-    } else {
-
-        if (verbose_) {
-            cout << "    Going into Solution::calculateState::GEM_to_MT (2)...";
-            cout.flush();
-        }
-        node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
-                Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
-                &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
-                &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
-                &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
-        if (verbose_) {
-            cout << "Done!" << endl;
-            cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
-            cout.flush();    
-        }
+    if (verbose_) {
+        cout << "    Going into Solution::calculateState::GEM_to_MT (2)...";
+        cout.flush();
     }
 
-  ///
-  /// The GEM calculation did not precipitate or dissolve solid, so it
-  /// stores the saturation index of each solid phase.  This now needs to
-  /// be assigned to the corresponding array in the Solution object.
-  ///
+    ///
+    /// Next call retrieves the GEMIPM chemical speciation calculation
+    /// results from the DBR structure instance into memory provided by
+    /// the THAMES code.  The dimensions and ordering of the arrays must
+    /// correspond to those in currently existing DCH memory structure
+    ///
+    /// This function returns nothing and appears unable of throwing exceptions
+    /// @todo Check carefully whether this function can throw an exception
+    ///
+    
+    node_->GEM_to_MT(nodehandle_,nodestatus_,iterdone_,Vs_,
+            Ms_,Gs_,Hs_,ionicstrength_,pH_,pe_,Eh_,&ICresiduals_[0],
+            &ICchempot_[0],&DCmoles_[0],&DCactivitycoeff_[0],&phasemoles_[0],
+            &phasevolume_[0],&phasemass_[0],&phasestoich_[0],
+            &carrier_[0],&surfacearea_[0],&solidstoich_[0]);
 
-  setSI();
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
+        cout.flush();    
+    }
 
-  return;
+    ///
+    /// The GEM calculation did not precipitate or dissolve solid, so it
+    /// stores the saturation index of each solid phase.  This now needs to
+    /// be assigned to the corresponding array in the Solution object.
+    ///
+
+    setSI();
+
+    return;
 
 }
 
