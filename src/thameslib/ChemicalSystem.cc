@@ -129,20 +129,20 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
         ///   -1 if internal memory allocation error occurred
         /// 
 
-        if (jsonformat_) {
-            if (verbose) {
-                cout << "Detected JSON input file format for ChemicalSystem GEM data files" << endl;
-                cout.flush();
-            }
-            getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
-            gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
-        } else {
-            if (verbose) {
-                cout << "Detected key-value input file format for ChemicalSystem GEM data files" << endl;
-                cout.flush();
-            }
+        // if (jsonformat_) {
+        //     if (verbose) {
+        //         cout << "Detected JSON input file format for ChemicalSystem GEM data files" << endl;
+        //         cout.flush();
+        //     }
+        //     getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
+        //     gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
+        // } else {
+        //     if (verbose) {
+        //         cout << "Detected key-value input file format for ChemicalSystem GEM data files" << endl;
+        //         cout.flush();
+        //     }
             gemflag = node_->GEM_init(cGEMfilename);
-        }
+        // }
     }
     catch (FileException fex) {
         throw fex;

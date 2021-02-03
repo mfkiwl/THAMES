@@ -14,6 +14,9 @@ thamestests/
 # ignore contents of bin directory but not bin itself
 bin/*
 
+# ignore the contents of the build directory but not build itself
+build/*
+
 # ignore contents of doc directories
 doc/html/*
 doc/latex/*
@@ -37,4 +40,3 @@ doc/latex/*
 src/version.h
 src/thameslib/myconfig.h
 src/vcctl2thames/vcctl2thames.h
-

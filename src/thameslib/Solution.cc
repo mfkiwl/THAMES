@@ -71,21 +71,21 @@ Solution::Solution (const string &GEMfilename,
         ///   -1 if internal memory allocation error occurred
         /// 
    
-        if (jsonformat_) {
-            if (verbose) {
-                cout << "Detected JSON input file format for Solution GEM data files" << endl;
-                cout.flush();
-            }
-            string json_dch,json_ipm,json_dbr;
-            getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
-            gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
-        } else {
-            if (verbose) {
-                cout << "Detected key-value input file format for Solution GEM data files" << endl;
-                cout.flush();
-            }
+        // if (jsonformat_) {
+        //     if (verbose) {
+        //         cout << "Detected JSON input file format for Solution GEM data files" << endl;
+        //         cout.flush();
+        //     }
+        //     string json_dch,json_ipm,json_dbr;
+        //     getJSONFiles(cGEMfilename,json_dch,json_ipm,json_dbr);
+        //     gemflag = node_->GEM_init(json_dch,json_ipm,json_dbr);
+        // } else {
+        //     if (verbose) {
+        //         cout << "Detected key-value input file format for Solution GEM data files" << endl;
+        //         cout.flush();
+        //     }
             gemflag = node_->GEM_init(cGEMfilename);
-        }
+        // }
     }
     catch (FileException fex) {
         throw fex;
@@ -299,7 +299,7 @@ Solution::Solution (const string &GEMfilename,
     ///
    
     GEMS3KGenerator::IOModes type_f = GEMS3KGenerator::f_key_value;
-    bool check_dch_compatibility = true;
+    bool check_dch_compatibility = false;
 
     if (jsonformat_) {
         if (verbose_) {

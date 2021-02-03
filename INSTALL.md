@@ -32,17 +32,28 @@ its applications can also be found in the following references:
 To install THAMES, you need 'cmake'.  Creation of the API documentation also
 requires 'doxygen'.
 
-    * CMake (>= 2.6), the build system used by THAMES
-        Required for building THAMES
+    * CMake (>= 3.0), the build system used by THAMES
+        * Required for building THAMES
 
     * Doxygen (>= 1.8.13), the API documentation software
-        Required for creating the API documentation
+        * Required for creating the API documentation
 
     * LaTeX 2e, the document preparation system
-        Required only for creating the PDF version of the API documentation
+        * Required only for creating the PDF version of the API documentation
 
+    * GEMS3K standalone library (>= 3.8)
+        * Source code available at https://bitbucket.org/gems4/gems3k.git
+
+    * GEM-Selektor
+        * Needed for producing input data files for thermodynamic calculations.
+        * Source code available at https://bitbucket.org/gems4/gems3gui.git
 
 ## BUILDING
+
+This section assumes that all the prerequisites are already installed on
+your system.  In particular, on Mac OS and Linux systems, the GEMS3K standalone
+library must be installed in /usr/local, which will be accomplished
+automatically if you use the install.sh script that comes with the source code.
 
 The recommended way to configure THAMES is to do an out-of-source build,
 which means that the original files and directories are left untouched.
