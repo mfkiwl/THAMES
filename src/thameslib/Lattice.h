@@ -232,16 +232,14 @@ unsigned int getNumsites () const
 This is simply the number of sites with a given phase divided by the
 total number of sites.
 
-@note NOT USED.
-
 @param i is the index of the microstructure phase
 @return the total number of lattice sites
 */
-double getVFrac (unsigned int i)
+double getVolumefraction (unsigned int i)
 {
     try {
         if (numsites_ == 0) {
-            throw FloatException("Lattice","getVFrac",
+            throw FloatException("Lattice","getVolumefraction",
                                  "Divide by zero (numsites_)");
         }
         return ((double)(count_.at(i))/(double)(numsites_));
@@ -251,7 +249,7 @@ double getVFrac (unsigned int i)
         exit(1);
     }
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","getVFrac","count_",
+        EOBException ex("Lattice","getVolumefraction","count_",
                         count_.size(),i);
         ex.printException();
         exit(1);

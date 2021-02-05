@@ -1803,6 +1803,14 @@ int ChemicalSystem::calculateState (double time,
         cout.flush();
     }
 
+    ///
+    /// Calculate microstructure phase volume fractions
+    ///
+    
+    for (int i = 0; i < micphasenum_; i++) {
+        micphasevolfrac_[i] = micphasevolume_[i] / mictotvolume_;
+    }
+
     setPhasestoich();
    
     ///
