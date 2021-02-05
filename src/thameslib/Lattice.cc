@@ -1219,9 +1219,17 @@ void Lattice::changeMicrostructure (double time,
     ///       a multiplicative factor on the phase volume fraction.
     ///
    
-    adjustMicrostructureVolumes(phasenames,vol_next);
+    try {
+        adjustMicrostructureVolumes(phasenames,vol_next);
 
-    adjustMicrostructureVolFracs(phasenames,vol_next,vfrac_next);
+        adjustMicrostructureVolFracs(phasenames,vol_next,vfrac_next);
+    }
+    catch (DataException dex) {
+        throw dex;
+    }
+    catch (EOBException ex) {
+        throw ex;
+    }
 
     ///
     /// Calculate number of sites of each phase in next state
@@ -1239,10 +1247,8 @@ void Lattice::changeMicrostructure (double time,
           }
         }
         catch (out_of_range &oor) {
-          EOBException ex("Lattice","changeMicrostructure","phasenames",
-                        phasenames.size(),i);
-          ex.printException();
-          exit(1);
+          throw EOBException("Lattice","changeMicrostructure","phasenames",
+                             phasenames.size(),i);
         }
     }
 
@@ -1359,11 +1365,9 @@ void Lattice::changeMicrostructure (double time,
         }
 
         catch (out_of_range &oor) {
-            EOBException ex("Lattice","changeMicrostructure",
+            throw EOBException("Lattice","changeMicrostructure",
                     "phasenames or count_ or pid or netsites or vfrac_next",
                     phasenames.size(),i);
-            ex.printException();
-            exit(1);
         }
 
     } else {
@@ -1398,11 +1402,9 @@ void Lattice::changeMicrostructure (double time,
             }
         }
         catch (out_of_range &oor) {
-            EOBException ex("Lattice","changeMicrostructure",
+            throw EOBException("Lattice","changeMicrostructure",
                     "phasenames or count_ or pid or netsites or vfrac_next",
                      phasenames.size(),i);
-            ex.printException();
-            exit(1);
         }
     }
     
@@ -1432,10 +1434,7 @@ void Lattice::changeMicrostructure (double time,
         }
     }
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","changeMicrostructure","pid",
-                     pid.size(),ii);
-        ex.printException();
-        exit(1);
+        throw EOBException("Lattice","changeMicrostructure","pid", pid.size(),ii);
     }
 
     Interface ifc;
@@ -1501,18 +1500,29 @@ void Lattice::changeMicrostructure (double time,
 	                    if (verbose_) cout << "Thresh = " << thresh << endl;
                         if (thresh < 1) {
     	                    double g = 0.0;
+                            int numfound = 0;
     	                    for (int k = 0; k < site_.size(); k++) {
     	                        if (site_[k].getPhaseId() == WATERID) {
     	                            g = rg_->Ran3();
-    	                            if (g < thresh) addGrowthSite(&site_[k],pid.at(i));
+    	                            if (g < thresh) {
+                                        addGrowthSite(&site_[k],pid.at(i));
+                                        numfound++;
+                                    }
     	                        }
     	                    }
+                            if (numfound == 0) {
+                                if (verbose_) {
+                                    cout << "There is no room to grow, so exit the program."
+                                         << endl;
+                                }
+                                throw MicrostructureException("Lattice","changeMicrostructure","no room to grow phase");
+                            }
                         } else {
                             if (verbose_) {
                                 cout << "There is no room to grow, so exit the program."
                                      << endl;
                             }
-                            exit(1);
+                            throw MicrostructureException("Lattice","changeMicrostructure","no room to grow phase");
                         }
 	                }
                     numadded = growPhase(pid.at(i),diff);
@@ -1540,10 +1550,8 @@ void Lattice::changeMicrostructure (double time,
     }
 
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","changeMicrostructure","pid",
-                    pid.size(),ii);
-        ex.printException();
-        exit(1);
+        throw EOBException("Lattice","changeMicrostructure","pid",
+                            pid.size(),ii);
     }
     
     if (verbose_) {
@@ -1601,10 +1609,8 @@ void Lattice::changeMicrostructure (double time,
     }
 
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","changeMicrostructure",
-                    "volumefraction_ or count_",volumefraction_.size(),i);
-        ex.printException();
-        exit(1);
+        throw EOBException("Lattice","changeMicrostructure",
+                           "volumefraction_ or count_",volumefraction_.size(),i);
     }
 
     if (verbose_) cout << "*******************************" << endl;
@@ -1753,14 +1759,11 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
     }
 
     catch (DataException dex) {
-        dex.printException();
-        exit(1);
+        throw dex;
     }
 
     catch (out_of_range &oor) {
-      EOBException ex("Lattice","adjustMicrostructureVolumes","name",name.size(),i);
-      ex.printException();
-      exit(1);
+      throw EOBException("Lattice","adjustMicrostructureVolumes","name",name.size(),i);
     }
 
     return;

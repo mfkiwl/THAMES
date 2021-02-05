@@ -557,6 +557,99 @@ void printException ()
 
 
 /**
+@class Declare the MicrostructureException class
+
+The `MicrostructureException` class handles exceptions related to
+microstructure modifications.
+
+*/
+class MicrostructureException {
+
+private:
+
+    string description_;    /**< Description of the GEM exception */
+    string classname_;      /**< Name of the class that threw the exception */
+    string functionname_;   /**< Number of function that threw the exception */
+
+public:
+
+/**
+@brief Default constructor initializes class members to default (blank) values.
+
+*/
+MicrostructureException ()
+{
+    classname_ = "";
+    functionname_ = "";
+    description_ = "";
+}
+
+/**
+@brief Overloaded constructor that is typically invoked by THAMES.
+
+@param cname is the class name where the exception was thrown
+@param fname is the method name where the exception was thrown
+@param strd is the description of the exception
+*/
+MicrostructureException (const string &cname,
+                         const string &fname,
+                         const string &strd)
+{
+    classname_ = cname;
+    functionname_ = fname;
+    description_ = strd;
+}
+
+/**
+@brief Get the class name responsible for throwing the exception.
+
+@return the class name
+*/
+string &getClassname () const
+{
+    return (string &)classname_;
+}
+
+/**
+@brief Get the function name responsible for throwing the exception.
+
+@return the function name
+*/
+string &getFunctionname () const
+{
+    return (string &)functionname_;
+}
+
+/**
+@brief Get the description of the exception.
+
+@return the file name
+*/
+string &getDescription () const
+{
+    return (string &)description_;
+}
+
+/**
+@brief Provide formatted output of the exception details.
+
+*/
+void printException ()
+{
+    cout << endl << "Microstructure Exception Thrown:" << endl;
+    cout << "    Details: " << endl;
+    cout << "        Offending Function " << classname_ << "::" << functionname_ << endl;
+    cout << "        Problem:" << description_ << endl;
+    cerr << endl << "Microstructure Exception Thrown:" << endl;
+    cerr << "    Details: " << endl;
+    cerr << "        Offending Function " << classname_ << "::" << functionname_ << endl;
+    cerr << "        Problem: " << description_ << endl;
+    return;
+}
+
+};      // End of MicrostructureException class
+
+/**
 @class Declare the DataException class
 
 The `DataException` class handles exceptions related to miscellaneous

@@ -296,7 +296,18 @@ void Controller::doCycle (const string &statfilename,
     /// this function rather than throwing an exception itself
     ////
     
-    lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
+    try {
+        lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
+    }
+    catch (DataException dex) {
+        throw dex;
+    }
+    catch (EOBException ex) {
+        throw ex;
+    }
+    catch (MicrostructureException mex) {
+        throw mex;
+    }
 
     ///
     /// Check if there is any capillary pore water remaining.  If not then

@@ -373,6 +373,48 @@ int main (int argc, char **argv)
       delete Ctrl;
       exit(1);
     }
+    catch (DataException dex) {
+      dex.printException();
+      delete KMod;
+      if (choice == SULFATE_ATTACK) {
+          delete AppliedStrainSolver;
+          delete ThermalStrainSolver;
+      }
+      delete Mic;
+      delete ChemSys;
+      delete ThermalStrainSolver;
+      delete AppliedStrainSolver;
+      delete Ctrl;
+      exit(1);
+    }
+    catch (EOBException ex) {
+      ex.printException();
+      delete KMod;
+      if (choice == SULFATE_ATTACK) {
+          delete AppliedStrainSolver;
+          delete ThermalStrainSolver;
+      }
+      delete Mic;
+      delete ChemSys;
+      delete ThermalStrainSolver;
+      delete AppliedStrainSolver;
+      delete Ctrl;
+      exit(1);
+    }
+    catch (MicrostructureException mex) {
+      mex.printException();
+      delete KMod;
+      if (choice == SULFATE_ATTACK) {
+          delete AppliedStrainSolver;
+          delete ThermalStrainSolver;
+      }
+      delete Mic;
+      delete ChemSys;
+      delete ThermalStrainSolver;
+      delete AppliedStrainSolver;
+      delete Ctrl;
+      exit(1);
+    }
         
     // 
     // Simulation is finished.  Record and output the timing data.
