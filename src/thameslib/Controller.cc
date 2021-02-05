@@ -109,10 +109,6 @@ Controller::Controller (Lattice *msh,
     for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
         out2 << "," << chemsys_->getMicphasename(i);
     }   
-    out2 << "|";
-    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
-        out2 << "," << chemsys_->getMicphasename(i);
-    }   
     out2 << endl;
     out2.close();
 
@@ -838,10 +834,6 @@ void Controller::calculateState (double time,
     }
     if (verbose_) cout << "Writing microstructure volume fractions at time " << time << endl;
     out5 << setprecision(5) << time;
-    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
-      out5 << "," << (chemsys_->getMicphasevolfrac(i));
-    }   
-    out5 << "|";
     for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
       out5 << "," << (lattice_->getVolumefraction(i));
     }   
