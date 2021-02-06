@@ -4,6 +4,7 @@
 
 -----------------------------------------------------------------------------
 
+Feb  6 16:56:47 2021 - Better exception handling; better interface to new GEMS3K standalone library
 Jan 14 19:33:52 2021 - Can now specifiy initial solution composition in input file
 Jan 11 19:03:08 2021 - Removed growthtemplate functionality from input
 Jan  8 20:54:08 2021 - Improved vcctl2thames program and integrated within cmake

@@ -83,7 +83,8 @@ KineticModel::KineticModel (ChemicalSystem *cs,
                             Lattice *lattice,
                             const string &fname,
                             const bool verbose,
-                            const bool warning)
+                            const bool warning,
+                            const bool debug)
 :chemsys_(cs),solut_(solut),lattice_(lattice)
 {
     const string PHASENUM = "phasenum";
@@ -117,6 +118,7 @@ KineticModel::KineticModel (ChemicalSystem *cs,
    
     verbose_ = verbose;
     warning_ = warning;
+    debug_ = debug;
 
     ///
     /// Default value for Blaine fineness in PK model is 385 m<sup>2</sup>/kg

@@ -2,7 +2,7 @@
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
     xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
   <!--The number of possible phases in the microstructure not counting Void-->
-  <numentries>17</numentries>
+  <numentries>18</numentries>
   <!--The Blaine fineness of the powder, cm2/kg-->
   <blaine>403.2</blaine>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
@@ -14,7 +14,22 @@
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <reftemperature>296.15</reftemperature>
   <!--Set to 1 for saturated, 0 for sealed-->
-  <saturated>1</saturated>
+  <saturated>0</saturated>
+  <!--Information for initial solution IC composition besides water, each in mol/kgw-->
+  <solution>
+      <ICcomp>
+          <name>K</name>
+          <conc>0.01</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>O</name>
+          <conc>0.01</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>H</name>
+          <conc>0.01</conc>
+      </ICcomp>
+  </solution>
   <!--Void phase should always be present and first in the list-->
   <phase>
     <thamesname>Void</thamesname>
@@ -81,10 +96,10 @@
     <!--We can specify minority impurity concentrations in a solid phase, which
     will be released in proportion during dissolution-->
     <impurity_data>
-        <k2ocoeff>0.0</k2ocoeff>  <!--K2O mole fraction-->
+        <k2ocoeff>0.00087</k2ocoeff>  <!--K2O mole fraction-->
         <na2ocoeff>0.0</na2ocoeff>    <!--Na2O mole fraction-->
-        <mgocoeff>0.0</mgocoeff>    <!--MgO mole fraction-->
-        <so3coeff>0.0</so3coeff>   <!--SO3 mole fraction-->
+        <mgocoeff>0.00861</mgocoeff>    <!--MgO mole fraction-->
+        <so3coeff>0.007942</so3coeff>   <!--SO3 mole fraction-->
     </impurity_data>
     <kinetic_data>
       <!--Type is whether the phase is controlled by kinetics or thermodynamics-->
@@ -125,10 +140,10 @@
     </interface_data>
     <porosity>0.0</porosity>
     <impurity_data>
-      <k2ocoeff>0.0</k2ocoeff>
+      <k2ocoeff>0.01152</k2ocoeff>
       <na2ocoeff>0.0</na2ocoeff>
-      <mgocoeff>0.0</mgocoeff>
-      <so3coeff>0.0</so3coeff>
+      <mgocoeff>0.00380</mgocoeff>
+      <so3coeff>0.010528</so3coeff>
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
@@ -188,9 +203,9 @@
     </interface_data>
     <porosity>0.0</porosity>
     <impurity_data>
-      <k2ocoeff>0.0</k2ocoeff>
+      <k2ocoeff>0.00979</k2ocoeff>
       <na2ocoeff>0.0</na2ocoeff>
-      <mgocoeff>0.0</mgocoeff>
+      <mgocoeff>0.01091</mgocoeff>
       <so3coeff>0.0</so3coeff>
     </impurity_data>
     <kinetic_data>
@@ -227,9 +242,9 @@
     </interface_data>
     <porosity>0.0</porosity>
     <impurity_data>
-      <k2ocoeff>0.0</k2ocoeff>
+      <k2ocoeff>0.00272</k2ocoeff>
       <na2ocoeff>0.0</na2ocoeff>
-      <mgocoeff>0.0</mgocoeff>
+      <mgocoeff>0.02292</mgocoeff>
       <so3coeff>0.0</so3coeff>
     </impurity_data>
     <kinetic_data>
@@ -251,10 +266,10 @@
     </display_data>
   </phase>
   <phase>
-    <thamesname>GYPSUM</thamesname>
+    <thamesname>K2SO4</thamesname>
     <gemphase_data>
-    <gemphasename>Gypsum</gemphasename>
-    <gemdcname>Gp</gemdcname>
+    <gemphasename>arcanite</gemphasename>
+    <gemdcname>K2SO4</gemdcname>
     </gemphase_data>
     <id>6</id>
     <interface_data>
@@ -263,8 +278,34 @@
         <affinityphaseid>6</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
+    </interface_data>
+    <porosity>0.0</porosity>
+    <kinetic_data>
+      <type>soluble</type>
+      <scaledmass>0.317</scaledmass>
+    </kinetic_data>
+    <display_data>
+      <red>255.0</red>
+      <green>0.0</green>
+      <blue>0.0</blue>
+      <gray>110.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>GYPSUM</thamesname>
+    <gemphase_data>
+    <gemphasename>Gypsum</gemphasename>
+    <gemdcname>Gp</gemdcname>
+    </gemphase_data>
+    <id>7</id>
+    <interface_data>
+      <randomgrowth>0.0</randomgrowth>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>6</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -281,6 +322,10 @@
       </affinity>
       <affinity>
         <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>15</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
@@ -306,19 +351,19 @@
     <gemphasename>Anhydrite</gemphasename>
     <gemdcname>Anh</gemdcname>
     </gemphase_data>
-    <id>7</id>
+    <id>8</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
+      <affinity>
+        <affinityphaseid>8</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
       <affinity>
         <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>12</affinityphaseid>
+        <affinityphaseid>11</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -331,6 +376,10 @@
       </affinity>
       <affinity>
         <affinityphaseid>15</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
@@ -356,15 +405,15 @@
     <gemphasename>Dolomite-ord</gemphasename>
     <gemdcname>Ord-Dol</gemdcname>
     </gemphase_data>
-    <id>8</id>
+    <id>9</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
       <affinity>
-        <affinityphaseid>7</affinityphaseid>
+        <affinityphaseid>8</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>8</affinityphaseid>
+        <affinityphaseid>9</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
     </interface_data>
@@ -386,15 +435,15 @@
     <gemphasename>Portlandite</gemphasename>
     <gemdcname>Portlandite</gemdcname>
     </gemphase_data>
-    <id>9</id>
+    <id>10</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>8</affinityphaseid>
+        <affinityphaseid>9</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>9</affinityphaseid>
+        <affinityphaseid>10</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -425,11 +474,11 @@
     <gemdcname>KSiOH</gemdcname>
     <gemdcname>NaSiOH</gemdcname>
     </gemphase_data>
-    <id>10</id>
+    <id>11</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>11</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -437,7 +486,7 @@
         <affinityvalue>4</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>8</affinityphaseid>
+        <affinityphaseid>9</affinityphaseid>
         <affinityvalue>2</affinityvalue>
       </affinity>
     </interface_data>
@@ -445,6 +494,14 @@
     <kinetic_data>
       <type>thermo</type>
       <scaledmass>0.0</scaledmass>
+      <Rd>
+        <Rdelement>K</Rdelement>
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
+      <Rd>
+        <Rdelement>Na</Rdelement>
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
     </kinetic_data>
     <display_data>
       <red>245.0</red>
@@ -492,11 +549,11 @@
     <gemdcname>C4AH13</gemdcname>
     <gemdcname>monosulphate12</gemdcname>
     </gemphase_data>
-    <id>11</id>
+    <id>12</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>11</affinityphaseid>
+        <affinityphaseid>12</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -504,15 +561,15 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
+        <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
         <affinityphaseid>13</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>12</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>11</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -562,7 +619,7 @@
     <gemphasename>C4FcH12</gemphasename>
     <gemdcname>Femonocarbonate</gemdcname>
     </gemphase_data>
-    <id>12</id>
+    <id>13</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
@@ -570,15 +627,15 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
+        <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>11</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
         <affinityphaseid>13</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>10</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
-      </affinity>
-      <affinity>
-        <affinityphaseid>12</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -621,11 +678,11 @@
     <gemdcname>monosulphate1205</gemdcname>
     <gemdcname>Fe-monosulph05</gemdcname>
     </gemphase_data>
-    <id>13</id>
+    <id>14</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>12</affinityphaseid>
+        <affinityphaseid>13</affinityphaseid>
         <affinityvalue>10</affinityvalue>
       </affinity>
       <affinity>
@@ -637,7 +694,7 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -645,7 +702,7 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>13</affinityphaseid>
+        <affinityphaseid>12</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -654,6 +711,10 @@
       </affinity>
       <affinity>
         <affinityphaseid>15</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -698,11 +759,11 @@
     <gemdcname>tricarboalu03</gemdcname>
     <gemdcname>ettringite03_ss</gemdcname>
     </gemphase_data>
-    <id>14</id>
+    <id>15</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>13</affinityphaseid>
+        <affinityphaseid>14</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -714,7 +775,7 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -726,11 +787,15 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>14</affinityphaseid>
+        <affinityphaseid>13</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
         <affinityphaseid>15</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -756,15 +821,15 @@
     <gemphasename>Brucite</gemphasename>
     <gemdcname>Brc</gemdcname>
     </gemphase_data>
-    <id>15</id>
+    <id>16</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>15</affinityphaseid>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>14</affinityphaseid>
+        <affinityphaseid>15</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -776,11 +841,19 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>13</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>15</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>11</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -811,15 +884,15 @@
     <gemdcname>Mg3AlC0.5OH</gemdcname>
     <gemdcname>Mg3FeC0.5OH</gemdcname>
     </gemphase_data>
-    <id>16</id>
+    <id>17</id>
     <interface_data>
       <randomgrowth>0.6</randomgrowth>
       <affinity>
-        <affinityphaseid>16</affinityphaseid>
+        <affinityphaseid>17</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>15</affinityphaseid>
+        <affinityphaseid>16</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -831,7 +904,7 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>12</affinityphaseid>
+        <affinityphaseid>7</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -839,7 +912,11 @@
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>10</affinityphaseid>
+        <affinityphaseid>14</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>11</affinityphaseid>
         <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
@@ -861,7 +938,7 @@
   </phase>
   <phase>
     <thamesname>DAMAGE</thamesname>
-    <id>17</id>
+    <id>18</id>
     <interface_data>
       <randomgrowth>0.0</randomgrowth>
     </interface_data>

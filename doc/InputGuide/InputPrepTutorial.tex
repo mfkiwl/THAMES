@@ -58,7 +58,7 @@ The following software must be installed and running properly on your computer:
 
 \section{Categories of THAMES Input}
 Throughout this document, it will be assumed that your THAMES simulation will happen
-in a working directory called \verb!workdir!.
+in a working directory called \verb!$WORKDIR!.
 
 THAMES requires three categories of input files:
 \begin{enumerate}
@@ -90,12 +90,12 @@ form in the system.
 
 Run the recipe and accept the result in the dialog window.  Confirm
 that the calculation has run without error and produced sensible output.  When you are
-confident that the calculation ran smoothly, export the GEMS3K files to \verb!workdir!:
+confident that the calculation ran smoothly, export the GEMS3K files to \verb!$WORKDIR!:
 \begin{verbatim}
 Data -> Export GEMS3K files ...
 \end{verbatim}
 You will need to select a root string for the output files; let us assume that the chosen
-root string is \verb!portcem!.  After saving, your \verb!workdir! will now contain the
+root string is \verb!portcem!.  After saving, your \verb!$WORKDIR! will now contain the
 following five new files:
 \begin{itemize}
     \item \verb!portcem-dat.lst!
@@ -117,13 +117,13 @@ and precipitation kinetics.
 
 Run this cloned recipe and accept the result in the dialog window.  Confirm
 that the calculation has run without error and produced sensible output.  When you are
-confident that the calculation ran smoothly, export the GEMS3K files to \verb!workdir!:
+confident that the calculation ran smoothly, export the GEMS3K files to \verb!$WORKDIR!:
 \begin{verbatim}
 Data -> Export GEMS3K files ...
 \end{verbatim}
 As before, you will need to select a root string for the output files; make this be the
 same as your previous root string and then add \verb!-sol! to it.  So in this case,
-root string is \verb!portcem-sol!.  After saving, your \verb!workdir! will now contain another
+root string is \verb!portcem-sol!.  After saving, your \verb!$WORKDIR! will now contain another
 set of five new files:
 \begin{itemize}
     \item \verb!portcem-sol-dat.lst!

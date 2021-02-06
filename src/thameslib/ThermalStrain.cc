@@ -15,10 +15,12 @@ ThermalStrain::ThermalStrain (int nx,
                               int nphase,
                               int npoints,
                               const bool verbose,
-                              const bool warning)
-    : ElasticModel(nx,ny,nz,dim,nphase,npoints) 
+                              const bool warning,
+                              const bool debug)
+    : ElasticModel(nx,ny,nz,dim,nphase,npoints,verbose,warning,debug) 
 { 
     verbose_ = verbose;
+    debug_ = debug;
     warning_ = warning;
 
     if (verbose_) cout << "constructor 'THERMAL3D' in derived class 'THERMAL3D'." << endl;

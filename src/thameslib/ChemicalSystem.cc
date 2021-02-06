@@ -10,7 +10,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const string &GEMdbrname,
                                 const string &Interfacefilename,
                                 const bool verbose,
-                                const bool warning) : solut_(Solut)
+                                const bool warning,
+                                const bool debug) : solut_(Solut)
 {
     unsigned int i,j;
     double *amat;
@@ -34,6 +35,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ///
  
     verbose_ = verbose;
+    debug_ = debug;
     jsonformat_ = false;
     warning_ = warning;
     micphasenum_ = phasenum_ = solutionphasenum_ = 0;
@@ -232,7 +234,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     }
     
     ///
-    /// Attempt to run GEM with automatic initial approximation (AIA)
+    /// Attempt to run GEM with smart initial approximation (SIA)
     ///
     /// This starts the thermodynamic calculation and returns the results, including
     /// the ionic strength, pH, IC chemical potentials, DC moles, phase moles, phase
@@ -257,20 +259,20 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
     ///
 
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
+    (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
     if (verbose_) {
         cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
              << nodestatus_ << endl;
         cout.flush();
     }
-    nodestatus_ = node_->GEM_run(false);
+    nodestatus_ = node_->GEM_run(true);
     if (verbose_) {
       cout << "Done! nodestatus is " << nodestatus_ << endl;
       cout.flush();
     }
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
-        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "ERROR: Call to GEM_run in ChemicalSystem constructor had an issue..." << endl;
         cerr << "       nodestatus_ = ";
         switch (nodestatus_) {
             case NEED_GEM_AIA:
@@ -307,7 +309,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                 break;
         }
         if (dothrow) {
-            throw GEMException("Solution","calculateState",exmsg);
+            throw GEMException("ChemicalSystem","calculateState",exmsg);
         }
     }
 
@@ -1245,6 +1247,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     micvoidvolume_ = obj.getMicvoidvolume();
     micvoidvolfrac_ = obj.getMicvoidvolfrac();
     verbose_ = obj.getVerbose();
+    debug_ = obj.getDebug();
     warning_ = obj.getWarning();
 }
 
@@ -1618,7 +1621,7 @@ int ChemicalSystem::calculateState (double time,
     ///
 
     if (isfirst) {
-        nodestatus_ = node_->GEM_run(false);
+        nodestatus_ = node_->GEM_run(true);
     } else {
         nodestatus_ = node_->GEM_run(true);
     }
@@ -1630,7 +1633,7 @@ int ChemicalSystem::calculateState (double time,
 
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
-        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "ERROR: Call to GEM_run in ChemicalSystem::calculateState had an issue..." << endl;
         cerr << "       nodestatus_ = ";
         switch (nodestatus_) {
             case NEED_GEM_AIA:

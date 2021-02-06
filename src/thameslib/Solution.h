@@ -120,6 +120,7 @@ vector<double> SI_;
 double crystrain_;                  /**< Assigned strain from FE model */
 
 bool verbose_;                      /**< Flag to determine verbose output */
+bool debug_;                        /**< Flag to determine debugging output */
 
 public:
 
@@ -132,11 +133,13 @@ which are passed to the constructor.
 @param GEMfilename is the name of the GEM DCH file
 @param GEMdbrname is the name of the GEM DBR (data bridge) file
 @param verbose is true if verbose output should be produced
+@param debug is true if debugging output should be produced
 */
 
 Solution (const string &GEMfilename,
           const string &GEMdbrname,
-          const bool verbose = false);
+          const bool verbose,
+          const bool debug = false);
 
 /**
 @brief Destructor.
@@ -489,6 +492,27 @@ void setVerbose (const bool isverbose)
 bool getVerbose () const
 {
     return verbose_;
+}
+
+/**
+@brief Set the debug flag
+
+@param isdebug is true if debug output should be produced
+*/
+void setDebug (const bool isdebug)
+{
+    debug_ = isdebug;
+    return;
+}
+
+/**
+@brief Get the debug flag
+
+@return the debug flag
+*/
+bool getDebug () const
+{
+    return debug_;
 }
 
 };      // End of the Solution class

@@ -14,7 +14,8 @@ Controller::Controller (Lattice *msh,
                         const string &parfilename,
                         const string &jobname,
                         const bool verbose,
-                        const bool warning)
+                        const bool warning,
+                        const bool debug)
     :lattice_(msh),
      kineticmodel_(km),
      chemsys_(cs),
@@ -23,7 +24,8 @@ Controller::Controller (Lattice *msh,
      thermalstr_(thmstr),
      jobroot_(jobname),
      verbose_(verbose),
-     warning_(warning)
+     warning_(warning),
+     debug_(debug)
 {
   unsigned int i;
   double tvalue,pvalue;
@@ -266,6 +268,7 @@ void Controller::doCycle (const string &statfilename,
         calculateState(time_[i],timestep,isfirst);
     }
     catch (GEMException gex) {
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         throw gex;
     }
 
@@ -296,12 +299,15 @@ void Controller::doCycle (const string &statfilename,
         lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
     }
     catch (DataException dex) {
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         throw dex;
     }
     catch (EOBException ex) {
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         throw ex;
     }
     catch (MicrostructureException mex) {
+        lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         throw mex;
     }
 

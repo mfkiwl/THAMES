@@ -92,6 +92,7 @@ protected:
     vector<vector<double> > Ah_;        /**< Local stiffness matrix */
 
     bool verbose_;                      /**< Whether of not to produce verbose output */
+    bool debug_;                        /**< Whether of not to produce debugging output */
     bool warning_;                      /**< Whether of not to produce warning output */
 
     /**
@@ -205,6 +206,7 @@ public:
 @param npoints is the number of microstructures to process
 @param verbose is true if one wants verbose output
 @param warning is false if suppressing warning messages
+@param debug is true if one wants debugging output
 */
 ElasticModel (int nx,
               int ny,
@@ -212,8 +214,9 @@ ElasticModel (int nx,
               int dim,
               int nphase,
               int npoints,
-              const bool verbose = false,
-              const bool warning = true);
+              const bool verbose,
+              const bool warning,
+              const bool debug);
 
 /**
 @brief Set up the elastic modulus variables.
@@ -679,6 +682,27 @@ void setWarning (const bool iswarning)
 bool getWarning () const
 {
     return warning_;
+}
+
+/**
+@brief Set the debug flag
+
+@param isdebug is true if debugging output should be produced
+*/
+void setDebug (const bool isdebug)
+{
+    debug_ = isdebug;
+    return;
+}
+
+/**
+@brief Get the debug flag
+
+@return the debug flag
+*/
+bool getDebug () const
+{
+    return debug_;
 }
 
 };      // End of ElasticModel class

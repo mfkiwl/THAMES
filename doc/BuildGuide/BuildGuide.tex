@@ -128,10 +128,11 @@ follow these steps:
 \end{center}
 
 \section{Build and Install GEMS3K Standalone Library}
-First, there is one tweak that must be made to the downloaded version of GEMS3K.
+First, there is one tweak that must be made to the downloaded version of GEMS3K so that
+longer phase nammes can be used (this is needed when working with the cemdata18 database).
 You can apply that tweak with the following command:
 \begin{enumerate}
-    \item \verb!/bin/cp $WORKDIR/THAMES/src/GEMS3K-mods/node.h $WORKDIR/gitGEMS/standalone/GEMS3K/.!
+    \item \verb!/bin/cp $WORKDIR/THAMES/src/GEMS3K-mods/*.h $WORKDIR/gitGEMS/standalone/GEMS3K/.!
 \end{enumerate}
 
 If you have administrator privileges on your computer (Mac or Linux), then these commands

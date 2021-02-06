@@ -10,7 +10,8 @@ using namespace std;
 
 Solution::Solution (const string &GEMfilename,
                     const string &GEMdbrname,
-                    const bool verbose)
+                    const bool verbose,
+                    const bool debug)
 {
     pH_ = 7.0;
     pe_ = 1.0;
@@ -23,6 +24,7 @@ Solution::Solution (const string &GEMfilename,
     nodestatus_ = nodehandle_ = iterdone_ = 0;
 
     verbose_ = verbose;
+    debug_ = debug;
     jsonformat_ = false;
 
     ICnum_ = DCnum_ = phasenum_ = solutionphasenum_ = 0;
@@ -163,7 +165,7 @@ Solution::Solution (const string &GEMfilename,
     /// Initialize GEM
     ///
 
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
+    (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
     if (verbose_) {
         cout << "Solution::Constructor: Entering GEM_run (1) with node status = "
              << nodestatus_ << endl;
@@ -199,7 +201,7 @@ Solution::Solution (const string &GEMfilename,
     }
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
-        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
+        cerr << "ERROR: Call to GEM_run in Solution::constructor had an issue..." << endl;
         cerr << "       nodestatus_ = ";
         switch (nodestatus_) {
             case NEED_GEM_AIA:
@@ -521,7 +523,7 @@ void Solution::calculateState (bool isfirst)
     ///
     
     if (isfirst) {
-        nodestatus_ = node_->GEM_run(false);
+        nodestatus_ = node_->GEM_run(true);
     } else {
         nodestatus_ = node_->GEM_run(true);
     }
@@ -532,8 +534,8 @@ void Solution::calculateState (bool isfirst)
     }
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
-        cerr << "ERROR: Call to GEM_run had an issue..." << endl;
-        cerr << "       nodestatus_ = ";
+        cerr << "ERROR: Call to GEM_run in Solution::calculateState had an issue..." << endl;
+        cerr << "       nodestatus_ = " << nodestatus_;
         switch (nodestatus_) {
             case NEED_GEM_AIA:
                 msg = " Need GEM calc with auto initial approx (AIA)";
