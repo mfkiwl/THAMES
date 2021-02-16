@@ -77,9 +77,9 @@ extern const double bar_to_Pa,
                kg_to_g;
 
 const long int
-    MaxICnameLength =      16,      // IC name length
-    MaxDCnameLength =      32,     // DC name length
-    MaxPHnameLength =      32;     // PH name length
+    MaxICnameLength =      6,      // IC name length
+    MaxDCnameLength =      16,     // DC name length
+    MaxPHnameLength =      16;     // PH name length
 
 /// \class TNode (GEMS3K kernel)
 /// Implements a simple C/C++ interface between GEM IPM and FMT codes.

@@ -34,9 +34,9 @@
 #define DataCh_H_
 
 const long int
-    MaxICN =      16,      // IC name length
-    MaxDCN =      32,     // DC name length
-    MaxPHN =      32;     // PH name length
+    MaxICN =      6,      // IC name length
+    MaxDCN =      16,     // DC name length
+    MaxPHN =      16;     // PH name length
 
 /// \struct DATACH - The Data for CHemistry data structure
 typedef struct
