@@ -248,15 +248,6 @@ void Controller::doCycle (const string &statfilename,
     /// Assume that only capillary pore water is chemically reactive,
     /// while water in nanopores is chemically inert.
     ///
-    /// @todo the following is a kluge to force the simulation to
-    /// stop when the capillary pore water is exhausted.
-    ///
-   
-    // if (isfirst) {
-    //     cout << "Going into Controller::initializeState" << endl;
-    //     initializeState(time_[i]);
-    // }
-
     ///
     /// This is the main step of the cycle; the calculateState method
     /// runs all fo the major steps of a computational cycle
@@ -460,8 +451,7 @@ void Controller::doCycle (const string &statfilename,
               damagecount_++;
           }
 
-          /*
-          if ((pid == DAMAGEID)) {
+          if ((ste->IsDamage())) {
             double strxx, stryy, strzz;
             strxx = stryy = strzz = 0.0;
             strxx = thermalstr_->getEleStress(index,0);
@@ -480,16 +470,28 @@ void Controller::doCycle (const string &statfilename,
               }
               lattice_->setExpansion(index,damageexp);
               lattice_->dWaterchange(poreincrease);
-              ste->setVolume(VOIDID,(ste->getVolume(VOIDID) + poreincrease));
+              /// JWB: This next line must be from some earlier version
+              /// The called method does not exist any longer
+              ///
+              /// @todo: Determine whether it is necessary to add this back
+              /// in for crystallization pressure calculations
+              //
+              //ste->setVolume(VOIDID,(ste->getVolume(VOIDID) + poreincrease));
+              //
             }
           }
-          */
 
           ///
           /// The next block gets the stress in each voxel that does NOT
           /// contain a clinker phase (C3S, C2S, C3A, or C4AF), then determine
           /// if the voxel should be damaged as a result
 
+          /// Prefer to make this independent of whether or not there is C4AF in
+          /// the phase definitions.  What if this is a white cement or something?
+          /// 
+          /// @todo Give each phase a calcstress property or something like that
+          ///       that can be checked instead of hardwiring phase ids
+          
           if (pid > C4AFID) {
             double strxx, stryy, strzz;
             strxx = stryy = strzz = 0.0;
@@ -566,47 +568,6 @@ void Controller::doCycle (const string &statfilename,
   return;
 }
 
-void Controller::initializeState (double time)
-{
-
-    // Set up the amount of water in the system
-    kineticmodel_->initializeMoles();      
-
-    // Set the temperature
-    double T = chemsys_->getTemperature();
-    lattice_->setTemperature(T);
-
-    ///
-    /// Now that the method is done determining the change in moles of each IC,
-    /// launch a thermodynamic calculation to determine new equilibrium state
-    /// 
-    /// The `ChemicalSystem` object provides an interface for these calculations
-    /// 
-
-    if (verbose_) {
-        cout << "Going to launch thermodynamic calculation now... ";
-        cout.flush();
-    }
-    try {
-        chemsys_->calculateState(time,true);
-        if (verbose_) {
-            cout << "*Returned from ChemicalSystem::calculateState" << endl;
-            cout << "*called by function Controller::initializeState" << endl;
-            cout.flush();
-        }
-    }
-    catch (GEMException gex) {
-        throw gex;
-    }
-
-    if (verbose_) {
-        cout << "Done!" << endl;
-        cout.flush();
-    }
-    
-  return;
-}
-
 void Controller::calculateState (double time,
                                  double dt,
                                  bool isfirst) 
@@ -631,18 +592,14 @@ void Controller::calculateState (double time,
     impurityrelease.clear();
     impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
        
-    if (verbose_) {
-        cout << "Before KineticModel::calculateKineticStep, print out "
-             << "ICmoles for solution..." << endl;
-    }
-    solut_->getICmoles();
- 
     ///
     /// Get the number of moles of each IC dissolved from kinetically controlled phases
     ///
 
     double T = lattice_->getTemperature();
-    if (verbose_) cout << "Going into KineticModel::calculateKineticStep now... " << endl;
+    if (verbose_) {
+        cout << "Going into KineticModel::calculateKineticStep now... " << endl;
+    }
     kineticmodel_->calculateKineticStep(dt,T,isfirst);
     if (verbose_) cout << "Done!" << endl;
 
@@ -725,22 +682,22 @@ void Controller::calculateState (double time,
         vector<int> micphasemembers;
         for (int i = 0; i < chemsys_->getMicphasenum(); ++i) {
             int newmicid = chemsys_->getMicid(chemsys_->getMicphasename(i));
-            if (verbose_) {
-                cout << "Mic phase " << chemsys_->getMicphasename(i)
-                     << " is associated with GEMS phases ";
-                cout.flush();
-            }
+            // if (verbose_) {
+            //      cout << "Mic phase " << chemsys_->getMicphasename(i)
+            //         << " is associated with GEMS phases ";
+            //    cout.flush();
+            //}
             aveSI = moles = 0.0;
             micphasemembers = chemsys_->getMicphasemembers(newmicid);
             for (int ii = 0; ii < micphasemembers.size(); ++ii) {
                 int newpid = micphasemembers[ii];
-                if (verbose_) {
-                    if (ii == 0) {
-                        cout << chemsys_->getPhasename(newpid);
-                    } else {
-                        cout << " , " << chemsys_->getPhasename(newpid);
-                    }
-                }
+                // if (verbose_) {
+                //     if (ii == 0) {
+                //         cout << chemsys_->getPhasename(newpid);
+                //     } else {
+                //         cout << " , " << chemsys_->getPhasename(newpid);
+                //     }
+                // }
                 aveSI += (solut_->getSI(newpid) * chemsys_->getPhasemoles(newpid));
                 moles += chemsys_->getPhasemoles(newpid);
             }
@@ -749,10 +706,10 @@ void Controller::calculateState (double time,
             } else {
                 aveSI = aveSI / (double)(micphasemembers.size());
             }
-            if (verbose_) {
-                cout << endl;
-                cout.flush();
-            }
+            // if (verbose_) {
+            //     cout << endl;
+            //     cout.flush();
+            // }
             lattice_->setSI(newmicid,aveSI);    
         }
     }

@@ -748,8 +748,6 @@ vector<string> getName () const
 /**
 @brief Get the name of phase with a given index in the kinetic model.
 
-@note NOT USED.
-
 @param i is the index of the phase in the kinetic model
 @return the name of the phase with index i
 */
@@ -1234,12 +1232,6 @@ void calculatePhaseChange (int pid,
                            double gamma,
                            double timestep);
  
-/**
-@brief Set up the initial number of moles of independent components in the system.
-
-*/
-void initializeMoles ();
-    
 /**
 @brief Set up the number of moles of dependent components in the kinetic phases.
 

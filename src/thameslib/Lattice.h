@@ -74,7 +74,10 @@ Solution *solut_;                           /**< Pointer to the simulation's Sol
 AppliedStrain *FEsolver_;                   /**< Pointer to simulation's FE elastic solver */
 vector<Interface> interface_;               /**< List of the different interface objects
                                                     in the microstructure */
+double wsratio_;                            /**< Water-to-solids mass ratio */
 vector<double> volumefraction_;             /**< Array of volume fractions of each 
+                                                    microstructure phase */
+vector<double> initvolumefraction_;         /**< Array of initial volume fractions of each 
                                                     microstructure phase */
 /**
 @note Changed count_ from type double to type int
@@ -230,13 +233,51 @@ unsigned int getNumsites () const
 }
     
 /**
+@brief Set the volume fraction of a given microstructure phase.
+
+@param i is the index of the microstructure phase
+@param vfrac is the volume fraction to assign on a total microstructure basis
+*/
+void setVolumefraction (unsigned int i, double vfrac)
+{
+    try {
+        volumefraction_.at(i) = vfrac;
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("Lattice","setVolumefraction","volumefraction_",
+                        volumefraction_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+}
+    
+/**
+@brief Set the initial volume fraction of a given microstructure phase.
+
+@param i is the index of the microstructure phase
+@param vfrac is the volume fraction to assign on a total microstructure basis
+*/
+void setInitvolumefraction (unsigned int i, double vfrac)
+{
+    try {
+        initvolumefraction_.at(i) = vfrac;
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("Lattice","setInitialvolumefraction","initvolumefraction_",
+                        initvolumefraction_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+}
+    
+/**
 @brief Get the volume fraction of a given microstructure phase.
 
 This is simply the number of sites with a given phase divided by the
 total number of sites.
 
 @param i is the index of the microstructure phase
-@return the total number of lattice sites
+@return the volume fraction of phase i on a total microstructure basis
 */
 double getVolumefraction (unsigned int i)
 {
@@ -245,15 +286,45 @@ double getVolumefraction (unsigned int i)
             throw FloatException("Lattice","getVolumefraction",
                                  "Divide by zero (numsites_)");
         }
-        return ((double)(count_.at(i))/(double)(numsites_));
+        return (volumefraction_.at(i));
     }
     catch (FloatException flex) {
         flex.printException();
         exit(1);
     }
     catch (out_of_range &oor) {
-        EOBException ex("Lattice","getVolumefraction","count_",
-                        count_.size(),i);
+        EOBException ex("Lattice","getVolumefraction","volumefraction_",
+                        volumefraction_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+}
+    
+/**
+@brief Get the initial volume fraction of a given microstructure phase.
+
+This is simply the number of sites with a given phase divided by the
+total number of sites.
+
+@param i is the index of the microstructure phase
+@return the initial volume fraction of phase i on a total microstructure basis
+*/
+double getInitvolumefraction (unsigned int i)
+{
+    try {
+        if (numsites_ == 0) {
+            throw FloatException("Lattice","getInitialvolumefraction",
+                                 "Divide by zero (numsites_)");
+        }
+        return (initvolumefraction_.at(i));
+    }
+    catch (FloatException flex) {
+        flex.printException();
+        exit(1);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("Lattice","getInitialvolumefraction","initvolumefraction_",
+                        initvolumefraction_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -695,9 +766,7 @@ void setPhaseId (Site *s,
 {
     string msg;
     try {
-        if (i != chemsys_->getMicid("DAMAGE")) {
-            count_.at(s->getPhaseId())--;        
-        }
+        count_.at(s->getPhaseId())--;        
         s->setPhaseId(i);
         count_.at(i)++;
     }
@@ -719,9 +788,7 @@ void setPhaseId (const int sitenum,
 {
     string msg;
     try {
-        if (i != chemsys_->getMicid("DAMAGE")) {
-          count_.at(site_.at(sitenum).getPhaseId())--;
-        }
+        count_.at(site_.at(sitenum).getPhaseId())--;
         site_.at(sitenum).setPhaseId(i);
         count_.at(i)++;
     }

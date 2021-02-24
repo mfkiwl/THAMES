@@ -207,7 +207,6 @@ vector<double> randomgrowth_;             /**< One real number for each microstr
                                           aggregation) as opposed to compact growth */
 vector<double> ICmolarmass_;              /**< One molar mass for each IC [g/mm3ol] */
 vector<double> DCmolarmass_;              /**< One molar mass for each DC [g/mol] */
-vector<double> DCmolarvolume_;            /**< One molar volume for each DC [m3] */
 vector<double> phasemolarmass_;           /**< One molar mass for each GEM phase [g/mol] */
 vector<vector<int> > growthtemplate_;   /**< A list of the phases on which a given phase
                                                 is allowed to grow; one list for each phase */
@@ -269,6 +268,10 @@ map<string,int> phaseidlookup_;         /**< Map that returns the vector index o
 map<int,int> mic2kinetic_;              /**< Map that returns the kinetic model id of
                                                 a given microstructure phase id */
 map<int,int> kinetic2mic_;              /**< Map that returns the microstructure phase id
+                                                of a given kinetic model phase id */
+map<int,int> mic2soluble_;              /**< Map that returns the kinetic model id of
+                                                a given soluble microstructure phase id */
+map<int,int> soluble2mic_;              /**< Map that returns the soluble microstructure phase id
                                                 of a given kinetic model phase id */
 map<int,int> mic2thermo_;               /**< Map that returns the GEM CSD phase id
                                                 of a given microstructure phase id */
@@ -776,7 +779,7 @@ void setMicphasename (const unsigned int idx,
         micphasename_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasename","micphasename_",
+        EOBException ex("ChemicalSystem","setMicphasename","micphasename_",
                         micphasename_.size(),idx);
         ex.printException();
         exit(1);
@@ -1550,6 +1553,11 @@ vector<int> getMic2DC (const int i)
 @brief Get the integer id of a phase in the kinetic model that is associated.
 with a given microstructure phase
 
+This method will return a nonsense id of -1 rather than throwing an exception
+if the micid is not found, such as will happen if there is no kinetic phase
+associated with a given microstructure phase.  The user takes the responsibility
+of handling the nonsense result.
+
 @param i is integer id of the microstructure phase
 @return the integer id  of the associated phase in the kinetic model
 */
@@ -1560,10 +1568,7 @@ int getMic2kinetic (const int i)
     if (p != mic2kinetic_.end()) {
         return p->second;
     } else {
-        msg = "Could not find mic2kinetic_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2kinetic",msg,mic2kinetic_.size(),0);
-        ex.printException();
-        exit(1);
+        return -1;   // Nonsense result, but don't throw exception
     }
 }
 
@@ -1589,10 +1594,57 @@ int getKinetic2mic (const int i)
 }
 
 /**
+@brief Get the integer id of a soluble phase in the kinetic model that is associated
+with a given microstructure phase
+
+This method will return a nonsense id of -1 rather than throwing an exception
+if the micid is not found, such as will happen if there is no kinetic phase
+associated with a given microstructure phase.  The user takes the responsibility
+of handling the nonsense result.
+
+@param i is integer id of the microstructure phase
+@return the integer id  of the associated soluble phase in the kinetic model
+*/
+int getMic2soluble (const int i)
+{
+    string msg;
+    map<int,int>::iterator p = mic2soluble_.find(i);
+    if (p != mic2soluble_.end()) {
+        return p->second;
+    } else {
+        return -1;   // Nonsense result, but don't throw exception
+    }
+}
+
+/**
+@brief Get the integer id of a microstructure phase that is associated
+with a given soluble phase in the kinetic model
+
+@param i is integer id of the phase in the kinetic model
+@return the integer id  of the associated microstructure phase
+*/
+int getSoluble2mic (const int i)
+{
+    string msg;
+    map<int,int>::iterator p = soluble2mic_.find(i);
+    if (p != soluble2mic_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find soluble2mic_ match to index provided";
+        EOBException ex("ChemicalSystem","getSoluble2mic",msg,soluble2mic_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
 @brief Get the integer id of a phase under thermodynamic control that is associated.
 with a given microstructure phase.
 
-@note NOT USED.
+This method will return a nonsense id of -1 rather than throwing an exception
+if the micid is not found, such as will happen if there is no thermo phase
+associated with a given microstructure phase.  The user takes the responsibility
+of handling the nonsense result.
 
 @param i is integer id of the microstructure phase
 @return the integer id of the thermodynamically controlled phase
@@ -1604,10 +1656,7 @@ int getMic2thermo (const int i)
     if (p != mic2thermo_.end()) {
         return p->second;
     } else {
-        msg = "Could not find mic2thermo_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2thermo",msg,mic2thermo_.size(),0);
-        ex.printException();
-        exit(1);
+        return -1;   // Nonsense result, but don't throw exception
     }
 }
 
@@ -1730,6 +1779,44 @@ void setKinetic2mic (const int kineticid,
     if (p == kinetic2mic_.end()) {
         kinetic2mic_.insert(make_pair(kineticid,micid));
         setMic2kinetic(micid,kineticid);
+    } else {
+        p->second = micid;
+    }
+}
+
+/**
+@brief Set the integer id of a soluble phase associated with a
+microstructure phase id.
+
+@param micid is integer id of the microstructure phase
+@param solubleid is the integer id of the soluble phase
+*/
+void setMic2soluble (const int micid,
+                     const int solubleid)
+{
+    map<int,int>::iterator p = mic2soluble_.find(micid);
+    if (p == mic2soluble_.end()) {
+        mic2soluble_.insert(make_pair(micid,solubleid));
+        setSoluble2mic(solubleid,micid);
+    } else {
+        p->second = solubleid;
+    }
+}
+
+/**
+@brief Set the integer id of a microstructure phase associated with a
+kinetically controlled phase id.
+
+@param solubleid is the integer id of the kinetically controlled phase
+@param micid is integer id of the microstructure phase
+*/
+void setSoluble2mic (const int solubleid,
+                     const int micid)
+{
+    map<int,int>::iterator p = soluble2mic_.find(solubleid);
+    if (p == soluble2mic_.end()) {
+        soluble2mic_.insert(make_pair(solubleid,micid));
+        setMic2soluble(micid,solubleid);
     } else {
         p->second = micid;
     }
@@ -3766,9 +3853,9 @@ void setPhasevolume ()
     setOphasevolume();
     for (long int i = 0; i < phasenum_; i++) {
         phasevolume_[i] = (double)(node_->Ph_Volume(i));
-        if (verbose_) {
-            cout << "phasevolume_[" << i << "] = " << phasevolume_[i] << endl;
-        }
+        // if (verbose_) {
+        //     cout << "phasevolume_[" << i << "] = " << phasevolume_[i] << endl;
+        // }
     }
 }
 
@@ -4069,8 +4156,6 @@ double getMicphasevolfrac (const unsigned int idx)
 /**
 @brief Set the volume of a microstructure phase (by id).
 
-@note NOT USED.
-
 @param idx is the microstructure phase id
 @param val is the volume to assign to that microstructure phase
 */
@@ -4138,19 +4223,21 @@ void setMicphasemass (const unsigned int idx,
         ex.printException();
         exit(1);
     }
-    micphasemass_[idx] = val;
     double v0 = node_->DC_V0(getMic2DC(idx,0),P_,T_);
     double dcmm = getDCmolarmass(getMic2DC(idx,0));
     if (verbose_) {
         cout << "    " << micphasename_[idx] << ": v0 = "
-             << v0 << ", dcmm = " << dcmm << endl;
+             << v0 << ", dcmm = " << dcmm
+             << ", so volume = ";
     }
     if (dcmm < 1.0e-9) {
+        if (verbose_) cout << " not defined" << endl;
         FloatException fex("ChemicalSystem","setMicphasemass",
                            "Divide by zero (dcmm)");
         fex.printException();
         exit(1);
     }
+    if (verbose_) cout << (val*v0/dcmm) << endl;
 
     setMicphasevolume(idx,(val*v0/dcmm));
 
@@ -4338,8 +4425,6 @@ double getMictotvolume () const
 
 /**
 @brief Set the initial total microstructure volume.
-
-@note NOT USED.
 
 @param val is the initial total volume to assign to the microstructure
 */
@@ -4614,27 +4699,6 @@ vector<double> getDCmolarmass () const
 }
 
 /**
-@brief Set the molar volumes of dependent components (DC) [m3].
-*/
-void setDCmolarvolume (void)
-{
-    long int i;
-    try {
-        DCmolarvolume_.resize(DCnum_,0.0);
-        for (i = 0; i < DCnum_; i++) {
-            DCmolarvolume_[i] = (double)(node_->DC_V0(i,P_,T_));
-        }
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setDCmolarvolume",
-                           "DCmolarvolume_",DCmolarvolume_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-    return;
-}
-
-/**
 @brief Get the molar volume of a particular dependent component (DC), by id [m3].
 
 @param dcidx is the id of the DC
@@ -4642,15 +4706,8 @@ void setDCmolarvolume (void)
 */
 double getDCmolarvolume (const unsigned int dcidx)
 {
-    try {
-        return DCmolarvolume_.at(dcidx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getDCmolarvolume",
-                           "DCmolarvolume_",DCmolarvolume_.size(),dcidx);
-        ex.printException();
-        exit(1);
-    }
+    double v0 = node_->DC_V0(dcidx,P_,T_);
+    return v0;
 }
 
 /**
@@ -4662,28 +4719,8 @@ double getDCmolarvolume (const unsigned int dcidx)
 double getDCmolarvolume (const string &str)
 {
     string msg;
-    try {
-        double V0 = getDCmolarvolume(getDCid(str));
-        return V0;
-    }
-    catch (out_of_range &oor) {
-        msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getDCmolarvolume",msg,DCmolarvolume_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the molar volumes of all dependent components (DC) [m3].
-
-@note Used only in this class's copy constructor.
-
-@return the vector of DC molar volumes [m3]
-*/
-vector<double> getDCmolarvolume () const
-{
-    return DCmolarvolume_;
+    double V0 = getDCmolarvolume(getDCid(str));
+    return V0;
 }
 
 /**
@@ -6201,10 +6238,10 @@ void setSI ()
     Falp = (node_->ppmm())->Falp;
     
     for (int i = 0; i < phasenum_; i++) {
-        if (verbose_) {
-            cout << "logSI for " << phasename_[i] << " is: "
-                 << Falp[i] << endl;
-        }
+        // if (verbose_) {
+        //     cout << "logSI for " << phasename_[i] << " is: "
+        //          << Falp[i] << endl;
+        // }
         double si = pow(10,Falp[i]);
         SI_.push_back(si);
     }

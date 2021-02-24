@@ -328,10 +328,10 @@ void setSI ()
     Falp = (node_->ppmm())->Falp;
     
     for (int i = 0; i < phasenum_; i++) {
-        if (verbose_) {
-            cout << "log10(SI) for " << phasename_[i] << " is: "
-                 << Falp[i] << endl;
-        }
+        // if (verbose_) {
+        //     cout << "log10(SI) for " << phasename_[i] << " is: "
+        //          << Falp[i] << endl;
+        // }
         double si = pow(10,Falp[i]);
         SI_.push_back(si);
     }

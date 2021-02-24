@@ -532,7 +532,7 @@
     <gemphase_data>
     <gemphasename>SO4_OH_AFm</gemphasename>
     <gemdcname>C4AH13</gemdcname>
-    <gemdcname>monosulphate12</gemdcname>
+    <gemdcname>monosulf12</gemdcname>
     </gemphase_data>
     <id>12</id>
     <interface_data>
@@ -578,31 +578,31 @@
     <thamesname>AFMC</thamesname>
     <gemphase_data>
     <gemphasename>C4AcH9</gemphasename>
-    <gemdcname>monocarbonate9</gemdcname>
+    <gemdcname>monocarb9</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4Ac0.5H105</gemphasename>
-    <gemdcname>hemicarbonat10.5</gemdcname>
+    <gemdcname>hemicarb10.5</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4Ac0.5H12</gemphasename>
-    <gemdcname>hemicarbonate</gemdcname>
+    <gemdcname>hemicarb</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4Ac0.5H9</gemphasename>
-    <gemdcname>hemicarbonate9</gemdcname>
+    <gemdcname>hemicarb9</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4AcH11</gemphasename>
-    <gemdcname>monocarbonate</gemdcname>
+    <gemdcname>monocarb</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4Fc05H10</gemphasename>
-    <gemdcname>Fe-hemicarbonate</gemdcname>
+    <gemdcname>Fe-hemicarb</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4FcH12</gemphasename>
-    <gemdcname>Femonocarbonate</gemdcname>
+    <gemdcname>Femonocarb</gemdcname>
     </gemphase_data>
     <id>13</id>
     <interface_data>
@@ -644,24 +644,20 @@
     <thamesname>MONOSULPH</thamesname>
     <gemphase_data>
     <gemphasename>C4AsH105</gemphasename>
-    <gemdcname>monosulphate10.5</gemdcname>
-    </gemphase_data>
-    <gemphase_data>
-    <gemphasename>C4AsH12</gemphasename>
-    <gemdcname>monosulphate12</gemdcname>
+    <gemdcname>monosulf10.5</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4AsH14</gemphasename>
-    <gemdcname>monosulphate14</gemdcname>
+    <gemdcname>monosulf14</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C4AsH9</gemphasename>
-    <gemdcname>monosulphate9</gemdcname>
+    <gemdcname>monosulf9</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>monosulph-AlFe</gemphasename>
-    <gemdcname>monosulphate1205</gemdcname>
-    <gemdcname>Fe-monosulph05</gemdcname>
+    <gemdcname>monosulf1205</gemdcname>
+    <gemdcname>Fe-monosulf05</gemdcname>
     </gemphase_data>
     <id>14</id>
     <interface_data>
@@ -723,26 +719,26 @@
     <thamesname>ETTR</thamesname>
     <gemphase_data>
     <gemphasename>ettringite</gemphasename>
-    <gemdcname>ettringite</gemdcname>
-    <gemdcname>ettringite30</gemdcname>
+    <gemdcname>ettr</gemdcname>
+    <gemdcname>ettr30</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C6AsH13</gemphasename>
-    <gemdcname>ettringite13</gemdcname>
+    <gemdcname>ettr13</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>C6AsH9</gemphasename>
-    <gemdcname>ettringite9</gemdcname>
+    <gemdcname>ettr9</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>ettringite-AlFe</gemphasename>
-    <gemdcname>ettringite05</gemdcname>
-    <gemdcname>Fe-ettringite05</gemdcname>
+    <gemdcname>ettr05</gemdcname>
+    <gemdcname>Fe-ettr05</gemdcname>
     </gemphase_data>
     <gemphase_data>
     <gemphasename>SO4_CO3_AFt</gemphasename>
     <gemdcname>tricarboalu03</gemdcname>
-    <gemdcname>ettringite03_ss</gemdcname>
+    <gemdcname>ettr03_ss</gemdcname>
     </gemphase_data>
     <id>15</id>
     <interface_data>
