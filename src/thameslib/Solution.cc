@@ -23,6 +23,9 @@ Solution::Solution (const string &GEMfilename,
     ionicstrength_ = 0.0;
     nodestatus_ = nodehandle_ = iterdone_ = 0;
 
+    timesGEMfailed_ = 0;
+    maxGEMfails_ = 3;
+
     verbose_ = verbose;
     debug_ = debug;
     jsonformat_ = false;
@@ -532,7 +535,7 @@ void Solution::calculateState (bool isfirst)
     if (isfirst) {
         nodestatus_ = node_->GEM_run(false);
     } else {
-        nodestatus_ = node_->GEM_run(false);
+        nodestatus_ = node_->GEM_run(true);
     }
 
     if (verbose_) {
@@ -545,48 +548,55 @@ void Solution::calculateState (bool isfirst)
         cerr << "       nodestatus_ = " << nodestatus_;
         switch (nodestatus_) {
             case NEED_GEM_AIA:
-                cout << " !!!!!Need GEM calc with auto initial approx (AIA)" << endl;
-                msg = " !!!!!Need GEM calc with auto initial approx (AIA)";
+                msg = "Need GEM calc with auto initial approx (AIA)";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
             case BAD_GEM_AIA:
-                cout << " !!!!! Untrustworthy result with auto initial approx (AIA)" << endl;
-                msg = " !!!!! Untrustworthy result with auto initial approx (AIA)";
+                msg = "Untrustworthy result with auto initial approx (AIA)";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
             case ERR_GEM_AIA:
-                cout << " !!!!! Failed result with auto initial approx (AIA)" << endl;
-                msg = " !!!!! Failed result with auto initial approx (AIA)";
+                msg = "Failed result with auto initial approx (AIA)";
+                cerr << msg << " and has failed " << timesGEMfailed_ << " in a row" << endl;
+                timesGEMfailed_++;
+                // dothrow = (timesGEMfailed_ > maxGEMfails_) ? true : false;
                 dothrow = false;
                 break;
             case NEED_GEM_SIA:
-                cout <<  " !!!!! Need GEM calc with smart initial approx (SIA)" << endl;
-                msg =  " !!!!! Need GEM calc with smart initial approx (SIA)";
+                msg =  "Need GEM calc with smart initial approx (SIA)";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
             case BAD_GEM_SIA:
-                cout << " !!!!! Untrustworthy result with smart initial approx (SIA)" << endl;
-                msg = " !!!!! Untrustworthy result with smart initial approx (SIA)";
+                msg = "Untrustworthy result with smart initial approx (SIA)";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
             case ERR_GEM_SIA:
-                cout <<  " !!!!! Failed result with smart initial approx (SIA)" << endl;
-                msg =  " !!!!! Failed result with smart initial approx (SIA)";
+                msg =  "Failed result with smart initial approx (SIA)";
+                cerr << msg << " and has failed " << timesGEMfailed_ << " in a row" << endl;
+                timesGEMfailed_++;
+                // dothrow = (timesGEMfailed_ > maxGEMfails_) ? true : false;
                 dothrow = false;
                 break;
             case T_ERROR_GEM:
-                msg = " !!!!! Terminal GEM error; need restart";
+                msg = "Terminal GEM error; need restart";
+                cerr << msg << endl;
                 dothrow = true;
                 break;
             case NO_GEM_SOLVER:
-                cout << " !!!!! No GEM recalculation needed for node" << endl;
-                msg =  " !!!!! No GEM recalculation needed for node";
+                msg =  "No GEM recalculation needed for node";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
         }
         if (dothrow) {
             throw GEMException("Solution","calculateState",msg);
         }
+    } else {
+        timesGEMfailed_ = 0;
     }
 
     ///

@@ -67,6 +67,11 @@ long int nodestatus_;               /**< integer flag used to identify node's st
 long int iterdone_;                 /**< number of iterations performed in the most
                                                 recent GEM calculation on the node */
 
+int timesGEMfailed_;                /**< number of consecutive times a call to GEM_run
+                                                has failed */
+
+int maxGEMfails_;                   /**< maximum allowed number of consecutive GEM_run fails */
+
 unsigned int ICnum_;                /**< Number of independent components (IC) */
 unsigned int DCnum_;                /**< Number of dependent components (DC) */
 unsigned int phasenum_;             /**< Number of GEM phases in the CSD */
@@ -472,6 +477,34 @@ bool getJsonformat () const
 {
     return jsonformat_;
 }
+
+/**
+@brief Set the number of times in a row that GEM_run has failed.
+
+Calculations of equilibrium state sometimes fail to converge.  It is
+possible that some small tweak in the composition could help the
+algorithm converge, so we allow up to `maxGEMfails_' attempts for
+convergence, each time tweaking the composition in some way
+before giving up and throwing an exception.
+
+@param ntimes is the number of consecutive times GEM_run has failed
+*/
+void setTimesGEMfailed (const int ntimes)
+{
+    timesGEMfailed_ = (ntimes >= 0) ? ntimes : 0;
+    return;
+}
+
+/**
+@brief Get the number of consecutive times a call to GEM_run has failed.
+
+@return the number of consecutive times a call to GEM_run has failed.
+*/
+int getTimesGEMfailed () const
+{
+    return timesGEMfailed_;
+}
+
 
 /**
 @brief Set the verbose flag

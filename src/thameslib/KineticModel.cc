@@ -822,8 +822,15 @@ void KineticModel::calculateKineticStep (const double timestep,
     double newDOH = 0.0;              // Updated value of doh
     double massdissolved = 0.0;
 
+    ///
+    /// Determine if this is a normal step or a necessary
+    /// tweak from a failed GEM_run call
+    ///
+    
+    bool dotweak = (chemsys_->getTimesGEMfailed() > 0) ? true : false;
+
     static double hyd_time = 0.0;
-    hyd_time = hyd_time + timestep;
+    if (!dotweak) hyd_time = hyd_time + timestep;
     if (verbose_) cout << "hyd_time = " << hyd_time << endl;
 
     try {
@@ -1047,6 +1054,7 @@ void KineticModel::calculateKineticStep (const double timestep,
         }   // End of special first-time tasks
 
         if (hyd_time < leach_time_ && hyd_time < sattack_time_) { 
+
           if (verbose_) {
              cout << "Looping over clinker minerals.  " << endl;
              cout.flush();
@@ -1058,6 +1066,14 @@ void KineticModel::calculateKineticStep (const double timestep,
 
           for (int i = 0; i < kineticphase_.size(); i++) {
             kpid = kineticphase_[i];
+            if (initscaledmass_[kpid] > 0.0) {
+              DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
+                    (initscaledmass_[kpid]);
+            } else {
+              throw FloatException("KineticModel","calculateKineticStep",
+                             "initscaledmass_ = 0.0");
+            }
+
             wcfactor = 1.0 + (3.333 *
                    (pow(((critDOH_[kpid] * wcratio_) - DOH),4.0)));
 
@@ -1073,15 +1089,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
             // }
 
-            if (initscaledmass_[kpid] > 0.0) {
-              DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
-                    (initscaledmass_[kpid]);
-            } else {
-              throw FloatException("KineticModel","calculateKineticStep",
-                             "initscaledmass_ = 0.0");
-            }
-
-            if (DOH < 1.0) {
+            if (DOH < 1.0 && !dotweak) {
         
                 if (fabs(n1_[kpid]) > 0.0) {
                   ngrate = (k1_[kpid]/n1_[kpid]) * (1.0 - DOH)
@@ -1210,6 +1218,19 @@ void KineticModel::calculateKineticStep (const double timestep,
     
                  }
 
+            } else if (DOH < 1.0) {
+
+                ///
+                /// We will just tweak the icmoles a bit to try to
+                /// cure a previous failed convergence with GEM_run
+                ///
+                
+                for (int ii = 0; ii < icmoles.size(); ii++) {
+                    if (icname[ii] != "H" && icname[ii] != "O" && icname[ii] != "Zz") {
+                        icmoles[ii] *= 1.01;
+                    }
+                }
+
             } else {
               throw DataException("KineticModel","calculateKineticStep",
                                 "DOH >= 1.0");
@@ -1218,12 +1239,22 @@ void KineticModel::calculateKineticStep (const double timestep,
         }	
 
 
-
         if (verbose_) {
-            cout << "KineticModel::calculateKineticstep ICmoles after dissolving:" << endl;
+            if (!dotweak) {
+                cout << "KineticModel::calculateKineticstep ICmoles after dissolving:" << endl;
+            } else {
+                cout << "KineticModel::calculateKineticstep ICmoles after tweaking:" << endl;
+            }
             for (int i = 0; i < icnum; i++) {
               cout << "    " << icname[i] << ": " << icmoles[i] << " mol" << endl;
             }
+        }
+
+        if (dotweak) {
+            for (int ii = 0; ii < icmoles.size(); ii++) {
+                chemsys_->setICmoles(ii,icmoles[ii]);
+            }
+            return;
         }
 
         vector<int> phaselist;

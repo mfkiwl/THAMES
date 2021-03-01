@@ -412,7 +412,10 @@ long int nodehandle_;                   /**< integer flag used to identify a nod
 long int nodestatus_;                   /**< integer flag used to identify node's status */
 long int iterdone_;                     /**< number of iterations performed in the most
                                                 recent GEM calculation on the node */
-
+int timesGEMfailed_;                    /**< tracks number of times in a row that the
+                                                GEM_run calculation failed */
+int maxGEMfails_;                       /**< maximum number of times GEM_run is allowed
+                                                to fail without throwing an exception */
 /**
 @brief Whether or not the system is saturated with moisture.
 
@@ -6018,6 +6021,33 @@ void setIterdone (const long int val)
 long int getIterdone () const
 {
     return iterdone_;
+}
+
+/**
+@brief Set the number of times in a row that GEM_run has failed.
+
+Calculations of equilibrium state sometimes fail to converge.  It is
+possible that some small tweak in the composition could help the
+algorithm converge, so we allow up to `maxGEMfails_' attempts for
+convergence, each time tweaking the composition in some way
+before giving up and throwing an exception.
+
+@param ntimes is the number of consecutive times GEM_run has failed
+*/
+void setTimesGEMfailed (const int ntimes)
+{
+    timesGEMfailed_ = (ntimes >= 0) ? ntimes : 0;
+    return;
+}
+
+/**
+@brief Get the number of consecutive times a call to GEM_run has failed.
+
+@return the number of consecutive times a call to GEM_run has failed.
+*/
+int getTimesGEMfailed () const
+{
+    return timesGEMfailed_;
 }
 
 /**

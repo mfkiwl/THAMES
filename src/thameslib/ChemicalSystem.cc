@@ -23,6 +23,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     unsigned int ii,jj;
     int k;
     bool found = false;
+    timesGEMfailed_ = 0;
+    maxGEMfails_ = 3;
     
     ///  The constructor initializes all the members to default values,
     ///  then launches the initial thermodynamic calculation, and sets
@@ -234,7 +236,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     }
     
     ///
-    /// Attempt to run GEM with smart initial approximation (SIA)
+    /// Attempt to run GEM with auto initial approximation (AIA)
     ///
     /// This starts the thermodynamic calculation and returns the results, including
     /// the ionic strength, pH, IC chemical potentials, DC moles, phase moles, phase
@@ -273,18 +275,21 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
         cerr << "ERROR: Call to GEM_run in ChemicalSystem constructor had an issue..." << endl;
-        cerr << "       nodestatus_ = ";
+        cerr << "       nodestatus_ = " << nodestatus_;
         switch (nodestatus_) {
             case NEED_GEM_AIA:
                 exmsg = " Need GEM calc with auto initial approx (AIA)";
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case BAD_GEM_AIA:
                 exmsg = " Untrustworthy result with auto initial approx (AIA)",
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case ERR_GEM_AIA:
                 exmsg = " Failed result with auto initial approx (AIA)";
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case NEED_GEM_SIA:
@@ -293,23 +298,27 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                 break;
             case BAD_GEM_SIA:
                 exmsg = " Untrustworthy result with smart initial approx (SIA)";
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case ERR_GEM_SIA:
                 exmsg =  " Failed result with smart initial approx (SIA)";
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case T_ERROR_GEM:
                 exmsg = " Terminal GEM error; need restart";
+                cerr << exmsg << endl;
                 dothrow = true;
                 break;
             case NO_GEM_SOLVER:
                 exmsg =  " No GEM recalculation needed for node";
+                cerr << exmsg << endl;
                 dothrow = false;
                 break;
         }
         if (dothrow) {
-            throw GEMException("ChemicalSystem","calculateState",exmsg);
+            throw GEMException("ChemicalSystem","Constructor",exmsg);
         }
     }
 
@@ -1511,9 +1520,7 @@ int ChemicalSystem::calculateState (double time,
     int status = 0;
     string msg;
  
-    /*
-    isfirst = true; 
-    */
+    // isfirst = true; 
       
     vector<double> oDCmoles;
     oDCmoles.clear();
@@ -1524,6 +1531,7 @@ int ChemicalSystem::calculateState (double time,
     }
 
     nodestatus_ = NEED_GEM_SIA;
+
     if (verbose_) {
         cout << "    Before calculateState, printing micphasevolumes" << endl;
         vector<double> micvols = getMicphasevolume();
@@ -1627,47 +1635,77 @@ int ChemicalSystem::calculateState (double time,
         cout.flush();
     }
 
+    if (time > 0.004) {
+        GEMS3KGenerator::IOModes type_f = GEMS3KGenerator::f_key_value;
+        string tmstr(to_string(time));
+        string fname = "/Users/bullard/thamestests/gem38/GitSelek/portcem-298K-sat-wc35/dbr_" + tmstr + ".txt";
+        cout << "DBR file will be named " << fname << endl;
+        node_->GEM_write_dbr(fname.c_str(),type_f);
+    }
+
     if (!(nodestatus_ == OK_GEM_AIA || nodestatus_ == OK_GEM_SIA)) {
         bool dothrow = false;
         cerr << "ERROR: Call to GEM_run in ChemicalSystem::calculateState had an issue..." << endl;
-        cerr << "       nodestatus_ = ";
+        cerr << "       nodestatus_ = " << nodestatus_;
         switch (nodestatus_) {
             case NEED_GEM_AIA:
                 msg = " Need GEM calc with auto initial approx (AIA)";
-                dothrow = true;
+                cerr << msg << endl;
+                dothrow = false;
                 break;
             case BAD_GEM_AIA:
                 msg = " Untrustworthy result with auto initial approx (AIA)",
-                dothrow = true;
+                cerr << msg << endl;
+                dothrow = false;
                 break;
             case ERR_GEM_AIA:
                 msg = " Failed result with auto initial approx (AIA)";
-                dothrow = true;
+                cerr << msg << ", GEMS failed " << timesGEMfailed_ << " times" << endl;
+                // node_->GEM_print_ipm("IPM_dump.txt");
+                timesGEMfailed_++;
+                dothrow = (timesGEMfailed_ > maxGEMfails_) ? true : false;
                 break;
             case NEED_GEM_SIA:
                 msg =  " Need GEM calc with smart initial approx (SIA)";
-                dothrow = true;
+                cerr << msg << endl;
+                dothrow = false;
                 break;
             case BAD_GEM_SIA:
                 msg = " Untrustworthy result with smart initial approx (SIA)";
-                dothrow = true;
+                cerr << msg << endl;
+                dothrow = false;
                 break;
             case ERR_GEM_SIA:
                 msg =  " Failed result with smart initial approx (SIA)";
-                dothrow = true;
+                cerr << msg << ", GEMS failed " << timesGEMfailed_ << " times" << endl;
+                // node_->GEM_print_ipm("IPM_dump.txt");
+                timesGEMfailed_++;
+                dothrow = (timesGEMfailed_ > maxGEMfails_) ? true : false;
                 break;
             case T_ERROR_GEM:
                 msg = " Terminal GEM error; need restart";
+                cerr << msg << endl;
                 dothrow = true;
                 break;
             case NO_GEM_SOLVER:
                 msg =  " No GEM recalculation needed for node";
+                cerr << msg << endl;
                 dothrow = false;
                 break;
         }
         if (dothrow) {
-            throw GEMException("Solution","calculateState",msg);
+            throw GEMException("ChemicalSystem","calculateState",msg);
         }
+    } else {
+        timesGEMfailed_ = 0;
+    }
+
+    if (timesGEMfailed_ > 0) {
+        if (verbose_) {
+            cout << "Call to GEM_run has failed " << timesGEMfailed_
+                 << " consecutive times.  Attempt this step again" << endl;
+        }
+        return timesGEMfailed_;
     }
 
     if (verbose_) {
@@ -1859,5 +1897,5 @@ int ChemicalSystem::calculateState (double time,
         cout.flush();
     }
 
-    return status;
+    return timesGEMfailed_;
 }

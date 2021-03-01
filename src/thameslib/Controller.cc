@@ -233,6 +233,12 @@ void Controller::doCycle (const string &statfilename,
 
   for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
+    ///
+    /// Do not advance the time step if GEM_run failed the last time
+    ///
+    
+    if (chemsys_->getTimesGEMfailed() > 0) i -= 1;
+
     cout << "Time = " << time_[i] << endl;
     cout << "Next output time = " << output_time_[time_index] << endl;
 
@@ -273,8 +279,20 @@ void Controller::doCycle (const string &statfilename,
 
     ///
     /// Once the change in state is determined, propagate the consequences
-    /// to the 3D microstructure
+    /// to the 3D microstructure only if the GEM_run calculation succeeded.
+    /// Otherwise we will need to tweak the IC moles so just return from
+    /// function without doing anything else
     ///
+
+    if (chemsys_->getTimesGEMfailed() > 0) {
+        // Skip the remainder of this iteration and go to the next iteration
+        if (verbose_) {
+            cout << "Previous call to GEM_run failed, so I will" << endl
+                 << "not update the microstructure or do anything else" << endl
+                 << "during this time step" << endl;
+        }
+        continue;
+    }
 
     if (verbose_) {
         cout << "Going into Lattice::changeMicrostructure" << endl;
@@ -675,6 +693,10 @@ void Controller::calculateState (double time,
     /// or growth.  Assign this to the lattice in case crystallization pressures
     /// should be calculated.
     ///
+
+    if (chemsys_->getTimesGEMfailed() > 0) {
+        return;
+    }
 
     try {
         double aveSI = 0.0;
