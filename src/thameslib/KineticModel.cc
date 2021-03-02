@@ -135,7 +135,13 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     wcratio_ = 0.45;
 
     ///
-    /// Default temperaturein the PK model is 20 C (or 293 K)
+    /// Default initial solid mass is 100 g
+    ///
+    
+    initsolidmass_ = 100.0;
+
+    ///
+    /// Default temperature in the PK model is 20 C (or 293 K)
     ///
 
     temperature_ = 293.15;
@@ -215,153 +221,16 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     // the initial mass fractions of the kinetic phases, rather than letting
     // the kinetic input file tell us.  This forces a direct link to the microstructure
     
-    if (verbose_) {
-        cout << "Made it to bottom of KineticModel constructor." << endl;
-    }
-
     vector<int> micid = chemsys_->getMicid();
-    vector<double> micmass;
-    micmass.clear();
-    micmass.resize(micid.size(),0.0);
 
-    double vfrac,msolids;
-    double watermass,molarmass,molarvolume,density;
-    int gemdcid,mid;
-    msolids = 0.0;
-    for (int i = 0; i < micid.size(); ++i) {
-        mid = micid[i];
-        if (mid != VOIDID) {
-            if (verbose_) {
-                cout << "  Found microstructure id " << mid;
-                cout.flush();
-                cout << " belongs to phase " << chemsys_->getMicphasename(mid);
-                cout.flush();
-                vfrac = lattice_->getVolumefraction(mid);
-                cout << "    Volume fraction = " << vfrac << endl;
-                gemdcid = chemsys_->getMic2DC(mid,0);
-                cout << "    DC id number = " << gemdcid << endl;
-                cout.flush();
-                molarmass = chemsys_->getDCmolarmass(gemdcid);      // g/mol
-                cout << "    Molar mass = " << molarmass << " g/mol" << endl;
-                cout.flush();
-                molarvolume = chemsys_->getDCmolarvolume(gemdcid);  // m3/mol
-                cout << "    Molar volume = " << molarvolume << " m3/mol" << endl;
-                cout.flush();
-                density = molarmass / molarvolume / 1.0e6;          // g/cm3
-                cout << "    Density = " << density << " g/cm3" << endl;
-                cout.flush();
-                micmass[mid] = vfrac * density;
-                if (mid != WATERID) {
-                    msolids += micmass[mid];
-                }
-                cout << "    Mass = " << micmass[mid] << " g" << endl;
-                cout.flush();
-            } else {
-                vfrac = lattice_->getVolumefraction(mid);
-                gemdcid = chemsys_->getMic2DC(mid,0);
-                molarmass = chemsys_->getDCmolarmass(gemdcid);      // g/mol
-                molarvolume = chemsys_->getDCmolarvolume(gemdcid);  // m3/mol
-                density = molarmass / molarvolume / 1.0e6;          // g/cm3
-                micmass[mid] = vfrac * density;
-                if (mid != WATERID) {
-                    msolids += micmass[mid];
-                }
-            }
-        }
-    }
-
-    // The water/solids mass ratio follows from that
-   
-    if (verbose_) {
-        cout << "Input file thinks wcratio = " << wcratio_ << endl;
-        cout.flush();
-    }
-
-    wcratio_ = micmass[WATERID] / msolids;
-
-    if (verbose_) {
-        cout << "Microstructure wcratio = " << wcratio_ << endl;
-        cout.flush();
-    }
+    setInitialphasefractions(micid);
 
     // JWB: Normalize mass fractions to total system mass and multiply by 100
     
-    int kpid,tpid;
-    double pscaledmass = 0.0;
-    for (int i = 0; i < micid.size(); i++) {
-        mid = micid[i];
-        if (mid == VOIDID) {
-            // Do nothing
-        } else if (mid == WATERID) {
-            int waterid = chemsys_->getDCid("H2O@");
-            double watermm = chemsys_->getDCmolarmass(waterid);
-            pscaledmass = wcratio_ * 100.0;  // Mass of solids scaled to 100 g now
-            if (verbose_) {
-                cout << "Setting DC moles of water to " << (pscaledmass / watermm) << endl;
-                cout.flush();
-            }
-            chemsys_->setDCmoles(waterid,(pscaledmass / watermm));
-            if (verbose_) {
-                cout << "Setting initial micphase mass and volume of "
-                     << chemsys_->getMicphasename(mid) << endl;
-                cout.flush();
-            }
-            chemsys_->setMicphasemass(mid,pscaledmass);
-            chemsys_->setMicphasemassdissolved(mid,0.0);
-
-        } else {
-            kpid = chemsys_->getMic2kinetic(mid);
-            pscaledmass = micmass[mid] * 100.0 / msolids;
-            if (kpid >= 0) {
-                scaledmass_[kpid] = pscaledmass;
-                initscaledmass_[kpid] = pscaledmass;
-                if (verbose_) {
-                    cout << "Microstructure scaled mass of "
-                         << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
-                         << micmass[mid] << " g out of " << msolids << " g total" << endl;
-                    cout << "   Implies scaledmass_["
-                         << kpid << "] = " << scaledmass_[kpid] << endl;
-                }
-            } else {
-                tpid = chemsys_->getMic2thermo(mid);  // soluble or thermo phase will be found
-
-                if (tpid >= 0) {
-                    scaledmass_[tpid] = pscaledmass;
-                    initscaledmass_[tpid] = pscaledmass;
-                    if (verbose_) {
-                        cout << "Microstructure scaled mass of "
-                             << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
-                             << micmass[mid] << " g out of " << msolids << " g total" << endl;
-                        cout << "   Implies scaledmass_["
-                             << tpid << "] = " << scaledmass_[tpid] << endl;
-                        cout.flush();
-                    }
-                } else {
-                    if (verbose_) {
-                        cout << "Microstructure scaled mass of "
-                             << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
-                             << micmass[mid] << " g out of " << msolids << " g total" << endl;
-                        cout.flush();
-                    }
-                }
-            }
-
-            // Setting the phase mass will also automatically calculate the phase volume
-            
-            if (verbose_) {
-                cout << "Setting initial micphase mass and volume of "
-                     << chemsys_->getMicphasename(mid) << endl;
-                cout.flush();
-            }
-            chemsys_->setMicphasemass(mid,pscaledmass);
-
-            chemsys_->setMicphasemassdissolved(mid,0.0);
-        }
-    }
-
     // Finally, set the initial total volume of the microstructure here
     
     double totmicvol = 0.0;
+    int mid = 0;
     for (int i = 0; i < micid.size(); i++) {
         mid = micid[i];
         if (mid != VOIDID) {
@@ -537,7 +406,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             kineticphase_.push_back(numentry);
             chemsys_->setKineticphase(kdata.micid);
             chemsys_->setMic2kinetic(kdata.micid,numentry);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Setting Mic2kinetic(" << kdata.micid << ","
             //          << numentry << ")... ";
             //     cout.flush();
@@ -548,7 +417,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             //     cout.flush();
             // }
             k1_.push_back(kdata.k1);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Okay, k1_[" << numentry << "] = "
             //          << k1_[numentry] << endl;
             //     cout << "    Setting k2_[" << numentry << "] = "
@@ -556,7 +425,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             //     cout.flush();
             // }
             k2_.push_back(kdata.k2);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Okay, k2_[" << numentry << "] = "
             //          << k2_[numentry] << endl;
             //     cout << "    Setting k3_[" << numentry << "] = "
@@ -564,7 +433,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             //     cout.flush();
             // }
             k3_.push_back(kdata.k3);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Okay, k3_[" << numentry << "] = "
             //          << k3_[numentry] << endl;
             //     cout << "    Setting n1_[" << numentry << "] = "
@@ -572,7 +441,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             //     cout.flush();
             // }
             n1_.push_back(kdata.n1);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Okay, n1_[" << numentry << "] = "
             //          << n1_[numentry] << endl;
             //     cout << "    Setting n3_[" << numentry << "] = "
@@ -580,7 +449,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             //     cout.flush();
             // }
             n3_.push_back(kdata.n3);
-            // if (verbose_) {
+            // if (debug_) {
             //     cout << "    Okay, n3_[" << numentry << "] = "
             //          << n3_[numentry] << endl;
             //     cout << "    Setting Ea_[" << numentry << "] = "
@@ -591,22 +460,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
         } else if (kdata.type == "soluble") {
 
-            // if (verbose_) {
-            //     cout << "This is a soluble phase, adding "
-            //          << numentry << " to the list ";
-            //     cout << "of soluble phases" << endl;
-            // }
             solublephase_.push_back(numentry);
-            // if (verbose_) {
-            //     cout << "    Setting Mic2kinetic(" << kdata.micid << ","
-            //          << numentry << ")... ";
-            //     cout.flush();
-            // }
-
-            ///
-            /// There is some discrepancy about whether an instantly
-            /// dissolving phase should be considered as kinetically
-            /// controlled or thermodynamically controlled
 
            // chemsys_->setKineticphase(kdata.micid);
            // chemsys_->setMic2kinetic(kdata.micid,numentry);
@@ -615,62 +469,16 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
         } else {
 
-            // if (verbose_) {
-            //     cout << "This is a thermo phase, adding "
-            //          << numentry << " to the list ";
-            //     cout << "of thermo phases" << endl;
-            // }
             thermophase_.push_back(numentry);
             chemsys_->setThermophase(kdata.micid);
             chemsys_->setMic2thermo(kdata.micid,numentry);
         }
     
-        // if (verbose_) {
-        //     cout << "    Setting initscaledmass_[" << numentry << "] = "
-        //          << kdata.scaledmass << endl;
-        //     cout.flush();
-        // }
-        initscaledmass_.push_back(kdata.scaledmass);
-        // if (verbose_) {
-        //     cout << "    Setting scaledmass_[" << numentry << "] = "
-        //          << kdata.scaledmass << endl;
-        //     cout.flush();
-        // }
-        scaledmass_.push_back(kdata.scaledmass);
-        // if (verbose_) {
-        //     cout << "    Setting name_[" << numentry << "] = "
-        //          << kdata.name << endl;
-        //     cout.flush();
-        // }
+        initscaledmass_.push_back(0.0);
+        scaledmass_.push_back(0.0);
         name_.push_back(kdata.name);
-        // if (verbose_) {
-        //     cout << "    Setting Micphasemass, micid = "
-        //          << kdata.micid << ", mass = " << kdata.scaledmass << endl;
-        // }
-        chemsys_->setMicphasemass(kdata.micid,kdata.scaledmass);
-        // if (verbose_) {
-        //     cout << "    Setting Micphasemassdissolved, micid = "
-        //          << kdata.micid << endl;
-        // }
-        chemsys_->setMicphasemassdissolved(kdata.micid,0.0);
-        // if (verbose_) {
-        //     cout << "    Setting chemsysDCid_[" << numentry << "] = "
-        //          << kdata.gemdcid << endl;
-        //     cout.flush();
-        // }
         chemsysDCid_.push_back(kdata.gemdcid);
-        // if (verbose_) {
-        //     cout << "    Setting chemsysphaseid_[" << numentry << "] = "
-        //          << kdata.gemphaseid << endl;
-        //     cout.flush();
-        // }
         chemsysphaseid_.push_back(kdata.gemphaseid);
-        // if (verbose_) {
-        //     cout << "    Setting critDOH_[" << numentry << "] = "
-        //          << kdata.critdoh << endl;
-        //     cout.flush();
-        // }
-
         critDOH_.push_back(kdata.critdoh);
         RdICid_.push_back(kdata.rdid);
         Rd_.push_back(kdata.rdval);
@@ -691,67 +499,67 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             kdata.type = st;
-            // if (verbose_) cout << "        type = " << kdata.type << endl;
+            // if (debug_) cout << "        type = " << kdata.type << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"scaledmass"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.scaledmass,st);
-            // if (verbose_) cout << "        scaledmass = " << kdata.scaledmass << endl;
+            // if (debug_) cout << "        scaledmass = " << kdata.scaledmass << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k1,st);
-            // if (verbose_) cout << "        k1 = " << kdata.k1 << endl;
+            // if (debug_) cout << "        k1 = " << kdata.k1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k2,st);
-            // if (verbose_) cout << "        k2 = " << kdata.k2 << endl;
+            // if (debug_) cout << "        k2 = " << kdata.k2 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k3,st);
-            // if (verbose_) cout << "        k3 = " << kdata.k3 << endl;
+            // if (debug_) cout << "        k3 = " << kdata.k3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n1,st);
-            // if (verbose_) cout << "        n1 = " << kdata.n1 << endl;
+            // if (debug_) cout << "        n1 = " << kdata.n1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n3,st);
-            // if (verbose_) cout << "        n3 = " << kdata.n3 << endl;
+            // if (debug_) cout << "        n3 = " << kdata.n3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.Ea,st);
-            // if (verbose_) cout << "        Ea = " << kdata.Ea << endl;
+            // if (debug_) cout << "        Ea = " << kdata.Ea << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.critdoh,st);
-            // if (verbose_) cout << "        critdoh = " << kdata.critdoh << endl;
+            // if (debug_) cout << "        critdoh = " << kdata.critdoh << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-            // if (verbose_) cout << "    Parsing Rd data..." << endl;
+            // if (debug_) cout << "    Parsing Rd data..." << endl;
 
             ///
             /// The data about partitioning of impurities among the clinker
@@ -760,7 +568,7 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             ///
 
             parseRdData(doc, cur, kdata);
-            // if (verbose_) cout << "    Done parsing Rd data." << endl;
+            // if (debug_) cout << "    Done parsing Rd data." << endl;
         }
         cur = cur->next;
     }
@@ -778,13 +586,13 @@ void KineticModel::parseRdData(xmlDocPtr doc,
     double rdval;
 
     while (cur != NULL) {
-        // if (verbose_) cout << "    Key name = " << cur->name << endl;
+        // if (debug_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             rdid = chemsys_->getICid(st);
             kdata.rdid.push_back(rdid);
-            // if (verbose_) cout << "            rdid = " << rdid << endl;
+            // if (debug_) cout << "            rdid = " << rdid << endl;
             xmlFree(key);
         }
 
@@ -793,11 +601,166 @@ void KineticModel::parseRdData(xmlDocPtr doc,
             string st((char *)key);
             from_string(rdval,st);
             kdata.rdval.push_back(rdval);
-            // if (verbose_) cout << "            rdval = " << rdval << endl;
+            // if (debug_) cout << "            rdval = " << rdval << endl;
             xmlFree(key);
         }
         cur = cur->next;
     }
+}
+
+void KineticModel::setInitialphasefractions(vector<int> micid)
+{
+    vector<double> micmass;
+    micmass.clear();
+    micmass.resize(micid.size(),0.0);
+
+    double vfrac,solidmass;
+    double watermass,molarmass,molarvolume,density;
+    int gemdcid,mid;
+    solidmass = 0.0;
+    for (int i = 0; i < micid.size(); ++i) {
+        mid = micid[i];
+        if (mid != VOIDID) {
+            if (verbose_) {
+                cout << "  Found microstructure id " << mid;
+                cout.flush();
+                cout << " belongs to phase " << chemsys_->getMicphasename(mid);
+                cout.flush();
+                vfrac = lattice_->getVolumefraction(mid);
+                cout << "    Volume fraction = " << vfrac << endl;
+                gemdcid = chemsys_->getMic2DC(mid,0);
+                cout << "    DC id number = " << gemdcid << endl;
+                cout.flush();
+                molarmass = chemsys_->getDCmolarmass(gemdcid);      // g/mol
+                cout << "    Molar mass = " << molarmass << " g/mol" << endl;
+                cout.flush();
+                molarvolume = chemsys_->getDCmolarvolume(gemdcid);  // m3/mol
+                cout << "    Molar volume = " << molarvolume << " m3/mol" << endl;
+                cout.flush();
+                density = molarmass / molarvolume / 1.0e6;          // g/cm3
+                cout << "    Density = " << density << " g/cm3" << endl;
+                cout.flush();
+                micmass[mid] = vfrac * density;
+                if (mid != WATERID) {
+                    solidmass += micmass[mid];
+                }
+                cout << "    Mass = " << micmass[mid] << " g" << endl;
+                cout.flush();
+            } else {
+                vfrac = lattice_->getVolumefraction(mid);
+                gemdcid = chemsys_->getMic2DC(mid,0);
+                molarmass = chemsys_->getDCmolarmass(gemdcid);      // g/mol
+                molarvolume = chemsys_->getDCmolarvolume(gemdcid);  // m3/mol
+                density = molarmass / molarvolume / 1.0e6;          // g/cm3
+                micmass[mid] = vfrac * density;
+                if (mid != WATERID) {
+                    solidmass += micmass[mid];
+                }
+            }
+        }
+    }
+
+    // The water/solids mass ratio follows from that
+   
+    if (verbose_) {
+        cout << "Input file thinks wcratio = " << wcratio_ << endl;
+        cout.flush();
+    }
+
+    wcratio_ = micmass[WATERID] / solidmass;
+
+    if (verbose_) {
+        cout << "Microstructure wcratio = " << wcratio_ << endl;
+        cout.flush();
+    }
+
+    normalizePhasemasses(micid,micmass,solidmass);
+
+    return;
+}
+
+void KineticModel::normalizePhasemasses(vector<int> micid,
+                                        vector<double> micmass,
+                                        double solidmass)
+{
+    int kpid,tpid,mid;
+    double pscaledmass = 0.0;
+
+    for (int i = 0; i < micid.size(); i++) {
+        mid = micid[i];
+        if (mid == VOIDID) {
+            // Do nothing with void phase
+            continue;
+        }
+        if (mid == WATERID) {
+            int waterid = chemsys_->getDCid("H2O@");
+            double watermm = chemsys_->getDCmolarmass(waterid);
+            pscaledmass = wcratio_ * 100.0;  // Mass of solids scaled to 100 g now
+            if (verbose_) {
+                cout << "Setting DC moles of water to " << (pscaledmass / watermm) << endl;
+                cout.flush();
+            }
+            chemsys_->setDCmoles(waterid,(pscaledmass / watermm));
+            if (verbose_) {
+                cout << "Setting initial micphase mass and volume of "
+                     << chemsys_->getMicphasename(mid) << endl;
+                cout.flush();
+            }
+            chemsys_->setMicphasemass(mid,pscaledmass);
+            chemsys_->setMicphasemassdissolved(mid,0.0);
+
+        } else {
+
+            kpid = chemsys_->getMic2kinetic(mid);
+            pscaledmass = micmass[mid] * 100.0 / solidmass;
+            if (kpid >= 0) {
+                scaledmass_[kpid] = pscaledmass;
+                initscaledmass_[kpid] = pscaledmass;
+                if (verbose_) {
+                    cout << "Microstructure scaled mass of "
+                         << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
+                         << micmass[mid] << " g out of " << solidmass << " g total" << endl;
+                    cout << "   Implies scaledmass_["
+                         << kpid << "] = " << scaledmass_[kpid] << endl;
+                }
+            } else {
+                tpid = chemsys_->getMic2thermo(mid);  // soluble or thermo phase will be found
+
+                if (tpid >= 0) {
+                    scaledmass_[tpid] = pscaledmass;
+                    initscaledmass_[tpid] = pscaledmass;
+                    if (verbose_) {
+                        cout << "Microstructure scaled mass of "
+                             << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
+                             << micmass[mid] << " g out of " << solidmass << " g total" << endl;
+                        cout << "   Implies scaledmass_["
+                             << tpid << "] = " << scaledmass_[tpid] << endl;
+                        cout.flush();
+                    }
+                } else {
+                    if (verbose_) {
+                        cout << "Microstructure scaled mass of "
+                             << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
+                             << micmass[mid] << " g out of " << solidmass << " g total" << endl;
+                        cout.flush();
+                    }
+                }
+            }
+
+            // Setting the phase mass will also automatically calculate the phase volume
+            
+            if (verbose_) {
+                cout << "Setting initial micphase mass and volume of "
+                     << chemsys_->getMicphasename(mid) << endl;
+                cout.flush();
+            }
+            chemsys_->setMicphasemass(mid,pscaledmass);
+
+            chemsys_->setMicphasemassdissolved(mid,0.0);
+        }
+    }
+
+    return;
 }
 
 void KineticModel::calculateKineticStep (const double timestep,

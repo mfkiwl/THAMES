@@ -172,6 +172,7 @@ ChemicalSystem *chemsys_;   /**< Pointer to the ChemicalSystem object for this s
 Solution *solut_;           /**< Pointer to the aqueous phase object for this simulation */
 Lattice *lattice_;          /**< Pointer to the lattice object holding the microstructure */
 double wcratio_;            /**< water-cement mass ratio */
+double initsolidmass_;      /**< initial total mass of solids [g] */
 double blaine_;             /**< Blaine fineness [m<sup>2</sup>/kg] */
 double refblaine_;          /**< Reference Blaine value for PK model,
                                     usually 385.0 m<sup>2</sup>/kg */
@@ -336,6 +337,53 @@ void parseRdData (xmlDocPtr doc,
                   xmlNodePtr cur,
                   KineticData &kineticdata);
     
+/**
+@brief Determine the initial phase fractions in the microstructure
+
+This method finds the volume fractions in the current microstructure,
+converts them to mass fractions using the CSD densities of the DCs,
+and then scales them to 100 grams of solid.  The water-solids mass ratio
+is also calculated.
+
+@param micid is a vector of all the microstructure phase id numbers
+*/
+void setInitialphasefractions(vector<int> micid);
+
+/**
+@brief Compute normalized initial microstructure phase masses
+
+Given the initial masses of all phases in the microstructure,
+this method scales them to 100 grams of solid.  In the process,
+this method also sets the initial moles of water in the
+chemical system definition.
+
+@param micid is a vector of all the microstructure phase id numbers
+@param micmass is a vector of all the microstructure masses
+@param solidmass is the combined mass of all the solids
+*/
+void normalizePhasemasses(vector<int> micid,
+                          vector<double> micmass,
+                          double solidmass);
+
+/**
+@brief Set the initial total microstructure volume
+
+This method computes the sums of all microstructure phase volumes
+and assigns the total.
+
+@param micid is a vector of all the microstructure phase id numbers
+*/
+void setInitialtotalvolume(vector<int> micid);
+
+/**
+@brief Set the initial moles of water
+
+This method uses the mass of water and the molar mass
+of water as defined in the CSD to calculate the moles
+of water in the system.
+*/
+void setInitialwatermoles(void);
+
 /**
 @brief Get the id for alite in the kinetic model (should be 0).
 
@@ -552,6 +600,30 @@ void setWcratio (double wcr)
 double getWcratio () const
 {
     return wcratio_;
+}
+
+/**
+@brief Set the initial total solid mass
+
+@note NOT USED
+
+@param ism is the initial solid mass [g]
+*/
+void setInitialsolidmass (double ism)
+{
+    initsolidmass_ = ism;
+}
+
+/**
+@brief Get the initial solid mass
+
+@note NOT USED
+
+@return the initial solid mass [g]
+*/
+double getInitsolidmass () const
+{
+    return initsolidmass_;
 }
 
 /**

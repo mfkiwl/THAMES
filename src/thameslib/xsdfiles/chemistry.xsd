@@ -88,14 +88,14 @@
   <xs:complexType mixed = "true" name="kinetic_datatype">
     <xs:sequence>
       <xs:element name="type" type="kineticTypetype"/>
-      <xs:element name="scaledmass" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="k1" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="k2" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="k3" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="n1" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="n3" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="Ea" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" name="critdoh" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="scaledmass" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k1" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k2" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="n1" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="Ea" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype"/>
     </xs:sequence>
   </xs:complexType>
@@ -139,7 +139,7 @@
         <xs:element name="numentries" type="positiveIntegertype"/>
         <xs:element name="blaine" type="positiveDoubletype"/>
         <xs:element name="refblaine" type="positiveDoubletype"/>
-        <xs:element name="wcRatio" type="positiveDoubletype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="wcRatio" type="positiveDoubletype"/>
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
         <xs:element name="saturated" type="integertype"/>
