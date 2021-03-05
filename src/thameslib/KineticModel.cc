@@ -295,45 +295,36 @@ void KineticModel::parseDoc (const string &docname)
         cur = cur->xmlChildrenNode;
         int testnumentries;
         while (cur != NULL) {
-            // if (verbose_) cout << "Key name = " << cur->name << endl;
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"blaine"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(blaine_,st);
-                // if (verbose_) cout << "Blaine value in interface xml file is "
-                //                    << blaine_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"refblaine"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(refblaine_,st);
-                // if (verbose_) cout << "Reference Blaine value in interface xml file is "
-                //                    << refblaine_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"wcRatio"))) {
+
+                // Left in for backward compatibility, but this is
+                // no longer used... w/c is calculated based on microstructure
+                
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(wcratio_,st);
-                // if (verbose_) cout << "wcRatio value in interface xml file is "
-                //                    << wcratio_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"temperature"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(temperature_,st);
-                // if (verbose_) cout << "Temperature in interface xml file is "
-                //                    << temperature_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"reftemperature"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 from_string(refT_,st);
-                // if (verbose_) cout << "Reference temperature value in interface xml file is "
-                //                    << refT_ << endl;
                 xmlFree(key);
             } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-                // if (verbose_) cout << "Preparing to parse a phase from interface xml file..."
-                //                    << endl;
 
                 /// Each phase is a more complicated grouping of data that
                 /// has a separate method for parsing.
@@ -365,37 +356,31 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     bool kineticfound = false;
 
 
-    // if (verbose_) cout << "In function KineticModel::parsePhase" << endl;
     kdata.rdid.clear();
     kdata.rdval.clear();
 
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
-        // if (verbose_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
-            // if (verbose_) cout << "    Trying to get phase name" << endl;
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string testname((char *)key);
             kdata.name = testname;
             kdata.micid = chemsys_->getMicid(testname);
-            // if (verbose_) cout << "    Phase name = " << kdata.name << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"kinetic_data"))) {
-            // if (verbose_) cout << "    Parsing kinetic data..." << endl;
             numentry += 1;
             kineticfound = true;
             kdata.gemphaseid = chemsys_->getMic2phase(kdata.micid,0);
             kdata.gemdcid = chemsys_->getMic2DC(kdata.micid,0);
 
             ///
-            /// The kinetic data is another complicated grouping of data,
+            /// Kinetic data are grouped together,
             /// so there is a method written just for parsing that grouping
             ///
 
             parseKineticData(doc, cur, kdata);
-            // if (verbose_) cout << "    Done parsing kinetic data." << endl;
         }
         cur = cur->next;
     }
@@ -406,64 +391,17 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             kineticphase_.push_back(numentry);
             chemsys_->setKineticphase(kdata.micid);
             chemsys_->setMic2kinetic(kdata.micid,numentry);
-            // if (debug_) {
-            //     cout << "    Setting Mic2kinetic(" << kdata.micid << ","
-            //          << numentry << ")... ";
-            //     cout.flush();
-            //     cout << "Done!" << endl;
-            //     cout.flush();
-            //     cout << "    Setting k1_[" << numentry << "] = "
-            //          << kdata.k1 << endl;
-            //     cout.flush();
-            // }
             k1_.push_back(kdata.k1);
-            // if (debug_) {
-            //     cout << "    Okay, k1_[" << numentry << "] = "
-            //          << k1_[numentry] << endl;
-            //     cout << "    Setting k2_[" << numentry << "] = "
-            //          << kdata.k2 << endl;
-            //     cout.flush();
-            // }
             k2_.push_back(kdata.k2);
-            // if (debug_) {
-            //     cout << "    Okay, k2_[" << numentry << "] = "
-            //          << k2_[numentry] << endl;
-            //     cout << "    Setting k3_[" << numentry << "] = "
-            //          << kdata.k3 << endl;
-            //     cout.flush();
-            // }
             k3_.push_back(kdata.k3);
-            // if (debug_) {
-            //     cout << "    Okay, k3_[" << numentry << "] = "
-            //          << k3_[numentry] << endl;
-            //     cout << "    Setting n1_[" << numentry << "] = "
-            //          << kdata.n1 << endl;
-            //     cout.flush();
-            // }
             n1_.push_back(kdata.n1);
-            // if (debug_) {
-            //     cout << "    Okay, n1_[" << numentry << "] = "
-            //          << n1_[numentry] << endl;
-            //     cout << "    Setting n3_[" << numentry << "] = "
-            //          << kdata.n3 << endl;
-            //     cout.flush();
-            // }
             n3_.push_back(kdata.n3);
-            // if (debug_) {
-            //     cout << "    Okay, n3_[" << numentry << "] = "
-            //          << n3_[numentry] << endl;
-            //     cout << "    Setting Ea_[" << numentry << "] = "
-            //          << kdata.Ea << endl;
-            //     cout.flush();
-            // }
             Ea_.push_back(kdata.Ea);
 
         } else if (kdata.type == "soluble") {
 
             solublephase_.push_back(numentry);
 
-           // chemsys_->setKineticphase(kdata.micid);
-           // chemsys_->setMic2kinetic(kdata.micid,numentry);
             chemsys_->setThermophase(kdata.micid);
             chemsys_->setMic2thermo(kdata.micid,numentry);
 
@@ -499,67 +437,62 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             kdata.type = st;
-            // if (debug_) cout << "        type = " << kdata.type << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"scaledmass"))) {
+
+            // Left in for backward compatibiltiy, but scaledmass
+            // is no longer used here... it is calculated directly
+            // from the microstructure
+            
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.scaledmass,st);
-            // if (debug_) cout << "        scaledmass = " << kdata.scaledmass << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k1,st);
-            // if (debug_) cout << "        k1 = " << kdata.k1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k2,st);
-            // if (debug_) cout << "        k2 = " << kdata.k2 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.k3,st);
-            // if (debug_) cout << "        k3 = " << kdata.k3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n1,st);
-            // if (debug_) cout << "        n1 = " << kdata.n1 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"n3"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.n3,st);
-            // if (debug_) cout << "        n3 = " << kdata.n3 << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.Ea,st);
-            // if (debug_) cout << "        Ea = " << kdata.Ea << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kdata.critdoh,st);
-            // if (debug_) cout << "        critdoh = " << kdata.critdoh << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-            // if (debug_) cout << "    Parsing Rd data..." << endl;
 
             ///
             /// The data about partitioning of impurities among the clinker
@@ -568,7 +501,6 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             ///
 
             parseRdData(doc, cur, kdata);
-            // if (debug_) cout << "    Done parsing Rd data." << endl;
         }
         cur = cur->next;
     }
@@ -586,13 +518,11 @@ void KineticModel::parseRdData(xmlDocPtr doc,
     double rdval;
 
     while (cur != NULL) {
-        // if (debug_) cout << "    Key name = " << cur->name << endl;
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             rdid = chemsys_->getICid(st);
             kdata.rdid.push_back(rdid);
-            // if (debug_) cout << "            rdid = " << rdid << endl;
             xmlFree(key);
         }
 
@@ -601,7 +531,6 @@ void KineticModel::parseRdData(xmlDocPtr doc,
             string st((char *)key);
             from_string(rdval,st);
             kdata.rdval.push_back(rdval);
-            // if (debug_) cout << "            rdval = " << rdval << endl;
             xmlFree(key);
         }
         cur = cur->next;

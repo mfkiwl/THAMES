@@ -8,11 +8,11 @@
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <refblaine>385.0</refblaine>
   <!--Temperature in K-->
-  <temperature>298.15</temperature>
+  <temperature>293.15</temperature>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <reftemperature>296.15</reftemperature>
   <!--Set to 1 for saturated, 0 for sealed-->
-  <saturated>0</saturated>
+  <saturated>1</saturated>
   <!--Information for initial solution IC composition besides water, each in mol/kgw-->
   <solution>
       <ICcomp>

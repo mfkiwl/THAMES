@@ -7,8 +7,6 @@
   <blaine>403.2</blaine>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <refblaine>385.0</refblaine>
-  <!--Water-solid mass ratio-->
-  <wcRatio>0.45</wcRatio>
   <!--Temperature in K-->
   <temperature>298.15</temperature>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
@@ -104,8 +102,6 @@
     <kinetic_data>
       <!--Type is whether the phase is controlled by kinetics or thermodynamics-->
       <type>kinetic</type>
-      <!--Percentage of this phase on a total solids mass basis-->
-      <scaledmass>66.202</scaledmass>
       <!--k1, k2, k3, n1, n3 are Parrott and Killoh parameters. Do not change-->
       <k1>1.5</k1>
       <k2>0.05</k2>
@@ -147,7 +143,6 @@
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>17.309</scaledmass>
       <k1>0.5</k1>
       <k2>0.02</k2>
       <k3>0.70</k3>
@@ -210,7 +205,6 @@
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>5.575</scaledmass>
       <k1>1.0</k1>
       <k2>0.04</k2>
       <k3>1.0</k3>
@@ -249,7 +243,6 @@
     </impurity_data>
     <kinetic_data>
       <type>kinetic</type>
-      <scaledmass>7.860</scaledmass>
       <k1>0.37</k1>
       <k2>0.015</k2>
       <k3>0.4</k3>
@@ -282,7 +275,6 @@
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>soluble</type>
-      <scaledmass>0.317</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -332,7 +324,6 @@
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>soluble</type>
-      <scaledmass>0.400</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -386,7 +377,6 @@
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>soluble</type>
-      <scaledmass>2.654</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -420,7 +410,6 @@
     <porosity>0.0</porosity>
     <kinetic_data>
       <type>thermo</type>
-      <scaledmass>0.491</scaledmass>
     </kinetic_data>
     <display_data>
       <red>255.0</red>
@@ -493,7 +482,6 @@
     <porosity>0.5</porosity>
     <kinetic_data>
       <type>thermo</type>
-      <scaledmass>0.0</scaledmass>
       <Rd>
         <Rdelement>K</Rdelement>
         <Rdvalue>0.42</Rdvalue>

@@ -4,6 +4,12 @@
 
 -----------------------------------------------------------------------------
 
+Mar  5 15:17:31 2021 - Cleaned up some comments and added new sample-input examples
+Mar  3 15:17:31 2021 - Added ability to "tweak" the IC compositions slightly
+                       when a GEM_run error is encountered, in the hopes of
+                       re-running the GEM_run method successfully.
+Mar  1 12:02:18 2021 - Water-cement ratio and scaled masses now inferred directly
+                       from the microstructure.
 Feb  6 16:56:47 2021 - Better exception handling; better interface to new GEMS3K standalone library
 Jan 14 19:33:52 2021 - Can now specifiy initial solution composition in input file
 Jan 11 19:03:08 2021 - Removed growthtemplate functionality from input

@@ -16,27 +16,42 @@
   <!--Information for initial solution IC composition besides water, each in mol/kgw-->
   <solution>
       <ICcomp>
-          <name>Ca</name>
-          <conc>0.001</conc>
-      </ICcomp>
-      <ICcomp>
-          <name>K</name>
-          <conc>0.001</conc>
+          <name>Al</name>
+          <conc>0.0000001</conc>
       </ICcomp>
       <ICcomp>
           <name>S</name>
-          <conc>0.0005</conc>
+          <conc>0.0000001</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>K</name>
+          <conc>0.0000012</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>Mg</name>
+          <conc>0.0000001</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>Fe</name>
+          <conc>0.00000002</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>C</name>
+          <conc>0.0000001</conc>
+      </ICcomp>
+      <ICcomp>
+          <name>Na</name>
+          <conc>0.0000003</conc>
       </ICcomp>
       <ICcomp>
           <name>O</name>
-          <conc>0.004</conc>
+          <conc>0.00000233</conc>
       </ICcomp>
       <ICcomp>
           <name>H</name>
-          <conc>0.002</conc>
+          <conc>0.0000016</conc>
       </ICcomp>
   </solution>
-
   <!--Void phase should always be present and first in the list-->
   <phase>
     <thamesname>Void</thamesname>
@@ -137,7 +152,7 @@
     </gemphase_data>
     <id>3</id>
     <interface_data>
-      <randomgrowth>0.6</randomgrowth>
+      <randomgrowth>0.3</randomgrowth>
       <affinity>
         <affinityphaseid>3</affinityphaseid>
         <affinityvalue>1</affinityvalue>
@@ -172,7 +187,7 @@
     </gemphase_data>
     <id>4</id>
     <interface_data>
-      <randomgrowth>0.6</randomgrowth>
+      <randomgrowth>0.99</randomgrowth>
       <affinity>
         <affinityphaseid>2</affinityphaseid>
         <affinityvalue>4</affinityvalue>
