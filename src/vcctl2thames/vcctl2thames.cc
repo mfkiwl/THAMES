@@ -247,7 +247,7 @@ int getCorrespondences (vector<int> vcctlid,
          << "*** to each of the following VCCTL phases:" << endl << endl;
 
     while (i < vcctlid.size()) {
-       cout << "%% Found VCCTL phase \"" << Vcctlnames[i] << "\"" << endl;
+       cout << "%% Found VCCTL phase \"" << Vcctlnames[vcctlid[i]] << "\"" << endl;
        validinput = false;
        cout << "---> Enter the THAMES id for this phase: ";
        do {

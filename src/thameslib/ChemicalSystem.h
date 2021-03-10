@@ -282,6 +282,7 @@ map<int,vector<int> > mic2phase_;       /**< Map that returns the GEM CSD phase 
 map<int,vector<int> > mic2DC_;          /**< Map that returns the GEM DC for
                                                 a given microstructure phase */
 vector<vector<double> > DCstoich_;        /**< List of amount of moles of each IC in a DC */
+
 vector<int> kineticphase_;              /**< List of GEM CSD phases that are NOT under
                                                 thermodynamic control (clinker, gypsum, etc) */
 vector<int> thermophase_;               /**< List of GEM CSD phases that ARE under
@@ -1576,7 +1577,7 @@ int getMic2kinetic (const int i)
 }
 
 /**
-@brief Get the integer id of a microstructure phase that is associated.
+@brief Get the integer id of a microstructure phase that is associated
 with a given phase in the kinetic model
 
 @param i is integer id of the phase in the kinetic model
@@ -1950,7 +1951,11 @@ map<int,vector<int> > getMic2DC () const
 }
 
 /**
-@brief Add a phase id to the list of phases that are kinetically controlled.
+@brief Add a microstructure phase id to the list of phases that are kinetically controlled.
+
+@todo We should change the name from kineticphase_ to something else because
+there is also a kineticphase_ data member in the KineticModel class that
+means something different.
 
 @param idx is the phase id number to add to the kinetic control list
 */
@@ -1973,8 +1978,6 @@ void setKineticphase (const unsigned int idx)
 
 /**
 @brief Get the microstructure id of a kinetically controlled phase.
-
-@note NOT USED.
 
 @param idx is the element number in the vector of kinetic phases
 @return the microstructdure phase id of that element
@@ -3571,6 +3574,24 @@ double *getPhasemoles () const
 */
 double getPhasemoles (const unsigned int idx)
 {
+    if (idx < phasenum_) {
+        return phasemoles_[idx];
+    } else {
+        EOBException ex("ChemicalSystem","getPhasemoles","phasemoles_",phasenum_,idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the number of moles of a GEM CSD phase in the system by name
+
+@param name is the GEM phase name to query
+@return the number of moles assigned to that GEM phase
+*/
+double getPhasemoles (const string &name)
+{
+    int idx = getPhaseid(name);
     if (idx < phasenum_) {
         return phasemoles_[idx];
     } else {

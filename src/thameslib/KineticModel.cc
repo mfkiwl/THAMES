@@ -216,6 +216,25 @@ KineticModel::KineticModel (ChemicalSystem *cs,
       exit(1);
     }
 
+    if (verbose_) {
+        cout << "RR Finished reading chemistry.xml file" << endl;
+        int micid,kpid;
+        for (int i = 0; i < kineticphase_.size(); ++i) {
+            int microid;
+            kpid = kineticphase_[i];
+            cout << "RR kinetic phase " << i << " is kpid " << kpid << endl;
+            microid = chemsys_->getKineticphase(i);
+            cout << "RR     name = " << chemsys_->getMicphasename(microid)
+                 << " micid = (" << microid << ")" << endl;
+            cout << "RR     k1 =  " << k1_[i] << endl;
+            cout << "RR     k2 =  " << k2_[i] << endl;
+            cout << "RR     k3 =  " << k3_[i] << endl;
+            cout << "RR     n1 =  " << n1_[i] << endl;
+            cout << "RR     n3 =  " << n3_[i] << endl;
+            cout << "RR     Ea =  " << Ea_[i] << endl;
+        }
+    }
+
     // JWB: We now know the identity of each phase in the microstructure and can
     // link it to a GEMS phase.  Now is the time to set the w/s ratio and
     // the initial mass fractions of the kinetic phases, rather than letting
@@ -244,7 +263,7 @@ KineticModel::KineticModel (ChemicalSystem *cs,
 
 void KineticModel::parseDoc (const string &docname)
 {
-    int numentry = -1;
+    int numentry = -1;   // Tracks number of solid phases
     int testgemid;
 
     ///
@@ -293,7 +312,6 @@ void KineticModel::parseDoc (const string &docname)
         }
 
         cur = cur->xmlChildrenNode;
-        int testnumentries;
         while (cur != NULL) {
             if ((!xmlStrcmp(cur->name, (const xmlChar *)"blaine"))) {
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -388,15 +406,25 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     if (kineticfound) {
 
         if (kdata.type == "kinetic") {
+            if (verbose_) {
+                cout << "QQ Kinetic Phase " << kdata.name << ", id = " << kdata.micid << endl;
+                cout << "QQ   Is kinetic phase " << numentry << endl;
+                cout << "QQ   (k1,k2,k3) =  " << kdata.k1 << "," << kdata.k2
+                     << "," << kdata.k3 << endl;
+                cout << "QQ   (n1,n3) =  " << kdata.n1 << "," << kdata.n3 << endl;
+                cout << "QQ   Ea = " << kdata.Ea << endl;
+            }
             kineticphase_.push_back(numentry);
             chemsys_->setKineticphase(kdata.micid);
             chemsys_->setMic2kinetic(kdata.micid,numentry);
+            chemsys_->setKinetic2mic(numentry,kdata.micid);
             k1_.push_back(kdata.k1);
             k2_.push_back(kdata.k2);
             k3_.push_back(kdata.k3);
             n1_.push_back(kdata.n1);
             n3_.push_back(kdata.n3);
             Ea_.push_back(kdata.Ea);
+            critDOH_.push_back(kdata.critdoh);
 
         } else if (kdata.type == "soluble") {
 
@@ -404,12 +432,14 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
             chemsys_->setThermophase(kdata.micid);
             chemsys_->setMic2thermo(kdata.micid,numentry);
+            chemsys_->setThermo2mic(numentry,kdata.micid);
 
         } else {
 
             thermophase_.push_back(numentry);
             chemsys_->setThermophase(kdata.micid);
             chemsys_->setMic2thermo(kdata.micid,numentry);
+            chemsys_->setThermo2mic(numentry,kdata.micid);
         }
     
         initscaledmass_.push_back(0.0);
@@ -417,7 +447,6 @@ void KineticModel::parsePhase (xmlDocPtr doc,
         name_.push_back(kdata.name);
         chemsysDCid_.push_back(kdata.gemdcid);
         chemsysphaseid_.push_back(kdata.gemphaseid);
-        critDOH_.push_back(kdata.critdoh);
         RdICid_.push_back(kdata.rdid);
         Rd_.push_back(kdata.rdval);
     }
@@ -956,7 +985,23 @@ void KineticModel::calculateKineticStep (const double timestep,
           impurityrelease.clear();
           impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
 
+          if (verbose_) cout << "SS In KineticModel::calculateKineticStep" << endl;
           for (int i = 0; i < kineticphase_.size(); i++) {
+            if (verbose_) {
+                int microid;
+                kpid = kineticphase_[i];
+                cout << "SS kinetic phase " << i << " is kpid " << kpid << endl;
+                microid = chemsys_->getKineticphase(i);
+                cout << "SS     name = " << chemsys_->getMicphasename(microid)
+                     << " micid = (" << microid << ")" << endl;
+                cout << "SS     k1 =  " << k1_[i] << endl;
+                cout << "SS     k2 =  " << k2_[i] << endl;
+                cout << "SS     k3 =  " << k3_[i] << endl;
+                cout << "SS     n1 =  " << n1_[i] << endl;
+                cout << "SS     n3 =  " << n3_[i] << endl;
+                cout << "SS     Ea =  " << Ea_[i] << endl;
+            }
+
             kpid = kineticphase_[i];
             if (initscaledmass_[kpid] > 0.0) {
               DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
@@ -969,7 +1014,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             wcfactor = 1.0 + (3.333 *
                    (pow(((critDOH_[kpid] * wcratio_) - DOH),4.0)));
 
-            arrhenius = exp((Ea_[kpid]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
+            arrhenius = exp((Ea_[i]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
             // if (verbose_) {
             //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
             //     cout << "Calculating Arrhenius effect:" << endl;
@@ -983,9 +1028,9 @@ void KineticModel::calculateKineticStep (const double timestep,
 
             if (DOH < 1.0 && !dotweak) {
         
-                if (fabs(n1_[kpid]) > 0.0) {
-                  ngrate = (k1_[kpid]/n1_[kpid]) * (1.0 - DOH)
-                         * pow((-log(1.0 - DOH)),(1.0 - n1_[kpid]));
+                if (fabs(n1_[i]) > 0.0) {
+                  ngrate = (k1_[i]/n1_[i]) * (1.0 - DOH)
+                         * pow((-log(1.0 - DOH)),(1.0 - n1_[i]));
                   ngrate *= (blainefactor_);  // only used for the N+G rate
               
                   if (ngrate < 1.0e-10) ngrate = 1.0e-10;
@@ -994,10 +1039,10 @@ void KineticModel::calculateKineticStep (const double timestep,
                                  "n1_ = 0.0");
                 }
         
-                hsrate = k3_[kpid] * pow((1.0 - DOH),n3_[kpid]);
+                hsrate = k3_[i] * pow((1.0 - DOH),n3_[i]);
                 if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
-                diffrate = (k2_[kpid] * pow((1.0 - DOH),(2.0/3.0))) /
+                diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
                            (1.0 - pow((1.0 - DOH),(1.0/3.0)));
                 if (diffrate < 1.0e-10) diffrate = 1.0e-10;
 

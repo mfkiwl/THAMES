@@ -4,7 +4,7 @@
 
 @section Introduction
 In THAMES, the `KineticModel` class can be perceived as the engine that calculates
-the kinetic chnages in the system during a given time increment.  The primary
+the kinetic changes in the system during a given time increment.  The primary
 kinetic aspect that is calculated is the extent of dissolution of mineral phases in
 the original clinker.
 As of March 2017, the kinetic model implements the Parrot and Killoh (PK) model of
@@ -296,7 +296,7 @@ Note that this method uses the libxml library, so this must be included.
 
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
-@param numentry is the number of entries in the XML file, will be incremented
+@param numentry is the number of solid entries in the XML file, will be incremented
 @param kineticdata is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
