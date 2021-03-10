@@ -4,6 +4,9 @@
 
 -----------------------------------------------------------------------------
 
+Mar  9 22:21:43 2021 - Fixed a bug that causes runtime errors when the chemistry.xml
+                       file has kinetically controlled phases separated by other
+                       types of phases.
 Mar  5 15:17:31 2021 - Cleaned up some comments and added new sample-input examples
 Mar  3 15:17:31 2021 - Added ability to "tweak" the IC compositions slightly
                        when a GEM_run error is encountered, in the hopes of
