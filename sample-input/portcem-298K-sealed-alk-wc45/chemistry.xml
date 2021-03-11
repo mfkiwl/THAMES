@@ -920,18 +920,4 @@
       <gray>238.0</gray>
     </display_data>
   </phase>
-  <phase>
-    <thamesname>DAMAGE</thamesname>
-    <id>18</id>
-    <interface_data>
-      <randomgrowth>0.0</randomgrowth>
-    </interface_data>
-    <porosity>1.0</porosity>
-    <display_data>
-      <red>255.0</red>
-      <green>0.0</green>
-      <blue>255.0</blue>
-      <gray>255.0</gray>
-    </display_data>
-  </phase>
 </chemistry_data>

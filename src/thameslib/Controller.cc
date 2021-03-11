@@ -240,7 +240,12 @@ void Controller::doCycle (const string &statfilename,
     if (chemsys_->getTimesGEMfailed() > 0) i -= 1;
 
     cout << "Time = " << time_[i] << endl;
-    cout << "Next output time = " << output_time_[time_index] << endl;
+    if (time_index < output_time_.size()) {
+        cout << "Next output time = " << output_time_[time_index] << endl;
+    } else {
+        int lasttime = time_.size() - 1;
+        cout << "Next output time = " << time_[lasttime] << endl;
+    }
 
     time_t lt10 = time(NULL);
     struct tm *time10;
@@ -577,11 +582,11 @@ void Controller::doCycle (const string &statfilename,
   }
 
   ///
-  /// Write the lattice state to an ASCII file and to a PNG file for visualization
+  /// Write the final lattice state to an ASCII file and to a PNG file for visualization
   ///
 
-  // lattice_->writeLattice(jobroot_);
-  // lattice_->writeLatticePNG(jobroot_);
+  lattice_->writeLattice(time_[i-1],sim_type_,jobroot_);
+  lattice_->writeLatticePNG(time_[i-1],sim_type_,jobroot_);
     
   return;
 }

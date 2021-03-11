@@ -4,6 +4,7 @@
 
 -----------------------------------------------------------------------------
 
+Mar 11 16:28:57 2021 - Corrected the chemistry.xml file in two of the sample-input examples
 Mar  9 22:21:43 2021 - Fixed a bug that causes runtime errors when the chemistry.xml
                        file has kinetically controlled phases separated by other
                        types of phases.
