@@ -223,10 +223,11 @@ This member may be obsolete.  Values for this quantity are read from a file.
 vector<double> SO4_target_;
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
-vector<int> kineticphase_;      /**< List of ids of phases that are kinetically controlled */
-vector<int> thermophase_;       /**< List of ids of phases that are thermodynamically
+vector<bool> iskinetic_;        /**< List of ids of phases that are kinetically controlled */
+vector<bool> isthermo_;         /**< List of ids of phases that are thermodynamically
                                         controlled */
-vector<int> solublephase_;      /**< List of ids of phases that are instantly dissolved */
+vector<bool> issoluble_;        /**< List of ids of phases that are instantly dissolved */
+vector<int> micid_;             /**< List of microstructure ids that are in kinetic model */
 vector<int> chemsysDCid_;       /**< List of DC ids from the ChemicalSystem object */
 vector<int> chemsysphaseid_;    /**< List of phase ids from the ChemicalSystem object */
 vector<vector<int> > RdICid_;   /**< List of IC ids for each phase */
@@ -345,9 +346,8 @@ converts them to mass fractions using the CSD densities of the DCs,
 and then scales them to 100 grams of solid.  The water-solids mass ratio
 is also calculated.
 
-@param micid is a vector of all the microstructure phase id numbers
 */
-void setInitialphasefractions(vector<int> micid);
+void setInitialphasefractions(void);
 
 /**
 @brief Compute normalized initial microstructure phase masses
@@ -357,12 +357,10 @@ this method scales them to 100 grams of solid.  In the process,
 this method also sets the initial moles of water in the
 chemical system definition.
 
-@param micid is a vector of all the microstructure phase id numbers
 @param micmass is a vector of all the microstructure masses
 @param solidmass is the combined mass of all the solids
 */
-void normalizePhasemasses(vector<int> micid,
-                          vector<double> micmass,
+void normalizePhasemasses(vector<double> micmass,
                           double solidmass);
 
 /**
@@ -370,10 +368,8 @@ void normalizePhasemasses(vector<int> micid,
 
 This method computes the sums of all microstructure phase volumes
 and assigns the total.
-
-@param micid is a vector of all the microstructure phase id numbers
 */
-void setInitialtotalvolume(vector<int> micid);
+void setInitialtotalvolume(void);
 
 /**
 @brief Set the initial moles of water
@@ -464,6 +460,36 @@ int getChemsysphaseid (const unsigned int i) const
 }
 
 /**
+@brief Get the list of all microstructure ids in the KineticModel.
+
+Usually this will be all of the ChemicalSystem microstructure phases
+except for VOID and H2O.
+
+@return the list of all microstructure ids.
+*/
+vector<int> getMicid () const
+{
+    return micid_;
+}
+  
+/**
+@brief Get a microstructure id in the KineticModel.
+
+@param idx is the the index of all the phases in the kinetic model
+@return the microstructure id of that phase
+*/
+int getMicid (const int idx)
+{
+    try { return micid_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getMicid",
+                           "micid_",micid_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+  
+/**
 @brief Set the total number of phases in the kinetic model.
 
 @note NOT USED.
@@ -488,93 +514,162 @@ int getPhasenum () const
 }
 
 /**
-@brief Get the list of phase ids for kinetically controlled phases.
+@brief Get the kinetic status of every microstructure phase
 
 @note NOT USED.
 
-@return the list of phase ids for kinetically controlled phases
+@return the list of kinetic status for all microstructure phases
 */
-vector<int> getKineticphase () const
+vector<bool> isKinetic () const
 {
-    return kineticphase_;
+    return iskinetic_;
 }
 
 /**
-@brief Get the list of phase ids for thermodynamically controlled phases.
+@brief Get the thermo status of every microstructure phase
 
 @note NOT USED.
 
-@return the list of phase ids for thermodynamically controlled phases
+@return the list of thermo status for all microstructure phases
 */
-vector<int> getThermophase () const
+vector<bool> isThermo () const
 {
-    return thermophase_;
+    return isthermo_;
 }
 
 /**
-@brief Get the list of phase ids for phases that dissolve instantly.
+@brief Get the readily soluble status of every microstructure phase
 
 @note NOT USED.
 
-@return the list of phase ids for instantly dissolving phases
+@return the list of readily soluble status for all microstructure phases
 */
-vector<int> getSolublephase () const
+vector<bool> isSoluble () const
 {
-    return solublephase_;
+    return issoluble_;
 }
-  
+
 /**
-@brief Get the microstructure id of a kinetically controlled phase by its id number.
+@brief Get the kinetic status of a microstructure phase by its id
 
 @note NOT USED.
 
-@param idx is the id number of the kinetically controlled phase
-@return the microstructure id of the phase
+@param idx is a microstructure id number
+@return true if it is kinetically controlled
 */
-unsigned int getKineticphase (const unsigned int idx)
+bool isKinetic (const unsigned int idx)
 {
-    try { return kineticphase_.at(idx); }
+    try { return iskinetic_.at(idx); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getKineticphase",
-                           "kineticphase_",kineticphase_.size(),idx);
+        EOBException ex("KineticModel","isKinetic",
+                           "iskinetic_",iskinetic_.size(),idx);
         ex.printException();
         exit(1);
     }
 }
 
 /**
-@brief Get the microstructure id of a thermodynamically controlled phase by its id number.
+@brief Get the kinetic status of a microstructure phase by its name
 
 @note NOT USED.
 
-@param idx is the id number of the kinetically controlled phase
-@return the microstructure id of the phase
+@param micname is the name of a microstructure phase
+@return true if it is kinetically controlled
 */
-unsigned int getThermophase (const unsigned int idx)
+bool isKinetic (const string micname)
 {
-    try { return thermophase_.at(idx); }
+    int idx;
+    try {
+        idx = chemsys_->getMicid(micname);
+        return iskinetic_.at(idx);
+    }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getThermophase",
-                           "thermophase_",thermophase_.size(),idx);
+        EOBException ex("KineticModel","isKinetic",
+                           "iskinetic_",iskinetic_.size(),idx);
         ex.printException();
         exit(1);
     }
 }
 
 /**
-@brief Get the microstructure id of an instantly dissolving phase by its id number.
+@brief Get the thermo status of a microstructure phase by its id
 
 @note NOT USED.
 
-@param idx is the id number of the instantly dissolving phase
-@return the microstructure id of the phase
+@param idx is a microstructure id number
+@return true if it is thermodynamically controlled
 */
-unsigned int getSolublephase (const unsigned int idx)
+bool isThermo (const unsigned int idx)
 {
-    try { return solublephase_.at(idx); }
+    try { return isthermo_.at(idx); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getSolublephase",
-                           "solublephase_",solublephase_.size(),idx);
+        EOBException ex("KineticModel","isThermo",
+                           "isthermo_",isthermo_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the thermo status of a microstructure phase by its name
+
+@note NOT USED.
+
+@param micname is the name of a microstructure phase
+@return true if it is thermodynamically controlled
+*/
+bool isThermo (const string micname)
+{
+    int idx;
+    try {
+        idx = chemsys_->getMicid(micname);
+        return isthermo_.at(idx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","isThermo",
+                           "isthermo_",isthermo_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the readily soluble status of a microstructure phase by its id
+
+@note NOT USED.
+
+@param idx is a microstructure id number
+@return true if it is readily soluble
+*/
+bool isSoluble (const unsigned int idx)
+{
+    try { return issoluble_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","isSoluble",
+                           "issoluble_",issoluble_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the soluble status of a microstructure phase by its name
+
+@note NOT USED.
+
+@param micname is the name of a microstructure phase
+@return true if it is readily soluble
+*/
+bool isSoluble (const string micname)
+{
+    int idx;
+    try {
+        idx = chemsys_->getMicid(micname);
+        return issoluble_.at(idx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","isSoluble",
+                           "issoluble_",issoluble_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -747,6 +842,29 @@ void setRefT (double rtval)
 double getRefT () const
 {
     return refT_;
+}
+
+/**
+@brief Initialize a kinetic data structure 
+*/
+void initKineticData(struct KineticData &kd)
+{
+    kd.name.clear();
+    kd.micid = 0;
+    kd.gemphaseid = 0;
+    kd.gemdcid = 0;
+    kd.type.clear();
+    kd.scaledmass = 0.0;
+    kd.k1 = 0.0;
+    kd.k2 = 0.0;
+    kd.k3 = 0.0;
+    kd.n1 = 0.0;
+    kd.n3 = 0.0;
+    kd.Ea = 0.0;
+    kd.critdoh = 0.0;
+    kd.rdid.clear();
+    kd.rdval.clear();
+    return;
 }
 
 /**

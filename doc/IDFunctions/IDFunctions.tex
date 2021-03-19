@@ -52,7 +52,7 @@ Every component in THAMES, whether it is an independent component (IC), a depend
 component (DC) or a phase, has \textit{two} ways to identify it:
 \begin{itemize}
     \item its name (a C++ string)
-    \item its identification number (a C++ string)
+    \item its identification number (an int)
 \end{itemize}
 The reason that each component needs an identification number is that properties of the
 components (number of moles, atomic mass, \textit{etc}) are stored in different
@@ -108,7 +108,7 @@ some other date about the ICs and DCs that are stored there:
         and each column in that row is the number of units of an IC in that DC.
 \end{itemize}
 
-\paragraph{Example 1.}  Suppose I have a system with three only three ICs in this order:
+\paragraph{Example 1.}  Suppose I have a system with only three ICs in this order:
 \ce{Al}, \ce{H}, and \ce{O}.  Furthermore, suppose that there are three DCs in this
 system in this order: \ce{Al^{3+}}, \ce{Al(OH)_4^+}, and \ce{H2O}.  Based on this
 information, we can write down what will be stored in all of the data structures
@@ -255,7 +255,7 @@ in \verb!phaseDCmembers_!:
 \end{itemize}
 
 \subsection{\ldots but phases are more complicated}
-The microstructure aspect of THAMES makes the accounting of phases more
+The microstructure aspect of THAMES makes the accounting of phases a little more
 complicated because we map each microstructure phase to one or more
 GEM phases.  For example, in THAMES we have a microstructure phase called \verb!C3S!
 that is mapped to the GEM phase called \verb!Alite!.  And we usually have a
@@ -321,23 +321,31 @@ microstructure phase with these functions:
 \end{itemize}
 
 \subsection{Microstructure phases grouped by their kinetic behavior}
-Among all the microstructure phases that are defined, we categorize
-them in terms of how the changes to their number of moles are determined.
-There are currently three of these categories:
+In an earlier version of THAMES, the \verb!KineticModel! object kept
+track of different lists of microstructure phases depending on whether
+they are kinetically contolled, thermodynamically controlled, or readily
+soluble.  However, this structure led to a lot of confusing mappings
+between the different list indices and their associated microstructure id numbers.
+Therefore, the \verb!KineticModel! just stores to which, if any, of
+these catagories a given microstructure phase id \verb!i! belongs with
+the boolean functions \verb!isKinetic(i)!, \verb!isThermo(i)!,
+and \verb!isSoluble(i)!.
 \begin{enumerate}
     \item \textbf{Kinetically controlled phases} are microstructure
         phases that change moles according to some kind of kinetic
-        rate equation.  The list of the id numbers of these phases is stored
-        in the \verb!KineticModel! object in a vector called \verb!kineticphase_!.
-    \item \textbf{Readily soluble phases} are microstructure phases that
-        will dissolve completely during the first time step.  The list of
-        the id numbers of these phases is stored in the \verb!KineticModel!
-        object in a vector called \verb!solublephase_!
+        rate equation.  The list of the id numbers of these phases is still stored
+        in the \verb!ChemicalSystem! object in a vector called \verb!kineticphase_!.
     \item \textbf{Thermodynamically controlled phases} are microstructure phases
         that have their moles determined by chemical equilibrium in the GEMS
         model. The list of
-        the id numbers of these phases is stored in the \verb!KineticModel!
+        the id numbers of these phases is stored in the \verb!ChemicalSystem!
         object in a vector called \verb!thermophase_!
+    \item \textbf{Readily soluble phases} are microstructure phases that
+        will dissolve completely during the first time step.  These are
+        also stored in the \verb!ChemicalSystem! object as
+        \verb!thermophase_! (\textbf{not} as solublephase) because their
+        precipitation can be thermodynamically favorable at some point during
+        the simulation.
 \end{enumerate}
 
 \paragraph{Example 2.}  Suppose I have a microstructure with five microstructure
@@ -349,7 +357,7 @@ phases given \textit{in this order} in the \verb!chemistry.xml! file:
     \item Name = K2SO4, id = 7 (readily soluble)
     \item Name = Ca(OH)2, id = 8 (thermodynamically controlled)
 \end{itemize}
-Here is how these data will be stored in the \verb!KineticModel! object.
+Here is how these data will be stored in the \verb!ChemicalSystem! object.
 See if you can understand each one.
 
 \scriptsize{
@@ -358,48 +366,13 @@ See if you can understand each one.
 \verb!kineticphase_! & \verb!kineticphase_[0] = 2! \hspace{0.1in} 
                  \verb!kineticphase_[1] = 4! \\
                  & \\
-\verb!solublephase_! & \verb!solublephase_[0] = 7! \\
-                 & \\
 \verb!thermophase_! & \verb!thermophase_[0] = 5! \hspace{0.1in}
-                 \verb!thermophase_[1] = 8! \\ \bottomrule
+\verb!thermophase_[1] = 7! \hspace{0.1in}
+                 \verb!thermophase_[2] = 8! \\ \bottomrule
 \end{tabular}
 }
 
 \normalsize{ }
-Why do we keep these different categories in separate lists? Because
-frequently we may want to perform a set of operations on all the kinetically controlled
-microstructure phases without doing anything to the other ones.  To do that, we would
-go through the list \verb!kineticphase_! one by one until we get to the end of that list.
-Otherwise, we would need to go through every microstructure phase and check for each
-one whether it is kinetically controlled or not.
-
-\subsection{ChemicalSystem keeps track of these categories, too}
-The \verb!ChemicalSystem! object has several data structures and several functions
-that keep track of whether a phase is kinetically controlled, thermodynamically
-controlled, or readily soluble.  Here are the functions:
-\begin{itemize}
-    \item  \verb!chemsys_->getMic2kinetic(i)! will return the \verb!kineticphase_! id
-        number of the microstructure phase \verb!i!.  If the microstructure phase is
-        not kinetically controlled, this function will a value of -1 to indicate
-        that it is not kinetically controlled.
-    \item  \verb!chemsys_->getKinetic2mic(i)! will return the microstructure phase
-        id number stored at \verb!kineticphase_[i]!.
-    \item  \verb!chemsys_->isKineticphase(i)! will return \verb!true! if microstructure
-        phase id number \verb!i! is kinetically controlled, or \verb!false! if not.
-    \item  \verb!chemsys_->getMic2thermo(i)! will return the \verb!thermophase_! id
-        number of the microstructure phase \verb!i!.  If the microstructure phase is
-        not thermodynamically controlled, this function will a value of -1 to indicate
-        that it is not thermodynamically controlled.
-    \item  \verb!chemsys_->getThermo2mic(i)! will return the microstructure phase
-        id number stored at \verb!thermophase_[i]!.
-    \item  \verb!chemsys_->getMic2soluble(i)! will return the \verb!solublephase_! id
-        number of the microstructure phase \verb!i!.  If the microstructure phase is
-        not readily soluble, this function will a value of -1 to indicate
-        that it is not readily soluble.
-    \item  \verb!chemsys_->getSoluble2mic(i)! will return the microstructure phase
-        id number stored at \verb!solublephase_[i]!.
-\end{itemize}
-
 
 \section{Exercises}
 

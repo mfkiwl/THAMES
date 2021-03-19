@@ -265,18 +265,6 @@ map<string,int> DCidlookup_;            /**< Map that returns the vector index o
 map<string,int> phaseidlookup_;         /**< Map that returns the vector index of the
                                                 GEM CSD phase name */
 
-map<int,int> mic2kinetic_;              /**< Map that returns the kinetic model id of
-                                                a given microstructure phase id */
-map<int,int> kinetic2mic_;              /**< Map that returns the microstructure phase id
-                                                of a given kinetic model phase id */
-map<int,int> mic2soluble_;              /**< Map that returns the kinetic model id of
-                                                a given soluble microstructure phase id */
-map<int,int> soluble2mic_;              /**< Map that returns the soluble microstructure phase id
-                                                of a given kinetic model phase id */
-map<int,int> mic2thermo_;               /**< Map that returns the GEM CSD phase id
-                                                of a given microstructure phase id */
-map<int,int> thermo2mic_;               /**< Map that returns the microstructure phase id
-                                                of a given GEM CSD phase id */
 map<int,vector<int> > mic2phase_;       /**< Map that returns the GEM CSD phase for
                                                 a given microstructure phase */
 map<int,vector<int> > mic2DC_;          /**< Map that returns the GEM DC for
@@ -1339,8 +1327,6 @@ int getMicid (const string &micname)
 /**
 @brief Get the list of all phase ids.
 
-@note Used only in this class's copy constructor.
-
 @return the vector holding phase id numbers
 */
 vector<int> getMicid () const
@@ -1554,138 +1540,6 @@ vector<int> getMic2DC (const int i)
 }
 
 /**
-@brief Get the integer id of a phase in the kinetic model that is associated.
-with a given microstructure phase
-
-This method will return a nonsense id of -1 rather than throwing an exception
-if the micid is not found, such as will happen if there is no kinetic phase
-associated with a given microstructure phase.  The user takes the responsibility
-of handling the nonsense result.
-
-@param i is integer id of the microstructure phase
-@return the integer id  of the associated phase in the kinetic model
-*/
-int getMic2kinetic (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = mic2kinetic_.find(i);
-    if (p != mic2kinetic_.end()) {
-        return p->second;
-    } else {
-        return -1;   // Nonsense result, but don't throw exception
-    }
-}
-
-/**
-@brief Get the integer id of a microstructure phase that is associated
-with a given phase in the kinetic model
-
-@param i is integer id of the phase in the kinetic model
-@return the integer id  of the associated microstructure phase
-*/
-int getKinetic2mic (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = kinetic2mic_.find(i);
-    if (p != kinetic2mic_.end()) {
-        return p->second;
-    } else {
-        msg = "Could not find kinetic2mic_ match to index provided";
-        EOBException ex("ChemicalSystem","getKinetic2mic",msg,kinetic2mic_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the integer id of a soluble phase in the kinetic model that is associated
-with a given microstructure phase
-
-This method will return a nonsense id of -1 rather than throwing an exception
-if the micid is not found, such as will happen if there is no kinetic phase
-associated with a given microstructure phase.  The user takes the responsibility
-of handling the nonsense result.
-
-@param i is integer id of the microstructure phase
-@return the integer id  of the associated soluble phase in the kinetic model
-*/
-int getMic2soluble (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = mic2soluble_.find(i);
-    if (p != mic2soluble_.end()) {
-        return p->second;
-    } else {
-        return -1;   // Nonsense result, but don't throw exception
-    }
-}
-
-/**
-@brief Get the integer id of a microstructure phase that is associated
-with a given soluble phase in the kinetic model
-
-@param i is integer id of the phase in the kinetic model
-@return the integer id  of the associated microstructure phase
-*/
-int getSoluble2mic (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = soluble2mic_.find(i);
-    if (p != soluble2mic_.end()) {
-        return p->second;
-    } else {
-        msg = "Could not find soluble2mic_ match to index provided";
-        EOBException ex("ChemicalSystem","getSoluble2mic",msg,soluble2mic_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the integer id of a phase under thermodynamic control that is associated.
-with a given microstructure phase.
-
-This method will return a nonsense id of -1 rather than throwing an exception
-if the micid is not found, such as will happen if there is no thermo phase
-associated with a given microstructure phase.  The user takes the responsibility
-of handling the nonsense result.
-
-@param i is integer id of the microstructure phase
-@return the integer id of the thermodynamically controlled phase
-*/
-int getMic2thermo (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = mic2thermo_.find(i);
-    if (p != mic2thermo_.end()) {
-        return p->second;
-    } else {
-        return -1;   // Nonsense result, but don't throw exception
-    }
-}
-
-/**
-@brief Get the integer id of a microstructure phase that is associated.
-with a given thermodynamically controlled phase.
-
-@param i is integer id of the thermodynamically controlled phase
-@return the integer id of the associated microstructure phase
-*/
-int getThermo2mic (const int i)
-{
-    string msg;
-    map<int,int>::iterator p = thermo2mic_.find(i);
-    if (p != thermo2mic_.end()) {
-        return p->second;
-    } else {
-        msg = "Could not find thermo2mic_ match to index provided";
-        EOBException ex("ChemicalSystem","getThermo2mic",msg,thermo2mic_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
 @brief Determine if a given microstructure phase is kinetically controlled.
 
 @param idx is integer id of the microstructure phase
@@ -1693,8 +1547,9 @@ int getThermo2mic (const int i)
 */
 bool isKineticphase (const int idx)
 {
-    map<int,int>::iterator p = mic2kinetic_.find(idx);
-    if (p != mic2kinetic_.end()) return true;
+    for (int i = 0; i < kineticphase_.size(); ++i) {
+        if (kineticphase_[i] == idx) return true;
+    }
     return false;
 }
 
@@ -1751,126 +1606,12 @@ void setMic2phase (const int micid,
 }
 
 /**
-@brief Set the integer id of a kinetically controlled phase associated with a
-microstructure phase id.
-
-@param micid is integer id of the microstructure phase
-@param kineticid is the integer id of the kinetically controlled phase
-*/
-void setMic2kinetic (const int micid,
-                     const int kineticid)
-{
-    map<int,int>::iterator p = mic2kinetic_.find(micid);
-    if (p == mic2kinetic_.end()) {
-        mic2kinetic_.insert(make_pair(micid,kineticid));
-        setKinetic2mic(kineticid,micid);
-    } else {
-        p->second = kineticid;
-    }
-}
-
-/**
-@brief Set the integer id of a microstructure phase associated with a
-kinetically controlled phase id.
-
-@param kineticid is the integer id of the kinetically controlled phase
-@param micid is integer id of the microstructure phase
-*/
-void setKinetic2mic (const int kineticid,
-                     const int micid)
-{
-    map<int,int>::iterator p = kinetic2mic_.find(kineticid);
-    if (p == kinetic2mic_.end()) {
-        kinetic2mic_.insert(make_pair(kineticid,micid));
-        setMic2kinetic(micid,kineticid);
-    } else {
-        p->second = micid;
-    }
-}
-
-/**
-@brief Set the integer id of a soluble phase associated with a
-microstructure phase id.
-
-@param micid is integer id of the microstructure phase
-@param solubleid is the integer id of the soluble phase
-*/
-void setMic2soluble (const int micid,
-                     const int solubleid)
-{
-    map<int,int>::iterator p = mic2soluble_.find(micid);
-    if (p == mic2soluble_.end()) {
-        mic2soluble_.insert(make_pair(micid,solubleid));
-        setSoluble2mic(solubleid,micid);
-    } else {
-        p->second = solubleid;
-    }
-}
-
-/**
-@brief Set the integer id of a microstructure phase associated with a
-kinetically controlled phase id.
-
-@param solubleid is the integer id of the kinetically controlled phase
-@param micid is integer id of the microstructure phase
-*/
-void setSoluble2mic (const int solubleid,
-                     const int micid)
-{
-    map<int,int>::iterator p = soluble2mic_.find(solubleid);
-    if (p == soluble2mic_.end()) {
-        soluble2mic_.insert(make_pair(solubleid,micid));
-        setMic2soluble(micid,solubleid);
-    } else {
-        p->second = micid;
-    }
-}
-
-/**
-@brief Set the integer id of a thermodynamically controlled phase associated with a
-microstructure phase id.
-
-@param micid is integer id of the microstructure phase
-@param thermoid is the integer id of the thermodynamically controlled phase
-*/
-void setMic2thermo (const int micid,
-                    const int thermoid)
-{
-    map<int,int>::iterator p = mic2thermo_.find(micid);
-    if (p == mic2thermo_.end()) {
-        mic2thermo_.insert(make_pair(micid,thermoid));
-        setThermo2mic(thermoid,micid);
-    } else {
-        p->second = thermoid;
-    }
-}
-
-/**
-@brief Set the integer id of a microstructure phase associated with a
-thermodynamically controlled phase id.
-
-@param thermoid is the integer id of the thermodynamically controlled phase
-@param micid is integer id of the microstructure phase
-*/
-void setThermo2mic (const int thermoid,
-                    const int micid)
-{
-    map<int,int>::iterator p = thermo2mic_.find(thermoid);
-    if (p == thermo2mic_.end()) {
-        thermo2mic_.insert(make_pair(thermoid,micid));
-        setMic2thermo(micid,thermoid);
-    } else {
-        p->second = micid;
-    }
-}
-
-/**
 @brief Get the list of integer ids of GEM phases associated with a microstructure phase name.
 
 @note NOT USED.
 
 @param micname is the name of the microstructure phase
-@return the vector of integer ids of the DCs for that microstructure phase
+@return the vector of integer ids of the GEM phases for that microstructure phase
 */
 vector<int> getMic2phase (const string &micname)
 {
@@ -1888,54 +1629,6 @@ vector<int> getMic2phase (const string &micname)
 map<int,vector<int> > getMic2phase () const
 {
     return mic2phase_;
-}
-
-/**
-@brief Get the map relating every kinetically controlled phase to its microstructure phase.
-
-@note Used only in this class's copy constructor.
-
-@return the map relating every kinetically controlled phase to its microstructure phase
-*/
-map<int,int> getKinetic2mic () const
-{
-    return kinetic2mic_;
-}
-
-/**
-@brief Get the map relating every microstructure phase to a kinetically controlled phase.
-
-@note Used only in this class's copy constructor.
-
-@return the map relating every microstructure phase to a kinetically controlled phase
-*/
-map<int,int> getMic2kinetic () const
-{
-    return mic2kinetic_;
-}
-
-/**
-@brief Get the map relating every thermodynamically controlled phase to its microstructure phase.
-
-@note Used only in this class's copy constructor.
-
-@return the map relating every thermodynamically controlled phase to its microstructure phase
-*/
-map<int,int> getThermo2mic () const
-{
-    return thermo2mic_;
-}
-
-/**
-@brief Get the map relating every microstructure phase to a thermodynamically controlled phase.
-
-@note Used only in this class's copy constructor.
-
-@return the map relating every microstructure phase to a thermodynamically controlled phase
-*/
-map<int,int> getMic2thermo () const
-{
-    return mic2thermo_;
 }
 
 /**
@@ -1980,7 +1673,7 @@ void setKineticphase (const unsigned int idx)
 @brief Get the microstructure id of a kinetically controlled phase.
 
 @param idx is the element number in the vector of kinetic phases
-@return the microstructdure phase id of that element
+@return the microstructure phase id of that element
 */
 int getKineticphase (const unsigned int idx)
 {

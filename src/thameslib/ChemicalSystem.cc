@@ -68,10 +68,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     phaseidlookup_.clear();
     mic2phase_.clear();
     mic2DC_.clear();
-    mic2kinetic_.clear();
-    kinetic2mic_.clear();
-    mic2thermo_.clear();
-    thermo2mic_.clear();
     kineticphase_.clear();
     thermophase_.clear();
     DCstoich_.clear();
@@ -1117,10 +1113,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     phaseidlookup_ = obj.getPhaseidlookup();
     mic2phase_ = obj.getMic2phase();
     mic2DC_ = obj.getMic2DC();
-    mic2kinetic_ = obj.getMic2kinetic();
-    kinetic2mic_ = obj.getKinetic2mic();
-	mic2thermo_ = obj.getMic2thermo();
-	thermo2mic_ = obj.getThermo2mic();
     kineticphase_ = obj.getKineticphase();
 	thermophase_ = obj.getThermophase();
     ICclasscode_ = obj.getICclasscode();
@@ -1183,10 +1175,6 @@ ChemicalSystem::~ChemicalSystem ()
     phaseidlookup_.clear();
     mic2phase_.clear();
     mic2DC_.clear();
-    mic2kinetic_.clear();
-    kinetic2mic_.clear();
-	mic2thermo_.clear();
-	thermo2mic_.clear();
 
     ///
     /// Clear out the vectors

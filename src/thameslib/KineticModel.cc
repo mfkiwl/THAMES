@@ -1,5 +1,5 @@
 /**
-@file
+@file  KineticModel.cc
 @brief Method definitions for the KineticModel class.
 
 */
@@ -44,9 +44,10 @@ KineticModel::KineticModel ()
     ///
 
     name_.clear();
-    kineticphase_.clear();
-    thermophase_.clear();
-    solublephase_.clear();
+    iskinetic_.clear();
+    isthermo_.clear();
+    issoluble_.clear();
+    micid_.clear();
     chemsysDCid_.clear();
     chemsysphaseid_.clear();
     RdICid_.clear();
@@ -164,9 +165,10 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     ///
 
     name_.clear();
-    kineticphase_.clear();
-    thermophase_.clear();
-    solublephase_.clear();
+    iskinetic_.clear();
+    isthermo_.clear();
+    issoluble_.clear();
+    micid_.clear();
     chemsysDCid_.clear();
     chemsysphaseid_.clear();
     RdICid_.clear();
@@ -216,22 +218,22 @@ KineticModel::KineticModel (ChemicalSystem *cs,
       exit(1);
     }
 
+    int mid,kpid;
     if (verbose_) {
         cout << "RR Finished reading chemistry.xml file" << endl;
-        int micid,kpid;
-        for (int i = 0; i < kineticphase_.size(); ++i) {
-            int microid;
-            kpid = kineticphase_[i];
-            cout << "RR kinetic phase " << i << " is kpid " << kpid << endl;
-            microid = chemsys_->getKineticphase(i);
-            cout << "RR     name = " << chemsys_->getMicphasename(microid)
-                 << " micid = (" << microid << ")" << endl;
-            cout << "RR     k1 =  " << k1_[i] << endl;
-            cout << "RR     k2 =  " << k2_[i] << endl;
-            cout << "RR     k3 =  " << k3_[i] << endl;
-            cout << "RR     n1 =  " << n1_[i] << endl;
-            cout << "RR     n3 =  " << n3_[i] << endl;
-            cout << "RR     Ea =  " << Ea_[i] << endl;
+        for (int i = 0; i < micid_.size(); ++i) {
+            mid = micid_[i];
+            if (isKinetic(i)) {
+                cout << "RR kinetic phase " << mid << endl;
+                cout << "RR     name = " << chemsys_->getMicphasename(mid)
+                     << endl;
+                cout << "RR     k1 =  " << k1_[i] << endl;
+                cout << "RR     k2 =  " << k2_[i] << endl;
+                cout << "RR     k3 =  " << k3_[i] << endl;
+                cout << "RR     n1 =  " << n1_[i] << endl;
+                cout << "RR     n3 =  " << n3_[i] << endl;
+                cout << "RR     Ea =  " << Ea_[i] << endl;
+            }
         }
     }
 
@@ -240,18 +242,15 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     // the initial mass fractions of the kinetic phases, rather than letting
     // the kinetic input file tell us.  This forces a direct link to the microstructure
     
-    vector<int> micid = chemsys_->getMicid();
-
-    setInitialphasefractions(micid);
+    setInitialphasefractions();
 
     // JWB: Normalize mass fractions to total system mass and multiply by 100
     
     // Finally, set the initial total volume of the microstructure here
     
     double totmicvol = 0.0;
-    int mid = 0;
-    for (int i = 0; i < micid.size(); i++) {
-        mid = micid[i];
+    for (int i = 0; i < micid_.size(); i++) {
+        mid = micid_[i];
         if (mid != VOIDID) {
             totmicvol += chemsys_->getMicphasevolume(mid);
         }
@@ -346,8 +345,7 @@ void KineticModel::parseDoc (const string &docname)
 
                 /// Each phase is a more complicated grouping of data that
                 /// has a separate method for parsing.
-                ///
-
+                
                 parsePhase(doc, cur, numentry, kineticdata);
             }
             cur = cur->next;
@@ -372,10 +370,11 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     int testmicid,testgemid,testdcid;
     string testname;
     bool kineticfound = false;
+    bool iskin = false;
+    bool istherm = false;
+    bool issol = false;
 
-
-    kdata.rdid.clear();
-    kdata.rdval.clear();
+    initKineticData(kdata);
 
     cur = cur->xmlChildrenNode;
 
@@ -408,48 +407,53 @@ void KineticModel::parsePhase (xmlDocPtr doc,
         if (kdata.type == "kinetic") {
             if (verbose_) {
                 cout << "QQ Kinetic Phase " << kdata.name << ", id = " << kdata.micid << endl;
-                cout << "QQ   Is kinetic phase " << numentry << endl;
                 cout << "QQ   (k1,k2,k3) =  " << kdata.k1 << "," << kdata.k2
                      << "," << kdata.k3 << endl;
                 cout << "QQ   (n1,n3) =  " << kdata.n1 << "," << kdata.n3 << endl;
                 cout << "QQ   Ea = " << kdata.Ea << endl;
             }
-            kineticphase_.push_back(numentry);
+            iskin = true;
+            istherm = false;
+            issol = false;
             chemsys_->setKineticphase(kdata.micid);
-            chemsys_->setMic2kinetic(kdata.micid,numentry);
-            chemsys_->setKinetic2mic(numentry,kdata.micid);
-            k1_.push_back(kdata.k1);
-            k2_.push_back(kdata.k2);
-            k3_.push_back(kdata.k3);
-            n1_.push_back(kdata.n1);
-            n3_.push_back(kdata.n3);
-            Ea_.push_back(kdata.Ea);
-            critDOH_.push_back(kdata.critdoh);
 
         } else if (kdata.type == "soluble") {
 
-            solublephase_.push_back(numentry);
+            iskin = false;
+            istherm = true;
+            issol = true;
 
             chemsys_->setThermophase(kdata.micid);
-            chemsys_->setMic2thermo(kdata.micid,numentry);
-            chemsys_->setThermo2mic(numentry,kdata.micid);
 
         } else {
 
-            thermophase_.push_back(numentry);
+            iskin = false;
+            istherm = true;
+            issol = false;
             chemsys_->setThermophase(kdata.micid);
-            chemsys_->setMic2thermo(kdata.micid,numentry);
-            chemsys_->setThermo2mic(numentry,kdata.micid);
         }
-    
-        initscaledmass_.push_back(0.0);
-        scaledmass_.push_back(0.0);
-        name_.push_back(kdata.name);
-        chemsysDCid_.push_back(kdata.gemdcid);
-        chemsysphaseid_.push_back(kdata.gemphaseid);
-        RdICid_.push_back(kdata.rdid);
-        Rd_.push_back(kdata.rdval);
+    } else {
+        iskin = istherm = issol = false;
     }
+    
+    iskinetic_.push_back(iskin);
+    isthermo_.push_back(istherm);
+    issoluble_.push_back(issol);
+    initscaledmass_.push_back(0.0);
+    scaledmass_.push_back(0.0);
+    name_.push_back(kdata.name);
+    micid_.push_back(kdata.micid);
+    chemsysDCid_.push_back(kdata.gemdcid);
+    chemsysphaseid_.push_back(kdata.gemphaseid);
+    RdICid_.push_back(kdata.rdid);
+    Rd_.push_back(kdata.rdval);
+    k1_.push_back(kdata.k1);
+    k2_.push_back(kdata.k2);
+    k3_.push_back(kdata.k3);
+    n1_.push_back(kdata.n1);
+    n3_.push_back(kdata.n3);
+    Ea_.push_back(kdata.Ea);
+    critDOH_.push_back(kdata.critdoh);
 
     return;
 }
@@ -566,18 +570,18 @@ void KineticModel::parseRdData(xmlDocPtr doc,
     }
 }
 
-void KineticModel::setInitialphasefractions(vector<int> micid)
+void KineticModel::setInitialphasefractions()
 {
     vector<double> micmass;
     micmass.clear();
-    micmass.resize(micid.size(),0.0);
+    micmass.resize(micid_.size(),0.0);
 
     double vfrac,solidmass;
     double watermass,molarmass,molarvolume,density;
     int gemdcid,mid;
     solidmass = 0.0;
-    for (int i = 0; i < micid.size(); ++i) {
-        mid = micid[i];
+    for (int i = 0; i < micid_.size(); ++i) {
+        mid = micid_[i];
         if (mid != VOIDID) {
             if (verbose_) {
                 cout << "  Found microstructure id " << mid;
@@ -632,24 +636,19 @@ void KineticModel::setInitialphasefractions(vector<int> micid)
         cout.flush();
     }
 
-    normalizePhasemasses(micid,micmass,solidmass);
+    normalizePhasemasses(micmass,solidmass);
 
     return;
 }
 
-void KineticModel::normalizePhasemasses(vector<int> micid,
-                                        vector<double> micmass,
+void KineticModel::normalizePhasemasses(vector<double> micmass,
                                         double solidmass)
 {
     int kpid,tpid,mid;
     double pscaledmass = 0.0;
 
-    for (int i = 0; i < micid.size(); i++) {
-        mid = micid[i];
-        if (mid == VOIDID) {
-            // Do nothing with void phase
-            continue;
-        }
+    for (int i = 0; i < micid_.size(); i++) {
+        mid = micid_[i];
         if (mid == WATERID) {
             int waterid = chemsys_->getDCid("H2O@");
             double watermm = chemsys_->getDCmolarmass(waterid);
@@ -661,38 +660,36 @@ void KineticModel::normalizePhasemasses(vector<int> micid,
             chemsys_->setDCmoles(waterid,(pscaledmass / watermm));
             if (verbose_) {
                 cout << "Setting initial micphase mass and volume of "
-                     << chemsys_->getMicphasename(mid) << endl;
+                     << chemsys_->getMicphasename(WATERID) << endl;
                 cout.flush();
             }
-            chemsys_->setMicphasemass(mid,pscaledmass);
-            chemsys_->setMicphasemassdissolved(mid,0.0);
+            chemsys_->setMicphasemass(WATERID,pscaledmass);
+            chemsys_->setMicphasemassdissolved(WATERID,0.0);
 
-        } else {
+        } else if (mid != VOIDID) {
 
-            kpid = chemsys_->getMic2kinetic(mid);
             pscaledmass = micmass[mid] * 100.0 / solidmass;
-            if (kpid >= 0) {
-                scaledmass_[kpid] = pscaledmass;
-                initscaledmass_[kpid] = pscaledmass;
+            if (isKinetic(i)) {
+                scaledmass_[i] = pscaledmass;
+                initscaledmass_[i] = pscaledmass;
                 if (verbose_) {
                     cout << "Microstructure scaled mass of "
                          << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
                          << micmass[mid] << " g out of " << solidmass << " g total" << endl;
                     cout << "   Implies scaledmass_["
-                         << kpid << "] = " << scaledmass_[kpid] << endl;
+                         << i << "] = " << scaledmass_[i] << endl;
                 }
             } else {
-                tpid = chemsys_->getMic2thermo(mid);  // soluble or thermo phase will be found
 
-                if (tpid >= 0) {
-                    scaledmass_[tpid] = pscaledmass;
-                    initscaledmass_[tpid] = pscaledmass;
+                if (isThermo(i)) {
+                    scaledmass_[i] = pscaledmass;
+                    initscaledmass_[i] = pscaledmass;
                     if (verbose_) {
                         cout << "Microstructure scaled mass of "
                              << chemsys_->getMicphasename(mid) << " (" << mid << ") = "
                              << micmass[mid] << " g out of " << solidmass << " g total" << endl;
                         cout << "   Implies scaledmass_["
-                             << tpid << "] = " << scaledmass_[tpid] << endl;
+                             << i << "] = " << scaledmass_[i] << endl;
                         cout.flush();
                     }
                 } else {
@@ -891,62 +888,70 @@ void KineticModel::calculateKineticStep (const double timestep,
             if (verbose_) {
                 cout << "Looping over soluble minerals.  ";
                 cout << "Here is the list of them:" << endl;
-                for (int i = 0; i < solublephase_.size(); i++) {
-                    cout << name_[solublephase_[i]] << endl;
+                for (int i = 0; i < micid_.size(); i++) {
+                    if (isSoluble(i)) {
+                        cout << name_[i] << endl;
+                    }
                 }
                 cout.flush();
             }
-            for (int i = 0; i < solublephase_.size(); i++) {
-                spid = solublephase_[i];
-                massdissolved = scaledmass_[spid];
-                scaledmass_[spid] = 0.0;
-                chemsys_->setMicphasemass(chemsys_->getThermo2mic(spid),
-                                      scaledmass_[spid]);
-                chemsys_->setMicphasemassdissolved(chemsys_->getThermo2mic(spid),
-                                   massdissolved);
-                if (verbose_) {
-                    cout << name_[spid] << ": Mass dissolved = "
-                         << massdissolved << endl;
-                    cout.flush();
-                    cout << name_[spid] << ": DC molar mass of "
-                         << chemsys_->getDCname(chemsysDCid_[spid])
-                         << " = " << chemsys_->getDCmolarmass(chemsysDCid_[spid])
-                         << endl;
-                    cout.flush();
-                }
-                for (int ii = 0; ii < icmoles.size(); ii++) {
-                    icmoles[ii] += ((massdissolved
-                           / chemsys_->getDCmolarmass(chemsysDCid_[spid]))
-                           * chemsys_->getDCstoich(chemsysDCid_[spid],ii));
+            for (int i = 0; i < micid_.size(); i++) {
+                if (isSoluble(i)) {
+                    spid = micid_[i];
+                    massdissolved = scaledmass_[i];
+                    scaledmass_[i] = 0.0;
+                    chemsys_->setMicphasemass(spid,
+                                          scaledmass_[spid]);
+                    chemsys_->setMicphasemassdissolved(spid,
+                                       massdissolved);
                     if (verbose_) {
-                        cout << name_[spid] << ":     Total dissolved "
-                             << icname[ii] << " = " << icmoles[ii] << " mol "
+                        cout << name_[i] << ": Mass dissolved = "
+                             << massdissolved << endl;
+                        cout.flush();
+                        cout << name_[i] << ": DC molar mass of "
+                             << chemsys_->getDCname(chemsysDCid_[i])
+                             << " = " << chemsys_->getDCmolarmass(chemsysDCid_[i])
                              << endl;
+                        cout.flush();
                     }
-                }
-                if (verbose_) cout.flush();
+                    for (int ii = 0; ii < icmoles.size(); ii++) {
+                        icmoles[ii] += ((massdissolved
+                               / chemsys_->getDCmolarmass(chemsysDCid_[i]))
+                               * chemsys_->getDCstoich(chemsysDCid_[i],ii));
+                        if (verbose_) {
+                            cout << name_[i] << ":     Total dissolved "
+                                 << icname[ii] << " = " << icmoles[ii] << " mol "
+                                 << endl;
+                        }
+                    }
+                    if (verbose_) cout.flush();
 
+                } // END OF IF SOLUBLE
             }
 
             if (verbose_) {
                 cout << "Looping over thermo minerals.  Here is the list of them:" << endl;
-                for (int i = 0; i < thermophase_.size(); i++) {
-                    cout << name_[thermophase_[i]] << endl;
+                for (int i = 0; i < micid_.size(); i++) {
+                    if (isThermo(i)) {
+                        cout << name_[i] << endl;
+                    }
                 }
                 cout.flush();
             }
-            for (int i = 0; i < thermophase_.size(); i++) {
-                tpid = thermophase_[i];
-                for (int ii = 0; ii < icmoles.size(); ii++) {
-                    icmoles[ii] += ((scaledmass_[tpid]
-                                / chemsys_->getDCmolarmass(chemsysDCid_[tpid]))
-                                * chemsys_->getDCstoich(chemsysDCid_[tpid],ii));
-                    if (verbose_) {
-                        cout << name_[tpid] << ":     Total IC " << icname[ii] << " = "
-                             << icmoles[ii] << " mol " << endl;
-                        cout.flush();
+            for (int i = 0; i < micid_.size(); i++) {
+                if (isThermo(i)) {
+                    for (int ii = 0; ii < icmoles.size(); ii++) {
+                        icmoles[ii] += ((scaledmass_[i]
+                                    / chemsys_->getDCmolarmass(chemsysDCid_[i]))
+                                    * chemsys_->getDCstoich(chemsysDCid_[i],ii));
+                        if (verbose_) {
+                            cout << name_[i] << ":     Total IC " << icname[ii] << " = "
+                                 << icmoles[ii] << " mol " << endl;
+                            cout.flush();
+                        }
                     }
-                }
+                
+                } // END OF IF THERMO
             }
 
             // Modify initial pore solution composition if desired
@@ -986,195 +991,191 @@ void KineticModel::calculateKineticStep (const double timestep,
           impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
 
           if (verbose_) cout << "SS In KineticModel::calculateKineticStep" << endl;
-          for (int i = 0; i < kineticphase_.size(); i++) {
-            if (verbose_) {
-                int microid;
-                kpid = kineticphase_[i];
-                cout << "SS kinetic phase " << i << " is kpid " << kpid << endl;
-                microid = chemsys_->getKineticphase(i);
-                cout << "SS     name = " << chemsys_->getMicphasename(microid)
-                     << " micid = (" << microid << ")" << endl;
-                cout << "SS     k1 =  " << k1_[i] << endl;
-                cout << "SS     k2 =  " << k2_[i] << endl;
-                cout << "SS     k3 =  " << k3_[i] << endl;
-                cout << "SS     n1 =  " << n1_[i] << endl;
-                cout << "SS     n3 =  " << n3_[i] << endl;
-                cout << "SS     Ea =  " << Ea_[i] << endl;
-            }
+          for (int i = 0; i < micid_.size(); i++) {
+            int mid = micid_[i];
+            if (isKinetic(i)) {
+                if (verbose_) {
+                    cout << "SS kinetic phase " << mid << endl;
+                    cout << "SS     name = " << chemsys_->getMicphasename(mid)
+                         << endl;
+                    cout << "SS     k1 =  " << k1_[i] << endl;
+                    cout << "SS     k2 =  " << k2_[i] << endl;
+                    cout << "SS     k3 =  " << k3_[i] << endl;
+                    cout << "SS     n1 =  " << n1_[i] << endl;
+                    cout << "SS     n3 =  " << n3_[i] << endl;
+                    cout << "SS     Ea =  " << Ea_[i] << endl;
+                }
 
-            kpid = kineticphase_[i];
-            if (initscaledmass_[kpid] > 0.0) {
-              DOH = (initscaledmass_[kpid] - scaledmass_[kpid]) /
-                    (initscaledmass_[kpid]);
-            } else {
-              throw FloatException("KineticModel","calculateKineticStep",
-                             "initscaledmass_ = 0.0");
-            }
-
-            wcfactor = 1.0 + (3.333 *
-                   (pow(((critDOH_[kpid] * wcratio_) - DOH),4.0)));
-
-            arrhenius = exp((Ea_[i]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
-            // if (verbose_) {
-            //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-            //     cout << "Calculating Arrhenius effect:" << endl;
-            //     cout << "    GASCONSTANT = " << GASCONSTANT << endl;
-            //     cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
-            //     cout << "    refT_ = " << refT_ << endl;
-            //     cout << "    T = " << T << endl;
-            //     cout << "    arrhenius factor = " << arrhenius << endl;
-            //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-            // }
-
-            if (DOH < 1.0 && !dotweak) {
-        
-                if (fabs(n1_[i]) > 0.0) {
-                  ngrate = (k1_[i]/n1_[i]) * (1.0 - DOH)
-                         * pow((-log(1.0 - DOH)),(1.0 - n1_[i]));
-                  ngrate *= (blainefactor_);  // only used for the N+G rate
-              
-                  if (ngrate < 1.0e-10) ngrate = 1.0e-10;
+                if (initscaledmass_[i] > 0.0) {
+                  DOH = (initscaledmass_[i] - scaledmass_[i]) /
+                        (initscaledmass_[i]);
                 } else {
                   throw FloatException("KineticModel","calculateKineticStep",
-                                 "n1_ = 0.0");
+                             "initscaledmass_ = 0.0");
                 }
+
+                wcfactor = 1.0 + (3.333 *
+                       (pow(((critDOH_[i] * wcratio_) - DOH),4.0)));
+
+                arrhenius = exp((Ea_[i]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
+                // if (verbose_) {
+                //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+                //     cout << "Calculating Arrhenius effect:" << endl;
+                //     cout << "    GASCONSTANT = " << GASCONSTANT << endl;
+                //     cout << "    Ea_[" << kpid << "] = " << Ea_[kpid] << endl;
+                //     cout << "    refT_ = " << refT_ << endl;
+                //     cout << "    T = " << T << endl;
+                //     cout << "    arrhenius factor = " << arrhenius << endl;
+                //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
+                // }
+
+                if (DOH < 1.0 && !dotweak) {
         
-                hsrate = k3_[i] * pow((1.0 - DOH),n3_[i]);
-                if (hsrate < 1.0e-10) hsrate = 1.0e-10;
+                    if (fabs(n1_[i]) > 0.0) {
+                      ngrate = (k1_[i]/n1_[i]) * (1.0 - DOH)
+                             * pow((-log(1.0 - DOH)),(1.0 - n1_[i]));
+                      ngrate *= (blainefactor_);  // only used for the N+G rate
+              
+                      if (ngrate < 1.0e-10) ngrate = 1.0e-10;
+                    } else {
+                      throw FloatException("KineticModel","calculateKineticStep",
+                                     "n1_ = 0.0");
+                    }
+        
+                    hsrate = k3_[i] * pow((1.0 - DOH),n3_[i]);
+                    if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
-                diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
-                           (1.0 - pow((1.0 - DOH),(1.0/3.0)));
-                if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+                    diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
+                               (1.0 - pow((1.0 - DOH),(1.0/3.0)));
+                    if (diffrate < 1.0e-10) diffrate = 1.0e-10;
 
 
-                rate = (ngrate < hsrate) ? ngrate : hsrate;
-                if (diffrate < rate) rate = diffrate;
-                rate *= (wcfactor * arrhenius);
-                newDOH = DOH + (rate * timestep);
-                if (verbose_) {
-                    cout << "PK model for " << getName(kpid)
-                         << ", timestep " << timestep
-                         << ", oldDOH = " << DOH << ", new DOH = "
-                         << newDOH << endl;
-                    cout.flush();
-                }
+                    rate = (ngrate < hsrate) ? ngrate : hsrate;
+                    if (diffrate < rate) rate = diffrate;
+                    rate *= (wcfactor * arrhenius);
+                    newDOH = DOH + (rate * timestep);
+                    if (verbose_) {
+                        cout << "PK model for " << getName(i)
+                             << ", timestep " << timestep
+                             << ", oldDOH = " << DOH << ", new DOH = "
+                             << newDOH << endl;
+                        cout.flush();
+                    }
 
-                // JWB:  This where we can figure out the volume dissolved
-                // and link it back to the current volume to see how many
-                // voxels need to dissolve
+                    // JWB:  This where we can figure out the volume dissolved
+                    // and link it back to the current volume to see how many
+                    // voxels need to dissolve
             
-                scaledmass_[kpid] = initscaledmass_[kpid] * (1.0 - newDOH);
-                massdissolved = (newDOH - DOH) * initscaledmass_[kpid];
-                chemsys_->setMicphasemass(chemsys_->getKinetic2mic(kpid),
-                                  scaledmass_[kpid]);
-                chemsys_->setMicphasemassdissolved(chemsys_->getKinetic2mic(kpid),
-                                        massdissolved);
-                if (verbose_) {
-                    cout << "Original scaled mass = " << initscaledmass_[kpid]
-                         << " and new scaled mass = "
-                         << chemsys_->getMicphasemass(chemsys_->getKinetic2mic(kpid))
-                         << " and new volume = "
-                         << chemsys_->getMicphasevolume(chemsys_->getKinetic2mic(kpid)) << endl;
-                }
+                    scaledmass_[i] = initscaledmass_[i] * (1.0 - newDOH);
+                    massdissolved = (newDOH - DOH) * initscaledmass_[i];
+                    chemsys_->setMicphasemass(mid,scaledmass_[i]);
+                    chemsys_->setMicphasemassdissolved(mid,massdissolved);
+                    if (verbose_) {
+                        cout << "Original scaled mass = " << initscaledmass_[i]
+                             << " and new scaled mass = "
+                             << chemsys_->getMicphasemass(mid)
+                             << " and new volume = "
+                             << chemsys_->getMicphasevolume(mid) << endl;
+                    }
 
-                impurityrelease[0] = (massdissolved *
-                        chemsys_->getK2o(chemsys_->getKinetic2mic(kpid)));
-                impurityrelease[1] = (massdissolved *
-                        chemsys_->getNa2o(chemsys_->getKinetic2mic(kpid)));
-                impurityrelease[2] = (massdissolved *
-                        chemsys_->getMgo(chemsys_->getKinetic2mic(kpid)));
-                impurityrelease[3] = (massdissolved *
-                        chemsys_->getSo3(chemsys_->getKinetic2mic(kpid)));
+                    impurityrelease[0] = (massdissolved *
+                            chemsys_->getK2o(mid));
+                    impurityrelease[1] = (massdissolved *
+                            chemsys_->getNa2o(mid));
+                    impurityrelease[2] = (massdissolved *
+                            chemsys_->getMgo(mid));
+                    impurityrelease[3] = (massdissolved *
+                            chemsys_->getSo3(mid));
 
-                for (int ii = 0; ii < icmoles.size(); ii++) {
-                  icmoles[ii] += ((massdissolved
-                              / chemsys_->getDCmolarmass(chemsysDCid_[kpid]))
-                              * chemsys_->getDCstoich(chemsysDCid_[kpid],ii));
-                  if (icname[ii] == "O") {
-                    // Dissolved K2O in this clinker phase
-                    if (chemsys_->isIC("K")) {
-                        icn = "K";
-                        molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                        icn = "O";
-                        molarmass += chemsys_->getICmolarmass(icn);
-                        icmoles[ii] += (impurityrelease[0]/molarmass);
-                    }
-                    // Dissolved Na2O in this clinker phase
-                    if (chemsys_->isIC("Na")) {
-                        icn = "Na";
-                        molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                        icn = "O";
-                        molarmass += chemsys_->getICmolarmass(icn);
-                        icmoles[ii] += (impurityrelease[1]/molarmass);
-                    }
-                    // Dissolved MgO in this clinker phase
-                    if (chemsys_->isIC("Mg")) {
-                        icn = "Mg";
-                        molarmass = chemsys_->getICmolarmass(icn);
-                        icn = "O";
-                        molarmass += chemsys_->getICmolarmass(icn);
-                        icmoles[ii] += (impurityrelease[2]/molarmass);
-                    }
-                    // Dissolved SO3  in this clinker phase
-                     if (chemsys_->isIC("S")) {
+                    for (int ii = 0; ii < icmoles.size(); ii++) {
+                      icmoles[ii] += ((massdissolved
+                                  / chemsys_->getDCmolarmass(chemsysDCid_[i]))
+                                  * chemsys_->getDCstoich(chemsysDCid_[i],ii));
+                      if (icname[ii] == "O") {
+                        // Dissolved K2O in this clinker phase
+                        if (chemsys_->isIC("K")) {
+                            icn = "K";
+                            molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                            icn = "O";
+                            molarmass += chemsys_->getICmolarmass(icn);
+                            icmoles[ii] += (impurityrelease[0]/molarmass);
+                        }
+                        // Dissolved Na2O in this clinker phase
+                        if (chemsys_->isIC("Na")) {
+                            icn = "Na";
+                            molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                            icn = "O";
+                            molarmass += chemsys_->getICmolarmass(icn);
+                            icmoles[ii] += (impurityrelease[1]/molarmass);
+                        }
+                        // Dissolved MgO in this clinker phase
+                        if (chemsys_->isIC("Mg")) {
+                            icn = "Mg";
+                            molarmass = chemsys_->getICmolarmass(icn);
+                            icn = "O";
+                            molarmass += chemsys_->getICmolarmass(icn);
+                            icmoles[ii] += (impurityrelease[2]/molarmass);
+                        }
+                        // Dissolved SO3  in this clinker phase
+                         if (chemsys_->isIC("S")) {
+                             icn = "S";
+                             molarmass = chemsys_->getICmolarmass(icn);
+                             icn = "O";
+                             molarmass += (3.0 * chemsys_->getICmolarmass(icn));
+                             icmoles[ii] += (3.0 * (impurityrelease[3]/molarmass));
+                         }
+                       } else if (icname[ii] == "S") {
+                         // Dissolved SO3  in this clinker phase
                          icn = "S";
                          molarmass = chemsys_->getICmolarmass(icn);
                          icn = "O";
                          molarmass += (3.0 * chemsys_->getICmolarmass(icn));
-                         icmoles[ii] += (3.0 * (impurityrelease[3]/molarmass));
-                     }
-                   } else if (icname[ii] == "S") {
-                     // Dissolved SO3  in this clinker phase
-                     icn = "S";
-                     molarmass = chemsys_->getICmolarmass(icn);
-                     icn = "O";
-                     molarmass += (3.0 * chemsys_->getICmolarmass(icn));
-                     icmoles[ii] += (impurityrelease[3]/molarmass);
-                   } else if (icname[ii] == "K") {
-                     // Dissolved K2O in this clinker phase
-                     icn = "K";
-                     molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                     icn = "O";
-                     molarmass += chemsys_->getICmolarmass(icn);
-                     icmoles[ii] += (2.0 * (impurityrelease[0]/molarmass));
-                   } else if (icname[ii] == "Na") {
-                     // Dissolved Na2O in this clinker phase
-                     icn = "Na";
-                     molarmass = 2.0 * chemsys_->getICmolarmass(icn);
-                     icn = "O";
-                     molarmass += chemsys_->getICmolarmass(icn);
-                     icmoles[ii] += (2.0 * (impurityrelease[1]/molarmass));
-                   } else if (icname[ii] == "Mg") {
-                     // Dissolved MgO in this clinker phase
-                     icn = "Mg";
-                     molarmass = chemsys_->getICmolarmass(icn);
-                     icn = "O";
-                     molarmass += chemsys_->getICmolarmass(icn);
-                     icmoles[ii] += (impurityrelease[2]/molarmass);
-                   }
+                         icmoles[ii] += (impurityrelease[3]/molarmass);
+                       } else if (icname[ii] == "K") {
+                         // Dissolved K2O in this clinker phase
+                         icn = "K";
+                         molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                         icn = "O";
+                         molarmass += chemsys_->getICmolarmass(icn);
+                         icmoles[ii] += (2.0 * (impurityrelease[0]/molarmass));
+                       } else if (icname[ii] == "Na") {
+                         // Dissolved Na2O in this clinker phase
+                         icn = "Na";
+                         molarmass = 2.0 * chemsys_->getICmolarmass(icn);
+                         icn = "O";
+                         molarmass += chemsys_->getICmolarmass(icn);
+                         icmoles[ii] += (2.0 * (impurityrelease[1]/molarmass));
+                       } else if (icname[ii] == "Mg") {
+                         // Dissolved MgO in this clinker phase
+                         icn = "Mg";
+                         molarmass = chemsys_->getICmolarmass(icn);
+                         icn = "O";
+                         molarmass += chemsys_->getICmolarmass(icn);
+                         icmoles[ii] += (impurityrelease[2]/molarmass);
+                       }
     
-                 }
+                     }
 
-            } else if (DOH < 1.0) {
+                } else if (DOH < 1.0) {
 
-                ///
-                /// We will just tweak the icmoles a bit to try to
-                /// cure a previous failed convergence with GEM_run
-                ///
+                    ///
+                    /// We will just tweak the icmoles a bit to try to
+                    /// cure a previous failed convergence with GEM_run
+                    ///
                 
-                for (int ii = 0; ii < icmoles.size(); ii++) {
-                    if (icname[ii] != "H" && icname[ii] != "O" && icname[ii] != "Zz") {
-                        icmoles[ii] *= 1.01;
+                    for (int ii = 0; ii < icmoles.size(); ii++) {
+                        if (icname[ii] != "H" && icname[ii] != "O" && icname[ii] != "Zz") {
+                            icmoles[ii] *= 1.01;
+                        }
                     }
-                }
 
-            } else {
-              throw DataException("KineticModel","calculateKineticStep",
-                                "DOH >= 1.0");
-            }   
+                } else {
+                  throw DataException("KineticModel","calculateKineticStep",
+                                    "DOH >= 1.0");
+                }   
+              }  // END OF IF KINETIC
           }
         }	
-
 
         if (verbose_) {
             if (!dotweak) {
@@ -1198,85 +1199,88 @@ void KineticModel::calculateKineticStep (const double timestep,
         double icmol,icstoich;
         double phmass,dphmass,partitionedmoles,denom;
         double partitionedmoles_K = 0.0, partitionedmoles_Na = 0.0;
+        int mid;
         if (verbose_) cout << "Aqueous mass = " << chemsys_->getPhasemass("aq_gen") << endl;
-        for (int i = 0; i < thermophase_.size(); i++) {
-            tpid = thermophase_[i];
-            if (verbose_) cout << "Partitioning alkali for phase " << name_[tpid] << ": ";
-            phaselist = chemsys_->getMic2phase(chemsys_->getThermo2mic(tpid));
-            // List of all phases making up this microstructure phase
-            // Compute the mass of each phase and sum to get phase mass
-            phmass = dphmass = 0.0;
-            for (int j = 0; j < phaselist.size(); j++) {
-                // Mass will be in g, not kg
-                if (verbose_) {
-                    cout << endl;
-                    cout << "phasename: " << chemsys_->getPhasename(phaselist[j]) << endl;
-                    cout << "phasemass: " << chemsys_->getPhasemass(phaselist[j]) << endl;
+        for (int i = 0; i < micid_.size(); i++) {
+            mid = micid_[i];
+            if (isThermo(i)) {
+                if (verbose_) cout << "Partitioning alkali for phase " << name_[i] << ": ";
+                phaselist = chemsys_->getMic2phase(mid);
+                // List of all phases making up this microstructure phase
+                // Compute the mass of each phase and sum to get phase mass
+                phmass = dphmass = 0.0;
+                for (int j = 0; j < phaselist.size(); j++) {
+                    // Mass will be in g, not kg
+                    if (verbose_) {
+                        cout << endl;
+                        cout << "phasename: " << chemsys_->getPhasename(phaselist[j]) << endl;
+                        cout << "phasemass: " << chemsys_->getPhasemass(phaselist[j]) << endl;
+                    }
+                    dphmass += (double)(chemsys_->getPhasemass(phaselist[j])
+                                      - chemsys_->getOphasemass(phaselist[j]));
+                    phmass += (double)(chemsys_->getPhasemass(phaselist[j]));
                 }
-                dphmass += (double)(chemsys_->getPhasemass(phaselist[j])
-                                  - chemsys_->getOphasemass(phaselist[j]));
-                phmass += (double)(chemsys_->getPhasemass(phaselist[j]));
-            }
-            if (verbose_) {
-                cout << "Mass is " << phmass << "; mass increment is "
-                     << dphmass << endl;
-                cout.flush();
-            }
-            for (int j = 0; j < RdICid_[tpid].size(); j++) {
-                icid = RdICid_[tpid][j];
-                Rd = Rd_[tpid][j];
-                icmol = chemsys_->getVphasestoich("aq_gen",icid);
                 if (verbose_) {
-                    cout << " Partitioning IC "
-                         << chemsys_->getICname(icid) << " with aqueous moles = ";
-                    cout << icmol << endl;
-                    cout << " Partitioning IC " << chemsys_->getICname(icid);
-                    cout << " with actual aqueous moles = ";
-                    cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),icid) << endl;
-                    cout << "moles of 'O' in the solution: ";
-                    cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
-                                                     chemsys_->getICid("O")) << endl;
+                    cout << "Mass is " << phmass << "; mass increment is "
+                         << dphmass << endl;
                     cout.flush();
                 }
-                if (dphmass > 0.0 && Rd > 0.0 && icmol > 0.0) {
-                    // phase volume will be in m3, so transform to cm3
-                    denom = 1.0 + (1.0e6 * chemsys_->getPhasevolume("aq_gen")
-                                           / dphmass / Rd);
-                    partitionedmoles = (icmol/denom);
-            
-                    // be careful whether partitionedmoles is the normalized ones?
-                    icmol -= (partitionedmoles);
-                    if (icid == chemsys_->getICid("Na")) {
-                        partitionedmoles_Na = partitionedmoles * 
-                                      chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
-                                      chemsys_->getICid("O"));
-                        if (verbose_) {
-                            cout << "partitionedmoles for Na: " << partitionedmoles << endl;
-                            cout << "actually removed Na: " << partitionedmoles_Na
-                                 << " moles" << endl;
-                        }
-                        icmoles[icid] = icmoles[icid] - partitionedmoles_Na;
-                    }
-                    if (icid == chemsys_->getICid("K")) {
-                        partitionedmoles_K = partitionedmoles * 
-                        chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
-                                         chemsys_->getICid("O"));
-                        if (verbose_) {
-                            cout << "partitionedmoles for K: " << partitionedmoles << endl;
-                            cout << "actually removed K: " << partitionedmoles_K
-                                 << " moles" << endl;
-                        }
-                        icmoles[icid] = icmoles[icid] - partitionedmoles_K;
-                    }
-                    if (icmol < 1.0e-16) icmol = 1.0e-16;
+                for (int j = 0; j < RdICid_[i].size(); j++) {
+                    icid = RdICid_[i][j];
+                    Rd = Rd_[i][j];
+                    icmol = chemsys_->getVphasestoich("aq_gen",icid);
                     if (verbose_) {
-                        cout << "; new conc = " << icmol / chemsys_->getPhasemass("aq_gen")
-                              * 1000.0 << " molal" << endl;
+                        cout << " Partitioning IC "
+                             << chemsys_->getICname(icid) << " with aqueous moles = ";
+                        cout << icmol << endl;
+                        cout << " Partitioning IC " << chemsys_->getICname(icid);
+                        cout << " with actual aqueous moles = ";
+                        cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),icid) << endl;
+                        cout << "moles of 'O' in the solution: ";
+                        cout << chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
+                                                         chemsys_->getICid("O")) << endl;
                         cout.flush();
                     }
+                    if (dphmass > 0.0 && Rd > 0.0 && icmol > 0.0) {
+                        // phase volume will be in m3, so transform to cm3
+                        denom = 1.0 + (1.0e6 * chemsys_->getPhasevolume("aq_gen")
+                                               / dphmass / Rd);
+                        partitionedmoles = (icmol/denom);
+            
+                        // be careful whether partitionedmoles is the normalized ones?
+                        icmol -= (partitionedmoles);
+                        if (icid == chemsys_->getICid("Na")) {
+                            partitionedmoles_Na = partitionedmoles * 
+                                          chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
+                                          chemsys_->getICid("O"));
+                            if (verbose_) {
+                                cout << "partitionedmoles for Na: " << partitionedmoles << endl;
+                                cout << "actually removed Na: " << partitionedmoles_Na
+                                     << " moles" << endl;
+                            }
+                            icmoles[icid] = icmoles[icid] - partitionedmoles_Na;
+                        }
+                        if (icid == chemsys_->getICid("K")) {
+                            partitionedmoles_K = partitionedmoles * 
+                            chemsys_->getPhasestoich(chemsys_->getPhaseid("aq_gen"),
+                                             chemsys_->getICid("O"));
+                            if (verbose_) {
+                                cout << "partitionedmoles for K: " << partitionedmoles << endl;
+                                cout << "actually removed K: " << partitionedmoles_K
+                                     << " moles" << endl;
+                            }
+                            icmoles[icid] = icmoles[icid] - partitionedmoles_K;
+                        }
+                        if (icmol < 1.0e-16) icmol = 1.0e-16;
+                        if (verbose_) {
+                            cout << "; new conc = " << icmol / chemsys_->getPhasemass("aq_gen")
+                                  * 1000.0 << " molal" << endl;
+                            cout.flush();
+                        }
+                    }
                 }
-            }
-        }
+            }  // END OF IF THERMO
+        }  
 
         if (hyd_time >= leach_time_ && hyd_time < sattack_time_) {
 
@@ -1545,7 +1549,6 @@ void KineticModel::calculateKineticStep (const double timestep,
             }
 
         }       // End of sulfate attack block
-
     }
 
     catch (EOBException eex) {
@@ -1663,7 +1666,7 @@ void KineticModel::setKineticDCmoles ()
         cout.flush();
     }
 
-    int kpid,csid;
+    int mid,csid;
 
     try {
         int waterid = chemsys_->getDCid("H2O@");
@@ -1676,21 +1679,22 @@ void KineticModel::setKineticDCmoles ()
                  << ", Molar mass = " << watermm
                  << endl;
         }
-        for (int i = 0; i < kineticphase_.size(); i++) {
-            kpid = kineticphase_[i];
-            csid = chemsysDCid_[kpid];
-            if (chemsys_->getDCmolarmass(csid) <= 0.0) {
-                throw FloatException("KineticModel","setKineticDCmoles",
-                                     "Divide by zero error");
-            }
-            if (verbose_) {
-                cout << "        Clinker phase "
-                     << name_[kpid] << ": Mass = " << scaledmass_[kpid]
-                     << ", Molar mass = " << chemsys_->getDCmolarmass(csid)
-                     << endl;
-            }
-            chemsys_->setDCmoles(csid,(scaledmass_[kpid]
+        for (int i = 0; i < micid_.size(); i++) {
+            if (isKinetic(i)) {
+                csid = chemsysDCid_[i];
+                if (chemsys_->getDCmolarmass(csid) <= 0.0) {
+                    throw FloatException("KineticModel","setKineticDCmoles",
+                                         "Divide by zero error");
+                }
+                if (verbose_) {
+                    cout << "        Clinker phase "
+                         << name_[i] << ": Mass = " << scaledmass_[i]
+                         << ", Molar mass = " << chemsys_->getDCmolarmass(csid)
+                         << endl;
+                }
+                chemsys_->setDCmoles(csid,(scaledmass_[i]
                                  / chemsys_->getDCmolarmass(csid)));
+            } // END OF IF KINETIC
         }
     }
     catch (EOBException eex) {
@@ -1713,8 +1717,10 @@ void KineticModel::setKineticDCmoles ()
 void KineticModel::zeroKineticDCmoles ()
 {
     try {
-        for (int i = 0; i < kineticphase_.size(); i++) {
-            chemsys_->setDCmoles(chemsysDCid_[kineticphase_[i]],0.0);
+        for (int i = 0; i < micid_.size(); i++) {
+            if (isKinetic(i)) {
+                chemsys_->setDCmoles(chemsysDCid_[i],0.0);
+            }
         }
     }
     catch (EOBException eex) {
