@@ -1,0 +1,29 @@
+{
+  "arangodb": {
+    "UseArangoDBInstance": "ArangoDBLocal",
+    "UseVelocypackPut": true,
+    "UseVelocypackGet": true,
+    "ArangoDBLocal": {
+      "DBName": "gemstest",
+      "DB_URL": "http://localhost:8580",
+      "DBUser": "gemsexec",
+      "DBUserPassword": "<password>",
+      "DBAccess": "rw",
+      "DBCreate": true,
+      "DBRootName": "",
+      "DBRootUser": "",
+      "DBRootPassword": ""
+    },
+    "ArangoDBRemote": {
+      "DBName": "gemstest",
+      "DB_URL": "https://db.thermohub.net",
+      "DBUser": "gemsexec",
+      "DBUserPassword": "<password>",
+      "DBAccess": "rw",
+      "DBCreate": false,
+      "DBRootName": "",
+      "DBRootUser": "",
+      "DBRootPassword": ""
+    }
+  }
+}
