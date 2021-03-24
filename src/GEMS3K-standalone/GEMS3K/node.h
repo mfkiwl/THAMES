@@ -875,6 +875,11 @@ long int GEM_step_MT( const long int step )
    /// or -1 if no such name was found in the DATACH Phase name list
    long int Ph_name_to_xCH( const char *Name ) const;
 
+   /// Returns Phase name string given the DCH index of Phase, check MaxPHnameLength
+   /// or -1 if no such name was found in the DATACH ccPH name list
+   char* xCH_to_Ph_name( int xCH ) const
+   {return CSD->PHNL[xCH];}
+
    /// Returns DBR index of IC given the IC Name string
    /// or -1 if no such name was found in the DATACH IC name list
    inline long int IC_name_to_xDB( const char *Name ) const
@@ -1453,6 +1458,11 @@ long int GEM_step_MT( const long int step )
         ipmlog_file_name = logFile;
     }
 
+    /// Inserted for compatibility with THAMES
+    
+    MULTI* ppmm(void) {
+        return (pmm);
+    }
 
 };
 
