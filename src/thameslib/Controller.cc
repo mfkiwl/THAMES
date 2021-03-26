@@ -18,7 +18,7 @@ Controller::Controller (Lattice *msh,
                         const bool debug)
     :lattice_(msh),
      kineticmodel_(km),
-     chemsys_(cs),
+     chemSys_(cs),
      solut_(solut),
      sim_type_(simtype),
      thermalstr_(thmstr),
@@ -57,7 +57,7 @@ Controller::Controller (Lattice *msh,
   /// Load up the pointers to the `ChemicalSystem` object and `Lattice` object
   ///
 
-  chemsys_ = lattice_->getChemsys();
+  chemSys_ = lattice_->getChemSys();
   lattice_->setJobroot(jobroot_);
     
   ///
@@ -76,10 +76,10 @@ Controller::Controller (Lattice *msh,
     }
     char cc;
     out << "Time(d)";
-    for (int i = 0; i < chemsys_->getDCnum(); i++) {
-        cc = chemsys_->getDCclasscode(i); 
+    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+        cc = chemSys_->getDCClassCode(i); 
         if (cc == 'S' || cc == 'T' || cc == 'W') {
-            out << "," << chemsys_->getDCname(i);
+            out << "," << chemSys_->getDCName(i);
         }
     }  
     out << endl;
@@ -92,10 +92,10 @@ Controller::Controller (Lattice *msh,
     }
 
     out1 << "Time(d)";
-    for (int i = 0; i < chemsys_->getDCnum(); i++) {
-        cc = chemsys_->getDCclasscode(i); 
+    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+        cc = chemSys_->getDCClassCode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-            out1 << "," << chemsys_->getDCname(i);
+            out1 << "," << chemSys_->getDCName(i);
         }
     }   
     out1 << endl;
@@ -108,8 +108,8 @@ Controller::Controller (Lattice *msh,
     }
 
     out2 << "Time(d)";
-    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
-        out2 << "," << chemsys_->getMicphasename(i);
+    for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
+        out2 << "," << chemSys_->getMicroPhaseName(i);
     }   
     out2 << endl;
     out2.close();
@@ -128,8 +128,8 @@ Controller::Controller (Lattice *msh,
         throw FileException("Controller","Controller",outfilename,"Could not append");
     }
     out4 << "Time(d)";
-    for (int i = 0; i < chemsys_->getICnum(); i++){
-        out4 << "," << chemsys_->getICname(i);
+    for (int i = 0; i < chemSys_->getNumICs(); i++){
+        out4 << "," << chemSys_->getICName(i);
     }
     out4 << ",Ca/Si" << endl;
     out4.close();
@@ -148,8 +148,8 @@ Controller::Controller (Lattice *msh,
         throw FileException("Controller","Controller",outfilename,"Could not append"); 
     }
     out6 << "Time(d)";
-    for (int i = 0; i < chemsys_->getICnum(); i++){
-        out6 << "," << chemsys_->getICname(i);
+    for (int i = 0; i < chemSys_->getNumICs(); i++){
+        out6 << "," << chemSys_->getICName(i);
     }
     out6 << endl;
     out6.close();
@@ -207,8 +207,8 @@ void Controller::doCycle (const string &statfilename,
   kineticmodel_->setLeach_time(leach_time_);
   */
 
-  chemsys_->setSattack_time(sattack_time_);
-  chemsys_->setLeach_time(leach_time_);
+  chemSys_->setSulfateAttackTime(sattack_time_);
+  chemSys_->setLeachTime(leach_time_);
   lattice_->setSattack_time(sattack_time_);
   lattice_->setLeach_time(leach_time_);
     
@@ -237,7 +237,7 @@ void Controller::doCycle (const string &statfilename,
     /// Do not advance the time step if GEM_run failed the last time
     ///
     
-    if (chemsys_->getTimesGEMfailed() > 0) i -= 1;
+    if (chemSys_->getTimesGEMFailed() > 0) i -= 1;
 
     cout << "Time = " << time_[i] << endl;
     if (time_index < output_time_.size()) {
@@ -289,7 +289,7 @@ void Controller::doCycle (const string &statfilename,
     /// function without doing anything else
     ///
 
-    if (chemsys_->getTimesGEMfailed() > 0) {
+    if (chemSys_->getTimesGEMFailed() > 0) {
         // Skip the remainder of this iteration and go to the next iteration
         if (verbose_) {
             cout << "Previous call to GEM_run failed, so I will" << endl
@@ -400,7 +400,7 @@ void Controller::doCycle (const string &statfilename,
         string ofname(jobroot_);
         ostringstream ostr1,ostr2;
         ostr1 << (int)(time_[i] * 100);
-        ostr2 << setprecision(3) << chemsys_->getTemperature();
+        ostr2 << setprecision(3) << chemSys_->getTemperature();
         string timestr(ostr1.str());
         string tempstr(ostr2.str());
         ofname = ofname + "." + timestr + "." + tempstr + ".img";
@@ -457,18 +457,18 @@ void Controller::doCycle (const string &statfilename,
         for (int ii = 0; ii < lattice_->getNumsites(); ii++) {
           Site *ste;
           ste = lattice_->getSite(i);
-          otruevolume = ste->getTruevolume();
+          otruevolume = ste->getTrueVolume();
           for (int j = 0; j < 3; j++) {
             truevolume += thermalstr_->getEleStrain(ii,j);
           }
           truevolume = otruevolume * (1 + truevolume);
-          ste->setTruevolume(truevolume);
+          ste->setTrueVolume(truevolume);
         }
 
         for (int index = 0; index < lattice_->getNumsites(); index++) {
           Site *ste;
           ste = lattice_->getSite(index);
-          int pid = ste->getPhaseId();
+          int pid = ste->getMicroPhaseId();
 
           if (ste->IsDamage()) {
               damagecount_++;
@@ -536,9 +536,9 @@ void Controller::doCycle (const string &statfilename,
                 for (int j = 0; j < ste->nbSize(1); j++) {
                   Site *stenb = ste->nb(j);
                   stenb->dWmc(dwmcval);
-                  if ((stenb->getWmc() > 0.0) && (stenb->getPhaseId() != WATERID) 
-                    && (stenb->getPhaseId() != VOIDID)) {
-                    lattice_->addDissolutionSite(stenb,stenb->getPhaseId());
+                  if ((stenb->getWmc() > 0.0) && (stenb->getMicroPhaseId() != WATERID) 
+                    && (stenb->getMicroPhaseId() != VOIDID)) {
+                    lattice_->addDissolutionSite(stenb,stenb->getMicroPhaseId());
                   }
                 }
                 for (int j = ste->nbSize(1); j < ste->nbSize(2); j++) {
@@ -599,7 +599,7 @@ void Controller::calculateState (double time,
 
     if (isfirst) {
 
-        double T = chemsys_->getTemperature();
+        double T = chemSys_->getTemperature();
         lattice_->setTemperature(T);
 
     }
@@ -613,7 +613,7 @@ void Controller::calculateState (double time,
 
     vector<double> impurityrelease;
     impurityrelease.clear();
-    impurityrelease.resize(chemsys_->getMicimpuritynum(),0.0);
+    impurityrelease.resize(chemSys_->getNumMicroImpurities(),0.0);
        
     ///
     /// Get the number of moles of each IC dissolved from kinetically controlled phases
@@ -637,30 +637,30 @@ void Controller::calculateState (double time,
                          << lattice_->getWaterchange() << endl;
 
       double addwatervol = lattice_->getWaterchange()
-          / lattice_->getNumsites() * chemsys_->getMictotinitvolume();
+          / lattice_->getNumsites() * chemSys_->getMicroInitVolume();
 
       ///
       /// Get the molar volume of water from the GEM node
       ///
 
-      double water_v0 = chemsys_->getNode()->DC_V0(chemsys_->getMic2DC(WATERID,0),
-                                            chemsys_->getP(),chemsys_->getTemperature());
+      double water_v0 = chemSys_->getNode()->DC_V0(chemSys_->getMicroPhaseToDC(WATERID,0),
+                                            chemSys_->getP(),chemSys_->getTemperature());
       double addwatermol = addwatervol / water_v0;
 
       if (verbose_) {
           cout << "Molar volume of water is: " << water_v0 << endl;
           cout << "The moles of water added into the system are: " << addwatermol << endl;
       }
-      for (int i = 0; i < chemsys_->getICnum(); i++) {
-        if (chemsys_->getICname(i) == "H") {
-          if (verbose_) cout << "previous IC moles for H is: " << chemsys_->getICmoles(i) << endl;
-          chemsys_->setICmoles(i,(chemsys_->getICmoles(i) + 2 * addwatermol));
-          if (verbose_) cout << "new ICmoles for H is: " << chemsys_->getICmoles(i) << endl;
+      for (int i = 0; i < chemSys_->getNumICs(); i++) {
+        if (chemSys_->getICName(i) == "H") {
+          if (verbose_) cout << "previous IC moles for H is: " << chemSys_->getICMoles(i) << endl;
+          chemSys_->setICMoles(i,(chemSys_->getICMoles(i) + 2 * addwatermol));
+          if (verbose_) cout << "new ICmoles for H is: " << chemSys_->getICMoles(i) << endl;
         }
-        if (chemsys_->getICname(i) == "O") {
-          if (verbose_) cout << "previous IC moles for O is: " << chemsys_->getICmoles(i) << endl;
-          chemsys_->setICmoles(i,(chemsys_->getICmoles(i) + addwatermol));
-          if (verbose_) cout << "new ICmoles for O is: " << chemsys_->getICmoles(i) << endl;
+        if (chemSys_->getICName(i) == "O") {
+          if (verbose_) cout << "previous IC moles for O is: " << chemSys_->getICMoles(i) << endl;
+          chemSys_->setICMoles(i,(chemSys_->getICMoles(i) + addwatermol));
+          if (verbose_) cout << "new ICmoles for O is: " << chemSys_->getICMoles(i) << endl;
         }
       }
     }
@@ -675,7 +675,7 @@ void Controller::calculateState (double time,
     if (verbose_) cout << "Going to launch thermodynamic calculation now with isfirst = "
                        << isfirst << endl;;
     try {
-        chemsys_->calculateState(time,isfirst);
+        chemSys_->calculateState(time,isfirst);
         if (verbose_) {
             cout << "*Returned from ChemicalSystem::calculateState" << endl;
             cout << "*called by function Controller::calculateState" << endl;
@@ -699,45 +699,30 @@ void Controller::calculateState (double time,
     /// should be calculated.
     ///
 
-    if (chemsys_->getTimesGEMfailed() > 0) {
+    if (chemSys_->getTimesGEMFailed() > 0) {
         return;
     }
 
     try {
         double aveSI = 0.0;
         double moles = 0.0;
-        vector<int> micphasemembers;
-        for (int i = 0; i < chemsys_->getMicphasenum(); ++i) {
-            int newmicid = chemsys_->getMicid(chemsys_->getMicphasename(i));
-            // if (verbose_) {
-            //      cout << "Mic phase " << chemsys_->getMicphasename(i)
-            //         << " is associated with GEMS phases ";
-            //    cout.flush();
-            //}
+        vector<int> microPhaseMembers;
+        for (int i = 0; i < chemSys_->getNumMicroPhases(); ++i) {
+            int newMicroPhaseId = chemSys_->getMicroPhaseId(chemSys_->getMicroPhaseName(i));
             aveSI = moles = 0.0;
-            micphasemembers = chemsys_->getMicphasemembers(newmicid);
-            for (int ii = 0; ii < micphasemembers.size(); ++ii) {
-                int newpid = micphasemembers[ii];
-                // if (verbose_) {
-                //     if (ii == 0) {
-                //         cout << chemsys_->getPhasename(newpid);
-                //     } else {
-                //         cout << " , " << chemsys_->getPhasename(newpid);
-                //     }
-                // }
-                aveSI += (solut_->getSI(newpid) * chemsys_->getPhasemoles(newpid));
-                moles += chemsys_->getPhasemoles(newpid);
+            microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
+            for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
+                int newGEMPhaseId = microPhaseMembers[ii];
+                aveSI += ((solut_->getSI(newGEMPhaseId)
+                            * chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
+                moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
             }
             if (moles > 0.0) {
                 aveSI = aveSI / moles;
             } else {
-                aveSI = aveSI / (double)(micphasemembers.size());
+                aveSI = aveSI / (double)(microPhaseMembers.size());
             }
-            // if (verbose_) {
-            //     cout << endl;
-            //     cout.flush();
-            // }
-            lattice_->setSI(newmicid,aveSI);    
+            lattice_->setSI(newMicroPhaseId,aveSI);    
         }
     }
     catch (EOBException eex) {
@@ -748,7 +733,7 @@ void Controller::calculateState (double time,
     if (isfirst) {        
       string csfilename("ChemSysOutput.dat");
       ofstream out2(csfilename.c_str(),ios::app);
-      chemsys_->writeChemSys(out2);
+      chemSys_->writeChemSys(out2);
       out2.close();
     }
         
@@ -759,12 +744,12 @@ void Controller::calculateState (double time,
     ///
 
     if (verbose_) {
-        cout << "About to enter setKineticDCmoles..." << endl;
+        cout << "About to enter setKineticDCMoles..." << endl;
         cout.flush();
     }
-    kineticmodel_->setKineticDCmoles();
+    kineticmodel_->setKineticDCMoles();
     if (verbose_) {
-        cout << "Finished with setKineticDCmoles..." << endl;
+        cout << "Finished with setKineticDCMoles..." << endl;
         cout.flush();
     }
         
@@ -780,10 +765,10 @@ void Controller::calculateState (double time,
 
     out3 << setprecision(5) << time;
     char cc;
-    for (int i = 0; i < chemsys_->getDCnum(); i++) {
-      cc = chemsys_->getDCclasscode(i); 
+    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+      cc = chemSys_->getDCClassCode(i); 
       if (cc == 'S' || cc == 'T' || cc == 'W') {
-        out3 << "," << (chemsys_->getNode())->Get_cDC((long int) i);
+        out3 << "," << (chemSys_->getNode())->Get_cDC((long int) i);
       }
     }   
     out3 << endl;
@@ -798,21 +783,21 @@ void Controller::calculateState (double time,
 
     out4 << setprecision(5) << time;
     if (verbose_) cout << "Writing DC volumes file at time = " << time << endl;
-    for (int i = 0; i < chemsys_->getDCnum(); i++) {
-      if (chemsys_->getDCmolarmass(i) > 0.0) {
-        cc = chemsys_->getDCclasscode(i); 
+    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+      if (chemSys_->getDCMolarMass(i) > 0.0) {
+        cc = chemSys_->getDCClassCode(i); 
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-            string dcname = chemsys_->getDCname(i);
-            double V0 = chemsys_->getDCmoles(dcname) * chemsys_->getDCmolarvolume(dcname);
+            string dcname = chemSys_->getDCName(i);
+            double V0 = chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
             out4 << "," << V0;
             if (verbose_) {
-                cout << "    DC = " << chemsys_->getDCname(i)
-                    << ", moles = " << chemsys_->getDCmoles(i) << ", molar mass = "
-                    << chemsys_->getDCmolarmass(i) << endl;
+                cout << "    DC = " << chemSys_->getDCName(i)
+                    << ", moles = " << chemSys_->getDCMoles(i) << ", molar mass = "
+                    << chemSys_->getDCMolarMass(i) << endl;
             }
         }
       } else {
-        string msg = "Divide by zero error for DC " + chemsys_->getDCname(i);
+        string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
         out4.close();
         throw FloatException("Controller","calculateState",msg);
       }
@@ -828,7 +813,7 @@ void Controller::calculateState (double time,
     }
     if (verbose_) cout << "Writing microstructure volume fractions at time " << time << endl;
     out5 << setprecision(5) << time;
-    for (int i = 0; i < chemsys_->getMicphasenum(); i++) {
+    for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
       out5 << "," << (lattice_->getVolumefraction(i));
     }   
     out5 << endl;
@@ -838,14 +823,14 @@ void Controller::calculateState (double time,
     ofstream out6(outfilename.c_str(),ios::app);
     if (!out6) {
       throw FileException("Controller","calculateState",outfilename,
-                        "Could not append");
+                          "Could not append");
     }
     if (verbose_) {
         cout << "Writing pH values...";
         cout.flush();
     }
     out6 << setprecision(5) << time;
-    out6 << "," << (chemsys_->getPH()) << endl;
+    out6 << "," << (chemSys_->getPH()) << endl;
     if (verbose_) {
         cout << "Done!" << endl;
         cout.flush();
@@ -853,18 +838,18 @@ void Controller::calculateState (double time,
     out6.close();
         
     if (verbose_) {
-        cout << "Call to chemsys_setPhasestoich() ... " << endl;
+        cout << "Call to chemSys_setGEMPhaseStoich() ... " << endl;
         cout.flush();
     }
-    chemsys_->setPhasestoich();
+    chemSys_->setGEMPhaseStoich();
     if (verbose_) {
         cout << "Done!" << endl;
-        cout << "Call to chemsys_getPhasestoich() ... " << endl;
+        cout << "Call to chemSys_getGEMPhaseStoich() ... " << endl;
         cout.flush();
     }
     double *CSHcomp;
     try {
-        CSHcomp = chemsys_->getPhasestoich(chemsys_->getPhaseid("CSHQ"));
+        CSHcomp = chemSys_->getPGEMPhaseStoich(chemSys_->getGEMPhaseId("CSHQ"));
     }
     catch (EOBException eex) {
         eex.printException();
@@ -874,7 +859,7 @@ void Controller::calculateState (double time,
         cout << "Done!" << endl;
         cout.flush();
     }
-    double Ca_moles = 0.0, Si_moles = 0.0, Ca_Si_Ratio = 0.0;
+    double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
     outfilename = jobroot_ + "_CSH.csv";
     ofstream out7(outfilename.c_str(),ios::app);
     if(!out7){
@@ -882,26 +867,25 @@ void Controller::calculateState (double time,
                         outfilename,"Could not append");
     }
     out7 << setprecision(5) << time;
-    for (unsigned int i = 0; i < chemsys_->getICnum(); i++){
+    for (unsigned int i = 0; i < chemSys_->getNumICs(); i++){
       out7 << "," << CSHcomp[i];
-      if (chemsys_->getICname(i) == "Ca"){
-        Ca_moles = CSHcomp[i];
+      if (chemSys_->getICName(i) == "Ca"){
+        CaMoles = CSHcomp[i];
       }
-      if (chemsys_->getICname(i) == "Si"){
-        Si_moles = CSHcomp[i];
+      if (chemSys_->getICName(i) == "Si"){
+        SiMoles = CSHcomp[i];
       }
     }
-    if (Ca_moles < 1.0e-16) Ca_moles = 1.0e-16;
-    if (Si_moles < 1.0e-16) Si_moles = 1.0e-16;
-    Ca_Si_Ratio = Ca_moles/Si_moles;
-    out7 << "," << Ca_Si_Ratio << endl;
+    if (CaMoles < 1.0e-16) CaMoles = 1.0e-16;
+    if (SiMoles < 1.0e-16) SiMoles = 1.0e-16;
+    CaSiRatio = CaMoles/SiMoles;
+    out7 << "," << CaSiRatio << endl;
     out7.close();
         
-    chemsys_->setPhasestoich();
-    double *phaserecord;
-    int ICindex;
-    Ca_moles = Si_moles = 0.0;
-    double C_S_ratio = 0.0;
+    chemSys_->setGEMPhaseStoich();
+    double *phaseRecord;
+    int ICIndex;
+    CaMoles = SiMoles = 0.0;
     outfilename = jobroot_ + "_CSratio_solid.csv";
     ofstream out8(outfilename.c_str(),ios::app);
     if(!out8){
@@ -909,19 +893,19 @@ void Controller::calculateState (double time,
                         outfilename,"Could not append");
     }
     out8 << setprecision(5) << time;
-    for (int i = 0; i < chemsys_->getPhasenum(); i++) {
-      cc = chemsys_->getPhaseclasscode(i);
+    for (int i = 0; i < chemSys_->getNumGEMPhases(); i++) {
+      cc = chemSys_->getGEMPhaseClassCode(i);
       if (cc == 's'){
-        phaserecord = chemsys_->getPhasestoich(i);
-        ICindex = chemsys_->getICid("Ca");
-        Ca_moles += phaserecord[ICindex];
-        ICindex = chemsys_->getICid("Si");
-        Si_moles += phaserecord[ICindex];
+        phaseRecord = chemSys_->getPGEMPhaseStoich(i);
+        ICIndex = chemSys_->getICId("Ca");
+        CaMoles += phaseRecord[ICIndex];
+        ICIndex = chemSys_->getICId("Si");
+        SiMoles += phaseRecord[ICIndex];
       }
     } 
-    if (Si_moles != 0) {
-      C_S_ratio = Ca_moles/Si_moles;
-      out8 << "," << C_S_ratio << endl;
+    if (SiMoles != 0) {
+      CaSiRatio = CaMoles/SiMoles;
+      out8 << "," << CaSiRatio << endl;
     }else{
       out8 << ",Si_moles is ZERO" << endl;
     }
@@ -934,20 +918,12 @@ void Controller::calculateState (double time,
                         outfilename,"Could not append");
     }
     out9 << setprecision(5) << time;
-    for (int i = 0; i < chemsys_->getICnum(); i++) {
-      out9 << "," << chemsys_->getICmoles(i);
+    for (int i = 0; i < chemSys_->getNumICs(); i++) {
+      out9 << "," << chemSys_->getICMoles(i);
     }
     out9 << endl;
     out9.close();
 
-    /*
-    ofstream out10("initicmoles.dat");
-    for (int i = 0; i < chemsys_->getICnum(); i++) {
-      out10 << chemsys_->getICmoles(i) << " " ;
-    }
-    out10 << endl;
-    out10.close();*/
-        
     ///
     /// Now that the end of the iteration is reached, zero out the kinetic
     /// DC moles in preparation for the next iteration
@@ -955,7 +931,7 @@ void Controller::calculateState (double time,
     /// @todo Find out what this is doing and why it is needed
     ///
 
-    kineticmodel_->zeroKineticDCmoles();
+    kineticmodel_->zeroKineticDCMoles();
   }
   catch (FileException fex) {
     fex.printException();
@@ -969,14 +945,14 @@ void Controller::calculateState (double time,
 
 }
 
-void Controller::parseDoc (const string &docname) 
+void Controller::parseDoc (const string &docName) 
 {
     xmlDocPtr doc;
     xmlNodePtr cur;
     xmlChar *key;
     cout.flush();
     double testtime;
-    doc = xmlParseFile(docname.c_str());
+    doc = xmlParseFile(docName.c_str());
 
     // check if the xml file is valid
     try {
@@ -985,19 +961,19 @@ void Controller::parseDoc (const string &docname)
         if(!is_xml_valid(doc,paramxsd.c_str())) {
             cout << "XML file is NOT valid" << endl;
             throw FileException("Controller","parseDoc",
-                                docname,"XML not valid");
+                                docName,"XML not valid");
         } else {
             int boolval;
 	    if (doc == NULL ) {
                 throw FileException("Controller","parseDoc",
-                                    docname,"XML not parsed successfully");
+                                    docName,"XML not parsed successfully");
             }
   	
             cur = xmlDocGetRootElement(doc);
 	
             if (cur == NULL) {
                 throw FileException("Controller","parseDoc",
-                                    docname,"Empty parameter XML document");
+                                    docName,"Empty parameter XML document");
             }
 
 

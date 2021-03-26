@@ -109,43 +109,43 @@ the same members are identified as class variables in the `KineticModel` class.
 
 Most of the members have self-evident meanings:
     - `name` is the name of the microstructure phase
-    - `micid` is the integer id for the phase in the microstructure
-    - `gemphaseid` is the integer id of the same phase in the GEM Chemical System
+    - `microPhaseId` is the integer id for the phase in the microstructure
+    - `GEMPhaseId` is the integer id of the same phase in the GEM Chemical System
         Definition (CSD) 
-    - `gemdcid` is the integer id of the GEM dependent component making up the phase
+    - `DCId` is the integer id of the GEM dependent component making up the phase
     - `type` is a string specifying whether the phase is under kinetic control
         or thermodynamic control
-    - `scaledmass` is the number of grams of the phase per 100 grams of solid
+    - `scaledMass` is the number of grams of the phase per 100 grams of solid
     - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
     - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
     - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
     - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
     - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
     - `Ea` is the activation energy [J/mol/K]
-    - `critdoh` is the critical degree of hydration used in the equation for
+    - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
-    - `rdid` is a vector of GEM CSD independent component (IC) ids
-    - `rdval` is a vector of the Rd values for each IC
+    - `RdId` is a vector of GEM CSD independent component (IC) ids
+    - `RdVal` is a vector of the Rd values for each IC
 */
 
 #ifndef KINETICDATASTRUCT
 #define KINETICDATASTRUCT
 struct KineticData {
     string name;            /**< Name of the microstructure phase */
-    int micid;              /**< Integer id of the microstructure phase */
-    int gemphaseid;         /**< Integer id of the phase in the GEM CSD */
-    int gemdcid;            /**< Integer id of the DC making up the phase */
+    int microPhaseId;       /**< Integer id of the microstructure phase */
+    int GEMPhaseId;         /**< Integer id of the phase in the GEM CSD */
+    int DCId;               /**< Integer id of the DC making up the phase */
     string type;            /**< Specifies kinetic or thermodynamic control */
-    double scaledmass;        /**< Mass percent on a total solids basis */
+    double scaledMass;        /**< Mass percent on a total solids basis */
     double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
     double k2;                /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
     double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
     double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
     double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
     double Ea;                /**< Apparent activation energy [J/mol/K] */
-    double critdoh;           /**< Critical degree of hydration for w/c effect */
-    vector<int> rdid;       /**< Vector of IC ids for the phase */
-    vector<double> rdval;   /**< Vector of Rd values for each IC */
+    double critDOH;           /**< Critical degree of hydration for w/c effect */
+    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
+    vector<double> RdVal;     /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -163,24 +163,24 @@ class KineticModel {
 
 protected:
     
-int modelc3sid_;            /**< Id of alite in the kinetic model */
-int modelc2sid_;            /**< Id of belite in the kinetic model */
-int modelc3aid_;            /**< Id of aluminate in the kinetic model */
-int modelc4afid_;           /**< Id of ferrit in the kinetic model */
-int phasenum_;              /**< Total number of phases in the kinetic model */
-ChemicalSystem *chemsys_;   /**< Pointer to the ChemicalSystem object for this simulation */
+int modelC3sId_;            /**< Id of alite in the kinetic model */
+int modelC2sId_;            /**< Id of belite in the kinetic model */
+int modelC3aId_;            /**< Id of aluminate in the kinetic model */
+int modelC4afId_;           /**< Id of ferrit in the kinetic model */
+int numPhases_;             /**< Total number of phases in the kinetic model */
+ChemicalSystem *chemSys_;   /**< Pointer to the ChemicalSystem object for this simulation */
 Solution *solut_;           /**< Pointer to the aqueous phase object for this simulation */
 Lattice *lattice_;          /**< Pointer to the lattice object holding the microstructure */
-double wcratio_;            /**< water-cement mass ratio */
-double initsolidmass_;      /**< initial total mass of solids [g] */
+double wcRatio_;            /**< water-cement mass ratio */
+double initSolidMass_;      /**< initial total mass of solids [g] */
 double blaine_;             /**< Blaine fineness [m<sup>2</sup>/kg] */
-double refblaine_;          /**< Reference Blaine value for PK model,
+double refBlaine_;          /**< Reference Blaine value for PK model,
                                     usually 385.0 m<sup>2</sup>/kg */
-double blainefactor_;       /**< `blaine_`/`refblaine_` */
+double blaineFactor_;       /**< `blaine_`/`refBlaine_` */
 double temperature_;        /**< Temperature [K] */
 double refT_;               /**< Reference temperature for PK model [K] */
-double sattack_time_;       /**< Time at which sulfate attack simulation starts [days] */
-double leach_time_;         /**< Time at which leaching simulation starts [days] */
+double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts [days] */
+double leachTime_;          /**< Time at which leaching simulation starts [days] */
 
 /**
 @brief List of target sodium concentrations [mol/kgw] at different time steps.
@@ -190,7 +190,7 @@ This member may be obsolete.  Values for this quantity are read from a file.
 @warning May be obsolete.  Seems to not be used.
 @todo Remove if determined to be obsolete.
 */
-vector<double> Na_target_;
+vector<double> NaTarget_;
 
 /**
 @brief List of target potassium concentrations [mol/kgw] at different time steps.
@@ -200,7 +200,7 @@ This member may be obsolete.  Values for this quantity are read from a file.
 @warning May be obsolete.  Seems to not be used.
 @todo Remove if determined to be obsolete.
 */
-vector<double> K_target_;
+vector<double> KTarget_;
 
 /**
 @brief List of target magnesium concentrations [mol/kgw] at different time steps.
@@ -210,7 +210,7 @@ This member may be obsolete.  Values for this quantity are read from a file.
 @warning May be obsolete.  Seems to not be used.
 @todo Remove if determined to be obsolete.
 */
-vector<double> Mg_target_;
+vector<double> MgTarget_;
 
 /**
 @brief List of target sulfate concentrations [mol/kgw] at different time steps.
@@ -220,30 +220,30 @@ This member may be obsolete.  Values for this quantity are read from a file.
 @warning May be obsolete.  Seems to not be used.
 @todo Remove if determined to be obsolete.
 */
-vector<double> SO4_target_;
+vector<double> SO4Target_;
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
-vector<bool> iskinetic_;        /**< List of ids of phases that are kinetically controlled */
-vector<bool> isthermo_;         /**< List of ids of phases that are thermodynamically
+vector<bool> isKinetic_;        /**< List of ids of phases that are kinetically controlled */
+vector<bool> isThermo_;         /**< List of ids of phases that are thermodynamically
                                         controlled */
-vector<bool> issoluble_;        /**< List of ids of phases that are instantly dissolved */
-vector<int> micid_;             /**< List of microstructure ids that are in kinetic model */
-vector<int> chemsysDCid_;       /**< List of DC ids from the ChemicalSystem object */
-vector<int> chemsysphaseid_;    /**< List of phase ids from the ChemicalSystem object */
-vector<vector<int> > RdICid_;   /**< List of IC ids for each phase */
+vector<bool> isSoluble_;        /**< List of ids of phases that are instantly dissolved */
+vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
+vector<int> DCId_;              /**< List of DC ids from the ChemicalSystem object */
+vector<int> GEMPhaseId_;        /**< List of phase ids from the ChemicalSystem object */
+vector<vector<int> > RdICId_;   /**< List of IC ids for each phase */
 vector<double> k1_;             /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
 vector<double> k2_;             /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
 vector<double> k3_;             /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
 vector<double> n1_;             /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
 vector<double> n3_;             /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
 vector<vector<double> > Rd_;    /**< List of Rd values for each IC in each kinetic phase */
-vector<double> scaledmass_;     /**< List of phase mass percents, total solids basis */
-vector<double> initscaledmass_; /**< List of initial phase mass percents */
-vector<double> Ea_;             /**< List of apparent activation energies for each
+vector<double> scaledMass_;     /**< List of phase mass percents, total solids basis */
+vector<double> initScaledMass_; /**< List of initial phase mass percents */
+vector<double> activationEnergy_;  /**< List of apparent activation energies for each
                                     kinetic phase [J/mol/K] */
 vector<double> critDOH_;        /**< List of critical degrees of hydration for w/c
                                         effect in the Parrot and Killoh model */
-vector<double> doh_;            /**< Degree of hydration of each kinetic (clinker) phase */
+vector<double> degreeOfHydration_; /**< Degree of hydration of each kinetic (clinker) phase */
 
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
@@ -270,7 +270,7 @@ various other objects for the simulation are allocated and constructed.
 @param cs is a pointer to the ChemicalSystem object for the simulation
 @param solut is a pointer to the aqeuous solution object for the simulation
 @param lattic is a pointer to the Lattice object holding the microstructure
-@param fname is the name of the XML file with the input for the kinetic model
+@param fileName is the name of the XML file with the input for the kinetic model
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
 @param debug is true if debugging output should be produced
@@ -278,17 +278,17 @@ various other objects for the simulation are allocated and constructed.
 KineticModel (ChemicalSystem *cs,
               Solution *solut,
               Lattice *lattic,
-              const string &fname,
+              const string &fileName,
               const bool verbose,
-              const bool warnining,
+              const bool warning,
               const bool debug);
      
 /**
 @brief Master method controlling the parsing of XML input to the kinetic model.
 
-@param docname is the name of the (purported) XML input file
+@param docName is the name of the (purported) XML input file
 */
-void parseDoc (const string &docname);
+void parseDoc (const string &docName);
 
 /**
 @brief Parse the input data for one phase in the XML input file.
@@ -297,14 +297,14 @@ Note that this method uses the libxml library, so this must be included.
 
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
-@param numentry is the number of solid entries in the XML file, will be incremented
-@param kineticdata is a reference to the KineticData structure for temporarily storing
+@param numEntry is the number of solid entries in the XML file, will be incremented
+@param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
 void parsePhase (xmlDocPtr doc,
                  xmlNodePtr cur,
-                 int &numentry,
-                 KineticData &kineticdata);
+                 int &numEntry,
+                 KineticData &kineticData);
 
 /**
 @brief Parse the kinetic data for one phase in the XML input file.
@@ -315,12 +315,12 @@ control of a given phase, including the Parrot and Killoh parameters.
 
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
-@param kineticdata is a reference to the KineticData structure for temporarily storing
+@param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
 void parseKineticData (xmlDocPtr doc,
                        xmlNodePtr cur,
-                       KineticData &kineticdata);
+                       KineticData &kineticData);
 
 /**
 @brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
@@ -331,12 +331,12 @@ kinetically controlled phases.
 
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
-@param kineticdata is a reference to the KineticData structure for temporarily storing
+@param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters
 */
 void parseRdData (xmlDocPtr doc,
                   xmlNodePtr cur,
-                  KineticData &kineticdata);
+                  KineticData &kineticData);
     
 /**
 @brief Determine the initial phase fractions in the microstructure
@@ -347,7 +347,7 @@ and then scales them to 100 grams of solid.  The water-solids mass ratio
 is also calculated.
 
 */
-void setInitialphasefractions(void);
+void setInitialPhaseVolumeFractions(void);
 
 /**
 @brief Compute normalized initial microstructure phase masses
@@ -357,11 +357,11 @@ this method scales them to 100 grams of solid.  In the process,
 this method also sets the initial moles of water in the
 chemical system definition.
 
-@param micmass is a vector of all the microstructure masses
-@param solidmass is the combined mass of all the solids
+@param microPhaseMass is a vector of all the microstructure masses
+@param solidMass is the combined mass of all the solids
 */
-void normalizePhasemasses(vector<double> micmass,
-                          double solidmass);
+void normalizePhaseMasses(vector<double> microPhaseMass,
+                          double solidMass);
 
 /**
 @brief Set the initial total microstructure volume
@@ -369,7 +369,7 @@ void normalizePhasemasses(vector<double> micmass,
 This method computes the sums of all microstructure phase volumes
 and assigns the total.
 */
-void setInitialtotalvolume(void);
+void setInitialTotalVolume(void);
 
 /**
 @brief Set the initial moles of water
@@ -378,7 +378,7 @@ This method uses the mass of water and the molar mass
 of water as defined in the CSD to calculate the moles
 of water in the system.
 */
-void setInitialwatermoles(void);
+void setInitialWaterMoles(void);
 
 /**
 @brief Get the id for alite in the kinetic model (should be 0).
@@ -387,9 +387,9 @@ void setInitialwatermoles(void);
 
 @return the id for alite in the kinetic model
 */
-int getModelc3sid () const
+int getModelC3sId () const
 {
-    return modelc3sid_;
+    return modelC3sId_;
 }
 
 /**
@@ -399,9 +399,9 @@ int getModelc3sid () const
 
 @return the id for belite in the kinetic model
 */
-int getModelc2sid () const
+int getModelC2sId () const
 {
-    return modelc2sid_;
+    return modelC2sId_;
 }
 
 /**
@@ -411,9 +411,9 @@ int getModelc2sid () const
 
 @return the id for aluminate in the kinetic model
 */
-int getModelc3aid () const
+int getModelC3aId () const
 {
-    return modelc3aid_;
+    return modelC3aId_;
 }
 
 /**
@@ -423,9 +423,9 @@ int getModelc3aid () const
 
 @return the id for ferrite in the kinetic model
 */
-int getModelc4afid () const
+int getModelC4afId () const
 {
-    return modelc4afid_;
+    return modelC4afId_;
 }
 
 /**
@@ -435,25 +435,25 @@ int getModelc4afid () const
 
 @return the list of all GEM DC ids in the ChemicalSystem object.
 */
-vector<int> getChemsysDCid () const
+vector<int> getDCId () const
 {
-    return chemsysDCid_;
+    return DCId_;
 }
   
 /**
-@brief Get the GEM phase id (in the ChemicalSystem object) for a given kinetic phase.
+@brief Get the GEM DC id (in the ChemicalSystem object) for a given kinetic phase.
 
 @note NOT USED.
 
 @param i is the id of the kinetic phase in the kinetic model
 @return the GEM phase id of the kinetic phase
 */
-int getChemsysphaseid (const unsigned int i) const
+int getDCId (const unsigned int i) const
 {
-    try { return chemsysDCid_.at(i); }
+    try { return DCId_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getChemsysphaseid",
-                           "chemsysDCid_",chemsysDCid_.size(),i);
+        EOBException ex("KineticModel","getDCId",
+                           "DCId_",DCId_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -467,9 +467,9 @@ except for VOID and H2O.
 
 @return the list of all microstructure ids.
 */
-vector<int> getMicid () const
+vector<int> getMicroPhaseId () const
 {
-    return micid_;
+    return microPhaseId_;
 }
   
 /**
@@ -478,12 +478,12 @@ vector<int> getMicid () const
 @param idx is the the index of all the phases in the kinetic model
 @return the microstructure id of that phase
 */
-int getMicid (const int idx)
+int getMicroPhaseId (const int idx)
 {
-    try { return micid_.at(idx); }
+    try { return microPhaseId_.at(idx); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getMicid",
-                           "micid_",micid_.size(),idx);
+        EOBException ex("KineticModel","getMicroPhaseId",
+                           "microPhaseId_",microPhaseId_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -494,11 +494,11 @@ int getMicid (const int idx)
 
 @note NOT USED.
 
-@param pnval is the total number of phases in the kinetic model
+@param numphases is the total number of phases in the kinetic model
 */
-void setPhasenum (const unsigned int pnval)
+void setNumPhases (const unsigned int numphases)
 {
-    phasenum_ = pnval;
+    numPhases_ = numphases;
 }
 
 /**
@@ -508,9 +508,9 @@ void setPhasenum (const unsigned int pnval)
 
 @return the total number of phases in the kinetic model
 */
-int getPhasenum () const
+int getNumPhases () const
 {
-    return phasenum_;
+    return numPhases_;
 }
 
 /**
@@ -522,7 +522,7 @@ int getPhasenum () const
 */
 vector<bool> isKinetic () const
 {
-    return iskinetic_;
+    return isKinetic_;
 }
 
 /**
@@ -534,7 +534,7 @@ vector<bool> isKinetic () const
 */
 vector<bool> isThermo () const
 {
-    return isthermo_;
+    return isThermo_;
 }
 
 /**
@@ -546,7 +546,7 @@ vector<bool> isThermo () const
 */
 vector<bool> isSoluble () const
 {
-    return issoluble_;
+    return isSoluble_;
 }
 
 /**
@@ -559,10 +559,10 @@ vector<bool> isSoluble () const
 */
 bool isKinetic (const unsigned int idx)
 {
-    try { return iskinetic_.at(idx); }
+    try { return isKinetic_.at(idx); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isKinetic",
-                           "iskinetic_",iskinetic_.size(),idx);
+                           "isKinetic_",isKinetic_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -580,12 +580,12 @@ bool isKinetic (const string micname)
 {
     int idx;
     try {
-        idx = chemsys_->getMicid(micname);
-        return iskinetic_.at(idx);
+        idx = chemSys_->getMicroPhaseId(micname);
+        return isKinetic_.at(idx);
     }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isKinetic",
-                           "iskinetic_",iskinetic_.size(),idx);
+                           "isKinetic_",isKinetic_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -601,10 +601,10 @@ bool isKinetic (const string micname)
 */
 bool isThermo (const unsigned int idx)
 {
-    try { return isthermo_.at(idx); }
+    try { return isThermo_.at(idx); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isThermo",
-                           "isthermo_",isthermo_.size(),idx);
+                           "isThermo_",isThermo_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -622,12 +622,12 @@ bool isThermo (const string micname)
 {
     int idx;
     try {
-        idx = chemsys_->getMicid(micname);
-        return isthermo_.at(idx);
+        idx = chemSys_->getMicroPhaseId(micname);
+        return isThermo_.at(idx);
     }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isThermo",
-                           "isthermo_",isthermo_.size(),idx);
+                           "isThermo_",isThermo_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -643,10 +643,10 @@ bool isThermo (const string micname)
 */
 bool isSoluble (const unsigned int idx)
 {
-    try { return issoluble_.at(idx); }
+    try { return isSoluble_.at(idx); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isSoluble",
-                           "issoluble_",issoluble_.size(),idx);
+                           "isSoluble_",isSoluble_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -664,12 +664,12 @@ bool isSoluble (const string micname)
 {
     int idx;
     try {
-        idx = chemsys_->getMicid(micname);
-        return issoluble_.at(idx);
+        idx = chemSys_->getMicroPhaseId(micname);
+        return isSoluble_.at(idx);
     }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isSoluble",
-                           "issoluble_",issoluble_.size(),idx);
+                           "isSoluble_",isSoluble_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -682,9 +682,9 @@ bool isSoluble (const string micname)
 
 @param wcr is the w/c ratio to set
 */
-void setWcratio (double wcr)
+void setWcRatio (double wcr)
 {
-    wcratio_ = wcr;
+    wcRatio_ = wcr;
 }
 
 /**
@@ -692,9 +692,9 @@ void setWcratio (double wcr)
 
 @return the w/c mass ratio
 */
-double getWcratio () const
+double getWcRatio () const
 {
-    return wcratio_;
+    return wcRatio_;
 }
 
 /**
@@ -704,9 +704,9 @@ double getWcratio () const
 
 @param ism is the initial solid mass [g]
 */
-void setInitialsolidmass (double ism)
+void setInitSolidMass (double ism)
 {
-    initsolidmass_ = ism;
+    initSolidMass_ = ism;
 }
 
 /**
@@ -716,9 +716,9 @@ void setInitialsolidmass (double ism)
 
 @return the initial solid mass [g]
 */
-double getInitsolidmass () const
+double getInitSolidMass () const
 {
-    return initsolidmass_;
+    return initSolidMass_;
 }
 
 /**
@@ -755,9 +755,9 @@ is no particular reason to change it.
 
 @param rbval is the reference Blaine fineness [m<sup>2</sup>/kg]
 */
-void setRefblaine (double rbval)
+void setRefBlaine (double rbval)
 {
-    refblaine_ = rbval;
+    refBlaine_ = rbval;
 }
 
 /**
@@ -767,9 +767,9 @@ void setRefblaine (double rbval)
 
 @return the reference Blaine fineness [m<sup>2</sup>/kg]
 */
-double getRefblaine () const
+double getRefBlaine () const
 {
-    return refblaine_;
+    return refBlaine_;
 }
 
 /**
@@ -779,9 +779,9 @@ double getRefblaine () const
 
 @param bfact is the ratio of the actual Blaine fineness to the reference value
 */
-void setBlainefactor (double bfact)
+void setBlaineFactor (double bfact)
 {
-    blainefactor_ = bfact;
+    blaineFactor_ = bfact;
 }
 
 /**
@@ -791,9 +791,9 @@ void setBlainefactor (double bfact)
 
 @return the ratio of the actual Blaine fineness to the reference value
 */
-double getBlainefactor () const
+double getBlaineFactor () const
 {
-    return blainefactor_;
+    return blaineFactor_;
 }
 
 /**
@@ -850,20 +850,20 @@ double getRefT () const
 void initKineticData(struct KineticData &kd)
 {
     kd.name.clear();
-    kd.micid = 0;
-    kd.gemphaseid = 0;
-    kd.gemdcid = 0;
+    kd.microPhaseId = 0;
+    kd.GEMPhaseId = 0;
+    kd.DCId = 0;
     kd.type.clear();
-    kd.scaledmass = 0.0;
+    kd.scaledMass = 0.0;
     kd.k1 = 0.0;
     kd.k2 = 0.0;
     kd.k3 = 0.0;
     kd.n1 = 0.0;
     kd.n3 = 0.0;
     kd.Ea = 0.0;
-    kd.critdoh = 0.0;
-    kd.rdid.clear();
-    kd.rdval.clear();
+    kd.critDOH = 0.0;
+    kd.RdId.clear();
+    kd.RdVal.clear();
     return;
 }
 
@@ -874,9 +874,9 @@ void initKineticData(struct KineticData &kd)
 
 @return a pointer to the ChemicalSystem object
 */
-ChemicalSystem *getChemsys () const
+ChemicalSystem *getChemSys () const
 {
-    return chemsys_;
+    return chemSys_;
 }
 
 /**
@@ -884,9 +884,9 @@ ChemicalSystem *getChemsys () const
 
 @param sattacktime is the simulation time to begin sulfate attack [days]
 */
-void setSattack_time (double sattacktime)
+void setSulfateAttackTime (double sattacktime)
 {
-    sattack_time_ = sattacktime;
+    sulfateAttackTime_ = sattacktime;
 }
 
 /**
@@ -896,9 +896,9 @@ void setSattack_time (double sattacktime)
 
 @return the simulation time to begin sulfate attack [days]
 */
-double getSattack_time (void) const
+double getSulfateAttackTime (void) const
 {
-    return sattack_time_;
+    return sulfateAttackTime_;
 }
 
 /**
@@ -906,9 +906,9 @@ double getSattack_time (void) const
 
 @param leachtime is the simulation time to begin leaching [days]
 */
-void setLeach_time (double leachtime)
+void setLeachTime (double leachtime)
 {
-    leach_time_ = leachtime;
+    leachTime_ = leachtime;
 }
 
 /**
@@ -918,9 +918,9 @@ void setLeach_time (double leachtime)
 
 @return the simulation time to begin leaching [days]
 */
-double getLeach_time (void) const
+double getLeachTime (void) const
 {
-    return leach_time_;
+    return leachTime_;
 }
 
 /**
@@ -1111,9 +1111,9 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 
 @return the vector of scaled masses [percent solids]
 */
-vector<double> getScaledmass () const
+vector<double> getScaledMass () const
 {
-    return scaledmass_;
+    return scaledMass_;
 }
 
 /**
@@ -1126,12 +1126,12 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 @param i is the index of the phase in the kinetic model
 @return the scaled mass of the phase [percent solids]
 */
-double getScaledmass (const unsigned int i) const
+double getScaledMass (const unsigned int i) const
 {
-    try { return scaledmass_.at(i); }
+    try { return scaledMass_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getScaledmass",
-                           "scaledmass_",scaledmass_.size(),i);
+        EOBException ex("KineticModel","getScaledMass",
+                           "scaledMass_",scaledMass_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -1146,9 +1146,9 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 
 @return the vector of initial scaled masses [percent solids]
 */
-vector<double> getInitscaledmass () const
+vector<double> getInitScaledMass () const
 {
-    return initscaledmass_;
+    return initScaledMass_;
 }
 
 /**
@@ -1161,12 +1161,12 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 @param i is the index of the phase in the kinetic model
 @return the initial scaled mass of the phase [percent solids]
 */
-double getInitscaledmass (const unsigned int i) const
+double getInitScaledMass (const unsigned int i) const
 {
-    try { return initscaledmass_.at(i); }
+    try { return initScaledMass_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getInitscaledmass",
-                           "initscaledmass_",initscaledmass_.size(),i);
+        EOBException ex("KineticModel","getInitScaledMass",
+                           "initScaledMass_",initScaledMass_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -1179,9 +1179,9 @@ double getInitscaledmass (const unsigned int i) const
 
 @return the vector of activation energies [J/mol/K]
 */
-vector<double> getEa () const
+vector<double> getActivationEnergy () const
 {
-    return Ea_;
+    return activationEnergy_;
 }
 
 /**
@@ -1192,11 +1192,12 @@ vector<double> getEa () const
 @param i is the index of the phase in the kinetic model
 @return the activation energy of the phase [J/mol/K]
 */
-double getEa (const unsigned int i) const
+double getActivationEnergy (const unsigned int i) const
 {
-    try { return Ea_.at(i); }
+    try { return activationEnergy_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getEa","Ea_",Ea_.size(),i);
+        EOBException ex("KineticModel","getActivationEnergy",
+                        "activationEnergy_",activationEnergy_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -1240,9 +1241,9 @@ double getCritDOH (const unsigned int i) const
 
 @return the vector of degrees of hydration of the clinker phases
 */
-vector<double> getDOH () const
+vector<double> getDegreeOfHydration () const
 {
-    return doh_;
+    return degreeOfHydration_;
 }
 
 /**
@@ -1253,12 +1254,12 @@ vector<double> getDOH () const
 @param i is the index of the phase in the kinetic model
 @return the degree of hydration of the phase
 */
-double getDOH (const unsigned int i) const
+double getDegreeOfHydration (const unsigned int i) const
 {
-    try { return doh_.at(i); }
+    try { return degreeOfHydration_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getDOH","doh_",
-                           doh_.size(),i);
+        EOBException ex("KineticModel","getDegreeOfHydration","degreeOfHydration_",
+                           degreeOfHydration_.size(),i);
         ex.printException();
         exit(1);
     }
@@ -1271,9 +1272,9 @@ double getDOH (const unsigned int i) const
 
 @return the vector of lists of ICs for the phases in the kinetic model
 */
-vector<vector<int> > getRdICid () const
+vector<vector<int> > getRdICId () const
 {
-    return RdICid_;
+    return RdICId_;
 }
 
 /**
@@ -1298,12 +1299,12 @@ vector<vector<double> > getRd () const
 @param idx is the index of the phase in the kinetic model
 @return the list of IC ids in that phase.
 */
-vector<int> getRdICid (const unsigned int idx)
+vector<int> getRdICId (const unsigned int idx)
 {
-    try { return RdICid_.at(idx); }
+    try { return RdICId_.at(idx); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRdICid",
-                           "RdICid_",RdICid_.size(),idx);
+        EOBException ex("KineticModel","getRdICId",
+                           "RdICId_",RdICId_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1339,13 +1340,13 @@ vector<double> getRd (const unsigned int idx)
 @param idx2 is the element location of the IC for that phase
 @return the IC id value
 */
-unsigned int getRdICid (const unsigned int idx1,
+unsigned int getRdICId (const unsigned int idx1,
                         const unsigned int idx2)
 {
-    try { return RdICid_.at(idx1).at(idx2); }
+    try { return RdICId_.at(idx1).at(idx2); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRdICid",
-                           "RdICid_",RdICid_.size(),idx1);
+        EOBException ex("KineticModel","getRdICId",
+                           "RdICId_",RdICId_.size(),idx1);
         ex.printException();
         exit(1);
     }
@@ -1429,7 +1430,7 @@ This method loops over the <i>kinetically</i> controlled phases in the kinetic
 model, gets the DC stoichiometry of each phase, and determines the number of moles
 of each DC component based on the number of moles of the kinetically controlled phases.
 */
-void setKineticDCmoles ();
+void setKineticDCMoles ();
 
 /**
 @brief Set the number of moles of dependent components to zero.
@@ -1437,7 +1438,7 @@ void setKineticDCmoles ();
 This method loops over the <i>kinetically</i> controlled phases in the kinetic
 model, and sets the number of moles of each DC component of that phase to zero.
 */
-void zeroKineticDCmoles ();
+void zeroKineticDCMoles ();
 
 /**
 @brief Set the verbose flag

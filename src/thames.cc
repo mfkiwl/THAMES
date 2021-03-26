@@ -209,7 +209,7 @@ int main (int argc, char **argv)
                                                   Mic->getYDim(),
                                                   Mic->getZDim(),
                                                   (Mic->getNumsites() + 2),
-                                                  ChemSys->getMicphasenum(),1,
+                                                  ChemSys->getNumMicroPhases(),1,
                                                   VERBOSE,WARNING,DEBUG);
           cout << "ThermalStrain object creation done... " << endl;
           ThermalStrainSolver->setPhasemodfname(phasemod_fname);
@@ -233,7 +233,7 @@ int main (int argc, char **argv)
 
       try {
           AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,
-                                                  ChemSys->getMicphasenum(),1,
+                                                  ChemSys->getNumMicroPhases(),1,
                                                   VERBOSE,WARNING,DEBUG);
           AppliedStrainSolver->setPhasemodfname(phasemod_fname);
       }

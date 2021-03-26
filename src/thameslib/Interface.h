@@ -52,8 +52,8 @@ class Interface {
 
 private:
     
-    unsigned int phaseid_;              /**< The phase id of the voxels at this interface */
-    ChemicalSystem *chemsys_;           /**< The `ChemicalSystem` object for the simulation */
+    unsigned int microPhaseId_;         /**< The phase id of the voxels at this interface */
+    ChemicalSystem *chemSys_;           /**< The `ChemicalSystem` object for the simulation */
     vector<Isite> growth_sites_;        /**< The list of all sites eligible for
                                                 adjacent growth */
     vector<Isite> dissolution_sites_;   /**< The list of sites eligible for self-dissolution */
@@ -114,9 +114,9 @@ Interface (ChemicalSystem *csys,
 
 @return the integer id for the phase associated with this interface
 */
-unsigned int getPhaseId () const
+unsigned int getMicroPhaseId () const
 {
-    return (unsigned int)(phaseid_);
+    return (unsigned int)(microPhaseId_);
 }
     
 /**

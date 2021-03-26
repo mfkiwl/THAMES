@@ -38,12 +38,12 @@ unsigned int x_;                    /**< x-coordinate in mesh coordinate frame *
 unsigned int y_;                    /**< y-coordinate in mesh coordinate frame */
 unsigned int z_;                    /**< y-coordinate in mesh coordinate frame */
 unsigned long int id_;              /**< Unique id in the 1D array of all sites */
-unsigned int phaseid_;              /**< The microstructure phase assignment */
-ChemicalSystem *chemsys_;           /**< Pointer to simulation's ChemicalSystem object */
+unsigned int microPhaseId_;         /**< The microstructure phase assignment */
+ChemicalSystem *chemSys_;           /**< Pointer to simulation's ChemicalSystem object */
 vector<unsigned int> dissolution_;  /**< Vector of phases that can dissolve at this site */
 vector<unsigned int> growth_;       /**< Vector of phases that can grow at this site */
-double strfreevolume_;              /**< Stress-free volume of the site */
-double truevolume_;                 /**< Actual volume of site, accounting for stress */
+double stressFreeVolume_;           /**< Stress-free volume of the site */
+double trueVolume_;                 /**< Actual volume of site, accounting for stress */
 bool damage_;                       /**< True if site is damaged, false otherwise */
 vector<Site *> nb_;                 /**< List of site ids that are neighbors to this site */
 
@@ -192,9 +192,9 @@ unsigned long int getId () const
 
 @return the microstructure phase id number
 */
-unsigned int getPhaseId () const
+unsigned int getMicroPhaseId () const
 {
-    return phaseid_;
+    return microPhaseId_;
 }
 
 /**
@@ -202,10 +202,10 @@ unsigned int getPhaseId () const
 
 @param pid is the microstructure phase id number to assign
 */
-void setPhaseId (const unsigned int pid)
+void setMicroPhaseId (const unsigned int pid)
 {
-    phaseid_ = pid;
-    strfreevolume_ = 1.0;
+    microPhaseId_ = pid;
+    stressFreeVolume_ = 1.0;
     return;
 }
     
@@ -430,7 +430,7 @@ void setDamage ()
 
 @param vol is the stress-free volume of the site to assign, normalized by reference site volume
 */
-void setStrfreevolume (double vol)
+void setStressFreeVolume (double vol)
 {
     if (vol < 0) {
         cout << "in the setStrfreevolume function...volume should not be negative."
@@ -439,7 +439,7 @@ void setStrfreevolume (double vol)
              << endl;
         exit(1);
     } else {
-        strfreevolume_ = vol;
+        stressFreeVolume_ = vol;
     }
 }
 
@@ -451,9 +451,9 @@ void setStrfreevolume (double vol)
 
 @return the stress-free volume of the site, normalized by reference site volume
 */
-double getStrfreevolume ()
+double getStressFreeVolume ()
 {
-    return strfreevolume_;
+    return stressFreeVolume_;
 }
 
 /**
@@ -461,9 +461,9 @@ double getStrfreevolume ()
 
 @return the actual volume of the site, normalized by the strain-free site volume
 */
-double getTruevolume ()
+double getTrueVolume ()
 {
-    return truevolume_;
+    return trueVolume_;
 }
 
 /**
@@ -471,16 +471,16 @@ double getTruevolume ()
 
 @param vol is the actual volume of the site, normalized by the strain-free site volume
 */
-void setTruevolume (double vol)
+void setTrueVolume (double vol)
 {
     if (vol < 0) {
-        cout << "in the setTruevolume function...volume should not be negative." 
+        cout << "in the setTrueVolume function...volume should not be negative." 
              << endl;
-        cerr << "in the setTruevolume function...volume should not be negative." 
+        cerr << "in the setTrueVolume function...volume should not be negative." 
              << endl;
         exit(1);
     } else {
-        truevolume_ = vol;
+        trueVolume_ = vol;
     }
     return;
 }

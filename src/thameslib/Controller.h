@@ -71,7 +71,7 @@ ThermalStrain *thermalstr_;         /**< Pointer to the finite element model obj
 vector<double> molesdissolved_;
 
 double imgfreq_;                    /**< Frequency to output microstructure image */
-ChemicalSystem *chemsys_;           /**< Pointer to `ChemicalSystem` object */
+ChemicalSystem *chemSys_;           /**< Pointer to `ChemicalSystem` object */
 Solution *solut_;                   /**< Pointer to the `Solution` object */
 vector<double> time_;               /**< List of simulation times for each iteration */
 vector<double> output_time_;        /**< List of times to output image */

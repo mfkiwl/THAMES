@@ -21,7 +21,7 @@ bool affinitySort (const Isite s1,
 
 Interface::Interface ()
 {
-    phaseid_ = 0;
+    microPhaseId_ = 0;
     growth_sites_.clear();
     dissolution_sites_.clear();
 }
@@ -30,7 +30,7 @@ Interface::Interface (RanGen *rg,
                       const bool verbose,
                       const bool debug)
 {
-    phaseid_ = 0;
+    microPhaseId_ = 0;
     growth_sites_.clear();
     dissolution_sites_.clear();
     rg_ = rg;
@@ -56,8 +56,8 @@ Interface::Interface (ChemicalSystem *csys,
     verbose_ = verbose;
     debug_ = debug;
     rg_ = rg;
-    phaseid_ = pid;
-    chemsys_ = csys;
+    microPhaseId_ = pid;
+    chemSys_ = csys;
 
     dissolution_sites_.clear();
     growth_sites_.clear();
@@ -94,7 +94,7 @@ Interface::Interface (ChemicalSystem *csys,
     for (j = 0; j < gv.size(); j++) {
         afty = 0;
         for (i = 0; i < gv[j]->nbSize(2); i++) {
-            afty += chemsys_->getAffinity(pid,gv[j]->nb(i)->getPhaseId());
+            afty += chemSys_->getAffinity(pid,gv[j]->nb(i)->getMicroPhaseId());
         }
 
         ///
@@ -127,7 +127,7 @@ Interface::Interface (ChemicalSystem *csys,
     unsigned long int site1,site2;
     unsigned long int numgsites = growth_sites_.size();
 
-    for (j = 0; j < (chemsys_->getRandomgrowth(pid) * numgsites); j++) {
+    for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
 
        // Choose two sites at random and switch their places
        site1 = (unsigned long int)(rg_->Ran3() * numgsites);
@@ -143,7 +143,7 @@ Interface::Interface (ChemicalSystem *csys,
         for (j = 0; j < dv.size(); j++) {
             afty = 0;
             for (i = 0; i < dv[j]->nbSize(2); i++) {
-                afty += chemsys_->getAffinity(pid,dv[j]->nb(i)->getPhaseId());
+                afty += chemSys_->getAffinity(pid,dv[j]->nb(i)->getMicroPhaseId());
             }
             dissolution_sites_.push_back(Isite(dv[j]->getId(),afty));
         }
@@ -167,7 +167,7 @@ Interface::Interface (ChemicalSystem *csys,
     ///
 
     try {
-        for (j = 0; j < (chemsys_->getRandomgrowth(pid) * numgsites); j++) {
+        for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
 
            // Choose two sites at random and switch their places
            site1 = (unsigned long int)(rg_->Ran3() * numgsites);
@@ -211,7 +211,7 @@ bool Interface::addGrowthSite (Site *loc)
     if (!found) {
         int afty = 0;
         for (i = 0; i < loc->nbSize(2); i++) {
-            afty += chemsys_->getAffinity(phaseid_,loc->nb(i)->getPhaseId());
+            afty += chemSys_->getAffinity(microPhaseId_,loc->nb(i)->getMicroPhaseId());
         }
         Isite tisite(loc->getId(),afty);
         q = lower_bound(start,end,tisite,affinitySort);
@@ -246,7 +246,7 @@ bool Interface::addDissolutionSite (Site *loc)
     if (!found) {
         int afty = 0;
         for (i = 0; i < loc->nbSize(2); i++) {
-            afty += chemsys_->getAffinity(phaseid_,loc->nb(i)->getPhaseId());
+            afty += chemSys_->getAffinity(microPhaseId_,loc->nb(i)->getMicroPhaseId());
         }
         Isite tisite(loc->getId(),afty);
         q = lower_bound(start,end,tisite,affinitySort);
@@ -273,7 +273,7 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
         afty = 0;
         gs = ste[growth_sites_[j].getId()];
         for (i = 0; i < gs.nbSize(2); i++) {
-            afty += chemsys_->getAffinity(pid,gs.nb(i)->getPhaseId());
+            afty += chemSys_->getAffinity(pid,gs.nb(i)->getMicroPhaseId());
         }
         growth_sites_[j].setAffinity(afty);
     }
@@ -301,7 +301,7 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
 
     unsigned long int site1,site2;
     unsigned long int numgsites = growth_sites_.size();
-    for (j = 0; j < (chemsys_->getRandomgrowth(pid) * numgsites); j++) {
+    for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
 
        ///
        /// Choose two sites at random and switch their places
@@ -331,7 +331,7 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
        afty = 0;
        ds = ste[dissolution_sites_[j].getId()];
        for (i = 0; i < ds.nbSize(2); i++) {
-           afty += chemsys_->getAffinity(pid,ds.nb(i)->getPhaseId());
+           afty += chemSys_->getAffinity(pid,ds.nb(i)->getMicroPhaseId());
        }
        dissolution_sites_[j].setAffinity(afty);
     }
@@ -359,7 +359,7 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
 
     unsigned long int site1,site2;
     unsigned long int numdsites = dissolution_sites_.size();
-    for (j = 0; j < (chemsys_->getRandomgrowth(pid) * numdsites); j++) {
+    for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numdsites); j++) {
 
        // Choose two sites at random and switch their places
        site1 = (unsigned long int)(rg_->Ran3() * numdsites);

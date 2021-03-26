@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 25 19:35:46 2021 | Improved readability of KineticModel and ChemicalSystem classes |
+| Mar 22 22:01:18 2021 | Added GEMS3K standalone library as a subtree |
 | Mar 11 16:28:57 2021 | Corrected the chemistry.xml file in two of the sample-input examples |
 | Mar  9 22:21:43 2021 | Fixed a bug that causes runtime errors when the chemistry.xml file has kinetically controlled phases separated by other types of phases |
 | Mar  5 15:17:31 2021 | Cleaned up some comments and added new sample-input examples |

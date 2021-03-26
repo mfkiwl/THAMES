@@ -36,7 +36,6 @@ possible.
 #include "myconfig.h"
 #include <iomanip>
 #include <typeinfo>
-#include <algorithm>
 
 using namespace std;
 
@@ -57,9 +56,9 @@ the same members are identified as class variables in the `ChemicalSystem` class
 
 Most of the members have self-evident meanings:
     - `id` is the unique integer id of the microstructure phase
-    - `randomgrowth` determines how much randomness is associated with the
+    - `randomGrowth` determines how much randomness is associated with the
        growth of the phase, rather than being determined only by mean curvature
-    - `stresscalc` determines whether or not crystallization pressure should be calculated
+    - `stressCalc` determines whether or not crystallization pressure should be calculated
     - `weak` determines whether or not the phase can be damaged by stress
     - `k2o`, `na2o`, `mgo`, and `so3` are the mass fractions of potassium,
        sodium, magnesium, and sulfur oxides dissolved within the phase.
@@ -69,25 +68,25 @@ Most of the members have self-evident meanings:
        phase will have in simulated color micrographs
     - `gray` is the grayscale index the phase will have in simulated backscattered
         electron micrographs
-    - `thamesname` is the name the phaes will have in the microstructure
-    - `gemphasename` is a vector of the GEM (thermodynamic) phases making up the
+    - `thamesName` is the name the phaes will have in the microstructure
+    - `GEMPhaseName` is a vector of the GEM (thermodynamic) phases making up the
        THAMES phase, given by name
-    - `gemdcname` is a vector of the GEM DCs (dependent components) making up the
+    - `DCName` is a vector of the GEM DCs (dependent components) making up the
        THAMES phase, given by name
-    - `gemphasedcmembers` is a vector of the GEM (thermodynamic) phase DCs making
+    - `GEMPhaseDCMembers` is a vector of the GEM (thermodynamic) phase DCs making
        up the THAMES phase, given by their GEM DC id number
-    - `gemphaseid` is a vector of the GEM (thermodynamic) phases making up
+    - `GEMPhaseId` is a vector of the GEM (thermodynamic) phases making up
        the THAMES phase, given by their GEM phase id number
-    - `gemdcid` is the id of the dependent component in the GEM data base
-    - `gtmplt` is a vector of the growth templates for the phase
-    - `atmpvec` the vector of affinities of a phase for another phase
+    - `DCId` is the id of the dependent component in the GEM data base
+    - `growthTemplate` is a vector of the growth templates for the phase
+    - `affinity` the vector of affinities of a phase for another phase
     - `colors` is the rgb colors for displaying the phase in visualizations
 */
 
 struct PhaseData {
     int id;
-    double randomgrowth;
-    int stresscalc;
+    double randomGrowth;
+    int stressCalc;
     int weak;
     double k2o;
     double na2o;
@@ -98,13 +97,13 @@ struct PhaseData {
     double green;
     double blue;
     double gray;
-    string thamesname;
-    vector<char * > gemphasename,gemdcname;
-    vector<int> gemphasedcmembers;
-    vector<int> gemphaseid;
-    vector<int> gemdcid;
-    vector<int> gtmplt;
-    vector<int> atmpvec;
+    string thamesName;
+    vector<char * > GEMPhaseName,DCName;
+    vector<int> GEMPhaseDCMembers;
+    vector<int> GEMPhaseId;
+    vector<int> DCId;
+    vector<int> growthTemplate;
+    vector<int> affinity;
     vector<double> colors;
 };
 #endif
@@ -148,78 +147,81 @@ that GEM data into THAMES data that are used to create and change microstructure
 
 class ChemicalSystem {
 
-bool jsonformat_;                       /**< True if input GEM data files are JSON format */
+bool jsonFormat_;                       /**< True if input GEM data files are JSON format */
 
 Solution *solut_;                       /**< Pointer to a Solution object for the system */
-unsigned int micphasenum_;              /**< Total number of material components that the
+unsigned int numMicroPhases_;              /**< Total number of material components that the
                                                 microstructure can contain.  The GEM
                                                 chemical system definition (CSD) will
                                                 list all of the possible phases in the
                                                 system, but we may want to combine two or
                                                 more phases into a single microstructure
                                                 component */
-unsigned int micimpuritynum_;           /**< Number of impurities, as oxides, dissolved
+unsigned int numMicroImpurities_;           /**< Number of impurities, as oxides, dissolved
                                                 in the clinker phases that will be tracked
                                                 Typically the value will be 4 (potassium,
                                                 sodium, magnesium, and sulfur oxides) */
-unsigned int ICnum_;                    /**< Number of independent components (IC) */
-unsigned int DCnum_;                    /**< Number of dependent components (DC) */
-unsigned int phasenum_;                 /**< Number of GEM phases in the CSD */
-unsigned int solutionphasenum_;         /**< Number of GEM solution phases in the CSD;
+unsigned int numICs_;                    /**< Number of independent components (IC) */
+unsigned int numDCs_;                    /**< Number of dependent components (DC) */
+unsigned int numGEMPhases_;                 /**< Number of GEM phases in the CSD */
+unsigned int numSolutionPhases_;         /**< Number of GEM solution phases in the CSD;
                                               solution phases are non-stoichiometric */
-vector<string> micphasename_;           /**< Names of phases identified in a THAMES
+vector<string> microPhaseName_;           /**< Names of phases identified in a THAMES
                                                 microstructure */
-vector<string> stressphasename_;        /**< Names of phases that can have crystallization
+vector<string> stressPhaseName_;        /**< Names of phases that can have crystallization
                                                 pressure in the microstructure */
-vector<string> weakphasename_;          /**< Names of solid phases that can be damaged
+vector<string> weakPhaseName_;          /**< Names of solid phases that can be damaged
                                                by stress in the microstructure */
-vector<string> porousphasename_;        /**< Names of solid phases that have internal
+vector<string> porousPhaseName_;        /**< Names of solid phases that have internal
                                                porosity in the microstructure */
-vector<int> stressphaseid_;             /**< IDs of phases that can have crystallization
+vector<int> stressPhaseId_;             /**< IDs of phases that can have crystallization
                                                 pressure in the microstructure */
-vector<int> weakphaseid_;               /**< IDs of solid phases that can be damaged
+vector<int> weakPhaseId_;               /**< IDs of solid phases that can be damaged
                                                by stress in the microstructure */
-vector<int> porousphaseid_;             /**< IDs of solid phases that have internal
+vector<int> porousPhaseId_;             /**< IDs of solid phases that have internal
                                                porosity in the microstructure */
-vector<string> ICname_;                 /**< Names of ICs in the GEM CSD */
-vector<string> DCname_;                 /**< Names of DCs in the GEM CSD */
-vector<string> phasename_;              /**< Names of phases in the GEM CSD */
-vector<int> micid_;                     /**< Unique ids of THAMES microstructure phases */
-int c3sid_;                             /**< Specific id number for C3S phase, treated
+vector<string> ICName_;                 /**< Names of ICs in the GEM CSD */
+vector<string> DCName_;                 /**< Names of DCs in the GEM CSD */
+vector<string> GEMPhaseName_;              /**< Names of phases in the GEM CSD */
+vector<int> microPhaseId_;                     /**< Unique ids of THAMES microstructure phases */
+int c3sId_;                             /**< Specific id number for C3S phase, treated
                                                 specially as one of the clinker phases as
                                                 a matter of convenience in kinetic model */
-int c2sid_;                             /**< Specific id number for C2S phase, treated
+int c2sId_;                             /**< Specific id number for C2S phase, treated
                                                 specially as one of the clinker phases as
                                                 a matter of convenience in kinetic model */
-int c3aid_;                             /**< Specific id number for C3A phase, treated
+int c3aId_;                             /**< Specific id number for C3A phase, treated
                                                 specially as one of the clinker phases as
                                                 a matter of convenience in kinetic model */
-int c4afid_;                            /**< Specific id number for C4AF phase, treated
+int c4afId_;                            /**< Specific id number for C4AF phase, treated
                                                 specially as one of the clinker phases as
                                                 a matter of convenience in kinetic model */
-int gypsumid_;                          /**< Specific id number for gypsum, treated
+int gypsumId_;                          /**< Specific id number for gypsum, treated
                                                 specially as one of the soluble portland cement
                                                 phases as a matter of convenience
                                                 in kinetic model */
-vector<double> randomgrowth_;             /**< One real number for each microstructure phase,
+vector<double> randomGrowth_;             /**< One real number for each microstructure phase,
                                           that indicates the tendency for growth in random
                                           directions (ballistic or diffusion-limited
                                           aggregation) as opposed to compact growth */
-vector<double> ICmolarmass_;              /**< One molar mass for each IC [g/mm3ol] */
-vector<double> DCmolarmass_;              /**< One molar mass for each DC [g/mol] */
-vector<double> phasemolarmass_;           /**< One molar mass for each GEM phase [g/mol] */
-vector<vector<int> > growthtemplate_;   /**< A list of the phases on which a given phase
+vector<double> ICMolarMass_;              /**< One molar mass for each IC [g/mm3ol] */
+vector<double> DCMolarMass_;              /**< One molar mass for each DC [g/mol] */
+vector<double> GEMPhaseMolarMass_;           /**< One molar mass for each GEM phase [g/mol] */
+vector<vector<int> > growthTemplate_;   /**< A list of the phases on which a given phase
                                                 is allowed to grow; one list for each phase */
 vector<vector<int> > affinity_;         /**< A list of the microstructure phases with which
                                                 a given microstructure phase has an affinity to
                                                 associate when growing */
-map<int,vector<int> > micphasemembers_; /**< A list of all the CSD phase ids that are
+map<int,vector<int> > microPhaseMembers_; /**< A list of all the CSD phase ids that are
                                                 associated with a given microstructure phase */
-map<int,vector<int> > micDCmembers_;     /**< A list of all the CSD DC ids that are
+
+map<int,vector<int> > microPhaseDCMembers_;     /**< A list of all the CSD DC ids that are
                                                 associated with a given microstructure phase */
-map<int,vector<int> > phaseDCmembers_;   /**< A list of all the CSD DC ids that are
+map<int,vector<int> > GEMPhaseDCMembers_;   /**< A list of all the CSD DC ids that are
                                                 associated with a given CSD phase */
 
+vector<bool> isKinetic_;                    /**< Whether of not each phase is kinetically
+                                                  controlled */
 /**
 @brief Initial solution composition
 
@@ -227,14 +229,14 @@ This is a map of key-value pairs.  The key is the integer value of an independen
 component (IC), and the value is the concentration of that IC in molal units
 [mol/kgw].
 */
-map<int,double> initial_solution_composition_;
+map<int,double> initialSolutionComposition_;
 
 /**
 @brief Volume fraction of each GEM CSD phase associated with a THAMES phase.
 
 @warning This variable may not be used
 */
-map<int,vector<double> > micphasemembersvolfrac_;
+map<int,vector<double> > microPhaseMemberVolumeFraction_;
 
 vector<double> porosity_;                 /**< The internal porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
@@ -256,78 +258,76 @@ vector<double> grayscale_;                /**< A number on [0,255] giving the re
 vector<vector<double> > color_;           /**< A list of <r,g,b> values specifying the
                                                 color of the THAMES phases in a false
                                                 color micrograph */
-map<string,int> micidlookup_;           /**< Map that returns the vector index of the
+map<string,int> microPhaseIdLookup_;           /**< Map that returns the vector index of the
                                                 microstructure phase name */
-map<string,int> ICidlookup_;            /**< Map that returns the vector index of the
+map<string,int> ICIdLookup_;            /**< Map that returns the vector index of the
                                                 IC name */
-map<string,int> DCidlookup_;            /**< Map that returns the vector index of the
+map<string,int> DCIdLookup_;            /**< Map that returns the vector index of the
                                                 DC name */
-map<string,int> phaseidlookup_;         /**< Map that returns the vector index of the
+map<string,int> GEMPhaseIdLookup_;         /**< Map that returns the vector index of the
                                                 GEM CSD phase name */
 
-map<int,vector<int> > mic2phase_;       /**< Map that returns the GEM CSD phase for
+map<int,vector<int> > microPhaseToGEMPhase_;   /**< Map that returns the GEM CSD phase for
                                                 a given microstructure phase */
-map<int,vector<int> > mic2DC_;          /**< Map that returns the GEM DC for
+map<int,vector<int> > microPhaseToDC_;      /**< Map that returns the GEM DC for
                                                 a given microstructure phase */
-vector<vector<double> > DCstoich_;        /**< List of amount of moles of each IC in a DC */
+vector<vector<double> > DCStoich_;      /**< List of amount of moles of each IC in a DC */
 
-vector<int> kineticphase_;              /**< List of GEM CSD phases that are NOT under
-                                                thermodynamic control (clinker, gypsum, etc) */
-vector<int> thermophase_;               /**< List of GEM CSD phases that ARE under
-                                                thermodynamic control */
-double *phasestoich_;                   /**< List of amount of moles of each IC in a
+double *pGEMPhaseStoich_;                   /**< List of amount of moles of each IC in a
                                                 GEM CSD phase (pointer form) */
 /**
 @brief Solid stoichiometry list for communicating with GEM-IPM.
 
-@warning Not sure how this variable is used
+@warning Only passed back and forth to GEM library
 */
-double *solidstoich_;           
+double *pSolidStoich_;           
 
 /**
 @brief Solution stoichiometry list for communicating with GEM-IPM.
 
-@warning Not sure how this variable is used
+@warning Only passed back and forth to GEM library
 */
-double *solutphasestoich_;
+double *pSolutPhaseStoich_;
 
 /**
 @brief Solution solid (?) stoichiometry list for communicating with GEM-IPM.
 
-@warning Not sure how this variable is used
+@warning Only passed back and forth to GEM library
 */
-double *solutsolidstoich_;
+double *pSolutSolidStoich_;
 
-vector<vector<double> > vphasestoich_;    /**< List of amount of moles of each IC in
+vector<vector<double> > GEMPhaseStoich_;    /**< List of amount of moles of each IC in
                                                 a given GEM CSD phase (vector form) */
 
-double *ICmoles_;                       /**< List of number of moles of each IC in system */
-double *ICresiduals_;                   /**< List of errors in IC moles for mass balance */
-double *ICchempot_;                     /**< List of chemical potentials of each IC, in
+double *ICMoles_;                       /**< List of number of moles of each IC in system */
+double *ICResiduals_;                   /**< List of errors in IC moles for mass balance */
+double *ICChemicalPotential_;                     /**< List of chemical potentials of each IC, in
                                                 the GEM dual solution */
-double *DCmoles_;                       /**< List of moles of each DC */
-double *DCactivitycoeff_;               /**< List of activity coefficients for each DC */
+double *DCMoles_;                       /**< List of moles of each DC */
+double *DCActivityCoeff_;               /**< List of activity coefficients for each DC */
 
-double *phasemoles_;                    /**< List of moles of each phase in the system */
-double *phasemass_;                     /**< List of mass of each phase in the system */
-double *phasevolume_;                   /**< List of volume of each phase in the system */
-double *solutphasemoles_;               /**< List of moles of each solution phase in
+double *GEMPhaseMoles_;                    /**< List of moles of each phase in the system */
+double *GEMPhaseMass_;                     /**< List of mass of each phase in the system */
+double *GEMPhaseVolume_;                   /**< List of volume of each phase in the system */
+double *solutPhaseMoles_;               /**< List of moles of each solution phase in
                                                 the system */
-double *solutphasemass_;                /**< List of mass of each solution phase in
+double *solutPhaseMass_;               /**< List of mass of each solution phase in
                                                 the system */
-double *solutphasevolume_;              /**< List of volume of each phase in the system */
-double *ophasemoles_;                   /**< List of moles of each phase in the system
+double *DCLowerLimitss_;                /**< List of mass of each solution phase in
+                                                the system */
+double *solutPhaseVolume_;              /**< List of volume of each phase in the system */
+double *prevGEMPhaseMoles_;             /**< List of moles of each phase in the system
                                                 in the previous time step */
-double *ophasemass_;                    /**< List of mass of each phase in the system
+double *prevGEMPhaseMass_;                    /**< List of mass of each phase in the system
                                                 in the previous time step */
-double *ophasevolume_;                  /**< List of volume of each phase in the system
+double *prevGEMPhaseVolume_;                  /**< List of volume of each phase in the system
                                                 in the previous time step */
 double *carrier_;                       /**< List of moles of carrier (solvent) in
                                                 multicomponent asymmetric phases */
-double *surfacearea_;                   /**< List of specific surface area of each
+double *surfaceArea_;                   /**< List of specific surface area of each
                                                 phase, in m<sup>2</sup>/kg */
-double *DCupperlimit_;                  /**< List of upper bound on moles of each DC */
-double *DClowerlimit_;                  /**< List of lower bound on moles of each DC,
+double *DCUpperLimit_;                  /**< List of upper bound on moles of each DC */
+double *DCLowerLimit_;                  /**< List of lower bound on moles of each DC,
                                                 generally non-zero for numerical
                                                 stability of the thermodynamic
                                                 calculations */
@@ -344,7 +344,7 @@ Each independent component is exactly one of six kinds in GEM database:
     - f = formula unit
     - z = electric charge
 */
-vector<char> ICclasscode_;
+vector<char> ICClassCode_;
                          
 /**
 @brief List of one-letter class codes for each DC, specifying its kind.
@@ -367,7 +367,7 @@ Each dependent component is exactly one of 15 kinds in GEM database:
     - H = hydrogen gas, H<sub>2</sub>
     - N = nitrogen gas, N<sub>2</sub>
 */
-vector<char> DCclasscode_;
+vector<char> DCClassCode_;
 
 /**
 @brief List of one-letter class codes for each phase defined in GEM CSD, specifying its kind.
@@ -382,7 +382,7 @@ Each phase in the GEM CSD is exactly one of seven kinds:
     - s = condensed solid solution phase
     - d = dispersed multicomponent solid phase
 */
-vector<char> phaseclasscode_;
+vector<char> GEMPhaseClassCode_;
 
 double T_;                              /**< System-wide temperature [K] */
 double P_;                              /**< System-wide pressure [Pa] */
@@ -390,20 +390,20 @@ double Vs_;                             /**< System total volume [m<sup>3</sup>]
 double Ms_;                             /**< System total mass [kg] */
 double Gs_;                             /**< System total Gibbs energy [J] */
 double Hs_;                             /**< System total enthalpy [J] */
-double ionicstrength_;                  /**< Solution ionic strength [mol/kgw] */
+double ionicStrength_;                  /**< Solution ionic strength [mol/kgw] */
 double pH_;                             /**< Solution pH */
 double pe_;                             /**< Solution pe */
 double Eh_;                             /**< Solution Eh [volts] */
 
 TNode *node_;                           /**< Pointer to a GEM3K TNode object */
 
-long int nodehandle_;                   /**< integer flag used to identify a node */
-long int nodestatus_;                   /**< integer flag used to identify node's status */
-long int iterdone_;                     /**< number of iterations performed in the most
+long int nodeHandle_;                   /**< integer flag used to identify a node */
+long int nodeStatus_;                   /**< integer flag used to identify node's status */
+long int iterDone_;                     /**< number of iterations performed in the most
                                                 recent GEM calculation on the node */
-int timesGEMfailed_;                    /**< tracks number of times in a row that the
+int timesGEMFailed_;                    /**< tracks number of times in a row that the
                                                 GEM_run calculation failed */
-int maxGEMfails_;                       /**< maximum number of times GEM_run is allowed
+int maxGEMFails_;                       /**< maximum number of times GEM_run is allowed
                                                 to fail without throwing an exception */
 /**
 @brief Whether or not the system is saturated with moisture.
@@ -412,7 +412,7 @@ If this variable is nonzero, then the porosity imbibes water from an external
 reservoir as it is consumed by reactions.  If it is set to zero,then the water
 is not replaced and the capillary porosity begins to desiccate.
 */
-bool saturated_;
+bool isSaturated_;
 
 /**
 @brief Time to begin sulfate solution exposure, in days.
@@ -422,7 +422,7 @@ clinker phases according to empirical rate laws in an otherwise closed system)
 and begin a simulation of sulfate attack on that hydrated system.  This variable
 designates the time (in days) at which this switch should happen.
 */
-double sattack_time_;
+double sulfateAttackTime_;
 
 /**
 @brief Time to begin leaching simulation, in days.
@@ -432,19 +432,19 @@ clinker phases according to empirical rate laws in an otherwise closed system)
 and begin a simulation of leaching by a low-pH solution.  This variable
 designates the time (in days) at which this switch should happen.
 */
-double leach_time_;
+double leachTime_;
 
-vector<double> micphasevolfrac_;        /**< Change in volume fraction of each phase
+vector<double> microPhaseVolumeFraction_;  /**< Change in volume fraction of each phase
                                                 in the microstructure */
-vector<double> micphasemass_;           /**< Absolute mass of each microstructure phase */
-vector<double> micphasemassdissolved_;  /**< Absolute mass dissolved of each microstructure
+vector<double> microPhaseMass_;           /**< Absolute mass of each microstructure phase */
+vector<double> microPhaseMassDissolved_;  /**< Absolute mass dissolved of each microstructure
                                                 phase */
-vector<double> micphasevolume_;         /**< Absolute volume of each microstructure phase */
+vector<double> microPhaseVolume_;         /**< Absolute volume of each microstructure phase */
 
-double mictotvolume_;                   /**< Absolute volume of the microstructure */
-double mictotinitvolume_;               /**< Initial absolute volume of the microstructure */
-double micvoidvolume_;                  /**< Absolute volume of void space in microstrucxture */
-double micvoidvolfrac_;                 /**< Volune fraction of void space in microstructure */
+double microVolume_;                   /**< Absolute volume of the microstructure */
+double microInitVolume_;               /**< Initial absolute volume of the microstructure */
+double microVoidVolume_;               /**< Absolute volume of void space in microstrucxture */
+double microVoidVolumeFraction_;       /**< Volune fraction of void space in microstructure */
 
 /**
 @brief Saturation index of each phase in the GEM CSD.
@@ -494,7 +494,7 @@ ChemicalSystem (const ChemicalSystem &obj);
 /**
 @brief Destructor (does nothing for now).
 */
-~ChemicalSystem ();
+~ChemicalSystem (void);
     
 /**
 @brief Determine whether GEM input data files are in JSON format
@@ -508,21 +508,21 @@ bool isInputFormatJSON(const char *masterFileName);
 @brief Get the name of the three JSON input files for GEMS data
 
 @param masterFileName is the lst name containing the others
-@param dchname is the name of the DCH data file
-@param ipmname is the name of the IPM data file
-@param dbrname is the name of the DBR data file
+@param dchName is the name of the DCH data file
+@param ipmName is the name of the IPM data file
+@param dbrName is the name of the DBR data file
 */
 void getJSONFiles(const char *masterFileName,
-                  string &dchname,
-                  string &ipmname,
-                  string &dbrname);
+                  string &dchName,
+                  string &ipmName,
+                  string &dbrName);
 
 /**
 @brief Master function for parsing an input file in XML format.
 
-@param docname is the name of the XML document to parse
+@param docName is the name of the XML document to parse
 */
-void parseDoc (const string &docname);
+void parseDoc (const string &docName);
 
 /**
 @brief Parse input about the initial solution composition from an XML document.
@@ -553,7 +553,7 @@ held in an associative map of key value pairs:
 @param doc points to the XML file
 @param cur points to the current location within the XML file
 */
-void parseICinSolution (xmlDocPtr doc,
+void parseICInSolution (xmlDocPtr doc,
                         xmlNodePtr cur);
 
 /**
@@ -561,68 +561,68 @@ void parseICinSolution (xmlDocPtr doc,
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param numentries is the number of entries in the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param numEntries is the number of entries in the XML file
+@param phaseData holds the structure of collected phase data from the document
 */
 void parsePhase (xmlDocPtr doc,
                  xmlNodePtr cur,
-                 int numentries,
-                 PhaseData &phasedata);
+                 int numEntries,
+                 PhaseData &phaseData);
 
 /**
 @brief Parse input about a GEM CSD phase from an XML document.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param phaseData holds the structure of collected phase data from the document
 */
-void parseGEMphasedata (xmlDocPtr doc,
+void parseGEMPhaseData (xmlDocPtr doc,
                         xmlNodePtr cur,
-                        PhaseData &phasedata);
+                        PhaseData &phaseData);
 
 /**
 @brief Parse input about how to render a phase in an image.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param phaseData holds the structure of collected phase data from the document
 */
-void parseDisplaydata (xmlDocPtr doc,
+void parseDisplayData (xmlDocPtr doc,
                        xmlNodePtr cur,
-                       PhaseData &phasedata);
+                       PhaseData &phaseData);
 
 /**
 @brief Parse input about dissolved impurities within a phase.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param phaseData holds the structure of collected phase data from the document
 */
-void parseImpuritydata (xmlDocPtr doc,
+void parseImpurityData (xmlDocPtr doc,
                         xmlNodePtr cur,
-                        PhaseData &phasedata);
+                        PhaseData &phaseData);
 
 /**
 @brief Parse input about interfaces associated with a phase.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param phaseData holds the structure of collected phase data from the document
 */
-void parseInterfacedata (xmlDocPtr doc,
+void parseInterfaceData (xmlDocPtr doc,
                          xmlNodePtr cur,
-                         PhaseData &phasedata);
+                         PhaseData &phaseData);
 
 /**
 @brief Parse input about affinity for one phase to grow on another.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
-@param phasedata holds the structure of collected phase data from the document
+@param phaseData holds the structure of collected phase data from the document
 */
-void parseAffinitydata (xmlDocPtr doc,
+void parseAffinityData (xmlDocPtr doc,
                         xmlNodePtr cur,
-                        PhaseData &phasedata);
+                        PhaseData &phaseData);
     
 
 /**
@@ -632,9 +632,9 @@ void parseAffinitydata (xmlDocPtr doc,
 
 @param val is the total number of possible microstructure phases (non-negative)
 */
-void setMicphasenum (const unsigned int val)
+void setNumMicroPhases (const unsigned int val)
 {
-    micphasenum_ = val;
+    numMicroPhases_ = val;
 }
 
 /**
@@ -642,9 +642,9 @@ void setMicphasenum (const unsigned int val)
 
 @return the total number of possible microstructure phases (non-negative)
 */
-unsigned int getMicphasenum () const
+unsigned int getNumMicroPhases (void) const
 {
-    return micphasenum_;
+    return numMicroPhases_;
 }
 
 /**
@@ -654,9 +654,9 @@ unsigned int getMicphasenum () const
 
 @param val is the total number of possible impurities (non-negative)
 */
-void setMicimpuritynum (const unsigned int val)
+void setNumMicroImpurities (const unsigned int val)
 {
-    micimpuritynum_ = val;
+    numMicroImpurities_ = val;
 }
 
 /**
@@ -664,7 +664,10 @@ void setMicimpuritynum (const unsigned int val)
 
 @return the total number of possible impurities (non-negative)
 */
-unsigned int getMicimpuritynum() const { return micimpuritynum_; }
+unsigned int getNumMicroImpurities (void) const
+{
+    return numMicroImpurities_;
+}
 
 /**
 @brief Set the number of independent components (ICs).
@@ -673,9 +676,9 @@ unsigned int getMicimpuritynum() const { return micimpuritynum_; }
 
 @param val is the total number of independent components (non-negative)
 */
-void setICnum (const unsigned int val)
+void setNumICs (const unsigned int val)
 {
-    ICnum_ = val;
+    numICs_ = val;
 }
 
 /**
@@ -683,9 +686,9 @@ void setICnum (const unsigned int val)
 
 @return the number of independent components (non-negative)
 */
-unsigned int getICnum() const
+unsigned int getNumICs (void) const
 {
-    return ICnum_;
+    return numICs_;
 }
 
 /**
@@ -695,9 +698,9 @@ unsigned int getICnum() const
 
 @param val is the total number of dependent components (non-negative)
 */
-void setDCnum(const unsigned int val)
+void setNumDCs (const unsigned int val)
 {
-    DCnum_ = val;
+    numDCs_ = val;
 }
 
 /**
@@ -705,9 +708,9 @@ void setDCnum(const unsigned int val)
 
 @return the number of dependent components (non-negative)
 */
-unsigned int getDCnum () const
+unsigned int getNumDCs (void) const
 {
-    return DCnum_;
+    return numDCs_;
 }
 
 /**
@@ -717,9 +720,9 @@ unsigned int getDCnum () const
 
 @param val is the total number of phases recognized in the GEM CSD (non-negative)
 */
-void setPhasenum (const unsigned int val)
+void setNumGEMPhases (const unsigned int val)
 {
-    phasenum_ = val;
+    numGEMPhases_ = val;
 }
 
 /**
@@ -727,9 +730,9 @@ void setPhasenum (const unsigned int val)
 
 @return the number of phases in the GEM CSD (non-negative)
 */
-unsigned int getPhasenum () const
+unsigned int getNumGEMPhases (void) const
 {
-    return phasenum_;
+    return numGEMPhases_;
 }
 
 /**
@@ -739,9 +742,9 @@ unsigned int getPhasenum () const
 
 @param val is the total number of solution phases recognized in the GEM CSD (non-negative)
 */
-void setSolutionphasenum (const unsigned int val)
+void setNumSolutionPhases (const unsigned int val)
 {
-    solutionphasenum_ = val;
+    numSolutionPhases_ = val;
 }
 
 /**
@@ -751,9 +754,9 @@ void setSolutionphasenum (const unsigned int val)
 
 @return the number of solution phases in the GEM CSD (non-negative)
 */
-unsigned int getSolutionphasenum () const
+unsigned int getNumSolutionPhases (void) const
 {
-    return phasenum_;
+    return numSolutionPhases_;
 }
 
 /**
@@ -764,15 +767,16 @@ unsigned int getSolutionphasenum () const
 @param idx is the phase index number (non-negative)
 @param str is the name to assign to the phase
 */
-void setMicphasename (const unsigned int idx,
-                      const string &str)
+void setMicroPhaseName (const unsigned int idx,
+                        const string &str)
 {
     try {
-        micphasename_.at(idx) = str;
+        microPhaseName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicphasename","micphasename_",
-                        micphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseName",
+                        "microPhaseName_",
+                        microPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -785,14 +789,14 @@ void setMicphasename (const unsigned int idx,
 @param idx is the phase index number (non-negative)
 @return the name of the phase
 */
-string &getMicphasename (const unsigned int idx)
+string &getMicroPhaseName (const unsigned int idx)
 {
     try {
-        return (string &)micphasename_.at(idx);
+        return (string &)microPhaseName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasename","micphasename_",
-                        micphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseName",
+                        "microPhaseName_",microPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -803,9 +807,9 @@ string &getMicphasename (const unsigned int idx)
 
 @return the vector of microstructure phase names
 */
-vector<string> getMicphasename () const
+vector<string> getMicroPhaseName (void) const
 {
-    return micphasename_;
+    return microPhaseName_;
 }
 
 /**
@@ -816,15 +820,15 @@ vector<string> getMicphasename () const
 @param idx is the phase index number (non-negative)
 @param str is the name to assign to the phase
 */
-void setStressphasename (const unsigned int idx,
-                      const string &str)
+void setStressPhaseName (const unsigned int idx,
+                         const string &str)
 {
     try {
-        stressphasename_.at(idx) = str;
+        stressPhaseName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setStressphasename","stressphasename_",
-                            stressphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","setStressPhaseName",
+                        "stressPhaseName_",stressPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -837,14 +841,14 @@ void setStressphasename (const unsigned int idx,
 @param idx is the phase index number (non-negative)
 @return the name of the phase
 */
-string &getStressphasename (const unsigned int idx)
+string &getStressPhaseName (const unsigned int idx)
 {
     try {
-        return (string &)stressphasename_.at(idx);
+        return (string &)stressPhaseName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getStressphasename","stressphasename_",
-                        stressphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","getStressPhaseName",
+                        "stressPhaseName_",stressPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -855,9 +859,9 @@ string &getStressphasename (const unsigned int idx)
 
 @return the vector of microstructure phase names
 */
-vector<string> getStressphasename () const
+vector<string> getStressPhaseName (void) const
 {
-    return stressphasename_;
+    return stressPhaseName_;
 }
 
 /**
@@ -865,9 +869,9 @@ vector<string> getStressphasename () const
 
 @return the vector of stress phase ids
 */
-vector<int> getStressphaseid () const
+vector<int> getStressPhaseId_ (void) const
 {
-    return stressphaseid_;
+    return stressPhaseId_;
 }
 
 /**
@@ -875,7 +879,7 @@ vector<int> getStressphaseid () const
 for crystallization pressure.
 
 The determination is made solely on the basis of whether the phase is
-a member of the stressphasename_ vector.
+a member of the stressPhaseName_ vector.
 
 @param idx is the phase id to check
 @return true if the phase is subject to crystallization pressure
@@ -883,8 +887,8 @@ a member of the stressphasename_ vector.
 bool isStress (const int idx)
 {
     bool istress = false;
-    for (int i = 0; i < stressphaseid_.size() && !istress; ++i) {
-        if (idx == stressphaseid_[i]) istress = true;
+    for (int i = 0; i < stressPhaseId_.size() && !istress; ++i) {
+        if (idx == stressPhaseId_[i]) istress = true;
     }
     return istress;
 }
@@ -894,7 +898,7 @@ bool isStress (const int idx)
 for crystallization pressure
 
 The determination is made solely on the basis of whether the phase is
-a member of the stressphasename_ vector.
+a member of the stressPhaseName_ vector.
 
 @param str is the name to check
 @return true if the phase is subject to crystallization pressure
@@ -902,8 +906,8 @@ a member of the stressphasename_ vector.
 bool isStress (const string &str)
 {
     bool istress = false;
-    for (int i = 0; i < stressphasename_.size() && !istress; ++i) {
-        if (str == stressphasename_[i]) istress = true;
+    for (int i = 0; i < stressPhaseName_.size() && !istress; ++i) {
+        if (str == stressPhaseName_[i]) istress = true;
     }
     return istress;
 }
@@ -915,15 +919,15 @@ bool isStress (const string &str)
 @param idx is the phase index number (non-negative)
 @param str is the name to assign to the phase
 */
-void setWeakphasename (const unsigned int idx,
-                      const string &str)
+void setWeakPhaseName (const unsigned int idx,
+                       const string &str)
 {
     try {
-        weakphasename_.at(idx) = str;
+        weakPhaseName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setWeakphasename","weakphasename_",
-                            weakphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","setWeakPhaseName",
+                        "weakPhaseName_",weakPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -936,14 +940,14 @@ void setWeakphasename (const unsigned int idx,
 @param idx is the phase index number (non-negative)
 @return the name of the phase
 */
-string &getWeakphasename (const unsigned int idx)
+string &getWeakPhaseName (const unsigned int idx)
 {
     try {
-        return (string &)weakphasename_.at(idx);
+        return (string &)weakPhaseName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getWeakphasename","weakphasename_",
-                        weakphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","getWeakPhaseName",
+                        "weakPhaseName_",weakPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -954,9 +958,9 @@ string &getWeakphasename (const unsigned int idx)
 
 @return the vector of microstructure phase names
 */
-vector<string> getWeakphasename () const
+vector<string> getWeakPhaseName (void) const
 {
-    return weakphasename_;
+    return weakPhaseName_;
 }
 
 /**
@@ -964,9 +968,9 @@ vector<string> getWeakphasename () const
 
 @return the vector of microstructure phase ids
 */
-vector<int> getWeakphaseid () const
+vector<int> getWeakPhaseId_ (void) const
 {
-    return weakphaseid_;
+    return weakPhaseId_;
 }
 
 /**
@@ -974,7 +978,7 @@ vector<int> getWeakphaseid () const
 for damage by stress
 
 The determination is made solely on the basis of whether the phase is
-a member of the weakphasename_ vector.
+a member of the weakPhaseName_ vector.
 
 @param idx is the phase id to check
 @return true if the phase is subject to damage
@@ -982,8 +986,8 @@ a member of the weakphasename_ vector.
 bool isWeak (const int idx)
 {
     bool isweak = false;
-    for (int i = 0; i < weakphaseid_.size() && !isweak; ++i) {
-        if (idx == weakphaseid_[i]) isweak = true;
+    for (int i = 0; i < weakPhaseId_.size() && !isweak; ++i) {
+        if (idx == weakPhaseId_[i]) isweak = true;
     }
     return isweak;
 }
@@ -993,7 +997,7 @@ bool isWeak (const int idx)
 for damage by stress
 
 The determination is made solely on the basis of whether the phase is
-a member of the weakphasename_ vector.
+a member of the weakPhaseName_ vector.
 
 @param str is the name to check
 @return true if the phase is subject to damage
@@ -1001,8 +1005,8 @@ a member of the weakphasename_ vector.
 bool isWeak (const string &str)
 {
     bool isweak = false;
-    for (int i = 0; i < weakphasename_.size() && !isweak; ++i) {
-        if (str == weakphasename_[i]) isweak = true;
+    for (int i = 0; i < weakPhaseName_.size() && !isweak; ++i) {
+        if (str == weakPhaseName_[i]) isweak = true;
     }
     return isweak;
 }
@@ -1015,15 +1019,15 @@ bool isWeak (const string &str)
 @param idx is the phase index number (non-negative)
 @param str is the name to assign to the phase
 */
-void setPorousphasename (const unsigned int idx,
-                      const string &str)
+void setPorousPhaseName (const unsigned int idx,
+                         const string &str)
 {
     try {
-        porousphasename_.at(idx) = str;
+        porousPhaseName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setPorousphasename","porousphasename_",
-                            porousphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","setPorousPhaseName",
+                        "porousPhaseName_",porousPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1036,14 +1040,14 @@ void setPorousphasename (const unsigned int idx,
 @param idx is the phase index number (non-negative)
 @return the name of the phase
 */
-string &getPorousphasename (const unsigned int idx)
+string &getPorousPhaseName (const unsigned int idx)
 {
     try {
-        return (string &)porousphasename_.at(idx);
+        return (string &)porousPhaseName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPorousphasename","porousphasename_",
-                        porousphasename_.size(),idx);
+        EOBException ex("ChemicalSystem","getPorousPhaseName",
+                        "porousPhaseName_",porousPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1052,11 +1056,11 @@ string &getPorousphasename (const unsigned int idx)
 /**
 @brief Get the list of all microstructure phase names that have internal porosity
 
-@return the vector of microstructure phase names
+@return the vector of microstructure porous phase names
 */
-vector<string> getPorousphasename () const
+vector<string> getPorousPhaseName (void) const
 {
-    return porousphasename_;
+    return porousPhaseName_;
 }
 
 /**
@@ -1064,16 +1068,16 @@ vector<string> getPorousphasename () const
 
 @return the vector of porous phase ids
 */
-vector<int> getPorousphaseid () const
+vector<int> getPorousPhaseId_ (void) const
 {
-    return porousphaseid_;
+    return porousPhaseId_;
 }
 
 /**
 @brief Determine if a given microstructure phase is porous
 
 The determination is made solely on the basis of whether the phase is
-a member of the porousphasename_ vector.
+a member of the porousPhaseName_ vector.
 
 @param str is the name to check
 @return true if the phase is porous
@@ -1081,8 +1085,8 @@ a member of the porousphasename_ vector.
 bool isPorous (const string &str)
 {
     bool isporous = false;
-    for (int i = 0; i < porousphasename_.size() && !isporous; ++i) {
-        if (str == porousphasename_[i]) isporous = true;
+    for (int i = 0; i < porousPhaseName_.size() && !isporous; ++i) {
+        if (str == porousPhaseName_[i]) isporous = true;
     }
     return isporous;
 }
@@ -1090,7 +1094,7 @@ bool isPorous (const string &str)
 /**
 @brief Determine if a given microstructure phase is porous
 The determination is made solely on the basis of whether the phase is
-a member of the porousphasename_ vector.
+a member of the porousPhaseName_ vector.
 
 @param idx is the phase id to check
 @return true if the phase is porous
@@ -1098,8 +1102,8 @@ a member of the porousphasename_ vector.
 bool isPorous (const int idx)
 {
     bool isporous = false;
-    for (int i = 0; i < porousphaseid_.size() && !isporous; ++i) {
-        if (idx == porousphaseid_[i]) isporous = true;
+    for (int i = 0; i < porousPhaseId_.size() && !isporous; ++i) {
+        if (idx == porousPhaseId_[i]) isporous = true;
     }
     return isporous;
 }
@@ -1112,15 +1116,15 @@ bool isPorous (const int idx)
 @param idx is the IC index number (non-negative)
 @param str is the name to assign to the IC
 */
-void setICname (const unsigned int idx,
+void setICName (const unsigned int idx,
                 const string &str)
 {
     try {
-        ICname_.at(idx) = str;
+        ICName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setICname","ICname_",
-                            ICname_.size(),idx);
+        EOBException ex("ChemicalSystem","setICName","ICName_",
+                            ICName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1133,14 +1137,14 @@ void setICname (const unsigned int idx,
 @param idx is the IC index number (non-negative)
 @return the name of the IC 
 */
-string &getICname (const unsigned int idx)
+string &getICName (const unsigned int idx)
 {
     try {
-        return (string &)ICname_.at(idx);
+        return (string &)ICName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getICname","ICname_",
-                        ICname_.size(),idx);
+        EOBException ex("ChemicalSystem","getICName","ICName_",
+                        ICName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1151,9 +1155,9 @@ string &getICname (const unsigned int idx)
 
 @return the vector of IC names
 */
-vector<string> getICname () const
+vector<string> getICName (void) const
 {
-    return ICname_;
+    return ICName_;
 }
 
 /**
@@ -1164,15 +1168,15 @@ vector<string> getICname () const
 @param idx is the DC index number (non-negative)
 @param str is the name to assign to the DC
 */
-void setDCname (const unsigned int idx,
+void setDCName (const unsigned int idx,
                 const string &str)
 {
     try {
-        DCname_.at(idx) = str;
+        DCName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setDCname","DCname_",
-                            DCname_.size(),idx);
+        EOBException ex("ChemicalSystem","setDCName","DCName_",
+                            DCName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1185,14 +1189,14 @@ void setDCname (const unsigned int idx,
 @param idx is the DC index number (non-negative)
 @return the name of the DC 
 */
-string &getDCname (const unsigned int idx)
+string &getDCName (const unsigned int idx)
 {
     try {
-        return (string &)DCname_.at(idx);
+        return (string &)DCName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getDCname","DCname_",
-                        DCname_.size(),idx);
+        EOBException ex("ChemicalSystem","getDCName","DCName_",
+                        DCName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1203,9 +1207,9 @@ string &getDCname (const unsigned int idx)
 
 @return the vector of DC names
 */
-vector<string> getDCname () const
+vector<string> getDCName (void) const
 {
-    return DCname_;
+    return DCName_;
 }
 
 /**
@@ -1216,15 +1220,15 @@ vector<string> getDCname () const
 @param idx is the GEM phase index number (non-negative)
 @param str is the name to assign to the phase
 */
-void setPhasename (const unsigned int idx,
-                   const string &str)
+void setGEMPhaseName (const unsigned int idx,
+                      const string &str)
 {
     try {
-        phasename_.at(idx) = str;
+        GEMPhaseName_.at(idx) = str;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setPhasename","phasename_",
-                            phasename_.size(),idx);
+        EOBException ex("ChemicalSystem","setGEMPhaseName",
+                        "GEMPhaseName_",GEMPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1237,14 +1241,14 @@ void setPhasename (const unsigned int idx,
 @param idx is the GEM phase index number (non-negative)
 @return the name of the GEM phase
 */
-string &getPhasename (const unsigned int idx)
+string &getGEMPhaseName (const unsigned int idx)
 {
     try {
-        return (string &)phasename_.at(idx);
+        return (string &)GEMPhaseName_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPhasename","phasename_",
-                        phasename_.size(),idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseName",
+                        "GEMPhaseName_",GEMPhaseName_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1255,9 +1259,9 @@ string &getPhasename (const unsigned int idx)
 
 @return the vector of GEM phase names
 */
-vector<string> getPhasename () const
+vector<string> getGEMPhaseName (void) const
 {
-    return phasename_;
+    return GEMPhaseName_;
 }
 
 /**
@@ -1268,15 +1272,15 @@ vector<string> getPhasename () const
 @param idx is the vector element holding the phase id (non-negative)
 @param val is the non-negative integer id to assign to the phase
 */
-void setMicid (const unsigned int idx,
-               const int val)
+void setMicroPhaseId (const unsigned int idx,
+                      const int val)
 {
     try {
-        micid_.at(idx) = val;
+        microPhaseId_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicid","micid_",
-                            micid_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseId",
+                        "microPhaseId_",microPhaseId_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1291,14 +1295,14 @@ void setMicid (const unsigned int idx,
 @param idx is the element of the vector holding the phase's id (non-negative)
 @return the integer id stored at that element
 */
-int getMicid (const unsigned int idx)
+int getMicroPhaseId (const unsigned int idx)
 {
     try {
-        return micid_.at(idx);
+        return microPhaseId_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicid","micid_",
-                        micid_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseId",
+                        "microPhaseId_",microPhaseId_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1310,15 +1314,16 @@ int getMicid (const unsigned int idx)
 @param micname is the name of the microstructure phase
 @return the integer id associated with that phase name
 */
-int getMicid (const string &micname)
+int getMicroPhaseId (const string &micname)
 {
     string msg;
-    map<string,int>::iterator p = micidlookup_.find(micname);
-    if (p != micidlookup_.end()) {
+    map<string,int>::iterator p = microPhaseIdLookup_.find(micname);
+    if (p != microPhaseIdLookup_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micid_ match to " + micname;
-        EOBException ex("ChemicalSystem","getMicid",msg,micid_.size(),0);
+        msg = "Could not find microPhaseId_ match to " + micname;
+        EOBException ex("ChemicalSystem","getMicroPhaseId",
+                        msg,microPhaseId_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -1329,9 +1334,73 @@ int getMicid (const string &micname)
 
 @return the vector holding phase id numbers
 */
-vector<int> getMicid () const
+vector<int> getMicroPhaseId (void) const
 {
-    return micid_;
+    return microPhaseId_;
+}
+
+/**
+@brief Get the list of booleans indicating whether a microstructure
+phase is kinetically controlled
+
+@note Used only in the copy constructor
+
+@return the vector holding phase id numbers
+*/
+vector<bool> getIsKinetic (void) const
+{
+    return isKinetic_;
+}
+
+/**
+@brief Get the kinetic status of a microstructure phase by its id
+
+@param idx is a microstructure id number
+@return true if it is kinetically controlled
+*/
+bool isKinetic (const unsigned int idx)
+{
+    try { return isKinetic_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","isKinetic",
+                           "isKinetic_",isKinetic_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the kinetic status of a microstructure phase by its name
+
+@note NOT USED.
+
+@param micname is the name of a microstructure phase
+@return true if it is kinetically controlled
+*/
+bool isKinetic (const string micname)
+{
+    int idx;
+    try {
+        idx = getMicroPhaseId(micname);
+        return isKinetic_.at(idx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","isKinetic",
+                           "isKinetic_",isKinetic_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Set the kinetic status of a microstructure phase
+
+@param idx is the index of a microstructure phase
+*/
+void setIsKinetic (vector<bool> &isKinetic)
+{
+    isKinetic_ = isKinetic;
+    return;
 }
 
 /**
@@ -1343,8 +1412,8 @@ vector<int> getMicid () const
 bool isIC (const string &icname)
 {
     string msg;
-    map<string,int>::iterator p = ICidlookup_.find(icname);
-    if (p != ICidlookup_.end()) {
+    map<string,int>::iterator p = ICIdLookup_.find(icname);
+    if (p != ICIdLookup_.end()) {
         return true;
     }
     return false;
@@ -1356,16 +1425,16 @@ bool isIC (const string &icname)
 @param icname is the name of the IC
 @return the integer id associated with that IC name (non-negative)
 */
-unsigned int getICid (const string &icname)
+unsigned int getICId (const string &icname)
 {
-    map<string,int>::iterator p = ICidlookup_.find(icname);
-    if (p != ICidlookup_.end()) {
+    map<string,int>::iterator p = ICIdLookup_.find(icname);
+    if (p != ICIdLookup_.end()) {
         return p->second;
     } else {
         if (warning_) {
-            cout << "WARNING: Could not find ICidlookup_ match to " << icname << endl;
+            cout << "WARNING: Could not find ICIdLookup_ match to " << icname << endl;
         }
-        return (ICnum_ + 9999);   // nonsense number should be detected
+        return (numICs_ + 9999);   // nonsense number should be detected
     }
 }
 
@@ -1377,8 +1446,8 @@ unsigned int getICid (const string &icname)
 */
 bool isDC (const string &dcname)
 {
-    map<string,int>::iterator p = DCidlookup_.find(dcname);
-    if (p != DCidlookup_.end()) {
+    map<string,int>::iterator p = DCIdLookup_.find(dcname);
+    if (p != DCIdLookup_.end()) {
         return true;
     }
     return false;
@@ -1390,16 +1459,16 @@ bool isDC (const string &dcname)
 @param dcname is the name of the DC
 @return the integer id associated with that DC name
 */
-unsigned int getDCid (const string &dcname)
+unsigned int getDCId (const string &dcname)
 {
-    map<string,int>::iterator p = DCidlookup_.find(dcname);
-    if (p != DCidlookup_.end()) {
+    map<string,int>::iterator p = DCIdLookup_.find(dcname);
+    if (p != DCIdLookup_.end()) {
         return p->second;
     } else {
         if (warning_) {
-            cout << "Could not find DCidlookup_ match to " << dcname << endl;
+            cout << "Could not find DCIdLookup_ match to " << dcname << endl;
         }
-        return (DCnum_ + 9999);
+        return (numDCs_ + 9999);
     }
 }
 
@@ -1411,8 +1480,8 @@ unsigned int getDCid (const string &dcname)
 */
 bool isGEMPhase (const string &phasename)
 {
-    map<string,int>::iterator p = phaseidlookup_.find(phasename);
-    if (p != phaseidlookup_.end()) {
+    map<string,int>::iterator p = GEMPhaseIdLookup_.find(phasename);
+    if (p != GEMPhaseIdLookup_.end()) {
         return true;
     }
     return false;
@@ -1424,16 +1493,16 @@ bool isGEMPhase (const string &phasename)
 @param phasename is the name of the GEM phase
 @return the integer id associated with that GEM phase name 
 */
-unsigned int getPhaseid (const string &phasename)
+unsigned int getGEMPhaseId (const string &phasename)
 {
-    map<string,int>::iterator p = phaseidlookup_.find(phasename);
-    if (p != phaseidlookup_.end()) {
+    map<string,int>::iterator p = GEMPhaseIdLookup_.find(phasename);
+    if (p != GEMPhaseIdLookup_.end()) {
         return p->second;
     } else {
         if (warning_) {
-            cout <<  "Could not find phaseidlookup_ match to " << phasename << endl;
+            cout <<  "Could not find GEMPhaseIdLookup_ match to " << phasename << endl;
         }
-        return (phasenum_ + 9999);
+        return (numGEMPhases_ + 9999);
     }
 }
 
@@ -1445,23 +1514,25 @@ unsigned int getPhaseid (const string &phasename)
         microstructure phase
 @return the integer id  of the GEM phase stored at position idx in the list
 */
-unsigned int getMic2phase (const int i,
-                           const unsigned int idx)
+unsigned int getMicroPhaseToGEMPhase (const int i,
+                               const unsigned int idx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = mic2phase_.find(i);
-    if (p != mic2phase_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseToGEMPhase_.find(i);
+    if (p != microPhaseToGEMPhase_.end()) {
         if (idx < (p->second).size()) {
             return (p->second)[idx];
         } else {
-            msg = "mic2phase_";
-            EOBException ex("ChemicalSystem","getMic2phase",msg,(p->second).size(),idx);
+            msg = "microPhaseToGEMPhase_";
+            EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+                            msg,(p->second).size(),idx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find mic2phase_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2phase",msg,mic2phase_.size(),0);
+        msg = "Could not find microPhaseToGEMPhase_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+                        msg,microPhaseToGEMPhase_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -1473,15 +1544,16 @@ unsigned int getMic2phase (const int i,
 @param i is integer id of the microstructure phase
 @return the vector of integer ids of the GEM phases for that microstructure phase
 */
-vector<int> getMic2phase (const int i)
+vector<int> getMicroPhaseToGEMPhase (const int i)
 {
     string msg;
-    map<int,vector<int> >::iterator p = mic2phase_.find(i);
-    if (p != mic2phase_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseToGEMPhase_.find(i);
+    if (p != microPhaseToGEMPhase_.end()) {
         return p->second;
     } else {
-        msg = "Could not find mic2phase_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2phase",msg,mic2phase_.size(),0);
+        msg = "Could not find microPhaseToGEMPhase_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+                        msg,microPhaseToGEMPhase_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -1495,23 +1567,25 @@ vector<int> getMic2phase (const int i)
         microstructure phase
 @return the integer id  of the DC stored at position idx in the list
 */
-int getMic2DC (const int i,
-               const unsigned int idx)
+int getMicroPhaseToDC (const int i,
+                const unsigned int idx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = mic2DC_.find(i);
-    if (p != mic2DC_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseToDC_.find(i);
+    if (p != microPhaseToDC_.end()) {
         if (idx < (p->second).size()) {
             return (p->second)[idx];
         } else {
-            msg = "mic2DC_";
-            EOBException ex("ChemicalSystem","getMic2DC",msg,(p->second).size(),idx);
+            msg = "microPhaseToDC_";
+            EOBException ex("ChemicalSystem","getMicroPhaseToDC",
+                            msg,(p->second).size(),idx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find mic2DC_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2DC",msg,mic2DC_.size(),0);
+        msg = "Could not find microPhaseToDC_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseToDC",
+                        msg,microPhaseToDC_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -1525,32 +1599,19 @@ int getMic2DC (const int i,
 @param i is integer id of the microstructure phase
 @return the vector of integer ids of the DCs for that microstructure phase
 */
-vector<int> getMic2DC (const int i)
+vector<int> getMicroPhaseToDC (const int i)
 {
     string msg;
-    map<int,vector<int> >::iterator p = mic2DC_.find(i);
-    if (p != mic2DC_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseToDC_.find(i);
+    if (p != microPhaseToDC_.end()) {
         return p->second;
     } else {
-        msg = "Could not find mic2DC_ match to index provided";
-        EOBException ex("ChemicalSystem","getMic2DC",msg,mic2DC_.size(),0);
+        msg = "Could not find microPhaseToDC_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseToDC",
+                        msg,microPhaseToDC_.size(),0);
         ex.printException();
         exit(1);
     }
-}
-
-/**
-@brief Determine if a given microstructure phase is kinetically controlled.
-
-@param idx is integer id of the microstructure phase
-@return true if the phase is kinetically controlled, false otherwise
-*/
-bool isKineticphase (const int idx)
-{
-    for (int i = 0; i < kineticphase_.size(); ++i) {
-        if (kineticphase_[i] == idx) return true;
-    }
-    return false;
 }
 
 /**
@@ -1558,24 +1619,24 @@ bool isKineticphase (const int idx)
 
 @note NOT USED.
 
-@param micid is integer id of the microstructure phase
-@param dcid is the integer id of the DC
+@param microPhaseid is integer id of the microstructure phase
+@param DCid is the integer id of the DC
 */
-void setMic2DC (const int micid,
-                const int dcid)
+void setMicroPhaseToDC (const int microPhaseid,
+                    const int DCid)
 {
-    map<int,vector<int> >::iterator p = mic2DC_.find(micid);
-    if (p == mic2DC_.end()) {
-        vector<int> dumvec;
-        dumvec.clear();
-        dumvec.push_back(dcid);
-        mic2DC_.insert(make_pair(micid,dumvec));
+    map<int,vector<int> >::iterator p = microPhaseToDC_.find(microPhaseid);
+    if (p == microPhaseToDC_.end()) {
+        vector<int> DCvector;
+        DCvector.clear();
+        DCvector.push_back(DCid);
+        microPhaseToDC_.insert(make_pair(microPhaseid,DCvector));
     } else {
         bool found = false;
         for (unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
-            if ((p->second)[i] == dcid) found = true;
+            if ((p->second)[i] == DCid) found = true;
         }
-        if (!found) (p->second).push_back(dcid);
+        if (!found) (p->second).push_back(DCid);
     }
 }
 
@@ -1584,24 +1645,24 @@ void setMic2DC (const int micid,
 
 @note NOT USED.
 
-@param micid is integer id of the microstructure phase
-@param phaseid is the integer id of the GEM phase
+@param microPhaseid is integer id of the microstructure phase
+@param GEMphaseid is the integer id of the GEM phase
 */
-void setMic2phase (const int micid,
-                   const int phaseid)
+void setMicroPhaseToGEMPhase (const int microPhaseid,
+                       const int GEMphaseid)
 {
-    map<int,vector<int> >::iterator p = mic2phase_.find(micid);
-    if (p == mic2phase_.end()) {
-        vector<int> dumvec;
-        dumvec.clear();
-        dumvec.push_back(phaseid);
-        mic2phase_.insert(make_pair(micid,dumvec));
+    map<int,vector<int> >::iterator p = microPhaseToGEMPhase_.find(microPhaseid);
+    if (p == microPhaseToGEMPhase_.end()) {
+        vector<int> GEMphasevector;
+        GEMphasevector.clear();
+        GEMphasevector.push_back(GEMphaseid);
+        microPhaseToGEMPhase_.insert(make_pair(microPhaseid,GEMphasevector));
     } else {
         bool found = false;
         for (unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
-            if ((p->second)[i] == phaseid) found = true;
+            if ((p->second)[i] == GEMphaseid) found = true;
         }
-        if (!found) (p->second).push_back(phaseid);
+        if (!found) (p->second).push_back(GEMphaseid);
     }
 }
 
@@ -1610,13 +1671,13 @@ void setMic2phase (const int micid,
 
 @note NOT USED.
 
-@param micname is the name of the microstructure phase
+@param microPhasename is the name of the microstructure phase
 @return the vector of integer ids of the GEM phases for that microstructure phase
 */
-vector<int> getMic2phase (const string &micname)
+vector<int> getMicroPhaseToGEMPhase (const string &microPhasename)
 {
-    int i = (int)(getMicid(micname));
-    return (getMic2phase(i));
+    int i = (int)(getMicroPhaseId(microPhasename));
+    return (getMicroPhaseToGEMPhase(i));
 }
 
 /**
@@ -1626,9 +1687,9 @@ vector<int> getMic2phase (const string &micname)
 
 @return the map relating every microstructure phase to a list of its associated GEM phases
 */
-map<int,vector<int> > getMic2phase () const
+map<int,vector<int> > getMicroPhaseToGEMPhase (void) const
 {
-    return mic2phase_;
+    return microPhaseToGEMPhase_;
 }
 
 /**
@@ -1638,121 +1699,9 @@ map<int,vector<int> > getMic2phase () const
 
 @return the map relating every microstructure phase to a list of its DCs
 */
-map<int,vector<int> > getMic2DC () const
+map<int,vector<int> > getMicroPhaseToDC (void) const
 {
-    return mic2DC_;
-}
-
-/**
-@brief Add a microstructure phase id to the list of phases that are kinetically controlled.
-
-@todo We should change the name from kineticphase_ to something else because
-there is also a kineticphase_ data member in the KineticModel class that
-means something different.
-
-@param idx is the phase id number to add to the kinetic control list
-*/
-void setKineticphase (const unsigned int idx)
-{
-    string msg;
-    bool found = false;
-    if (idx >= phasenum_) {
-        msg = "kineticphase_";
-        EOBException ex("ChemicalSystem","setKineticphase",msg,phasenum_,idx);
-        ex.printException();
-        exit(1);
-    }
-    for (unsigned int i = 0; (i < kineticphase_.size() && !found); i++) {
-        if (kineticphase_[i] == idx) found = true;
-    }
-    if (!found) kineticphase_.push_back(idx);
-    return;
-}
-
-/**
-@brief Get the microstructure id of a kinetically controlled phase.
-
-@param idx is the element number in the vector of kinetic phases
-@return the microstructure phase id of that element
-*/
-int getKineticphase (const unsigned int idx)
-{
-    try {
-        return kineticphase_.at(idx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getKineticphase","kineticphase_",
-                        kineticphase_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Add a phase id to the list of phases that are thermodynamically controlled.
-
-@param idx is the phase id number to add to the thermodynamic control list
-*/
-void setThermophase (const unsigned int idx)
-{
-    string msg;
-    bool found = false;
-    if (idx >= phasenum_) {
-        msg = "thermophase_";
-        EOBException ex("ChemicalSystem","setThermophase",msg,phasenum_,idx);
-        ex.printException();
-        exit(1);
-    }
-    for (unsigned int i = 0; (i < thermophase_.size() && !found); i++) {
-        if (thermophase_[i] == idx) found = true;
-    }
-    if (!found) thermophase_.push_back(idx);
-    return;
-}
-
-/**
-@brief Get the thermodynamic phase id of a microstructure phase.
-
-@note NOT USED.
-
-@param idx is the element number in the vector of thermodynamic phases
-@return the microstructure phase id of that thermodynamically controlled phase
-*/
-int getThermophase (const unsigned int idx)
-{
-    try {
-        return thermophase_.at(idx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getThermophase","thermophase_",
-                        thermophase_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the whole list of kinetically controlled phases.
-
-@note Used only in this class's copy constructor.
-
-@return the vector of ids of all microstructure phases that are kinetically controlled
-*/
-vector<int> getKineticphase () const
-{
-    return kineticphase_;
-}
-
-/**
-@brief Get the whole list of thermodynamically controlled phases.
-
-@note Used only in this class's copy constructor.
-
-@return the vector of ids of all microstructure phases that are thermodynamically controlled
-*/
-vector<int> getThermophase () const
-{
-    return thermophase_;
+    return microPhaseToDC_;
 }
 
 /**
@@ -1766,9 +1715,9 @@ we have special id tags for the four clinker phases.
 
 @param val is the integer id of the tricalcium silicate phase
 */
-void setC3sid (const int val)
+void setC3sId (const int val)
 {
-    c3sid_ = val;
+    c3sId_ = val;
 }
 
 /**
@@ -1782,9 +1731,9 @@ we have special id tags for the four clinker phases.
 
 @return the integer id of the tricalcium silicate phase
 */
-int getC3sid () const
+int getC3sId (void) const
 {
-    return c3sid_;
+    return c3sId_;
 }
 
 /**
@@ -1798,9 +1747,9 @@ we have special id tags for the four clinker phases.
 
 @param val is the integer id of the dicalcium silicate phase
 */
-void setC2sid (const int val)
+void setC2sId (const int val)
 {
-    c2sid_ = val;
+    c2sId_ = val;
 }
 
 /**
@@ -1814,9 +1763,9 @@ we have special id tags for the four clinker phases.
 
 @return the integer id of the dicalcium silicate phase
 */
-int getC2sid () const
+int getC2sId (void) const
 {
-    return c2sid_;
+    return c2sId_;
 }
 
 /**
@@ -1830,9 +1779,9 @@ we have special id tags for the four clinker phases.
 
 @param val is the integer id of the tricalcium aluminate phase
 */
-void setC3aid (const int val)
+void setC3aId (const int val)
 {
-    c3aid_ = val;
+    c3aId_ = val;
 }
 
 /**
@@ -1846,9 +1795,9 @@ we have special id tags for the four clinker phases.
 
 @return the integer id of the tricalcium aluminate phase
 */
-int getC3aid () const
+int getC3aId (void) const
 {
-    return c3aid_;
+    return c3aId_;
 }
 
 /**
@@ -1862,9 +1811,9 @@ we have special id tags for the four clinker phases.
 
 @param val is the integer id of the tetracalcium aluminoferrite phase
 */
-void setC4afid (const int val)
+void setC4afId (const int val)
 {
-    c4afid_ = val;
+    c4afId_ = val;
 }
 
 /**
@@ -1878,9 +1827,9 @@ we have special id tags for the four clinker phases.
 
 @return the integer id of the tetracalcium aluminoferrite phase
 */
-int getC4afid () const
+int getC4afId (void) const
 {
-    return c4afid_;
+    return c4afId_;
 }
 
 /**
@@ -1894,9 +1843,9 @@ we have special id tags for the soluble calcium sulfates.
 
 @param val is the integer id of the calcium sulfate dihydrate phase
 */
-void setGypsumid (const int val)
+void setGypsumId (const int val)
 {
-    gypsumid_ = val;
+    gypsumId_ = val;
 }
 
 /**
@@ -1910,9 +1859,9 @@ we have special id tags for the soluble calcium sulfates.
 
 @return the integer id of the calcium sulfate dihydrate phase
 */
-int getGypsumid() const
+int getGypsumId (void) const
 {
-    return gypsumid_;
+    return gypsumId_;
 }
 
 /**
@@ -1930,16 +1879,16 @@ cause more severe shuffling of the ordered list of growth sites.
 @param idx is the microstructure phase id
 @param gmval is the random growth parameter value to set for that phase
 */
-void setRandomgrowth (const unsigned int idx,
+void setRandomGrowth (const unsigned int idx,
                       double gmval)
 {
-    if (idx < randomgrowth_.size()) {
+    if (idx < randomGrowth_.size()) {
         if (gmval > 1.0) gmval = 1.0;
         if (gmval < 0.0) gmval = 0.0;
-        randomgrowth_[idx] = gmval;
+        randomGrowth_[idx] = gmval;
     } else {
-        EOBException ex("ChemicalSystem","setRandomgrowth","randomgrowth_",
-                        randomgrowth_.size(),idx);
+        EOBException ex("ChemicalSystem","setRandomGrowth",
+                        "randomGrowth_",randomGrowth_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1958,14 +1907,14 @@ cause more severe shuffling of the ordered list of growth sites.
 @param idx is the microstructure phase id
 @return the random growth parameter value for that phase
 */
-double getRandomgrowth (const unsigned int idx)
+double getRandomGrowth (const unsigned int idx)
 {
     try {
-        return randomgrowth_.at(idx);
+        return randomGrowth_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getRandomgrowth","randomgrowth_",
-                        randomgrowth_.size(),idx);
+        EOBException ex("ChemicalSystem","getRandomGrowth",
+                        "randomGrowth_",randomGrowth_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1985,9 +1934,9 @@ cause more severe shuffling of the ordered list of growth sites.
 
 @return the vector of random growth parameters for all microstructure phases
 */
-vector<double> getRandomgrowth () const
+vector<double> getRandomGrowth (void) const
 {
-    return randomgrowth_;
+    return randomGrowth_;
 }
 
 /**
@@ -2013,7 +1962,8 @@ vector<int> calcGrowthtemplate (vector<int> affty)
     }
     catch (out_of_range &oor) {
         msg = "affty index is out of range";
-        EOBException ex("ChemicalSystem","calcGrowthtemplate",msg,affty.size(),i);
+        EOBException ex("ChemicalSystem","calcGrowthtemplate",
+                        msg,affty.size(),i);
         ex.printException();
         exit(1);
     }
@@ -2029,15 +1979,16 @@ This function seeks a requested template for growth of a phase.
 @param idx is the microstructure phase id
 @return the list of all templates for growth of that phase
 */
-vector<int> getGrowthtemplate (const unsigned int idx)
+vector<int> getGrowthTemplate (const unsigned int idx)
 {
     string msg;
     try {
-        return growthtemplate_.at(idx);
+        return growthTemplate_.at(idx);
     }
     catch (out_of_range &oor) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","getGrowthtemplate",msg,growthtemplate_.size(),idx);
+        msg = "growthTemplate_";
+        EOBException ex("ChemicalSystem","getGrowthTemplate",
+                        msg,growthTemplate_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2058,24 +2009,25 @@ a low energy barrier for heterogeneous nucleation.
 @param jdx is the element to query in the list of templates for phase idx
 @return the integer id of the growth template phase at element jdx
 */
-int getGrowthtemplate (const unsigned int idx,
+int getGrowthTemplate (const unsigned int idx,
                        const unsigned int jdx)
 {
     string msg;
-    if (idx >= growthtemplate_.size()) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","getGrowthtemplate",msg,growthtemplate_.size(),idx);
+    if (idx >= growthTemplate_.size()) {
+        msg = "growthTemplate_";
+        EOBException ex("ChemicalSystem","getGrowthTemplate",
+                        msg,growthTemplate_.size(),idx);
         ex.printException();
         exit(1);
     }
-    if (jdx >= growthtemplate_[idx].size()) {
-        msg = "growthtemplate_";
-        EOBException ex("ChemicalSystem","getGrowthtemplate",
-                            msg,growthtemplate_[idx].size(),jdx);
+    if (jdx >= growthTemplate_[idx].size()) {
+        msg = "growthTemplate_";
+        EOBException ex("ChemicalSystem","getGrowthTemplate",
+                            msg,growthTemplate_[idx].size(),jdx);
         ex.printException();
         exit(1);
     }
-    return growthtemplate_[idx][jdx];
+    return growthTemplate_[idx][jdx];
 }
 
 /**
@@ -2091,9 +2043,9 @@ a low energy barrier for heterogeneous nucleation.
 
 @return the whole growth template list for all phases
 */
-vector<vector<int> > getGrowthtemplate () const
+vector<vector<int> > getGrowthTemplate (void) const
 {
-    return growthtemplate_;
+    return growthTemplate_;
 }
 
 /**
@@ -2109,13 +2061,13 @@ a low energy barrier for heterogeneous nucleation.
 @param gtmpid is the id of another phase that may or may not be a template
 @return true if gtmpid is a template for growth of gphaseid, false otherwise
 */
-bool isGrowthtemplate (const unsigned int gphaseid,
+bool isGrowthTemplate (const unsigned int gphaseid,
                        int gtmpid)
 {
     bool answer = false;
     for (unsigned int i = 0;
-            (i < growthtemplate_[gphaseid].size()) && (!answer); i++) {
-        if (growthtemplate_[gphaseid][i] == gtmpid) answer = true;
+            (i < growthTemplate_[gphaseid].size()) && (!answer); i++) {
+        if (growthTemplate_[gphaseid][i] == gtmpid) answer = true;
     }
     return answer;
 }
@@ -2144,7 +2096,8 @@ void setAffinity (const unsigned int idx,
     }
     catch (out_of_range &oor) {
         msg = "affinity_";
-        EOBException ex("ChemicalSystem","setAffinity",msg,affinity_.size(),idx);
+        EOBException ex("ChemicalSystem","setAffinity",
+                        msg,affinity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2173,7 +2126,8 @@ void setAffinity (const unsigned int idx,
     string msg;
     if (idx >= affinity_.size()) {
         msg = "affinity_";
-        EOBException ex("ChemicalSystem","setAffinity",msg,affinity_.size(),idx);
+        EOBException ex("ChemicalSystem","setAffinity",
+                        msg,affinity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2236,7 +2190,8 @@ int getAffinity (const unsigned int idx,
     string msg;
     if (idx >= affinity_.size()) {
         msg = "affinity_";
-        EOBException ex("ChemicalSystem","getAffinity",msg,affinity_.size(),idx);
+        EOBException ex("ChemicalSystem","getAffinity",
+                        msg,affinity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2264,7 +2219,7 @@ cause more severe shuffling of the ordered list of growth sites.
 
 @return the list of all integer affinities for all the templates for growth of all phases
 */
-vector<vector<int> > getAffinity () const
+vector<vector<int> > getAffinity (void) const
 {
     return affinity_;
 }
@@ -2285,7 +2240,8 @@ void setK2o (const unsigned int idx,
         k2o_.at(idx) = ival;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setK2o","k2o_",k2o_.size(),idx);
+        EOBException ex("ChemicalSystem","setK2o","k2o_",
+                        k2o_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2308,7 +2264,8 @@ void setNa2o (const unsigned int idx,
         na2o_.at(idx) = ival;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setNa2o","na2o_",na2o_.size(),idx);
+        EOBException ex("ChemicalSystem","setNa2o","na2o_",
+                        na2o_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2331,7 +2288,8 @@ void setMgo (const unsigned int idx,
         mgo_.at(idx) = ival;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMgo","mgo_",mgo_.size(),idx);
+        EOBException ex("ChemicalSystem","setMgo","mgo_",
+                        mgo_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2354,7 +2312,8 @@ void setSo3 (const unsigned int idx,
         so3_.at(idx) = ival;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setSo3","so3_",so3_.size(),idx);
+        EOBException ex("ChemicalSystem","setSo3","so3_",
+                        so3_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2393,7 +2352,8 @@ double getNa2o (const unsigned int idx)
         return na2o_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getNa2o","na2o_",na2o_.size(),idx);
+        EOBException ex("ChemicalSystem","getNa2o","na2o_",
+                        na2o_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2412,7 +2372,8 @@ double getMgo (const unsigned int idx)
         return mgo_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMgo","mgo_",mgo_.size(),idx);
+        EOBException ex("ChemicalSystem","getMgo","mgo_",
+                        mgo_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2431,7 +2392,8 @@ double getSo3 (const unsigned int idx)
         return so3_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getSo3","so3_",so3_.size(),idx);
+        EOBException ex("ChemicalSystem","getSo3","so3_",
+                        so3_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2445,7 +2407,7 @@ double getSo3 (const unsigned int idx)
 @return a list of the mass percentages of potassium in all clinker phases on an oxide basis,
        with units of g per 100 g of each clinker phase
 */
-vector<double> getK2o () const
+vector<double> getK2o (void) const
 {
     return k2o_;
 }
@@ -2458,7 +2420,7 @@ vector<double> getK2o () const
 @return a list of the mass percentages of sodium in all clinker phases on an oxide basis,
        with units of g per 100 g of each clinker phase
 */
-vector<double> getNa2o () const
+vector<double> getNa2o (void) const
 {
     return na2o_;
 }
@@ -2471,7 +2433,7 @@ vector<double> getNa2o () const
 @return a list of the mass percentages of magnesium in all clinker phases on an oxide basis,
        with units of g per 100 g of each clinker phase
 */
-vector<double> getMgo () const
+vector<double> getMgo (void) const
 {
     return mgo_;
 }
@@ -2484,7 +2446,7 @@ vector<double> getMgo () const
 @return a list of the mass percentages of sulfur in all clinker phases on an oxide basis,
        with units of g per 100 g of each clinker phase
 */
-vector<double> getSo3 () const
+vector<double> getSo3 (void) const
 {
     return so3_;
 }
@@ -2515,7 +2477,8 @@ void setPorosity (const unsigned int idx,
         porosity_.at(idx) = pval;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setPorosity","porosity_",porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","setPorosity","porosity_",
+                        porosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2549,7 +2512,8 @@ double getPorosity (const unsigned int idx)
         return porosity_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPorosity","porosity_",porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","getPorosity",
+                        "porosity_",porosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2566,12 +2530,13 @@ needs to be checked to see what the convention ensures compatibility with that l
 */
 double getPorosity (const string &str)
 {
-    int idx = getMicid(str);
+    int idx = getMicroPhaseId(str);
     try {
         return porosity_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPorosity","porosity_",porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","getPorosity",
+                        "porosity_",porosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2608,14 +2573,14 @@ vector<double> getPorosity() const
 @param idx is the microstructure phase in question
 @param mpvec is the vector of all GEM CSD phase ids associated with the microstructure phase
 */
-void setMicphasemembers (const unsigned int idx,
+void setMicroPhaseMembers (const unsigned int idx,
                          vector<int> mpvec)
 {
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         p->second = mpvec;
     } else {
-        micphasemembers_.insert(make_pair(idx,mpvec));
+        microPhaseMembers_.insert(make_pair(idx,mpvec));
     }
 }
 
@@ -2628,23 +2593,26 @@ void setMicphasemembers (const unsigned int idx,
 @param jdx is the element position in the list of all GEM CSD phases for microstructure phase idx
 @param val is GEM CSD phase id to assign to this element in the list
 */
-void setMicphasemembers(const unsigned int idx,
-                        const unsigned int jdx,
-                        const unsigned int val)
+void setMicroPhaseMembers(const unsigned int idx,
+                          const unsigned int jdx,
+                          const unsigned int val)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         if (jdx < (p->second).size()) {
             (p->second)[jdx] = val;
         } else {
-            EOBException ex("ChemicalSystem","setMicphasemembers","micphasemembers_",micphasemembers_.size(),jdx);
+            EOBException ex("ChemicalSystem","setMicroPhaseMembers",
+                            "microPhaseMembers_",
+                            microPhaseMembers_.size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micphasemembers_ match to index provided";
-        EOBException ex("ChemicalSystem","setMicphasemembers",msg,micphasemembers_.size(),0);
+        msg = "Could not find microPhaseMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","setMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2658,15 +2626,16 @@ void setMicphasemembers(const unsigned int idx,
 @param idx is the microstructure phase in question
 @return the vector of all GEM CSD phase ids associated with the microstructure phase
 */
-vector<int> getMicphasemembers (const unsigned int idx)
+vector<int> getMicroPhaseMembers (const unsigned int idx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micphasemembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembers",msg,micphasemembers_.size(),0);
+        msg = "Could not find microPhaseMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2677,19 +2646,20 @@ vector<int> getMicphasemembers (const unsigned int idx)
 
 @note NOT USED.
 
-@param stre is the name of the microstructure phase in question
+@param str is the name of the microstructure phase in question
 @return the vector of all GEM CSD phase ids associated with the microstructure phase
 */
-vector<int> getMicphasemembers (const string &str)
+vector<int> getMicroPhaseMembers (const string &str)
 {
     string msg;
-    int idx = getMicid(str);
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    int idx = getMicroPhaseId(str);
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micphasemembers_ match to " + str;
-        EOBException ex("ChemicalSystem","getMicphasemembers",msg,micphasemembers_.size(),0);
+        msg = "Could not find microPhaseMembers_ match to " + str;
+        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2704,23 +2674,24 @@ vector<int> getMicphasemembers (const string &str)
 @param jdx is the element position in the list of all GEM CSD phases for microstructure phase idx
 @return the GEM CSD phase id at element jdx in the list
 */
-unsigned int getMicphasemembers(const unsigned int idx,
-                                const unsigned int jdx)
+unsigned int getMicroPhaseMembers(const unsigned int idx,
+                                  const unsigned int jdx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
-            EOBException ex("ChemicalSystem","getMicphasemembers",
-                            "micphasemembers_",(p->second).size(),jdx);
+            EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                            "microPhaseMembers_",(p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micphasemembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembers",msg,micphasemembers_.size(),0);
+        msg = "Could not find microPhaseMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2735,24 +2706,25 @@ unsigned int getMicphasemembers(const unsigned int idx,
 @param jdx is the element position in the list of all GEM CSD phases for microstructure phase idx
 @return the GEM CSD phase id at element jdx in the list
 */
-unsigned int getMicphasemembers (const string &str,
-                                 const unsigned int jdx)
+unsigned int getMicroPhaseMembers (const string &str,
+                                   const unsigned int jdx)
 {
     string msg;
-    int idx = getMicid(str);
-    map<int,vector<int> >::iterator p = micphasemembers_.find(idx);
-    if (p != micphasemembers_.end()) {
+    int idx = getMicroPhaseId(str);
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
-            EOBException ex("ChemicalSystem","getMicphasemembers",
-                            "micphasemembers_",(p->second).size(),jdx);
+            EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                            "microPhaseMembers_",(p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micphasemembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembers",msg,micphasemembers_.size(),0);
+        msg = "Could not find microPhaseMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2765,9 +2737,14 @@ unsigned int getMicphasemembers (const string &str,
 
 @return the map of all GEM CSD associations for all microstructure phases
 */
-map<int, vector<int> > getMicphasemembers () const
+map<int, vector<int> > getMicroPhaseMembers (void) const
 {
-    return micphasemembers_;
+    return microPhaseMembers_;
+}
+
+map<int,vector<double> > getMicroPhaseMemberVolumeFraction (void) const
+{
+    return microPhaseMemberVolumeFraction_;
 }
 
 /**
@@ -2778,16 +2755,17 @@ map<int, vector<int> > getMicphasemembers () const
 @param idx is the integer id of the microstructure phase
 @return the vector of volume fractions of each GEM CSD phase for this microstructure phase
 */
-vector<double> getMicphasemembersvolfrac (const unsigned int idx)
+vector<double> getMicroPhaseMemberVolumeFraction (const unsigned int idx)
 {
     string msg;
-    map<int,vector<double> >::iterator p = micphasemembersvolfrac_.find(idx);
-    if (p != micphasemembersvolfrac_.end()) {
+    map<int,vector<double> >::iterator p = microPhaseMemberVolumeFraction_.find(idx);
+    if (p != microPhaseMemberVolumeFraction_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micphasemembersvolfrac_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembersvolfrac_",
-                        msg,micphasemembersvolfrac_.size(),0);
+        msg = "Could not find microPhaseMemberVolumeFraction_ match to index provided";
+        EOBException ex("ChemicalSystem",
+                        "getMicroPhaseMemberVolumeFraction",
+                        msg,microPhaseMemberVolumeFraction_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2802,24 +2780,27 @@ vector<double> getMicphasemembersvolfrac (const unsigned int idx)
 @param jdx is the element position in the list of all GEM CSD phases for microstructure phase idx
 @return the volume fraction of that GEM CSD phase id at element jdx in the list
 */
-double getMicphasemembersvolfrac (const unsigned int idx,
-                                  const unsigned int jdx)
+double getMicroPhaseMemberVolumeFraction (const unsigned int idx,
+                                          const unsigned int jdx)
 {
     string msg;
-    map<int,vector<double> >::iterator p = micphasemembersvolfrac_.find(idx);
-    if (p != micphasemembersvolfrac_.end()) {
+    map<int,vector<double> >::iterator p = microPhaseMemberVolumeFraction_.find(idx);
+    if (p != microPhaseMemberVolumeFraction_.end()) {
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
-            EOBException ex("ChemicalSystem","getMicphasemembersvolfrac",
-                            "micphasemembersvolfrac_",(p->second).size(),jdx);
+            EOBException ex("ChemicalSystem",
+                            "getMicroPhaseMemberVolumeFraction",
+                            "microPhaseMemberVolumeFraction_",
+                            (p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micphasemembersvolfrac_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembersvolfrac",msg,
-                        micphasemembersvolfrac_.size(),0);
+        msg = "Could not find microPhaseMemberVolumeFraction_ match to index provided";
+        EOBException ex("ChemicalSystem",
+                        "getMicroPhaseMemberVolumeFraction",msg,
+                        microPhaseMemberVolumeFraction_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2834,14 +2815,14 @@ double getMicphasemembersvolfrac (const unsigned int idx,
 @param idx is the microstructure phase in question
 @param mpvec is the list of all DCs for that phase
 */
-void setMicDCmembers (const unsigned int idx,
+void setMicroPhaseDCMembers (const unsigned int idx,
                       vector<int> mpvec)
 {
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         p->second = mpvec;
     } else {
-        micDCmembers_.insert(make_pair(idx,mpvec));
+        microPhaseDCMembers_.insert(make_pair(idx,mpvec));
     }
 }
 
@@ -2854,23 +2835,25 @@ void setMicDCmembers (const unsigned int idx,
 @param jdx is the element position in the list of all GEM CSD phases for microstructure phase idx
 @param val is the DC component id to set at that position in the list
 */
-void setMicDCmembers (const unsigned int idx,
+void setMicroPhaseDCMembers (const unsigned int idx,
                       const unsigned int jdx,
                       const unsigned int val)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         if (jdx < (p->second).size()) {
             (p->second)[jdx] = val;
         } else {
-            EOBException ex("ChemicalSystem","setMicDCmembers","micDCmembers_",(p->second).size(),jdx);
+            EOBException ex("ChemicalSystem","setMicroPhaseDCMembers",
+                            "microPhaseDCMembers_",(p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","setMicDCmembers",msg,micDCmembers_.size(),0);
+        msg = "Could not find microPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","setMicroPhaseDCMembers",
+                        msg,microPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2884,15 +2867,16 @@ void setMicDCmembers (const unsigned int idx,
 @param idx is the microstructure phase id in question
 @return the list of all DC component ids for that phase
 */
-vector<int> getMicDCmembers (const unsigned int idx)
+vector<int> getMicroPhaseDCMembers (const unsigned int idx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicDCmembers",msg,micDCmembers_.size(),0);
+        msg = "Could not find microPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                        msg,microPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2906,16 +2890,17 @@ vector<int> getMicDCmembers (const unsigned int idx)
 @param str is the name of the microstructure phase in question
 @return the list of all DC component ids for that phase
 */
-vector<int> getMicDCmembers (const string &str)
+vector<int> getMicroPhaseDCMembers (const string &str)
 {
     string msg;
-    int idx = getMicid(str);
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    int idx = getMicroPhaseId(str);
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find micDCmembers_ match to " + str;
-        EOBException ex("ChemicalSystem","getMicDCmembers",msg,micDCmembers_.size(),0);
+        msg = "Could not find microPhaseDCMembers_ match to " + str;
+        EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                        msg,microPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2930,22 +2915,24 @@ vector<int> getMicDCmembers (const string &str)
 @param jdx is the element position in the list of all DCs for microstructure phase idx
 @return the DC component id to set at that position in the list
 */
-unsigned int getMicDCmembers (const unsigned int idx,
+unsigned int getMicroPhaseDCMembers (const unsigned int idx,
                               const unsigned int jdx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
-            EOBException ex("ChemicalSystem","getMicDCmembers","micDCmembers_",(p->second).size(),jdx);
+            EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                            "microPhaseDCMembers_",(p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicDCmembers",msg,micDCmembers_.size(),0);
+        msg = "Could not find microPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                        msg,microPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2960,24 +2947,26 @@ unsigned int getMicDCmembers (const unsigned int idx,
 @param jdx is the element position in the list of all DCs for microstructure phase idx
 @return the DC component id to set at that position in the list
 */
-unsigned int getMicDCmembers (const string &str,
+unsigned int getMicroPhaseDCMembers (const string &str,
                               const unsigned int jdx)
 {
     string msg;
-    int idx = getMicid(str);
-    map<int,vector<int> >::iterator p = micDCmembers_.find(idx);
-    if (p != micDCmembers_.end()) {
+    int idx = getMicroPhaseId(str);
+    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+    if (p != microPhaseDCMembers_.end()) {
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
-            EOBException ex("ChemicalSystem","getMicDCmembers","micDCmembers_",
+            EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                            "microPhaseDCMembers_",
                             (p->second).size(),jdx);
             ex.printException();
             exit(1);
         }
     } else {
-        msg = "Could not find micDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicDCmembers",msg,micDCmembers_.size(),0);
+        msg = "Could not find microPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
+                        msg,microPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2991,9 +2980,9 @@ unsigned int getMicDCmembers (const string &str,
 
 @return the map of all DC component ids for every microstructure phase
 */
-map<int, vector<int> > getMicDCmembers () const
+map<int, vector<int> > getMicroPhaseDCMembers (void) const
 {
-    return micDCmembers_;
+    return microPhaseDCMembers_;
 }
 
 /**
@@ -3002,15 +2991,16 @@ map<int, vector<int> > getMicDCmembers () const
 @param idx is the GEM phase id in question
 @return the list of all DC component ids for that GEM phase
 */
-vector<int> getPhaseDCmembers (const unsigned int idx)
+vector<int> getGEMPhaseDCMembers (const unsigned int idx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = phaseDCmembers_.find(idx);
-    if (p != phaseDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(idx);
+    if (p != GEMPhaseDCMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find phaseDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getPhaseDCmembers",msg,phaseDCmembers_.size(),0);
+        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
+                        msg,GEMPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -3024,16 +3014,17 @@ vector<int> getPhaseDCmembers (const unsigned int idx)
 @param str is the GEM phase name in question
 @return the list of all DC component ids for that GEM phase
 */
-vector<int> getPhaseDCmembers (const string &str)
+vector<int> getGEMPhaseDCMembers (const string &str)
 {
     string msg;
-    int pidx = getPhaseid(str);
-    map<int,vector<int> >::iterator p = phaseDCmembers_.find(pidx);
-    if (p != phaseDCmembers_.end()) {
+    int pidx = getGEMPhaseId(str);
+    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(pidx);
+    if (p != GEMPhaseDCMembers_.end()) {
         return p->second;
     } else {
-        msg = "Could not find phaseDCmembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getPhaseDCmembers",msg,phaseDCmembers_.size(),0);
+        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
+                        msg,GEMPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -3048,23 +3039,24 @@ vector<int> getPhaseDCmembers (const string &str)
 @param jdx is the element position in the list of all DCs for GEM phase idx
 @return the DC component id to set at that position in the list
 */
-unsigned int getPhaseDCmembers (const unsigned int idx,
+unsigned int getGEMPhaseDCMembers (const unsigned int idx,
                                 const unsigned int jdx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = phaseDCmembers_.find(idx);
-    if (p != phaseDCmembers_.end()) {
+    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(idx);
+    if (p != GEMPhaseDCMembers_.end()) {
         if (jdx < (p->second).size()) {
            return (p->second)[jdx];
         } else {
-           EOBException ex("ChemicalSystem","getPhaseDCmembers",
-                           "phaseDCmembers_",(p->second).size(),jdx);
+           EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
+                           "GEMPhaseDCMembers_",(p->second).size(),jdx);
            ex.printException();
            exit(1);
         }
     } else {
-        msg = "Could not find micphasemembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicphasemembers",msg,phaseDCmembers_.size(),0);
+        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
+                        msg,GEMPhaseDCMembers_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -3079,7 +3071,7 @@ unsigned int getPhaseDCmembers (const unsigned int idx,
 @param jdx is the element position in the list of all DCs for GEM phase idx
 @return the DC component id to set at that position in the list
 */
-unsigned int getPhaseDCmembers (const string &str,
+unsigned int getGEMPhaseDCMembers (const string &str,
                                 const unsigned int jdx);
 
 /**
@@ -3088,13 +3080,13 @@ unsigned int getPhaseDCmembers (const string &str,
 @param idx is the GEM IC id to set
 @param val is the number of moles to assign to that IC
 */
-void setICmoles (const unsigned int idx,
+void setICMoles (const unsigned int idx,
                  const double val)
 {
-    if (idx < ICnum_) {
-        ICmoles_[idx] = val;
+    if (idx < numICs_) {
+        ICMoles_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setICmoles","ICmoles_",ICnum_,idx);
+        EOBException ex("ChemicalSystem","setICMoles","ICMoles_",numICs_,idx);
         ex.printException();
         exit(1);
     }
@@ -3108,9 +3100,9 @@ void setICmoles (const unsigned int idx,
 
 @return a pointer to the list of number of moles assigned to each IC
 */
-double *getICmoles () const
+double *getICMoles (void) const
 {
-    return ICmoles_;
+    return ICMoles_;
 }
 
 /**
@@ -3119,12 +3111,12 @@ double *getICmoles () const
 @param idx is the GEM IC id to query
 @return the number of moles assigned to that IC
 */
-double getICmoles (const unsigned int idx)
+double getICMoles (const unsigned int idx)
 {
-    if (idx < ICnum_) {
-        return ICmoles_[idx];
+    if (idx < numICs_) {
+        return ICMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getICmoles","ICmoles_",ICnum_,idx);
+        EOBException ex("ChemicalSystem","getICMoles","ICMoles_",numICs_,idx);
         ex.printException();
         exit(1);
     }
@@ -3134,12 +3126,12 @@ double getICmoles (const unsigned int idx)
 @brief Output the number of moles of every independent component (IC) in the system.
 
 */
-void writeICmoles ()
+void writeICMoles (void)
 {
     cout << endl;
     cout << "Vector of Independent Components:" << endl;
-    for (unsigned int i = 0; i < ICnum_; i++) {
-        cout << "    " << ICname_[i] << ": " << ICmoles_[i] << " mol" << endl;
+    for (unsigned int i = 0; i < numICs_; i++) {
+        cout << "    " << ICName_[i] << ": " << ICMoles_[i] << " mol" << endl;
     }
     cout << endl;
     cout.flush();
@@ -3152,12 +3144,12 @@ void writeICmoles ()
 @param idx is the GEM DC id to set
 @param val is the number of moles to assign to that DC
 */
-void setDCmoles (const unsigned int idx, const double val)
+void setDCMoles (const unsigned int idx, const double val)
 {
-    if (idx < DCnum_) {
-        DCmoles_[idx] = val;
+    if (idx < numDCs_) {
+        DCMoles_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setDCmoles","DCmoles_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","setDCMoles","DCMoles_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -3171,9 +3163,9 @@ void setDCmoles (const unsigned int idx, const double val)
 
 @return a pointer to the list of number of moles assigned to each DC
 */
-double *getDCmoles () const
+double *getDCMoles (void) const
 {
-    return DCmoles_;
+    return DCMoles_;
 }
 
 /**
@@ -3182,12 +3174,12 @@ double *getDCmoles () const
 @param idx is the GEM DC id to query
 @return the number of moles assigned to that DC
 */
-double getDCmoles (const unsigned int idx)
+double getDCMoles (const unsigned int idx)
 {
-    if (idx < DCnum_) {
-        return DCmoles_[idx];
+    if (idx < numDCs_) {
+        return DCMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getDCmoles","DCmoles_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","getDCMoles","DCMoles_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -3199,13 +3191,13 @@ double getDCmoles (const unsigned int idx)
 @param str is the GEM DC name to query
 @return the number of moles assigned to that DC
 */
-double getDCmoles (const string &str)
+double getDCMoles (const string &str)
 {
-    int idx = getDCid(str);
-    if (idx < DCnum_) {
-        return DCmoles_[idx];
+    int idx = getDCId(str);
+    if (idx < numDCs_) {
+        return DCMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getDCmoles","DCmoles_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","getDCMoles","DCMoles_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -3215,12 +3207,12 @@ double getDCmoles (const string &str)
 @brief Output the number of moles of every independent component (IC) in the system.
 
 */
-void writeDCmoles()
+void writeDCMoles()
 {
     cout << endl;
     cout << "Vector of Dependent Components:" << endl;
-    for (unsigned int i = 0; i < DCnum_; i++) {
-        cout << "    " << DCname_[i] << ": " << DCmoles_[i] << " mol" << endl;
+    for (unsigned int i = 0; i < numDCs_; i++) {
+        cout << "    " << DCName_[i] << ": " << DCMoles_[i] << " mol" << endl;
     }
     cout << endl;
     cout.flush();
@@ -3234,13 +3226,14 @@ void writeDCmoles()
 @param idx is the GEM CSD phase id to set
 @param val is the number of moles to assign to that GEM phase
 */
-void setPhasemoles (const unsigned int idx,
-                    const double val)
+void setGEMPhaseMoles (const unsigned int idx,
+                       const double val)
 {
-    if (idx < phasenum_) {
-        phasemoles_[idx] = val;
+    if (idx < numGEMPhases_) {
+        GEMPhaseMoles_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setPhasemoles","phasemoles_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setGEMPhaseMoles",
+                        "GEMPhaseMoles_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3254,9 +3247,9 @@ void setPhasemoles (const unsigned int idx,
 
 @return a pointer to the list of number of moles assigned to each GEM phase
 */
-double *getPhasemoles () const
+double *getGEMPhaseMoles (void) const
 {
-    return phasemoles_;
+    return GEMPhaseMoles_;
 }
 
 /**
@@ -3265,12 +3258,13 @@ double *getPhasemoles () const
 @param idx is the GEM phase id to query
 @return the number of moles assigned to that GEM phase
 */
-double getPhasemoles (const unsigned int idx)
+double getGEMPhaseMoles (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return phasemoles_[idx];
+    if (idx < numGEMPhases_) {
+        return GEMPhaseMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getPhasemoles","phasemoles_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseMoles",
+                        "GEMPhaseMoles_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3282,13 +3276,14 @@ double getPhasemoles (const unsigned int idx)
 @param name is the GEM phase name to query
 @return the number of moles assigned to that GEM phase
 */
-double getPhasemoles (const string &name)
+double getGEMPhaseMoles (const string &name)
 {
-    int idx = getPhaseid(name);
-    if (idx < phasenum_) {
-        return phasemoles_[idx];
+    int idx = getGEMPhaseId(name);
+    if (idx < numGEMPhases_) {
+        return GEMPhaseMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getPhasemoles","phasemoles_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseMoles",
+                        "GEMPhaseMoles_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3299,12 +3294,12 @@ double getPhasemoles (const string &name)
 
 @note NOT USED.
 
-This is just a simple copying of the `phasemoles_` vector to `ophasemoles_`.
+This is just a simple copying of the `GEMPhaseMoles_` vector to `prevGEMPhaseMoles_`.
 */
-void setOphasemoles ()
+void setPrevGEMPhaseMoles (void)
 {
-    for (int idx = 0; idx < phasenum_; idx++)
-       ophasemoles_[idx] = phasemoles_[idx];
+    for (int idx = 0; idx < numGEMPhases_; idx++)
+       prevGEMPhaseMoles_[idx] = GEMPhaseMoles_[idx];
 }
 
 /**
@@ -3315,13 +3310,14 @@ void setOphasemoles ()
 @param idx is the GEM CSD phase id
 @param val is the number of moles to assign to that GEM phase in the previous time step
 */
-void setOphasemoles (const unsigned int idx,
-                     const double val)
+void setPrevGEMPhaseMoles (const unsigned int idx,
+                           const double val)
 {
-    if (idx < phasenum_) {
-        ophasemoles_[idx] = val;
+    if (idx < numGEMPhases_) {
+        prevGEMPhaseMoles_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setOphasemoles","ophasemoles_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setPrevGEMPhaseMoles",
+                        "prevGEMPhaseMoles_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3335,9 +3331,9 @@ void setOphasemoles (const unsigned int idx,
 
 @return a pointer to the list of number of moles assigned to each GEM phase in last time step
 */
-double *getOphasemoles () const
+double *getPrevGEMPhaseMoles (void) const
 {
-    return ophasemoles_;
+    return prevGEMPhaseMoles_;
 }
 
 /**
@@ -3348,12 +3344,13 @@ double *getOphasemoles () const
 @param idx is the GEM phase id to query
 @return the number of moles assigned to that GEM phase in the previous time step
 */
-double getOphasemoles (const unsigned int idx)
+double getPrevGEMPhaseMoles (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return ophasemoles_[idx];
+    if (idx < numGEMPhases_) {
+        return prevGEMPhaseMoles_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getOphasemoles","ophasemoles_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPrevGEMPhaseMoles",
+                        "prevGEMPhaseMoles_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3363,13 +3360,13 @@ double getOphasemoles (const unsigned int idx)
 @brief Output the number of moles of every GEM phase in the system.
 
 */
-void writePhasemoles ()
+void writePhaseMoles (void)
 {
     cout << endl;
     cout << "Vector of Phases:" << endl;
-    for (unsigned int i = 0; i < phasenum_; i++) {
-        cout << "    " << phasename_[i] << ": "
-             << phasemoles_[i] << " mol" << endl;
+    for (unsigned int i = 0; i < numGEMPhases_; i++) {
+        cout << "    " << GEMPhaseName_[i] << ": "
+             << GEMPhaseMoles_[i] << " mol" << endl;
     }
     cout << endl;
     cout.flush();
@@ -3383,13 +3380,14 @@ void writePhasemoles ()
 @param idx is the GEM CSD phase id
 @param val is the mass to assign to that GEM phase [g]
 */
-void setPhasemass (const unsigned int idx,
-                   const double val)
+void setGEMPhaseMass (const unsigned int idx,
+                      const double val)
 {
-    if (idx < phasenum_) {
-        phasemass_[idx] = val;
+    if (idx < numGEMPhases_) {
+        GEMPhaseMass_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setPhasemass","phasemass_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setGEMPhaseMass",
+                        "GEMPhaseMass_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3400,11 +3398,11 @@ void setPhasemass (const unsigned int idx,
 @brief Set the mass of all GEM CSD phases [g].
 
 */
-void setPhasemass ()
+void setGEMPhaseMass (void)
 {
-    setOphasemass();
-    for (long int i = 0; i < phasenum_; i++) {
-        phasemass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+    setPrevGEMPhaseMass();
+    for (long int i = 0; i < numGEMPhases_; i++) {
+        GEMPhaseMass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
     }
 }
 
@@ -3415,9 +3413,9 @@ void setPhasemass ()
 
 @return a pointer to the list of masses assigned to each GEM phase [g]
 */
-double *getPhasemass () const
+double *getGEMPhaseMass (void) const
 {
-    return phasemass_;
+    return GEMPhaseMass_;
 }
 
 /**
@@ -3426,12 +3424,13 @@ double *getPhasemass () const
 @param idx is the GEM phase id to query
 @return the mass assigned to that GEM phase [g]
 */
-double getPhasemass (const unsigned int idx)
+double getGEMPhaseMass (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return phasemass_[idx];
+    if (idx < numGEMPhases_) {
+        return GEMPhaseMass_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getPhasemass","phasemass_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseMass",
+                        "GEMPhaseMass_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3443,15 +3442,16 @@ double getPhasemass (const unsigned int idx)
 @param str is the GEM phase name to query
 @return the mass assigned to that GEM phase [g]
 */
-double getPhasemass (const string &str)
+double getGEMPhaseMass (const string &str)
 {
     string msg;
-    unsigned int idx = getPhaseid(str);
-    if (idx < phasenum_) {
-        return phasemass_[idx];
+    unsigned int idx = getGEMPhaseId(str);
+    if (idx < numGEMPhases_) {
+        return GEMPhaseMass_[idx];
     } else {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getPhasemass",msg,phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPhasemass",
+                        msg,numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3465,13 +3465,14 @@ double getPhasemass (const string &str)
 @param idx is the GEM CSD phase id
 @param val is the mass to assign to that GEM phase in the previous time step [g]
 */
-void setOphasemass (const unsigned int idx,
-                    const double val)
+void setPrevGEMPhaseMass (const unsigned int idx,
+                          const double val)
 {
-    if (idx < phasenum_) {
-        ophasemass_[idx] = val;
+    if (idx < numGEMPhases_) {
+        prevGEMPhaseMass_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setOPhasemass","ophasemass_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setPrevGEMPhaseMass",
+                        "prevGEMPhaseMass_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3482,10 +3483,10 @@ void setOphasemass (const unsigned int idx,
 @brief Set the mass of all GEM CSD phases in the previous time step [g].
 
 */
-void setOphasemass ()
+void setPrevGEMPhaseMass (void)
 {
-    for (long int i = 0; i < phasenum_; i++) {
-        ophasemass_[i] = phasemass_[i];
+    for (long int i = 0; i < numGEMPhases_; i++) {
+        prevGEMPhaseMass_[i] = GEMPhaseMass_[i];
     }
 }
 
@@ -3496,9 +3497,9 @@ void setOphasemass ()
 
 @return a pointer to the list of masses assigned to each GEM phase in the previous time step [g]
 */
-double *getOphasemass () const
+double *getPrevGEMPhaseMass (void) const
 {
-    return ophasemass_;
+    return prevGEMPhaseMass_;
 }
 
 /**
@@ -3507,12 +3508,13 @@ double *getOphasemass () const
 @param idx is the GEM phase id to query
 @return the mass assigned to that GEM phase in the previous time step [g]
 */
-double getOphasemass (const unsigned int idx)
+double getPrevGEMPhaseMass (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return ophasemass_[idx];
+    if (idx < numGEMPhases_) {
+        return prevGEMPhaseMass_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getOPhasemass","ophasemass_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPrevGEMPhaseMass",
+                        "prevGEMPhaseMass_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3526,15 +3528,16 @@ double getOphasemass (const unsigned int idx)
 @param str is the GEM phase name to query
 @return the mass assigned to that GEM phase in the previous time step
 */
-double getOphasemass (const string &str)
+double getPrevGEMPhaseMass (const string &str)
 {
     string msg;
-    unsigned int idx = getPhaseid(str);
-    if (idx < phasenum_) {
-        return ophasemass_[idx];
+    unsigned int idx = getGEMPhaseId(str);
+    if (idx < numGEMPhases_) {
+        return prevGEMPhaseMass_[idx];
     } else {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getOPhasemass",msg,phasenum_,0);
+        EOBException ex("ChemicalSystem","getPrevGEMPhaseMass",
+                        msg,numGEMPhases_,0);
         ex.printException();
         exit(1);
     }
@@ -3548,13 +3551,14 @@ double getOphasemass (const string &str)
 @param idx is the GEM CSD phase id
 @param val is the volume to assign to that GEM phase
 */
-void setPhasevolume (const unsigned int idx,
+void setGEMPhaseVolume (const unsigned int idx,
                      const double val)
 {
-    if (idx < phasenum_) {
-        phasevolume_[idx] = val;
+    if (idx < numGEMPhases_) {
+        GEMPhaseVolume_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setPhasevolume","phasevolume_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setGEMPhaseVolume",
+                        "GEMPhaseVolume_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3565,13 +3569,13 @@ void setPhasevolume (const unsigned int idx,
 @brief Set the volume of all GEM CSD phases.
 
 */
-void setPhasevolume ()
+void setGEMPhaseVolume (void)
 {
-    setOphasevolume();
-    for (long int i = 0; i < phasenum_; i++) {
-        phasevolume_[i] = (double)(node_->Ph_Volume(i));
+    setPrevGEMPhaseVolume();
+    for (long int i = 0; i < numGEMPhases_; i++) {
+        GEMPhaseVolume_[i] = (double)(node_->Ph_Volume(i));
         // if (verbose_) {
-        //     cout << "phasevolume_[" << i << "] = " << phasevolume_[i] << endl;
+        //     cout << "GEMPhaseVolume_[" << i << "] = " << GEMPhaseVolume_[i] << endl;
         // }
     }
 }
@@ -3583,9 +3587,9 @@ void setPhasevolume ()
 
 @return a pointer to the list of volumes assigned to each GEM phase
 */
-double *getPhasevolume() const
+double *getGEMPhaseVolume() const
 {
-    return phasevolume_;
+    return GEMPhaseVolume_;
 }
 
 /**
@@ -3596,12 +3600,13 @@ double *getPhasevolume() const
 @param idx is the GEM phase id to query
 @return the volume assigned to that GEM phase
 */
-double getPhasevolume (const unsigned int idx)
+double getGEMPhaseVolume (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return phasevolume_[idx];
+    if (idx < numGEMPhases_) {
+        return GEMPhaseVolume_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getPhasevolume","phasevolume_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseVolume",
+                        "GEMPhaseVolume_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3613,15 +3618,16 @@ double getPhasevolume (const unsigned int idx)
 @param str is the GEM phase name to query
 @return the volume assigned to that GEM phase
 */
-double getPhasevolume (const string &str)
+double getGEMPhaseVolume (const string &str)
 {
     string msg;
-    unsigned int idx = getPhaseid(str);
-    if (idx < phasenum_) {
-        return phasevolume_[idx];
+    unsigned int idx = getGEMPhaseId(str);
+    if (idx < numGEMPhases_) {
+        return GEMPhaseVolume_[idx];
     } else {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getPhasevolume",msg,phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPhasevolume",
+                        msg,numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3635,13 +3641,14 @@ double getPhasevolume (const string &str)
 @param idx is the GEM CSD phase id
 @param val is the volume to assign to that GEM phase in the previous time step
 */
-void setOphasevolume (const unsigned int idx,
-                      const double val)
+void setPrevGEMPhaseVolume (const unsigned int idx,
+                            const double val)
 {
-    if (idx < phasenum_) {
-        ophasevolume_[idx] = val;
+    if (idx < numGEMPhases_) {
+        prevGEMPhaseVolume_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setOphasevolume","ophasevolume_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setPrevGEMPhaseVolume",
+                        "prevGEMPhaseVolume_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3653,10 +3660,10 @@ void setOphasevolume (const unsigned int idx,
 
 @return a pointer to the list of volumes assigned to each GEM phase in the previous time step
 */
-void setOphasevolume ()
+void setPrevGEMPhaseVolume (void)
 {
-    for (long int i = 0; i < phasenum_; i++) {
-        ophasevolume_[i] = phasevolume_[i];
+    for (long int i = 0; i < numGEMPhases_; i++) {
+        prevGEMPhaseVolume_[i] = GEMPhaseVolume_[i];
     }
 }
 
@@ -3667,9 +3674,9 @@ void setOphasevolume ()
 
 @return a pointer to the list of volumes assigned to each GEM phase in the previous time step
 */
-double *getOphasevolume () const
+double *getPrevGEMPhaseVolume (void) const
 {
-    return ophasevolume_;
+    return prevGEMPhaseVolume_;
 }
 
 /**
@@ -3682,10 +3689,11 @@ double *getOphasevolume () const
 */
 double getOphasevolume (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return ophasevolume_[idx];
+    if (idx < numGEMPhases_) {
+        return prevGEMPhaseVolume_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getOphasevolume","ophasevolume_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPrevGEMPhaseVolume",
+                        "prevGEMPhaseVolume_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3699,15 +3707,16 @@ double getOphasevolume (const unsigned int idx)
 @param str is the GEM phase name to query
 @return the volume assigned to that GEM phase in the previous time step
 */
-double getOphasevolume (const string &str)
+double getPrevGEMPhaseVolume (const string &str)
 {
     string msg;
-    unsigned int idx = getPhaseid(str);
-    if (idx < phasenum_) {
-        return ophasevolume_[idx];
+    unsigned int idx = getGEMPhaseId(str);
+    if (idx < numGEMPhases_) {
+        return prevGEMPhaseVolume_[idx];
     } else {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getOphasevolume",msg,phasenum_,idx);
+        EOBException ex("ChemicalSystem","getPrevGEMPhaseVolume",
+                        msg,numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3724,10 +3733,11 @@ double getOphasevolume (const string &str)
 void setCarrier (const unsigned int idx,
                  const double val)
 {
-    if (idx < solutionphasenum_) {
+    if (idx < numSolutionPhases_) {
         carrier_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setCarrier","carrier_",solutionphasenum_,idx);
+        EOBException ex("ChemicalSystem","setCarrier","carrier_",
+                        numSolutionPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3741,7 +3751,7 @@ void setCarrier (const unsigned int idx,
 
 @return a pointer to the list of moles assigned to each GEM solvent phase
 */
-double *getCarrier () const
+double *getCarrier (void) const
 {
     return carrier_;
 }
@@ -3756,10 +3766,11 @@ double *getCarrier () const
 */
 double getCarrier (const unsigned int idx)
 {
-    if (idx < solutionphasenum_) {
+    if (idx < numSolutionPhases_) {
         return carrier_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getCarrier","carrier_",solutionphasenum_,idx);
+        EOBException ex("ChemicalSystem","getCarrier","carrier_",
+                        numSolutionPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3773,14 +3784,14 @@ double getCarrier (const unsigned int idx)
 @param idx is the GEM CSD phase id
 @param val is the surface area to assign to that GEM phase
 */
-void setSurfacearea (const unsigned int idx,
+void setSurfaceArea (const unsigned int idx,
                      const double val)
 {
-    if (idx < phasenum_) {
-        surfacearea_[idx] = val;
+    if (idx < numGEMPhases_) {
+        surfaceArea_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setSurfacearea",
-                           "surfacearea_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setSurfaceArea",
+                           "surfaceArea_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3793,9 +3804,9 @@ void setSurfacearea (const unsigned int idx,
 
 @return a pointer to the list of all phase surface areas
 */
-double *getSurfacearea () const
+double *getSurfaceArea (void) const
 {
-    return surfacearea_;
+    return surfaceArea_;
 }
 
 /**
@@ -3806,13 +3817,13 @@ double *getSurfacearea () const
 @param idx is the GEM CSD phase id
 @return the surface area assigned to that GEM phase
 */
-double getSurfacearea (const unsigned int idx)
+double getSurfaceArea (const unsigned int idx)
 {
-    if (idx < phasenum_) {
-        return surfacearea_[idx];
+    if (idx < numGEMPhases_) {
+        return surfaceArea_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getSurfacearea",
-                           "surfacearea_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","getSurfaceArea",
+                           "surfaceArea_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -3826,15 +3837,16 @@ double getSurfacearea (const unsigned int idx)
 @param idx is the microstructure phase id
 @param val is the volume fraction to assign to that microstructure phase
 */
-void setMicphasevolfrac (const unsigned int idx,
-                         const double val)
+void setMicroPhaseVolumeFraction (const unsigned int idx,
+                                  const double val)
 {
     try {
-        micphasevolfrac_.at(idx) = val;
+        microPhaseVolumeFraction_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicphasevolfrac",
-                           "micphasevolfrac_",micphasevolfrac_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseVolumeFraction",
+                        "microPhaseVolumeFraction_",
+                        microPhaseVolumeFraction_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -3846,9 +3858,9 @@ void setMicphasevolfrac (const unsigned int idx,
 
 @return a pointer to the list of volume fractions of every microstructure phase
 */
-vector<double> getMicphasevolfrac () const
+vector<double> getMicroPhaseVolumeFraction (void) const
 {
-    return micphasevolfrac_;
+    return microPhaseVolumeFraction_;
 }
 
 /**
@@ -3857,14 +3869,15 @@ vector<double> getMicphasevolfrac () const
 @param idx is the microstructure phase id
 @return the volume fraction assigned to that microstructure phase
 */
-double getMicphasevolfrac (const unsigned int idx)
+double getMicroPhaseVolumeFraction (const unsigned int idx)
 {
     try {
-        return micphasevolfrac_.at(idx);
+        return microPhaseVolumeFraction_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasevolfrac",
-                           "micphasevolfrac_",micphasevolfrac_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseVolumeFraction",
+                        "microPhaseVolumeFraction_",
+                        microPhaseVolumeFraction_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -3876,15 +3889,15 @@ double getMicphasevolfrac (const unsigned int idx)
 @param idx is the microstructure phase id
 @param val is the volume to assign to that microstructure phase
 */
-void setMicphasevolume (const unsigned int idx,
+void setMicroPhaseVolume (const unsigned int idx,
                         const double val)
 {
     try {
-        micphasevolume_.at(idx) = val;
+        microPhaseVolume_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicphasevolume",
-                           "micphasevolume_",micphasevolume_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseVolume",
+                           "microPhaseVolume_",microPhaseVolume_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -3896,9 +3909,9 @@ void setMicphasevolume (const unsigned int idx,
 
 @return a vector of volumes of every microstructure phase
 */
-vector<double> getMicphasevolume () const
+vector<double> getMicroPhaseVolume (void) const
 {
-    return micphasevolume_;
+    return microPhaseVolume_;
 }
 
 /**
@@ -3909,14 +3922,14 @@ vector<double> getMicphasevolume () const
 @param idx is the microstructure phase id
 @return the volume assigned to that microstructure phase
 */
-double getMicphasevolume(const unsigned int idx)
+double getMicroPhaseVolume(const unsigned int idx)
 {
     try {
-        return micphasevolume_.at(idx);
+        return microPhaseVolume_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasevolume",
-                           "micphasevolume_",micphasevolume_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseVolume",
+                           "microPhaseVolume_",microPhaseVolume_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -3928,35 +3941,35 @@ double getMicphasevolume(const unsigned int idx)
 @param idx is the microstructure phase id
 @param val is the mass to assign to that microstructure phase
 */
-void setMicphasemass (const unsigned int idx,
+void setMicroPhaseMass (const unsigned int idx,
                       const double val)
 {
     try {
-        micphasemass_.at(idx) = val;
+        microPhaseMass_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicphasemass",
-                           "micphasemass_",micphasemass_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseMass",
+                           "microPhaseMass_",microPhaseMass_.size(),idx);
         ex.printException();
         exit(1);
     }
-    double v0 = node_->DC_V0(getMic2DC(idx,0),P_,T_);
-    double dcmm = getDCmolarmass(getMic2DC(idx,0));
+    double v0 = node_->DC_V0(getMicroPhaseToDC(idx,0),P_,T_);
+    double dcmm = getDCMolarMass(getMicroPhaseToDC(idx,0));
     if (verbose_) {
-        cout << "    " << micphasename_[idx] << ": v0 = "
+        cout << "    " << microPhaseName_[idx] << ": v0 = "
              << v0 << ", dcmm = " << dcmm
              << ", so volume = ";
     }
     if (dcmm < 1.0e-9) {
         if (verbose_) cout << " not defined" << endl;
-        FloatException fex("ChemicalSystem","setMicphasemass",
+        FloatException fex("ChemicalSystem","setMicroPhaseMass",
                            "Divide by zero (dcmm)");
         fex.printException();
         exit(1);
     }
     if (verbose_) cout << (val*v0/dcmm) << endl;
 
-    setMicphasevolume(idx,(val*v0/dcmm));
+    setMicroPhaseVolume(idx,(val*v0/dcmm));
 
     return;
 }
@@ -3968,9 +3981,9 @@ void setMicphasemass (const unsigned int idx,
 
 @return a pointer to the list of masses of every microstructure phase
 */
-vector<double> getMicphasemass () const
+vector<double> getMicroPhaseMass (void) const
 {
-    return micphasemass_;
+    return microPhaseMass_;
 }
 
 /**
@@ -3981,14 +3994,14 @@ vector<double> getMicphasemass () const
 @param idx is the microstructure phase id
 @return the mass assigned to that microstructure phase
 */
-double getMicphasemass (const unsigned int idx)
+double getMicroPhaseMass (const unsigned int idx)
 {
     try {
-        return micphasemass_.at(idx);
+        return microPhaseMass_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasemass",
-                           "micphasemass_",micphasemass_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseMass",
+                           "microPhaseMass_",microPhaseMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -3999,17 +4012,19 @@ double getMicphasemass (const unsigned int idx)
 
 @note NOT USED.
 */
-void writeMicphases ()
+void writeMicroPhases (void)
 {
     cout << endl;
     cout << "Microstructure phase quantities:" << endl;
     cout << "Name     Mass (g)     Volume (m3)     Volume Fraction" << endl;
     cout << "----     --------     -----------     ---------------" << endl;
-    for (unsigned int i = 1; i < micphasename_.size(); i++) {
-        cout << micphasename_[i] << "     " << micphasemass_[i] << "     "
-             << micphasevolume_[i] << "     " << micphasevolfrac_[i] << endl;
+    for (unsigned int i = 1; i < microPhaseName_.size(); i++) {
+        cout << microPhaseName_[i] << "     " << microPhaseMass_[i] << "     "
+             << microPhaseVolume_[i] << "     "
+             << microPhaseVolumeFraction_[i] << endl;
     }
-    cout << "Void     0.0    " << micvoidvolume_ << " " << micvoidvolfrac_ << endl;
+    cout << "Void     0.0    " << microVoidVolume_ << " "
+         << microVoidVolumeFraction_ << endl;
     cout << endl;
     cout.flush();
 }
@@ -4022,15 +4037,16 @@ void writeMicphases ()
 @param idx is the microstructure phase id
 @param val is the dissolved mass to assign to that microstructure phase
 */
-void setMicphasemassdissolved (const unsigned int idx,
-                               const double val)
+void setMicroPhaseMassDissolved (const unsigned int idx,
+                                 const double val)
 {
     try {
-        micphasemassdissolved_.at(idx) = val;
+        microPhaseMassDissolved_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicphasemassdissolved",
-                           "micphasemassdissolved_",micphasemassdissolved_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhaseMassDissolved",
+                        "microPhaseMassDissolved_",
+                        microPhaseMassDissolved_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4044,9 +4060,9 @@ void setMicphasemassdissolved (const unsigned int idx,
 
 @return a pointer to the list of dissolved masses of every microstructure phase
 */
-vector<double> getMicphasemassdissolved () const
+vector<double> getMicroPhaseMassDissolved (void) const
 {
-    return micphasemassdissolved_;
+    return microPhaseMassDissolved_;
 }
 
 /**
@@ -4057,14 +4073,15 @@ vector<double> getMicphasemassdissolved () const
 @param idx is the microstructure phase id
 @return the dissolved mass assigned to that microstructure phase
 */
-double getMicphasemassdissolved (const unsigned int idx)
+double getMicroPhaseMassDissolved (const unsigned int idx)
 {
     try {
-        return micphasemassdissolved_.at(idx);
+        return microPhaseMassDissolved_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicphasemassdissolved",
-                           "micphasemassdissolved_",micphasemassdissolved_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhaseMassDissolved",
+                        "microPhaseMassDissolved_",
+                        microPhaseMassDissolved_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4075,9 +4092,9 @@ double getMicphasemassdissolved (const unsigned int idx)
 
 @param val is the volume of void space to assign to the microstructure
 */
-void setMicvoidvolume (const double val)
+void setMicroVoidVolume (const double val)
 {
-    micvoidvolume_ = val;
+    microVoidVolume_ = val;
 }
 
 /**
@@ -4087,9 +4104,9 @@ void setMicvoidvolume (const double val)
 
 @return the volume of void space in the microstructure
 */
-double getMicvoidvolume () const
+double getMicroVoidVolume (void) const
 {
-    return micvoidvolume_;
+    return microVoidVolume_;
 }
 
 /**
@@ -4099,9 +4116,9 @@ double getMicvoidvolume () const
 
 @param val is the volume fraction of void space to assign to the microstructure
 */
-void setMicvoidvolfrac (const double val)
+void setMicroVoidVolumeFraction (const double val)
 {
-    micvoidvolfrac_ = val;
+    microVoidVolumeFraction_ = val;
 }
 
 /**
@@ -4111,9 +4128,9 @@ void setMicvoidvolfrac (const double val)
 
 @return the volume fraction of void space in the microstructure
 */
-double getMicvoidvolfrac () const
+double getMicroVoidVolumeFraction (void) const
 {
-    return micvoidvolfrac_;
+    return microVoidVolumeFraction_;
 }
 
 /**
@@ -4123,9 +4140,9 @@ double getMicvoidvolfrac () const
 
 @param val is the total volume to assign to the microstructure
 */
-void setMictotvolume (const double val)
+void setMicroVolume (const double val)
 {
-    mictotvolume_ = val;
+    microVolume_ = val;
 }
 
 /**
@@ -4135,9 +4152,9 @@ void setMictotvolume (const double val)
 
 @return the total volume of the microstructure
 */
-double getMictotvolume () const
+double getMicroVolume (void) const
 {
-    return mictotvolume_;
+    return microVolume_;
 }
 
 /**
@@ -4145,9 +4162,9 @@ double getMictotvolume () const
 
 @param val is the initial total volume to assign to the microstructure
 */
-void setMictotinitvolume (const double val)
+void setMicroInitVolume (const double val)
 {
-    mictotinitvolume_ = val;
+    microInitVolume_ = val;
 }
 
 /**
@@ -4155,9 +4172,9 @@ void setMictotinitvolume (const double val)
 
 @return the initial total volume of the microstructure
 */
-double getMictotinitvolume () const
+double getMicroInitVolume (void) const
 {
-    return mictotinitvolume_;
+    return microInitVolume_;
 }
 
 /**
@@ -4166,14 +4183,14 @@ double getMictotinitvolume () const
 @param idx is the id of the DC component
 @param val is the upper bound to set
 */
-void setDCupperlimit (const unsigned int idx,
+void setDCUpperLimit (const unsigned int idx,
                       const double val)
 {
-    if (idx < DCnum_) {
-        DCupperlimit_[idx] = val;
+    if (idx < numDCs_) {
+        DCUpperLimit_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setDCupperlimit",
-                           "DCupperlimit_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","setDCUpperLimit",
+                           "DCUpperLimit_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -4187,9 +4204,9 @@ void setDCupperlimit (const unsigned int idx,
 
 @return a pointer to the list of DC upper bounds
 */
-double *getDCupperlimit () const
+double *getDCUpperLimit (void) const
 {
-    return DCupperlimit_;
+    return DCUpperLimit_;
 }
 
 /**
@@ -4200,13 +4217,13 @@ double *getDCupperlimit () const
 @param idx is the id of the DC component
 @return the upper bound on moles of that DC
 */
-double getDCupperlimit (const unsigned int idx)
+double getDCUpperLimit (const unsigned int idx)
 {
-    if (idx < DCnum_) {
-        return DCupperlimit_[idx];
+    if (idx < numDCs_) {
+        return DCUpperLimit_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getDCupperlimit",
-                           "DCupperlimit_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","getDCUpperLimit",
+                           "DCUpperLimit_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -4218,14 +4235,14 @@ double getDCupperlimit (const unsigned int idx)
 @param idx is the id of the DC component
 @param val is the lower bound to set for this DC
 */
-void setDClowerlimit (const unsigned int idx,
+void setDCLowerLimit (const unsigned int idx,
                       const double val)
 {
-    if (idx < DCnum_) {
-        DClowerlimit_[idx] = val;
+    if (idx < numDCs_) {
+        DCLowerLimit_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setDClowerlimit",
-                           "DClowerlimit_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","setDCLowerLimit",
+                           "DCLowerLimit_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -4240,9 +4257,9 @@ void setDClowerlimit (const unsigned int idx,
 @param idx is the id of the DC component
 @return a pointer to the list of DC lower bounds
 */
-double *getDClowerlimit () const
+double *getDCLowerLimit (void) const
 {
-    return DClowerlimit_;
+    return DCLowerLimit_;
 }
 
 /**
@@ -4253,13 +4270,13 @@ double *getDClowerlimit () const
 @param idx is the id of the DC component
 @return a pointer to the list of DC lower bounds
 */
-double getDClowerlimit (const unsigned int idx)
+double getDCLowerLimit (const unsigned int idx)
 {
-    if (idx < DCnum_) {
-        return DClowerlimit_[idx];
+    if (idx < numDCs_) {
+        return DCLowerLimit_[idx];
     } else {
-        EOBException ex("ChemicalSystem","getDClowerlimit",
-                           "DClowerlimit_",DCnum_,idx);
+        EOBException ex("ChemicalSystem","getDCLowerLimit",
+                           "DCLowerLimit_",numDCs_,idx);
         ex.printException();
         exit(1);
     }
@@ -4273,15 +4290,15 @@ double getDClowerlimit (const unsigned int idx)
 @param idx is the id of the IC
 @param val is the molar mass to assign to that IC [g/mol]
 */
-void setICmolarmass (const unsigned int idx,
+void setICMolarMass (const unsigned int idx,
                      const double val)
 {
     try {
-        ICmolarmass_.at(idx) = val;
+        ICMolarMass_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setICmolarmass",
-                           "ICmolarmass_",ICmolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","setICMolarMass",
+                           "ICMolarMass_",ICMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4294,14 +4311,14 @@ void setICmolarmass (const unsigned int idx,
 @param idx is the id of the IC
 @return the molar mass of that IC, [g/mol]
 */
-double getICmolarmass (const unsigned int idx)
+double getICMolarMass (const unsigned int idx)
 {
     try {
-        return ICmolarmass_.at(idx);
+        return ICMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getICmolarmass",
-                           "ICmolarmass_",ICmolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","getICMolarMass",
+                           "ICMolarMass_",ICMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4313,16 +4330,17 @@ double getICmolarmass (const unsigned int idx)
 @param str is the name of the IC
 @return the molar mass of that IC, [g/mol]
 */
-double getICmolarmass (const string &str)
+double getICMolarMass (const string &str)
 {
     string msg;
-    int idx = getICid(str);
+    int idx = getICId(str);
     try {
-        return ICmolarmass_.at(idx);
+        return ICMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getICmolarmass",msg,ICmolarmass_.size(),0);
+        EOBException ex("ChemicalSystem","getICMolarMass",
+                        msg,ICMolarMass_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -4335,9 +4353,9 @@ double getICmolarmass (const string &str)
 
 @return the vector of IC molar masses [g/mol]
 */
-vector<double> getICmolarmass () const
+vector<double> getICMolarMass (void) const
 {
-    return ICmolarmass_;
+    return ICMolarMass_;
 }
 
 /**
@@ -4348,15 +4366,15 @@ vector<double> getICmolarmass () const
 @param idx is the id of the DC
 @param val is the molar mass to assign to that DC [g/mol]
 */
-void setDCmolarmass (const unsigned int idx,
+void setDCMolarMass (const unsigned int idx,
                      const double val)
 {
     try {
-        DCmolarmass_.at(idx) = val;
+        DCMolarMass_.at(idx) = val;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setDCmolarmass",
-                           "DCmolarmass_",DCmolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","setDCMolarMass",
+                           "DCMolarMass_",DCMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4369,14 +4387,14 @@ void setDCmolarmass (const unsigned int idx,
 @param idx is the id of the DC
 @return the molar mass of that DC, [g/mol]
 */
-double getDCmolarmass (const unsigned int idx)
+double getDCMolarMass (const unsigned int idx)
 {
     try {
-        return DCmolarmass_.at(idx);
+        return DCMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getDCmolarmass",
-                           "DCmolarmass_",DCmolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","getDCMolarMass",
+                           "DCMolarMass_",DCMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4388,16 +4406,17 @@ double getDCmolarmass (const unsigned int idx)
 @param str is the name of the DC
 @return the molar mass of that DC, [g/mol]
 */
-double getDCmolarmass (const string &str)
+double getDCMolarMass (const string &str)
 {
     string msg;
-    int idx = getDCid(str);
+    int idx = getDCId(str);
     try {
-        return DCmolarmass_.at(idx);
+        return DCMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getDCmolarmass",msg,DCmolarmass_.size(),0);
+        EOBException ex("ChemicalSystem","getDCMolarMass",
+                        msg,DCMolarMass_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -4410,9 +4429,9 @@ double getDCmolarmass (const string &str)
 
 @return the vector of DC molar masses [g/mol]
 */
-vector<double> getDCmolarmass () const
+vector<double> getDCMolarMass (void) const
 {
-    return DCmolarmass_;
+    return DCMolarMass_;
 }
 
 /**
@@ -4421,7 +4440,7 @@ vector<double> getDCmolarmass () const
 @param dcidx is the id of the DC
 @return the molar volume of that DC, [m3]
 */
-double getDCmolarvolume (const unsigned int dcidx)
+double getDCMolarVolume (const unsigned int dcidx)
 {
     double v0 = node_->DC_V0(dcidx,P_,T_);
     return v0;
@@ -4433,10 +4452,10 @@ double getDCmolarvolume (const unsigned int dcidx)
 @param str is the name of the DC
 @return the molar volume of that DC, [m3]
 */
-double getDCmolarvolume (const string &str)
+double getDCMolarVolume (const string &str)
 {
     string msg;
-    double V0 = getDCmolarvolume(getDCid(str));
+    double V0 = getDCMolarVolume(getDCId(str));
     return V0;
 }
 
@@ -4447,26 +4466,26 @@ double getDCmolarvolume (const string &str)
 
 @return the vector of GEM phase molar masses [g/mol]
 */
-vector<double> getPhasemolarmass () const
+vector<double> getGEMPhaseMolarMass (void) const
 {
-    return phasemolarmass_;
+    return GEMPhaseMolarMass_;
 }
 
 /**
 @brief Set the molar masses of all GEM CSD phases [g/mol].
 
 */
-void setPhasemolarmass ()
+void setGEMPhaseMolarMass (void)
 {
     double pmm;
-    phasemolarmass_.clear();
-    phasemolarmass_.resize(phasenum_,0.0);
-    for (unsigned int pidx = 0; pidx < vphasestoich_.size(); pidx++) {
+    GEMPhaseMolarMass_.clear();
+    GEMPhaseMolarMass_.resize(numGEMPhases_,0.0);
+    for (unsigned int pidx = 0; pidx < GEMPhaseStoich_.size(); pidx++) {
         pmm = 0.0;
-        for (unsigned int icidx = 0; icidx < vphasestoich_[pidx].size(); icidx++) {
-            pmm += ((vphasestoich_[pidx][icidx]) * getICmolarmass(icidx));
+        for (unsigned int icidx = 0; icidx < GEMPhaseStoich_[pidx].size(); icidx++) {
+            pmm += ((GEMPhaseStoich_[pidx][icidx]) * getICMolarMass(icidx));
         }
-        phasemolarmass_[pidx] = pmm;
+        GEMPhaseMolarMass_[pidx] = pmm;
     }
 }
 
@@ -4478,14 +4497,14 @@ void setPhasemolarmass ()
 @param idx is the id of the GEM phase
 @return the molar mass of that GEM phase [g/mol]
 */
-double getPhasemolarmass (const unsigned int idx)
+double getGEMPhaseMolarMass (const unsigned int idx)
 {
     try {
-        return phasemolarmass_.at(idx);
+        return GEMPhaseMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPhasemolarmass",
-                           "phasemolarmass_",phasemolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseMolarMass",
+                        "GEMPhaseMolarMass_",GEMPhaseMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4499,16 +4518,17 @@ double getPhasemolarmass (const unsigned int idx)
 @param str is the name of the GEM phase
 @return the molar mass of that GEM phase [g/mol]
 */
-double getPhasemolarmass (const string &str)
+double getGEMPhaseMolarMass (const string &str)
 {
     string msg;
-    unsigned int idx = getPhaseid(str);
+    unsigned int idx = getGEMPhaseId(str);
     try {
-        return phasemolarmass_.at(idx);
+        return GEMPhaseMolarMass_.at(idx);
     }
     catch (out_of_range &oor) {
         msg = "Name " + str + " does not have a valid phase id";
-        EOBException ex("ChemicalSystem","getPhasemolarmass",msg,phasemolarmass_.size(),idx);
+        EOBException ex("ChemicalSystem","getGEMPhaseMolarMass",
+                        msg,GEMPhaseMolarMass_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -4525,22 +4545,22 @@ of the DC.
 @param icidx is the id of the IC that may be contained within this DC
 @return the number of moles of the ID icidx contained within the DC dcidx
 */
-double getDCstoich (const unsigned int dcidx,
+double getDCStoich (const unsigned int dcidx,
                     const unsigned int icidx)
 {
-    if (dcidx >= DCstoich_.size()) {
-        EOBException ex("ChemicalSystem","getDCstoich",
-                           "DCstoich_",DCstoich_.size(),dcidx);
+    if (dcidx >= DCStoich_.size()) {
+        EOBException ex("ChemicalSystem","getDCStoich",
+                        "DCStoich_",DCStoich_.size(),dcidx);
         ex.printException();
         exit(1);
     }
-    if(icidx >= DCstoich_[dcidx].size()) {
-        EOBException ex("ChemicalSystem","getDCstoich",
-                           "DCstoich_",DCstoich_[dcidx].size(),icidx);
+    if(icidx >= DCStoich_[dcidx].size()) {
+        EOBException ex("ChemicalSystem","getDCStoich",
+                        "DCStoich_",DCStoich_[dcidx].size(),icidx);
         ex.printException();
         exit(1);
     }
-    return DCstoich_[dcidx][icidx];
+    return DCStoich_[dcidx][icidx];
 }
 
 /**
@@ -4555,14 +4575,14 @@ of the DC.
 @param dcidx is the id of the DC being queried
 @return the list of moles of each IC in the DC specified by dcidx
 */
-vector<double> getDCstoich (const int dcidx)
+vector<double> getDCStoich (const int dcidx)
 {
     try {
-        return DCstoich_.at(dcidx);
+        return DCStoich_.at(dcidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getDCstoich",
-                           "DCstoich_",DCstoich_.size(),dcidx);
+        EOBException ex("ChemicalSystem","getDCStoich",
+                           "DCStoich_",DCStoich_.size(),dcidx);
         ex.printException();
         exit(1);
     }
@@ -4579,9 +4599,9 @@ of the DC.
 
 @return the matrix of moles of each IC in every DCs.
 */
-vector<vector<double> > getDCstoich () const
+vector<vector<double> > getDCStoich (void) const
 {
-    return DCstoich_;
+    return DCStoich_;
 }
 
 /**
@@ -4592,13 +4612,13 @@ For example, one mole of the GEM phase gypsum has one mole of CaSO4 and 1 mole o
 one mole of sulfur, four moles of hydrogen and six moles of oxygen
 
 This method makes calls to the GEM node to get the matrix of GEM phase
-stoichiometries, and assigns the results into the 1D `phasestoich_` array within
+stoichiometries, and assigns the results into the 1D `pGEMPhaseStoich_` array within
 the method itself.  For this reason, the function does not return anything.
 
 @todo Consider renaming this method because it does not actually return anything
 to the calling function
 */
-void getGEMPhasestoich ();
+void getPGEMPhaseStoich (void);
 
 /**
 @brief Set the matrix of moles all ICs in all GEM CSD phases.
@@ -4607,13 +4627,13 @@ GEM phases comprise one or (usually) more independent components (IC).
 For example, one mole of the GEM phase gypsum has one mole of CaSO4 and 1 mole of calcium,
 one mole of sulfur, four moles of hydrogen and six moles of oxygen
 
-This particular function just calls the getGEMPhasestoich method, which sets all
-the phase stoichiometries into the 1D `phasestoich_` array.
+This particular function just calls the getPGEMPhaseStoich method, which sets all
+the phase stoichiometries into the 1D `pGEMPhaseStoich_` array.
 
 */
-void setPhasestoich ()
+void setPGEMPhaseStoich (void)
 {
-    getGEMPhasestoich();
+    getPGEMPhaseStoich();
     return;
 }
 
@@ -4630,15 +4650,16 @@ one mole of sulfur, four moles of hydrogen and six moles of oxygen
 @param icidx is the IC component index
 @param val is the number of moles of IC icidx in GEM phase pidx
 */
-void setPhasestoich (const unsigned int pidx,
-                     const unsigned int icidx,
-                     const double val)
+void setPGEMPhaseStoich (const unsigned int pidx,
+                         const unsigned int icidx,
+                         const double val)
 {
-    unsigned int idx = (pidx * ICnum_) + icidx;
-    if (idx < phasenum_) {
-        phasestoich_[idx] = val;
+    unsigned int idx = (pidx * numICs_) + icidx;
+    if (idx < numGEMPhases_) {
+        pGEMPhaseStoich_[idx] = val;
     } else {
-        EOBException ex("ChemicalSystem","setPhasestoich","phasestoich_",phasenum_,idx);
+        EOBException ex("ChemicalSystem","setPGEMPhaseStoich",
+                        "pGEMPhaseStoich_",numGEMPhases_,idx);
         ex.printException();
         exit(1);
     }
@@ -4656,22 +4677,22 @@ of oxygen in that phase.
 version
 @todo Rename this function to something more descriptive
 */
-void getGEMVphasestoich ();
+void getGEMPhaseStoich (void);
 
 /**
-@brief Caller function for `getGEMVphasestoich`.
+@brief Caller function for `getGEMPhaseStoich`.
 
 */
-void setVphasestoich ()
+void setGEMPhaseStoich (void)
 {
-    getGEMVphasestoich();
+    getGEMPhaseStoich();
     return;
 }
 
 /**
 @brief Get the number of moles of an IC in a GEM phase.
 
-This function uses the 1D array pointed to by the `phasestoich_` member
+This function uses the 1D array pointed to by the `pGEMPhaseStoich_` member
 variable.  This variable lists the IC molar stoichiometry of phase one in the first
 n elements (where n is the number of ICs), and of phase two in the second
 n elements, etc., instead of storing as a 2D matrix
@@ -4682,14 +4703,15 @@ n elements, etc., instead of storing as a 2D matrix
 @param icidx is the index of the IC being queried
 @return the molar stoichiometry of the icidx-th IC in phase id pidx
 */
-double getPhasestoich (const unsigned int pidx,
-                      const unsigned int icidx)
+double getPGEMPhaseStoich (const unsigned int pidx,
+                           const unsigned int icidx)
 {
-    unsigned int index = (pidx * ICnum_) + icidx;
-    if (index < phasenum_) {
-        return phasestoich_[index];
+    unsigned int index = (pidx * numICs_) + icidx;
+    if (index < numGEMPhases_) {
+        return pGEMPhaseStoich_[index];
     } else {
-        EOBException ex("ChemicalSystem","getPhasestoich","phasestoich_",phasenum_,index);       
+        EOBException ex("ChemicalSystem","getPGEMPhaseStoich",
+                        "pGEMPhaseStoich_",numGEMPhases_,index);       
         ex.printException();
         exit(1);
     }
@@ -4698,7 +4720,7 @@ double getPhasestoich (const unsigned int pidx,
 /**
 @brief Get the list of moles of all ICs in a GEM phase.
 
-This function uses the 1D array pointed to by the `phasestoich_` member
+This function uses the 1D array pointed to by the `pGEMPhaseStoich_` member
 variable.  This variable lists the IC molar stoichiometry of phase one in the first
 n elements (where n is the number of ICs), and of phase two in the second
 n elements, etc., instead of storing as a 2D matrix
@@ -4706,15 +4728,16 @@ n elements, etc., instead of storing as a 2D matrix
 @param pidx is the id of the GEM phase to query
 @return a pointer to the list of IC moles in phase id pidx
 */
-double *getPhasestoich(const unsigned int pidx)
+double *getPGEMPhaseStoich (const unsigned int pidx)
 {
-    if (pidx >= phasenum_) {
-        EOBException ex("ChemicalSystem","getPhasestoich","phasestoich_",phasenum_,pidx);       
+    if (pidx >= numGEMPhases_) {
+        EOBException ex("ChemicalSystem","getPGEMPhaseStoich",
+                        "pGEMPhaseStoich_",numGEMPhases_,pidx);       
         ex.printException();
         exit(1);
     }
-    double *p = phasestoich_;
-    p += (pidx * ICnum_);
+    double *p = pGEMPhaseStoich_;
+    p += (pidx * numICs_);
     return p;
 }
 
@@ -4722,7 +4745,7 @@ double *getPhasestoich(const unsigned int pidx)
 @brief Get the number of moles of an IC in a GEM phase by phase id.
 
 This function uses the 2D matrix form of the molar stoichiometries, implemented
-as a vector of vectors, `vphasestoich_`.  Each row is a phase and each column
+as a vector of vectors, `GEMPhaseStoich_`.  Each row is a phase and each column
 is an IC.
 
 @note NOT USED.
@@ -4731,59 +4754,62 @@ is an IC.
 @param icidx is the index of the IC being queried
 @return the molar stoichiometry of the icidx-th IC in phase id pidx
 */
-double getVphasestoich(const unsigned int pidx,
-                       const unsigned int icidx)
+double getGEMPhaseStoich (const unsigned int pidx,
+                          const unsigned int icidx)
 {
-    if (pidx >= vphasestoich_.size()) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                           vphasestoich_.size(),pidx);       
+    if (pidx >= GEMPhaseStoich_.size()) {
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_.size(),
+                        pidx);       
         ex.printException();
         exit(1);
     }
-    if (icidx >= vphasestoich_[pidx].size()) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                           vphasestoich_[pidx].size(),icidx);
+    if (icidx >= GEMPhaseStoich_[pidx].size()) {
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_[pidx].size(),
+                        icidx);
         ex.printException();
         exit(1);
     }
-    return ((double)(vphasestoich_[pidx][icidx]));
+    return ((double)(GEMPhaseStoich_[pidx][icidx]));
 }
 
 /**
 @brief Get the number of moles of an IC in a GEM phase by phase name.
 
 This function uses the 2D matrix form of the molar stoichiometries, implemented
-as a vector of vectors, `vphasestoich_`.  Each row is a phase and each column
+as a vector of vectors, `GEMPhaseStoich_`.  Each row is a phase and each column
 is an IC.
 
 @param str is the name of the GEM phase to query
 @param icidx is the index of the IC being queried
 @return the molar stoichiometry of the icidx-th IC in phase id pidx
 */
-double getVphasestoich (const string &str,
-                        const unsigned int icidx)
+double getGEMPhaseStoich (const string &str,
+                          const unsigned int icidx)
 {
-    unsigned int pidx = getPhaseid(str);
-    if (pidx >= vphasestoich_.size()) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                           vphasestoich_.size(),pidx);       
+    unsigned int pidx = getGEMPhaseId(str);
+    if (pidx >= GEMPhaseStoich_.size()) {
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_.size(),pidx);       
         ex.printException();
         exit(1);
     }
-    if (icidx >= vphasestoich_[pidx].size()) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                           vphasestoich_[pidx].size(),icidx);
+    if (icidx >= GEMPhaseStoich_[pidx].size()) {
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_[pidx].size(),
+                        icidx);
         ex.printException();
         exit(1);
     }
-    return ((double)(vphasestoich_[pidx][icidx]));
+    return ((double)(GEMPhaseStoich_[pidx][icidx]));
 }
 
 /**
 @brief Get the number of moles of each IC in a GEM phase by phase id.
 
 This function uses the 2D matrix form of the molar stoichiometries, implemented
-as a vector of vectors, `vphasestoich_`.  Each row is a phase and each column
+as a vector of vectors, `GEMPhaseStoich_`.  Each row is a phase and each column
 is an IC.
 
 @note NOT USED.
@@ -4791,14 +4817,14 @@ is an IC.
 @param pidx is the id of the GEM phase to query
 @return the list of moles of each IC in phase id pidx
 */
-vector<double> getVphasestoich (const unsigned int pidx)
+vector<double> getGEMPhaseStoich (const unsigned int pidx)
 {
     try {
-        return vphasestoich_.at(pidx);
+        return GEMPhaseStoich_.at(pidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                            vphasestoich_.size(),pidx);       
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_.size(),pidx);       
         ex.printException();
         exit(1);
     }
@@ -4808,7 +4834,7 @@ vector<double> getVphasestoich (const unsigned int pidx)
 @brief Get the number of moles of each IC in a GEM phase by phase name.
 
 This function uses the 2D matrix form of the molar stoichiometries, implemented
-as a vector of vectors, `vphasestoich_`.  Each row is a phase and each column
+as a vector of vectors, `GEMPhaseStoich_`.  Each row is a phase and each column
 is an IC.
 
 @note NOT USED.
@@ -4816,15 +4842,15 @@ is an IC.
 @param str is the name of the GEM phase to query
 @return the list of moles of each IC in phase id pidx
 */
-vector<double> getVphasestoich (const string &str)
+vector<double> getGEMPhaseStoich (const string &str)
 {
-    unsigned int pidx = getPhaseid(str);
+    unsigned int pidx = getGEMPhaseId(str);
     try {
-        return vphasestoich_.at(pidx);
+        return GEMPhaseStoich_.at(pidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getVphasestoich","vphasestoich_",
-                            vphasestoich_.size(),pidx);       
+        EOBException ex("ChemicalSystem","getGEMPhaseStoich",
+                        "GEMPhaseStoich_",GEMPhaseStoich_.size(),pidx);       
         ex.printException();
         exit(1);
     }
@@ -4833,32 +4859,32 @@ vector<double> getVphasestoich (const string &str)
 /**
 @brief Get the 1D array of IC stoichiometries of each GEM CSD phase.
 
-This function uses the 1D array pointed to by the `phasestoich_` member
+This function uses the 1D array pointed to by the `pGEMPhaseStoich_` member
 variable.  This variable lists the IC molar stoichiometry of phase one in the first
 n elements (where n is the number of ICs), and of phase two in the second
 n elements, etc., instead of storing as a 2D matrix
 
 @return a pointer to the list of moles of each IC in every GEM phase
 */
-double *getPhasestoich () const
+double *getPGEMPhaseStoich (void) const
 {
-    return phasestoich_;
+    return pGEMPhaseStoich_;
 }
 
 /**
 @brief Get the 2D matrix of IC stoichiometries of each GEM phase.
 
 This function uses the 2D matrix form of the molar stoichiometries, implemented
-as a vector of vectors, `vphasestoich_`.  Each row is a phase and each column
+as a vector of vectors, `GEMPhaseStoich_`.  Each row is a phase and each column
 is an IC.
 
 @note Used only in this class's copy constructor.
 
 @return the 2D matrix of moles of each IC in each GEM phase
 */
-vector<vector<double> > getVphasestoich () const
+vector<vector<double> > getGEMPhaseStoich (void) const
 {
-    return vphasestoich_;
+    return GEMPhaseStoich_;
 }
 
 /**
@@ -4869,12 +4895,13 @@ vector<vector<double> > getVphasestoich () const
 @param icidx is the index of the IC being queried
 @return the chemical potential of the IC
 */
-double getICchempot (const unsigned int icidx)
+double getICChemicalPotential (const unsigned int icidx)
 {
-    if (icidx < ICnum_) {
-        return ICchempot_[icidx];
+    if (icidx < numICs_) {
+        return ICChemicalPotential_[icidx];
     } else {
-        EOBException ex("ChemicalSystem","getICchempot","ICchempot_",ICnum_,icidx);       
+        EOBException ex("ChemicalSystem","getICChemicalPotential",
+                        "ICChemicalPotential_",numICs_,icidx);       
         ex.printException();
         exit(1);
     }
@@ -4887,9 +4914,9 @@ double getICchempot (const unsigned int icidx)
 
 @return a pointer to the list of IC chemical potentials [mol/mol]
 */
-double *getICchempot () const
+double *getICChemicalPotential (void) const
 {
-    return ICchempot_;
+    return ICChemicalPotential_;
 }
 
 /**
@@ -4900,13 +4927,13 @@ double *getICchempot () const
 @param dcidx is the index of the DC being queried
 @return the activity coefficient of the DC
 */
-double getDCactivitycoeff (const unsigned int dcidx)
+double getDCActivityCoeff (const unsigned int dcidx)
 {
-    if (dcidx < DCnum_) {
-        return DCactivitycoeff_[dcidx];
+    if (dcidx < numDCs_) {
+        return DCActivityCoeff_[dcidx];
     } else {
-        EOBException ex("ChemicalSystem","getDCactivitycoeff","DCactivitycoeff_",
-                            DCnum_,dcidx);       
+        EOBException ex("ChemicalSystem","getDCActivityCoeff",
+                        "DCActivityCoeff_",numDCs_,dcidx);       
         ex.printException();
         exit(1);
     }
@@ -4919,9 +4946,9 @@ double getDCactivitycoeff (const unsigned int dcidx)
 
 @return a pointer to the list of DC molal activity coefficients
 */
-double *getDCactivitycoeff () const
+double *getDCActivityCoeff (void) const
 {
-    return DCactivitycoeff_;
+    return DCActivityCoeff_;
 }
 
 /**
@@ -4932,13 +4959,13 @@ double *getDCactivitycoeff () const
 @param icidx is the index of the IC being queried
 @return the residual for the IC being queried
 */
-double getICresiduals (const unsigned int icidx)
+double getICResiduals (const unsigned int icidx)
 {
-    if (icidx < ICnum_) {
-        return ICresiduals_[icidx];
+    if (icidx < numICs_) {
+        return ICResiduals_[icidx];
     } else {
-        EOBException ex("ChemicalSystem","getICresiduals","ICresiduals_",
-                           ICnum_,icidx);       
+        EOBException ex("ChemicalSystem","getICResiduals","ICResiduals_",
+                           numICs_,icidx);       
         ex.printException();
         exit(1);
     }
@@ -4951,9 +4978,9 @@ double getICresiduals (const unsigned int icidx)
 
 @return a pointer to the list of IC residuals
 */
-double *getICresiduals () const
+double *getICResiduals (void) const
 {
-    return ICresiduals_;
+    return ICResiduals_;
 }
 
 /**
@@ -4965,7 +4992,8 @@ double *getICresiduals () const
 @param norm is true if units will be in mol/mol, otherwise in J/mol
 @return the chemical potential of the DC
 */
-double getDCchempot(const long int dcidx, bool norm = false) {
+double getDCChemicalPotential (const long int dcidx, bool norm = false)
+{
     return (node_->Get_muDC(dcidx,norm));
 }
 
@@ -4977,7 +5005,7 @@ double getDCchempot(const long int dcidx, bool norm = false) {
 @param dcidx is the index of the DC being queried
 @return the chemical activity of the DC
 */
-double getDCactivity (const long int dcidx)
+double getDCActivity (const long int dcidx)
 {
     return (node_->Get_aDC(dcidx));
 }
@@ -4997,7 +5025,7 @@ The units of the returned value depend on the typd of DC being queried:
 @param dcidx is the index of the DC being queried
 @return the concentration of the DC in appropriate units
 */
-double getDCconcentration (const long int dcidx)
+double getDCConcentration (const long int dcidx)
 {
     return (node_->Get_cDC(dcidx));
 }
@@ -5014,7 +5042,8 @@ void setRed (const unsigned int mpidx,
              const double rval)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","setRed","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","setRed","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5033,7 +5062,8 @@ void setRed (const unsigned int mpidx,
 double getRed (const unsigned int mpidx)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","getRed","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","getRed","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5052,7 +5082,8 @@ void setGreen (const unsigned int mpidx,
                const double rval)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","setGreen","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","setGreen","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5070,7 +5101,8 @@ void setGreen (const unsigned int mpidx,
 double getGreen (const unsigned int mpidx)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","getGreen","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","getGreen","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5089,7 +5121,8 @@ void setBlue (const unsigned int mpidx,
               const double rval)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","setBlue","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","setBlue","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5108,7 +5141,8 @@ void setBlue (const unsigned int mpidx,
 double getBlue (const unsigned int mpidx)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","getBlue","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","getBlue","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5127,7 +5161,8 @@ void setColor (const unsigned int mpidx,
                vector<double> cv)
 {
     if (mpidx >= color_.size()) {
-        EOBException ex("ChemicalSystem","setColor","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","setColor","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5147,7 +5182,8 @@ vector<double> getColor (const unsigned int mpidx)
         return color_.at(mpidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getColor","color_",color_.size(),mpidx);
+        EOBException ex("ChemicalSystem","getColor","color_",
+                        color_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5172,7 +5208,7 @@ void setColor (vector<vector<double> > cv)
 
 @return the 2D matrix of rgb values of every microstructure phase
 */
-vector<vector<double> > getColor () const
+vector<vector<double> > getColor (void) const
 {
     return color_;
 }
@@ -5195,7 +5231,8 @@ void setGrayscale (const unsigned int mpidx,
         grayscale_.at(mpidx) = min(rval,COLORSATVAL);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setGrayscale","grayscale_",grayscale_.size(),mpidx);
+        EOBException ex("ChemicalSystem","setGrayscale","grayscale_",
+                        grayscale_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5219,7 +5256,8 @@ double getGrayscale (const unsigned int mpidx)
         return grayscale_.at(mpidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getGrayscale","grayscale_",grayscale_.size(),mpidx);
+        EOBException ex("ChemicalSystem","getGrayscale","grayscale_",
+                        grayscale_.size(),mpidx);
         ex.printException();
         exit(1);
     }
@@ -5247,7 +5285,7 @@ void setGrayscale (vector<double> gv)
 
 @return the list of grayscale values of every microstructure phase
 */
-vector<double> getGrayscale () const
+vector<double> getGrayscale (void) const
 {
     return grayscale_;
 }
@@ -5262,9 +5300,9 @@ so one can "look up" a phase id by the name of that phase.
 
 @return the microstructure phase lookup map (look up by name)
 */
-map<string,int> getMicidlookup () const
+map<string,int> getMicroPhaseIdLookup (void) const
 {
-    return micidlookup_;
+    return microPhaseIdLookup_;
 }
 
 /**
@@ -5277,9 +5315,9 @@ so one can "look up" a IC id by the name of that IC.
 
 @return the IC lookup map (look up by name)
 */
-map<string,int> getICidlookup () const
+map<string,int> getICIdLookup (void) const
 {
-    return ICidlookup_;
+    return ICIdLookup_;
 }
 
 /**
@@ -5292,9 +5330,9 @@ so one can "look up" a DC id by the name of that DC.
 
 @return the DC lookup map (look up by name)
 */
-map<string,int> getDCidlookup () const
+map<string,int> getDCIdLookup (void) const
 {
-    return DCidlookup_;
+    return DCIdLookup_;
 }
 
 /**
@@ -5307,9 +5345,9 @@ so one can "look up" a GEM phase id by the name of that phase.
 
 @return the DC lookup map (look up by name)
 */
-map<string,int> getPhaseidlookup() const
+map<string,int> getGEMPhaseIdLookup (void) const
 {
-return phaseidlookup_;
+return GEMPhaseIdLookup_;
 }
 
 /**
@@ -5320,14 +5358,14 @@ return phaseidlookup_;
 @param icidx is the index of the IC
 @return the class code of the IC
 */
-char getICclasscode (const unsigned int icidx)
+char getICClassCode (const unsigned int icidx)
 {
     try {
-        return ICclasscode_.at(icidx);
+        return ICClassCode_.at(icidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getICclasscode","ICclasscode_",
-                           ICclasscode_.size(),icidx);
+        EOBException ex("ChemicalSystem","getICClassCode",
+                        "ICClassCode_",ICClassCode_.size(),icidx);
         ex.printException();
         exit(1);
     }
@@ -5340,9 +5378,9 @@ char getICclasscode (const unsigned int icidx)
 
 @return the list of character class codes of the ICs
 */
-vector<char> getICclasscode () const
+vector<char> getICClassCode (void) const
 {
-    return ICclasscode_;
+    return ICClassCode_;
 }
 
 /**
@@ -5351,14 +5389,14 @@ vector<char> getICclasscode () const
 @param dcidx is the index of the DC
 @return the class code of the DC
 */
-char getDCclasscode (const unsigned int dcidx)
+char getDCClassCode (const unsigned int dcidx)
 {
     try {
-        return DCclasscode_.at(dcidx);
+        return DCClassCode_.at(dcidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getDCclasscode","DCclasscode_",
-                           DCclasscode_.size(),dcidx);
+        EOBException ex("ChemicalSystem","getDCClassCode",
+                        "DCClassCode_",DCClassCode_.size(),dcidx);
         ex.printException();
         exit(1);
     }
@@ -5369,9 +5407,9 @@ char getDCclasscode (const unsigned int dcidx)
 
 @return the list of character class codes of the DCs
 */
-vector<char> getDCclasscode () const
+vector<char> getDCClassCode (void) const
 {
-    return DCclasscode_;
+    return DCClassCode_;
 }
 
 /**
@@ -5380,14 +5418,15 @@ vector<char> getDCclasscode () const
 @param pidx is the index of a GEM phase
 @return the class code of the GEM phase 
 */
-char getPhaseclasscode (const unsigned int pidx)
+char getGEMPhaseClassCode (const unsigned int pidx)
 {
     try {
-        return phaseclasscode_.at(pidx);
+        return GEMPhaseClassCode_.at(pidx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPhaseclasscode","phaseclasscode_",
-                           phaseclasscode_.size(),pidx);
+        EOBException ex("ChemicalSystem","getGEMPhaseClassCode",
+                        "GEMPhaseClassCode_",
+                        GEMPhaseClassCode_.size(),pidx);
         ex.printException();
         exit(1);
     }
@@ -5398,9 +5437,9 @@ char getPhaseclasscode (const unsigned int pidx)
 
 @return the list of character class codes of the GEM phases
 */
-vector<char> getPhaseclasscode () const
+vector<char> getGEMPhaseClassCode (void) const
 {
-    return phaseclasscode_;
+    return GEMPhaseClassCode_;
 }
 
 /**
@@ -5418,7 +5457,7 @@ void setTemperature (const double val)
 
 @return the absolute temperature [K]
 */
-double getTemperature () const
+double getTemperature (void) const
 {
     return T_;
 }
@@ -5440,7 +5479,7 @@ void setP (const double val)
 
 @return the pressure [Pa]
 */
-double getP () const
+double getP (void) const
 {
     return P_;
 }
@@ -5464,7 +5503,7 @@ void setVs (const double val)
 
 @return the system volume [m<sup>3</sup>]
 */
-double getVs () const
+double getVs (void) const
 {
     return Vs_;
 }
@@ -5488,7 +5527,7 @@ void setMs (const double val)
 
 @return the system mass [kg]
 */
-double getMs () const
+double getMs (void) const
 {
     return Ms_;
 }
@@ -5512,7 +5551,7 @@ void setGs (const double val)
 
 @return the system Gibbs energy [J]
 */
-double getGs () const
+double getGs (void) const
 {
     return Gs_;
 }
@@ -5536,7 +5575,7 @@ void setHs (const double val)
 
 @return the system enthalpy [J]
 */
-double getHs () const
+double getHs (void) const
 {
     return Hs_;
 }
@@ -5548,9 +5587,9 @@ double getHs () const
 
 @param isval is the aqueous solution ionic strength [molal]
 */
-void setIonicstrength (const double isval)
+void setIonicStrength (const double isval)
 {
-    ionicstrength_ = isval;
+    ionicStrength_ = isval;
 }
 
 /**
@@ -5560,9 +5599,9 @@ void setIonicstrength (const double isval)
 
 @return the aqueous solution ionic strength [molal]
 */
-double getIonicstrength () const
+double getIonicStrength (void) const
 {
-    return ionicstrength_;
+    return ionicStrength_;
 }
 
 /**
@@ -5582,7 +5621,7 @@ void setPH (const double val)
 
 @return the aqueous solution pH
 */
-double getPH () const
+double getPH (void) const
 {
     return pH_;
 }
@@ -5606,7 +5645,7 @@ void setPe (const double val)
 
 @return the aqueous solution pe
 */
-double getPe () const
+double getPe (void) const
 {
     return pe_;
 }
@@ -5630,7 +5669,7 @@ void setEh (const double val)
 
 @return the aqueous solution Eh [V]
 */
-double getEh () const
+double getEh (void) const
 {
     return Eh_;
 }
@@ -5642,9 +5681,9 @@ double getEh () const
 
 @param val is the node handle identification number
 */
-void setNodehandle (const long int val)
+void setNodeHandle (const long int val)
 {
-    nodehandle_ = val;
+    nodeHandle_ = val;
 }
 
 /**
@@ -5654,9 +5693,9 @@ void setNodehandle (const long int val)
 
 @return the node handle identification number
 */
-long int getNodehandle () const
+long int getNodeHandle (void) const
 {
-    return nodehandle_;
+    return nodeHandle_;
 }
 
 /**
@@ -5681,9 +5720,9 @@ The node status can be:
 
 @param val is the node status number to set
 */
-void setNodestatus (const long int val)
+void setNodeStatus (const long int val)
 {
-    nodestatus_ = val;
+    nodeStatus_ = val;
 }
 
 /**
@@ -5708,9 +5747,9 @@ The node status can be:
 
 @return the node status number
 */
-long int getNodestatus () const
+long int getNodeStatus (void) const
 {
-    return nodestatus_;
+    return nodeStatus_;
 }
 
 /**
@@ -5720,9 +5759,9 @@ long int getNodestatus () const
 
 @param val is the number of iterations
 */
-void setIterdone (const long int val)
+void setIterDone (const long int val)
 {
-    iterdone_ = val;
+    iterDone_ = val;
 }
 
 /**
@@ -5732,9 +5771,9 @@ void setIterdone (const long int val)
 
 @return the number of iterations executed by the GEM-IPM solver
 */
-long int getIterdone () const
+long int getIterDone (void) const
 {
-    return iterdone_;
+    return iterDone_;
 }
 
 /**
@@ -5742,15 +5781,15 @@ long int getIterdone () const
 
 Calculations of equilibrium state sometimes fail to converge.  It is
 possible that some small tweak in the composition could help the
-algorithm converge, so we allow up to `maxGEMfails_' attempts for
+algorithm converge, so we allow up to `maxGEMFails_' attempts for
 convergence, each time tweaking the composition in some way
 before giving up and throwing an exception.
 
 @param ntimes is the number of consecutive times GEM_run has failed
 */
-void setTimesGEMfailed (const int ntimes)
+void setTimesGEMFailed (const int ntimes)
 {
-    timesGEMfailed_ = (ntimes >= 0) ? ntimes : 0;
+    timesGEMFailed_ = (ntimes >= 0) ? ntimes : 0;
     return;
 }
 
@@ -5759,9 +5798,9 @@ void setTimesGEMfailed (const int ntimes)
 
 @return the number of consecutive times a call to GEM_run has failed.
 */
-int getTimesGEMfailed () const
+int getTimesGEMFailed (void) const
 {
-    return timesGEMfailed_;
+    return timesGEMFailed_;
 }
 
 /**
@@ -5781,7 +5820,7 @@ void setNode (TNode *np)
 
 @return a pointer to the GEM TNode object doing the GEM-IPM calculations
 */
-TNode *getNode ()
+TNode *getNode (void)
 {
     return node_;
 }
@@ -5791,9 +5830,9 @@ TNode *getNode ()
 
 @param satstate is the flag value
 */
-void setSaturated(const bool satstate)
+void setIsSaturated(const bool satstate)
 {
-    saturated_ = satstate;
+    isSaturated_ = satstate;
 }
 
 /**
@@ -5801,9 +5840,9 @@ void setSaturated(const bool satstate)
 
 @return the saturation state flag
 */
-bool isSaturated () const
+bool isSaturated (void) const
 {
-    return saturated_;
+    return isSaturated_;
 }
 
 /**
@@ -5811,9 +5850,9 @@ bool isSaturated () const
 
 @param sattack_time is the time at which to start sulfate attack [days]
 */
-void setSattack_time(const double sattack_time)
+void setSulfateAttackTime (const double sattack_time)
 {
-    sattack_time_ = sattack_time;
+    sulfateAttackTime_ = sattack_time;
 }
 
 /**
@@ -5823,9 +5862,9 @@ void setSattack_time(const double sattack_time)
 
 @return the simulated time at which to begin sulfate attack [days]
 */
-double getSattack_time () const
+double getSulfateAttackTime (void) const
 {
-    return sattack_time_;
+    return sulfateAttackTime_;
 }
 
 /**
@@ -5833,9 +5872,9 @@ double getSattack_time () const
 
 @param leach_time is the time at which to start leaching [days]
 */
-void setLeach_time (const double leach_time)
+void setLeachTime (const double leach_time)
 {
-    leach_time_ = leach_time;
+    leachTime_ = leach_time;
 }
 
 /**
@@ -5845,9 +5884,9 @@ void setLeach_time (const double leach_time)
 
 @return the simulated time at which to begin leaching [days]
 */
-double getLeach_time () const
+double getLeachTime (void) const
 {
-    return leach_time_;
+    return leachTime_;
 }
    
 /**
@@ -5874,7 +5913,7 @@ void writeMember (const unsigned int i,
 
 The output stream is defined, opened, and closed within the function itself
 */
-void writeChemSys ();
+void writeChemSys (void);
 
 /**
 @brief Formatted writing of ChemicalSystem data to a prescribed stream.
@@ -5930,11 +5969,11 @@ int calculateState (double time,
 @param dcid is the index of the DC
 @param moles is the change in number of moles of the DC
 */
-void DCimpact (int dcid,
+void DCImpact (int dcid,
                double moles)
 {
-    for (int i = 0; i < ICnum_; i++) {
-        ICmoles_[i] += DCstoich_[dcid][i] * moles;
+    for (int i = 0; i < numICs_; i++) {
+        ICMoles_[i] += DCStoich_[dcid][i] * moles;
     }
 
     return;
@@ -5954,13 +5993,13 @@ checks whether that would happen.
 @param moles is the proposed change in moles of that DC
 @return true if the change in this DC would not cause an IC mole content to drop to near zero
 */
-bool checkDCimpact (int dcid,
+bool checkDCImpact (int dcid,
                     double moles)
 {
     bool possible;
     possible = true;
-    for (int i = 0; i < ICnum_; i++) {
-        if ((ICmoles_[i] + DCstoich_[dcid][i] * moles) < 2.0e-17) {
+    for (int i = 0; i < numICs_; i++) {
+        if ((ICMoles_[i] + DCStoich_[dcid][i] * moles) < 2.0e-17) {
             possible = false;
             cout << "The growth of this phase can cause one or more IC moles to be" 
                  << " lower than 2.0e-17, so this phase can not grow."
@@ -5975,15 +6014,15 @@ bool checkDCimpact (int dcid,
 @brief Set the vector of saturation indices of all GEM CSD phases.
 
 */
-void setSI ()
+void setSI (void)
 {
     SI_.clear();
     double *Falp;
     Falp = (node_->ppmm())->Falp;
     
-    for (int i = 0; i < phasenum_; i++) {
+    for (int i = 0; i < numGEMPhases_; i++) {
         // if (verbose_) {
-        //     cout << "logSI for " << phasename_[i] << " is: "
+        //     cout << "logSI for " << GEMPhaseName_[i] << " is: "
         //          << Falp[i] << endl;
         // }
         double si = pow(10,Falp[i]);
@@ -5997,7 +6036,7 @@ void setSI ()
 
 @return the vector of saturation indices of all GEM CSD phases
 */
-vector<double> getSI ()
+vector<double> getSI (void)
 {
     return SI_;
 }
@@ -6029,7 +6068,7 @@ double getSI (int phaseid)
 */
 double getSI (const string &str)
 {
-    return SI_[getPhaseid(str)];
+    return SI_[getGEMPhaseId(str)];
 }
 
 /**
@@ -6037,7 +6076,7 @@ double getSI (const string &str)
 
 @return the vector of moles of each IC in the aqueous solution
 */
-vector<double> getSolution ();
+vector<double> getSolution (void);
 
 /**
 @brief Get the initial solution composition other than water
@@ -6047,30 +6086,30 @@ the initial solution [mol/kgw].
 
 @return the initial solute concentration map
 */
-map<int,double> getInitialSolutionComp(void)
+map<int,double> getInitialSolutionComposition (void)
 {
-    return initial_solution_composition_;
+    return initialSolutionComposition_;
 }
  
 /**
-@brief Set the jsonformat_ flag
+@brief Set the jsonFormat_ flag
 
-@param jsonformat is true if input files are in JSON format
+@param jsonFormat is true if input files are in JSON format
 */
-void setJsonformat (const bool jsonformat)
+void setJSONFormat (const bool jsonFormat)
 {
-    jsonformat_ = jsonformat;
+    jsonFormat_ = jsonFormat;
     return;
 }
 
 /**
-@brief Get the jsonformat_ flag
+@brief Get the jsonFormat_ flag
 
-@return the jsonformat flag
+@return the jsonFormat flag
 */
-bool getJsonformat () const
+bool isJSONFormat (void) const
 {
-    return jsonformat_;
+    return jsonFormat_;
 }
 
 
@@ -6090,7 +6129,7 @@ void setVerbose (const bool isverbose)
 
 @return the verbose flag
 */
-bool getVerbose () const
+bool getVerbose (void) const
 {
     return verbose_;
 }
@@ -6111,7 +6150,7 @@ void setDebug (const bool isdebug)
 
 @return the debug flag
 */
-bool getDebug () const
+bool getDebug (void) const
 {
     return debug_;
 }
@@ -6132,7 +6171,7 @@ void setWarning (const bool iswarning)
 
 @return the warning flag
 */
-bool getWarning () const
+bool getWarning (void) const
 {
     return warning_;
 }

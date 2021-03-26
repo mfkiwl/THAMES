@@ -12,7 +12,7 @@ Site::Site ()
   x_ = y_ = z_ = 0;
   id_ = 0;
   nb_.clear();
-  strfreevolume_ = truevolume_ = 0.0;
+  stressFreeVolume_ = trueVolume_ = 0.0;
   damage_ = false;
   expstrain_ = 0.0;
 }
@@ -30,7 +30,7 @@ Site::Site (unsigned int xp,
     x_ = y_ = z_ = 0;
     id_ = 0;
     nb_.clear();
-    strfreevolume_ = truevolume_ = 0.0;
+    stressFreeVolume_ = trueVolume_ = 1.0;
     damage_ = false;
     x_ = xp;
     y_ = yp;
@@ -45,17 +45,15 @@ Site::Site (unsigned int xp,
 
     if (neigh > 0) nb_.resize(neigh,0);
 
-    chemsys_ = csys;
-
-    strfreevolume_ = truevolume_ = 1.0;
+    chemSys_ = csys;
 
     expstrain_ = 0.0;
 }
 
 void Site::calcWmc(void)
 {
-    wmc_ = chemsys_->getPorosity(getPhaseId());
+    wmc_ = chemSys_->getPorosity(getMicroPhaseId());
     for (unsigned int i = 0; i < nb_.size(); i++) {
-        wmc_ += chemsys_->getPorosity(nb_[i]->getPhaseId());
+        wmc_ += chemSys_->getPorosity(nb_[i]->getMicroPhaseId());
     }
 }

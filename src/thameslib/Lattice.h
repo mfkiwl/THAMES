@@ -69,7 +69,7 @@ RanGen *rg_;                                /**< Pointer to random number genera
 vector<Site> site_;                         /**< 1D list of Site objects (site = voxel) */
 unsigned int numsites_;                     /**< Total number of sites */
 const unsigned int siteneighbors_;          /**< Number of neighbor sites to a given site */
-ChemicalSystem *chemsys_;                   /**< Pointer to simulation's ChemicalSystem */
+ChemicalSystem *chemSys_;                   /**< Pointer to simulation's ChemicalSystem */
 Solution *solut_;                           /**< Pointer to the simulation's Solution */
 AppliedStrain *FEsolver_;                   /**< Pointer to simulation's FE elastic solver */
 vector<Interface> interface_;               /**< List of the different interface objects
@@ -750,9 +750,9 @@ int checkBC (int pos,
 
 @return a pointer to the ChemicalSystem object for the simulation
 */
-ChemicalSystem* getChemsys () const
+ChemicalSystem* getChemSys () const
 {
-    return chemsys_;
+    return chemSys_;
 }
     
 /**
@@ -761,18 +761,18 @@ ChemicalSystem* getChemsys () const
 @param s is a pointer to the Site object
 @param i is the phase index to set at that site
 */
-void setPhaseId (Site *s,
+void setMicroPhaseId (Site *s,
                  const unsigned int i)
 {
     string msg;
     try {
-        count_.at(s->getPhaseId())--;        
-        s->setPhaseId(i);
+        count_.at(s->getMicroPhaseId())--;        
+        s->setMicroPhaseId(i);
         count_.at(i)++;
     }
     catch (out_of_range &oor) {
         msg = "Site does not exist?";
-        throw EOBException("Lattice","setPhaseId",msg,count_.size(),i);
+        throw EOBException("Lattice","setMicroPhaseId",msg,count_.size(),i);
     }
     return;
 }
@@ -783,18 +783,18 @@ void setPhaseId (Site *s,
 @param sitenum is the index of the site in the `site_` array
 @param i is the phase index to set at that site
 */
-void setPhaseId (const int sitenum,
+void setMicroPhaseId (const int sitenum,
                  const unsigned int i)
 {
     string msg;
     try {
-        count_.at(site_.at(sitenum).getPhaseId())--;
-        site_.at(sitenum).setPhaseId(i);
+        count_.at(site_.at(sitenum).getMicroPhaseId())--;
+        site_.at(sitenum).setMicroPhaseId(i);
         count_.at(i)++;
     }
     catch (out_of_range &oor) {
         msg = "Site does not exist?";
-        throw EOBException("Lattice","setPhaseId",msg,count_.size(),i);
+        throw EOBException("Lattice","setMicroPhaseId",msg,count_.size(),i);
     }
 }
 
@@ -804,15 +804,15 @@ void setPhaseId (const int sitenum,
 @param sitenum is the index of the site in the `site_` array
 @return the microstructure phase id at the site
 */
-int getPhaseId (const int sitenum)
+int getMicroPhaseId (const int sitenum)
 {
     try {
         Site *ste;
         ste = &site_[sitenum];
-        return (ste->getPhaseId());
+        return (ste->getMicroPhaseId());
     }
     catch(out_of_range &oor) {
-        EOBException ex("Lattice","getPhaseId","sitenum",
+        EOBException ex("Lattice","getMicroPhaseId","sitenum",
                         numsites_,sitenum);
         ex.printException();
         exit(1);

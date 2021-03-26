@@ -8,7 +8,7 @@
 
 Lattice::Lattice (ChemicalSystem *cs,
                   Solution *solut)
-: siteneighbors_(18),chemsys_(cs),solut_(solut)
+: siteneighbors_(18),chemSys_(cs),solut_(solut)
 {
   xdim_ = ydim_ = zdim_ = 0;
   time_ = 0.0;
@@ -27,7 +27,7 @@ Lattice::Lattice (ChemicalSystem *cs,
                   const bool verbose,
                   const bool warning,
                   const bool debug)
-: siteneighbors_(18),chemsys_(cs),solut_(solut)
+: siteneighbors_(18),chemSys_(cs),solut_(solut)
 {
   unsigned int i,j,k;
   unsigned int ii;
@@ -137,10 +137,10 @@ Lattice::Lattice (ChemicalSystem *cs,
     }
 
     count_.clear();
-    count_.resize(chemsys_->getMicphasenum(),0);
+    count_.resize(chemSys_->getNumMicroPhases(),0);
 
     SI_.clear();
-    SI_.resize(chemsys_->getMicphasenum(),1.0);
+    SI_.resize(chemSys_->getNumMicroPhases(),1.0);
 
     expansion_.clear();
     expansion_coordin_.clear();
@@ -340,7 +340,7 @@ Lattice::Lattice (ChemicalSystem *cs,
 
     for (i = 0; i < numsites_; i++) {
       in >> pid;
-      site_[i].setPhaseId(pid);
+      site_[i].setMicroPhaseId(pid);
       count_.at(pid)++;
     }
     
@@ -356,16 +356,18 @@ Lattice::Lattice (ChemicalSystem *cs,
     /// Phase identities are determined by the KineticModel
     ///
 
+    int numMicroPhases = chemSys_->getNumMicroPhases();
+
     volumefraction_.clear();
-    volumefraction_.resize(chemsys_->getMicphasenum(),0.0);
+    volumefraction_.resize(numMicroPhases,0.0);
     initvolumefraction_.clear();
-    initvolumefraction_.resize(chemsys_->getMicphasenum(),0.0);
+    initvolumefraction_.resize(numMicroPhases,0.0);
 
     if (verbose_) cout << "Calculating Volume Fractions now..." << endl;
     double vfrac,mfrac;
     try {
       if (site_.size() > 0) {
-        for (ii = 0; ii < chemsys_->getMicphasenum(); ii++) {
+        for (ii = 0; ii < numMicroPhases; ii++) {
             vfrac = ((double)count_[ii])/((double)site_.size());
             setVolumefraction(ii,vfrac);
             setInitvolumefraction(ii,vfrac);
@@ -418,17 +420,10 @@ void Lattice::addSite (const unsigned int x,
       exit(1);
     }
     
-    ///
-    /// Why is numphase assigned here?  It is a local variable and is not
-    /// used.
-    ///
-
-    unsigned int numphase = chemsys_->getMicphasenum();
-
     // Assume that the site is WATER by default.  This will break if
     // there is ever a sytem without water.
     
-    site_.push_back(Site(x,y,z,xdim_,ydim_,zdim_,siteneighbors_,chemsys_));
+    site_.push_back(Site(x,y,z,xdim_,ydim_,zdim_,siteneighbors_,chemSys_));
 }
 
 void Lattice::findInterfaces (void)
@@ -442,7 +437,7 @@ void Lattice::findInterfaces (void)
     ///
 
     interface_.clear();
-    for (i = 0; i < chemsys_->getMicphasenum(); i++) { 
+    for (i = 0; i < chemSys_->getNumMicroPhases(); i++) { 
       // if (verbose_) {
       //     cout << "  Database item " << i << ": ";
       //     cout.flush();
@@ -453,11 +448,11 @@ void Lattice::findInterfaces (void)
         dsite.clear();
         for (k = 0; k < site_.size(); k++) {
           if (site_[k].getWmc() > 0) {  // Is there some water nearby?
-            if ((site_[k].getPhaseId() == i)) {
+            if ((site_[k].getMicroPhaseId() == i)) {
               dsite.push_back(&site_[k]);
               site_[k].setDissolutionSite(i);
               for (kk = 0; kk < site_[k].nbSize(2); kk++) {
-                if ((site_[k].nb(kk))->getPhaseId() == WATERID) {
+                if ((site_[k].nb(kk))->getMicroPhaseId() == WATERID) {
                   gsite.push_back(site_[k].nb(kk));
                   site_[k].nb(kk)->setGrowthSite(i);
                 }
@@ -468,9 +463,9 @@ void Lattice::findInterfaces (void)
               /// a growth template for any phase, because we already
               /// tested for those above.
        
-            } else if (chemsys_->isGrowthtemplate(i,site_[k].getPhaseId())) {
+            } else if (chemSys_->isGrowthTemplate(i,site_[k].getMicroPhaseId())) {
               for (kk = 0; kk < site_[k].nbSize(1); kk++) {
-                if ((site_[k].nb(kk))->getPhaseId() == WATERID) {
+                if ((site_[k].nb(kk))->getMicroPhaseId() == WATERID) {
                   gsite.push_back(site_[k].nb(kk));
                   site_[k].nb(kk)->setGrowthSite(i);
                 }
@@ -499,7 +494,7 @@ void Lattice::findInterfaces (void)
           // }
           double g = 0.0;
           for (k = 0; k < site_.size(); k++) {
-            if ((site_[k].getPhaseId() == WATERID)) {
+            if ((site_[k].getMicroPhaseId() == WATERID)) {
               g = rg_->Ran3();
               if (g < thresh) {
                 gsite.push_back(&site_[k]);
@@ -513,7 +508,7 @@ void Lattice::findInterfaces (void)
         //     cout << "Trying to add a water interface for phase " << i << "... ";
         //     cout.flush();
         // }
-        interface_.push_back(Interface(chemsys_,rg_,gsite,dsite,i,verbose_,debug_));   
+        interface_.push_back(Interface(chemSys_,rg_,gsite,dsite,i,verbose_,debug_));   
         // if (verbose_) {
         //     cout << "Done!" << endl;
         //     cout.flush();
@@ -569,7 +564,7 @@ int Lattice::growPhase (unsigned int phaseid,
     while ((numleft > 0) && (isite.size() >= 1)) {
       for (i = 0; (numleft > 0) && (i < isite.size()); i++) {
         ste = &site_[isite[i].getId()];
-        pid = ste->getPhaseId();
+        pid = ste->getMicroPhaseId();
      
         if (pid == WATERID) {
           removeGrowthSite(ste,phaseid);
@@ -587,9 +582,9 @@ int Lattice::growPhase (unsigned int phaseid,
           /// @todo Determine why the calculation works this way.
           ///
 
-          dwmcval = chemsys_->getPorosity(phaseid)
-                  - chemsys_->getPorosity(pid);
-          setPhaseId(ste,phaseid);
+          dwmcval = chemSys_->getPorosity(phaseid)
+                  - chemSys_->getPorosity(pid);
+          setMicroPhaseId(ste,phaseid);
           ste->dWmc(dwmcval);
 
           ///
@@ -611,10 +606,10 @@ int Lattice::growPhase (unsigned int phaseid,
           for (j = 0; j < ste->nbSize(1); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
-            if (stenb->getPhaseId() == WATERID) {
+            if (stenb->getMicroPhaseId() == WATERID) {
               addGrowthSite(stenb,phaseid);
             } else if (stenb->getWmc() <= 0.0) {
-              removeDissolutionSite(stenb,stenb->getPhaseId());
+              removeDissolutionSite(stenb,stenb->getMicroPhaseId());
             }
           }
 
@@ -662,10 +657,10 @@ int Lattice::dissolvePhase (unsigned int phaseid,
                        << isite.size() << endl; 
     try {
       for (i = 0; i < isite.size(); i++) {
-        if (site_.at(isite[i].getId()).getPhaseId() != phaseid) {
+        if (site_.at(isite[i].getId()).getMicroPhaseId() != phaseid) {
           cout << "Uh-oh... interface " << phaseid
                << " is corrupted with phase "
-               << site_.at(isite[i].getId()).getPhaseId() << endl;
+               << site_.at(isite[i].getId()).getMicroPhaseId() << endl;
           cout << "Offending site is " << isite[i].getId() << endl;
         }
       }
@@ -686,10 +681,10 @@ int Lattice::dissolvePhase (unsigned int phaseid,
       try {
         for (i = isite.size() - 1; (i > 0) && (numleft > 0); i--) {
           ste = &site_.at(isite[i].getId());
-          pid = ste->getPhaseId();
+          pid = ste->getMicroPhaseId();
           removeDissolutionSite(ste,pid);
       
-          setPhaseId(ste,WATERID);
+          setMicroPhaseId(ste,WATERID);
       
           ///
           /// Weighted mean curvature (wmc) is changed by the difference
@@ -698,15 +693,15 @@ int Lattice::dissolvePhase (unsigned int phaseid,
           /// @todo Determine why the calculation works this way.
           ///
 
-          dwmcval = chemsys_->getPorosity(WATERID)
-                  - chemsys_->getPorosity(pid);
+          dwmcval = chemSys_->getPorosity(WATERID)
+                  - chemSys_->getPorosity(pid);
           ste->dWmc(dwmcval);
       
           unsigned int j;
           for (j = 0; j < ste->nbSize(1); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
-            int nbpid = stenb->getPhaseId();
+            int nbpid = stenb->getMicroPhaseId();
             if ((nbpid != WATERID)
                 && (nbpid != VOIDID)) {
 
@@ -721,7 +716,7 @@ int Lattice::dissolvePhase (unsigned int phaseid,
     
               vector<int> nbgrowthtemp;
               nbgrowthtemp.clear();
-              nbgrowthtemp = chemsys_->getGrowthtemplate(nbpid);
+              nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
               for (int ii = 0; ii < nbgrowthtemp.size(); ii++) {
                 if (nbgrowthtemp[ii] != WATERID) {
                   addGrowthSite(ste,nbgrowthtemp[ii]);
@@ -876,7 +871,7 @@ int Lattice::emptyPorosity (int numsites)
     try {
         while (it != distlist.end()) {
             siteid = (*it).siteid;
-            setPhaseId(site_[siteid].getId(),VOIDID);
+            setMicroPhaseId(site_[siteid].getId(),VOIDID);
             numemptied++;
             it++;
         }
@@ -929,7 +924,7 @@ int Lattice::fillPorosity (int numsites)
     try {
         while (it != distlist.end()) {
             siteid = (*it).siteid;
-            setPhaseId(site_[siteid].getId(),WATERID);
+            setMicroPhaseId(site_[siteid].getId(),WATERID);
             numfilled++;
             it++;
         }
@@ -982,8 +977,8 @@ int Lattice::countBox (int boxsize,
                 hy = iy + checkBC(iy,ydim_);
                 for (ix = qxlo; ix <= qxhi; ix++) {
                     hx = ix + checkBC(ix,xdim_);
-                    if (site_.at(getIndex(hx,hy,hz)).getPhaseId() == WATERID
-                            || site_.at(getIndex(hx,hy,hz)).getPhaseId() == VOIDID) {
+                    if (site_.at(getIndex(hx,hy,hz)).getMicroPhaseId() == WATERID
+                            || site_.at(getIndex(hx,hy,hz)).getMicroPhaseId() == VOIDID) {
                         nfound++;
                     }
                 }
@@ -1213,8 +1208,8 @@ void Lattice::changeMicrostructure (double time,
     /// just load them up here from the ChemicalSystem object.
     ///
 
-    vol_next = chemsys_->getMicphasevolume();
-    phasenames = chemsys_->getMicphasename();
+    vol_next = chemSys_->getMicroPhaseVolume();
+    phasenames = chemSys_->getMicroPhaseName();
 
     /// JWB: 2020 Dec 22  Do manual adjustment of certain microstructure
     /// phase voxels in a cement paste, accounting for gel porosity, etc.
@@ -1277,11 +1272,14 @@ void Lattice::changeMicrostructure (double time,
         ///  there will eventually be sulfate attack.  Why not wait until
         ///  sulfate attack simulation actually starts?
         ///
+        
+
+        int numMicroPhases = chemSys_->getNumMicroPhases();
 
         netsites.clear();
-        netsites.resize(chemsys_->getMicphasenum(),0);
+        netsites.resize(numMicroPhases,0);
         pid.clear();
-        pid.resize(chemsys_->getMicphasenum(),0);
+        pid.resize(numMicroPhases,0);
 
         vector<int> growing;
         vector<vector<int> > shrinking;
@@ -1298,15 +1296,15 @@ void Lattice::changeMicrostructure (double time,
             // Hard wiring for sulfate attack here
             // @todo Generalize to other phases
             
-            growing.push_back(chemsys_->getMicid("ETTR"));
+            growing.push_back(chemSys_->getMicroPhaseId("ETTR"));
             shrinking.resize(growing.size(),idummy);
             volratios.resize(growing.size(),ddummy);
             for (i = 0; i < growing.size(); ++i) {
-                shrinking[i].push_back(chemsys_->getMicid("MONOSULPH"));
+                shrinking[i].push_back(chemSys_->getMicroPhaseId("MONOSULPH"));
                 volratios[i].push_back(2.288);
-                shrinking[i].push_back(chemsys_->getMicid("AFMC"));
+                shrinking[i].push_back(chemSys_->getMicroPhaseId("AFMC"));
                 volratios[i].push_back(2.699);
-                shrinking[i].push_back(chemsys_->getMicid("HYDROTALC"));
+                shrinking[i].push_back(chemSys_->getMicroPhaseId("HYDROTALC"));
                 volratios[i].push_back(3.211);
             }
 
@@ -1389,9 +1387,9 @@ void Lattice::changeMicrostructure (double time,
         ///
 
         netsites.clear();
-        netsites.resize(chemsys_->getMicphasenum(),0);
+        netsites.resize(chemSys_->getNumMicroPhases(),0);
         pid.clear();
-        pid.resize(chemsys_->getMicphasenum(),0);
+        pid.resize(chemSys_->getNumMicroPhases(),0);
 
         try {
             for (i = FIRST_SOLID; i < vfrac_next.size(); i++) {
@@ -1516,7 +1514,7 @@ void Lattice::changeMicrostructure (double time,
                             vector<int> watersites;
                             watersites.clear();
                             for (int k = 0; k < site_.size(); ++k) {
-                                if (site_[k].getPhaseId() == WATERID) watersites.push_back(k);
+                                if (site_[k].getMicroPhaseId() == WATERID) watersites.push_back(k);
                             }
                             if (verbose_) {
                                 cout << "Found " << watersites.size() << " water sites" << endl;
@@ -1681,7 +1679,7 @@ void Lattice::changeMicrostructure (double time,
     ///  @todo Why not eliminate this line completely?
     ///
 
-    double surfa = getSurfaceArea(chemsys_->getMicid("CSH"));
+    double surfa = getSurfaceArea(chemSys_->getMicroPhaseId("CSH"));
     
     if (volumefraction_[WATERID] <= 0.0) capwater = false;
 
@@ -1708,8 +1706,8 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
 
         // Find the total system volume according to GEMS
         
-        double GEM_thinks_totmicvol = chemsys_->getMictotvolume();
-        double GEM_thinks_totmicinitvol = chemsys_->getMictotinitvolume();
+        double GEM_thinks_totmicvol = chemSys_->getMicroVolume();
+        double GEM_thinks_totmicinitvol = chemSys_->getMicroInitVolume();
 
         // Find the total SOLIDS volume
         
@@ -1742,12 +1740,12 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
         // Adjust the volume of CSH to
         // account for its saturated gel porosity
            
-        int cshid = chemsys_->getMicid("CSH");
+        int cshid = chemSys_->getMicroPhaseId("CSH");
 
         tot_watervolume = vol.at(WATERID);
         cap_voidvolume = vol.at(VOIDID);
 
-        gel_watervolume = (chemsys_->getPorosity(cshid)) * vol.at(cshid);
+        gel_watervolume = (chemSys_->getPorosity(cshid)) * vol.at(cshid);
         cap_watervolume = tot_watervolume - gel_watervolume;
         vol.at(cshid) += gel_watervolume;
 
@@ -1757,7 +1755,7 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
         cap_spacevolume = (GEM_thinks_totmicinitvol - GEM_thinks_solidvol);
         double spaceforwater = cap_spacevolume + gel_watervolume;
 
-        if (!(chemsys_->isSaturated())) {   // System is sealed
+        if (!(chemSys_->isSaturated())) {   // System is sealed
 
             double volchange = GEM_thinks_totmicvol - GEM_thinks_totmicinitvol;
 
@@ -1912,7 +1910,7 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
         for (j = 0; j < ydim_; j++) {
             for (i = 0; i < xdim_; i++) {
                int index = getIndex(i,j,k);
-               out << site_[index].getPhaseId() << endl;
+               out << site_[index].getMicroPhaseId() << endl;
             }
         }
     }
@@ -1952,7 +1950,7 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
                    if (site_[index].IsDamage()) {
                      out1 << DAMAGEID << endl;
                    } else {
-                     out1 << site_[index].getPhaseId() << endl;
+                     out1 << site_[index].getMicroPhaseId() << endl;
                    }
                 }
             }
@@ -2076,7 +2074,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
                ixx = slice;
                do {
                    sitenum = getIndex(ixx,j,k);
-                   if (nd == 10 || site_[sitenum].getPhaseId() > 1) {
+                   if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
                        done = true;
                    } else {
                        nd++;
@@ -2085,11 +2083,11 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
                    }
                } while (!done);
                sitenum = getIndex(ixx,j,k);
-               image[j][k] = site_[sitenum].getPhaseId();
+               image[j][k] = site_[sitenum].getMicroPhaseId();
                dshade[j][k] = 0.1 * (10.0 - ((double)nd));
            } else {
                sitenum = getIndex(slice,j,k);
-               image[j][k] = site_[sitenum].getPhaseId();
+               image[j][k] = site_[sitenum].getMicroPhaseId();
                dshade[j][k] = 1.0;
            }
 
@@ -2100,7 +2098,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
     vector<double> colors;
     for (k = 0; k < zdim_; k++) {
         for (j = 0; j < ydim_; j++) {
-           colors = chemsys_->getColor(image[j][k]);
+           colors = chemSys_->getColor(image[j][k]);
            red = dshade[j][k]*colors[0] + 0.5;
            green = dshade[j][k]*colors[1] + 0.5;
            blue = dshade[j][k]*colors[2] + 0.5;
@@ -2190,7 +2188,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
            ixx = slice;
            do {
                sitenum = getIndex(ixx,j,k);
-               if (nd == 10 || site_[sitenum].getPhaseId() > 1) {
+               if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
                    done = true;
                } else {
                    nd++;
@@ -2215,7 +2213,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
     vector<double> colors;
     for (k = 0; k < zdim_; k++) {
         for (j = 0; j < ydim_; j++) {
-           colors = chemsys_->getColor(image[j][k]);
+           colors = chemSys_->getColor(image[j][k]);
            red = dshade[j][k]*colors[0] + 0.5;
            green = dshade[j][k]*colors[1] + 0.5;
            blue = dshade[j][k]*colors[2] + 0.5;
@@ -2310,7 +2308,7 @@ void Lattice::makeMovie (const string &root)
                ixx = slice;
                do {
                    sitenum = getIndex(ixx,j,k);
-                   if (nd == 10 || site_[sitenum].getPhaseId() > 1) {
+                   if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
                        done = true;
                    } else {
                        nd++;
@@ -2319,7 +2317,7 @@ void Lattice::makeMovie (const string &root)
                    }
                } while (!done);
                sitenum = getIndex(ixx,j,k);
-               image[j][k] = site_[sitenum].getPhaseId();
+               image[j][k] = site_[sitenum].getMicroPhaseId();
                dshade[j][k] = 0.1 * (10.0 - ((double)nd));
             }
         }          
@@ -2328,7 +2326,7 @@ void Lattice::makeMovie (const string &root)
         vector<double> colors;
         for (k = 0; k < zdim_; k++) {
             for (j = 0; j < ydim_; j++) {
-               colors = chemsys_->getColor(image[j][k]);
+               colors = chemSys_->getColor(image[j][k]);
                red = dshade[j][k]*colors[0] + 0.5;
                green = dshade[j][k]*colors[1] + 0.5;
                blue = dshade[j][k]*colors[2] + 0.5;
@@ -2401,7 +2399,7 @@ vector<int> Lattice::transform (int shrinkingid,
     if (diss.size() < (-netsites_shrinkingid)) {
         for (int ii = 0; ii < numsites_; ii++) {
             ste = &site_[ii];
-            if (ste->getPhaseId() == shrinkingid) {
+            if (ste->getMicroPhaseId() == shrinkingid) {
                 addDissolutionSite(ste,shrinkingid);
             }
         }
@@ -2427,9 +2425,9 @@ vector<int> Lattice::transform (int shrinkingid,
         for (int j = 0; j < ste->nbSize(1); j++) {
             Site *stenb;
             stenb = ste->nb(j);
-            if (stenb->getPhaseId() == WATERID) {
+            if (stenb->getMicroPhaseId() == WATERID) {
               waterneighbor.push_back(stenb);
-            } else if (chemsys_->isPorous(stenb->getPhaseId())) {
+            } else if (chemSys_->isPorous(stenb->getMicroPhaseId())) {
               porousneighbor.push_back(stenb);
             }
         }
@@ -2454,12 +2452,12 @@ vector<int> Lattice::transform (int shrinkingid,
             numWater = numPorous = 0;
             for (int nb = 0; nb < alnb.size(); nb++) {
               Site *alstenb = &site_[alnb[nb]];
-              if (alstenb->getPhaseId() == WATERID) {
+              if (alstenb->getMicroPhaseId() == WATERID) {
                 numWater++;
-              } else if (chemsys_->isPorous(alstenb->getPhaseId())) {
+              } else if (chemSys_->isPorous(alstenb->getMicroPhaseId())) {
                 numPorous++;
                 alstenb->setDamage();
-              } else if (chemsys_->isWeak(alstenb->getPhaseId())) {
+              } else if (chemSys_->isWeak(alstenb->getMicroPhaseId())) {
                 alstenb->setDamage();
               }
             }
@@ -2508,7 +2506,7 @@ vector<int> Lattice::transform (int shrinkingid,
      
             applyExp(alnb, exp);
 
-            setPhaseId(ste, growingid);
+            setMicroPhaseId(ste, growingid);
 
             ///
             /// The Al-bearing phase has dissolved, so remove it from the
@@ -2521,7 +2519,7 @@ vector<int> Lattice::transform (int shrinkingid,
             count_.at(growingid)++;
             
             for (int i = 0; i < waterneighbor.size(); i++) {
-                setPhaseId(waterneighbor[i], growingid);
+                setMicroPhaseId(waterneighbor[i], growingid);
 
                 ///
                 /// Ettringite has grown here, so remove this site from the
@@ -2539,8 +2537,8 @@ vector<int> Lattice::transform (int shrinkingid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemsys_->getPorosity(growingid)
-                                - chemsys_->getPorosity(WATERID);
+                double dwmcval = chemSys_->getPorosity(growingid)
+                                - chemSys_->getPorosity(WATERID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
                     nb->dWmc(dwmcval);
@@ -2558,7 +2556,7 @@ vector<int> Lattice::transform (int shrinkingid,
             /// free space for local ettringite growth.
             ///
 
-            setPhaseId(ste, growingid);
+            setMicroPhaseId(ste, growingid);
 
             ///
             /// The Al-bearing phase has dissolved, so remove it from the
@@ -2575,7 +2573,7 @@ vector<int> Lattice::transform (int shrinkingid,
 
             int upperindex = (g < thresh) ? max : max - 1;
             for (int i = 0; i < upperindex; i++) {
-                setPhaseId(waterneighbor[i], growingid);
+                setMicroPhaseId(waterneighbor[i], growingid);
                 removeGrowthSite(waterneighbor[i], growingid);
                 alreadygrown++;
                 count_.at(growingid)++;
@@ -2587,8 +2585,8 @@ vector<int> Lattice::transform (int shrinkingid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemsys_->getPorosity(growingid)
-                                 - chemsys_->getPorosity(WATERID);
+                double dwmcval = chemSys_->getPorosity(growingid)
+                                 - chemSys_->getPorosity(WATERID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
                     nb->dWmc(dwmcval);
@@ -2633,7 +2631,7 @@ vector<unsigned int> Lattice::writeSubVolume (string fname,
     vector<unsigned int> alnb = getNeighborhood(centerste->getId(),size);
 
     for (int j = 0; j < alnb.size(); j++) {
-      int phaseid = site_[alnb[j]].getPhaseId();
+      int phaseid = site_[alnb[j]].getMicroPhaseId();
       out << phaseid << endl;
     }
     out.close();
@@ -2699,10 +2697,10 @@ double Lattice::getSurfaceArea (int phaseid)
 
     for (int i = 0; i < site_.size(); i++) {
         ste = &site_[i];
-        if (ste->getPhaseId() == phaseid) {
+        if (ste->getMicroPhaseId() == phaseid) {
             for (int j = 0; j < ste->nbSize(1); j++) {
                 stenb = ste->nb(j);
-                surface2 += chemsys_->getPorosity(stenb->getPhaseId());
+                surface2 += chemSys_->getPorosity(stenb->getMicroPhaseId());
             }
         }
     }    
@@ -2735,7 +2733,7 @@ list<Sitesize> Lattice::findDomainSizeDistribution(int phaseid,
     Sitesize ss;
     int domainsize = 0;
     for (int i = 0; i < site_.size(); i++) {
-        if (site_[i].getPhaseId() == phaseid) {
+        if (site_[i].getMicroPhaseId() == phaseid) {
             domainsize = findDomainSize(i,maxsize);
             ss.siteid = i;
             ss.nsize = domainsize;
@@ -2783,7 +2781,7 @@ int Lattice::findDomainSize(int siteid, int maxsize)
     int boxhalf = maxsize / 2;
     int nfound = 0;
 
-    int phaseid = (site_[siteid]).getPhaseId();
+    int phaseid = (site_[siteid]).getMicroPhaseId();
     int qx = (site_[siteid]).getX();
     int qy = (site_[siteid]).getY();
     int qz = (site_[siteid]).getZ();
@@ -2806,7 +2804,7 @@ int Lattice::findDomainSize(int siteid, int maxsize)
 
                 /// Count if phase id only
 
-                if (site_[getIndex(ix,iy,iz)].getPhaseId() == phaseid) {
+                if (site_[getIndex(ix,iy,iz)].getMicroPhaseId() == phaseid) {
                     nfound++;
                 }
             }
