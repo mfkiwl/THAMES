@@ -43,6 +43,7 @@ Isite ();
 
 @param idval is the id of the corresponding Site object
 @param aftyval is the prescribed value of the affinity to set
+@param verbose is the flag for verbose output
 */
 Isite (unsigned long int idval,
        int aftyval,
@@ -60,7 +61,7 @@ Isite (const Isite &obj);
 
 @return the id number of the corresponding Site object
 */
-unsigned long int getId () const
+unsigned long int getId (void) const
 {
     return id_;
 }
@@ -82,7 +83,7 @@ void setId (unsigned long int idval)
 
 @return the growth affinity of the corresponding Site object
 */
-int getAffinity () const
+int getAffinity (void) const
 {
     return affinity_;
 }
@@ -115,7 +116,7 @@ void setVerbose (const bool isverbose)
 
 @return the verbose flag
 */
-bool getVerbose () const
+bool getVerbose (void) const
 {
     return verbose_;
 }

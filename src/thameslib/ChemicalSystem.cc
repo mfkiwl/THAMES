@@ -535,7 +535,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
 
     vector<double> solutionICMoles = getSolution();
 
-    solut_->setICmoles(solutionICMoles);
+    solut_->setICMoles(solutionICMoles);
     try {
         solut_->calculateState(true);
     }
@@ -1439,12 +1439,12 @@ void ChemicalSystem::writeChemSys (ostream &out)
 }
 
 int ChemicalSystem::calculateState (double time,
-                                    bool isfirst = false)
+                                    bool isFirst = false)
 {
     int status = 0;
     string msg;
  
-    // isfirst = true; 
+    // isFirst = true; 
       
     vector<double> oDCMoles;
     oDCMoles.clear();
@@ -1516,7 +1516,7 @@ int ChemicalSystem::calculateState (double time,
         cout << "Done!" << endl
              << "    Going into "
              << "ChemicalSystem::calculateState::GEM_run() "
-             << "(2), with isfirst " << isfirst << endl;
+             << "(2), with isFirst " << isFirst << endl;
         cout.flush();
         writeICMoles();
     }
@@ -1551,7 +1551,7 @@ int ChemicalSystem::calculateState (double time,
     ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
     ///
 
-    if (isfirst) {
+    if (isFirst) {
         nodeStatus_ = node_->GEM_run(true);
     } else {
         nodeStatus_ = node_->GEM_run(true);
@@ -1803,7 +1803,7 @@ int ChemicalSystem::calculateState (double time,
     //     }
     // }
     // for (int i = 0; i < numICs_; i++) {
-    //     solut_->setICmoles(i, soluticmoles[i]);
+    //     solut_->setICMoles(i, soluticmoles[i]);
     // }
     // try {
     //     solut_->calculateState(true);
@@ -1820,7 +1820,7 @@ int ChemicalSystem::calculateState (double time,
     vector<double> solutICMoles = getSolution();
     if (verbose_) cout << "Now update solution IC moles...";
     for (int i = 0; i < numICs_; i++) {
-        solut_->setICmoles(i, solutICMoles[i]);
+        solut_->setICMoles(i, solutICMoles[i]);
     } 
     if (verbose_) cout << "Done." << endl;
 

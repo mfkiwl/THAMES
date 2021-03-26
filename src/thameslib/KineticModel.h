@@ -1396,11 +1396,11 @@ should be made more general.
 
 @param timestep is the time interval to simulate [days]
 @param temperature is the absolute temperature during this step [K]
-@param isfirst is true if this is the first time step of the simulation, false otherwise
+@param isFirst is true if this is the first time step of the simulation, false otherwise
 */
 void calculateKineticStep (const double timestep,
                            const double temperature,
-                           bool isfirst);
+                           bool isFirst);
      
 /**
 @brief Determine the change in moles of a given kinetically controlled phase.

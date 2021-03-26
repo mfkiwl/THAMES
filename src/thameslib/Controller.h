@@ -162,11 +162,11 @@ This method calculates the change in state of the system during a cycle, includi
 
 @param time is the simulation time [days]
 @param dt is the change in simulation time used by the kinetic model [days]
-@param isfirst is true iff this is the first state calculation (initialization)
+@param isFirst is true iff this is the first state calculation (initialization)
 */
 void calculateState (double time,
                      double dt,
-                     bool isfirst);
+                     bool isFirst);
  
 /**
 @brief Parse the input XML file specifying Controller parameters to use.

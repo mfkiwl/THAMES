@@ -25,7 +25,7 @@ ThermalStrain::ThermalStrain (int nx,
 
     if (verbose_) cout << "constructor 'THERMAL3D' in derived class 'THERMAL3D'." << endl;
 
-    isfirst_ = true;
+    isFirst_ = true;
 		
     Y_ = 0.0;
     
@@ -168,7 +168,7 @@ void ThermalStrain::femat (int nx,
       /// the bulk modulus K and the shear modulus G.                               
       ///
 
-      ElasModul(phasemod_fname_,nphase_);
+      ElasModul(phasemod_fileName_,nphase_);
 	   
       ///
       /// Set up Simpson's integration rule weight vector                          
@@ -2469,7 +2469,7 @@ void ThermalStrain::stress (int nx,
 }
 
 void ThermalStrain::Calc (double time,
-                          string fname,
+                          string fileName,
                           double exx,
                           double eyy,
                           double ezz,
@@ -2486,7 +2486,7 @@ void ThermalStrain::Calc (double time,
     /// the appropriate phase assignments.                                         
     ///
 
-    ppixel(fname,nphase_);
+    ppixel(fileName,nphase_);
 
     ///
     /// Count and output the volume fractions of the different phases.             
@@ -2526,7 +2526,7 @@ void ThermalStrain::Calc (double time,
     }
     */
   
-    if (isfirst_) {
+    if (isFirst_) {
       if (verbose_) {
           cout << "This is the first time Calc to be called, "
                << "so u_ should be initialized." << endl;
@@ -2604,7 +2604,7 @@ void ThermalStrain::Calc (double time,
         }
       }
   
-      isfirst_ = false;
+      isFirst_ = false;
     }
 	  
     ///

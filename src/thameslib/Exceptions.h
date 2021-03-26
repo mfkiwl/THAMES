@@ -57,19 +57,19 @@ EOBException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param arname is the name of the array that was accessed
 @param sl is the total number of array elements in that array
 @param id is the element number (out of bounds) that was queried erroneously
 */
 EOBException (const string &cname,
-              const string &fname,
+              const string &fileName,
               const string &arname,
               const int sl,
               const unsigned int id)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     arrayname_ = arname;
     sizelimit_ = sl;
     indx_ = id;
@@ -183,17 +183,17 @@ FileException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param filename is the name of the offending file
 @param extype is the description of the exception type
 */
 FileException (const string &cname,
-               const string &fname,
+               const string &fileName,
                const string &filename,
                const string &extype)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     filename_ = filename;
     extype_ = extype;
 }
@@ -289,15 +289,15 @@ FloatException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param strd is the description of the exception
 */
 FloatException (const string &cname,
-                const string &fname,
+                const string &fileName,
                 const string &strd)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     description_ = strd;
 }
 
@@ -385,17 +385,17 @@ HandleException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param handle is the handle that caused the exception
 @param strd is the description of the exception
 */
 HandleException (const string &cname,
-                 const string &fname,
+                 const string &fileName,
                  const string &handle,
                  const string &strd)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     handle_ = handle;
     description_ = strd;
 }
@@ -494,15 +494,15 @@ GEMException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param strd is the description of the exception
 */
 GEMException (const string &cname,
-              const string &fname,
+              const string &fileName,
               const string &strd)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     description_ = strd;
 }
 
@@ -588,15 +588,15 @@ MicrostructureException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param strd is the description of the exception
 */
 MicrostructureException (const string &cname,
-                         const string &fname,
+                         const string &fileName,
                          const string &strd)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     description_ = strd;
 }
 
@@ -681,15 +681,15 @@ DataException ()
 @brief Overloaded constructor that is typically invoked by THAMES.
 
 @param cname is the class name where the exception was thrown
-@param fname is the method name where the exception was thrown
+@param fileName is the method name where the exception was thrown
 @param strd is the description of the exception
 */
 DataException (const string &cname,
-               const string &fname,
+               const string &fileName,
                const string &strd)
 {
     classname_ = cname;
-    functionname_ = fname;
+    functionname_ = fileName;
     description_ = strd;
 }
 

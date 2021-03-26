@@ -197,8 +197,8 @@ int main (int argc, char **argv)
       cout << "What is the name of the elastic modulus file?" << endl;
       buff = "";
       cin >> buff;
-      const string phasemod_fname(buff);
-      cout << phasemod_fname << endl;
+      const string phasemod_fileName(buff);
+      cout << phasemod_fileName << endl;
 
       //
       // Create the ThermalStrain FE solver, which handles phase transformation misfit
@@ -212,7 +212,7 @@ int main (int argc, char **argv)
                                                   ChemSys->getNumMicroPhases(),1,
                                                   VERBOSE,WARNING,DEBUG);
           cout << "ThermalStrain object creation done... " << endl;
-          ThermalStrainSolver->setPhasemodfname(phasemod_fname);
+          ThermalStrainSolver->setPhasemodfileName(phasemod_fileName);
       }
       catch (bad_alloc &ba) {
           cout << "Bad memory allocation in ThermalStrain constructor: "
@@ -235,7 +235,7 @@ int main (int argc, char **argv)
           AppliedStrainSolver = new AppliedStrain(nx,ny,nz,ns,
                                                   ChemSys->getNumMicroPhases(),1,
                                                   VERBOSE,WARNING,DEBUG);
-          AppliedStrainSolver->setPhasemodfname(phasemod_fname);
+          AppliedStrainSolver->setPhasemodfileName(phasemod_fileName);
       }
       catch (bad_alloc &ba) {
           cout << "Bad memory allocation in AppliedStrain constructor: "
@@ -531,7 +531,7 @@ void checkargs (int argc, char **argv)
 
 void writeReport (const string &jobroot,
                   struct tm *itime,
-                  const string &mfname,
+                  const string &mfileName,
                   const string &parfilename,
                   const string &csname,
                   ChemicalSystem *csys,
@@ -553,7 +553,7 @@ void writeReport (const string &jobroot,
     out << " initialized on " << asctime(itime) << endl;
     out << endl;
     out << "INPUT FILES USED:" << endl;
-    out << "   Microstructure file name: " << mfname << endl;
+    out << "   Microstructure file name: " << mfileName << endl;
     out << "        GEM input file name: " << csname << endl;
     out << endl;
     out << "OUTPUT FILES GENERATED:" << endl;

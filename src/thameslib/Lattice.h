@@ -134,14 +134,14 @@ the voxel phase assignments can be made at each site.
 
 @param cs is a pointer to the ChemicalSystem object for the simulation
 @param solut is a pointer to the Solution object for the simulation
-@param fname is the name of the file containing the microstructure data
+@param fileName is the name of the file containing the microstructure data
 @param verbose is true if extra messages are to be printed
 @param warning is true if warning messages are to be printed
 @param debug is true if debugging output is to produced
 */
 Lattice (ChemicalSystem *cs,
         Solution *solut,
-        const string &fname,
+        const string &fileName,
         const bool verbose,
         const bool warning,
         const bool debug);
@@ -872,13 +872,13 @@ that the nanopore water is chemically unreactive and cannot be removed.
 
 @param time is is the simulation time [days]
 @param simtype is the type of simulation (hydration, leaching, etc)
-@param isfirst is true if this is the first microstructure update, false otherwise
-@param capwater is true if there is any capillary pore water in the system.
+@param isFirst is true if this is the first microstructure update, false otherwise
+@param capWater is true if there is any capillary pore water in the system.
 */
 void changeMicrostructure (double time,
                            const int simtype,
-                           bool isfirst,
-                           bool &capwater);
+                           bool isFirst,
+                           bool &capWater);
     
 /**
 @brief Adjust GEMS calculated volumes of microstructure phases
@@ -1197,12 +1197,12 @@ void setFEsolver (AppliedStrain *AppliedStrainSolver)
 /**
 @brief Write a contiguous subvolume of the lattice to a file.
 
-@param fname is the file name to which the subvolume will be written
+@param fileName is the file name to which the subvolume will be written
 @param centerste is a pointer to the central site within the subvolume
 @param size is the extent of the subvolume in each direction away from the center site
 @return a list of the site indices belonging to the subvolume that was written
 */
-vector<unsigned int> writeSubVolume (string fname,
+vector<unsigned int> writeSubVolume (string fileName,
                                      Site *centerste,
                                      int size);
 

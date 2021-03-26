@@ -22,8 +22,8 @@ bool affinitySort (const Isite s1,
 Interface::Interface ()
 {
     microPhaseId_ = 0;
-    growth_sites_.clear();
-    dissolution_sites_.clear();
+    growthSites_.clear();
+    dissolutionSites_.clear();
 }
 
 Interface::Interface (RanGen *rg,
@@ -31,8 +31,8 @@ Interface::Interface (RanGen *rg,
                       const bool debug)
 {
     microPhaseId_ = 0;
-    growth_sites_.clear();
-    dissolution_sites_.clear();
+    growthSites_.clear();
+    dissolutionSites_.clear();
     rg_ = rg;
     verbose_ = verbose;
     debug_ = debug;
@@ -59,8 +59,8 @@ Interface::Interface (ChemicalSystem *csys,
     microPhaseId_ = pid;
     chemSys_ = csys;
 
-    dissolution_sites_.clear();
-    growth_sites_.clear();
+    dissolutionSites_.clear();
+    growthSites_.clear();
 
     ///
     /// Eliminate duplicate values from the growth site vector
@@ -102,12 +102,12 @@ Interface::Interface (ChemicalSystem *csys,
         /// of a pointer to a site and an affinity value
         ///
 
-        growth_sites_.push_back(Isite(gv[j]->getId(),afty));
+        growthSites_.push_back(Isite(gv[j]->getId(),afty));
     }
 
-    if (growth_sites_.size() > 0) {
-        start = growth_sites_.begin();
-        end = growth_sites_.end();
+    if (growthSites_.size() > 0) {
+        start = growthSites_.begin();
+        end = growthSites_.end();
 
         ///
         /// The sort is built in to the STL for vectors or portions of vectors,
@@ -125,14 +125,14 @@ Interface::Interface (ChemicalSystem *csys,
     ///
 
     unsigned long int site1,site2;
-    unsigned long int numgsites = growth_sites_.size();
+    unsigned long int numgsites = growthSites_.size();
 
     for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
 
        // Choose two sites at random and switch their places
        site1 = (unsigned long int)(rg_->Ran3() * numgsites);
        site2 = (unsigned long int)(rg_->Ran3() * numgsites);
-       swap(growth_sites_[site1],growth_sites_[site2]);
+       swap(growthSites_[site1],growthSites_[site2]);
     }
 
     ///
@@ -145,7 +145,7 @@ Interface::Interface (ChemicalSystem *csys,
             for (i = 0; i < dv[j]->nbSize(2); i++) {
                 afty += chemSys_->getAffinity(pid,dv[j]->nb(i)->getMicroPhaseId());
             }
-            dissolution_sites_.push_back(Isite(dv[j]->getId(),afty));
+            dissolutionSites_.push_back(Isite(dv[j]->getId(),afty));
         }
     }
     catch (EOBException e) {
@@ -153,13 +153,13 @@ Interface::Interface (ChemicalSystem *csys,
         exit(0);
     }
 
-    if (dissolution_sites_.size() > 0) {
-        start = dissolution_sites_.begin();
-        end = dissolution_sites_.end();
+    if (dissolutionSites_.size() > 0) {
+        start = dissolutionSites_.begin();
+        end = dissolutionSites_.end();
         sort(start,end,affinitySort);
     }
 
-    numgsites = dissolution_sites_.size();
+    numgsites = dissolutionSites_.size();
     
     ///
     /// The dissolution sites are perfectly ordered by affinity, just like the
@@ -172,7 +172,7 @@ Interface::Interface (ChemicalSystem *csys,
            // Choose two sites at random and switch their places
            site1 = (unsigned long int)(rg_->Ran3() * numgsites);
            site2 = (unsigned long int)(rg_->Ran2() * numgsites);
-           swap(dissolution_sites_[site1],dissolution_sites_[site2]);
+           swap(dissolutionSites_[site1],dissolutionSites_[site2]);
         }
     }
     catch (EOBException e) {
@@ -183,8 +183,8 @@ Interface::Interface (ChemicalSystem *csys,
 
 Interface::~Interface ()
 {
-    growth_sites_.clear();
-    dissolution_sites_.clear();
+    growthSites_.clear();
+    dissolutionSites_.clear();
 }
 
 bool Interface::addGrowthSite (Site *loc)
@@ -193,15 +193,15 @@ bool Interface::addGrowthSite (Site *loc)
     bool found = false;
     unsigned int i;
     vector<Isite>::iterator p,q,start,end;
-    start = growth_sites_.begin();
-    end = growth_sites_.end();
+    start = growthSites_.begin();
+    end = growthSites_.end();
 
     ///
     /// See if site is already present
     ///
 
-    for (i = 0; (i < growth_sites_.size()) && (!found); i++) {
-        if (loc->getId() == growth_sites_[i].getId()) found = true;
+    for (i = 0; (i < growthSites_.size()) && (!found); i++) {
+        if (loc->getId() == growthSites_[i].getId()) found = true;
     }
 
     ///
@@ -215,7 +215,7 @@ bool Interface::addGrowthSite (Site *loc)
         }
         Isite tisite(loc->getId(),afty);
         q = lower_bound(start,end,tisite,affinitySort);
-        growth_sites_.insert(q,tisite);
+        growthSites_.insert(q,tisite);
         answer = true;
     }
 
@@ -228,15 +228,15 @@ bool Interface::addDissolutionSite (Site *loc)
     bool found = false;
     unsigned int i;
     vector<Isite>::iterator p,q,start,end;
-    start = dissolution_sites_.begin();
-    end = dissolution_sites_.end();
+    start = dissolutionSites_.begin();
+    end = dissolutionSites_.end();
 
     ///
     /// See if site is already present
     ///
 
-    for (i = 0; (i < dissolution_sites_.size()) && (!found); i++) {
-        if (loc->getId() == dissolution_sites_[i].getId()) found = true;
+    for (i = 0; (i < dissolutionSites_.size()) && (!found); i++) {
+        if (loc->getId() == dissolutionSites_[i].getId()) found = true;
     }
 
     ///
@@ -250,7 +250,7 @@ bool Interface::addDissolutionSite (Site *loc)
         }
         Isite tisite(loc->getId(),afty);
         q = lower_bound(start,end,tisite,affinitySort);
-        dissolution_sites_.insert(q,tisite);
+        dissolutionSites_.insert(q,tisite);
         answer = true;
     }
 
@@ -269,13 +269,13 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
     /// only need to update the affinities for each site
     ///
 
-    for (j = 0; j < growth_sites_.size(); j++) {
+    for (j = 0; j < growthSites_.size(); j++) {
         afty = 0;
-        gs = ste[growth_sites_[j].getId()];
+        gs = ste[growthSites_[j].getId()];
         for (i = 0; i < gs.nbSize(2); i++) {
             afty += chemSys_->getAffinity(pid,gs.nb(i)->getMicroPhaseId());
         }
-        growth_sites_[j].setAffinity(afty);
+        growthSites_[j].setAffinity(afty);
     }
 
     ///
@@ -284,10 +284,10 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
     /// in this class, that must be passed to the STL sort function.
     ///
 
-    if (growth_sites_.size() > 0) {
+    if (growthSites_.size() > 0) {
         vector<Isite>::iterator start,end;
-        start = growth_sites_.begin();
-        end = growth_sites_.end();
+        start = growthSites_.begin();
+        end = growthSites_.end();
         sort(start,end,affinitySort);
     }
 
@@ -300,7 +300,7 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
     ///
 
     unsigned long int site1,site2;
-    unsigned long int numgsites = growth_sites_.size();
+    unsigned long int numgsites = growthSites_.size();
     for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
 
        ///
@@ -309,7 +309,7 @@ bool Interface::sortGrowthSites (vector<Site> &ste,
  
        site1 = (unsigned long int)(rg_->Ran3() * numgsites);
        site2 = (unsigned long int)(rg_->Ran3() * numgsites);
-       swap(growth_sites_[site1],growth_sites_[site2]);
+       swap(growthSites_[site1],growthSites_[site2]);
     }
 
     return true;  // successful sorting
@@ -327,13 +327,13 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
     /// only need to update the affinities for each site
     ///
 
-    for (j = 0; j < dissolution_sites_.size(); j++) {
+    for (j = 0; j < dissolutionSites_.size(); j++) {
        afty = 0;
-       ds = ste[dissolution_sites_[j].getId()];
+       ds = ste[dissolutionSites_[j].getId()];
        for (i = 0; i < ds.nbSize(2); i++) {
            afty += chemSys_->getAffinity(pid,ds.nb(i)->getMicroPhaseId());
        }
-       dissolution_sites_[j].setAffinity(afty);
+       dissolutionSites_[j].setAffinity(afty);
     }
 
     ///
@@ -342,10 +342,10 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
     /// in this class, that must be passed to the STL sort function.
     ///
 
-    if (dissolution_sites_.size() > 0) {
+    if (dissolutionSites_.size() > 0) {
         vector<Isite>::iterator start,end;
-        start = dissolution_sites_.begin();
-        end = dissolution_sites_.end();
+        start = dissolutionSites_.begin();
+        end = dissolutionSites_.end();
         sort(start,end,affinitySort);
     }
 
@@ -358,13 +358,13 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
     ///
 
     unsigned long int site1,site2;
-    unsigned long int numdsites = dissolution_sites_.size();
+    unsigned long int numdsites = dissolutionSites_.size();
     for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numdsites); j++) {
 
        // Choose two sites at random and switch their places
        site1 = (unsigned long int)(rg_->Ran3() * numdsites);
        site2 = (unsigned long int)(rg_->Ran3() * numdsites);
-       swap(dissolution_sites_[site1],dissolution_sites_[site2]);
+       swap(dissolutionSites_[site1],dissolutionSites_[site2]);
     }
 
     return true;
@@ -373,10 +373,10 @@ bool Interface::sortDissolutionSites (vector<Site> &ste,
 bool Interface::removeGrowthSite (Site *loc)
 {
     bool found = false;
-    vector<Isite>::iterator p = growth_sites_.begin();
-    while ((p != growth_sites_.end()) && (!found)) {
+    vector<Isite>::iterator p = growthSites_.begin();
+    while ((p != growthSites_.end()) && (!found)) {
         if (p->getId() == loc->getId()) {
-            growth_sites_.erase(p);
+            growthSites_.erase(p);
             found = true;
         }
         p++;
@@ -389,7 +389,7 @@ bool Interface::removeDissolutionSite (Site *loc)
 {
      if (debug_) {
         cout << "Removing dissolution site " << loc->getId()
-             << ", size is " << dissolution_sites_.size()
+             << ", size is " << dissolutionSites_.size()
              << endl;
         cout.flush();
         bool found = false;
@@ -398,15 +398,15 @@ bool Interface::removeDissolutionSite (Site *loc)
         vector<Isite>::iterator p;
         cout << "Success!" << endl;
         cout.flush();
-        cout << "Trying to set it to beginning of dissolution_sites_ ... ";
+        cout << "Trying to set it to beginning of dissolutionSites_ ... ";
         cout.flush();
-        p = dissolution_sites_.begin();
+        p = dissolutionSites_.begin();
         cout << "Success!" << endl;
         cout.flush();
-        for (int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
-            if (dissolution_sites_[i].getId() == loc->getId()) {
+        for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
+            if (dissolutionSites_[i].getId() == loc->getId()) {
                 p += i;
-                dissolution_sites_.erase(p);
+                dissolutionSites_.erase(p);
                 found = true;
             }
         }
@@ -415,11 +415,11 @@ bool Interface::removeDissolutionSite (Site *loc)
     } else {
         bool found = false;
         vector<Isite>::iterator p;
-        p = dissolution_sites_.begin();
-        for (int i = dissolution_sites_.size() - 1; (i >= 0 && (!found)); i--) {
-            if (dissolution_sites_[i].getId() == loc->getId()) {
+        p = dissolutionSites_.begin();
+        for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
+            if (dissolutionSites_[i].getId() == loc->getId()) {
                 p += i;
-                dissolution_sites_.erase(p);
+                dissolutionSites_.erase(p);
                 found = true;
             }
         }

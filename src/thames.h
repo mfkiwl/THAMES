@@ -158,7 +158,7 @@ through its `writeChemSys` method.
 
 @param jobRoot is the root name of the THAMES simulation
 @param itime is the start time of the job
-@param mfname is name of the initial microstructure image file
+@param mfileName is name of the initial microstructure image file
 @param parfilename is the name of the input parameter file
 @param csname is the name of the GEM chemical system definition (CSD) file
 @param csys is a pointer to the ChemicalSystem object for the simulation
@@ -168,7 +168,7 @@ If a file is not present, the file name should be given as an empty string.
 */
 void writeReport (const string &jobroot,
                   struct tm *itime,
-                  const string &mfname,
+                  const string &mfileName,
                   const string &parfilename,
                   const string &csname,
                   ChemicalSystem *csys,

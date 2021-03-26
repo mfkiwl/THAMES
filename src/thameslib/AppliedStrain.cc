@@ -68,7 +68,7 @@ void AppliedStrain::femat (int nx,
     /// Set up elastic moduli matrices for each kind of element                    
     ///
 
-    ElasModul(phasemod_fname_,nphase_);
+    ElasModul(phasemod_fileName_,nphase_);
 
     ///
     /// Set up Simpson's integration rule weight vector         
@@ -1047,7 +1047,7 @@ void AppliedStrain::relax (int kmax)
 }
 
 
-void AppliedStrain::Calc (string fname,
+void AppliedStrain::calc (string fileName,
                           double exx,
                           double eyy,
                           double ezz,
@@ -1062,7 +1062,7 @@ void AppliedStrain::Calc (string fname,
     /// the appropriate phase assignments.                                         
     ///
 
-    ppixel(fname,nphase_);
+    ppixel(fileName,nphase_);
 
     ///
     /// Count and output the volume fractions of the different phases.             
@@ -1143,13 +1143,13 @@ void AppliedStrain::Calc (string fname,
     return;
 }
 
-double AppliedStrain::getBulkModulus (string fname)
+double AppliedStrain::getBulkModulus (string fileName)
 {
     double bulk;
     double Stress, Strain;
     Stress = Strain = 0.0;
 
-    Calc(fname,0.1,0.1,0.1,0.05,0.05,0.05);
+    calc(fileName,0.1,0.1,0.1,0.05,0.05,0.05);
 
     for (int i = 0; i < 3; i++) {
       Stress += getStress(i);

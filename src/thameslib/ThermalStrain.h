@@ -122,7 +122,7 @@ is just an incremental recalculation, we keep the displacement vector equal to
 its relaxed state the previous time, which should shorten the number of
 conjugate gradient steps needed to relax the incremented system.
 */
-bool isfirst_;
+bool isFirst_;
 
 double Y_;                                      /**< Constant energy term needed
                                                     to correct for the apparent
@@ -402,7 +402,7 @@ global relaxation is executed.
 @note Argument index is NOT USED.
 
 @param time is the simulation time [days]
-@param fname is the file name containing the prior equilibrium displacement field if needed
+@param fileName is the file name containing the prior equilibrium displacement field if needed
 @param exx is the xx component of the macrostrain
 @param eyy is the yy component of the macrostrain
 @param ezz is the zz component of the macrostrain
@@ -411,7 +411,7 @@ global relaxation is executed.
 @param exy is the xy component of the macrostrain
 */
 void Calc (double time,
-           string fname,
+           string fileName,
            double exx,
            double eyy,
            double ezz,

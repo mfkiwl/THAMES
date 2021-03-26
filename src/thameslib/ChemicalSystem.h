@@ -5955,11 +5955,11 @@ The method returns the GEM-IPM TNode status, which can be:
 modify chemical potentials to capture lower reactivity when only gel water remains.
 
 @param time is the simulated time associated with this state [days]
-@param isfirst is true if this is the first state calculation, false otherwise
+@param isFirst is true if this is the first state calculation, false otherwise
 @return the node status handle
 */
 int calculateState (double time,
-                    bool isfirst);
+                    bool isFirst);
 
 /**
 @brief Update the number of moles of each IC based on changes to a dependent component.

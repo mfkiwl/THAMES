@@ -54,9 +54,9 @@ private:
     
     unsigned int microPhaseId_;         /**< The phase id of the voxels at this interface */
     ChemicalSystem *chemSys_;           /**< The `ChemicalSystem` object for the simulation */
-    vector<Isite> growth_sites_;        /**< The list of all sites eligible for
+    vector<Isite> growthSites_;        /**< The list of all sites eligible for
                                                 adjacent growth */
-    vector<Isite> dissolution_sites_;   /**< The list of sites eligible for self-dissolution */
+    vector<Isite> dissolutionSites_;   /**< The list of sites eligible for self-dissolution */
     RanGen *rg_;                        /**< The random number generator object */
     bool verbose_;                      /**< Flag for verbose output */
     bool debug_;                        /**< Flag for debugging output */
@@ -114,7 +114,7 @@ Interface (ChemicalSystem *csys,
 
 @return the integer id for the phase associated with this interface
 */
-unsigned int getMicroPhaseId () const
+unsigned int getMicroPhaseId (void) const
 {
     return (unsigned int)(microPhaseId_);
 }
@@ -124,9 +124,9 @@ unsigned int getMicroPhaseId () const
 
 @return the vector of Isite objects where growth can occur
 */
-vector<Isite> getGrowthSites ()
+vector<Isite> getGrowthSites (void)
 {
-    return growth_sites_;
+    return growthSites_;
 }
 
 /**
@@ -134,9 +134,9 @@ vector<Isite> getGrowthSites ()
 
 @return the vector of Isite objects where dissolution can occur
 */
-vector<Isite> getDissolutionSites ()
+vector<Isite> getDissolutionSites (void)
 {
-    return dissolution_sites_;
+    return dissolutionSites_;
 }
 
 /**
@@ -146,9 +146,9 @@ vector<Isite> getDissolutionSites ()
 
 @return the number of potential growth sites adjacent to the interface
 */
-unsigned long int getGrowthNumSites ()
+unsigned long int getGrowthNumSites (void)
 {
-    return growth_sites_.size();
+    return growthSites_.size();
 }
 
 /**
@@ -158,9 +158,9 @@ unsigned long int getGrowthNumSites ()
 
 @return the number of potential dissolution sites adjacent to the interface
 */
-unsigned long int getDissolutionNumSites ()
+unsigned long int getDissolutionNumSites (void)
 {
-    return dissolution_sites_.size();
+    return dissolutionSites_.size();
 }
     
 /**
@@ -234,7 +234,7 @@ void setVerbose (const bool isverbose)
 
 @return the verbose flag
 */
-bool getVerbose () const
+bool getVerbose (void) const
 {
     return verbose_;
 }
@@ -255,7 +255,7 @@ void setDebug (const bool isdebug)
 
 @return the debug flag
 */
-bool getDebug () const
+bool getDebug (void) const
 {
     return debug_;
 }

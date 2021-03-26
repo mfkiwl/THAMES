@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 25 21:29:03 2021 | Improved readability of Solution and Lattice classes |
 | Mar 25 19:35:46 2021 | Improved readability of KineticModel and ChemicalSystem classes |
 | Mar 22 22:01:18 2021 | Added GEMS3K standalone library as a subtree |
 | Mar 11 16:28:57 2021 | Corrected the chemistry.xml file in two of the sample-input examples |

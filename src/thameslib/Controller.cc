@@ -253,7 +253,7 @@ void Controller::doCycle (const string &statfilename,
     cout << asctime(time10);
 
     timestep = (i > 0) ? (time_[i] - time_[i-1]) : (time_[i]);
-    bool isfirst = (i == 0) ? true : false;
+    bool isFirst = (i == 0) ? true : false;
 
     /// 
     /// Assume that only capillary pore water is chemically reactive,
@@ -264,10 +264,10 @@ void Controller::doCycle (const string &statfilename,
     /// runs all fo the major steps of a computational cycle
     ///
 
-    if (verbose_) cout << "Going into Controller::calculateState with isfirst = "
-                       << isfirst << endl;
+    if (verbose_) cout << "Going into Controller::calculateState with isFirst = "
+                       << isFirst << endl;
     try {
-        calculateState(time_[i],timestep,isfirst);
+        calculateState(time_[i],timestep,isFirst);
     }
     catch (GEMException gex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
@@ -277,7 +277,7 @@ void Controller::doCycle (const string &statfilename,
 
     if (verbose_) {
         cout << "*Returned from Controller::calculateState(" << time_[i] << ","
-             << timestep << "," << isfirst << ")" << endl;
+             << timestep << "," << isFirst << ")" << endl;
         cout << "*called by Controller::doCycle" << endl;
         cout.flush();
     }
@@ -311,7 +311,7 @@ void Controller::doCycle (const string &statfilename,
     ////
     
     try {
-        lattice_->changeMicrostructure(time_[i],sim_type_,isfirst,capwater);
+        lattice_->changeMicrostructure(time_[i],sim_type_,isFirst,capwater);
     }
     catch (DataException dex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
@@ -397,13 +397,13 @@ void Controller::doCycle (const string &statfilename,
     
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
-        string ofname(jobroot_);
+        string ofileName(jobroot_);
         ostringstream ostr1,ostr2;
         ostr1 << (int)(time_[i] * 100);
         ostr2 << setprecision(3) << chemSys_->getTemperature();
         string timestr(ostr1.str());
         string tempstr(ostr2.str());
-        ofname = ofname + "." + timestr + "." + tempstr + ".img";
+        ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
     
         ///
         /// In the sulfate attack algorithm, calculate the stress and strain distributions
@@ -443,7 +443,7 @@ void Controller::doCycle (const string &statfilename,
         ///
  
         if (verbose_) cout << "Entering ThermalStrain calculation..." << endl;
-        thermalstr_->Calc(time_[i],ofname,0.0,0.0,0.0,0.0,0.0,0.0);
+        thermalstr_->Calc(time_[i],ofileName,0.0,0.0,0.0,0.0,0.0,0.0);
         //thermalstr_ -> writeStress(jobroot_,time_[i],0); //write strxx
         //thermalstr_ -> writeStrainEngy(jobroot_,time_[i]);
         thermalstr_->writeDisp(jobroot_,time_[i]);
@@ -593,11 +593,11 @@ void Controller::doCycle (const string &statfilename,
 
 void Controller::calculateState (double time,
                                  double dt,
-                                 bool isfirst) 
+                                 bool isFirst) 
 {
   try {
 
-    if (isfirst) {
+    if (isFirst) {
 
         double T = chemSys_->getTemperature();
         lattice_->setTemperature(T);
@@ -623,7 +623,7 @@ void Controller::calculateState (double time,
     if (verbose_) {
         cout << "Going into KineticModel::calculateKineticStep now... " << endl;
     }
-    kineticmodel_->calculateKineticStep(dt,T,isfirst);
+    kineticmodel_->calculateKineticStep(dt,T,isFirst);
     if (verbose_) cout << "Done!" << endl;
 
     ///
@@ -672,10 +672,10 @@ void Controller::calculateState (double time,
     /// The `ChemicalSystem` object provides an interface for these calculations
     /// 
 
-    if (verbose_) cout << "Going to launch thermodynamic calculation now with isfirst = "
-                       << isfirst << endl;;
+    if (verbose_) cout << "Going to launch thermodynamic calculation now with isFirst = "
+                       << isFirst << endl;;
     try {
-        chemSys_->calculateState(time,isfirst);
+        chemSys_->calculateState(time,isFirst);
         if (verbose_) {
             cout << "*Returned from ChemicalSystem::calculateState" << endl;
             cout << "*called by function Controller::calculateState" << endl;
@@ -730,7 +730,7 @@ void Controller::calculateState (double time,
         exit(1);
     }
     
-    if (isfirst) {        
+    if (isFirst) {        
       string csfilename("ChemSysOutput.dat");
       ofstream out2(csfilename.c_str(),ios::app);
       chemSys_->writeChemSys(out2);

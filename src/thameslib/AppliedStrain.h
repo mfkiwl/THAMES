@@ -189,7 +189,7 @@ void relax (int kmax);
 @brief Main block, including the initialization of the stiffness matrix
 and the energy relaxation sequence.
 
-@param fname is the file name for the microstructure image
+@param fileName is the file name for the microstructure image
 @param exx is the xx component of the applied strain
 @param eyy is the yy component of the applied strain
 @param ezz is the zz component of the applied strain
@@ -197,7 +197,7 @@ and the energy relaxation sequence.
 @param eyz is the yz component of the applied strain
 @param exy is the xy component of the applied strain
 */
-void Calc (string fname,
+void calc (string fileName,
            double exx,
            double eyy,
            double ezz,
@@ -208,10 +208,10 @@ void Calc (string fname,
 /**
 @brief Calculates the effective bulk modulus of the relaxed mesh.
 
-@param fname is the file name for the microstructure image
+@param fileName is the file name for the microstructure image
 @return the bulk modulus (GPa)
 */
-double getBulkModulus (string fname);
+double getBulkModulus (string fileName);
 
 };      // End of AppliedStrain class
 

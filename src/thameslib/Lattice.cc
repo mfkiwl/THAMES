@@ -23,7 +23,7 @@ Lattice::Lattice (ChemicalSystem *cs,
 
 Lattice::Lattice (ChemicalSystem *cs,
                   Solution *solut,
-                  const string &fname,
+                  const string &fileName,
                   const bool verbose,
                   const bool warning,
                   const bool debug)
@@ -54,9 +54,9 @@ Lattice::Lattice (ChemicalSystem *cs,
   /// Open the microstructure input file and process it
   ///
 
-  ifstream in(fname.c_str());
+  ifstream in(fileName.c_str());
   if (!in) {
-      throw FileException("Lattice","Lattice",fname,"Could not open");
+      throw FileException("Lattice","Lattice",fileName,"Could not open");
   }
     
   in >> buff;
@@ -1114,8 +1114,8 @@ unsigned int Lattice::getIndex (int ix,
 
 void Lattice::changeMicrostructure (double time,
                                     const int simtype,
-                                    bool isfirst,
-                                    bool &capwater)
+                                    bool isFirst,
+                                    bool &capWater)
 {
     unsigned int i,ii;
     int numadded, numadded_actual;
@@ -1316,7 +1316,7 @@ void Lattice::changeMicrostructure (double time,
                     if (i != WATERID && i != VOIDID) tnetsites = (newsites - cursites);
                     netsites.at(i) = tnetsites;
                     pid.at(i) = i;
-                    if (i == growing[ii] && isfirst) {
+                    if (i == growing[ii] && isFirst) {
                       netsites.at(i) = 0;
                       count_.at(i) = newsites;
                     }        
@@ -1681,7 +1681,7 @@ void Lattice::changeMicrostructure (double time,
 
     double surfa = getSurfaceArea(chemSys_->getMicroPhaseId("CSH"));
     
-    if (volumefraction_[WATERID] <= 0.0) capwater = false;
+    if (volumefraction_[WATERID] <= 0.0) capWater = false;
 
     return;
 }
@@ -1874,23 +1874,23 @@ void Lattice::adjustMicrostructureVolFracs (vector<string> &names,
 void Lattice::writeLattice (double curtime, const int simtype, const string &root)
 {
     unsigned int i,j,k;
-    string ofname(root);
+    string ofileName(root);
     ostringstream ostr1,ostr2;
     ostr1 << setfill('0') << setw(6) << (int)((curtime * 24.0 * 60.0) + 0.5);	// minutes
     ostr2 << setprecision(3) << temperature_;
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
-    ofname = ofname + "." + timestr + "." + tempstr + ".img";
+    ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
     if (verbose_) {
         cout << "    In Lattice::writeLattice, curtime = " << curtime
              << ", timestr = " << timestr << endl;
         cout.flush();
     }
 
-    ofstream out(ofname.c_str());
+    ofstream out(ofileName.c_str());
     try {
         if (!out.is_open()) {
-            throw FileException("Lattice","writeLattice",ofname,"Could not open");
+            throw FileException("Lattice","writeLattice",ofileName,"Could not open");
         }
     }
     catch (FileException fex) {
@@ -1920,13 +1920,13 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
     // The next block is implemented only if we are dealing with sulfate attack
     if (simtype == SULFATE_ATTACK) {
     
-        ofname = root;
-        ofname = ofname + "." + timestr + "." + tempstr + ".img.damage";
+        ofileName = root;
+        ofileName = ofileName + "." + timestr + "." + tempstr + ".img.damage";
 
-        ofstream out1(ofname.c_str());
+        ofstream out1(ofileName.c_str());
         try {
             if (!out1.is_open()) {
-                throw FileException("Lattice","writeLattice",ofname,"Could not open");
+                throw FileException("Lattice","writeLattice",ofileName,"Could not open");
             }
         }
         catch (FileException fex) {
@@ -1963,18 +1963,18 @@ void Lattice::writeLattice (double curtime, const int simtype, const string &roo
 void Lattice::writeDamageLattice (double curtime, const string &root)
 {
     unsigned int i,j,k;
-    string ofname(root);
+    string ofileName(root);
     ostringstream ostr1,ostr2;
     ostr1 << (int)((curtime * 100.0) + 0.5);	// hundredths of a day
     ostr2 << setprecision(3) << temperature_;
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
-    ofname = ofname + "." + timestr + "." + tempstr + ".img";
+    ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
 
-    ofstream out(ofname.c_str());
+    ofstream out(ofileName.c_str());
     try {
         if (!out.is_open()) {
-            throw FileException("Lattice","writeLattice",ofname,"Could not open");
+            throw FileException("Lattice","writeLattice",ofileName,"Could not open");
         }
     }
     catch (FileException fex) {
@@ -2009,7 +2009,7 @@ void Lattice::writeDamageLattice (double curtime, const string &root)
 void Lattice::writeLatticePNG (double curtime, const int simtype, const string &root)
 {
     unsigned int i,j,k;
-    string ofname(root);
+    string ofileName(root);
     string ofbasename(root);
     string ofpngname(root);
     string ofpngbasename(root);
@@ -2034,7 +2034,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
     string buff;
-    ofname = ofname + "." + timestr + "." + tempstr + ".ppm";
+    ofileName = ofileName + "." + timestr + "." + tempstr + ".ppm";
     ofpngname = ofpngname + "." + timestr
         + "." + tempstr + ".png";
 
@@ -2042,11 +2042,11 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
     /// Open the output file
     ///
 
-    ofstream out(ofname.c_str());
+    ofstream out(ofileName.c_str());
     try {
         if (!out.is_open()) {
             throw FileException("Lattice","writeLatticePNG",
-                                ofname,"Could not open");
+                                ofileName,"Could not open");
         }
     }
     catch (FileException fex) {
@@ -2116,7 +2116,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
     /// @warning This relies on installation of ImageMagick
     ///
 
-    buff = "convert " + ofname + " " + ofpngname;
+    buff = "convert " + ofileName + " " + ofpngname;
     system(buff.c_str());
     return;
 }
@@ -2124,7 +2124,7 @@ void Lattice::writeLatticePNG (double curtime, const int simtype, const string &
 void Lattice::writeDamageLatticePNG (double curtime, const string &root)
 {
     unsigned int i,j,k;
-    string ofname(root);
+    string ofileName(root);
     string ofbasename(root);
     string ofpngname(root);
     string ofpngbasename(root);
@@ -2149,7 +2149,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
     string timestr(ostr1.str());
     string tempstr(ostr2.str());
     string buff;
-    ofname = ofname + "." + timestr + "." + tempstr + ".ppm";
+    ofileName = ofileName + "." + timestr + "." + tempstr + ".ppm";
     ofpngname = ofpngname + "." + timestr
         + "." + tempstr + ".png";
 
@@ -2157,11 +2157,11 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
     /// Open the output file
     ///
 
-    ofstream out(ofname.c_str());
+    ofstream out(ofileName.c_str());
     try {
         if (!out.is_open()) {
             throw FileException("Lattice","writeLatticePNG",
-                                ofname,"Could not open");
+                                ofileName,"Could not open");
         }
     }
     catch (FileException fex) {
@@ -2231,7 +2231,7 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
     /// @warning This relies on installation of ImageMagick
     ///
 
-    buff = "convert " + ofname + " " + ofpngname;
+    buff = "convert " + ofileName + " " + ofpngname;
     system(buff.c_str());
     return;
 }
@@ -2239,9 +2239,9 @@ void Lattice::writeDamageLatticePNG (double curtime, const string &root)
 void Lattice::makeMovie (const string &root)
 {
     unsigned int i,j,k;
-    string ofname(root);
+    string ofileName(root);
     string ofbasename(root);
-    string ofgifname(root);
+    string ofgifileName(root);
     string ofgifbasename(root);
 
     vector<double> dumvec;
@@ -2279,14 +2279,14 @@ void Lattice::makeMovie (const string &root)
         ostr3.clear();
         ostr3 << (int)(i);	// x slice number
         string istr(ostr3.str());
-        ofname = ofbasename + "." + timestr + "."
+        ofileName = ofbasename + "." + timestr + "."
             + tempstr + "." + istr + ".ppm";
-        ofgifname = ofgifbasename + "." + timestr
+        ofgifileName = ofgifbasename + "." + timestr
             + "." + tempstr + "." + istr + ".gif";
 
-        ofstream out(ofname.c_str());
+        ofstream out(ofileName.c_str());
         if (!out.is_open()) {
-            throw FileException("Lattice","makeMovie",ofname,"Could not open");
+            throw FileException("Lattice","makeMovie",ofileName,"Could not open");
         }
 
         ///
@@ -2344,7 +2344,7 @@ void Lattice::makeMovie (const string &root)
         /// @warning This relies on installation of ImageMagick
         ///
 
-        buff = "convert " + ofname + " " + ofgifname;
+        buff = "convert " + ofileName + " " + ofgifileName;
         system(buff.c_str());
     }
 
@@ -2445,8 +2445,8 @@ vector<int> Lattice::transform (int shrinkingid,
             /// 1. Take the subvolume centered on aluminate site that will dissolve
             ///
 
-            string fname(jobroot_ + "_alsubvol.dat");
-            vector<unsigned int> alnb = writeSubVolume(fname, ste, 1);
+            string fileName(jobroot_ + "_alsubvol.dat");
+            vector<unsigned int> alnb = writeSubVolume(fileName, ste, 1);
             ste->setDamage();  
             int numWater, numPorous;
             numWater = numPorous = 0;
@@ -2466,7 +2466,7 @@ vector<int> Lattice::transform (int shrinkingid,
             /// 2. Calculate the effective bulk modulus of this subvolume
             ///
 
-            double subbulk = FEsolver_->getBulkModulus(fname);
+            double subbulk = FEsolver_->getBulkModulus(fileName);
             if (verbose_) cout << "subbulk = " << subbulk << " GPa." << endl;   
             subbulk = subbulk * 1.0e3; // convert GPa to MPa
             double subsolidbulk = subbulk;
@@ -2495,7 +2495,7 @@ vector<int> Lattice::transform (int shrinkingid,
             //  This is hard-wired right now
             //  @todo generalize crystallization pressure to more phases
            
-            double exp = solut_->calculateCrystrain(SI_[growingid],
+            double exp = solut_->calculateCrystalStrain(SI_[growingid],
                                                     porevolfrac,
                                                     subbulk,
                                                     subsolidbulk);
@@ -2616,11 +2616,11 @@ vector<int> Lattice::transform (int shrinkingid,
     return numchanged;
 }
 
-vector<unsigned int> Lattice::writeSubVolume (string fname,
+vector<unsigned int> Lattice::writeSubVolume (string fileName,
                                               Site *centerste,
                                               int size)
 {
-    ofstream out(fname.c_str());
+    ofstream out(fileName.c_str());
     
     out << "Version: 7.0" << endl;
     out << "X_Size: 3" << endl;

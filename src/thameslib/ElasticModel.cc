@@ -280,7 +280,7 @@ void ElasticModel::BuildNeighbor ()
     return;
 }
 
-void ElasticModel::ElasModul (string phasemod_fname,
+void ElasticModel::ElasModul (string phasemod_fileName,
                               int nphase) 
 {
     ///
@@ -289,10 +289,10 @@ void ElasticModel::ElasModul (string phasemod_fname,
     /// Poisson's ratio of each phase
     ///
 
-    ifstream in(phasemod_fname.c_str());
+    ifstream in(phasemod_fileName.c_str());
     if(!in) {
-      cout << "can't open the file: " << phasemod_fname << endl;
-      cerr << "can't open the file: " << phasemod_fname << endl;
+      cout << "can't open the file: " << phasemod_fileName << endl;
+      cerr << "can't open the file: " << phasemod_fileName << endl;
       exit(1);
     } else {
       string buff;
@@ -424,7 +424,7 @@ void ElasticModel::ElasModul (string phasemod_fname,
 	
 }
 
-void ElasticModel::ppixel (string fname,
+void ElasticModel::ppixel (string fileName,
                            int nphase)
 {
     ///
@@ -440,12 +440,12 @@ void ElasticModel::ppixel (string fname,
     /// Open and read the input file stream with the microstructure data
     ///
   
-    ifstream in(fname.c_str());
+    ifstream in(fileName.c_str());
 
     if (!in) {
 
-      cout << "can't open the file: " << fname << endl;
-      cerr << "can't open the file: " << fname << endl;
+      cout << "can't open the file: " << fileName << endl;
+      cerr << "can't open the file: " << fileName << endl;
       exit(1);
 
     } else {
@@ -737,30 +737,30 @@ void ElasticModel::writeStress (string &root,
       ostringstream ostr;
       ostr << (int) (time * 100.0);
       string timestr(ostr.str());
-      string ofname(root);
+      string ofileName(root);
       string ofpngname(root);
       if (index == 0) {
-        ofname = ofname + "." + "stress-xx." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-xx." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-xx." + timestr + ".png";
       } else if (index == 1) {
-        ofname = ofname + "." + "stress-yy." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-yy." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-yy." + timestr + ".png";
       } else if (index == 2) {
-        ofname = ofname + "." + "stress-zz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-zz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-zz." + timestr + ".png";
       } else if (index == 3) {
-        ofname = ofname + "." + "stress-xz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-xz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-xz." + timestr + ".png";
       } else if (index == 4) {
-        ofname = ofname + "." + "stress-yz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-yz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-yz." + timestr + ".png";
       } else if (index == 5) {
-        ofname = ofname + "." + "stress-xy." + timestr + ".ppm";
+        ofileName = ofileName + "." + "stress-xy." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "stress-xy." + timestr + ".png";
       }
-      ofstream out(ofname.c_str());
+      ofstream out(ofileName.c_str());
       if (!out.is_open()) {
-        cout << ofname << "could not open." << endl;
+        cout << ofileName << "could not open." << endl;
         exit(1);
       }
 
@@ -802,7 +802,7 @@ void ElasticModel::writeStress (string &root,
       /// command via a system call (not recommended).
       ///
 
-      string buff = "convert " + ofname + " " + ofpngname;
+      string buff = "convert " + ofileName + " " + ofpngname;
       system(buff.c_str());
       return;
 
@@ -838,30 +838,30 @@ void ElasticModel::writeStrain (string &root,
       ostringstream ostr;
       ostr << (int) (time * 100.0);
       string timestr(ostr.str());
-      string ofname(root);
+      string ofileName(root);
       string ofpngname(root);
       if (index == 0) {
-        ofname = ofname + "." + "strain-xx." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-xx." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-xx." + timestr + ".png";
       } else if (index == 1) {
-        ofname = ofname + "." + "strain-yy." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-yy." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-yy." + timestr + ".png";
       } else if (index == 2) {
-        ofname = ofname + "." + "strain-zz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-zz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-zz." + timestr + ".png";
       } else if (index == 3) {
-        ofname = ofname + "." + "strain-xz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-xz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-xz." + timestr + ".png";
       } else if (index == 4) {
-        ofname = ofname + "." + "strain-yz." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-yz." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-yz." + timestr + ".png";
       } else if (index == 5) {
-        ofname = ofname + "." + "strain-xy." + timestr + ".ppm";
+        ofileName = ofileName + "." + "strain-xy." + timestr + ".ppm";
         ofpngname = ofpngname + "." + "strain-xy." + timestr + ".png";
       }
-      ofstream out(ofname.c_str());
+      ofstream out(ofileName.c_str());
       if (!out.is_open()) {
-        cout << ofname << "could not open." << endl;
+        cout << ofileName << "could not open." << endl;
         exit(1);
       }
 
@@ -901,7 +901,7 @@ void ElasticModel::writeStrain (string &root,
       /// command via a system call (not recommended).
       ///
 
-      string buff = "convert " + ofname + " " + ofpngname;
+      string buff = "convert " + ofileName + " " + ofpngname;
       system(buff.c_str());
       return;
 
@@ -925,12 +925,12 @@ void ElasticModel::writeDisp (string &root,
   ostringstream ostr;
   ostr << (int) (time * 100.0);
   string timestr(ostr.str());
-  string ofname(root);
-  ofname = ofname + "." + "disp." + timestr + ".dat";
-  ofstream out(ofname.c_str());
+  string ofileName(root);
+  ofileName = ofileName + "." + "disp." + timestr + ".dat";
+  ofstream out(ofileName.c_str());
 
   if (!out.is_open()) {
-    cout << ofname << "could not open." << endl;
+    cout << ofileName << "could not open." << endl;
     exit(1);
   }
 
@@ -970,13 +970,13 @@ void ElasticModel::writeStrainEngy (string &root,
     ostringstream ostr;
     ostr << (int) (time * 100.0);
     string timestr(ostr.str());
-    string ofname(root);
+    string ofileName(root);
     string ofpngname(root);
-    ofname = ofname + "." + "strainengy." + timestr + ".ppm";
+    ofileName = ofileName + "." + "strainengy." + timestr + ".ppm";
     ofpngname = ofpngname + "." + "strainengy." + timestr + ".png";
-    ofstream out(ofname.c_str());
+    ofstream out(ofileName.c_str());
     if (!out.is_open()) {
-      cout << ofname << "could not open." << endl;
+      cout << ofileName << "could not open." << endl;
       exit(1);
     }
 
@@ -1017,7 +1017,7 @@ void ElasticModel::writeStrainEngy (string &root,
     /// command via a system call (not recommended).
     ///
 
-    string buff = "convert " + ofname + " " + ofpngname;
+    string buff = "convert " + ofileName + " " + ofpngname;
     system(buff.c_str());
     return;
 }

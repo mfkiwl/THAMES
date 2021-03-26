@@ -729,7 +729,7 @@ void KineticModel::normalizePhaseMasses(vector<double> microPhaseMass,
 
 void KineticModel::calculateKineticStep (const double timestep,
                                          const double temperature,
-                                         bool isfirst)
+                                         bool isFirst)
 {
     ///
     /// Initialize local variables
@@ -789,7 +789,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             cout << "DC moles of water = " << chemSys_->getDCMoles(waterId);
             cout.flush();
             for (int i = 0; i < ICNum; i++) {
-              if (isfirst) {
+              if (isFirst) {
                   ICMoles[i] = 1.0e-9;
               } else {
                   ICMoles[i] = chemSys_->getICMoles(i);
@@ -800,7 +800,7 @@ void KineticModel::calculateKineticStep (const double timestep,
         } else {
             for (int i = 0; i < ICNum; i++) {
               ICMoles[i] = chemSys_->getICMoles(i);
-              if (isfirst) {
+              if (isFirst) {
                   ICMoles[i] = 1.0e-9;
               } else {
                   ICMoles[i] = chemSys_->getICMoles(i);
@@ -818,7 +818,7 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         solutICMoles = chemSys_->getSolution();
 
-        if (isfirst) {  // Beginning of special first-time setup tasks
+        if (isFirst) {  // Beginning of special first-time setup tasks
             
             // Set the proper amount of water for the total solid mass
             // and the water-solid ratio
@@ -879,7 +879,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                         cout << "previous IC moles for H is: " << ICMoles[i] << endl;
                     }
                     ICMoles[i] = (2.0 * waterMoles);
-                    solut_->setICmoles(i,ICMoles[i]);
+                    solut_->setICMoles(i,ICMoles[i]);
                     chemSys_->setDCMoles(waterId,waterMoles);
                     if (verbose_) {
                         cout << "new ICmoles for H is: " << ICMoles[i] << endl;
@@ -888,7 +888,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 if (ICName[i] == "O") {
                     if (verbose_) cout << "previous IC moles for O is: " << ICMoles[i] << endl;
                     ICMoles[i] = waterMoles;
-                    solut_->setICmoles(i,ICMoles[i]);
+                    solut_->setICMoles(i,ICMoles[i]);
                     if (verbose_) cout << "new ICmoles for O is: " << ICMoles[i] << endl;
                }
             }
@@ -1573,7 +1573,7 @@ void KineticModel::calculateKineticStep (const double timestep,
    
             for (int ii = 0; ii < ICMoles.size(); ii++) {
                 chemSys_->setICMoles(ii,ICMoles[ii]);
-                solut_->setICmoles(ii,solutICMoles[ii]);
+                solut_->setICMoles(ii,solutICMoles[ii]);
             }
 
         }       // End of sulfate attack block

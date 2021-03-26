@@ -84,7 +84,7 @@ protected:
     int ns_;                            /**< Number of total voxels */
     int nphase_;                        /**< Maximimum allowed number of phases */
     int npoints_;                       /**< Number of microstructures to process */
-    string phasemod_fname_;             /**< File name saving the phase elastic moduli */
+    string phasemod_fileName_;             /**< File name saving the phase elastic moduli */
     vector<vector<double> > u_;         /**< 2D displacement field */
     vector<vector<double> > gb_;        /**< Energy gradient */
     vector<vector<double> > b_;         /**< Coefficient of linear displacement in energy */
@@ -223,10 +223,10 @@ ElasticModel (int nx,
 
 @todo Change the name of this method to setElasticModuli.
 
-@param phasemod_fname is the file name for saving the phase moduli data
+@param phasemod_fileName is the file name for saving the phase moduli data
 @param nphase is the maximum allowed number of phases in the microstructure
 */
-void ElasModul (string phasemod_fname,
+void ElasModul (string phasemod_fileName,
                 int nphase);
 
 
@@ -289,10 +289,10 @@ double getPhasemod (int phaseid,
 
 @todo Change the name of this method to setMicrostructure.
 
-@param fname is the input file containing the microstructure data
+@param fileName is the input file containing the microstructure data
 @param nphase is the maximum allowed number of phases in the microstructure
 */
-void ppixel (string fname,
+void ppixel (string fileName,
              int nphase);
 
 /**
@@ -538,7 +538,7 @@ This is a virtual method which does nothing in the base class, but which
 will be customized for each of the derived classes.
 
 @param time is the simulation time [days]
-@param fname is the file name to store the results
+@param fileName is the file name to store the results
 @param exx is the input prescribed xx component of the strain
 @param eyy is the input prescribed yy component of the strain
 @param ezz is the input prescribed zz component of the strain
@@ -547,7 +547,7 @@ will be customized for each of the derived classes.
 @param exy is the input prescribed xy component of the strain
 */
 virtual void Calc (double time,
-                   string fname,
+                   string fileName,
                    double exx,
                    double eyy,
                    double ezz,
@@ -624,11 +624,11 @@ void writeStrainEngy (string &root,
 /**
 @brief Set the name of the file containing the phase elastic moduli
 
-@param phasemod_fname is the file name to set
+@param phasemod_fileName is the file name to set
 */
-void setPhasemodfname (string phasemod_fname)
+void setPhasemodfileName (string phasemod_fileName)
 {
-    phasemod_fname_ = phasemod_fname;
+    phasemod_fileName_ = phasemod_fileName;
     return;
 }
 
@@ -637,9 +637,9 @@ void setPhasemodfname (string phasemod_fname)
 
 @return the phase modulus input file name
 */
-string getPhasemodfname (void)
+string getPhasemodfileName (void)
 {
-    return phasemod_fname_;
+    return phasemod_fileName_;
 }
 
 /**

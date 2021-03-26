@@ -49,7 +49,7 @@ private:
 
 TNode *node_;                       /**< Pointer to the GEM3K Tnode object */
 
-bool jsonformat_;                   /**< True if GEM input data files are in JSON format */
+bool jsonFormat_;                   /**< True if GEM input data files are in JSON format */
 
 double T_;                          /**< System-wide temperature [K] */
 double P_;                          /**< System-wide pressure [Pa] */
@@ -57,60 +57,60 @@ double Vs_;                         /**< System total volume [m<sup>3</sup>] */
 double Ms_;                         /**< System total mass [kg] */
 double Gs_;                         /**< System total Gibbs energy [J] */
 double Hs_;                         /**< System total enthalpy [J] */
-double ionicstrength_;              /**< Solution ionic strength [mol/kgw] */
+double ionicStrength_;              /**< Solution ionic strength [mol/kgw] */
 double pH_;                         /**< Solution pH */
 double pe_;                         /**< Solution pe */
 double Eh_;                         /**< Solution Eh [volts] */
 
-long int nodehandle_;               /**< integer flag used to identify a node */
-long int nodestatus_;               /**< integer flag used to identify node's status */
-long int iterdone_;                 /**< number of iterations performed in the most
+long int nodeHandle_;               /**< integer flag used to identify a node */
+long int nodeStatus_;               /**< integer flag used to identify node's status */
+long int iterDone_;                 /**< number of iterations performed in the most
                                                 recent GEM calculation on the node */
 
-int timesGEMfailed_;                /**< number of consecutive times a call to GEM_run
+int timesGEMFailed_;                /**< number of consecutive times a call to GEM_run
                                                 has failed */
 
-int maxGEMfails_;                   /**< maximum allowed number of consecutive GEM_run fails */
+int maxGEMFails_;                   /**< maximum allowed number of consecutive GEM_run fails */
 
-unsigned int ICnum_;                /**< Number of independent components (IC) */
-unsigned int DCnum_;                /**< Number of dependent components (DC) */
-unsigned int phasenum_;             /**< Number of GEM phases in the CSD */
-unsigned int solutionphasenum_;     /**< Number of GEM solution phases in the CSD;
+unsigned int numICs_;                /**< Number of independent components (IC) */
+unsigned int numDCs_;                /**< Number of dependent components (DC) */
+unsigned int numGEMPhases_;             /**< Number of GEM phases in the CSD */
+unsigned int numSolutionPhases_;     /**< Number of GEM solution phases in the CSD;
                                               solution phases are non-stoichiometric */
 
-double *ICmoles_;                   /**< List of number of moles of each IC in system */
-double *ICresiduals_;               /**< List of errors in IC moles for mass balance */
-double *ICchempot_;                 /**< List of chemical potentials of each IC, in
+double *ICMoles_;                   /**< List of number of moles of each IC in system */
+double *ICResiduals_;               /**< List of errors in IC moles for mass balance */
+double *ICChemicalPotential_;                 /**< List of chemical potentials of each IC, in
                                             the GEM dual solution */
-double *DCmoles_;                   /**< List of moles of each DC */
-double *DCactivitycoeff_;           /**< List of activity coefficients for each DC */
+double *DCMoles_;                   /**< List of moles of each DC */
+double *DCActivityCoeff_;           /**< List of activity coefficients for each DC */
 
-double *phasemoles_;                /**< List of moles of each phase in the system */
-double *phasemass_;                 /**< List of mass of each phase in the system [kg] */
-double *phasevolume_;               /**< List of volume of each phase in the system
+double *GEMPhaseMoles_;                /**< List of moles of each phase in the system */
+double *GEMPhaseMass_;                 /**< List of mass of each phase in the system [kg] */
+double *GEMPhaseVolume_;               /**< List of volume of each phase in the system
                                             [m<sup>3</sup> */
 
-double *phasestoich_;               /**< List of amount of moles of each IC in a
+double *pGEMPhaseStoich_;               /**< List of amount of moles of each IC in a
                                                 GEM CSD phase (pointer form) */
 /**
 @brief Solid stoichiometry list for communicating with GEM-IPM.
 
 @warning Not sure how this variable is used
 */
-double *solidstoich_;  
+double *solidStoich_;  
 
 double *carrier_;                   /**< List of moles of carrier (solvent) in
                                             multicomponent asymmetric phases */
-double *surfacearea_;               /**< List of specific surface area of each
+double *surfaceArea_;               /**< List of specific surface area of each
                                             phase, in m<sup>2</sup>/kg */
-double *DCupperlimit_;              /**< List of upper bound on moles of each DC */
-double *DClowerlimit_;              /**< List of lower bound on moles of each DC,
+double *DCUpperLimit_;              /**< List of upper bound on moles of each DC */
+double *DCLowerLimit_;              /**< List of lower bound on moles of each DC,
                                             generally non-zero for numerical
                                             stability of the thermodynamic
                                             calculations */
-vector<string> ICname_;             /**< Names of ICs in the GEM CSD */
-vector<string> DCname_;             /**< Names of DCs in the GEM CSD */
-vector<string> phasename_;          /**< Names of phases in the GEM CSD */
+vector<string> ICName_;             /**< Names of ICs in the GEM CSD */
+vector<string> DCName_;             /**< Names of DCs in the GEM CSD */
+vector<string> GEMPhaseName_;          /**< Names of phases in the GEM CSD */
 
 /**
 @brief Saturation index of each phase in the GEM CSD.
@@ -122,7 +122,7 @@ product.  This variable stores the current SI for each solid phase in the GEM CS
 */
 vector<double> SI_;
 
-double crystrain_;                  /**< Assigned strain from FE model */
+double crystalStrain_;                  /**< Assigned strain from FE model */
 
 bool verbose_;                      /**< Flag to determine verbose output */
 bool debug_;                        /**< Flag to determine debugging output */
@@ -135,14 +135,14 @@ public:
 The class members can all be assigned by reading GEM3K input files,
 which are passed to the constructor.
 
-@param GEMfilename is the name of the GEM DCH file
-@param GEMdbrname is the name of the GEM DBR (data bridge) file
+@param dchFileName is the name of the GEM DCH file
+@param dbrFileName is the name of the GEM DBR (data bridge) file
 @param verbose is true if verbose output should be produced
 @param debug is true if debugging output should be produced
 */
 
-Solution (const string &GEMfilename,
-          const string &GEMdbrname,
+Solution (const string &dchFileName,
+          const string &dbrFileName,
           const bool verbose,
           const bool debug = false);
 
@@ -165,14 +165,14 @@ bool isInputFormatJSON(const char *masterFileName);
 @brief Get the name of the three JSON input files for GEMS data
 
 @param masterFileName is the lst name containing the others
-@param dchname is the name of the DCH data file
-@param ipmname is the name of the IPM data file
-@param dbrname is the name of the DBR data file
+@param dchName is the name of the DCH data file
+@param ipmName is the name of the IPM data file
+@param dbrName is the name of the DBR data file
 */
 void getJSONFiles(const char *masterFileName,
-                  string &dchname,
-                  string &ipmname,
-                  string &dbrname);
+                  string &dchName,
+                  string &ipmName,
+                  string &dbrName);
 
 /**
 @brief Calculate the thermodynanmic equilibrium state of the solution.
@@ -184,18 +184,18 @@ to each dependent component in the GEM chemical system definition (CSD).
 
 @todo Find out how GEM knows not to precipitate or dissolve in this version.
 
-@param isfirst is true if this is the first equilibrium calculation, false otherwise
+@param isFirst is true if this is the first equilibrium calculation, false otherwise
 */
-void calculateState (bool isfirst);
+void calculateState (bool isFirst);
 
 /**
 @brief Get the list of multicomponent phase volumes.
 
 @return a pointer to the array of phase volumes [m<sup>3</sup>]
 */
-double *getPhasevolume () const
+double *getGEMPhaseVolume () const
 {
-  return phasevolume_; 
+  return GEMPhaseVolume_; 
 }
 
 /**
@@ -204,14 +204,14 @@ double *getPhasevolume () const
 @param idx is the index of the phase in the array of phase volumes
 @return the volume [m<sup>3</sup>]
 */
-double getPhasevolume (const unsigned int idx)
+double getGEMPhaseVolume (const unsigned int idx)
 {
-  if (idx >= phasenum_) {
-      cout << "idx beyonds the range of phasenum_" << endl;
-      cerr << "idx beyonds the range of phasenum_" << endl;
+  if (idx >= numGEMPhases_) {
+      cout << "idx beyond the range of numGEMPhases_" << endl;
+      cerr << "idx beyond the range of numGEMPhases_" << endl;
       exit(1);
   }
-  return phasevolume_[idx];
+  return GEMPhaseVolume_[idx];
 }
 
 /**
@@ -219,9 +219,9 @@ double getPhasevolume (const unsigned int idx)
 
 @return the total number of defined phases
 */
-int getPhasenum ()
+int getNumGEMPhases (void)
 {
-    return phasenum_;
+    return numGEMPhases_;
 }
 
 /**
@@ -230,14 +230,14 @@ int getPhasenum ()
 @param idx is the index of the phase in the array of phase names
 @return the phase name
 */
-string &getPhasename (const unsigned int idx)
+string &getGEMPhaseName (const unsigned int idx)
 {
-    if (idx >= phasename_.size()) {
-        cout << "idx beyonds the range of phasename_" << endl;
-        cerr << "idx beyonds the range of phasename_" << endl;
+    if (idx >= GEMPhaseName_.size()) {
+        cout << "idx beyond the range of GEMPhaseName_" << endl;
+        cerr << "idx beyond the range of GEMPhaseName_" << endl;
         exit(1);
     }
-    return (string &)phasename_[idx];
+    return (string &)GEMPhaseName_[idx];
 }
 
 /**
@@ -245,9 +245,9 @@ string &getPhasename (const unsigned int idx)
 
 @return a pointer to the array of phase moles
 */
-double *getPhasemoles () const
+double *getGEMPhaseMoles (void) const
 {
-    return phasemoles_;
+    return GEMPhaseMoles_;
 }
 
 /**
@@ -255,9 +255,9 @@ double *getPhasemoles () const
 
 @return a pointer to the array of phase names
 */
-vector<string> getPhasename () const
+vector<string> getGEMPhaseName (void) const
 {
-    return phasename_;
+    return GEMPhaseName_;
 }
 
 /**
@@ -265,7 +265,7 @@ vector<string> getPhasename () const
 
 @return the number of iterations executed by GEM
 */
-long int getIterdone ();
+long int getIterdone (void);
 
 /**
 @brief Set the number of moles of a given independent component (IC) in the solution.
@@ -273,15 +273,17 @@ long int getIterdone ();
 @param idx is the index of the IC in the array of ICs
 @param val is the number of moles to set for this component
 */
-void setICmoles (const unsigned int idx,
+void setICMoles (const unsigned int idx,
                  const double val)
 {
-    if (idx >= ICnum_) {
-        cout << "index beyond the range of ICnum, so exit the program." << endl;
-        cerr << "index beyond the range of ICnum, so exit the program." << endl;
+    if (idx >= numICs_) {
+        cout << "index beyond the range of ICnum, "
+             << "so exit the program." << endl;
+        cerr << "index beyond the range of ICnum, "
+             << "so exit the program." << endl;
         exit(1);
     } else {
-        ICmoles_[idx] = val;
+        ICMoles_[idx] = val;
     }
     return;
 }
@@ -291,10 +293,10 @@ void setICmoles (const unsigned int idx,
 
 @param val is an array of mole values, one for each IC
 */
-void setICmoles (vector<double> val)
+void setICMoles (vector<double> val)
 {
-    for (int i = 0; i < ICnum_; i++) {
-      ICmoles_[i] = val[i];
+    for (int i = 0; i < numICs_; i++) {
+      ICMoles_[i] = val[i];
     }
 
     return;
@@ -305,9 +307,9 @@ void setICmoles (vector<double> val)
 
 @return a pointer to the array of IC moles
 */
-double *getICmoles ()
+double *getICMoles (void)
 {
-    return ICmoles_;
+    return ICMoles_;
 }
 
 /**
@@ -318,25 +320,21 @@ double *getICmoles ()
 @param idx is the index of the IC to query
 @return the number of moles of that IC in the system
 */
-double getICmoles (const unsigned int idx)
+double getICMoles (const unsigned int idx)
 {
-    return ICmoles_[idx];
+    return ICMoles_[idx];
 }
 
 /**
 @brief Set the saturation index of each dependent component.
 */
-void setSI ()
+void setSI (void)
 {
     SI_.clear();
     double *Falp;
     Falp = (node_->ppmm())->Falp;
     
-    for (int i = 0; i < phasenum_; i++) {
-        // if (verbose_) {
-        //     cout << "log10(SI) for " << phasename_[i] << " is: "
-        //          << Falp[i] << endl;
-        // }
+    for (int i = 0; i < numGEMPhases_; i++) {
         double si = pow(10,Falp[i]);
         SI_.push_back(si);
     }
@@ -348,7 +346,7 @@ void setSI ()
 
 @return the vector of saturation indices, one for each solid phase
 */
-vector<double> getSI ()
+vector<double> getSI (void)
 {
     return SI_;
 }
@@ -358,12 +356,12 @@ vector<double> getSI ()
 
 @todo Perform bounds checking and throw an error if out of bounds.
 
-@param phaseid is the position of the queried phase in the array of SIs
+@param GEMPhaseId is the position of the queried phase in the array of SIs
 @return the saturation index of that phase
 */
-double getSI (int phaseid)
+double getSI (int GEMPhaseId)
 {
-    return SI_[phaseid];
+    return SI_[GEMPhaseId];
 }
    
 /**
@@ -371,7 +369,7 @@ double getSI (int phaseid)
 
 @return the GEM node doing the calculations
 */
-TNode *getNode ()
+TNode *getNode (void)
 {
     return node_;
 }  
@@ -447,24 +445,24 @@ atmospheric pressure.
 @todo Consider renaming this function to calcCrystallizationStrain.
 
 @param SI is the saturation index of the growing crystal
-@param porevolfrac is the local porosity
+@param poreVolFrac is the local porosity
 @param Kp is the effective bulk modulus of the porous body
 @param Ks is the effective shear modulus of the porous body
 @return the calculated crystallization strain
 */
-double calculateCrystrain (double SI,
-                           double porevolfrac,
-                           double Kp,
-                           double Ks);
+double calculateCrystalStrain (double SI,
+                               double poreVolFrac,
+                               double Kp,
+                               double Ks);
 
 /**
-@brief Set the jsonformat_ flag
+@brief Set the jsonFormat_ flag
 
-@param jsonformat is true if input files are in JSON format
+@param jsonFormat is true if input files are in JSON format
 */
-void setJsonformat (const bool jsonformat)
+void setJSONformat (const bool jsonFormat)
 {
-    jsonformat_ = jsonformat;
+    jsonFormat_ = jsonFormat;
     return;
 }
 
@@ -473,9 +471,9 @@ void setJsonformat (const bool jsonformat)
 
 @return the jsonformat flag
 */
-bool getJsonformat () const
+bool getJSONFormat (void) const
 {
-    return jsonformat_;
+    return jsonFormat_;
 }
 
 /**
@@ -483,15 +481,15 @@ bool getJsonformat () const
 
 Calculations of equilibrium state sometimes fail to converge.  It is
 possible that some small tweak in the composition could help the
-algorithm converge, so we allow up to `maxGEMfails_' attempts for
+algorithm converge, so we allow up to `maxGEMFails_' attempts for
 convergence, each time tweaking the composition in some way
 before giving up and throwing an exception.
 
-@param ntimes is the number of consecutive times GEM_run has failed
+@param nTimes is the number of consecutive times GEM_run has failed
 */
-void setTimesGEMfailed (const int ntimes)
+void setTimesGEMFailed (const int nTimes)
 {
-    timesGEMfailed_ = (ntimes >= 0) ? ntimes : 0;
+    timesGEMFailed_ = (nTimes >= 0) ? nTimes : 0;
     return;
 }
 
@@ -500,9 +498,9 @@ void setTimesGEMfailed (const int ntimes)
 
 @return the number of consecutive times a call to GEM_run has failed.
 */
-int getTimesGEMfailed () const
+int getTimesGEMFailed (void) const
 {
-    return timesGEMfailed_;
+    return timesGEMFailed_;
 }
 
 
@@ -522,7 +520,7 @@ void setVerbose (const bool isverbose)
 
 @return the verbose flag
 */
-bool getVerbose () const
+bool getVerbose (void) const
 {
     return verbose_;
 }
@@ -543,7 +541,7 @@ void setDebug (const bool isdebug)
 
 @return the debug flag
 */
-bool getDebug () const
+bool getDebug (void) const
 {
     return debug_;
 }
