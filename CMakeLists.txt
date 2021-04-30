@@ -97,6 +97,7 @@ set (THAMES_INCLUDE_PATH "-I${CMAKE_SOURCE_DIR}/src -I/usr/local/include")
 set (CMAKE_CXX_FLAGS "-O2 -std=c++17 -DIPMGEMPLUGIN ${THAMES_INCLUDE_PATH} ${XML_INCLUDE_PATH}")
 
 message ("Top level CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+message ("Linked libraries are: " ${EXTRA_LIBS})
 
 add_subdirectory (${CMAKE_SOURCE_DIR}/src/thameslib)
 add_subdirectory (${CMAKE_SOURCE_DIR}/src/vcctl2thames)
