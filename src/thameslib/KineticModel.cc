@@ -725,6 +725,7 @@ void KineticModel::calculateKineticStep (const double timestep,
 
     double T = temperature;
     double wcFactor = 1.0;
+    double rhFactor = 1.0;
     double DOH = 0.0;
     double arrhenius = 1.0;
 
@@ -988,6 +989,18 @@ void KineticModel::calculateKineticStep (const double timestep,
           impurityRelease.resize(chemSys_->getNumMicroImpurities(),0.0);
 
           if (verbose_) cout << "SS In KineticModel::calculateKineticStep" << endl;
+
+          // RH factor is the same for all clinker phases
+          double vfvoid = lattice_->getVolumefraction(VOIDID);
+          double vfh2o = lattice_->getVolumefraction(WATERID);
+
+          // This is a big kluge for internal relative humidity
+          // @todo Fix the relative humidity calculation
+          
+          double rh = 1.0 - (vfvoid/vfh2o);
+          rh = rh > 0.55 ? rh : 0.55;
+          rhFactor = pow(((rh - 0.55)/0.45),4.0);
+
           for (int i = 0; i < microPhaseId_.size(); i++) {
             microPhaseId = microPhaseId_[i];
             if (isKinetic(i)) {
@@ -1042,17 +1055,25 @@ void KineticModel::calculateKineticStep (const double timestep,
                     hsrate = k3_[i] * pow((1.0 - DOH),n3_[i]);
                     if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
-                    diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
-                               (1.0 - pow((1.0 - DOH),(1.0/3.0)));
-                    if (diffrate < 1.0e-10) diffrate = 1.0e-10;
-
+                    if (DOH > 0.0) {
+                        diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
+                                   (1.0 - pow((1.0 - DOH),(1.0/3.0)));
+                        if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+                    } else {
+                        diffrate = 1.0e9;
+                    }
 
                     rate = (ngrate < hsrate) ? ngrate : hsrate;
                     if (diffrate < rate) rate = diffrate;
-                    rate *= (wcFactor * arrhenius);
+                    rate *= (wcFactor * rhFactor * arrhenius);
                     newDOH = DOH + (rate * timestep);
                     if (verbose_) {
                         cout << "PK model for " << getName(i)
+                             << ", ngrate = " << ngrate
+                             << ", hsrate = " << hsrate
+                             << ", diffrate = " << diffrate
+                             << ", rhFactor = " << rhFactor
+                             << ", wcFactor = " << wcFactor
                              << ", timestep " << timestep
                              << ", oldDOH = " << DOH << ", new DOH = "
                              << newDOH << endl;
@@ -1431,14 +1452,13 @@ void KineticModel::calculateKineticStep (const double timestep,
             // moles of solution in solution after
             double Na2_aq, K2_aq, Mg2_aq, S2_aq, Ca2_aq, H2_aq, OH2_aq;
 
-            double waterMass = 0.0;
-            waterMass = chemSys_->getDCMoles(chemSys_->getDCId("H2O@"))
-                       * chemSys_->getDCMolarMass("H2O@");
-
-
             double c1; //current concentration
             double c2; //new concentration
 
+            double waterMass = 0.0;
+            waterMass = chemSys_->getDCMoles(chemSys_->getDCId("H2O@"))
+                        * chemSys_->getDCMolarMass("H2O@");
+            
             int KId = chemSys_->getDCId("K+");
             int NaId = chemSys_->getDCId("Na+");
             int CaId = chemSys_->getDCId("Ca+2");
