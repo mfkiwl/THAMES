@@ -406,14 +406,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       GEMPhaseIdLookup_.insert(make_pair(string1,i));
     }
 
-    //if (verbose_) {
-    //    cout << "To initialize GEMPhaseVolume_ and GEMPhaseMass_, "
-    //         << set DCUpperLimit to be normal: "  << endl;
-    //    for (int i = 0; i < numDCs_; i++) {
-    //      cout << DCName_[i] << ": " << DCUpperLimit_[i] << endl;
-    //    }
-    //}
-
     ///
     /// Set up the stoichiometry matrix for dependent components (DCs) in terms
     /// of independent components (ICs).  This is the GEM CSD A matrix
@@ -811,6 +803,9 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 
     cur = cur->xmlChildrenNode;
 
+    /// @note This parsing ignores the kinetic data portion for each
+    /// phase.  The kinetic data parsing is handled by the KineticModel class
+   
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"id"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -876,7 +871,7 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     randomGrowth_.push_back(phaseData.randomGrowth);
     affinity_.push_back(phaseData.affinity);
 
-    // Growth template is based on positive affinities only
+    /// Growth template is based on positive affinities only
     
     growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
 
@@ -889,6 +884,9 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     so3_.push_back(phaseData.so3);
     microPhaseMembers_.insert(make_pair(phaseData.id,phaseData.GEMPhaseId));
     microPhaseDCMembers_.insert(make_pair(phaseData.id,phaseData.DCId));
+
+    // Done with this unfortunate PC clinker phase identification
+   
     numMicroPhases_++;
 
     return;
@@ -1095,11 +1093,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     GEMPhaseName_ = obj.getGEMPhaseName();
     microPhaseId_ = obj.getMicroPhaseId();
     isKinetic_ = obj.getIsKinetic();
-    c3sId_ = obj.getC3sId();
-    c2sId_ = obj.getC2sId();
-    c3aId_ = obj.getC3aId();
-    c4afId_ = obj.getC4afId();
-    gypsumId_ = obj.getGypsumId();
     randomGrowth_ = obj.getRandomGrowth();
     ICMoles_ = obj.getICMoles();
     DCMoles_ = obj.getDCMoles();
@@ -1341,58 +1334,6 @@ void ChemicalSystem::writeChemSys (void)
 
     string CSfilename("chemsys.report");
     ofstream out(CSfilename.c_str());
-    out << "Report on the Material Database" << endl;
-    out << "-------------------------------" << endl << endl;
-    out << "List of Independent Components:" << endl << endl;
-    for(unsigned int i = 0; i < numICs_; i++) {
-        out << i << ")            Name: " << ICName_[i] << endl;
-        out << "        classcode: " << ICClassCode_[i] << endl;
-        out << "       molar mass: " << ICMolarMass_[i] << endl << endl;
-    }
-
-    out << "List of Dependent Components:" << endl << endl;
-    for(unsigned int i = 0; i < numDCs_; i++) {
-        out << i << ")            Name: " << DCName_[i] << endl;
-        out << "        classcode: " << DCClassCode_[i] << endl;
-        out << "       molar mass: " << DCMolarMass_[i] << endl << endl;
-    }
-
-    out << "List of Phases:" << endl << endl;
-    for(unsigned int i = 0; i < numGEMPhases_; i++) {
-        out << i << ")            Name: " << GEMPhaseName_[i] << endl;
-        out << "        classcode: " << GEMPhaseClassCode_[i] << endl;
-    }
-
-    out << "List of Microstructure Phases:" << endl << endl;
-    for(unsigned int i = 0; i < numMicroPhases_; i++) {
-        out << i << ")       Name: " << microPhaseName_[i] << endl;
-        out << "               id: " << microPhaseId_[i] << endl;
-        out << "    random growth: " << randomGrowth_[i] << endl;
-        for (j = 0; j < affinity_[i].size(); j++) {
-            out << "        affinity to " << j << ": " << affinity_[i][j] << endl;
-        }
-        for (j = 0; j < growthTemplate_[i].size(); j++) {
-            out << "        growthTemplate: " << growthTemplate_[i][j] << endl;
-        }
-        out << "         porosity: " << porosity_[i] << endl;
-        out << "              k2o: " << k2o_[i] << endl;
-        out << "             na2o: " << na2o_[i] << endl;
-        out << "              mgo: " << mgo_[i] << endl;
-        out << "              so3: " << so3_[i] << endl;
-    }
-
-    out.close();
-    return;
-}
-
-void ChemicalSystem::writeChemSys (ostream &out)
-{
-    unsigned int j;
-
-    ///
-    /// First we will list details for the ICs
-    ///
-
     out << "Report on the Material Database" << endl;
     out << "-------------------------------" << endl << endl;
     out << "List of Independent Components:" << endl << endl;

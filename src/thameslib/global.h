@@ -6,6 +6,25 @@
 #ifndef GLOBALH
 #define GLOBALH
 
+// String indicating THAMES version in the input microstructure file
+const string VERSIONSTRING = "#THAMES:Version:";
+
+// String indicating the voxel resolution in micrometers
+// for the THAMES input microstructure file
+const string IMGRESSTRING("#THAMES:Image_Resolution:");
+
+// String indicating the x dimension in voxels
+// for the THAMES input microstructure file
+const string XSIZESTRING("#THAMES:X_Size:");
+
+// String indicating the y dimension in voxels
+// for the THAMES input microstructure file
+const string YSIZESTRING("#THAMES:Y_Size:");
+
+// String indicating the z dimension in voxels
+// for the THAMES input microstructure file
+const string ZSIZESTRING("#THAMES:Z_Size:");
+
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
 
@@ -56,10 +75,6 @@ const int INVALID_INPUT = 4;
 const int VOIDID = 0;
 const int WATERID = 1;
 const int FIRST_SOLID = WATERID + 1;
-const int C3SID = 2;
-const int C2SID = 3;
-const int C3AID = 4;
-const int C4AFID = 5;
 const int NUMCLINKERPHASES = 4;
 
 // The number of face, edge, and corner neighbors to a cubic lattice site

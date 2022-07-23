@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+    xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
+  <!--The number of possible phases in the microstructure *not counting* Void-->
+  <!--Can be calculated after this file is otherwise finished-->
+  <numentries>5</numentries>
+  <!--The Blaine fineness of the powder, cm2/kg-->
+  <!--User input, must be positive, typically less than 1000-->
+  <blaine>403.2</blaine>
+  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
+  <refblaine>385.0</refblaine>
+  <!--Temperature in K, can be read from the <TK> field of the dbr file-->
+  <temperature>298.15</temperature>
+  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
+  <reftemperature>296.15</reftemperature>
+  <!--User inputs "saturated" or "sealed" system, then
+  set this value to 1 for saturated, 0 for sealed-->
+  <saturated>0</saturated>
+
+  <!--Each <phase> is a microstructure phase
+      The number of these phases can be determined
+      from the number of unique ids found in
+      the vcctl img file after it is converted to thames
+      format
+  -->
+
+  <!--Void phase should always be present and first in the list-->
+  <!--All of its settings should remain exactly the same-->
+  <phase>
+    <thamesname>Void</thamesname>
+    <!--Unique integer id for microstructure phase-->
+    <id>0</id>
+    <interface_data>
+      <randomgrowth>0.0</randomgrowth>
+    </interface_data>
+    <!--Internal fraction of saturated pore space-->
+    <porosity>0.0</porosity>
+    <!--Display rgb colors, 0 to 255-->
+    <display_data>
+        <red>0.0</red>
+        <green>0.0</green>
+        <blue>0.0</blue>
+        <gray>0.0</gray>
+    </display_data>
+  </phase>
+
+  <!--Water phase should always be present and have id 1-->
+  <phase>
+    <thamesname>H2O</thamesname>
+    <!--Which GEM phase(s) and DC(s) are linked to this microstructure phase?-->
+    <gemphase_data>
+    <!-- If the gemphasename and gemdcname below
+         exist in the GEM dbr filed, then those
+         are the ones that must be used.  If they
+         don't exist (they should), then you
+         could prompt the user to select them
+         from among all the names in the <PHNL> and <DCNL>
+         fields of the dch file, respectively
+    -->
+        <gemphasename>aq_gen</gemphasename>
+        <gemdcname>H2O@</gemdcname>
+    </gemphase_data>
+    <id>1</id>
+    <!--All remaining values should stay as they are here-->
+    <interface_data>
+      <randomgrowth>0.0</randomgrowth>
+    </interface_data>
+    <porosity>1.0</porosity>
+    <display_data>
+      <red>25.0</red>
+      <green>25.0</green>
+      <blue>25.0</blue>
+      <gray>25.0</gray>
+    </display_data>
+  </phase>
+
+  <!--This is the beginning of the non-mandatory phases-->
+
+  <phase>
+    <!--User chooses the thamesname (types it in)-->
+    <thamesname>C3S</thamesname>
+    <gemphase_data>
+        <!--User selects one OR MORE gemphasename from those
+            in the <PHNL> a field of the dch data file
+        -->
+        <gemphasename>Alite</gemphasename>
+        <!--User selects one OR MORE gemdcname from those
+            in the <DCNL> a field of the dch data file
+        -->
+        <gemdcname>C3S</gemdcname>
+    </gemphase_data>
+
+        <!--You will set the id by incrementing
+        from the H2O phase id value of 1-->
+    <id>2</id>
+    <interface_data>
+        <!--randomgrowth is on the closed interval [0.0,1.0],
+            1 is totally random attachment or detachment, 0 means
+            interface mean curvature governs the
+            attachment and detachment points
+        -->
+      <randomgrowth>0.0</randomgrowth>
+      <!--Affinity is the relative strength of the attraction between this phase
+          and one or more "template" phases.
+      -->
+      <affinity>
+        <!--affinityphaseid is a valid thames img id-->
+        <affinityphaseid>2</affinityphaseid>
+        <!--affinityvalue is an integer; more positive numbers
+              mean a stronger desire for this phase to grow
+              near the one with affinityphaseid; more
+              negative numbers mean a stronger repulsion
+              from that affinityphaseid; a value of 0
+              is the default and means no particular preference
+        -->
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+    </interface_data>
+     <!--User defines the porosity, must be in the half-open
+         interval [0.0,1.0)
+     -->
+    <porosity>0.0</porosity>
+    <!--We can specify minority impurity concentrations in a solid phase, which
+    will be released in proportion during dissolution-->
+    <impurity_data>
+        <!--Here we can specify minority impurity concentrations in a
+            solid phase, which will be released in proportion during
+            dissolution
+        -->
+        <!--These four numbers should default to zero, unless
+            user gives them non-zero values.  They should
+            be on the closed interval [0.0,0.01]
+        -->
+        <k2ocoeff>0.00087</k2ocoeff>  <!--K2O mole fraction-->
+        <na2ocoeff>0.0</na2ocoeff>    <!--Na2O mole fraction-->
+        <mgocoeff>0.00861</mgocoeff>    <!--MgO mole fraction-->
+        <so3coeff>0.007942</so3coeff>   <!--SO3 mole fraction-->
+    </impurity_data>
+    <kinetic_data>
+      <!--type is the category of the phase, with the
+          choices of kinetic, thermo, or soluble
+      -->
+      <type>kinetic</type>
+      <!--k1, k2, k3, n1, n3 are Parrott and Killoh parameters. Do not change-->
+      <!--They will be present only if the type is kinetic-->
+      <k1>1.5</k1>
+      <k2>0.05</k2>
+      <k3>1.1</k3>
+      <n1>0.7</n1>
+      <n3>3.3</n3>
+      <!--Ea is the apparent activation energy for dissolution-->
+      <!--User can define this number, on the closed interval [0.0,1e5] -->
+      <Ea>41570.0</Ea>
+      <!--critdoh is another P&K parameter, do not change-->
+      <!--critdoh will be present only if the type is kinetic-->
+      <critdoh>2.0</critdoh>
+      <!--There can be one Rd field for each impurity element that can
+          be incorporated into the phase as it grows-->
+      <Rd>
+        <!--Rdelement must be a value from the <ICNL> field in the
+            dch input file
+        -->
+        <Rdelement>K</Rdelement>
+        <!--Rdvalue must be on the open interval [0.0,1.0)-->
+        <!--Default is zero-->
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
+      <Rd>
+        <Rdelement>Na</Rdelement>
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
+    </kinetic_data>
+    <display_data>
+      <!--These are the rgb colors of the phase for visualization purposes-->
+        <!--Each number must be on the closed interval [0.0,255.0] -->
+      <red>162.0</red>
+      <green>117.0</green>
+      <blue>95.0</blue>
+      <gray>220.0</gray>
+    </display_data>
+  </phase>
+
+  <phase>
+    <thamesname>CH</thamesname>
+    <gemphase_data>
+    <gemphasename>Portlandite</gemphasename>
+    <gemdcname>Portlandite</gemdcname>
+    </gemphase_data>
+    <id>3</id>
+    <interface_data>
+      <randomgrowth>0.6</randomgrowth>
+      <affinity>
+        <affinityphaseid>3</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>4</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>2</affinityphaseid>
+        <affinityvalue>-10</affinityvalue>
+      </affinity>
+    </interface_data>
+    <porosity>0.0</porosity>
+    <display_data>
+      <red>0.0</red>
+      <green>0.0</green>
+      <blue>255.0</blue>
+      <gray>186.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>CSH</thamesname>
+    <gemphase_data>
+    <gemphasename>CSHQ</gemphasename>
+    <gemdcname>CSHQ-JenD</gemdcname>
+    <gemdcname>CSHQ-JenH</gemdcname>
+    <gemdcname>CSHQ-TobD</gemdcname>
+    <gemdcname>CSHQ-TobH</gemdcname>
+    <gemdcname>KSiOH</gemdcname>
+    <gemdcname>NaSiOH</gemdcname>
+    </gemphase_data>
+    <id>4</id>
+    <interface_data>
+      <randomgrowth>0.6</randomgrowth>
+      <affinity>
+        <affinityphaseid>2</affinityphaseid>
+        <affinityvalue>4</affinityvalue>
+      </affinity>
+      <affinity>
+        <affinityphaseid>4</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
+      </affinity>
+    </interface_data>
+    <porosity>0.27</porosity>
+    <kinetic_data>
+      <type>thermo</type>
+      <Rd>
+        <Rdelement>K</Rdelement>
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
+      <Rd>
+        <Rdelement>Na</Rdelement>
+        <Rdvalue>0.42</Rdvalue>
+      </Rd>
+    </kinetic_data>
+    <display_data>
+      <red>245.0</red>
+      <green>222.0</green>
+      <blue>179.0</blue>
+      <gray>159.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>DAMAGE</thamesname>
+    <id>5</id>
+    <interface_data>
+      <randomgrowth>0.0</randomgrowth>
+    </interface_data>
+    <porosity>1.0</porosity>
+    <display_data>
+      <red>255.0</red>
+      <green>0.0</green>
+      <blue>255.0</blue>
+      <gray>255.0</gray>
+    </display_data>
+  </phase>
+</chemistry_data>

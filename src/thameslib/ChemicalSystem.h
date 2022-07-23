@@ -158,7 +158,7 @@ unsigned int numMicroPhases_;              /**< Total number of material compone
                                                 more phases into a single microstructure
                                                 component */
 unsigned int numMicroImpurities_;           /**< Number of impurities, as oxides, dissolved
-                                                in the clinker phases that will be tracked
+                                                in the phases that will be tracked
                                                 Typically the value will be 4 (potassium,
                                                 sodium, magnesium, and sulfur oxides) */
 unsigned int numICs_;                    /**< Number of independent components (IC) */
@@ -184,22 +184,7 @@ vector<string> ICName_;                 /**< Names of ICs in the GEM CSD */
 vector<string> DCName_;                 /**< Names of DCs in the GEM CSD */
 vector<string> GEMPhaseName_;              /**< Names of phases in the GEM CSD */
 vector<int> microPhaseId_;                     /**< Unique ids of THAMES microstructure phases */
-int c3sId_;                             /**< Specific id number for C3S phase, treated
-                                                specially as one of the clinker phases as
-                                                a matter of convenience in kinetic model */
-int c2sId_;                             /**< Specific id number for C2S phase, treated
-                                                specially as one of the clinker phases as
-                                                a matter of convenience in kinetic model */
-int c3aId_;                             /**< Specific id number for C3A phase, treated
-                                                specially as one of the clinker phases as
-                                                a matter of convenience in kinetic model */
-int c4afId_;                            /**< Specific id number for C4AF phase, treated
-                                                specially as one of the clinker phases as
-                                                a matter of convenience in kinetic model */
-int gypsumId_;                          /**< Specific id number for gypsum, treated
-                                                specially as one of the soluble portland cement
-                                                phases as a matter of convenience
-                                                in kinetic model */
+
 vector<double> randomGrowth_;             /**< One real number for each microstructure phase,
                                           that indicates the tendency for growth in random
                                           directions (ballistic or diffusion-limited
@@ -241,16 +226,16 @@ map<int,vector<double> > microPhaseMemberVolumeFraction_;
 vector<double> porosity_;                 /**< The internal porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
 vector<double> k2o_;                      /**< Mass fraction of K<sub>2</sub>O dissolved in
-                                                each clinker phase, in units of
+                                                each phase, in units of
                                                 g per 100 g of the phase */
 vector<double> na2o_;                     /**< Mass fraction of Na<sub>2</sub>O dissolved in
-                                                each clinker phase, in units of
+                                                each phase, in units of
                                                 g per 100 g of the phase */
 vector<double> mgo_;                      /**< Mass fraction of MgO dissolved in
-                                                each clinker phase, in units of
+                                                each phase, in units of
                                                 g per 100 g of the phase */
 vector<double> so3_;                      /**< Mass fraction of SO<sub>3</sub> dissolved in
-                                                each clinker phase, in units of
+                                                each phase, in units of
                                                 g per 100 g of the phase */
 vector<double> grayscale_;                /**< A number on [0,255] giving the relative
                                                 grayscale brightness of the THAMES
@@ -417,8 +402,8 @@ bool isSaturated_;
 /**
 @brief Time to begin sulfate solution exposure, in days.
 
-THAMES enables one to turn of the hydration simulation (i.e., kinetic dissolution of
-clinker phases according to empirical rate laws in an otherwise closed system) 
+THAMES enables one to turn off the hydration simulation (i.e., kinetic dissolution of
+phases according to empirical rate laws in an otherwise closed system) 
 and begin a simulation of sulfate attack on that hydrated system.  This variable
 designates the time (in days) at which this switch should happen.
 */
@@ -428,7 +413,7 @@ double sulfateAttackTime_;
 @brief Time to begin leaching simulation, in days.
 
 THAMES enables one to turn of the hydration simulation (i.e., kinetic dissolution of
-clinker phases according to empirical rate laws in an otherwise closed system) 
+phases according to empirical rate laws in an otherwise closed system) 
 and begin a simulation of leaching by a low-pH solution.  This variable
 designates the time (in days) at which this switch should happen.
 */
@@ -1702,166 +1687,6 @@ map<int,vector<int> > getMicroPhaseToGEMPhase (void) const
 map<int,vector<int> > getMicroPhaseToDC (void) const
 {
     return microPhaseToDC_;
-}
-
-/**
-@brief Set the integer phase id of the tricalcium silicate (alite) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note NOT USED.
-
-@param val is the integer id of the tricalcium silicate phase
-*/
-void setC3sId (const int val)
-{
-    c3sId_ = val;
-}
-
-/**
-@brief Get the integer phase id of the tricalcium silicate (alite) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note Used only in this class's copy constructor.
-
-@return the integer id of the tricalcium silicate phase
-*/
-int getC3sId (void) const
-{
-    return c3sId_;
-}
-
-/**
-@brief Set the integer phase id of the dicalcium silicate (belite) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note NOT USED.
-
-@param val is the integer id of the dicalcium silicate phase
-*/
-void setC2sId (const int val)
-{
-    c2sId_ = val;
-}
-
-/**
-@brief Get the integer phase id of the dicalcium silicate (belite) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note Used only in this class's copy constructor.
-
-@return the integer id of the dicalcium silicate phase
-*/
-int getC2sId (void) const
-{
-    return c2sId_;
-}
-
-/**
-@brief Set the integer phase id of the tricalcium aluminate (aluminate)  phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note NOT USED.
-
-@param val is the integer id of the tricalcium aluminate phase
-*/
-void setC3aId (const int val)
-{
-    c3aId_ = val;
-}
-
-/**
-@brief Get the integer phase id of the tricalcium aluminate (aluminate) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note Used only in this class's copy constructor.
-
-@return the integer id of the tricalcium aluminate phase
-*/
-int getC3aId (void) const
-{
-    return c3aId_;
-}
-
-/**
-@brief Set the integer phase id of the tetracalcium aluminoferrite (ferrite)  phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note NOT USED.
-
-@param val is the integer id of the tetracalcium aluminoferrite phase
-*/
-void setC4afId (const int val)
-{
-    c4afId_ = val;
-}
-
-/**
-@brief Get the integer phase id of the tetracalcium aluminoferrite (ferrite) phase.
-
-Each clinker phase is especially important because it is kinetically controlled
-and therefore is considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the four clinker phases.
-
-@note Used only in this class's copy constructor.
-
-@return the integer id of the tetracalcium aluminoferrite phase
-*/
-int getC4afId (void) const
-{
-    return c4afId_;
-}
-
-/**
-@brief Set the integer phase id of the calcium sulfate dihydrate (gypsum) phase.
-
-Soluble calcium sulfates are important because they are kinetically controlled
-and therefore are considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the soluble calcium sulfates.
-
-@note NOT USED.
-
-@param val is the integer id of the calcium sulfate dihydrate phase
-*/
-void setGypsumId (const int val)
-{
-    gypsumId_ = val;
-}
-
-/**
-@brief Get the integer phase id of the calcium sulfate dihydrate (gypsum) phase.
-
-Soluble calcium sulfates are important because they are kinetically controlled
-and therefore are considered to be outside the thermodynamic system.  For convenience,
-we have special id tags for the soluble calcium sulfates.
-
-@note Used only in this class's copy constructor.
-
-@return the integer id of the calcium sulfate dihydrate phase
-*/
-int getGypsumId (void) const
-{
-    return gypsumId_;
 }
 
 /**

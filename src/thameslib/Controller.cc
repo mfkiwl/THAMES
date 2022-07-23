@@ -512,10 +512,12 @@ void Controller::doCycle (const string &statfilename,
           /// Prefer to make this independent of whether or not there is C4AF in
           /// the phase definitions.  What if this is a white cement or something?
           /// 
+          /// @note Associating the last clinker phase with id 5 is a kluge
+          
           /// @todo Give each phase a calcstress property or something like that
           ///       that can be checked instead of hardwiring phase ids
           
-          if (pid > C4AFID) {
+          if (pid > 5) {
             double strxx, stryy, strzz;
             strxx = stryy = strzz = 0.0;
             strxx = thermalstr_->getEleStress(index,0);
@@ -731,10 +733,7 @@ void Controller::calculateState (double time,
     }
     
     if (isFirst) {        
-      string csfilename("ChemSysOutput.dat");
-      ofstream out2(csfilename.c_str(),ios::app);
-      chemSys_->writeChemSys(out2);
-      out2.close();
+      chemSys_->writeChemSys();
     }
         
     ///

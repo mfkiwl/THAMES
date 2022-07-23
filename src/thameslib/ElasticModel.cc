@@ -450,12 +450,6 @@ void ElasticModel::ppixel (string fileName,
 
     } else {
 
-      const string VERSIONSTRING("Version:");
-      const string IMGSIZESTRING("Image_Size:");
-      const string IMGRESSTRING("Image_Resolution:");
-      const string XSIZESTRING("X_Size:");
-      const string YSIZESTRING("Y_Size:");
-      const string ZSIZESTRING("Z_Size:");
       in >> buff;
       if(buff == VERSIONSTRING) {
         in >> version;
@@ -466,9 +460,6 @@ void ElasticModel::ppixel (string fileName,
           in >> ny_;
           in >> buff;
           in >> nz_;
-        } else if (buff == IMGSIZESTRING) {
-          in >> nx_;
-          ny_ = nz_ = nx_;
         }
         in >> buff;
         if(buff == IMGRESSTRING) {
@@ -575,6 +566,9 @@ void ElasticModel::getAvgStrainengy ()
     /// a molar volume of 7.318e-5 m3/mol.  Multiplying that molar volume by
     /// e9 to convert from GJ to J gives an overall converstion factor of
     /// 7.318e4 J m3 / GJ mol.
+    ///
+    /// @note This is only true for one particular incarnation of GEMS
+    /// and one particular set of ICs, DCs, etc.
     ///
     /// @remarks It would be better if these index values
     /// and molar volumes were not hard-coded like this.

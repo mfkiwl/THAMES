@@ -32,13 +32,6 @@ exists, hydrates, and possibly deteriorates.
 #include "RanGen.h"
 #include "AppliedStrain.h"
 
-const string VERSIONSTRING("Version:");
-const string IMGSIZESTRING("Image_Size:");
-const string IMGRESSTRING("Image_Resolution:");
-const string XSIZESTRING("X_Size:");
-const string YSIZESTRING("Y_Size:");
-const string ZSIZESTRING("Z_Size:");
-
 /**
 @struct Sitesize
 @brief Structure to catalog site domain sizes

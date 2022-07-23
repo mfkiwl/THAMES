@@ -163,10 +163,6 @@ class KineticModel {
 
 protected:
     
-int modelC3sId_;            /**< Id of alite in the kinetic model */
-int modelC2sId_;            /**< Id of belite in the kinetic model */
-int modelC3aId_;            /**< Id of aluminate in the kinetic model */
-int modelC4afId_;           /**< Id of ferrit in the kinetic model */
 int numPhases_;             /**< Total number of phases in the kinetic model */
 ChemicalSystem *chemSys_;   /**< Pointer to the ChemicalSystem object for this simulation */
 Solution *solut_;           /**< Pointer to the aqueous phase object for this simulation */
@@ -379,54 +375,6 @@ of water as defined in the CSD to calculate the moles
 of water in the system.
 */
 void setInitialWaterMoles(void);
-
-/**
-@brief Get the id for alite in the kinetic model (should be 0).
-
-@note NOT USED.
-
-@return the id for alite in the kinetic model
-*/
-int getModelC3sId () const
-{
-    return modelC3sId_;
-}
-
-/**
-@brief Get the id for belite in the kinetic model (should be 1).
-
-@note NOT USED.
-
-@return the id for belite in the kinetic model
-*/
-int getModelC2sId () const
-{
-    return modelC2sId_;
-}
-
-/**
-@brief Get the id for aluminate in the kinetic model (should be 2).
-
-@note NOT USED.
-
-@return the id for aluminate in the kinetic model
-*/
-int getModelC3aId () const
-{
-    return modelC3aId_;
-}
-
-/**
-@brief Get the id for ferrite in the kinetic model (should be 3).
-
-@note NOT USED.
-
-@return the id for ferrite in the kinetic model
-*/
-int getModelC4afId () const
-{
-    return modelC4afId_;
-}
 
 /**
 @brief Get the list of all GEM DC ids in the ChemicalSystem object.

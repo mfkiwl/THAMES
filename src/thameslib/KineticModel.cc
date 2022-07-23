@@ -21,22 +21,11 @@ KineticModel::KineticModel ()
     refBlaine_ = 385.0;     // reference Blaine fineness (m2/kg)
 
     ///
-    /// Default temperaturein the PK model is 20 C (or 293 K)
+    /// Default temperature in the PK model is 20 C (or 293 K)
     ///
 
     temperature_ = 293.15;  // default temperature (K)
     refT_ = 293.15;         // default temperature (K)
-
-    ///
-    /// Clinker phases have special status in the PK kinetic model, and occupy
-    /// phase id numbers 0, 1, 2, and 3 for alite, belite, aluminate, and ferrite,
-    /// respectively
-    ///
-
-    modelC3sId_ = 0;
-    modelC2sId_ = 1;
-    modelC3aId_ = 2;
-    modelC4afId_ = 3;
 
     ///
     /// Clear out the vectors so they can be populated with values from the
@@ -95,11 +84,6 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     const string TYPE = "type";
     const string GEMNAME = "gemname";
     const string DCNAME = "dcname";
-    const string C3S = "C3S";
-    const string C2S = "C2S";
-    const string C3A = "C3A";
-    const string C4AF = "C4AF";
-    const string C4AFGEMNAME = "Ferrite";
     const string BLAINE = "Blaine";
     const string REFBLAINE = "refBlaine";
     const string WCRATIO = "wcRatio";
@@ -147,17 +131,6 @@ KineticModel::KineticModel (ChemicalSystem *cs,
 
     temperature_ = 293.15;
     refT_ = 293.15;
-
-    ///
-    /// Clinker phases have special status in the PK kinetic model, and occupy
-    /// phase id numbers 0, 1, 2, and 3 for alite, belite, aluminate, and ferrite,
-    /// respectively
-    ///
-
-    modelC3sId_ = 0;
-    modelC2sId_ = 1;
-    modelC3aId_ = 2;
-    modelC4afId_ = 3;
 
     ///
     /// Clear out the vectors so they can be populated with values from the
@@ -449,6 +422,14 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     GEMPhaseId_.push_back(kineticData.GEMPhaseId);
     RdICId_.push_back(kineticData.RdId);
     Rd_.push_back(kineticData.RdVal);
+
+    /// @note k1, k2, k3, n1, n3, and critDOH are all
+    /// specific to PK model.
+    
+    /// Not knowing the order in which the clinker
+    /// phases will appear, we must figure that out
+    /// now.
+    
     k1_.push_back(kineticData.k1);
     k2_.push_back(kineticData.k2);
     k3_.push_back(kineticData.k3);
@@ -467,6 +448,13 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
     xmlChar *key;
     cur = cur->xmlChildrenNode;
 
+    /// @note Everything in here pretty much depends on the PK
+    /// model for PC clinker phase dissolution.
+    ///
+    /// @todo Replace PK model with more generic kinetic model
+    /// for dissolution of each cement clinker phase and any
+    /// others that may be kinetically controlled.
+    
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"type"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -754,10 +742,10 @@ void KineticModel::calculateKineticStep (const double timestep,
     /// tweak from a failed GEM_run call
     ///
     
-    bool dotweak = (chemSys_->getTimesGEMFailed() > 0) ? true : false;
+    bool doTweak = (chemSys_->getTimesGEMFailed() > 0) ? true : false;
 
     static double hyd_time = 0.0;
-    if (!dotweak) hyd_time = hyd_time + timestep;
+    if (!doTweak) hyd_time = hyd_time + timestep;
     if (verbose_) cout << "hyd_time = " << hyd_time << endl;
 
     try {
@@ -971,10 +959,6 @@ void KineticModel::calculateKineticStep (const double timestep,
             // input units are mol/kgw
             // watermass is in units of grams, not kg
             
-            // ICMoles[chemSys_->getICId("K")] += (1.00 * waterMass * 0.001);
-            // ICMoles[chemSys_->getICId("O")] += (1.00 * waterMass * 0.001);
-            // ICMoles[chemSys_->getICId("H")] += (1.00 * waterMass * 0.001);
-
             double kgWaterMass = waterMass / 1000.0;
             
             map<int,double> isComp = chemSys_->getInitialSolutionComposition();
@@ -995,7 +979,7 @@ void KineticModel::calculateKineticStep (const double timestep,
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
 
           if (verbose_) {
-             cout << "Looping over clinker minerals.  " << endl;
+             cout << "Looping over kinetically controlled phases.  " << endl;
              cout.flush();
           }
 
@@ -1042,7 +1026,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
                 // }
 
-                if (DOH < 1.0 && !dotweak) {
+                if (DOH < 1.0 && !doTweak) {
         
                     if (fabs(n1_[i]) > 0.0) {
                       ngrate = (k1_[i]/n1_[i]) * (1.0 - DOH)
@@ -1075,10 +1059,16 @@ void KineticModel::calculateKineticStep (const double timestep,
                         cout.flush();
                     }
 
-                    // JWB:  This where we can figure out the volume dissolved
-                    // and link it back to the current volume to see how many
-                    // voxels need to dissolve
-            
+                    /// @note This where we can figure out the volume dissolved
+                    /// and link it back to the current volume to see how many
+                    /// voxels need to dissolve
+                    ///
+
+                    /// @note This all depends on concept of degree of
+                    /// hydration as defined by the PK model 
+
+                    /// @todo Make this independent of PK model
+                    
                     scaledMass_[i] = initScaledMass_[i] * (1.0 - newDOH);
                     massDissolved = (newDOH - DOH) * initScaledMass_[i];
                     chemSys_->setMicroPhaseMass(microPhaseId,scaledMass_[i]);
@@ -1091,6 +1081,16 @@ void KineticModel::calculateKineticStep (const double timestep,
                              << chemSys_->getMicroPhaseVolume(microPhaseId) << endl;
                     }
 
+                    /// @note impurityRelease index values are assumed to
+                    /// be uniquely associated with particular chemical
+                    /// elements
+                    
+                    /// @todo Make this more general so that any indexing
+                    /// can be used
+                   
+                    /// @todo Allow any IC element to be an impurity, not
+                    /// necessarily just the ones hard-coded here
+                   
                     impurityRelease[0] = (massDissolved *
                             chemSys_->getK2o(microPhaseId));
                     impurityRelease[1] = (massDissolved *
@@ -1105,7 +1105,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                                   / chemSys_->getDCMolarMass(DCId_[i]))
                                   * chemSys_->getDCStoich(DCId_[i],ii));
                       if (ICName[ii] == "O") {
-                        // Dissolved K2O in this clinker phase
+                        // Dissolved K2O in this phase
                         if (chemSys_->isIC("K")) {
                             icn = "K";
                             molarMass = 2.0 * chemSys_->getICMolarMass(icn);
@@ -1113,7 +1113,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                             molarMass += chemSys_->getICMolarMass(icn);
                             ICMoles[ii] += (impurityRelease[0]/molarMass);
                         }
-                        // Dissolved Na2O in this clinker phase
+                        // Dissolved Na2O in this phase
                         if (chemSys_->isIC("Na")) {
                             icn = "Na";
                             molarMass = 2.0 * chemSys_->getICMolarMass(icn);
@@ -1121,7 +1121,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                             molarMass += chemSys_->getICMolarMass(icn);
                             ICMoles[ii] += (impurityRelease[1]/molarMass);
                         }
-                        // Dissolved MgO in this clinker phase
+                        // Dissolved MgO in this phase
                         if (chemSys_->isIC("Mg")) {
                             icn = "Mg";
                             molarMass = chemSys_->getICMolarMass(icn);
@@ -1129,7 +1129,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                             molarMass += chemSys_->getICMolarMass(icn);
                             ICMoles[ii] += (impurityRelease[2]/molarMass);
                         }
-                        // Dissolved SO3  in this clinker phase
+                        // Dissolved SO3 in this phase
                          if (chemSys_->isIC("S")) {
                              icn = "S";
                              molarMass = chemSys_->getICMolarMass(icn);
@@ -1138,28 +1138,28 @@ void KineticModel::calculateKineticStep (const double timestep,
                              ICMoles[ii] += (3.0 * (impurityRelease[3]/molarMass));
                          }
                        } else if (ICName[ii] == "S") {
-                         // Dissolved SO3  in this clinker phase
+                         // Dissolved SO3  in this phase
                          icn = "S";
                          molarMass = chemSys_->getICMolarMass(icn);
                          icn = "O";
                          molarMass += (3.0 * chemSys_->getICMolarMass(icn));
                          ICMoles[ii] += (impurityRelease[3]/molarMass);
                        } else if (ICName[ii] == "K") {
-                         // Dissolved K2O in this clinker phase
+                         // Dissolved K2O in this phase
                          icn = "K";
                          molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                          icn = "O";
                          molarMass += chemSys_->getICMolarMass(icn);
                          ICMoles[ii] += (2.0 * (impurityRelease[0]/molarMass));
                        } else if (ICName[ii] == "Na") {
-                         // Dissolved Na2O in this clinker phase
+                         // Dissolved Na2O in this phase
                          icn = "Na";
                          molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                          icn = "O";
                          molarMass += chemSys_->getICMolarMass(icn);
                          ICMoles[ii] += (2.0 * (impurityRelease[1]/molarMass));
                        } else if (ICName[ii] == "Mg") {
-                         // Dissolved MgO in this clinker phase
+                         // Dissolved MgO in this phase
                          icn = "Mg";
                          molarMass = chemSys_->getICMolarMass(icn);
                          icn = "O";
@@ -1191,7 +1191,7 @@ void KineticModel::calculateKineticStep (const double timestep,
         }	
 
         if (verbose_) {
-            if (!dotweak) {
+            if (!doTweak) {
                 cout << "KineticModel::calculateKineticstep ICmoles after dissolving:" << endl;
             } else {
                 cout << "KineticModel::calculateKineticstep ICmoles after tweaking:" << endl;
@@ -1201,7 +1201,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             }
         }
 
-        if (dotweak) {
+        if (doTweak) {
             for (int ii = 0; ii < ICMoles.size(); ii++) {
                 chemSys_->setICMoles(ii,ICMoles[ii]);
             }
