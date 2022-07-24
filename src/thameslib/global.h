@@ -6,24 +6,26 @@
 #ifndef GLOBALH
 #define GLOBALH
 
+#include<string>
+
 // String indicating THAMES version in the input microstructure file
-const string VERSIONSTRING = "#THAMES:Version:";
+const std::string VERSIONSTRING = "#THAMES:Version:";
 
 // String indicating the voxel resolution in micrometers
 // for the THAMES input microstructure file
-const string IMGRESSTRING("#THAMES:Image_Resolution:");
+const std::string IMGRESSTRING("#THAMES:Image_Resolution:");
 
 // String indicating the x dimension in voxels
 // for the THAMES input microstructure file
-const string XSIZESTRING("#THAMES:X_Size:");
+const std::string XSIZESTRING("#THAMES:X_Size:");
 
 // String indicating the y dimension in voxels
 // for the THAMES input microstructure file
-const string YSIZESTRING("#THAMES:Y_Size:");
+const std::string YSIZESTRING("#THAMES:Y_Size:");
 
 // String indicating the z dimension in voxels
 // for the THAMES input microstructure file
-const string ZSIZESTRING("#THAMES:Z_Size:");
+const std::string ZSIZESTRING("#THAMES:Z_Size:");
 
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
@@ -82,7 +84,7 @@ const unsigned int NUM_NEAREST_NEIGHBORS = 6;
 const unsigned int NUM_SECONDNEAREST_NEIGHBORS = 12;
 const unsigned int NUM_THIRDNEAREST_NEIGHBORS = 8;
 
-// Maximum allowed string length (NOT USED)
+// Maximum allowed std::string length (NOT USED)
 const int MAXSTRING = 128;
 
 // Reference temperature for kinetic calculations [K]

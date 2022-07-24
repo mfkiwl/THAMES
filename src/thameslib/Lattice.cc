@@ -62,22 +62,16 @@ Lattice::Lattice (ChemicalSystem *cs,
   in >> buff;
   if (buff == VERSIONSTRING) {
     in >> version_;
-    in >> buff;
-    if (buff == XSIZESTRING) {
-        in >> xdim_;
-        in >> buff;
-        in >> ydim_;
-        in >> buff;
-        in >> zdim_;
-    } else if (buff == IMGSIZESTRING) {
-        ydim_ = zdim_ = xdim_;
-    }
-    in >> buff;
-    if (buff == IMGRESSTRING) {
-        double testres;
-        in >> testres;
-        setResolution(testres);
-    }
+    in >> buff; // X size string identifier
+    in >> xdim_;
+    in >> buff; // Y size string identifier
+    in >> ydim_;
+    in >> buff; // Z size string identifier
+    in >> zdim_;
+    double testres;
+    in >> buff; // Voxel resolution identifier
+    in >> testres;
+    setResolution(testres);
   } else {
 
     ///

@@ -542,16 +542,29 @@ void parseICInSolution (xmlDocPtr doc,
                         xmlNodePtr cur);
 
 /**
+@brief Scan an XML document for the phase names.
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+@param phaseids is a map associating phase names with id numbers
+*/
+void parsePhaseNames (xmlDocPtr doc,
+                     xmlNodePtr cur,
+                     map<string,int> &phaseids);
+
+/**
 @brief Parse input about a microstructure phase from an XML document.
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
 @param numEntries is the number of entries in the XML file
+@param phaseids is a map associating phase names with id numbers
 @param phaseData holds the structure of collected phase data from the document
 */
 void parsePhase (xmlDocPtr doc,
                  xmlNodePtr cur,
                  int numEntries,
+                 map<string,int> phaseids,
                  PhaseData &phaseData);
 
 /**
@@ -592,10 +605,12 @@ void parseImpurityData (xmlDocPtr doc,
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
+@param phaseids is a map associating phase names with id numbers
 @param phaseData holds the structure of collected phase data from the document
 */
 void parseInterfaceData (xmlDocPtr doc,
                          xmlNodePtr cur,
+                         map<string,int> &phaseids,
                          PhaseData &phaseData);
 
 /**
@@ -603,10 +618,12 @@ void parseInterfaceData (xmlDocPtr doc,
 
 @param doc points to the XML file
 @param cur points to the current location within the XML file
+@param phaseids is a map associating phase names with id numbers
 @param phaseData holds the structure of collected phase data from the document
 */
 void parseAffinityData (xmlDocPtr doc,
                         xmlNodePtr cur,
+                        map<string,int> &phaseids,
                         PhaseData &phaseData);
     
 
@@ -1904,7 +1921,7 @@ A given phase, whether hydration product or product of chemical degradation,
 will generally grow in a compact form by make the growth potential highest
 at sites with low mean curvature and lowest at point with high mean curvature.
 The growth sites are ordered from lowest to highest mean curvature when the
-random growth parameter is set to zero.  Higer values of random growth parameter
+random growth parameter is set to zero.  Higher values of random growth parameter
 cause more severe shuffling of the ordered list of growth sites.
 
 @note NOT USED.

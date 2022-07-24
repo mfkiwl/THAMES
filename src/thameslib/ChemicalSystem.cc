@@ -645,6 +645,9 @@ vector<double> ChemicalSystem::getSolution (void)
 
 void ChemicalSystem::parseDoc (const string &docName)
 {
+    // Need to open the docName and scan it somehow for
+    // phase names and id numbers
+
     string msg;
     PhaseData phaseData;
     xmlDocPtr doc;
@@ -680,8 +683,22 @@ void ChemicalSystem::parseDoc (const string &docName)
                             docName,msg);
     }
 
+    /// XML file is valid and non-empty
+    /// Do a first scan through to get the phase names and ids
     ///
-    /// Go through the XML file one tag at a time
+
+    cur = cur->xmlChildrenNode;
+    map<string,int> phaseids;
+    phaseids.clear();
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
+            parsePhaseNames (doc, cur, phaseids);
+        }
+        cur = cur->next;
+    }
+
+    ///
+    /// Now back up to the beginning and scan properly
     ///
     /// The interface file contains information about each microstructure
     /// phase that is defined, including the list of GEM CSD phases that
@@ -689,6 +706,7 @@ void ChemicalSystem::parseDoc (const string &docName)
     /// dissolved impurities, and visualization properties.
     ///
 
+    cur = xmlDocGetRootElement(doc);
     cur = cur->xmlChildrenNode;
     int testnumEntries = 0;
     int satstate = 1;
@@ -707,7 +725,7 @@ void ChemicalSystem::parseDoc (const string &docName)
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"solution"))) {
             parseSolutionComp(doc, cur);
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-            parsePhase(doc, cur, testnumEntries, phaseData);
+            parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
         }
         cur = cur->next;
     }
@@ -778,10 +796,39 @@ void ChemicalSystem::parseICInSolution (xmlDocPtr doc,
     return;
 }
 
+void ChemicalSystem::parsePhaseNames (xmlDocPtr doc,
+                                      xmlNodePtr cur,
+                                      map<string,int> &phaseids)
+{
+
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+    int pid;
+    string pname;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"id"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(pid,st);
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            pname = st;
+            xmlFree(key);
+        }
+        cur = cur->next;
+    }
+    phaseids.insert(make_pair(pname,pid));
+}
+
 
 void ChemicalSystem::parsePhase (xmlDocPtr doc,
                                  xmlNodePtr cur,
                                  int numEntries,
+                                 map<string,int> phaseids,
                                  PhaseData &phaseData)
 {
     xmlChar *key;
@@ -848,7 +895,7 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
             parseImpurityData(doc, cur, phaseData);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
-            parseInterfaceData(doc, cur, phaseData);
+            parseInterfaceData(doc, cur, phaseids, phaseData);
         }
         cur = cur->next;
     }
@@ -1019,6 +1066,7 @@ void ChemicalSystem::parseImpurityData (xmlDocPtr doc,
 
 void ChemicalSystem::parseInterfaceData (xmlDocPtr doc,
                                          xmlNodePtr cur,
+                                         map<string,int> &phaseids,
                                          PhaseData &phaseData)
 {
 
@@ -1030,13 +1078,10 @@ void ChemicalSystem::parseInterfaceData (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phaseData.randomGrowth,st);
-            // if (verbose_) cout << "        randomGrowth = " << phaseData.randomGrowth << endl;
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinity"))) {
-            // if (verbose_) cout << "        Parsing affinity data..." << endl;
-            parseAffinityData(doc,cur,phaseData);
-            // if (verbose_) cout << "        Done parsing affinity data." << endl;
+            parseAffinityData(doc,cur,phaseids,phaseData);
         }
         cur = cur->next;
 
@@ -1046,30 +1091,37 @@ void ChemicalSystem::parseInterfaceData (xmlDocPtr doc,
 
 void ChemicalSystem::parseAffinityData (xmlDocPtr doc,
                                         xmlNodePtr cur,
+                                        map<string,int> &phaseids,
                                         PhaseData &phaseData)
 {
     xmlChar *key;
     cur = cur->xmlChildrenNode;
-    int testaftyid,testaftyval;
+    int testaftyid, testaftyval;
+    map<string,int>::iterator it = phaseids.begin();
 
     while (cur != NULL) {
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityphaseid"))) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityphase"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(testaftyid,st);
-            // if (verbose_) cout << "            affinity id = " << testaftyid << endl;
+            map<string,int>::iterator it = phaseids.find(st);
+            if (it != phaseids.end()) {
+                testaftyid = it->second;
+            }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(testaftyval,st);
-            // if (verbose_) cout << "            affinity value = " << testaftyval << endl;
             xmlFree(key);
         }
         cur = cur->next;
     }
-    phaseData.affinity[testaftyid] = ((int)testaftyval);
+
+    // Must be a valid phase name to be added to the list
+    if (it != phaseids.end()) {
+        phaseData.affinity[testaftyid] = ((int)testaftyval);
+    }
     return;
 }
 

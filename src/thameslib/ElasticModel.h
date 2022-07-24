@@ -67,6 +67,7 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 #include <cmath>
 #include <vector>
 
+#include "global.h"
 #include "StrainEnergy.h"
 
 using namespace std;

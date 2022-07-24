@@ -57,7 +57,7 @@
 
   <xs:complexType name="affinitytype">
     <xs:sequence>
-      <xs:element name="affinityphaseid" type="integertype"/>
+      <xs:element name="affinityphase" type="stringtype"/>
       <xs:element name="affinityvalue" type="integertype"/>
     </xs:sequence>
   </xs:complexType>
