@@ -1526,14 +1526,14 @@ unsigned int getMicroPhaseToGEMPhase (const int i,
             return (p->second)[idx];
         } else {
             msg = "microPhaseToGEMPhase_";
-            EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+            EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase(1)",
                             msg,(p->second).size(),idx);
             ex.printException();
             exit(1);
         }
     } else {
         msg = "Could not find microPhaseToGEMPhase_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase(1)",
                         msg,microPhaseToGEMPhase_.size(),0);
         ex.printException();
         exit(1);
@@ -1554,7 +1554,7 @@ vector<int> getMicroPhaseToGEMPhase (const int i)
         return p->second;
     } else {
         msg = "Could not find microPhaseToGEMPhase_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase",
+        EOBException ex("ChemicalSystem","getMicroPhaseToGEMPhase(2)",
                         msg,microPhaseToGEMPhase_.size(),0);
         ex.printException();
         exit(1);

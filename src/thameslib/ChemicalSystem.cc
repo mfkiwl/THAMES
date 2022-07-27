@@ -162,7 +162,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     /// Determine the number of possible ICs, DCs, and phases from the
     /// GEM CSD input that was read by GEM-IPM during initialization
     ///
-  
+    
     numICs_ = (unsigned int)((node_->pCSD())->nIC);
     numDCs_ = (unsigned int)((node_->pCSD())->nDC);
     numGEMPhases_ = (unsigned int)((node_->pCSD())->nPH);

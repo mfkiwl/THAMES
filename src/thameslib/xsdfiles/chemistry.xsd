@@ -38,6 +38,32 @@
       <xs:enumeration value="Na"/>
       <xs:enumeration value="S"/>
       <xs:enumeration value="Al"/>
+      <xs:enumeration value="C"/>
+      <xs:enumeration value="Ca"/>
+      <xs:enumeration value="Si"/>
+      <xs:enumeration value="Mg"/>
+      <xs:enumeration value="Fe"/>
+      <xs:enumeration value="P"/>
+      <xs:enumeration value="N"/>
+      <xs:enumeration value="O"/>
+      <xs:enumeration value="Cl"/>
+      <xs:enumeration value="F"/>
+      <xs:enumeration value="Li"/>
+      <xs:enumeration value="B"/>
+      <xs:enumeration value="Cr"/>
+      <xs:enumeration value="Mn"/>
+      <xs:enumeration value="Co"/>
+      <xs:enumeration value="Sr"/>
+      <xs:enumeration value="Ba"/>
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="Ti"/>
+      <xs:enumeration value="Be"/>
+      <xs:enumeration value="Nb"/>
+      <xs:enumeration value="Cd"/>
+      <xs:enumeration value="Zn"/>
+      <xs:enumeration value="Sc"/>
+      <xs:enumeration value="Cu"/>
+      <xs:enumeration value="V"/>
     </xs:restriction>
   </xs:simpleType>
 

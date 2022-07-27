@@ -368,7 +368,8 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             kineticfound = true;
             kineticData.GEMPhaseId =
                 chemSys_->getMicroPhaseToGEMPhase(kineticData.microPhaseId,0);
-            kineticData.DCId = chemSys_->getMicroPhaseToDC(kineticData.microPhaseId,0);
+            kineticData.DCId =
+                chemSys_->getMicroPhaseToDC(kineticData.microPhaseId,0);
 
             ///
             /// Kinetic data are grouped together,
