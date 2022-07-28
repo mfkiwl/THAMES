@@ -848,7 +848,7 @@ void Controller::calculateState (double time,
     }
     double *CSHcomp;
     try {
-        CSHcomp = chemSys_->getPGEMPhaseStoich(chemSys_->getGEMPhaseId("CSHQ"));
+        CSHcomp = chemSys_->getPGEMPhaseStoich(chemSys_->getGEMPhaseId(CSHGEMName));
     }
     catch (EOBException eex) {
         eex.printException();

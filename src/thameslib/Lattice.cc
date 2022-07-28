@@ -1122,6 +1122,12 @@ void Lattice::changeMicrostructure (double time,
     vector<unsigned int> pid;
     vector<string> phasenames;
 
+    extern string CSHMicroName;
+    extern string MonocarbMicroName;
+    extern string MonosulfMicroName;
+    extern string HydrotalcMicroName;
+    extern string AFTMicroName;
+
     ///
     /// @todo This function is very large; consider breaking it into small pieces
     /// for ease of maintenance and readability.
@@ -1290,16 +1296,22 @@ void Lattice::changeMicrostructure (double time,
             // Hard wiring for sulfate attack here
             // @todo Generalize to other phases
             
-            growing.push_back(chemSys_->getMicroPhaseId("ETTR"));
+            growing.push_back(chemSys_->getMicroPhaseId(AFTMicroName));
             shrinking.resize(growing.size(),idummy);
             volratios.resize(growing.size(),ddummy);
             for (i = 0; i < growing.size(); ++i) {
-                shrinking[i].push_back(chemSys_->getMicroPhaseId("MONOSULPH"));
-                volratios[i].push_back(2.288);
-                shrinking[i].push_back(chemSys_->getMicroPhaseId("AFMC"));
-                volratios[i].push_back(2.699);
-                shrinking[i].push_back(chemSys_->getMicroPhaseId("HYDROTALC"));
-                volratios[i].push_back(3.211);
+                if (MonosulfMicroName.length() > 0) {
+                    shrinking[i].push_back(chemSys_->getMicroPhaseId(MonosulfMicroName));
+                    volratios[i].push_back(2.288);
+                }
+                if (MonocarbMicroName.length() > 0) {
+                    shrinking[i].push_back(chemSys_->getMicroPhaseId(MonocarbMicroName));
+                    volratios[i].push_back(2.699);
+                }
+                if (HydrotalcMicroName.length() > 0) {
+                    shrinking[i].push_back(chemSys_->getMicroPhaseId(HydrotalcMicroName));
+                    volratios[i].push_back(3.211);
+                }
             }
 
             for (int ii = 0; ii < growing.size(); ++ii) {
@@ -1673,7 +1685,7 @@ void Lattice::changeMicrostructure (double time,
     ///  @todo Why not eliminate this line completely?
     ///
 
-    double surfa = getSurfaceArea(chemSys_->getMicroPhaseId("CSH"));
+    double surfa = getSurfaceArea(chemSys_->getMicroPhaseId(CSHMicroName));
     
     if (volumefraction_[WATERID] <= 0.0) capWater = false;
 
@@ -1689,6 +1701,8 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
     double cap_voidvolume = 0.0;
     double gel_watervolume = 0.0;
     double tot_watervolume = 0.0;
+
+    extern string CSHMicroName;
 
     try {
         
@@ -1734,7 +1748,7 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
         // Adjust the volume of CSH to
         // account for its saturated gel porosity
            
-        int cshid = chemSys_->getMicroPhaseId("CSH");
+        int cshid = chemSys_->getMicroPhaseId(CSHMicroName);
 
         tot_watervolume = vol.at(WATERID);
         cap_voidvolume = vol.at(VOIDID);

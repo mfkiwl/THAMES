@@ -8,24 +8,46 @@
 
 #include<string>
 
+using namespace std;
+
 // String indicating THAMES version in the input microstructure file
-const std::string VERSIONSTRING = "#THAMES:Version:";
+const string VERSIONSTRING = "#THAMES:Version:";
 
 // String indicating the voxel resolution in micrometers
 // for the THAMES input microstructure file
-const std::string IMGRESSTRING("#THAMES:Image_Resolution:");
+const string IMGRESSTRING("#THAMES:Image_Resolution:");
 
 // String indicating the x dimension in voxels
 // for the THAMES input microstructure file
-const std::string XSIZESTRING("#THAMES:X_Size:");
+const string XSIZESTRING("#THAMES:X_Size:");
 
 // String indicating the y dimension in voxels
 // for the THAMES input microstructure file
-const std::string YSIZESTRING("#THAMES:Y_Size:");
+const string YSIZESTRING("#THAMES:Y_Size:");
 
 // String indicating the z dimension in voxels
 // for the THAMES input microstructure file
-const std::string ZSIZESTRING("#THAMES:Z_Size:");
+const string ZSIZESTRING("#THAMES:Z_Size:");
+
+// String indicating the CSH GEM Phase name
+// @todo Make this general somehow
+const string CSHGEMName("CSHQ");
+
+// String indicating the AFt GEM Phase name
+// @todo Make this general somehow
+const string AFTDCName("ettringite");
+
+// String indicating the monosulfate GEM Phase name
+// @todo Make this general somehow
+const string MonosulfDCName("monosulf14");
+
+// String indicating the monocarboaluminate GEM Phase name
+// @todo Make this general somehow
+const string MonocarbGEMName("C4AcH11");
+
+// String indicating the hydrotalcite GEM Phase name
+// @todo Make this general somehow
+const string HydrotalcGEMName("OH-hydrotalcite");
 
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
@@ -39,13 +61,11 @@ const int LEACHING = 3;
 // Flag to indicate simulation of external sulfate only
 const int SULFATE_ATTACK = 4;
 
-
 // Flag to indicate kinetic equations handled within code (NOT USED)
 const int INTERNAL_KINETICS = 0;
 
 // Flag to indicate kinetics is done a priori outside the code (NOT USED)
 const int EXTERNAL_KINETICS = 1;
-
 
 // Normal return condition flag (NOT USED)
 const int RETURN_NORMAL = 0;

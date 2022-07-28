@@ -1,9 +1,14 @@
-/**
-@file ChemicalSystem.cc
+/** @file ChemicalSystem.cc
 @brief Method definitions for the ChemicalSystem base class
 */
 
 #include "ChemicalSystem.h"
+
+string CSHMicroName("");
+string MonocarbMicroName("");
+string HydrotalcMicroName("");
+string AFTMicroName("");
+string MonosulfMicroName("");
 
 ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const string &GEMfilename,
@@ -947,12 +952,24 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
     cur = cur->xmlChildrenNode;
 
     int GEMPhaseId = 0;
+    string mystr;
     phaseData.GEMPhaseDCMembers.clear();
 
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemphasename"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.GEMPhaseName.push_back((char *)key);
+            mystr = (char *)key;
+            // Assign the global microstructure phase name associated with CSH
+            if (mystr == CSHGEMName) {
+                CSHMicroName = phaseData.thamesName;
+            }
+            if (mystr == MonocarbGEMName) {
+                MonocarbMicroName = phaseData.thamesName;
+            }
+            if (mystr == HydrotalcGEMName) {
+                HydrotalcMicroName = phaseData.thamesName;
+            }
             GEMPhaseId = getGEMPhaseId((char *)key);
             phaseData.GEMPhaseId.push_back(GEMPhaseId);
             xmlFree(key);
@@ -960,6 +977,13 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdcname"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.DCName.push_back((char *)key);
+            mystr = (char *)key;
+            if (mystr == AFTDCName) {
+                AFTMicroName = phaseData.thamesName;
+            }
+            if (mystr == MonosulfDCName) {
+                MonosulfMicroName = phaseData.thamesName;
+            }
             int dcid = getDCId((char *)key);
             phaseData.DCId.push_back(dcid);
             phaseData.GEMPhaseDCMembers.push_back(dcid);
@@ -968,6 +992,8 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
         cur = cur->next;
     } 
     GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId,phaseData.GEMPhaseDCMembers));   
+    return;
+
 }
 
 void ChemicalSystem::parseDisplayData (xmlDocPtr doc,
