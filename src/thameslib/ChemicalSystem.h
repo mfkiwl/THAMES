@@ -1467,9 +1467,18 @@ unsigned int getDCId (const string &dcname)
     if (p != DCIdLookup_.end()) {
         return p->second;
     } else {
-        if (warning_) {
-            cout << "Could not find DCIdLookup_ match to " << dcname << endl;
+        cout << "WARNING: Could not find DCIdLookup_ match to " << dcname << endl;
+        cout << "WARNING: Here are the ones I know about:" << endl;
+        cout.flush();
+        p = DCIdLookup_.begin();
+        while (p != DCIdLookup_.end()) {
+            cout << "WARNING:     " << p->first << " ("
+                 << p->second << ")" << endl;
+            cout.flush();
+            p++;
         }
+        cout << "WARNING:" << endl;
+        cout.flush();
         return (numDCs_ + 9999);
     }
 }

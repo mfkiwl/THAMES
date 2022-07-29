@@ -29,6 +29,14 @@ const string YSIZESTRING("#THAMES:Y_Size:");
 // for the THAMES input microstructure file
 const string ZSIZESTRING("#THAMES:Z_Size:");
 
+// String indicating the liquid solution GEM Phase name
+// @todo Make this general somehow
+const string WaterGEMName("aq_gen");
+
+// String indicating the liquid solution GEM Phase name
+// @todo Make this general somehow
+const string WaterDCName("H2O@");
+
 // String indicating the CSH GEM Phase name
 // @todo Make this general somehow
 const string CSHGEMName("CSHQ");

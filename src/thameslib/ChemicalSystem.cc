@@ -388,27 +388,37 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       dcmolarmass++;
     }
   
+    int maxICnameLength = node_->getMaxICnameLength(); 
+    int maxDCnameLength = node_->getMaxDCnameLength(); 
+    int maxPHnameLength = node_->getMaxPHnameLength(); 
+
     string string1;
     for (i = 0; i < numICs_; i++) {
-      string1.assign(node_->xCH_to_IC_name(i));
-      ICName_.push_back(string1);
-      ICIdLookup_.insert(make_pair(string1,i));
+        string1 = node_->xCH_to_IC_name(i);
+        if( string1.length() >= maxICnameLength ) string1.resize(maxICnameLength);
+        if (verbose_) {
+            cout << "IC number " << i << " is " << string1 << endl;
+        }
+        ICName_.push_back(string1);
+        ICIdLookup_.insert(make_pair(string1,i));
     }
     for (i = 0; i < numDCs_; i++) {
-      // if (verbose_) {
-      //    cout << "DC id " << i << " name is "
-      //         << node_->xCH_to_DC_name(i) << endl;
-      //    cout.flush();
-      //}
-      string1.assign(node_->xCH_to_DC_name(i));
-  
-      DCName_.push_back(string1);
-      DCIdLookup_.insert(make_pair(string1,i));
+        string1 = node_->xCH_to_DC_name(i) ; 
+        if( string1.length() >= maxDCnameLength ) string1.resize(maxDCnameLength);
+        if (verbose_) {
+            cout << "DC number " << i << " is " << string1 << endl;
+        }
+        DCName_.push_back(string1);
+        DCIdLookup_.insert(make_pair(string1,i));
     }
     for (i = 0; i < numGEMPhases_; i++) {
-      string1.assign(node_->xCH_to_Ph_name(i));
-      GEMPhaseName_.push_back(string1);
-      GEMPhaseIdLookup_.insert(make_pair(string1,i));
+        string1 = node_->xCH_to_Ph_name(i);
+        if( string1.length() >= maxPHnameLength ) string1.resize(maxPHnameLength);
+        if (verbose_) {
+            cout << "PH number " << i << " is " << string1 << endl;
+        }
+        GEMPhaseName_.push_back(string1);
+        GEMPhaseIdLookup_.insert(make_pair(string1,i));
     }
 
     ///
@@ -952,22 +962,32 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
     cur = cur->xmlChildrenNode;
 
     int GEMPhaseId = 0;
-    string mystr;
+    int dcid = 0;
+    string mypstr,mydcstr;
     phaseData.GEMPhaseDCMembers.clear();
+    bool scrapeWaterDCs = false;
 
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemphasename"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.GEMPhaseName.push_back((char *)key);
-            mystr = (char *)key;
+            mypstr = (char *)key;
+            if (mypstr == WaterGEMName) {
+                scrapeWaterDCs = true;
+            } else {
+                scrapeWaterDCs = false;
+            }
+            cout << "GEM Phase name = " << mypstr
+                 << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+            cout.flush();
             // Assign the global microstructure phase name associated with CSH
-            if (mystr == CSHGEMName) {
+            if (mypstr == CSHGEMName) {
                 CSHMicroName = phaseData.thamesName;
             }
-            if (mystr == MonocarbGEMName) {
+            if (mypstr == MonocarbGEMName) {
                 MonocarbMicroName = phaseData.thamesName;
             }
-            if (mystr == HydrotalcGEMName) {
+            if (mypstr == HydrotalcGEMName) {
                 HydrotalcMicroName = phaseData.thamesName;
             }
             GEMPhaseId = getGEMPhaseId((char *)key);
@@ -977,16 +997,25 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdcname"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.DCName.push_back((char *)key);
-            mystr = (char *)key;
-            if (mystr == AFTDCName) {
+            mydcstr = (char *)key;
+            cout << "GEM DC name = " << mydcstr
+                 << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+            cout.flush();
+            if (mydcstr == AFTDCName) {
                 AFTMicroName = phaseData.thamesName;
             }
-            if (mystr == MonosulfDCName) {
+            if (mydcstr == MonosulfDCName) {
                 MonosulfMicroName = phaseData.thamesName;
             }
-            int dcid = getDCId((char *)key);
-            phaseData.DCId.push_back(dcid);
-            phaseData.GEMPhaseDCMembers.push_back(dcid);
+            if (!scrapeWaterDCs || mydcstr == WaterDCName) {
+                // Only for aqueous solution, we keep only the water DC,
+                // not all the dissolved components
+                dcid = getDCId((char *)key);
+                phaseData.DCId.push_back(dcid);
+                phaseData.GEMPhaseDCMembers.push_back(dcid);
+                cout << "GEM DC id = " << dcid
+                     << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+            }
             xmlFree(key);
         }
         cur = cur->next;

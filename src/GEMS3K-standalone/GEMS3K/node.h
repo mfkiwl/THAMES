@@ -851,17 +851,29 @@ long int GEM_step_MT( const long int step )
    /// or -1 if no such name was found in the DATACH DC name list
    long int DC_name_to_xCH( const char *Name ) const;
 
+   /// Returns the maximum allowed IC name length
+   int getMaxDCnameLength(void) const
+   {return ((int)(MaxDCnameLength));}
+
    /// Returns DC Name string given the DCH index of DC, check MaxDCnameLength
    /// or -1 if no such name was found in the DATACH DC name list
    char* xCH_to_DC_name( int xCH ) const
    {return CSD->DCNL[xCH];}
+
+   /// Returns the maximum allowed DC name length
+   int getMaxICnameLength(void) const
+   {return ((int)(MaxICnameLength));}
 
    /// Returns IC Name string given the ICH index of IC, check MaxICnameLength
    /// or -1 if no such name was found in the DATACH IC name list
    char* xCH_to_IC_name( int xCH ) const
    {return CSD->ICNL[xCH];}
 
- /// Returns the class codes of phase given the ICH index of PH, check check MaxPHnameLength
+   /// Returns the maximum allowed phase name length
+   int getMaxPHnameLength(void) const
+   {return ((int)(MaxPHnameLength));}
+
+   /// Returns the class codes of phase given the ICH index of PH, check check MaxPHnameLength
    /// or -1 if no such name was found in the DATACH ccPH list
    char xCH_to_ccPH( int xCH ) const
    {return CSD->ccPH[xCH];}

@@ -583,6 +583,8 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 cout << "    Volume fraction = " << volumeFraction << endl;
                 DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
                 cout << "    DC id number = " << DCId << endl;
+                DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
+                cout << "    DC id number = " << DCId << endl;
                 cout.flush();
                 molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
                 cout << "    Molar mass = " << molarMass << " g/mol" << endl;
