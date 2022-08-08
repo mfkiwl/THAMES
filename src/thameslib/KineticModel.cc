@@ -592,7 +592,10 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
                 cout << "    Molar volume = " << molarVolume << " m3/mol" << endl;
                 cout.flush();
-                density = molarMass / molarVolume / 1.0e6;          // g/cm3
+                density = 0.0;
+                if (molarVolume > 1.0e-12) {
+                    density = molarMass / molarVolume / 1.0e6;          // g/cm3
+                }
                 cout << "    Density = " << density << " g/cm3" << endl;
                 cout.flush();
                 microPhaseMass[microPhaseId] = volumeFraction * density;
@@ -606,7 +609,10 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
                 molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
                 molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
-                density = molarMass / molarVolume / 1.0e6;          // g/cm3
+                density = 0.0;                 
+                if (molarVolume > 1.0e-12) P
+                    density = molarMass / molarVolume / 1.0e6;          // g/cm3
+                }  
                 microPhaseMass[microPhaseId] = volumeFraction * density;
                 if (microPhaseId != WATERID) {
                     solidMass += microPhaseMass[microPhaseId];
