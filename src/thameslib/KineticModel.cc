@@ -34,6 +34,7 @@ KineticModel::KineticModel ()
 
     name_.clear();
     isKinetic_.clear();
+    isPK_.clear();
     isThermo_.clear();
     isSoluble_.clear();
     microPhaseId_.clear();
@@ -64,6 +65,8 @@ KineticModel::KineticModel ()
 
     sulfateAttackTime_ = 1.0e10;
     leachTime_ = 1.0e10;
+
+    pfk1_ = pfk2_ = pfk3_ = 1.0;  // Default PK pozzolanic factors for no pozzolans
 
     return;
 }
@@ -139,6 +142,7 @@ KineticModel::KineticModel (ChemicalSystem *cs,
 
     name_.clear();
     isKinetic_.clear();
+    isPK_.clear();
     isThermo_.clear();
     isSoluble_.clear();
     microPhaseId_.clear();
@@ -230,6 +234,8 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     }
     chemSys_->setMicroInitVolume(totmicvol);
 
+    pfk1_ = pfk2_ = pfk3_ = 1.0;   // Default PK factors for no pozzolanic material
+                                   
     return;
 }
 
@@ -348,6 +354,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     string testname;
     bool kineticfound = false;
     bool iskin = false;
+    bool isPK = false;
     bool istherm = false;
     bool issol = false;
 
@@ -413,6 +420,12 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     }
     
     isKinetic_.push_back(iskin);
+    string sfume("SFUME");
+    if (kineticData.name == sfume) {
+        isPK_.push_back(false);
+    } else {
+        isPK_.push_back(iskin);
+    }
     isThermo_.push_back(istherm);
     isSoluble_.push_back(issol);
     initScaledMass_.push_back(0.0);
@@ -610,7 +623,7 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
                 molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
                 density = 0.0;                 
-                if (molarVolume > 1.0e-12) P
+                if (molarVolume > 1.0e-12) {
                     density = molarMass / molarVolume / 1.0e6;          // g/cm3
                 }  
                 microPhaseMass[microPhaseId] = volumeFraction * density;
@@ -738,7 +751,6 @@ void KineticModel::calculateKineticStep (const double timestep,
     double DOH = 0.0;
     double arrhenius = 1.0;
 
-
     double ngrate = 1.0e-10;          // Nucleation and growth rate
     double hsrate = 1.0e-10;          // Hydration shell rate
     double diffrate = 1.0e-10;        // Diffusion rate
@@ -821,7 +833,7 @@ void KineticModel::calculateKineticStep (const double timestep,
             // Set the proper amount of water for the total solid mass
             // and the water-solid ratio
             
-            // Determine total intial solid mass
+            // Determine total initial solid mass
             double solidMass = 0.0;
             vector<double> initSolidMasses = getInitScaledMass();
             for (int i = 0; i < initSolidMasses.size(); i++) {
@@ -984,6 +996,39 @@ void KineticModel::calculateKineticStep (const double timestep,
                 p++;
             }
 
+            // @todo BULLARD PLACEHOLDER
+            // While we are still using PK model for clinker phases, we
+            // must scan for and account for pozzolanic reactive components
+            // that will alter the hydration rate of clinker phases, presumably
+            // by making a denser hydration shell with slower transport
+
+            for (int i = 0; i < microPhaseId_.size(); i++) {
+
+              microPhaseId = microPhaseId_[i];
+
+              // @todo BULLARD PLACEHOLDER
+              // Currently silica fume is the only pozzolanically reactive
+              // component
+            
+              if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+                  double betarea = k1_[i];
+                  double area = betarea * scaledMass_[i];
+                  double loi = k2_[i];
+                  double sio2 = critDOH_[i];
+
+                  // Handle silica fume as a special case here:
+                  // Only for silica fume, we let k1 = BET surface area in m2/g,
+                  // k2 = LOI in percent by solid mass.
+                  // critDOH = silica content in PERCENT BY MASS of silica fume
+                  
+                  for (int ii = 0; ii < microPhaseId_.size(); ii++) {
+                      if (isPK(ii)) {
+                          pfk1_ = pfk2_ = pfk3_ = ((betarea/24.0) * (sio2/94.0) * (sio2/94.0));
+                      }
+                  }
+              }
+            }
+
         }   // End of special first-time tasks
 
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
@@ -1017,9 +1062,9 @@ void KineticModel::calculateKineticStep (const double timestep,
                     cout << "SS kinetic phase " << microPhaseId << endl;
                     cout << "SS     name = " << chemSys_->getMicroPhaseName(microPhaseId)
                          << endl;
-                    cout << "SS     k1 =  " << k1_[i] << endl;
-                    cout << "SS     k2 =  " << k2_[i] << endl;
-                    cout << "SS     k3 =  " << k3_[i] << endl;
+                    cout << "SS     k1 =  " << k1_[i] * pfk1_ << endl;
+                    cout << "SS     k2 =  " << k2_[i] * pfk2_ << endl;
+                    cout << "SS     k3 =  " << k3_[i] * pfk3_ << endl;
                     cout << "SS     n1 =  " << n1_[i] << endl;
                     cout << "SS     n3 =  " << n3_[i] << endl;
                     cout << "SS     Ea =  " << activationEnergy_[i] << endl;
@@ -1028,6 +1073,9 @@ void KineticModel::calculateKineticStep (const double timestep,
                 if (initScaledMass_[i] > 0.0) {
                   DOH = (initScaledMass_[i] - scaledMass_[i]) /
                         (initScaledMass_[i]);
+                  if (!isPK(i)) {
+                      DOH = min(DOH,0.99);  // prevents DOH from prematurely stopping PK calculations
+                  }
                 } else {
                   throw FloatException("KineticModel","calculateKineticStep",
                              "initScaledMass_ = 0.0");
@@ -1037,70 +1085,154 @@ void KineticModel::calculateKineticStep (const double timestep,
                        (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
 
                 arrhenius = exp((activationEnergy_[i]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
-                // if (verbose_) {
-                //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-                //     cout << "Calculating Arrhenius effect:" << endl;
-                //     cout << "    GASCONSTANT = " << GASCONSTANT << endl;
-                //     cout << "    activationEnergy_[" << i << "] = " << activationEnergy_[i] << endl;
-                //     cout << "    refT_ = " << refT_ << endl;
-                //     cout << "    T = " << T << endl;
-                //     cout << "    arrhenius factor = " << arrhenius << endl;
-                //     cout << "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ" << endl;
-                // }
 
                 if (DOH < 1.0 && !doTweak) {
-        
-                    if (fabs(n1_[i]) > 0.0) {
-                      ngrate = (k1_[i]/n1_[i]) * (1.0 - DOH)
-                             * pow((-log(1.0 - DOH)),(1.0 - n1_[i]));
-                      ngrate *= (blaineFactor_);  // only used for the N+G rate
-              
-                      if (ngrate < 1.0e-10) ngrate = 1.0e-10;
-                    } else {
-                      throw FloatException("KineticModel","calculateKineticStep",
-                                     "n1_ = 0.0");
-                    }
-        
-                    hsrate = k3_[i] * pow((1.0 - DOH),n3_[i]);
-                    if (hsrate < 1.0e-10) hsrate = 1.0e-10;
-
-                    if (DOH > 0.0) {
-                        diffrate = (k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
-                                   (1.0 - pow((1.0 - DOH),(1.0/3.0)));
-                        if (diffrate < 1.0e-10) diffrate = 1.0e-10;
-                    } else {
-                        diffrate = 1.0e9;
-                    }
-
-                    rate = (ngrate < hsrate) ? ngrate : hsrate;
-                    if (diffrate < rate) rate = diffrate;
-                    rate *= (wcFactor * rhFactor * arrhenius);
-                    newDOH = DOH + (rate * timestep);
-                    if (verbose_) {
-                        cout << "PK model for " << getName(i)
-                             << ", ngrate = " << ngrate
-                             << ", hsrate = " << hsrate
-                             << ", diffrate = " << diffrate
-                             << ", rhFactor = " << rhFactor
-                             << ", wcFactor = " << wcFactor
-                             << ", timestep " << timestep
-                             << ", oldDOH = " << DOH << ", new DOH = "
-                             << newDOH << endl;
-                        cout.flush();
-                    }
-
-                    /// @note This where we can figure out the volume dissolved
-                    /// and link it back to the current volume to see how many
-                    /// voxels need to dissolve
-                    ///
-
-                    /// @note This all depends on concept of degree of
-                    /// hydration as defined by the PK model 
-
-                    /// @todo Make this independent of PK model
                     
-                    scaledMass_[i] = initScaledMass_[i] * (1.0 - newDOH);
-                    massDissolved = (newDOH - DOH) * initScaledMass_[i];
+                    // @todo BULLARD PLACEHOLDER
+                    // Handle silica fume as a special case here:
+                    // Only for silica fume, we let k1 = BET surface area in m2/g,
+                    // k2 = LOI in percent by solid mass.
+                    // critDOH = silica content in PERCENT BY MASS of silica fume
+                    //
+                    // This is a TOTAL KLUGE right now from here...
+
+                    if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+
+                        // TBD, Dove and Crerar 1990 (Geochim et Cosmochim Acta) 
+                        // report k+ (aSiO2)(aH2O)^2 (1 - Q/K) for pure water, where
+                        // k+ = 5.6e-9 mol m-2 s-1  in 0.05 m NaCl at 100 C and
+                        // an activation enthalpy of about 71 kJ/mol
+                        
+                        double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
+                                                                    //
+
+                        double ca = chemSys_->getDCConcentration("Ca+2");
+                        double kca = 4.0e-7; // mol m-2 s-1 ads. rate const for Ca (guess)
+                        double Kca = 10.0; // adsorption equilibrium constant is a guess
+                        double na = chemSys_->getDCConcentration("Na+");
+                        double kna = 6.35e-7; // mol m-2 s-1 ads. rate const from Dove and Crerar
+                        double Kna = 58.3; // adsorption equilibrium constant from Dove and Crerar
+                        double k = chemSys_->getDCConcentration("K+");
+                        double kk = 5.6e-7; // mol m-2 s-1 ads. rate const from Dove and Crerar
+                        double Kk = 46.6; // adsorption equilibrium constant from Dove and Crerar
+
+                        // Langmuir adsorption isotherms assumed to be additive
+                       
+                        baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
+                        baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
+                        baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
+ 
+                        double ohact = chemSys_->getDCActivity("OH-");
+                        double betarea = k1_[i];
+                        double area = betarea * scaledMass_[i];
+                        double loi = k2_[i];
+                        double sio2 = critDOH_[i];
+                        arrhenius = exp((activationEnergy_[i]/GASCONSTANT)*((1.0/373.0) - (1.0/T)));
+                        double molarmass = chemSys_->getDCMolarMass("Amor-Sl"); // g mol-1
+                        vector<int> GEMPhaseIndex;
+                        GEMPhaseIndex.clear();
+                        GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId);
+
+                        // saturation index , but be sure that there is only one GEM Phase
+                       
+                        double satindex = solut_->getSI(GEMPhaseIndex[0]);
+
+                        // activity of water
+                        double wateractivity = chemSys_->getDCActivity(chemSys_->getDCId("H2O@"));
+
+                        // Make sure sio2 is given in percent by mass of silica fume
+                        // This equation basically implements the Dove and Crerar rate equation
+                        // for quartz.  Needs to be calibrated for silica fume, but hopefully
+                        // the BET area and LOI will help do that.
+                       
+                        rate = baserateconst * ohact * area * pow(wateractivity,2.0)
+                               * (1.0 - (loi/100.0)) * (sio2/100.0) * (1.0 - satindex); 
+                                    
+                        massDissolved = (rate * timestep) * molarmass;
+
+                        cout << "SFUME: baserateconst = " << baserateconst << " mol/m2/s" << endl;
+                        cout << "SFUME: betarea = " << betarea << " m2/g" << endl;
+                        cout << "SFUME: scaledMass = " << scaledMass_[i] << " g/(100 g)" << endl;
+                        cout << "SFUME: area = " << area << " m2" << endl;
+                        cout << "SFUME: loi = " << loi << " %" << endl;
+                        cout << "SFUME: sio2 = " << sio2 << " %" << endl;
+                        cout << "SFUME: arrhenius = " << arrhenius << endl;
+                        cout << "SFUME: satindex = " << satindex << endl;
+                        cout << "SFUME: wateractivity = " << wateractivity << endl;
+                        cout << "SFUME: rate = " << rate << " mol/s" << endl;
+                        cout << "SFUME: massDissolved = " << massDissolved << " g/(100 g)" << endl;
+                        cout.flush();
+
+                        scaledMass_[i] -= massDissolved;
+
+
+                    // @todo BULLARD PLACEHOLDER ... to here
+                    
+                    } else {
+
+                        wcFactor = 1.0 + (3.333 * (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
+
+                        // Normal Parrott and Killoh implementation here
+                        
+                        // @todo BULLARD PLACEHOLDER pfk1_, pfk2_, pfk3_ are
+                        // pozzolanic modification factors for the Parrott and Killoh
+                        // rate constants k1, k2, and k3.
+        
+                        if (fabs(n1_[i]) > 0.0) {
+                          ngrate = (pfk1_ * k1_[i]/n1_[i]) * (1.0 - DOH)
+                                 * pow((-log(1.0 - DOH)),(1.0 - n1_[i]));
+                          ngrate *= (blaineFactor_);  // only used for the N+G rate
+              
+                          if (ngrate < 1.0e-10) ngrate = 1.0e-10;
+                        } else {
+                          throw FloatException("KineticModel","calculateKineticStep",
+                                         "n1_ = 0.0");
+                        }
+        
+                        hsrate = pfk3_ * k3_[i] * pow((1.0 - DOH),n3_[i]);
+                        if (hsrate < 1.0e-10) hsrate = 1.0e-10;
+
+                        if (DOH > 0.0) {
+                            diffrate = (pfk2_ * k2_[i] * pow((1.0 - DOH),(2.0/3.0))) /
+                                       (1.0 - pow((1.0 - DOH),(1.0/3.0)));
+                            if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+                        } else {
+                            diffrate = 1.0e9;
+                        }
+
+                        rate = (ngrate < hsrate) ? ngrate : hsrate;
+                        if (diffrate < rate) rate = diffrate;
+                        rate *= (wcFactor * rhFactor * arrhenius);
+                        newDOH = DOH + (rate * timestep);
+                        if (verbose_) {
+                            cout << "PK model for " << getName(i)
+                                 << ", ngrate = " << ngrate
+                                 << ", hsrate = " << hsrate
+                                 << ", diffrate = " << diffrate
+                                 << ", rhFactor = " << rhFactor
+                                 << ", wcFactor = " << wcFactor
+                                 << ", timestep " << timestep
+                                 << ", oldDOH = " << DOH << ", new DOH = "
+                                 << newDOH << endl;
+                            cout.flush();
+                        }
+
+                        /// @note This where we can figure out the volume dissolved
+                        /// and link it back to the current volume to see how many
+                        /// voxels need to dissolve
+                        ///
+
+                        /// @note This all depends on concept of degree of
+                        /// hydration as defined by the PK model 
+
+                        /// @todo Make this independent of PK model
+                    
+                        scaledMass_[i] = initScaledMass_[i] * (1.0 - newDOH);
+                        massDissolved = (newDOH - DOH) * initScaledMass_[i];
+
+                        // end it here?
+                    }
+                       
                     chemSys_->setMicroPhaseMass(microPhaseId,scaledMass_[i]);
                     chemSys_->setMicroPhaseMassDissolved(microPhaseId,massDissolved);
                     if (verbose_) {
@@ -1114,10 +1246,10 @@ void KineticModel::calculateKineticStep (const double timestep,
                     /// @note impurityRelease index values are assumed to
                     /// be uniquely associated with particular chemical
                     /// elements
-                    
+                
                     /// @todo Make this more general so that any indexing
                     /// can be used
-                   
+               
                     /// @todo Allow any IC element to be an impurity, not
                     /// necessarily just the ones hard-coded here
                    
@@ -1131,9 +1263,19 @@ void KineticModel::calculateKineticStep (const double timestep,
                             chemSys_->getSo3(microPhaseId));
 
                     for (int ii = 0; ii < ICMoles.size(); ii++) {
-                      ICMoles[ii] += ((massDissolved
-                                  / chemSys_->getDCMolarMass(DCId_[i]))
-                                  * chemSys_->getDCStoich(DCId_[i],ii));
+
+                      /// @todo BULLARD PLACEHOLDER
+                      /// Special case for SFUME here to account for SiO2 < 100%
+                     
+                      double purity = 1.0;
+                      if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+                          purity = critDOH_[i] / 100.0;
+                      }
+
+                      ICMoles[ii] += ((purity * massDissolved
+                              / chemSys_->getDCMolarMass(DCId_[i]))
+                              * chemSys_->getDCStoich(DCId_[i],ii));
+                      
                       if (ICName[ii] == "O") {
                         // Dissolved K2O in this phase
                         if (chemSys_->isIC("K")) {
