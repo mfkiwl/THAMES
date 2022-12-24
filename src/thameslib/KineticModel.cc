@@ -392,11 +392,14 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
         if (kineticData.type == "kinetic") {
             if (verbose_) {
-                cout << "QQ Kinetic Phase " << kineticData.name << ", id = "
+                cout << "QQ Kinetic Phase " << kineticData.name
+                     << ", id = "
                      << kineticData.microPhaseId << endl;
-                cout << "QQ   (k1,k2,k3) =  " << kineticData.k1 << "," << kineticData.k2
+                cout << "QQ   (k1,k2,k3) =  " << kineticData.k1
+                     << "," << kineticData.k2
                      << "," << kineticData.k3 << endl;
-                cout << "QQ   (n1,n3) =  " << kineticData.n1 << "," << kineticData.n3 << endl;
+                cout << "QQ   (n1,n3) =  " << kineticData.n1 << ","
+                     << kineticData.n3 << endl;
                 cout << "QQ   Ea = " << kineticData.Ea << endl;
             }
             iskin = true;
@@ -1016,7 +1019,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                   double loi = k2_[i];
                   double sio2 = critDOH_[i];
 
-                  // Handle silica fume as a special case here:
+                  // @note Handle silica fume as a special case here:
                   // Only for silica fume, we let k1 = BET surface area in m2/g,
                   // k2 = LOI in percent by solid mass.
                   // critDOH = silica content in PERCENT BY MASS of silica fume
