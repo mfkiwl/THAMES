@@ -220,7 +220,6 @@ vector<double> SO4Target_;
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
 vector<bool> isKinetic_;        /**< List of ids of phases that are kinetically controlled */
-vector<bool> isPK_;             /**< List of ids of phases that are PK-model controlled */
 vector<bool> isThermo_;         /**< List of ids of phases that are thermodynamically
                                         controlled */
 vector<bool> isSoluble_;        /**< List of ids of phases that are instantly dissolved */
@@ -241,8 +240,6 @@ vector<double> activationEnergy_;  /**< List of apparent activation energies for
 vector<double> critDOH_;        /**< List of critical degrees of hydration for w/c
                                         effect in the Parrot and Killoh model */
 vector<double> degreeOfHydration_; /**< Degree of hydration of each kinetic (clinker) phase */
-
-double pfk1_,pfk2_,pfk3_;       /**< Pozzolanic factors for the Parrott and Killoh parameters */
 
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
@@ -537,44 +534,6 @@ bool isKinetic (const string micname)
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","isKinetic",
                            "isKinetic_",isKinetic_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the Parrott and Killoh model status of a microstructure phase by its id
-
-@param idx is a microstructure id number
-@return true if it is kinetically controlled by PK model
-*/
-bool isPK (const unsigned int idx)
-{
-    try { return isPK_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isPK",
-                           "isPK_",isPK_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the Parrott and Killoh model status of a microstructure phase by its name
-
-@param micname is the name of a microstructure phase
-@return true if it is kinetically controlled by PK model
-*/
-bool isPK (const string micname)
-{
-    int idx;
-    try {
-        idx = chemSys_->getMicroPhaseId(micname);
-        return isPK_.at(idx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isPK",
-                           "isPK_",isPK_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -1221,66 +1180,6 @@ double getCritDOH (const unsigned int i) const
         ex.printException();
         exit(1);
     }
-}
-
-/**
-@brief Set the "pozzolanic factor" for the Parrott and Killoh k1 parameter
-
-@param pk1 is the value to set for the k1 parameter's pozzolanic factor
-*/
-void setPfk1 (const double pk1)
-{
-    pfk1_ = pk1;
-}
-
-/**
-@brief Get the "pozzolanic factor" for the Parrott and Killoh k1 parameter
-
-@return the "pozzolanic factor" for the Parrott and Killoh k1 parameter
-*/
-double getPfk1 () const
-{
-    return pfk1_;
-}
-
-/**
-@brief Set the "pozzolanic factor" for the Parrott and Killoh k2 parameter
-
-@param pk2 is the value to set for the k2 parameter's pozzolanic factor
-*/
-void setPfk2 (const double pk2)
-{
-    pfk2_ = pk2;
-}
-
-/**
-@brief Get the "pozzolanic factor" for the Parrott and Killoh k2 parameter
-
-@return the "pozzolanic factor" for the Parrott and Killoh k2 parameter
-*/
-double getPfk2 () const
-{
-    return pfk2_;
-}
-
-/**
-@brief Set the "pozzolanic factor" for the Parrott and Killoh k3 parameter
-
-@param pk3 is the value to set for the k3 parameter's pozzolanic factor
-*/
-void setPfk3 (const double pk3)
-{
-    pfk3_ = pk3;
-}
-
-/**
-@brief Get the "pozzolanic factor" for the Parrott and Killoh k3 parameter
-
-@return the "pozzolanic factor" for the Parrott and Killoh k3 parameter
-*/
-double getPfk3 () const
-{
-    return pfk3_;
 }
 
 /**

@@ -1467,18 +1467,18 @@ unsigned int getDCId (const string &dcname)
     if (p != DCIdLookup_.end()) {
         return p->second;
     } else {
-        // cout << "WARNING: Could not find DCIdLookup_ match to " << dcname << endl;
-        // cout << "WARNING: Here are the ones I know about:" << endl;
-        // cout.flush();
-        // p = DCIdLookup_.begin();
-        // while (p != DCIdLookup_.end()) {
-        //     cout << "WARNING:     " << p->first << " ("
-        //          << p->second << ")" << endl;
-        //     cout.flush();
-        //     p++;
-        // }
-        // cout << "WARNING:" << endl;
-        // cout.flush();
+        cout << "WARNING: Could not find DCIdLookup_ match to " << dcname << endl;
+        cout << "WARNING: Here are the ones I know about:" << endl;
+        cout.flush();
+        p = DCIdLookup_.begin();
+        while (p != DCIdLookup_.end()) {
+            cout << "WARNING:     " << p->first << " ("
+                 << p->second << ")" << endl;
+            cout.flush();
+            p++;
+        }
+        cout << "WARNING:" << endl;
+        cout.flush();
         return (numDCs_ + 9999);
     }
 }
@@ -4851,6 +4851,8 @@ double getDCChemicalPotential (const long int dcidx, bool norm = false)
 /**
 @brief Get the chemical activity of a dependent component (DC).
 
+@note NOT USED.
+
 @param dcidx is the index of the DC being queried
 @return the chemical activity of the DC
 */
@@ -4860,24 +4862,9 @@ double getDCActivity (const long int dcidx)
 }
 
 /**
-@brief Get the chemical activity of a dependent component (DC) by name
-
-@param dcname is the name of the DC being queried
-@return the chemical activity of the DC
-*/
-double getDCActivity (const string &dcname)
-{
-    int dcidx = getDCId(dcname);
-    if (dcidx < numDCs_) {
-        return (node_->Get_aDC(dcidx));
-    }
-    return(0.0);
-}
-
-/**
 @brief Get the concentration of a dependent component (DC).
 
-The units of the returned value depend on the type of DC being queried:
+The units of the returned value depend on the typd of DC being queried:
 
     - Aqueous species [molal]
     - Gas species [partial pressure]
@@ -4892,30 +4879,6 @@ The units of the returned value depend on the type of DC being queried:
 double getDCConcentration (const long int dcidx)
 {
     return (node_->Get_cDC(dcidx));
-}
-
-/**
-@brief Get the concentration of a dependent component (DC) by name
-
-The units of the returned value depend on the type of DC being queried:
-
-    - Aqueous species [molal]
-    - Gas species [partial pressure]
-    - Surface complexes [mol/m<sup>2</sup>]
-    - Species in other phases [mole fraction]
-
-Will return a value of zero if the DC does not exist
-
-@param dcname is the name of the DC component begin queried
-@return the concentration of the DC in appropriate units
-*/
-double getDCConcentration (const string &dcname)
-{
-    int dcidx = getDCId(dcname);
-    if (dcidx < numDCs_) {
-        return (node_->Get_cDC(dcidx));
-    }
-    return(0.0);
 }
 
 /**
