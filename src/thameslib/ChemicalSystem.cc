@@ -853,7 +853,7 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 
     /// @note The affinity vector is always the same length, one entry for every
     /// microstructure phase, and the default value is zero.  Therefore
-    /// the chemistry file does not need to zero affinity values
+    /// the chemistry file does not need to include zero affinity values
     
     phaseData.affinity.resize(numEntries,0);
     phaseData.GEMPhaseId.clear();
@@ -947,8 +947,6 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     microPhaseMembers_.insert(make_pair(phaseData.id,phaseData.GEMPhaseId));
     microPhaseDCMembers_.insert(make_pair(phaseData.id,phaseData.DCId));
 
-    // Done with this unfortunate PC clinker phase identification
-   
     numMicroPhases_++;
 
     return;

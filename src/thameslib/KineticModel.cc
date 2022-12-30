@@ -425,12 +425,13 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     isKinetic_.push_back(iskin);
 
     // @todo BULLARD PLACEHOLDER
-    // Special kluges here for silica fume
+    // Special kluges here for silica fume, which we have to call Silica-amorph
+    // for now to make it compatible with the user interface as of 2022 Dec 29
    
     string sfume("SFUME");
     string siamorph("Silica-amorph");
     if (kineticData.name == sfume || kineticData.name == siamorph) {
-        kineticData.name = sfume;
+        kineticData.name = siamorph;
         isPK_.push_back(false);
     } else {
         isPK_.push_back(iskin);
@@ -1019,7 +1020,7 @@ void KineticModel::calculateKineticStep (const double timestep,
               // Currently silica fume is the only pozzolanically reactive
               // component
             
-              if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+              if (chemSys_->getMicroPhaseName(microPhaseId) == "Silica-amorph") {
                   double betarea = k1_[i];
                   double area = betarea * scaledMass_[i];
                   double loi = k2_[i];
@@ -1105,7 +1106,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                     //
                     // This is a TOTAL KLUGE right now from here...
 
-                    if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+                    if (chemSys_->getMicroPhaseName(microPhaseId) == "Silica-amorph") {
 
                         // TBD, Dove and Crerar 1990 (Geochim et Cosmochim Acta) 
                         // report k+ (aSiO2)(aH2O)^2 (1 - Q/K) for pure water, where
@@ -1159,17 +1160,17 @@ void KineticModel::calculateKineticStep (const double timestep,
                                     
                         massDissolved = (rate * timestep) * molarmass;
 
-                        cout << "SFUME: baserateconst = " << baserateconst << " mol/m2/s" << endl;
-                        cout << "SFUME: betarea = " << betarea << " m2/g" << endl;
-                        cout << "SFUME: scaledMass = " << scaledMass_[i] << " g/(100 g)" << endl;
-                        cout << "SFUME: area = " << area << " m2" << endl;
-                        cout << "SFUME: loi = " << loi << " %" << endl;
-                        cout << "SFUME: sio2 = " << sio2 << " %" << endl;
-                        cout << "SFUME: arrhenius = " << arrhenius << endl;
-                        cout << "SFUME: satindex = " << satindex << endl;
-                        cout << "SFUME: wateractivity = " << wateractivity << endl;
-                        cout << "SFUME: rate = " << rate << " mol/s" << endl;
-                        cout << "SFUME: massDissolved = " << massDissolved << " g/(100 g)" << endl;
+                        cout << "Silica-amorph: baserateconst = " << baserateconst << " mol/m2/s" << endl;
+                        cout << "Silica-amorph: betarea = " << betarea << " m2/g" << endl;
+                        cout << "Silica-amorph: scaledMass = " << scaledMass_[i] << " g/(100 g)" << endl;
+                        cout << "Silica-amorph: area = " << area << " m2" << endl;
+                        cout << "Silica-amorph: loi = " << loi << " %" << endl;
+                        cout << "Silica-amorph: sio2 = " << sio2 << " %" << endl;
+                        cout << "Silica-amorph: arrhenius = " << arrhenius << endl;
+                        cout << "Silica-amorph: satindex = " << satindex << endl;
+                        cout << "Silica-amorph: wateractivity = " << wateractivity << endl;
+                        cout << "Silica-amorph: rate = " << rate << " mol/s" << endl;
+                        cout << "Silica-amorph: massDissolved = " << massDissolved << " g/(100 g)" << endl;
                         cout.flush();
 
                         scaledMass_[i] -= massDissolved;
@@ -1274,10 +1275,10 @@ void KineticModel::calculateKineticStep (const double timestep,
                     for (int ii = 0; ii < ICMoles.size(); ii++) {
 
                       /// @todo BULLARD PLACEHOLDER
-                      /// Special case for SFUME here to account for SiO2 < 100%
+                      /// Special case for Silica-amorph here to account for SiO2 < 100%
                      
                       double purity = 1.0;
-                      if (chemSys_->getMicroPhaseName(microPhaseId) == "SFUME") {
+                      if (chemSys_->getMicroPhaseName(microPhaseId) == "Silica-amorph") {
                           purity = critDOH_[i] / 100.0;
                       }
 

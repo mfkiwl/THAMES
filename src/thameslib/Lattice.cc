@@ -672,14 +672,31 @@ int Lattice::dissolvePhase (unsigned int phaseid,
     int numchange = 0;
     while ((numleft > 0) && (isite.size() > 1)) {
   
+      if (phaseid == 10 && verbose_) {
+          cout << "====>   Entering dissolution loop with numleft = "
+               << numleft << endl;
+          cout.flush();
+      }
       try {
         for (i = isite.size() - 1; (i > 0) && (numleft > 0); i--) {
           ste = &site_.at(isite[i].getId());
           pid = ste->getMicroPhaseId();
+          if (phaseid == 10 && verbose_) {
+              cout << "   i = " << i << ", numleft = " << numleft << endl;
+              cout.flush();
+          }
           removeDissolutionSite(ste,pid);
       
+          if (phaseid == 10 && verbose_) {
+              cout << "   Made it 01" << endl;
+              cout.flush();
+          }
           setMicroPhaseId(ste,WATERID);
       
+          if (phaseid == 10 && verbose_) {
+              cout << "   Made it 02" << endl;
+              cout.flush();
+          }
           ///
           /// Weighted mean curvature (wmc) is changed by the difference
           /// between the growing phase's porosity and the template's porosity.
@@ -712,6 +729,16 @@ int Lattice::dissolvePhase (unsigned int phaseid,
               nbgrowthtemp.clear();
               nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
               for (int ii = 0; ii < nbgrowthtemp.size(); ii++) {
+                if (phaseid == 10 && verbose_) {
+                    cout << "   Made it 02ga, j = "
+                         << j << ", ii = "
+                         << ii << ", nbpid = "
+                         << nbpid << ", nbgrowthtemp.size = "
+                         << nbgrowthtemp.size();
+                    cout.flush();
+                    cout << ", pid = " << nbgrowthtemp[ii] << endl;
+                    cout.flush();
+                }
                 if (nbgrowthtemp[ii] != WATERID) {
                   addGrowthSite(ste,nbgrowthtemp[ii]);
                 }
@@ -719,6 +746,10 @@ int Lattice::dissolvePhase (unsigned int phaseid,
             }
           }
 
+          if (phaseid == 10 && verbose_) {
+              cout << "   Made it 03" << endl;
+              cout.flush();
+          }
           ///
           /// Update the wmc of the neighboring sites.  This can be done
           /// because the wmc is originally calculated within a box around each
@@ -729,6 +760,11 @@ int Lattice::dissolvePhase (unsigned int phaseid,
           for (j = ste->nbSize(1); j < ste->nbSize(2); j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
+          }
+
+          if (phaseid == 10 && verbose_) {
+              cout << "   Made it 04" << endl;
+              cout.flush();
           }
 
           numleft--;
