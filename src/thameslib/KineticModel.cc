@@ -423,8 +423,14 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     }
     
     isKinetic_.push_back(iskin);
+
+    // @todo BULLARD PLACEHOLDER
+    // Special kluges here for silica fume
+   
     string sfume("SFUME");
-    if (kineticData.name == sfume) {
+    string siamorph("Silica-amorph");
+    if (kineticData.name == sfume || kineticData.name == siamorph) {
+        kineticData.name = sfume;
         isPK_.push_back(false);
     } else {
         isPK_.push_back(iskin);
