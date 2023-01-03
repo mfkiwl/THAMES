@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan  3 13:52:07 2023 | Assume XML schema files are in local working directory |
 | Jul 28 15:16:48 2022 | Reduced code's dependence on hard-wired phase names |
 | Mar 25 19:35:46 2021 | Improved readability of KineticModel and ChemicalSystem classes |
 | Mar 22 22:01:18 2021 | Added GEMS3K standalone library as a subtree |
