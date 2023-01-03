@@ -265,11 +265,10 @@ void KineticModel::parseDoc (const string &docName)
 
     ///
     /// Check if the xml file is valid and parse it if so.
-    ///
+    /// @note This block requires schema file to be local
 
     try {
-        string rxcsd = xsd_files_path;
-        rxcsd+="/chemistry.xsd";
+        string rxcsd = "chemistry.xsd";
         if (verbose_) cout << "Chemistry xsd file is at " << rxcsd << endl;
         if(!is_xml_valid(doc,rxcsd.c_str())) {
             throw FileException("KineticModel","KineticModel",docName,

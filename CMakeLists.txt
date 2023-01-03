@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 project (THAMES)
 
-set (THAMES_VERSION 2.5)
+set (THAMES_VERSION 2.6)
 set (THAMES_VERSION_MAJOR 2)
-set (THAMES_VERSION_MINOR 5.1)
+set (THAMES_VERSION_MINOR 6.0)
 
 set (thames_XSDFILES_DIR "${CMAKE_SOURCE_DIR}/src/thameslib/xsdfiles")
 
@@ -12,11 +12,6 @@ set (thames_XSDFILES_DIR "${CMAKE_SOURCE_DIR}/src/thameslib/xsdfiles")
 configure_file (
     "${CMAKE_SOURCE_DIR}/src/version.h.in"
     "${CMAKE_SOURCE_DIR}/src/version.h"
-    )
-
-configure_file (
-    "${CMAKE_SOURCE_DIR}/src/thameslib/myconfig.h.in"
-    "${CMAKE_SOURCE_DIR}/src/thameslib/myconfig.h"
     )
 
 configure_file (

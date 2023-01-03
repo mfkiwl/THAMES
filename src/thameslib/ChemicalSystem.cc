@@ -672,9 +672,9 @@ void ChemicalSystem::parseDoc (const string &docName)
     doc = xmlParseFile(docName.c_str());
 
     /// Check if the xml file is valid
+    /// @note This block requires the schema file to be local
 
-    string rxcsd = xsd_files_path;
-    rxcsd+="/chemistry.xsd";
+    string rxcsd = "chemistry.xsd";
     if(!is_xml_valid(doc,rxcsd.c_str())) {
         cout << "Chemistry xml is NOT valid" <<endl;
         cout.flush();

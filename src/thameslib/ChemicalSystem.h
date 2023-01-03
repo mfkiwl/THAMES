@@ -33,7 +33,7 @@ possible.
 #include <map>
 #include <GEMS3K/node.h>
 // #include <GEMS3K/io_arrays.h>
-#include "myconfig.h"
+#include <string>
 #include <iomanip>
 #include <typeinfo>
 

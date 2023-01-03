@@ -4,7 +4,10 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan  3 13:52:07 2023 | Tagged as version 2.6 |
 | Jan  3 13:52:07 2023 | Assume XML schema files are in local working directory |
+| Dec 29 23:28:35 2022 | Made silica fume a kinetic phase with a custom dissolution rate equation |
+| Dec 14 13:52:07 2022 | Minor formatting changes |
 | Jul 28 15:16:48 2022 | Reduced code's dependence on hard-wired phase names |
 | Mar 25 19:35:46 2021 | Improved readability of KineticModel and ChemicalSystem classes |
 | Mar 22 22:01:18 2021 | Added GEMS3K standalone library as a subtree |

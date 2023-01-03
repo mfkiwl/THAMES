@@ -954,9 +954,10 @@ void Controller::parseDoc (const string &docName)
     doc = xmlParseFile(docName.c_str());
 
     // check if the xml file is valid
+    /// @note This block requires the schema file to be local
+    
     try {
-        string paramxsd = xsd_files_path;
-        paramxsd += "/parameters.xsd";
+        string paramxsd = "parameters.xsd";
         if(!is_xml_valid(doc,paramxsd.c_str())) {
             cout << "XML file is NOT valid" << endl;
             throw FileException("Controller","parseDoc",
