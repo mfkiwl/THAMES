@@ -18,10 +18,17 @@ Zachry Department of Civil Engineering
 Texas A&M University
 College Station, Texas USA
 
+# CONTRIBUTORS
+
 Xiaodan Li, PhD
 Department of Civil and Environmental Engineering
 Oklahoma State University
 Stillwater, Oklahoma USA  74078
+
+Serdar Astarlioglu
+Engineer Research and Development Center
+US Army Corps of Engineers
+Vicksburg, Mississippi USA 39183
 
 -----------------------------------------------------------------------------
 

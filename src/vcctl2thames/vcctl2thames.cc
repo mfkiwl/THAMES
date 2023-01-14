@@ -4,11 +4,11 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <algorithm>
 #include "vcctl2thames.h"
 
 int main(int argc, char **argv)
 {
-
     int xsize,ysize,zsize;
     string input_filename;
     float res;
