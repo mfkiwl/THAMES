@@ -1,11 +1,9 @@
 # AUTHORS
 
 Jeffrey W. Bullard, PhD
-National Institute of Standards and Technology
-Engineering Laboratory
-Materials and Structural Systems Division
-100 Bureau Drive, Stop 8615
-Gaithersburg, Maryland USA  20899-8615
+Zachry Department of Civil and Environmental Engineering
+Texas A&M University
+College Station, Texas USA
 
 Pan Feng, PhD
 Jiangsu Key Laboratory of Construction Materials
