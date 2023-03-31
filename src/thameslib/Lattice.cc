@@ -1211,7 +1211,7 @@ void Lattice::changeMicrostructure (double time,
     phasenames = chemSys_->getMicroPhaseName();
 
     /// JWB: 2020 Dec 22  Do manual adjustment of certain microstructure
-    /// phase voxels in a cement paste, accounting for gel porosity, etc.
+    /// phase voxels in a cement paste, accounting for interhydrate porosity, etc.
     /// This is VERY rough right now.
     /// Solid microstructure phase adjustments are always traded with
     /// adjustment to saturated capillary pore volume to keep the total
@@ -1697,9 +1697,10 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
     int i = 0;
     double cap_watervolume = 0.0;
     double cap_spacevolume = 0.0;
-    double cap_voidvolume = 0.0;
-    double gel_watervolume = 0.0;
-    double tot_watervolume = 0.0;
+    double voidvolume = 0.0;
+    double interhydrate_watervolume = 0.0;
+    double interhydrate_volume = 0.0;
+    double current_watervolume = 0.0;
 
     extern string CSHMicroName;
 
@@ -1718,10 +1719,29 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
 
         // Find the total SOLIDS volume
         
-        double GEM_thinks_solidvol = 0.0;
+        // vol is the GEMS-based volume not counting interhydrate pores that are smaller
+        // than the voxel scale. The volume fraction of these pores has been input by the
+        // user as 'porosity'.  We need to alter the apparent volume of the GEMS-based volume
+        // to include these pores in the 'apparent volume' observed at the voxel scale
+       
+        double apparent_solidvol = 0.0;
+        double apparent_volume = 0.0;    // this is a dummy variable for holding calculations
+        double phi = 0.0;                // this will hold the interhydrate porosity of a phase
+        double upper_cutoff_porosity = 0.8;
+        interhydrate_volume = 0.0;
+
         for (i = 0; i < vol.size(); ++i) {
             if (i != WATERID && i != VOIDID) {
-                GEM_thinks_solidvol += vol.at(i);
+                phi = chemSys_->getPorosity(i);
+                if (phi > upper_cutoff_porosity) phi = upper_cutoff_porosity;
+                apparent_volume = vol.at(i) * (1.0 + (phi/(1.0 - phi)));
+                interhydrate_volume += (vol.at(i) * phi);
+                vol.at(i) = apparent_volume;
+                apparent_solidvol += apparent_volume;
+
+                if (verbose_) {
+                    cout << "    Phase name " << name.at(i) << ": volume = " << vol.at(i) << endl;
+                }
             }
         }
 
@@ -1730,70 +1750,100 @@ void Lattice::adjustMicrostructureVolumes (vector<string> name,
             cout << "Current microstructure volume is " << GEM_thinks_totmicvol << endl;
         }
 
-        double GEM_micvols_addto = 0.0;
-        for (i = 0; i < vol.size(); ++i) {
-            GEM_micvols_addto += vol.at(i);
-            if (verbose_) {
-                cout << "    Phase name " << name.at(i) << ": volume = " << vol.at(i) << endl;
-            }
-        }
-
-        if (GEM_micvols_addto <= 0.0) {
+        if (apparent_solidvol <= 0.0) {
             throw DataException("Lattice",
                                 "adjustMicrostructureVolumes",
                                 "totvolume is NOT positive");
         }
 
-        // Adjust the volume of CSH to
-        // account for its saturated gel porosity
-           
-        int cshid = chemSys_->getMicroPhaseId(CSHMicroName);
-
-        tot_watervolume = vol.at(WATERID);
-        cap_voidvolume = vol.at(VOIDID);
-
-        gel_watervolume = (chemSys_->getPorosity(cshid)) * vol.at(cshid);
-        cap_watervolume = tot_watervolume - gel_watervolume;
-        vol.at(cshid) += gel_watervolume;
-
         // The capillary SPACE volume is all the volume in the initial microstructure
-        // that is not occupied by solids or gel porosity
+        // that is not occupied by solids or interhydrate porosity
 
-        cap_spacevolume = (GEM_thinks_totmicinitvol - GEM_thinks_solidvol);
-        double spaceforwater = cap_spacevolume + gel_watervolume;
+        cap_spacevolume = (GEM_thinks_totmicinitvol - apparent_solidvol);
+        double spaceforwater = cap_spacevolume + interhydrate_volume;
 
         if (!(chemSys_->isSaturated())) {   // System is sealed
 
-            double volchange = GEM_thinks_totmicvol - GEM_thinks_totmicinitvol;
+            // Step 1: Total volume of void space in RVE is equal to the initial
+            // volume according to GEMS minus the current total volume according
+            // to GEMS.  At the moment we do not divide pores into capillary
+            // and interhydrate; both of them make up the new_voidvolume
+           
+            double new_voidvolume = GEM_thinks_totmicinitvol - GEM_thinks_totmicvol;
 
-            // Create void space due to self-desiccation
+            // Step 2: Calculate total space occupied by capillary pores (those
+            // with a diameter smaller than a single voxel). This capillary SPACE volume
+            // is the difference between the *initial* microstructure volume
+            // according to GEMS (solids + water) and the *current* apparent volume
+            // of solid phases (all solids plus any interhydrate porosity)
+
+            cap_spacevolume = (GEM_thinks_totmicinitvol - apparent_solidvol);
+
+            current_watervolume = vol.at(WATERID); // This is current free liquid water volume
+                                                   // according to GEMS, not the volume of capillary
+                                                   // pore water.  In reality it will be divided
+                                                   // between capillary pores (>= one voxel volume) and
+                                                   // interhydrate pores (< one voxel volume)
+                                                   
+            double current_voidvolume = vol.at(VOIDID);
+
+            // Step 3: Calculate how much of the capillary pore volume (pores
+            // with diameter greater or equal to a voxel) is occupied by liquid
+            // water.  Free liquid water goes into interhydrate pores first.  If any
+            // liquid water is left over after filling the interhydrate pores,
+            // then it goes into capillary pores (>= voxel scale)
+        
+            if (current_watervolume >= interhydrate_volume) {
+                cap_watervolume = current_watervolume - interhydrate_volume;
+                interhydrate_watervolume = interhydrate_volume;
+            } else {
+                interhydrate_watervolume = current_watervolume;
+                cap_watervolume = 0.0;
+            }
+
             if (verbose_) {
                 cout << "System is SEALED:" << endl;
                 cout << "Volume change should be made up by voids with volume "
-                     << -volchange << endl;
-                cout << "Current GEM water volume = " << tot_watervolume
-                     << endl;
-                cout << "   This is divided between 1. " << gel_watervolume
-                     << " in gel pores" << endl;
+                    << new_voidvolume << endl;
+                cout << "Current GEM water volume = " << current_watervolume
+                    << endl;
+                cout << "   This is divided between 1. " << interhydrate_watervolume
+                     << " in interhydrate pores (< one voxel volume)" << endl;
                 cout << "                           2. " << cap_watervolume
-                                                         << " in capillary pores"
+                                                         << " in capillary pores (>= one voxel volume)"
                                                          << endl;
-                cout << "                          (3. Plus " << cap_voidvolume
-                     << " void space)" << endl;
+                cout << "Current GEM void volume = " << current_voidvolume << endl;
             }
 
-            if (volchange < 0) {
-                vol.at(VOIDID) = -volchange;
+            // Step 4: Reassign the volume of void and water so that the water now
+            // refers only to water in capillary pores that are larger in diameter
+            // than one voxel. We can always recover the total water volume (capillary
+            // plus interhydrate) from GEMS if we need to.
+           
+            if (new_voidvolume > 0) {
+                // The volume of VOIDID is still not differentiated between voids in
+                // capillary pores and those in interhydrate pores.
+                
+                vol.at(VOIDID) = new_voidvolume;
+                
+                // We now change the meaning of vol.at(WATERID).  Up to this point
+                // it has been the volume of liquid water in the system as determined
+                // by GEMS.  Now, we are instead going to store the volume of
+                // liquid water in capillary pores only.
+                
                 vol.at(WATERID) = cap_watervolume - vol.at(VOIDID);
             } else {
                 vol.at(VOIDID) = 0.0;
                 vol.at(WATERID) = cap_watervolume;
             }
 
-        } else {
-            
+        } else { // The system is saturated with water, so there will never be voids
+
+            // @note Do we eventually want to check for capillary pore percolation as
+            // a requirement for saturated conditions?
+           
             vol.at(VOIDID) = 0.0;
-            vol.at(WATERID) = cap_spacevolume;
+            vol.at(WATERID) = spaceforwater;
         }
 
         if (verbose_) {
