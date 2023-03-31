@@ -5,6 +5,7 @@
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
+| Jan 14 17:12:41 2023 | Corrected local path for GEMS-3K node.h include file |
 | Jan  3 13:52:07 2023 | Tagged as version 2.6 |
 | Jan  3 13:52:07 2023 | Assume XML schema files are in local working directory |
 | Dec 29 23:28:35 2022 | Made silica fume a kinetic phase with a custom dissolution rate equation |
