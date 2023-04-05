@@ -45,7 +45,7 @@ endif (LIBXML2_FOUND)
 find_library (
     GEMS3K_LIB
     NAMES GEMS3K-static libGEMS3K-static libGEMS3K-static.a GEMS3K-static.a # what to look for
-    HINTS "/usr/local/lib" # where to look
+    HINTS "${CMAKE_SOURCE_DIR}/src/GEMS3K-standalone/Resources/lib" # where to look
 )
 
 # check if we found the GEMS3K library
