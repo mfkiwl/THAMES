@@ -479,7 +479,8 @@
         <affinityvalue>2</affinityvalue>
       </affinity>
     </interface_data>
-    <porosity>0.5</porosity>
+    <porosity>0.363</porosity>
+    <poresizefilename>CSH-PoreSizeDistribution.csv</poresizefilename>
     <kinetic_data>
       <type>thermo</type>
       <Rd>
