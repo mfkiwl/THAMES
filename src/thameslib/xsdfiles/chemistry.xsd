@@ -149,7 +149,7 @@
       <xs:element name="id" type="integertype"/>
       <xs:element minOccurs="0" name="interface_data" type="interface_datatype"/>
       <xs:element maxOccurs="1" name="porosity" type="doubletype"/>
-      <xs:element maxOccurs="1" name="poresizefilename" type="stringtype"/>
+      <xs:element minOccurs='0' maxOccurs="1" name="poresizefilename" type="stringtype"/>
       <xs:element minOccurs="0" name="impurity_data" type="impurity_datatype"/>
       <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="stresscalc" type="integertype"/>
