@@ -62,6 +62,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     growthTemplate_.clear();
     affinity_.clear();
     porosity_.clear();
+    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();
@@ -740,7 +741,17 @@ void ChemicalSystem::parseDoc (const string &docName)
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"solution"))) {
             parseSolutionComp(doc, cur);
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-            parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
+            try {
+                parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
+            }
+            catch (FileException fex) {
+               fex.printException();
+               cout << endl;
+            }
+            catch (GEMException gex) {
+               gex.printException();
+               cout << endl;
+            }
         }
         cur = cur->next;
     }
@@ -848,6 +859,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 {
     xmlChar *key;
 
+    string poreSizeFileName;
+
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
 
@@ -888,6 +901,19 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phaseData.porosity,st);
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizefilename"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(poreSizeFileName,st);
+            try {
+                parsePoreSizeDistribution(poreSizeFileName, phaseData);
+            }
+            catch (FileException fex) {
+               fex.printException();
+               cout << endl;
+            }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
@@ -938,6 +964,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
 
     porosity_.push_back(phaseData.porosity);
+    poreSizeDistribution_.push_back(phaseData.poreSizeDist);
+    phaseData.poreSizeDist.clear();
     grayscale_.push_back(phaseData.gray);
     color_.push_back(phaseData.colors);
     k2o_.push_back(phaseData.k2o);
@@ -949,6 +977,62 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 
     numMicroPhases_++;
 
+    return;
+}
+
+void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
+                                               PhaseData &phaseData)
+{
+    if (verbose_) {
+        cout << "Reading Pore Size Distribution:" << endl;
+        cout.flush();
+    }
+
+    ifstream in(poreSizeFileName);
+    if (!in) {
+        throw FileException("ChemicalSystem","parsePoreSizeDistribution",
+                            poreSizeFileName,"Could not open");
+    }
+
+    // Read the header line
+    string headerline;
+    getline(in,headerline);
+
+    struct PoreSizeVolume datarow;
+    double diam,vfrac;
+
+    phaseData.poreSizeDist.clear();
+
+    // Now read the data row by row
+    double sum = 0.0;
+    while (!in.eof()) {
+        in >> datarow.diam >> datarow.volfrac;
+        sum += datarow.volfrac;
+        datarow.volume = 0.0;
+        phaseData.poreSizeDist.push_back(datarow);
+        if (verbose_) {
+            cout << "---> " << datarow.diam << "," << datarow.volfrac << endl;
+            cout.flush();
+        }
+        in.peek();
+    }
+
+    sum -= datarow.volfrac;
+    phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
+
+    if (verbose_) {
+        cout << "<---- sum = " << sum << endl;
+        cout.flush();
+    }
+    in.close();
+
+    // Normalize the pore size distribution in case it is not already
+    if (sum > 0.0) {
+        for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
+            phaseData.poreSizeDist[i].volfrac *= (1.0/sum);
+        }
+    }
+   
     return;
 }
 
@@ -1209,6 +1293,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
     microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
     porosity_ = obj.getPorosity();
+    poreSizeDistribution_ = obj.getPoreSizeDistribution();
     k2o_ = obj.getK2o();
     na2o_ = obj.getNa2o();
     mgo_ = obj.getMgo();
@@ -1301,6 +1386,7 @@ ChemicalSystem::~ChemicalSystem (void)
     microPhaseMassDissolved_.clear();
     microPhaseDCMembers_.clear();
     porosity_.clear();
+    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();

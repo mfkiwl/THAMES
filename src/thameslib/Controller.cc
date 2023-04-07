@@ -272,6 +272,7 @@ void Controller::doCycle (const string &statfilename,
     catch (GEMException gex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
         throw gex;
     }
 
@@ -316,16 +317,19 @@ void Controller::doCycle (const string &statfilename,
     catch (DataException dex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
         throw dex;
     }
     catch (EOBException ex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
         throw ex;
     }
     catch (MicrostructureException mex) {
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
         throw mex;
     }
 
@@ -344,6 +348,8 @@ void Controller::doCycle (const string &statfilename,
         }
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
+
         // lattice_->CheckPoint(jobroot_);
         time_index++;
         if (verbose_) cout << "...Done!" << endl;
@@ -397,6 +403,7 @@ void Controller::doCycle (const string &statfilename,
     
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
         string ofileName(jobroot_);
         ostringstream ostr1,ostr2;
         ostr1 << (int)(time_[i] * 100);
@@ -589,6 +596,7 @@ void Controller::doCycle (const string &statfilename,
 
   lattice_->writeLattice(time_[i-1],sim_type_,jobroot_);
   lattice_->writeLatticePNG(time_[i-1],sim_type_,jobroot_);
+  lattice_->writePoreSizeDistribution(time_[i-1],sim_type_,jobroot_);
     
   return;
 }

@@ -43,6 +43,17 @@ using namespace std;
 #define CHEMSYSDATASTRUCT
 
 /**
+@struct PoreSizeVolume
+@brief Volume fraction of a sub-voxel pore of a given effective diameter
+*/
+
+struct PoreSizeVolume {
+    double diam;
+    double volume;
+    double volfrac;
+};
+
+/**
 @struct PhaseData
 @brief Stores data about each phase possible in the system for ease of parsing the input files.
 
@@ -64,11 +75,13 @@ Most of the members have self-evident meanings:
        sodium, magnesium, and sulfur oxides dissolved within the phase.
     - `porosity` is the volume fraction of internal porosity in the phase,
        (e.g., C-S-H)
+    - `poreSizeDist` is the pore size distribution probability density
+       function (volume basis), stored as a vector
     - `red`, `green`, and `blue` are the rgb values for the color that the
        phase will have in simulated color micrographs
     - `gray` is the grayscale index the phase will have in simulated backscattered
         electron micrographs
-    - `thamesName` is the name the phaes will have in the microstructure
+    - `thamesName` is the name the phase will have in the microstructure
     - `GEMPhaseName` is a vector of the GEM (thermodynamic) phases making up the
        THAMES phase, given by name
     - `DCName` is a vector of the GEM DCs (dependent components) making up the
@@ -93,6 +106,7 @@ struct PhaseData {
     double mgo;
     double so3;
     double porosity;
+    vector<struct PoreSizeVolume> poreSizeDist;
     double red;
     double green;
     double blue;
@@ -223,8 +237,14 @@ map<int,double> initialSolutionComposition_;
 */
 map<int,vector<double> > microPhaseMemberVolumeFraction_;
 
-vector<double> porosity_;                 /**< The internal porosity of a given phase,
+vector<double> porosity_;                 /**< The sub-voxel porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
+
+/**
+@brief Sub-voxel pore size distribution (volume basis) of each phase
+*/
+vector<vector<struct PoreSizeVolume> > poreSizeDistribution_;
+
 vector<double> k2o_;                      /**< Mass fraction of K<sub>2</sub>O dissolved in
                                                 each phase, in units of
                                                 g per 100 g of the phase */
@@ -577,6 +597,20 @@ void parsePhase (xmlDocPtr doc,
 void parseGEMPhaseData (xmlDocPtr doc,
                         xmlNodePtr cur,
                         PhaseData &phaseData);
+
+/**
+@brief Parse a phase's sub-voxel pore size distribution from a file
+
+The file must have a header line that will be discarded.  The rest of
+the file must be two column csv with pore diameter in the first column
+(nanometers) and the volume fraction in the second column.  After
+the data are read the volume fraction is normalized.
+
+@param poreSizeFilename is the name of the file containing the data
+@param phaseData holds the structure of collected phase data from the document
+*/
+void parsePoreSizeDistribution(string poreSizeFilename,
+                               PhaseData &phaseData);
 
 /**
 @brief Parse input about how to render a phase in an image.
@@ -2417,6 +2451,23 @@ vector<double> getPorosity() const
 }
 
 /**
+@brief Get the list of sub-voxel pore size distributions.
+
+A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
+at the microstructure scale, so these phases are given a property of their pore
+size distribution as a probability density function. These data are used
+to provide better refinement to the moisture distribution in a partially
+saturated microstructure.
+
+@return the list of pore size distributions of all microstructure phases
+at the scale of one voxel
+*/
+vector<vector<struct PoreSizeVolume> > getPoreSizeDistribution() const
+{
+    return poreSizeDistribution_;
+}
+
+/**
 @brief Set the list of all GEM CSD phases that are associated with a given microstructure phase.
 
 @note NOT USED.
@@ -3767,8 +3818,6 @@ vector<double> getMicroPhaseVolume (void) const
 
 /**
 @brief Get the volume of a microstructure phase (by id).
-
-@note NOT USED.
 
 @param idx is the microstructure phase id
 @return the volume assigned to that microstructure phase

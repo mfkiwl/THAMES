@@ -813,7 +813,7 @@ int getMicroPhaseId (const int sitenum)
 }
     
 /**
-@brief Add a site to the list of sites where dissolution of a given phase can occur.
+@brisef Add a site to the list of sites where dissolution of a given phase can occur.
 
 @param loc is a pointer to the Site object to add to the list of potential dissolution sites
 @param pid is the microstructure phase id
@@ -905,6 +905,17 @@ void adjustMicrostructureVolumes (vector<string> phasenames,
 void adjustMicrostructureVolFracs (vector<string> &names,
                                    const vector<double> vol,
                                    vector<double> &vfrac);
+    
+/**
+@brief Write the pore size distribution data to a file.
+
+@param curtime is the current time in days
+@param simtype is the simulation type
+@param root is the root name of the output file to create
+*/
+void writePoreSizeDistribution (double curtime,
+                                const int simtype,
+                                const string &root);
     
 /**
 @brief Write the 3D microstructure to a file.
