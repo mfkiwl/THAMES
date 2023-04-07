@@ -24,17 +24,15 @@
  * $ cd THAMES/src/GEMS3K-Standalone
  * $ mkdir build
  * $ cd build
- * $ cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+ * $ cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../Resources
  * $ /mingw64/bin/mingw32-make.exe
  * $ /mingw64/bin/mingw32-make.exe install
  
 6. Build THAMES
- * Edit Solution.h, line 19 as: #include "../GEMS3K-standalone/GEMS3K/node.h"
- * Edit ChemicalSystem.h line 34 as: #include "../GEMS3K-standalone/GEMS3K/node.h"
  * Edit vcctl2thames.cc
     - Add #include <algorithm>
  * $ cd ../../../build          or back out and go to THAMES/build folder
- * $ cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+ * $ cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../bin
  * $ /mingw64/bin/mingw32-make.exe
  * $ /mingw64/bin/mingw32-make.exe install
  
