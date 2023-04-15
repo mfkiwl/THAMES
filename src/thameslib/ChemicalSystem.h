@@ -439,8 +439,6 @@ designates the time (in days) at which this switch should happen.
 */
 double leachTime_;
 
-vector<double> microPhaseVolumeFraction_;  /**< Change in volume fraction of each phase
-                                                in the microstructure */
 vector<double> microPhaseMass_;           /**< Absolute mass of each microstructure phase */
 vector<double> microPhaseMassDissolved_;  /**< Absolute mass dissolved of each microstructure
                                                 phase */
@@ -449,7 +447,6 @@ vector<double> microPhaseVolume_;         /**< Absolute volume of each microstru
 double microVolume_;                   /**< Absolute volume of the microstructure */
 double microInitVolume_;               /**< Initial absolute volume of the microstructure */
 double microVoidVolume_;               /**< Absolute volume of void space in microstrucxture */
-double microVoidVolumeFraction_;       /**< Volune fraction of void space in microstructure */
 
 /**
 @brief Saturation index of each phase in the GEM CSD.
@@ -3732,60 +3729,6 @@ double getSurfaceArea (const unsigned int idx)
 }
 
 /**
-@brief Set the volume fraction of a microstructure phase (by id).
-
-@note NOT USED.
-
-@param idx is the microstructure phase id
-@param val is the volume fraction to assign to that microstructure phase
-*/
-void setMicroPhaseVolumeFraction (const unsigned int idx,
-                                  const double val)
-{
-    try {
-        microPhaseVolumeFraction_.at(idx) = val;
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicroPhaseVolumeFraction",
-                        "microPhaseVolumeFraction_",
-                        microPhaseVolumeFraction_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-    return;
-}
-
-/**
-@brief Get the volume fractions of all microstructure phases.
-
-@return a pointer to the list of volume fractions of every microstructure phase
-*/
-vector<double> getMicroPhaseVolumeFraction (void) const
-{
-    return microPhaseVolumeFraction_;
-}
-
-/**
-@brief Get the volume fraction of a microstructure phase (by id).
-
-@param idx is the microstructure phase id
-@return the volume fraction assigned to that microstructure phase
-*/
-double getMicroPhaseVolumeFraction (const unsigned int idx)
-{
-    try {
-        return microPhaseVolumeFraction_.at(idx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getMicroPhaseVolumeFraction",
-                        "microPhaseVolumeFraction_",
-                        microPhaseVolumeFraction_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
 @brief Set the volume of a microstructure phase (by id).
 
 @param idx is the microstructure phase id
@@ -3916,15 +3859,13 @@ void writeMicroPhases (void)
 {
     cout << endl;
     cout << "Microstructure phase quantities:" << endl;
-    cout << "Name     Mass (g)     Volume (m3)     Volume Fraction" << endl;
-    cout << "----     --------     -----------     ---------------" << endl;
+    cout << "Name     Mass (g)     Volume (m3)" << endl;
+    cout << "----     --------     -----------" << endl;
     for (unsigned int i = 1; i < microPhaseName_.size(); i++) {
         cout << microPhaseName_[i] << "     " << microPhaseMass_[i] << "     "
-             << microPhaseVolume_[i] << "     "
-             << microPhaseVolumeFraction_[i] << endl;
+             << microPhaseVolume_[i] << endl;
     }
-    cout << "Void     0.0    " << microVoidVolume_ << " "
-         << microVoidVolumeFraction_ << endl;
+    cout << "Void     0.0    " << microVoidVolume_ << endl;
     cout << endl;
     cout.flush();
 }
@@ -4010,30 +3951,6 @@ double getMicroVoidVolume (void) const
 }
 
 /**
-@brief Set the volume fraction of void space in the microstructure.
-
-@note NOT USED.
-
-@param val is the volume fraction of void space to assign to the microstructure
-*/
-void setMicroVoidVolumeFraction (const double val)
-{
-    microVoidVolumeFraction_ = val;
-}
-
-/**
-@brief Get the volume fraction of void space in the microstructure.
-
-@note Used only in this class's copy constructor.
-
-@return the volume fraction of void space in the microstructure
-*/
-double getMicroVoidVolumeFraction (void) const
-{
-    return microVoidVolumeFraction_;
-}
-
-/**
 @brief Set the total microstructure volume.
 
 @note NOT USED.
@@ -4047,8 +3964,6 @@ void setMicroVolume (const double val)
 
 /**
 @brief Get the total microstructure volume.
-
-@note Used only in this class's copy constructor.
 
 @return the total volume of the microstructure
 */

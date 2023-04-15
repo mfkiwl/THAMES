@@ -545,7 +545,7 @@ void Controller::doCycle (const string &statfilename,
                 for (int j = 0; j < ste->nbSize(1); j++) {
                   Site *stenb = ste->nb(j);
                   stenb->dWmc(dwmcval);
-                  if ((stenb->getWmc() > 0.0) && (stenb->getMicroPhaseId() != WATERID) 
+                  if ((stenb->getWmc() > 0.0) && (stenb->getMicroPhaseId() != ELECTROLYTEID) 
                     && (stenb->getMicroPhaseId() != VOIDID)) {
                     lattice_->addDissolutionSite(stenb,stenb->getMicroPhaseId());
                   }
@@ -653,7 +653,7 @@ void Controller::calculateState (double time,
       /// Get the molar volume of water from the GEM node
       ///
 
-      double water_v0 = chemSys_->getNode()->DC_V0(chemSys_->getMicroPhaseToDC(WATERID,0),
+      double water_v0 = chemSys_->getNode()->DC_V0(chemSys_->getMicroPhaseToDC(ELECTROLYTEID,0),
                                             chemSys_->getP(),chemSys_->getTemperature());
       double addwatermol = addwatervol / water_v0;
 

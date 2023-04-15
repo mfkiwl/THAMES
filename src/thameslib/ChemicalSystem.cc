@@ -93,7 +93,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ICIdLookup_.clear();
     DCIdLookup_.clear();
     GEMPhaseIdLookup_.clear();
-    microPhaseVolumeFraction_.clear();
     microPhaseVolume_.clear();
     microPhaseMass_.clear();
     microPhaseMassDissolved_.clear();
@@ -500,7 +499,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       if (foundxml != string::npos) {
         parseDoc(interfaceFileName);
           
-        microPhaseVolumeFraction_.resize(numMicroPhases_,0.0);
         microPhaseVolume_.resize(numMicroPhases_,0.0);
         microPhaseMass_.resize(numMicroPhases_,0.0);
         if (verbose_) {
@@ -1341,14 +1339,12 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     nodeHandle_ = obj.getNodeHandle();
     nodeStatus_ = obj.getNodeStatus();
     iterDone_ = obj.getIterDone();
-    microPhaseVolumeFraction_ = obj.getMicroPhaseVolumeFraction();
     microPhaseVolume_ = obj.getMicroPhaseVolume();
     microVolume_ = obj.getMicroVolume();
     microInitVolume_ = obj.getMicroInitVolume();
     microPhaseMass_ = obj.getMicroPhaseMass();
     microPhaseMassDissolved_ = obj.getMicroPhaseMassDissolved();
     microVoidVolume_ = obj.getMicroVoidVolume();
-    microVoidVolumeFraction_ = obj.getMicroVoidVolumeFraction();
     verbose_ = obj.getVerbose();
     debug_ = obj.getDebug();
     warning_ = obj.getWarning();
@@ -1815,17 +1811,22 @@ int ChemicalSystem::calculateState (double time,
              << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
     }
 
-    /// JWB: 2020 December 22
-    /// Testing a change to the way we handle CSH molar volume adjustments
-    /// Will let GEMS (thermodynamics) determine volumes of CSH and water
-    /// Will adjust volume FRACTIONS of CSH and capillary porosity in the lattice part
-    ///
-    
+    /// JWB 2023-04-14
+    /// Account for subvoxel porosity within each microstructure phase here
+    /// We used to do this in the Lattice class but it is cleaner here
+   
+    double phi;  // local variable to store subvoxel volume fraction of pores of a phase
+                 // 0 <= phi <= 1
+                 
     for (unsigned int i = 1; i < numMicroPhases_; i++) {
         if (verbose_) {
             cout << "Setting microPhase amounts for "
                  << i << " = " << microPhaseName_[i] << endl;
             cout.flush();
+        }
+        phi = 0.0;
+        if ((i != ELECTROLYTEID) && (i != VOIDID)) {
+            phi = getPorosity(i);
         }
         if (!isKinetic(i)) {
             microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
@@ -1842,13 +1843,12 @@ int ChemicalSystem::calculateState (double time,
                 }
                 microPhaseMass_[i] +=
                      GEMPhaseMass_[microPhaseMembers_[i][j]];
+
+                /// Here is where the subvoxel porosity is included
                 microPhaseVolume_[i] +=
-                     GEMPhaseVolume_[microPhaseMembers_[i][j]];
+                     (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
             }
             microVolume_ += microPhaseVolume_[i];
-
-      /// End of test JWB: 2020 December 22
-      ///
 
         } else {
             if (verbose_) {
@@ -1864,7 +1864,7 @@ int ChemicalSystem::calculateState (double time,
             /// already set in KineticModel::calculateKineticStep
             ///
 
-            microVolume_ += microPhaseVolume_[i];
+            microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
         }
     }
 
@@ -1875,6 +1875,7 @@ int ChemicalSystem::calculateState (double time,
                  << "porosity." << endl;
         }
   
+        double water_molarv, water_molesincr;
         if (microInitVolume_ > microVolume_) {
             double water_molarv, water_molesincr;
             for (int i = 0; i < numMicroPhases_; i++) {
@@ -1904,14 +1905,6 @@ int ChemicalSystem::calculateState (double time,
              << 100.0 * (microVolume_ - microInitVolume_)/(microInitVolume_)
              << " %" << endl;
         cout.flush();
-    }
-
-    ///
-    /// Calculate microstructure phase volume fractions
-    ///
-    
-    for (int i = 0; i < numMicroPhases_; i++) {
-        microPhaseVolumeFraction_[i] = microPhaseVolume_[i] / microVolume_;
     }
 
     setGEMPhaseStoich();

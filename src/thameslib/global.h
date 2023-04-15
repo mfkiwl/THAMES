@@ -103,8 +103,8 @@ const int INVALID_INPUT = 4;
 
 // Special phase ids that are important and must always be the same value
 const int VOIDID = 0;
-const int WATERID = 1;
-const int FIRST_SOLID = WATERID + 1;
+const int ELECTROLYTEID = 1;
+const int FIRST_SOLID = ELECTROLYTEID + 1;
 const int NUMCLINKERPHASES = 4;
 
 // The number of face, edge, and corner neighbors to a cubic lattice site
