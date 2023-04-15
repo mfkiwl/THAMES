@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 14 23:54:13 2023 | Accounting for subvoxel porosity of microstructure phases |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
 | Jan 14 17:12:41 2023 | Corrected local path for GEMS-3K node.h include file |
 | Jan  3 13:52:07 2023 | Tagged as version 2.6 |

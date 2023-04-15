@@ -83,6 +83,11 @@ map<int,vector<int> > expansion_coordin_;   /**< Map of coordinates of sites wit
                                                     local expansion strain */
 double waterchange_;                        /**< How much water must be added or subtracted
                                                     due to hydration or deterioration */
+double capillaryporevolume_;               /**< Total volume of capillary pores */
+double capillaryporevolumefraction_;       /**< Total volume fraction of capillary pores */
+double subvoxelporevolume_;               /**< Total volume of subvoxel pores */
+double subvoxelporevolumefraction_;               /**< Total volume fraction of subvoxel pores */
+
 double time_;                               /**< The current simulation time [days] */
 double temperature_;                        /**< The current simulation temperature [K] */
 double oldtemp_;                            /**< The temperature in the previous
@@ -857,7 +862,7 @@ to do that, and then actually causing the switches in phase id to happen at thos
 The interfaces and lists of dissolution and growth sites are updated accordingly, too.
 
 @note Water is assumed to be chemically reactive only if it is in capillary
-porosity (microstructure id WATERID).  If the capillary water is exhausted then
+porosity (microstructure id ELECTROLYTEID).  If the capillary water is exhausted then
 some reaction can still happen with water in nanoporosity, but for now we assume
 that the nanopore water is chemically unreactive and cannot be removed.
 
@@ -883,7 +888,7 @@ scales smaller than the lattice spatial resolution.  This method fixes
 those volume fractions, paying special attention to the water distribution.
 
 @note Water is assumed to be chemically reactive only if it is in capillary
-porosity (microstructure id WATERID).  If the capillary water is exhausted then
+porosity (microstructure id ELECTROLYTEID).  If the capillary water is exhausted then
 some reaction can still happen with water in nanoporosity, but for now we assume
 that the nanopore water is chemically unreactive and cannot be removed.
 
@@ -1126,6 +1131,92 @@ void setExpansionCoordin (int index,
     }
 }
     
+/**
+@brief Get the total capillary pore volume
+
+@return the volume of capillary pores (GEMS volume units)
+*/
+double getCapillaryporevolume (void) const
+{
+    return capillaryporevolume_;
+}
+
+/**
+@brief Set the capillary pore volume
+
+@param capillaryporevolume is the capillary pore volume (GEMS volume units)
+*/
+void setCapillaryporevolume (double capillaryporevolume)
+{
+    capillaryporevolume_ = capillaryporevolume;
+}
+
+/**
+@brief Get the total capillary pore volume fraction
+This is calculated on a total system volume basis
+
+@return the volume fraction of capillary pores (microstructure basis)
+*/
+double getCapillaryporevolumefraction (void) const
+{
+    return capillaryporevolumefraction_;
+}
+
+/**
+@brief Set the capillary pore volume fraction
+This is calculated on a total system volume basis
+
+@param capillaryporevolumefraction is the capillary pore volume
+fraction (microstructure basis)
+*/
+void setCapillaryporevolumefraction (double capillaryporevolumefraction)
+{
+    capillaryporevolumefraction_ = capillaryporevolumefraction;
+}
+
+/**
+@brief Get the total subvoxel pore volume
+
+@return the volume of subvoxel pores (GEMS volume units)
+*/
+double getSubvoxelporevolume (void) const
+{
+    return subvoxelporevolume_;
+}
+
+/**
+@brief Set the subvoxel pore volume
+
+@param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
+*/
+void setSubvoxelporevolume (double subvoxelporevolume)
+{
+    subvoxelporevolume_ = subvoxelporevolume;
+}
+
+/**
+@brief Get the total subvoxel pore volume fraction
+This is calculated on a total system volume basis
+
+@return the volume fraction of subvoxel pores (microstructure basis)
+*/
+double getSubvoxelporevolumefraction (void) const
+{
+    return subvoxelporevolumefraction_;
+}
+
+/**
+@brief Set the subvoxel pore volume fraction
+This is calculated on a total system volume basis
+
+@param subvoxelporevolumefraction is the subvoxel pore volume
+fraction (microstructure basis)
+*/
+void setSubvoxelporevolumefraction (double subvoxelporevolumefraction)
+{
+    subvoxelporevolumefraction_ = subvoxelporevolumefraction;
+}
+
 /**
 @brief Get the number of sites of water that must be added after a time step.
 
