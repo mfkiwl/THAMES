@@ -1169,7 +1169,7 @@ This is calculated on a total system volume basis
 @param capillaryporevolumefraction is the capillary pore volume
 fraction (microstructure basis)
 */
-void setCapillaryporevolumefraction (double capillaryporevolumefraction)
+void setCapillaryporevolumefraction (const double capillaryporevolumefraction)
 {
     capillaryporevolumefraction_ = capillaryporevolumefraction;
 }
@@ -1189,7 +1189,7 @@ double getSubvoxelporevolume (void) const
 
 @param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
 */
-void setSubvoxelporevolume (double subvoxelporevolume)
+void setSubvoxelporevolume (const double subvoxelporevolume)
 {
     subvoxelporevolume_ = subvoxelporevolume;
 }
@@ -1212,7 +1212,7 @@ This is calculated on a total system volume basis
 @param subvoxelporevolumefraction is the subvoxel pore volume
 fraction (microstructure basis)
 */
-void setSubvoxelporevolumefraction (double subvoxelporevolumefraction)
+void setSubvoxelporevolumefraction (const double subvoxelporevolumefraction)
 {
     subvoxelporevolumefraction_ = subvoxelporevolumefraction;
 }

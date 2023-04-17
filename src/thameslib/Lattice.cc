@@ -1221,6 +1221,8 @@ void Lattice::changeMicrostructure (double time,
    
     try {
         adjustMicrostructureVolumes(phasenames,vol_next);
+        cout << "Outside of adjustMicrostructureVolumes, subvoxelporevolume_ = " << subvoxelporevolume_ << endl;
+        cout.flush();
 
         adjustMicrostructureVolFracs(phasenames,vol_next,vfrac_next);
     }
@@ -1724,7 +1726,7 @@ void Lattice::adjustMicrostructureVolumes (vector<string> names,
         // This will hold the subvoxel pore volume (m3)
         
         double totsolidvol_withpores = 0.0;
-        double subvoxelporevolume_ = 0.0;
+        subvoxelporevolume_ = 0.0;
         double phi;   // Holds the subvoxel porosity of a microstructurephase
         for (i = 0; i < vol.size(); ++i) {
             if (i != ELECTROLYTEID && i != VOIDID) {
@@ -1862,6 +1864,7 @@ void Lattice::adjustMicrostructureVolFracs (vector<string> &names,
         if (verbose_) {
             cout << endl;
             cout << "@@@@@@@@ ADJUSTING *TARGET* MICROSTRUCTURE PHASE VOLUME FRACTIONS @@@@@@@@" << endl;
+            cout << "Before anything else, subvoxelporevolume_ = " << subvoxelporevolume_ << endl;
             cout << endl;
         }
 
