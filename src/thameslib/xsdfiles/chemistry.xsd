@@ -135,10 +135,17 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="gemdc_datatype">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="gemdcname" type="stringtype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="gemdcporosity" type="stringtype"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="gemphase_datatype">
     <xs:sequence>
       <xs:element name="gemphasename" type="stringtype"/>
-      <xs:element maxOccurs="unbounded" name="gemdcname" type="stringtype"/>
+      <xs:element maxOccurs="unbounded" name="gemdc" type="gemdc_datatype"/>
     </xs:sequence>
   </xs:complexType>
 

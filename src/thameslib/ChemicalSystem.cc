@@ -69,6 +69,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     so3_.clear();
     color_.clear();
     GEMPhaseStoich_.clear();
+    GEMPhaseDCMembers_.clear();
+    GEMPhaseDCPorosities_.clear();
     microPhaseIdLookup_.clear();
     ICIdLookup_.clear();
     DCIdLookup_.clear();
@@ -1019,7 +1021,29 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
             phaseData.GEMPhaseId.push_back(GEMPhaseId);
             xmlFree(key);
         }
-        if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdcname"))) {
+        if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdc"))) {
+            parseGEMDCData(doc, cur, phaseData);
+        }
+        cur = cur->next;
+    } 
+    GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId,phaseData.GEMPhaseDCMembers));   
+    GEMPhaseDCPorosities_.insert(make_pair(GEMPhaseID,phaseData.GEMPhaseDCPorosities));
+
+    return;
+
+}
+
+void ChemicalSystem::parseGEMPhaseDCData (xmlDocPtr doc,
+                                       xmlNodePtr cur,
+                                       PhaseData &phaseData)
+{
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+
+    double porosity = 0.0;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcname"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.DCName.push_back((char *)key);
             mydcstr = (char *)key;
@@ -1041,13 +1065,29 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
                 cout << "GEM DC id = " << dcid
                      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
             }
+            // Make certain that there will be a porosity associated
+            // with this DC
+            if (phaseData.DCPorosities.size() < phaseData.DCName.size()) {
+                phaseData.DCPorosities.push_back(0.0);
+            }
             xmlFree(key);
         }
-        cur = cur->next;
-    } 
-    GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId,phaseData.GEMPhaseDCMembers));   
-    return;
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcporosity"))) {
+            key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
+            string st((char *)key);
+            from_string(porosity,st);
+            // Make certain that there will be a porosity associated
+            // with this DC
+            if (phaseData.DCPorosities.size() < phaseData.DCName.size()) {
+                phaseData.DCPorosities.push_back(porosity);
+            } else {
+                phaseData.DCPorosities.at(phaseData.DCPorosities.size()-1) = porosity;
+            }
+            xmlFree(key);
+        }
 
+        cur = cur->next;
+    }
 }
 
 void ChemicalSystem::parseDisplayData (xmlDocPtr doc,
@@ -1223,6 +1263,8 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     ICName_ = obj.getICName();
     DCName_ = obj.getDCName();
     GEMPhaseName_ = obj.getGEMPhaseName();
+    GEMPhaseDCMembers_ = obj.getGEMDCMembers();
+    GEMPhaseDCPorosities_ = obj.getGEMDCPorosities();
     microPhaseId_ = obj.getMicroPhaseId();
     isKinetic_ = obj.getIsKinetic();
     randomGrowth_ = obj.getRandomGrowth();

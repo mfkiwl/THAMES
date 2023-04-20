@@ -73,11 +73,12 @@ Most of the members have self-evident meanings:
        THAMES phase, given by name
     - `DCName` is a vector of the GEM DCs (dependent components) making up the
        THAMES phase, given by name
-    - `GEMPhaseDCMembers` is a vector of the GEM (thermodynamic) phase DCs making
-       up the THAMES phase, given by their GEM DC id number
+    - `GEMPhaseDCMembers` is a vector of the GEM (thermodynamic) phase DC
+       structures making up the THAMES phase, indexed by their GEM DC id number
     - `GEMPhaseId` is a vector of the GEM (thermodynamic) phases making up
        the THAMES phase, given by their GEM phase id number
     - `DCId` is the id of the dependent component in the GEM data base
+    - `DCPorosity` is subvoxel porosity of the dependent components
     - `growthTemplate` is a vector of the growth templates for the phase
     - `affinity` the vector of affinities of a phase for another phase
     - `colors` is the rgb colors for displaying the phase in visualizations
@@ -101,6 +102,7 @@ struct PhaseData {
     vector<char * > GEMPhaseName,DCName;
     vector<int> GEMPhaseDCMembers;
     vector<int> GEMPhaseId;
+    vector<int> GEMPhaseDCPorosities;
     vector<int> DCId;
     vector<int> growthTemplate;
     vector<int> affinity;
@@ -202,7 +204,9 @@ map<int,vector<int> > microPhaseMembers_; /**< A list of all the CSD phase ids t
 
 map<int,vector<int> > microPhaseDCMembers_;     /**< A list of all the CSD DC ids that are
                                                 associated with a given microstructure phase */
-map<int,vector<int> > GEMPhaseDCMembers_;   /**< A list of all the CSD DC ids that are
+map<int,vector<int> > GEMPhaseDCMembersj;   /**< A list of all the CSD DC ids that are
+                                                associated with a given CSD phase */
+map<int,vector<double> > GEMPhaseDCPorosities_;   /**< A list of all the CSD DC porosities that are
                                                 associated with a given CSD phase */
 
 vector<bool> isKinetic_;                    /**< Whether of not each phase is kinetically
@@ -575,6 +579,31 @@ void parsePhase (xmlDocPtr doc,
 void parseGEMPhaseData (xmlDocPtr doc,
                         xmlNodePtr cur,
                         PhaseData &phaseData);
+
+/**
+@brief Parse input about a GEM DC associated with a CSD phase from an XML document.
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+@param phaseData holds the structure of collected phase data from the document
+*/
+void parseGEMPhaseDCData (xmlDocPtr doc,
+                        xmlNodePtr cur,
+                        PhaseData &phaseData);
+
+/**
+@brief Parse a phase's sub-voxel pore size distribution from a file
+
+The file must have a header line that will be discarded.  The rest of
+the file must be two column csv with pore diameter in the first column
+(nanometers) and the volume fraction in the second column.  After
+the data are read the volume fraction is normalized.
+
+@param poreSizeFilename is the name of the file containing the data
+@param phaseData holds the structure of collected phase data from the document
+*/
+void parsePoreSizeDistribution(string poreSizeFilename,
+                               PhaseData &phaseData);
 
 /**
 @brief Parse input about how to render a phase in an image.
@@ -2352,7 +2381,7 @@ value of the molar volume and density of such phases.
 @warning Each version of the GEMIPM library
 needs to be checked to see what the convention ensures compatibility with that library.
 
-@param idx is the microstructure phase with internal porosity
+@param idx is the microstructure phase with internal (subvoxel) porosity
 @return the volume fraction of the phase occupied by pores at the scale of one micrometer
 */
 double getPorosity (const unsigned int idx)
@@ -2374,14 +2403,14 @@ double getPorosity (const unsigned int idx)
 @warning Each version of the GEMIPM library
 needs to be checked to see what the convention ensures compatibility with that library.
 
-@param str is the name of the microstructure phase with internal porosity
+@param str is the name of the microstructure phase with internal (subvoxel) porosity
 @return the volume fraction of the phase occupied by pores at the scale of one micrometer
 */
 double getPorosity (const string &str)
 {
     int idx = getMicroPhaseId(str);
     try {
-        return porosity_.at(idx);
+        return getPorosity(idx);
     }
     catch (out_of_range &oor) {
         EOBException ex("ChemicalSystem","getPorosity",
@@ -2835,6 +2864,30 @@ map<int, vector<int> > getMicroPhaseDCMembers (void) const
 }
 
 /**
+@brief Get the map of DC component ids associated with a given GEM CSD phase id.
+
+@note Used only in this class's copy constructor
+
+@return the map of all DC member ids for that GEM phase
+*/
+map<int, vector<int> > getGEMPhaseDCMembers (void)
+{
+    return GEMPhaseDCMembers_;
+} 
+
+/**
+@brief Get the map of DC porosities associated with a given GEM CSD phase id.
+
+@note Used only in this class's copy constructor
+
+@return the map of all DC member porosities for that GEM phase
+*/
+map<int, vector<double> > getGEMPhaseDCPorosities (void)
+{
+    return GEMPhaseDCPorosities_;
+} 
+
+/**
 @brief Get the list of DC component ids associated with a given GEM CSD phase id.
 
 @param idx is the GEM phase id in question
@@ -2850,6 +2903,48 @@ vector<int> getGEMPhaseDCMembers (const unsigned int idx)
         msg = "Could not find GEMPhaseDCMembers_ match to index provided";
         EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
                         msg,GEMPhaseDCMembers_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+} 
+
+/**
+@brief Get the list of DC component ids associated with a given GEM CSD phase id.
+
+@param idx is the GEM phase id in question
+@return the list of all DC component ids for that GEM phase
+*/
+vector<int> getGEMPhaseDCMembers (const unsigned int idx)
+{
+    string msg;
+    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(idx);
+    if (p != GEMPhaseDCMembers_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
+                        msg,GEMPhaseDCMembers_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+} 
+
+/**
+@brief Get the list of DC component porosities associated with a given GEM CSD phase id.
+
+@param idx is the GEM phase id in question
+@return the list of all DC component porosities for that GEM phase
+*/
+vector<double> getGEMPhaseDCPorosities (const unsigned int idx)
+{
+    string msg;
+    map<int,vector<double> >::iterator p = GEMPhaseDCPorosities_.find(idx);
+    if (p != GEMPhaseDCPorosities_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find GEMPhaseDCPorosities_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCPorosities",
+                        msg,GEMPhaseDCPorosities_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -2880,32 +2975,56 @@ vector<int> getGEMPhaseDCMembers (const string &str)
 }
 
 /**
-@brief Get one of the DC component ids for a given GEM CSD phase id.
+@brief Get the list of DC component porosities associated with a given GEM CSD phase name.
+
+@note NOT USED.
+
+@param str is the GEM phase name in question
+@return the list of all DC component porosities for that GEM phase
+*/
+vector<double> getGEMPhaseDCPorosities (const string &str)
+{
+    string msg;
+    int pidx = getGEMPhaseId(str);
+    map<int,vector<int> >::iterator p = GEMPhaseDCPorosities_.find(pidx);
+    if (p != GEMPhaseDCPorosities_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find GEMPhaseDCPorosities_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCPorosities",
+                        msg,GEMPhaseDCPorosities_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get one of the DC component's porosity for a given GEM CSD phase id.
 
 @note NOT USED.
 
 @param idx is the GEM phase id in question
 @param jdx is the element position in the list of all DCs for GEM phase idx
-@return the DC component id to set at that position in the list
+@return the DC component porosity to set at that position in the list
 */
-unsigned int getGEMPhaseDCMembers (const unsigned int idx,
+unsigned int getGEMPhaseDCPorosities (const unsigned int idx,
                                 const unsigned int jdx)
 {
     string msg;
-    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(idx);
-    if (p != GEMPhaseDCMembers_.end()) {
+    map<int,vector<int> >::iterator p = GEMPhaseDCPorosities_.find(idx);
+    if (p != GEMPhaseDCPorosities_.end()) {
         if (jdx < (p->second).size()) {
            return (p->second)[jdx];
         } else {
-           EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
-                           "GEMPhaseDCMembers_",(p->second).size(),jdx);
+           EOBException ex("ChemicalSystem","getGEMPhaseDCPorosities",
+                           "GEMPhaseDCPorosities_",(p->second).size(),jdx);
            ex.printException();
            exit(1);
         }
     } else {
-        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
-                        msg,GEMPhaseDCMembers_.size(),0);
+        msg = "Could not find GEMPhaseDCPorosities_ match to index provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseDCPorosities",
+                        msg,GEMPhaseDCPorosities_.size(),0);
         ex.printException();
         exit(1);
     }
@@ -3443,6 +3562,29 @@ void setGEMPhaseVolume (void)
         //     cout << "GEMPhaseVolume_[" << i << "] = " << GEMPhaseVolume_[i] << endl;
         // }
     }
+    setGEMPhasePorosity();
+}
+
+/**
+@brief Set the subvoxel porosity of all GEM CSD phases.
+
+We can imitate a variation of subvoxel porosity with phase
+composition by letting the subvoxel porosity of each dependent
+component be different.  The overall subvoxel porosity
+of a CSD phase is assumed to be the volume weighted average
+of the the subvoxel porosities of all the dependent components
+of that phase.
+
+@note Should never be called separately.  It is only called from
+ChemicalSystem::setGEMPhaseVolume
+
+*/
+void setGEMPhasePorosity (void)
+{
+    setPrevGEMPhasePorosity();
+    for (long int i = 0; i < numGEMPhases_; i++) {
+        GEMPhaseVolume_[i] = (double)(node_->Ph_Volume(i));
+    }
 }
 
 /**
@@ -3530,6 +3672,19 @@ void setPrevGEMPhaseVolume (void)
     for (long int i = 0; i < numGEMPhases_; i++) {
         prevGEMPhaseVolume_[i] = GEMPhaseVolume_[i];
     }
+}
+
+/**
+@brief Get the subvoxel porosity of every GEM CSD phase in the system in the previous time step.
+
+@note Does nothing for now, just a placeholder in case it is needed later
+*/
+void setPrevGEMPhasePorosity (void)
+{
+    // for (long int i = 0; i < numGEMPhases_; i++) {
+    //     prevGEMPhaseVolume_[i] = GEMPhaseVolume_[i];
+    // }
+    return;
 }
 
 /**
