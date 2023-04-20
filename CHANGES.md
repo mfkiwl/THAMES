@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 20 14:19:42 2023 | Composition-dependent subvoxel porosity compiles; need to test runtime behavior |
+| Apr 19 18:21:20 2023 | Created a branch for composition-dependent subvoxel porosity |
 | Apr 14 23:54:13 2023 | Accounting for subvoxel porosity of microstructure phases |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
 | Jan 14 17:12:41 2023 | Corrected local path for GEMS-3K node.h include file |

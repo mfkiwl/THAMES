@@ -582,8 +582,8 @@ int Lattice::growPhase (unsigned int phaseid,
           /// @todo Determine why the calculation works this way.
           ///
 
-          dwmcval = chemSys_->getPorosity(phaseid)
-                  - chemSys_->getPorosity(pid);
+          dwmcval = chemSys_->getMicroPhasePorosity(phaseid)
+                  - chemSys_->getMicroPhasePorosity(pid);
           setMicroPhaseId(ste,phaseid);
           ste->dWmc(dwmcval);
 
@@ -692,8 +692,8 @@ int Lattice::dissolvePhase (unsigned int phaseid,
           /// @todo Determine why the calculation works this way.
           ///
 
-          dwmcval = chemSys_->getPorosity(ELECTROLYTEID)
-                  - chemSys_->getPorosity(pid);
+          dwmcval = chemSys_->getMicroPhasePorosity(ELECTROLYTEID)
+                  - chemSys_->getMicroPhasePorosity(pid);
           ste->dWmc(dwmcval);
       
           unsigned int j;
@@ -1728,7 +1728,7 @@ void Lattice::adjustMicrostructureVolumes (vector<string> names,
         double phi;   // Holds the subvoxel porosity of a microstructurephase
         for (i = 0; i < vol.size(); ++i) {
             if (i != ELECTROLYTEID && i != VOIDID) {
-                phi = chemSys_->getPorosity(i);
+                phi = chemSys_->getMicroPhasePorosity(i);
                 subvoxelporevolume_ += (vol.at(i) * phi);
                 totsolidvol_withpores += vol.at(i);
 
@@ -1960,7 +1960,7 @@ void Lattice::writePoreSizeDistribution (double curtime,
     // Get the combined pore volume as a function of diameter 
     for (int i = 0; i < volumefraction_.size(); ++i) {
         if (i != ELECTROLYTEID && i != VOIDID) {
-            phi = chemSys_->getPorosity(i);
+            phi = chemSys_->getMicroPhasePorosity(i);
             if (phi > upper_cutoff_porosity) phi = upper_cutoff_porosity;
             subpore_volume[i] = volumefraction_.at(i) * phi;
         }
@@ -2944,8 +2944,8 @@ vector<int> Lattice::transform (int shrinkingid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemSys_->getPorosity(growingid)
-                                - chemSys_->getPorosity(ELECTROLYTEID);
+                double dwmcval = chemSys_->getMicroPhasePorosity(growingid)
+                                - chemSys_->getMicroPhasePorosity(ELECTROLYTEID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
                     nb->dWmc(dwmcval);
@@ -2992,8 +2992,8 @@ vector<int> Lattice::transform (int shrinkingid,
                 /// @todo Determine why the calculation works this way.
                 ///
 
-                double dwmcval = chemSys_->getPorosity(growingid)
-                                 - chemSys_->getPorosity(ELECTROLYTEID);
+                double dwmcval = chemSys_->getMicroPhasePorosity(growingid)
+                                 - chemSys_->getMicroPhasePorosity(ELECTROLYTEID);
                 for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
                     Site *nb = waterneighbor[i]->nb(j);
                     nb->dWmc(dwmcval);
@@ -3107,7 +3107,7 @@ double Lattice::getSurfaceArea (int phaseid)
         if (ste->getMicroPhaseId() == phaseid) {
             for (int j = 0; j < ste->nbSize(1); j++) {
                 stenb = ste->nb(j);
-                surface2 += chemSys_->getPorosity(stenb->getMicroPhaseId());
+                surface2 += chemSys_->getMicroPhasePorosity(stenb->getMicroPhaseId());
             }
         }
     }    
