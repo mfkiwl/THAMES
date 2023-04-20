@@ -383,7 +383,7 @@ void KineticModel::parsePhase (xmlDocPtr doc,
             kineticData.GEMPhaseId =
                 chemSys_->getMicroPhaseToGEMPhase(kineticData.microPhaseId,0);
             kineticData.DCId =
-                chemSys_->getMicroPhaseToDC(kineticData.microPhaseId,0);
+                chemSys_->getMicroPhaseDCMembers(kineticData.microPhaseId,0);
 
             ///
             /// Kinetic data are grouped together,
@@ -611,9 +611,9 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 cout.flush();
                 volumeFraction = lattice_->getVolumefraction(microPhaseId);
                 cout << "    Volume fraction = " << volumeFraction << endl;
-                DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
+                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
                 cout << "    DC id number = " << DCId << endl;
-                DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
+                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
                 cout << "    DC id number = " << DCId << endl;
                 cout.flush();
                 molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
@@ -636,7 +636,7 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 cout.flush();
             } else {
                 volumeFraction = lattice_->getVolumefraction(microPhaseId);
-                DCId = chemSys_->getMicroPhaseToDC(microPhaseId,0);
+                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
                 molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
                 molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
                 density = 0.0;                 

@@ -7,6 +7,9 @@
 | May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
 | May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
+| Apr 20 14:19:42 2023 | Composition-dependent subvoxel porosity compiles; need to test runtime behavior |
+| Apr 19 18:21:20 2023 | Created a branch for composition-dependent subvoxel porosity |
+| Apr 14 23:54:13 2023 | Accounting for subvoxel porosity of microstructure phases |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
 | Jan 14 17:12:41 2023 | Corrected local path for GEMS-3K node.h include file |
 | Jan  3 13:52:07 2023 | Tagged as version 2.6 |

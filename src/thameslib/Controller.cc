@@ -647,7 +647,7 @@ void Controller::calculateState (double time,
       /// Get the molar volume of water from the GEM node
       ///
 
-      double water_v0 = chemSys_->getNode()->DC_V0(chemSys_->getMicroPhaseToDC(ELECTROLYTEID,0),
+      double water_v0 = chemSys_->getNode()->DC_V0(chemSys_->getMicroPhaseDCMembers(ELECTROLYTEID,0),
                                             chemSys_->getP(),chemSys_->getTemperature());
       double addwatermol = addwatervol / water_v0;
 
