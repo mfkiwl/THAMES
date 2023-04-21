@@ -338,29 +338,15 @@ void parseRdData (xmlDocPtr doc,
                   KineticData &kineticData);
     
 /**
-@brief Determine the initial phase fractions in the microstructure
-
-This method finds the volume fractions in the current microstructure,
-converts them to mass fractions using the CSD densities of the DCs,
-and then scales them to 100 grams of solid.  The water-solids mass ratio
-is also calculated.
-
-*/
-void setInitialPhaseVolumeFractions(void);
-
-/**
 @brief Compute normalized initial microstructure phase masses
 
 Given the initial masses of all phases in the microstructure,
 this method scales them to 100 grams of solid.  In the process,
 this method also sets the initial moles of water in the
 chemical system definition.
-
-@param microPhaseMass is a vector of all the microstructure masses
-@param solidMass is the combined mass of all the solids
 */
-void normalizePhaseMasses(vector<double> microPhaseMass,
-                          double solidMass);
+
+void getPhaseMasses (void);
 
 /**
 @brief Set the initial total microstructure volume

@@ -352,6 +352,10 @@ Lattice::Lattice (ChemicalSystem *cs,
 
     int numMicroPhases = chemSys_->getNumMicroPhases();
 
+    vector<double> microPhaseMass;
+    microPhaseMass.clear();
+    microPhaseMass.resize(numMicroPhases,0.0);
+
     volumefraction_.clear();
     volumefraction_.resize(numMicroPhases,0.0);
 
@@ -359,20 +363,76 @@ Lattice::Lattice (ChemicalSystem *cs,
     initvolumefraction_.resize(numMicroPhases,0.0);
 
     if (verbose_) cout << "Calculating Volume Fractions now..." << endl;
-    double vfrac,mfrac,capfrac;
+    double vfrac,mfrac,capfrac,molarMass,molarVolume,density;
+    double solidMass = 0.0;
+    int microPhaseId = 0;
+    int DCId = 0;
     try {
       if (site_.size() > 0) {
         for (ii = 0; ii < numMicroPhases; ii++) {
+            microPhaseId = chemSys_->getMicroPhaseId(ii);
             vfrac = ((double)count_[ii])/((double)site_.size());
-            setVolumefraction(ii,vfrac);
-            setInitvolumefraction(ii,vfrac);
-            if (getVolumefraction(ii) > 0.0 && verbose_) cout << "***Volume fraction["
-                << ii << "] = " << volumefraction_[ii] << endl;
+            setVolumefraction(microPhaseId,vfrac);
+            setInitvolumefraction(microPhaseId,vfrac);
+            if (microPhaseId == ELECTROLYTEID) {
+                DCId = chemSys_->getDCId("H2O@");
+            } else if (microPhaseId != VOIDID) {
+                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
+            }
+            if (microPhaseId != VOIDID) {
+                molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
+                molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
+                density = 0.0;                 
+                if (molarVolume > 1.0e-12) {
+                    density = molarMass / molarVolume / 1.0e6;          // g/cm3
+                }  
+                microPhaseMass[microPhaseId] = vfrac * density;
+                if (microPhaseId != ELECTROLYTEID) {
+                    solidMass += microPhaseMass[microPhaseId];
+                }
+                if (verbose_ && vfrac > 0.0) {
+                    cout << "Phase " << chemSys_->getMicroPhaseName(microPhaseId);
+                    cout << "    Molar mass = " << molarMass << " g/mol" << endl;
+                    cout << "    Molar volume = " << molarVolume << " m3/mol" << endl;
+                    cout << "    Density = " << density << " g/cm3" << endl;
+                    cout << "    Volume Fraction = " << vfrac << endl;
+                    cout << "    Mass = " << (vfrac * density) << endl;
+                }
+            }
         }
       } else {
         msg = "Divide by zero error:  site_.size() = 0";
         throw FloatException("Lattice","Lattice",msg);
       }
+
+      // Set the water-solids mass ratio based on the initial microstructure
+    
+      wsratio_ = microPhaseMass[ELECTROLYTEID] / solidMass;
+
+      if (verbose_) {
+        cout << "Microstructure w/s = " << wsratio_ << endl;
+        cout << "(Mass of water = " << microPhaseMass[ELECTROLYTEID]
+             << ", mass of solids = " << solidMass << ")" << endl;
+        cout.flush();
+      }
+
+      // Next we set the initial normalized phase masses, microstructure
+      // phase volume, and subvoxel porosity.  This is all triggered when we set the
+      // mass.
+   
+      normalizePhaseMasses(microPhaseMass,solidMass);
+      
+      // Set the initial total volume of the microstructure
+    
+      double totmicvol = 0.0;
+      for (int i = 0; i < numMicroPhases; i++) {
+          microPhaseId = chemSys_->getMicroPhaseId(i);
+          if (microPhaseId != VOIDID) {
+              totmicvol += chemSys_->getMicroPhaseVolume(microPhaseId);
+          }
+      }
+      chemSys_->setMicroInitVolume(totmicvol);
+
       // Initially assume that all free water and void space
       // is capillary volume
      
@@ -424,6 +484,70 @@ void Lattice::addSite (const unsigned int x,
     // there is ever a sytem without water.
     
     site_.push_back(Site(x,y,z,xdim_,ydim_,zdim_,siteneighbors_,chemSys_));
+}
+
+void Lattice::normalizePhaseMasses (vector<double> microPhaseMass,
+                                    double solidMass)
+{
+    int microPhaseId;
+    double pscaledMass = 0.0;
+
+    int numMicroPhases = chemSys_->getNumMicroPhases();
+
+    for (int i = 0; i < numMicroPhases; i++) {
+        microPhaseId = chemSys_->getMicroPhaseId(i);
+        if (microPhaseId == ELECTROLYTEID) {
+            int waterId = chemSys_->getDCId("H2O@");
+            double waterMolarMass = chemSys_->getDCMolarMass(waterId);
+            pscaledMass = wsratio_ * 100.0;  // Mass of solids scaled to 100 g now
+            if (verbose_) {
+                cout << "Setting DC moles of water to "
+                     << (pscaledMass / waterMolarMass) << endl;
+                cout.flush();
+            }
+            chemSys_->setDCMoles(waterId,(pscaledMass / waterMolarMass));
+            if (verbose_) {
+                cout << "Setting initial micphase mass and volume of "
+                     << chemSys_->getMicroPhaseName(ELECTROLYTEID) << endl;
+                cout.flush();
+            }
+            chemSys_->setMicroPhaseMass(ELECTROLYTEID,pscaledMass);
+            chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID,0.0);
+
+        } else if (microPhaseId != VOIDID) {
+
+            pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
+            if (verbose_) {
+                cout << "Microstructure scaled mass of "
+                     << chemSys_->getMicroPhaseName(microPhaseId)
+                     << " (" << microPhaseId << ") = "
+                     << microPhaseMass[microPhaseId] << " g out of "
+                     << solidMass << " g total" << endl;
+            }
+
+            // Setting the phase mass will also automatically calculate the phase volume
+            
+            if (verbose_) {
+                cout << "Setting initial micphase mass and volume of "
+                     << chemSys_->getMicroPhaseName(microPhaseId) << endl;
+                cout.flush();
+            }
+            chemSys_->setMicroPhaseMass(microPhaseId,pscaledMass);
+
+            chemSys_->setMicroPhaseMassDissolved(microPhaseId,0.0);
+        }
+    }
+
+    // Up to this point we could not really handle volume of void space, but
+    // now we can do so in proportion to electrolyte volume
+   
+    double vfv = getVolumefraction(VOIDID);
+    double vfe = getVolumefraction(ELECTROLYTEID);
+    double ve = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
+
+    chemSys_->setMicroPhaseVolume(VOIDID,(ve*vfv/vfe));
+
+    return;
 }
 
 void Lattice::findInterfaces (void)

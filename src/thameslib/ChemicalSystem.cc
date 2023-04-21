@@ -61,7 +61,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     randomGrowth_.clear();
     growthTemplate_.clear();
     affinity_.clear();
-    microphaseporosity_.clear();
+    microPhasePorosity_.clear();
     poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
@@ -96,6 +96,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     GEMPhaseIdLookup_.clear();
     microPhaseVolume_.clear();
     microPhaseMass_.clear();
+    microPhasePorosity_.clear();
     microPhaseMassDissolved_.clear();
     SI_.clear();
       
@@ -502,6 +503,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
           
         microPhaseVolume_.resize(numMicroPhases_,0.0);
         microPhaseMass_.resize(numMicroPhases_,0.0);
+        microPhasePorosity_.resize(numMicroPhases_,0.0);
         if (verbose_) {
             cout << " Setting microPhaseMass size to "
                  << numMicroPhases_ << endl;
@@ -1342,7 +1344,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMembers_ = obj.getMicroPhaseMembers();
     microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
     microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
-    microphaseporosity_ = obj.getMicroPhasePorosity();
+    microPhasePorosity_ = obj.getMicroPhasePorosity();
     poreSizeDistribution_ = obj.getPoreSizeDistribution();
     k2o_ = obj.getK2o();
     na2o_ = obj.getNa2o();
@@ -1431,7 +1433,7 @@ ChemicalSystem::~ChemicalSystem (void)
     microPhaseMass_.clear();
     microPhaseMassDissolved_.clear();
     microPhaseDCMembers_.clear();
-    microphaseporosity_.clear();
+    microPhasePorosity_.clear();
     poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
@@ -1557,7 +1559,7 @@ void ChemicalSystem::writeMember (const unsigned int i,
     stream << "DATA FOR MATERIAL " << i << ":" << endl;
     stream << "       Name = " << microPhaseName_[i] << endl;
     stream << "         Id = " << microPhaseId_[i] << endl;
-    stream << "   Porosity = " << microphaseporosity_[i] << endl;
+    stream << "   Porosity = " << microPhasePorosity_[i] << endl;
     stream << "------------------------------------------------------" << endl;
 }
 
@@ -1606,7 +1608,7 @@ void ChemicalSystem::writeChemSys (void)
             out << "        growthTemplate: "
                 << growthTemplate_[i][j] << endl;
         }
-        out << "         porosity: " << microphaseporosity_[i] << endl;
+        out << "         porosity: " << microPhasePorosity_[i] << endl;
         out << "              k2o: " << k2o_[i] << endl;
         out << "             na2o: " << na2o_[i] << endl;
         out << "              mgo: " << mgo_[i] << endl;
