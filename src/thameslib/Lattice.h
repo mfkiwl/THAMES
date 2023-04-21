@@ -269,6 +269,30 @@ void setInitvolumefraction (unsigned int i, double vfrac)
 }
     
 /**
+@brief Set the water-solids mass ratio
+
+@param ws is the water-solids mass ratio
+*/
+void setWsratio (const double ws)
+{
+    wsratio_ = 0.0;
+    if (ws > 0.0) {
+        wsratio_ = ws;
+    }
+    return;
+}
+
+/**
+@brief Get the water-solids mass ratio
+
+@return the water-solids mass ratio
+*/
+double getWsratio (void) const
+{
+    return wsratio_;
+}
+
+/**
 @brief Get the volume fraction of a given microstructure phase.
 
 This is simply the number of sites with a given phase divided by the
@@ -648,7 +672,20 @@ void dWmc(int index,
 
 }
 
-    
+/**
+@brief Compute normalized initial microstructure phase masses
+
+Given the initial masses of all phases in the microstructure,
+this method scales them to 100 grams of solid.  In the process,
+this method also sets the initial moles of water in the
+chemical system definition.
+
+@param microPhaseMass is a vector of all the microstructure masses
+@param solidMass is the combined mass of all the solids
+*/
+void normalizePhaseMasses(vector<double> microPhaseMass,
+                          double solidMass);
+
 /**
 @brief Master method to locate the interfaces for each phase in the microstructure.
 

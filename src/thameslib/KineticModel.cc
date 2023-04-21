@@ -80,28 +80,6 @@ KineticModel::KineticModel (ChemicalSystem *cs,
                             const bool debug)
 :chemSys_(cs),solut_(solut),lattice_(lattice)
 {
-    const string PHASENUM = "phasenum";
-    const string BEGINPHASE = "<phase>";
-    const string ENDPHASE = "</phase>";
-    const string PHASENAME = "name";
-    const string TYPE = "type";
-    const string GEMNAME = "gemname";
-    const string DCNAME = "dcname";
-    const string BLAINE = "Blaine";
-    const string REFBLAINE = "refBlaine";
-    const string WCRATIO = "wcRatio";
-    const string TEMPERATURE = "Temperature";
-    const string REFTEMPERATURE = "refTemperature";
-    const string K1 = "K1";
-    const string K2 = "K2";
-    const string K3 = "K3";
-    const string N1 = "N1";
-    const string N3 = "N3";
-    const string RD = "Rd";
-    const string EA = "Ea";
-    const string SCALEDMASS = "scaledMass";
-    const string CRITDOH = "criticalDOH";
-    
     // Set the verbose and warning flags
    
     verbose_ = verbose;
@@ -214,25 +192,12 @@ KineticModel::KineticModel (ChemicalSystem *cs,
         }
     }
 
-    // JWB: We now know the identity of each phase in the microstructure and can
-    // link it to a GEMS phase.  Now is the time to set the w/s ratio and
-    // the initial mass fractions of the kinetic phases, rather than letting
-    // the kinetic input file tell us.  This forces a direct link to the microstructure
+    // The ChemicalSystem and Lattice objects were constructed before we get
+    // here, so now we know nearly everything we need to know about the
+    // microstructure.  The only thing left to do is to populate the scaled
+    // phase masses and read the w/s ratio, which the kinetic model needs
     
-    setInitialPhaseVolumeFractions();
-
-    // JWB: Normalize mass fractions to total system mass and multiply by 100
-    
-    // Finally, set the initial total volume of the microstructure here
-    
-    double totmicvol = 0.0;
-    for (int i = 0; i < microPhaseId_.size(); i++) {
-        microPhaseId = microPhaseId_[i];
-        if (microPhaseId != VOIDID) {
-            totmicvol += chemSys_->getMicroPhaseVolume(microPhaseId);
-        }
-    }
-    chemSys_->setMicroInitVolume(totmicvol);
+    getPhaseMasses();
 
     pfk1_ = pfk2_ = pfk3_ = 1.0;   // Default PK factors for no pozzolanic material
                                    
@@ -591,160 +556,27 @@ void KineticModel::parseRdData(xmlDocPtr doc,
     }
 }
 
-void KineticModel::setInitialPhaseVolumeFractions()
-{
-    vector<double> microPhaseMass;
-    microPhaseMass.clear();
-    microPhaseMass.resize(microPhaseId_.size(),0.0);
-
-    double volumeFraction,solidMass;
-    double waterMass,molarMass,molarVolume,density;
-    int DCId,microPhaseId;
-    solidMass = 0.0;
-    for (int i = 0; i < microPhaseId_.size(); ++i) {
-        microPhaseId = microPhaseId_[i];
-        if (microPhaseId != VOIDID) {
-            if (verbose_) {
-                cout << "  Found microstructure id " << microPhaseId;
-                cout.flush();
-                cout << " belongs to phase " << chemSys_->getMicroPhaseName(microPhaseId);
-                cout.flush();
-                volumeFraction = lattice_->getVolumefraction(microPhaseId);
-                cout << "    Volume fraction = " << volumeFraction << endl;
-                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
-                cout << "    DC id number = " << DCId << endl;
-                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
-                cout << "    DC id number = " << DCId << endl;
-                cout.flush();
-                molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
-                cout << "    Molar mass = " << molarMass << " g/mol" << endl;
-                cout.flush();
-                molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
-                cout << "    Molar volume = " << molarVolume << " m3/mol" << endl;
-                cout.flush();
-                density = 0.0;
-                if (molarVolume > 1.0e-12) {
-                    density = molarMass / molarVolume / 1.0e6;          // g/cm3
-                }
-                cout << "    Density = " << density << " g/cm3" << endl;
-                cout.flush();
-                microPhaseMass[microPhaseId] = volumeFraction * density;
-                if (microPhaseId != ELECTROLYTEID) {
-                    solidMass += microPhaseMass[microPhaseId];
-                }
-                cout << "    Mass = " << microPhaseMass[microPhaseId] << " g" << endl;
-                cout.flush();
-            } else {
-                volumeFraction = lattice_->getVolumefraction(microPhaseId);
-                DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId,0);
-                molarMass = chemSys_->getDCMolarMass(DCId);      // g/mol
-                molarVolume = chemSys_->getDCMolarVolume(DCId);  // m3/mol
-                density = 0.0;                 
-                if (molarVolume > 1.0e-12) {
-                    density = molarMass / molarVolume / 1.0e6;          // g/cm3
-                }  
-                microPhaseMass[microPhaseId] = volumeFraction * density;
-                if (microPhaseId != ELECTROLYTEID) {
-                    solidMass += microPhaseMass[microPhaseId];
-                }
-            }
-        }
-    }
-
-    // The water/solids mass ratio follows from that
-   
-    wcRatio_ = microPhaseMass[ELECTROLYTEID] / solidMass;
-
-    if (verbose_) {
-        cout << "Microstructure w/c = " << wcRatio_ << endl;
-        cout << "(Mass of water = " << microPhaseMass[ELECTROLYTEID]
-             << ", mass of solids = " << solidMass << ")" << endl;
-        cout.flush();
-    }
-
-    normalizePhaseMasses(microPhaseMass,solidMass);
-
-    return;
-}
-
-void KineticModel::normalizePhaseMasses(vector<double> microPhaseMass,
-                                        double solidMass)
+void KineticModel::getPhaseMasses(void)
 {
     int microPhaseId;
     double pscaledMass = 0.0;
 
+    wcRatio_ = lattice_->getWsratio();
+
     for (int i = 0; i < microPhaseId_.size(); i++) {
         microPhaseId = microPhaseId_[i];
-        if (microPhaseId == ELECTROLYTEID) {
-            int waterId = chemSys_->getDCId("H2O@");
-            double waterMolarMass = chemSys_->getDCMolarMass(waterId);
-            pscaledMass = wcRatio_ * 100.0;  // Mass of solids scaled to 100 g now
-            if (verbose_) {
-                cout << "Setting DC moles of water to "
-                     << (pscaledMass / waterMolarMass) << endl;
-                cout.flush();
-            }
-            chemSys_->setDCMoles(waterId,(pscaledMass / waterMolarMass));
-            if (verbose_) {
-                cout << "Setting initial micphase mass and volume of "
-                     << chemSys_->getMicroPhaseName(ELECTROLYTEID) << endl;
-                cout.flush();
-            }
-            chemSys_->setMicroPhaseMass(ELECTROLYTEID,pscaledMass);
-            chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID,0.0);
-
-        } else if (microPhaseId != VOIDID) {
-
-            pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
-            if (isKinetic(i)) {
-                scaledMass_[i] = pscaledMass;
-                initScaledMass_[i] = pscaledMass;
-                if (verbose_) {
-                    cout << "Microstructure scaled mass of "
-                         << chemSys_->getMicroPhaseName(microPhaseId)
-                         << " (" << microPhaseId << ") = "
-                         << microPhaseMass[microPhaseId] << " g out of "
-                         << solidMass << " g total" << endl;
-                    cout << "   Implies scaledMass_["
-                         << i << "] = " << scaledMass_[i] << endl;
-                }
-            } else {
-
-                if (isThermo(i)) {
-                    scaledMass_[i] = pscaledMass;
-                    initScaledMass_[i] = pscaledMass;
-                    if (verbose_) {
-                        cout << "Microstructure scaled mass of "
-                             << chemSys_->getMicroPhaseName(microPhaseId)
-                             << " (" << microPhaseId << ") = "
-                             << microPhaseMass[microPhaseId] << " g out of "
-                             << solidMass << " g total" << endl;
-                        cout << "   Implies scaledMass_["
-                             << i << "] = " << scaledMass_[i] << endl;
-                        cout.flush();
-                    }
-                } else {
-                    if (verbose_) {
-                        cout << "Microstructure scaled mass of "
-                             << chemSys_->getMicroPhaseName(microPhaseId)
-                             << " (" << microPhaseId << ") = "
-                             << microPhaseMass[microPhaseId] << " g out of "
-                             << solidMass << " g total" << endl;
-                        cout.flush();
-                    }
-                }
-            }
+        if (microPhaseId != VOIDID) {
+            pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
+            scaledMass_[i] = pscaledMass;
+            initScaledMass_[i] = pscaledMass;
 
             // Setting the phase mass will also automatically calculate the phase volume
             
             if (verbose_) {
-                cout << "Setting initial micphase mass and volume of "
+                cout << "Kinetic model is setting initial micphase mass and volume of "
                      << chemSys_->getMicroPhaseName(microPhaseId) << endl;
                 cout.flush();
             }
-            chemSys_->setMicroPhaseMass(microPhaseId,pscaledMass);
-
-            chemSys_->setMicroPhaseMassDissolved(microPhaseId,0.0);
         }
     }
 

@@ -227,7 +227,7 @@ map<int,double> initialSolutionComposition_;
 */
 map<int,vector<double> > microPhaseMemberVolumeFraction_;
 
-vector<double> microphaseporosity_;                 /**< The sub-voxel porosity of a given phase,
+vector<double> microPhasePorosity_;                 /**< The sub-voxel porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
 
 vector<double> k2o_;                      /**< Mass fraction of K<sub>2</sub>O dissolved in
@@ -2254,11 +2254,11 @@ void setMicroPhasePorosity (const unsigned int idx,
                             double pval)
 {
     try {
-        microphaseporosity_.at(idx) = pval;
+        microPhasePorosity_.at(idx) = pval;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicroPhasePorosity","microphaseporosity_",
-                        microphaseporosity_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhasePorosity","microPhasePorosity_",
+                        microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2289,11 +2289,11 @@ needs to be checked to see what the convention ensures compatibility with that l
 double getMicroPhasePorosity (const unsigned int idx)
 {
     try {
-        return microphaseporosity_.at(idx);
+        return microPhasePorosity_.at(idx);
     }
     catch (out_of_range &oor) {
         EOBException ex("ChemicalSystem","getMicroPhasePorosity",
-                        "microphaseporosity_",microphaseporosity_.size(),idx);
+                        "microPhasePorosity_",microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2316,7 +2316,7 @@ double getMicroPhasePorosity (const string &str)
     }
     catch (out_of_range &oor) {
         EOBException ex("ChemicalSystem","getMicroPhasePorosity",
-                        "microphaseporosity_",microphaseporosity_.size(),idx);
+                        "microPhasePorosity_",microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2342,7 +2342,7 @@ micrometer
 */
 vector<double> getMicroPhasePorosity() const
 {
-    return microphaseporosity_;
+    return microPhasePorosity_;
 }
 
 /**
@@ -2699,8 +2699,13 @@ unsigned int getMicroPhaseDCMembers (const unsigned int idx,
                               const unsigned int jdx)
 {
     string msg;
+    
     map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
     if (p != microPhaseDCMembers_.end()) {
+        if (verbose_) {
+            cout << "micro phase id " << idx << " looking for dc index " << jdx << endl;
+            cout.flush();
+        }
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
@@ -3658,7 +3663,7 @@ double getSurfaceArea (const unsigned int idx)
 @param val is the volume to assign to that microstructure phase
 */
 void setMicroPhaseVolume (const unsigned int idx,
-                        const double val)
+                          const double val)
 {
     try {
         microPhaseVolume_.at(idx) = val;
@@ -3671,6 +3676,10 @@ void setMicroPhaseVolume (const unsigned int idx,
     }
 
     // Calculate the subvoxel porosity of this phase as well
+    if (verbose_) {
+        cout << "Setting volume of microphase " << idx << " to " << val << endl;
+        cout.flush();
+    }
     calcMicroPhasePorosity(idx);
 
     return;
@@ -3702,30 +3711,40 @@ void calcMicroPhasePorosity (const unsigned int idx)
     double conc = 0.0; // Temporary variable for holding concentrations
                        // For solid phases this will be mole fraction
 
+    int DCId = 0;
     double porosity = 0.0;
     double vol = 0.0;
     double sumvol = 0.0;
     double weightedporosities = 0.0;
     if (verbose_) {
         cout << "Calculating micro phase porosity for micro phase " << getMicroPhaseName(idx) << endl;
+        cout.flush();
     }
     for (int i = 0; i < DClist.size(); ++i) {
-        conc = getDCConcentration(i);
+        DCId = DClist[i];
+        conc = getDCConcentration(DCId);
         porosity = DCporosities[i];
-        vol = conc * getDCMolarVolume(i);
+        vol = conc * getDCMolarVolume(DCId);
         weightedporosities += (vol * porosity);
         sumvol += vol;
         if (verbose_) {
-            cout << "    " << getDCName(i) << " concentration = " << conc << endl;
-            cout << "    " << getDCName(i) << " porosity = " << porosity << endl;
+            cout << "    " << getDCName(DCId) << " concentration = " << conc << endl;
+            cout << "    " << getDCName(DCId) << " porosity = " << porosity << endl;
+            cout << "    " << getDCName(DCId) << " molarvolume = " << getDCMolarVolume(DCId) << endl;
             cout << "****" << endl;
+            cout.flush();
         }
     }
-    porosity = (weightedporosities / sumvol);
+    if (sumvol > 0.0) {
+        porosity = (weightedporosities / sumvol);
+    } else {
+        porosity = 0.0;
+    }
     if (verbose_) {
         cout << "    " << getMicroPhaseName(idx) << " subvoxel porosity = " << porosity << endl;
         cout.flush();
     }
+
     setMicroPhasePorosity(idx,porosity);
 
     return;
@@ -3778,23 +3797,32 @@ void setMicroPhaseMass (const unsigned int idx,
         ex.printException();
         exit(1);
     }
-    double v0 = node_->DC_V0(getMicroPhaseMembers(idx,0),P_,T_);
-    double dcmm = getDCMolarMass(getMicroPhaseMembers(idx,0));
-    if (verbose_) {
-        cout << "    " << microPhaseName_[idx] << ": v0 = "
-             << v0 << ", dcmm = " << dcmm
-             << ", so volume = ";
-    }
-    if (dcmm < 1.0e-9) {
-        if (verbose_) cout << " not defined" << endl;
-        FloatException fex("ChemicalSystem","setMicroPhaseMass",
-                           "Divide by zero (dcmm)");
-        fex.printException();
-        exit(1);
-    }
-    if (verbose_) cout << (val*v0/dcmm) << endl;
 
-    setMicroPhaseVolume(idx,(val*v0/dcmm));
+    int DCId = 0;
+    if (idx == ELECTROLYTEID) {
+        DCId = getDCId("H2O@");
+    } else if (idx != VOIDID) {
+        DCId = getMicroPhaseDCMembers(idx,0);
+    }
+    if (idx != VOIDID) {
+        double v0 = node_->DC_V0(DCId,P_,T_);
+        double dcmm = getDCMolarMass(DCId);
+        if (verbose_) {
+            cout << "    " << microPhaseName_[idx] << ", DC " << getDCName(DCId) << ": v0 = "
+                 << v0 << ", dcmm = " << dcmm
+                 << ", so volume = ";
+            cout.flush();
+        }
+        if (dcmm < 1.0e-9) {
+            FloatException fex("ChemicalSystem","setMicroPhaseMass",
+                               "Divide by zero (dcmm)");
+            fex.printException();
+            exit(1);
+        }
+        if (verbose_) cout << (val*v0/dcmm) << endl;
+
+        setMicroPhaseVolume(idx,(val*v0/dcmm));
+    }
 
     return;
 }
@@ -3813,8 +3841,6 @@ vector<double> getMicroPhaseMass (void) const
 
 /**
 @brief Get the mass of a microstructure phase (by id).
-
-@note NOT USED.
 
 @param idx is the microstructure phase id
 @return the mass assigned to that microstructure phase
