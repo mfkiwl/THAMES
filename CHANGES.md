@@ -7,6 +7,7 @@
 | May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
 | May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
+| Apr 22 21:45:58 2023 | Fixed more runtime errors. Almost working but won't empty pores |
 | Apr 21 17:46:33 2023 | Fixed multiple runtime errors, but still has some |
 | Apr 20 14:19:42 2023 | Composition-dependent subvoxel porosity compiles; need to test runtime behavior |
 | Apr 19 18:21:20 2023 | Created a branch for composition-dependent subvoxel porosity |

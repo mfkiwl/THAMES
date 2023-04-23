@@ -3690,65 +3690,7 @@ void setMicroPhaseVolume (const unsigned int idx,
 
 @param idx is the microstructure phase id
 */
-void calcMicroPhasePorosity (const unsigned int idx)
-{
-
-    // Find all the DC ids for this microstructure phase
-    vector<int> DClist = getMicroPhaseDCMembers(idx);
-    vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
-    
-    /// @todo Do we need to check that DClist and DCporosities are the same size?
-    /// @todo Do we need to check that DClist and DCporosities are in the same order?
-    /// @note I think this is already guaranteed when we parse the phase data
-    
-
-    // Loop over them one by one and get each one's volume and
-    // subvoxel porosity.  Create a volume weighted average
-    // of porosities
-
-    /// @todo Will this work for capillary porosity?  Conc will be molal
-
-    double conc = 0.0; // Temporary variable for holding concentrations
-                       // For solid phases this will be mole fraction
-
-    int DCId = 0;
-    double porosity = 0.0;
-    double vol = 0.0;
-    double sumvol = 0.0;
-    double weightedporosities = 0.0;
-    if (verbose_) {
-        cout << "Calculating micro phase porosity for micro phase " << getMicroPhaseName(idx) << endl;
-        cout.flush();
-    }
-    for (int i = 0; i < DClist.size(); ++i) {
-        DCId = DClist[i];
-        conc = getDCConcentration(DCId);
-        porosity = DCporosities[i];
-        vol = conc * getDCMolarVolume(DCId);
-        weightedporosities += (vol * porosity);
-        sumvol += vol;
-        if (verbose_) {
-            cout << "    " << getDCName(DCId) << " concentration = " << conc << endl;
-            cout << "    " << getDCName(DCId) << " porosity = " << porosity << endl;
-            cout << "    " << getDCName(DCId) << " molarvolume = " << getDCMolarVolume(DCId) << endl;
-            cout << "****" << endl;
-            cout.flush();
-        }
-    }
-    if (sumvol > 0.0) {
-        porosity = (weightedporosities / sumvol);
-    } else {
-        porosity = 0.0;
-    }
-    if (verbose_) {
-        cout << "    " << getMicroPhaseName(idx) << " subvoxel porosity = " << porosity << endl;
-        cout.flush();
-    }
-
-    setMicroPhasePorosity(idx,porosity);
-
-    return;
-}
+void calcMicroPhasePorosity (const unsigned int idx);
 
 /**
 @brief Get the volumes of all microstructure phases.
@@ -3786,47 +3728,7 @@ double getMicroPhaseVolume(const unsigned int idx)
 @param val is the mass to assign to that microstructure phase
 */
 void setMicroPhaseMass (const unsigned int idx,
-                      const double val)
-{
-    try {
-        microPhaseMass_.at(idx) = val;
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicroPhaseMass",
-                           "microPhaseMass_",microPhaseMass_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-
-    int DCId = 0;
-    if (idx == ELECTROLYTEID) {
-        DCId = getDCId("H2O@");
-    } else if (idx != VOIDID) {
-        DCId = getMicroPhaseDCMembers(idx,0);
-    }
-    if (idx != VOIDID) {
-        double v0 = node_->DC_V0(DCId,P_,T_);
-        double dcmm = getDCMolarMass(DCId);
-        if (verbose_) {
-            cout << "    " << microPhaseName_[idx] << ", DC " << getDCName(DCId) << ": v0 = "
-                 << v0 << ", dcmm = " << dcmm
-                 << ", so volume = ";
-            cout.flush();
-        }
-        if (dcmm < 1.0e-9) {
-            FloatException fex("ChemicalSystem","setMicroPhaseMass",
-                               "Divide by zero (dcmm)");
-            fex.printException();
-            exit(1);
-        }
-        if (verbose_) cout << (val*v0/dcmm) << endl;
-
-        setMicroPhaseVolume(idx,(val*v0/dcmm));
-    }
-
-    return;
-}
-
+                        const double val);
 /**
 @brief Get the masses of all microstructure phases.
 

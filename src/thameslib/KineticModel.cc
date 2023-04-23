@@ -565,7 +565,7 @@ void KineticModel::getPhaseMasses(void)
 
     for (int i = 0; i < microPhaseId_.size(); i++) {
         microPhaseId = microPhaseId_[i];
-        if (microPhaseId != VOIDID) {
+        if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
             pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
             scaledMass_[i] = pscaledMass;
             initScaledMass_[i] = pscaledMass;
@@ -573,8 +573,9 @@ void KineticModel::getPhaseMasses(void)
             // Setting the phase mass will also automatically calculate the phase volume
             
             if (verbose_) {
-                cout << "Kinetic model is setting initial micphase mass and volume of "
-                     << chemSys_->getMicroPhaseName(microPhaseId) << endl;
+                cout << "Kinetic model reads solid micphase mass of "
+                     << chemSys_->getMicroPhaseName(microPhaseId)
+                     << " as " << initScaledMass_[i] << endl;
                 cout.flush();
             }
         }
