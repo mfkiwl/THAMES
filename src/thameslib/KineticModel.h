@@ -1117,8 +1117,6 @@ double getScaledMass (const unsigned int i) const
 
 The scaled mass of a phase is its mass percent on a total solids basis.
 
-@note NOT USED.
-
 @return the vector of initial scaled masses [percent solids]
 */
 vector<double> getInitScaledMass () const

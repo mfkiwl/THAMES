@@ -41,3 +41,4 @@ src/version.h
 src/thameslib/myconfig.h
 src/vcctl2thames/vcctl2thames.h
 src/GEMS3K-standalone/Resources
+src/Resources
