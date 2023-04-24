@@ -2077,7 +2077,7 @@ void Lattice::writePoreSizeDistribution (double curtime,
 {
     // First compose the full pore volume distribution
 
-        vector<double> subpore_volume;
+    vector<double> subpore_volume;
     subpore_volume.resize(volumefraction_.size(),0.0);
 
     // Following will hold the subvoxel porosity of a phase
@@ -2098,12 +2098,16 @@ void Lattice::writePoreSizeDistribution (double curtime,
     
     vector<vector<struct PoreSizeVolume> > porevolume;
     porevolume = chemSys_->getPoreSizeDistribution();
-
+    
     // subpore_volume[i] is the non-normalized pore volume fraction
     // within all of phase i throughout the microstructure.  We
     // now partition that non-normalized volume among the different
     // pore diameters for that phase using the normalized
     // pore volume distribution for that phase
+    //
+    /// @todo Watch out that pore size distributions are indexed
+    /// the same as the THAMES phase id numbers, or else change this
+    /// code below.
    
     for (int i = 0; i < porevolume.size(); ++i) {
         if (i != ELECTROLYTEID && i != VOIDID) {
@@ -2135,18 +2139,30 @@ void Lattice::writePoreSizeDistribution (double curtime,
         if (i != ELECTROLYTEID && i != VOIDID) {
             maxsize = 1.0;
             int j = 0;
+            if (verbose_) {
+                cout << "Lattice::writePoreSizeDistribution: Distribution "
+                     << i << " of " << (porevolume.size() - 1)
+                     << " now has " << porevolume[i].size() << " elements" << endl;
+                cout.flush();
+            }
             while (j < porevolume[i].size()) {
+                if (verbose_) {
+                    cout << "    " << j << " of " << (porevolume[i].size() - 1)
+                         << " diameter = " << porevolume[i][j].diam << ", maxsize = "
+                         << maxsize << ", binnedporevolume size = "
+                         << binnedporevolume[i].size() << endl;
+                    cout.flush();
+                }
                 while ((porevolume[i][j].diam <= maxsize)
                     && (j < porevolume[i].size())) {
                     cumulative_volume += porevolume[i][j].volume;
                     cumulative_volfrac += porevolume[i][j].volfrac;
                     j++;
                 }
-                dpsv.diam = maxsize;
-                dpsv.volume = cumulative_volume;
-                dpsv.volfrac = cumulative_volfrac;
                 binnedporevolume[i].push_back(dpsv);
-                dpsv.diam = dpsv.volume = dpsv.volfrac = 0.0;
+                binnedporevolume[i][binnedporevolume[i].size()-1].diam = maxsize;
+                binnedporevolume[i][binnedporevolume[i].size()-1].volume = cumulative_volume;
+                binnedporevolume[i][binnedporevolume[i].size()-1].volfrac = cumulative_volfrac;
                 cumulative_volume = cumulative_volfrac = 0.0;
                 maxsize += 1.0;
             }
@@ -2158,8 +2174,21 @@ void Lattice::writePoreSizeDistribution (double curtime,
         cout << "  %%%%% Binned pore distributions %%%%" << endl;
         for (int i = 0; i < porevolume.size(); ++i) {
             if (i != ELECTROLYTEID && i != VOIDID) {
+                if (verbose_) {
+                    cout << "Lattice::writePoreSizeDistribution: Distribution "
+                         << i << " of " << (porevolume.size() - 1)
+                         << " now has " << porevolume[i].size() << " elements" << endl;
+                    cout.flush();
+                }
                 cout << "  %%%% " << chemSys_->getMicroPhaseName(i) << endl;
                 for (int j = 0; j < binnedporevolume[i].size(); ++j) {
+                    if (verbose_) {
+                        cout << "    binnedporevolume[" << i << "][" << j << "]: diam = "
+                             << binnedporevolume[i][j].diam << ", volume = "
+                             << binnedporevolume[i][j].volume << ", volfrac = "
+                             << binnedporevolume[i][j].volfrac << endl;
+                        cout.flush();
+                    }
                     if (binnedporevolume[i][j].volume > 0.0) {
                         cout << "  %%%%%%% diam = " << binnedporevolume[i][j].diam << " nm,"
                              << " volume = " << binnedporevolume[i][j].volume << ","

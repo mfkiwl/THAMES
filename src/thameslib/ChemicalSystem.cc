@@ -988,6 +988,12 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
 
     poreSizeDistribution_.push_back(phaseData.poreSizeDist);
+    if (verbose_) {
+        cout << "Pushed pore size distribution data for phase " << phaseData.thamesName << endl;
+        cout << "This phase distribution has " << phaseData.poreSizeDist.size() << " entries" << endl;
+        cout << "Have now registered " << poreSizeDistribution_.size() << " PSDs" << endl;
+        cout.flush();
+    }
     phaseData.poreSizeDist.clear();
     grayscale_.push_back(phaseData.gray);
     color_.push_back(phaseData.colors);
