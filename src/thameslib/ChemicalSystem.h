@@ -3676,11 +3676,14 @@ void setMicroPhaseVolume (const unsigned int idx,
     }
 
     // Calculate the subvoxel porosity of this phase as well
-    if (verbose_) {
-        cout << "Setting volume of microphase " << idx << " to " << val << endl;
-        cout.flush();
+
+    if (idx != VOIDID) {
+        if (verbose_) {
+            cout << "Going into calcMicroPhasePorosity(" << idx << ")" << endl;
+            cout.flush();
+        }
+        calcMicroPhasePorosity(idx);
     }
-    calcMicroPhasePorosity(idx);
 
     return;
 }

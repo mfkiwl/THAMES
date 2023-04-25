@@ -1339,14 +1339,23 @@ void Lattice::changeMicrostructure (double time,
 
     vol_next = chemSys_->getMicroPhaseVolume();
     phasenames = chemSys_->getMicroPhaseName();
+    if (verbose_) {
+        cout << "Before adjustMicrostructureVolumes:" << endl;
+        for (int iii = 0; iii < vol_next.size(); ++iii) {
+            cout << "   Volume of " << phasenames[iii] << " = "
+                 << vol_next[iii] << " m3" << endl;
+        }
+    }
 
-    /// Add two spots to the end of vol_next, one for total
-    /// capillary porosity and another for subvoxel porosity.
-   
     try {
         adjustMicrostructureVolumes(phasenames,vol_next);
-        cout << "Outside of adjustMicrostructureVolumes, subvoxelporevolume_ = " << subvoxelporevolume_ << endl;
-        cout.flush();
+        if (verbose_) {
+            cout << "After adjustMicrostructureVolumes:" << endl;
+            for (int iii = 0; iii < vol_next.size(); ++iii) {
+                cout << "   Volume of " << phasenames[iii] << " = "
+                     << vol_next[iii] << " m3" << endl;
+            }
+        }
 
         adjustMicrostructureVolFracs(phasenames,vol_next,vfrac_next);
     }

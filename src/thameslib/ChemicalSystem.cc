@@ -1619,8 +1619,13 @@ void ChemicalSystem::setMicroPhaseMass (const unsigned int idx,
             fex.printException();
             exit(1);
         }
-        if (verbose_) cout << (val*v0/dcmm) << endl;
-
+        if (verbose_) {
+            cout << (val*v0/dcmm) << endl;
+            cout << "Setting volume of microphase " << idx << " to "
+                 << (val*v0/dcmm) << " (VOIDID = " << VOIDID
+                  << ")" << endl;
+            cout.flush();
+        }
         setMicroPhaseVolume(idx,(val*v0/dcmm));
     }
 
@@ -1634,89 +1639,98 @@ void ChemicalSystem::calcMicroPhasePorosity (const unsigned int idx)
 
     double porosity = 0.0;
 
-    if (getMicroPhaseVolume(idx) > 1.0e-12) {
-
-        // Get the first GEM phase for this microstructure phase
+    // Get the first GEM phase for this microstructure phase
    
-        unsigned int gemphaseid = getMicroPhaseToGEMPhase (idx,0);
+    /// @todo Generalize calcMicroPhasePorosity so that we
+    /// don't just check the first GEM Phase listed as part
+    /// of this microstructure phase
+ 
+    unsigned int gemphaseid = getMicroPhaseToGEMPhase (idx,0);
 
-        // Find all the DC ids for this GEM phase
+    // Find all the DC ids for this GEM phase
 
-        vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
+    vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
 
-        // Get the porosities for each DC in the microstructure phase
-   
-        vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
+    // Get the porosities for each DC in the microstructure phase
+
+    vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
     
-        /// @todo Do we need to check that DClist and DCporosities are the same size?
-        /// @todo Do we need to check that DClist and DCporosities are in the same order?
-        /// @note I think this is already guaranteed when we parse the phase data
-    
-
-        // Loop over them one by one and get each one's volume and
-        // subvoxel porosity.  Create a volume weighted average
-        // of porosities
-
-        /// @todo Will this work for capillary porosity?  Conc will be molal
-
-        double conc = 0.0; // Temporary variable for holding concentrations
-                       // For solid phases this will be mole fraction
-
-        int DCId = 0;
-        double vol = 0.0;
-        double sumvol = 0.0;
-        double weightedporosities = 0.0;
-        if (verbose_) {
-            cout << "Calculating micro phase porosity for micro phase "
-                 << getMicroPhaseName(idx) << endl;
+    if (verbose_) {
+        cout << "ChemicalSystem::calcMicroPhasePorosity for "
+             << getMicroPhaseName(idx) << endl;
+        cout << "    This phase's GEM phase id = " << gemphaseid
+             << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
+        cout << "    The DC members for this GEM phase are:" << endl;
+        for (int ii = 0; ii < DClist.size(); ++ii) {
+            cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii])
+                 << ")" << endl;
             cout.flush();
         }
+    }
 
-        // JWB (2023-Apr-22) This algorithm works ONLY if there are no
-        // solid solutions that are kinetic phases.  But THAMES is not
-        // set up for that in all sorts of ways and this is not the
-        // biggest of them.
+    /// @todo Do we need to check that DClist and DCporosities are the same size?
+    /// @todo Do we need to check that DClist and DCporosities are in the same order?
+    /// @note I think this is already guaranteed when we parse the phase data
+    
+
+    // Loop over them one by one and get each one's volume and
+    // subvoxel porosity.  Create a volume weighted average
+    // of porosities
+
+    /// @todo Will this work for capillary porosity?  Conc will be molal
+
+    double conc = 0.0; // Temporary variable for holding concentrations
+                       // For solid phases this will be mole fraction
+
+    int DCId = 0;
+    double vol = 0.0;
+    double sumvol = 0.0;
+    double weightedporosities = 0.0;
+
+    // JWB (2023-Apr-22) This algorithm works ONLY if there are no
+    // solid solutions that are kinetic phases.  But THAMES is not
+    // set up for that in all sorts of ways and this is not the
+    // biggest of them.
        
-        if (DClist.size() == 1) {
-            DCId = DClist[0];
-            porosity = DCporosities[0];
-            conc = 1.0;
+    if (DClist.size() == 1) {
+        DCId = DClist[0];
+        porosity = DCporosities[0];
+        conc = 1.0;
+        vol = conc * getDCMolarVolume(DCId);
+        if (verbose_) {
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") concentration = " << conc << endl;
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") porosity = " << porosity << endl;
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+            cout << "****" << endl;
+            cout.flush();
+        }
+    } else {
+        for (int i = 0; i < DClist.size(); ++i) {
+            DCId = DClist[i];
+            conc = getDCConcentration(DCId);
+            porosity = DCporosities[i];
             vol = conc * getDCMolarVolume(DCId);
+            weightedporosities += (vol * porosity);
+            sumvol += vol;
             if (verbose_) {
-                cout << "    " << getDCName(DCId) << " (" << DCId
-                     << ") concentration = " << conc << endl;
-                cout << "    " << getDCName(DCId) << " (" << DCId
-                     << ") porosity = " << porosity << endl;
-                cout << "    " << getDCName(DCId) << " (" << DCId
-                     << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") concentration = " << conc << endl;
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") porosity = " << porosity << endl;
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
                 cout << "****" << endl;
                 cout.flush();
             }
+        }
+        if (sumvol > 0.0) {
+            porosity = (weightedporosities / sumvol);
         } else {
-            for (int i = 0; i < DClist.size(); ++i) {
-                DCId = DClist[i];
-                conc = getDCConcentration(DCId);
-                porosity = DCporosities[i];
-                vol = conc * getDCMolarVolume(DCId);
-                weightedporosities += (vol * porosity);
-                sumvol += vol;
-                if (verbose_) {
-                    cout << "    " << getDCName(DCId) << " (" << DCId << ") concentration = " << conc << endl;
-                    cout << "    " << getDCName(DCId) << " (" << DCId << ") porosity = " << porosity << endl;
-                    cout << "    " << getDCName(DCId) << " (" << DCId << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
-                    cout << "****" << endl;
-                    cout.flush();
-                }
-            }
-            if (sumvol > 0.0) {
-                porosity = (weightedporosities / sumvol);
-            } else {
-                porosity = 0.0;
-            }
-            if (verbose_) {
-                cout << "    " << getMicroPhaseName(idx) << " subvoxel porosity = " << porosity << endl;
-                cout.flush();
-            }
+            porosity = 0.0;
+        }
+        if (verbose_) {
+            cout << "    " << getMicroPhaseName(idx) << " subvoxel porosity = " << porosity << endl;
+            cout.flush();
         }
     }
 
@@ -1989,12 +2003,12 @@ int ChemicalSystem::calculateState (double time,
             cout.flush();
         }
         if (!isKinetic(i)) {
+            calcMicroPhasePorosity(i);
+            phi = getMicroPhasePorosity(i);
             microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
             for (unsigned int j = 0; j < microPhaseMembers_[i].size(); j++) {
                 microPhaseMass_[i] +=
                      GEMPhaseMass_[microPhaseMembers_[i][j]];
-                calcMicroPhasePorosity(i);
-                phi = getMicroPhasePorosity(i);
 
                 if (verbose_) {
                     cout << "    Is NOT a KINETIC phase: is composed of "
@@ -2009,11 +2023,22 @@ int ChemicalSystem::calculateState (double time,
                 }
 
                 /// Here is where the subvoxel porosity is included
-                microPhaseVolume_[i] +=
-                     (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
+                /// @todo Need a more disciplined approach to making sure
+                /// these are solid phases and not capillary porosity
+              
+                if (i == ELECTROLYTEID) {
+                    microPhaseVolume_[i] += GEMPhaseVolume_[microPhaseMembers_[i][j]];
+                } else if (i != VOIDID && phi < 1.0) {
+                    microPhaseVolume_[i] +=
+                         (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
+                } else {
+                    cout << "WARNING: A solid phase with porosity = 1.0?" << endl;
+                    cout.flush();
+                    microPhaseVolume_[i] +=
+                         (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (0.001));
+                }
             }
             microVolume_ += microPhaseVolume_[i];
-
         } else {
             if (verbose_) {
                 calcMicroPhasePorosity(i);
