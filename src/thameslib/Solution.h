@@ -125,7 +125,6 @@ vector<double> SI_;
 double crystalStrain_;                  /**< Assigned strain from FE model */
 
 bool verbose_;                      /**< Flag to determine verbose output */
-bool debug_;                        /**< Flag to determine debugging output */
 
 public:
 
@@ -138,13 +137,11 @@ which are passed to the constructor.
 @param dchFileName is the name of the GEM DCH file
 @param dbrFileName is the name of the GEM DBR (data bridge) file
 @param verbose is true if verbose output should be produced
-@param debug is true if debugging output should be produced
 */
 
 Solution (const string &dchFileName,
           const string &dbrFileName,
-          const bool verbose,
-          const bool debug = false);
+          const bool verbose = false);
 
 /**
 @brief Destructor.
@@ -523,27 +520,6 @@ void setVerbose (const bool isverbose)
 bool getVerbose (void) const
 {
     return verbose_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug (void) const
-{
-    return debug_;
 }
 
 };      // End of the Solution class

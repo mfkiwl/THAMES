@@ -25,8 +25,7 @@ Lattice::Lattice (ChemicalSystem *cs,
                   Solution *solut,
                   const string &fileName,
                   const bool verbose,
-                  const bool warning,
-                  const bool debug)
+                  const bool warning)
 : siteneighbors_(18),chemSys_(cs),solut_(solut)
 {
   unsigned int i,j,k;
@@ -47,7 +46,6 @@ Lattice::Lattice (ChemicalSystem *cs,
   deptheffect_ = true;
     
   verbose_ = verbose;
-  debug_ = debug;
   warning_ = warning;
 
   ///
@@ -632,7 +630,7 @@ void Lattice::findInterfaces (void)
         //     cout << "Trying to add a water interface for phase " << i << "... ";
         //     cout.flush();
         // }
-        interface_.push_back(Interface(chemSys_,rg_,gsite,dsite,i,verbose_,debug_));   
+        interface_.push_back(Interface(chemSys_,rg_,gsite,dsite,i,verbose_));   
         // if (verbose_) {
         //     cout << "Done!" << endl;
         //     cout.flush();
@@ -640,7 +638,7 @@ void Lattice::findInterfaces (void)
       } else {
         // cout << "Trying to add a regular interface for phase " << i << "... ";
         // cout.flush();
-        interface_.push_back(Interface(rg_,verbose_,debug_));   
+        interface_.push_back(Interface(rg_,verbose_));   
       }
     }
 

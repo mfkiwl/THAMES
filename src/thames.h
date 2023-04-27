@@ -115,11 +115,6 @@ THAMES are contained in library files.
 bool VERBOSE;
 
 /**
-@brief Flag for debug output
-*/
-bool DEBUG;
-
-/**
 @brief Flag for warning message output
 */
 bool WARNING;

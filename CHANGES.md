@@ -4,7 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
-| Apr 25 21:45:58 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
+| Apr 27 17:47:31 2023 | Removed debug as class variables and now have a global DEBUG preprocessor define |
+| Apr 25 21:17:23 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
 | Apr 24 21:45:58 2023 | Fixed one error in Lattice::writePoreSizeDistribution. Phase porosity still not being calculated |
 | Apr 22 21:45:58 2023 | Fixed more runtime errors. Almost working but won't empty pores |
 | Apr 21 17:46:33 2023 | Fixed multiple runtime errors, but still has some |

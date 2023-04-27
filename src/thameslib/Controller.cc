@@ -14,8 +14,7 @@ Controller::Controller (Lattice *msh,
                         const string &parfilename,
                         const string &jobname,
                         const bool verbose,
-                        const bool warning,
-                        const bool debug)
+                        const bool warning)
     :lattice_(msh),
      kineticmodel_(km),
      chemSys_(cs),
@@ -24,8 +23,7 @@ Controller::Controller (Lattice *msh,
      thermalstr_(thmstr),
      jobroot_(jobname),
      verbose_(verbose),
-     warning_(warning),
-     debug_(debug)
+     warning_(warning)
 {
   unsigned int i;
   double tvalue,pvalue;

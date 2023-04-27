@@ -101,7 +101,6 @@ double surfacearea_;                        /**< Total surface area [m<sup>2</su
 bool deptheffect_;                          /**< Whether or not PNG images should have
                                                     depth effect */
 bool verbose_;                              /**< Flag to determine verbose output */
-bool debug_;                                /**< Flag to determine debugging output */
 bool warning_;                              /**< Flag to determine warning message output */
 
 public:
@@ -135,14 +134,12 @@ the voxel phase assignments can be made at each site.
 @param fileName is the name of the file containing the microstructure data
 @param verbose is true if extra messages are to be printed
 @param warning is true if warning messages are to be printed
-@param debug is true if debugging output is to produced
 */
 Lattice (ChemicalSystem *cs,
         Solution *solut,
         const string &fileName,
         const bool verbose,
-        const bool warning,
-        const bool debug);
+        const bool warning);
     
 /**
 @brief Destructor.
@@ -1424,27 +1421,6 @@ void setWarning (const bool iswarning)
 bool getWarning () const
 {
     return warning_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug () const
-{
-    return debug_;
 }
 
 };      // End of Lattice class

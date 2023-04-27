@@ -15,8 +15,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const string &GEMdbrname,
                                 const string &interfaceFileName,
                                 const bool verbose,
-                                const bool warning,
-                                const bool debug) : solut_(Solut)
+                                const bool warning) : solut_(Solut)
 {
     unsigned int i,j;
     double *amat;
@@ -42,7 +41,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ///
  
     verbose_ = verbose;
-    debug_ = debug;
     jsonFormat_ = false;
     warning_ = warning;
     numMicroPhases_ = numGEMPhases_ = numSolutionPhases_ = 0;
@@ -1405,7 +1403,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMassDissolved_ = obj.getMicroPhaseMassDissolved();
     microVoidVolume_ = obj.getMicroVoidVolume();
     verbose_ = obj.getVerbose();
-    debug_ = obj.getDebug();
     warning_ = obj.getWarning();
 }
 

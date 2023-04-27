@@ -89,7 +89,6 @@ long int damagecount_;              /**< Number of pixels in the lattice that ar
 
 bool verbose_;                      /**< Flag for verbose output */
 bool warning_;                      /**< Flag for warning output */
-bool debug_;                        /**< Flag for debugging output */
 
 public:
     
@@ -115,7 +114,6 @@ auxiliary objects be defined already, including
 @param jobname is the root name to give to all output files
 @param verbose is true if verbose output should be produced
 @param warning is true if warning output should be produced
-@param debug is true if debugging output should be produced
 */
 Controller (Lattice *msh,
             KineticModel *km,
@@ -126,8 +124,7 @@ Controller (Lattice *msh,
             const string &parfilename,
             const string &jobname,
             const bool verbose,
-            const bool warning,
-            const bool debug);
+            const bool warning);
     
 /**
 @brief Run a computational iteration.
@@ -260,27 +257,6 @@ void setWarning (const bool iswarning)
 bool getWarning () const
 {
     return warning_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug () const
-{
-    return debug_;
 }
 
 };      // End of Controller class

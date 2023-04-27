@@ -154,4 +154,9 @@ const int EXTERNALFORMAT = 0;
 
 #include "Exceptions.h"
 #include <stdexcept>
+
+#ifndef DEBUG
+#define DEBUG
+#endif
+
 #endif
