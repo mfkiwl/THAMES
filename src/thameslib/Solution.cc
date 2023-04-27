@@ -10,8 +10,7 @@ using namespace std;
 
 Solution::Solution (const string &dchFileName,
                     const string &dbrFileName,
-                    const bool verbose,
-                    const bool debug)
+                    const bool verbose)
 {
     pH_ = 7.0;
     pe_ = 1.0;
@@ -28,7 +27,6 @@ Solution::Solution (const string &dchFileName,
     maxGEMFails_ = 3;
 
     verbose_ = verbose;
-    debug_ = debug;
     jsonFormat_ = false;
 
     numICs_ = numDCs_ = numGEMPhases_ = numSolutionPhases_ = 0;

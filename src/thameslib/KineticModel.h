@@ -246,7 +246,6 @@ double pfk1_,pfk2_,pfk3_;       /**< Pozzolanic factors for the Parrott and Kill
 
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
-bool debug_;                    /**< Flag for debugging output */
 
 public:
     
@@ -272,15 +271,13 @@ various other objects for the simulation are allocated and constructed.
 @param fileName is the name of the XML file with the input for the kinetic model
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
-@param debug is true if debugging output should be produced
 */
 KineticModel (ChemicalSystem *cs,
               Solution *solut,
               Lattice *lattic,
               const string &fileName,
               const bool verbose,
-              const bool warning,
-              const bool debug);
+              const bool warning);
      
 /**
 @brief Master method controlling the parsing of XML input to the kinetic model.
@@ -1513,27 +1510,6 @@ void setWarning (const bool iswarning)
 bool getWarning () const
 {
     return warning_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debugging output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug () const
-{
-    return debug_;
 }
 
 };      // End of KineticModel class

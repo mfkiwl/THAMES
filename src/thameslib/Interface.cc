@@ -27,15 +27,13 @@ Interface::Interface ()
 }
 
 Interface::Interface (RanGen *rg,
-                      const bool verbose,
-                      const bool debug)
+                      const bool verbose)
 {
     microPhaseId_ = 0;
     growthSites_.clear();
     dissolutionSites_.clear();
     rg_ = rg;
     verbose_ = verbose;
-    debug_ = debug;
 }
 
 Interface::Interface (ChemicalSystem *csys,
@@ -43,8 +41,7 @@ Interface::Interface (ChemicalSystem *csys,
                       vector<Site *> gv,
                       vector<Site *> dv,
                       unsigned int pid,
-                      const bool verbose,
-                      const bool debug)
+                      const bool verbose)
 {
     unsigned long int j;
     unsigned int i;
@@ -54,7 +51,6 @@ Interface::Interface (ChemicalSystem *csys,
     vector<Isite>::iterator start,end;
 
     verbose_ = verbose;
-    debug_ = debug;
     rg_ = rg;
     microPhaseId_ = pid;
     chemSys_ = csys;
@@ -387,7 +383,7 @@ bool Interface::removeGrowthSite (Site *loc)
 
 bool Interface::removeDissolutionSite (Site *loc)
 {
-     if (debug_) {
+     if (verbose_) {
         cout << "Removing dissolution site " << loc->getId()
              << ", size is " << dissolutionSites_.size()
              << endl;

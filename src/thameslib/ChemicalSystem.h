@@ -443,7 +443,6 @@ vector<double> SI_;
 
 bool verbose_;                          /**< Whether to produce verbose output */
 bool warning_;                          /**< Whether to produce warning output */
-bool debug_;                            /**< Whether to produce debugging output */
 
 public:
 
@@ -466,8 +465,7 @@ ChemicalSystem (Solution *Solut,
                 const string &GEMdbrname,
                 const string &Interfacefilename,
                 const bool verbose,
-                const bool warning,
-                const bool debug = false);
+                const bool warning = false);
     
 /**
 @brief Copy constructor.
@@ -5897,27 +5895,6 @@ void setVerbose (const bool isverbose)
 bool getVerbose (void) const
 {
     return verbose_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug (void) const
-{
-    return debug_;
 }
 
 /**

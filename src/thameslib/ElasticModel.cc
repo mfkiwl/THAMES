@@ -12,8 +12,7 @@ ElasticModel::ElasticModel (int nx,
                             int nphase,
                             int npoints,
                             const bool verbose,
-                            const bool warning,
-                            const bool debug) 
+                            const bool warning)
 {
     ///
     /// Assign the dimensions of the finite element (FE) mesh
@@ -21,7 +20,6 @@ ElasticModel::ElasticModel (int nx,
 
     verbose_ = verbose;
     warning_ = warning;
-    debug_ = debug;
 
     nx_ = nx;
     ny_ = ny;

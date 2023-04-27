@@ -76,15 +76,13 @@ KineticModel::KineticModel (ChemicalSystem *cs,
                             Lattice *lattice,
                             const string &fileName,
                             const bool verbose,
-                            const bool warning,
-                            const bool debug)
+                            const bool warning)
 :chemSys_(cs),solut_(solut),lattice_(lattice)
 {
     // Set the verbose and warning flags
    
     verbose_ = verbose;
     warning_ = warning;
-    debug_ = debug;
 
     ///
     /// Default value for Blaine fineness in PK model is 385 m<sup>2</sup>/kg
