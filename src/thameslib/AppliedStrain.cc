@@ -17,11 +17,19 @@ AppliedStrain::AppliedStrain (int nx,
                               const bool warning)
     : ElasticModel (nx,ny,nz,dim,nphase,npoints,verbose,warning) 
 {
-    verbose_ = verbose;
-    warning_ = warning;
-    if (verbose_) {
-        cout << "constructor AppliedStrain in derived class AppliedStrain." << endl;
-    }
+    #ifdef DEBUG
+        verbose_ = true;
+        warning_ = true;
+    #else
+        verbose_ = verbose;
+        warning_ = warning;
+    #endif
+
+    #ifdef DEBUG
+        cout << "AppliedStrain::AppliedStrain Constructor" << endl;
+        cout.flush();
+    #endif
+
     exx_ = eyy_ = ezz_ = 0.0;
     exz_ = eyz_ = exy_ = 0.0;
 }
@@ -949,6 +957,10 @@ void AppliedStrain::relax (int kmax)
     /// is kmax * ldemb.                                                          
     ///
 
+    #ifdef DEBUG
+        cout << "AppliedStrain::relax Entering energy" << endl;
+        cout.flush();
+    #endif
 
     int ldemb = 50, ltot = 0;
     double utot;
@@ -991,8 +1003,10 @@ void AppliedStrain::relax (int kmax)
       utot = energy(nx_,ny_,nz_,ns_);
 
       if (verbose_) {
-          cout << "Energy = " << utot << ", gg_ = " << gg_ << endl;
-          cout << "Number of conjugate steps = " << ltot << endl;
+          cout << "AppliedStrain::relax Energy = " << utot
+               << ", gg_ = " << gg_ << endl;
+          cout << "AppliedStrain::relax Number of conjugate steps = "
+               << ltot << endl;
           cout.flush();
       }
 
@@ -1010,16 +1024,17 @@ void AppliedStrain::relax (int kmax)
 
         stress(nx_,ny_,nz_,ns_);
 
-        if (verbose_) {
-            cout << " stresses: xx,    yy,    zz,    xz,    yz,    xy" << endl;
-            cout << "         " << strxx_ << " " << stryy_ << " "
+        #ifdef DEBUG
+            cout << "AppliedStrain::relax stresses: xx,    yy,    zz,    xz,    yz,    xy" << endl;
+            cout << "AppliedStrain::relax         " << strxx_ << " " << stryy_ << " "
                  << strzz_ << " " << strxz_ << " " << stryz_ << " "
                  << strxy_ << endl;	
-            cout << " strains: xx,    yy,    zz,    xz,    yz,    xy" << endl;
-            cout << "         " << sxx_ << " " << syy_ << " "
+            cout << "AppliedStrain::relax strains: xx,    yy,    zz,    xz,    yz,    xy" << endl;
+            cout << "AppliedStrain::relax         " << sxx_ << " " << syy_ << " "
                  << szz_ << " " << sxz_ << " " << syz_ << " "
                  << sxy_ << endl;
-        }
+            cout.flush();
+        #endif
 
       } else {
 
@@ -1031,14 +1046,15 @@ void AppliedStrain::relax (int kmax)
     stress(nx_,ny_,nz_,ns_);
 
     if (verbose_) {
-        cout << " stresses: xx,    yy,    zz,    xz,    yz,    xy" << endl;
-        cout << "         " << strxx_ << " " << stryy_ << " "
+        cout << "AppliedStrain::relax stresses: xx,    yy,    zz,    xz,    yz,    xy" << endl;
+        cout << "AppliedStrain::relax         " << strxx_ << " " << stryy_ << " "
              << strzz_ << " " << strxz_ << " " << stryz_ << " "
              << strxy_ << endl;	
-        cout << " strains: xx,    yy,    zz,    xz,    yz,    xy" << endl;
-        cout << "         " << sxx_ << " " << syy_ << " "
+        cout << "AppliedStrain::relax strains: xx,    yy,    zz,    xz,    yz,    xy" << endl;
+        cout << "AppliedStrain::relax         " << sxx_ << " " << syy_ << " "
              << szz_ << " " << sxz_ << " " << syz_ << " "
              << sxy_ << endl;
+        cout.flush();
     }
 	
     return;
@@ -1068,16 +1084,17 @@ void AppliedStrain::calc (string fileName,
 
     assig(ns_,nphase_);
 
-    if (verbose_) {
+    #ifdef DEBUG
         for (int i = 0; i < nphase_; i++) {
-          cout << " Phase " << i << " bulk = " << phasemod_[i][0] << " shear = " 
+          cout << "AppliedStrain::calc Phase " << i << " bulk = " << phasemod_[i][0] << " shear = " 
                << phasemod_[i][1] << endl;
         }
 	  
         for (int i = 0; i < nphase_; i++) {
-          cout << " Volume fraction of phase " << i << "  is " << prob_[i] << endl;
+          cout << "AppliedStrain::calc Volume fraction of phase " << i << "  is " << prob_[i] << endl;
         }
-    }
+        cout.flush();
+    #endif
 
     ///
     /// (USER) Set applied strains.                                                
@@ -1093,12 +1110,13 @@ void AppliedStrain::calc (string fileName,
     eyz_ = eyz;
     exy_ = exy;
 
-    if (verbose_) {
-        cout << "Applied engineering strains" << endl;
-        cout << " exx_,   eyy_,   ezz_,   exz_,   eyz_,   exy_" << endl;
-        cout << exx_ << "   " << eyy_ << "   " << ezz_ << "   "
-             << exz_ << "   " << eyz_ << "   " << exy_ << endl;
-    }
+    #ifdef DEBUG
+        cout << "AppliedStrain::calc Applied engineering strains" << endl;
+        cout << "AppliedStrain::calc  exx_,   eyy_,   ezz_,   exz_,   eyz_,   exy_" << endl;
+        cout << "AppliedStrain::calc " << exx_ << "   " << eyy_ << "   "
+             << ezz_ << "   " << exz_ << "   " << eyz_ << "   " << exy_ << endl;
+        cout.flush();
+    #endif
 		  
     ///
     /// Set up elastic modulus variables, finite element stiffness matrices,       

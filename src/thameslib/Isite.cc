@@ -20,7 +20,12 @@ Isite::Isite (unsigned long int idval,
 {
     id_ = idval;
     affinity_ = aftyval;
-    verbose_ = verbose;
+
+    #ifdef DEBUG
+        verbose_ = true;
+    #else
+        verbose_ = verbose;
+    #endif
 }
 
 Isite::Isite (const Isite &obj)

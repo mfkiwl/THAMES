@@ -36,7 +36,11 @@ Site::Site (unsigned int xp,
     y_ = yp;
     z_ = zp;
 
-    verbose_ = verbose;
+    #ifdef DEBUG
+        verbose_ = true;
+    #else
+        verbose_ = verbose;
+    #endif
 
     dissolution_.clear();
     growth_.clear();

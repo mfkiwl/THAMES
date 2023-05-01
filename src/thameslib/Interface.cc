@@ -33,7 +33,13 @@ Interface::Interface (RanGen *rg,
     growthSites_.clear();
     dissolutionSites_.clear();
     rg_ = rg;
-    verbose_ = verbose;
+
+    #ifdef DEBUG
+        verbose_ = true;
+    #else
+        verbose_ = verbose;
+    #endif
+
 }
 
 Interface::Interface (ChemicalSystem *csys,
@@ -50,7 +56,12 @@ Interface::Interface (ChemicalSystem *csys,
     vector<Site *>::iterator beginLocation,endLocation;
     vector<Isite>::iterator start,end;
 
-    verbose_ = verbose;
+    #ifdef DEBUG
+        verbose_ = true;
+    #else
+        verbose_ = verbose;
+    #endif
+
     rg_ = rg;
     microPhaseId_ = pid;
     chemSys_ = csys;
@@ -383,22 +394,20 @@ bool Interface::removeGrowthSite (Site *loc)
 
 bool Interface::removeDissolutionSite (Site *loc)
 {
-     if (verbose_) {
-        cout << "Removing dissolution site " << loc->getId()
+     #ifdef DEBUG
+        cout << "Interface::removeDissolutionSite " << loc->getId()
              << ", size is " << dissolutionSites_.size()
              << endl;
         cout.flush();
         bool found = false;
-        cout << "Trying to declare iterator to Isite vector... ";
+        cout << "Interface::removeDissolutionSite Trying to "
+             << "declare iterator to Isite vector";
         cout.flush();
         vector<Isite>::iterator p;
-        cout << "Success!" << endl;
-        cout.flush();
-        cout << "Trying to set it to beginning of dissolutionSites_ ... ";
+        cout << "Inrterface::removeDissolutionSite Trying to "
+             << "set it to beginning of dissolutionSites_ ... ";
         cout.flush();
         p = dissolutionSites_.begin();
-        cout << "Success!" << endl;
-        cout.flush();
         for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
             if (dissolutionSites_[i].getId() == loc->getId()) {
                 p += i;
@@ -406,9 +415,7 @@ bool Interface::removeDissolutionSite (Site *loc)
                 found = true;
             }
         }
-
-        return found;
-    } else {
+    #else
         bool found = false;
         vector<Isite>::iterator p;
         p = dissolutionSites_.begin();
@@ -419,7 +426,6 @@ bool Interface::removeDissolutionSite (Site *loc)
                 found = true;
             }
         }
-
-        return found;
-    }
+    #endif
+    return found;
 }
