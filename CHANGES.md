@@ -8,6 +8,7 @@
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
 | May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
 | Apr 25 21:45:58 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
+| Apr 30 20:59:06 2023 | Fuller implementation of global DEBUG preprocessor define |
 | Apr 27 17:47:31 2023 | Removed debug as class variables and now have a global DEBUG preprocessor define |
 | Apr 25 21:17:23 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
 | Apr 24 21:45:58 2023 | Fixed one error in Lattice::writePoreSizeDistribution. Phase porosity still not being calculated |
