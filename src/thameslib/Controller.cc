@@ -237,6 +237,8 @@ void Controller::doCycle (const string &statfilename,
     /// Do not advance the time step if GEM_run failed the last time
     ///
     
+    bool isFirst = (i == 0) ? true : false;
+
     if (chemSys_->getTimesGEMFailed() > 0) i -= 1;
 
     cout << "Time = " << time_[i] << endl;
@@ -253,7 +255,6 @@ void Controller::doCycle (const string &statfilename,
     cout << asctime(time10);
 
     timestep = (i > 0) ? (time_[i] - time_[i-1]) : (time_[i]);
-    bool isFirst = (i == 0) ? true : false;
 
     /// 
     /// Assume that only capillary pore water is chemically reactive,
@@ -261,7 +262,7 @@ void Controller::doCycle (const string &statfilename,
     ///
     ///
     /// This is the main step of the cycle; the calculateState method
-    /// runs all fo the major steps of a computational cycle
+    /// runs all the major steps of a computational cycle
     ///
 
     if (verbose_) cout << "Going into Controller::calculateState with isFirst = "
@@ -682,13 +683,16 @@ void Controller::calculateState (double time,
     /// The `ChemicalSystem` object provides an interface for these calculations
     /// 
 
+    int timesGEMFailed = 0;
+
     if (verbose_) cout << "Going to launch thermodynamic calculation now with isFirst = "
                        << isFirst << endl;;
     try {
-        chemSys_->calculateState(time,isFirst);
+        timesGEMFailed = chemSys_->calculateState(time,isFirst);
         if (verbose_) {
             cout << "*Returned from ChemicalSystem::calculateState" << endl;
             cout << "*called by function Controller::calculateState" << endl;
+            cout << "*timesGEMFailed = " << timesGEMFailed << endl;
             cout.flush();
         }
     }

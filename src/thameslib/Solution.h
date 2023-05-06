@@ -456,6 +456,22 @@ double calculateCrystalStrain (double SI,
                                double Ks);
 
 /**
+@brief Make sure that the IC moles are all greater than e-10
+to ensure stability of the IPM calculation.
+
+The exception is for charge, which should always be set to zero
+for these kinds of simulations.
+*/
+void checkICMoles (void)
+{
+    for (unsigned int i = 0; i < numICs_; i++) {
+        if (ICMoles_[i] < 1.0e-9) ICMoles_[i] = 1.0e-9;
+        if (i == numICs_ - 1) ICMoles_[i] = 0.0;
+    }
+    return;
+}
+
+/**
 @brief Set the jsonFormat_ flag
 
 @param jsonFormat is true if input files are in JSON format
