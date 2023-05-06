@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
 | Jan  3 13:52:07 2023 | Tagged as version 2.6 |
 | Jan  3 13:52:07 2023 | Assume XML schema files are in local working directory |

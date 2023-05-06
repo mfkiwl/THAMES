@@ -150,7 +150,7 @@ protected:
     to a unique 1D index, <i>k</i>, is
     \f{equation}
         k = n_x n_y z + n_x y + x
-    \f}
+    \f
     where <i>n</i><sub>x</sub>, <i>n</i><sub>y</sub>, and <i>n</i><sub>z</sub>
     are the <i>x</i>, <i>y</i>, and <i>z</i> dimensions of the mesh, respectively.
 

@@ -21,7 +21,8 @@ Solution::Solution (const string &dchFileName,
     Vs_ = Ms_ = 1.0;
     Gs_ = Hs_ = 0.0;
     ionicStrength_ = 0.0;
-    nodeStatus_ = nodeHandle_ = iterDone_ = 0;
+    nodeStatus_ = NEED_GEM_AIA;
+    nodeHandle_ = iterDone_ = 0;
 
     timesGEMFailed_ = 0;
     maxGEMFails_ = 3;
@@ -182,7 +183,7 @@ Solution::Solution (const string &dchFileName,
     /// Initialize GEM
     ///
 
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
+    (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
     if (verbose_) {
         cout << "Solution::Constructor: "
              << "Entering GEM_run (1) with node status = "
@@ -531,7 +532,7 @@ void Solution::calculateState (bool isFirst)
     /// Load GEM data to the GEM3K library
     ///
 
-    nodeStatus_ = NEED_GEM_SIA;
+    nodeStatus_ = NEED_GEM_AIA;
     if (verbose_) {
         cout << "    Going into Solution::calculateState::GEM_from_MT "
              << "(2) ..." << endl;
@@ -551,6 +552,8 @@ void Solution::calculateState (bool isFirst)
     /// the generic designation given to the code that couples to GEMS, THAMES
     /// in this case.
     ///
+
+    checkICMoles();
 
     node_->GEM_from_MT(nodeHandle_,nodeStatus_,T_,P_,Vs_,Ms_,
            ICMoles_,DCUpperLimit_,DCLowerLimit_,surfaceArea_,
@@ -590,11 +593,14 @@ void Solution::calculateState (bool isFirst)
     ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
     ///
     
+    checkICMoles();
+
     if (isFirst) {
-        nodeStatus_ = node_->GEM_run(false);
+        (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
     } else {
-        nodeStatus_ = node_->GEM_run(true);
+        (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
     }
+    nodeStatus_ = node_->GEM_run(true);
 
     if (verbose_) {
         cout << "Done! nodestatus is " << nodeStatus_ << endl;

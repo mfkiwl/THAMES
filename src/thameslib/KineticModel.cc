@@ -645,15 +645,12 @@ void KineticModel::setInitialPhaseVolumeFractions()
 
     // The water/solids mass ratio follows from that
    
-    if (verbose_) {
-        cout << "Input file thinks w/c = " << wcRatio_ << endl;
-        cout.flush();
-    }
-
     wcRatio_ = microPhaseMass[WATERID] / solidMass;
 
     if (verbose_) {
         cout << "Microstructure w/c = " << wcRatio_ << endl;
+        cout << "(Mass of water = " << microPhaseMass[WATERID]
+             << ", mass of solids = " << solidMass << ")" << endl;
         cout.flush();
     }
 

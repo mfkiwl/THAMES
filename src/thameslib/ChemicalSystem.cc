@@ -1,4 +1,5 @@
-/** @file ChemicalSystem.cc
+/**
+@file ChemicalSystem.cc
 @brief Method definitions for the ChemicalSystem base class
 */
 
@@ -83,7 +84,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     P_ = 101325.0;          // Default pressure in [Pa]
     Vs_ = Ms_ = 1.0;
     Gs_ = Ms_ = 0.0;
-    nodeStatus_ = nodeHandle_ = iterDone_ = 0;
+    nodeStatus_ = NEED_GEM_AIA;
+    nodeHandle_ = iterDone_ = 0;
     sulfateAttackTime_ = 1.0e10;
     leachTime_ = 1.0e10; 
     ICName_.clear();
@@ -263,7 +265,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
     ///
 
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
+    (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
     if (verbose_) {
         cout << "ChemicalSystem::Constructor: Entering GEM_run (1) with node status = "
              << nodeStatus_ << endl;
@@ -281,17 +283,17 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
         switch (nodeStatus_) {
             case NEED_GEM_AIA:
                 exmsg = " Need GEM calc with auto initial approx (AIA)";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case BAD_GEM_AIA:
                 exmsg = " Untrustworthy result with auto initial approx (AIA)",
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case ERR_GEM_AIA:
                 exmsg = " Failed result with auto initial approx (AIA)";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case NEED_GEM_SIA:
@@ -300,22 +302,22 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                 break;
             case BAD_GEM_SIA:
                 exmsg = " Untrustworthy result with smart initial approx (SIA)";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case ERR_GEM_SIA:
                 exmsg =  " Failed result with smart initial approx (SIA)";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case T_ERROR_GEM:
                 exmsg = " Terminal GEM error; need restart";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = true;
                 break;
             case NO_GEM_SOLVER:
                 exmsg =  " No GEM recalculation needed for node";
-                cerr << exmsg << endl;
+                cout << exmsg << endl;
                 dothrow = false;
                 break;
         }
@@ -705,6 +707,10 @@ void ChemicalSystem::parseDoc (const string &docName)
     cur = cur->xmlChildrenNode;
     map<string,int> phaseids;
     phaseids.clear();
+    if (verbose_) {
+        cout << "Parsing phase names" << endl;
+        cout.flush();
+    }
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
             parsePhaseNames (doc, cur, phaseids);
@@ -721,6 +727,10 @@ void ChemicalSystem::parseDoc (const string &docName)
     /// dissolved impurities, and visualization properties.
     ///
 
+    if (verbose_) {
+        cout << "Back to the top of the xml file to parse properly" << endl;
+        cout.flush();
+    }
     cur = xmlDocGetRootElement(doc);
     cur = cur->xmlChildrenNode;
     int testnumEntries = 0;
@@ -836,6 +846,10 @@ void ChemicalSystem::parsePhaseNames (xmlDocPtr doc,
         }
         cur = cur->next;
     }
+    if (verbose_) {
+        cout << "    Phase name = " << pname << endl;
+        cout.flush();
+    }
     phaseids.insert(make_pair(pname,pid));
 }
 
@@ -948,6 +962,11 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     microPhaseDCMembers_.insert(make_pair(phaseData.id,phaseData.DCId));
 
     numMicroPhases_++;
+
+    if (verbose_) {
+        cout << "Parsed phase " << phaseData.thamesName << endl;
+        cout.flush();
+    }
 
     return;
 }
@@ -1500,7 +1519,7 @@ int ChemicalSystem::calculateState (double time,
       oDCMoles[i] = DCMoles_[i];
     }
 
-    nodeStatus_ = NEED_GEM_SIA;
+    nodeStatus_ = NEED_GEM_AIA;
 
     if (verbose_) {
         cout << "    Before calculateState, "
@@ -1597,11 +1616,14 @@ int ChemicalSystem::calculateState (double time,
     ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption).  Need restart
     ///
 
+    checkICMoles();
+
     if (isFirst) {
-        nodeStatus_ = node_->GEM_run(true);
+        (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
     } else {
-        nodeStatus_ = node_->GEM_run(true);
+        (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
     }
+    nodeStatus_ = node_->GEM_run(true);
 
     if (verbose_) {
         cout << "Done!  nodeStatus is " << nodeStatus_ << endl;
@@ -1691,6 +1713,8 @@ int ChemicalSystem::calculateState (double time,
     /// This function returns nothing and appears unable of throwing exceptions
     /// @todo Check carefully whether this function can throw an exception
     ///
+
+    checkICMoles();
 
     node_->GEM_to_MT(nodeHandle_,nodeStatus_,iterDone_,Vs_,
             Ms_,Gs_,Hs_,ionicStrength_,pH_,pe_,Eh_,&ICResiduals_[0],
