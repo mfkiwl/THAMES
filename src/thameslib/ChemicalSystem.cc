@@ -63,7 +63,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     growthTemplate_.clear();
     affinity_.clear();
     porosity_.clear();
-    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();
@@ -95,7 +94,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ICIdLookup_.clear();
     DCIdLookup_.clear();
     GEMPhaseIdLookup_.clear();
-    microPhaseVolumeFraction_.clear();
     microPhaseVolume_.clear();
     microPhaseMass_.clear();
     microPhaseMassDissolved_.clear();
@@ -502,7 +500,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       if (foundxml != string::npos) {
         parseDoc(interfaceFileName);
           
-        microPhaseVolumeFraction_.resize(numMicroPhases_,0.0);
         microPhaseVolume_.resize(numMicroPhases_,0.0);
         microPhaseMass_.resize(numMicroPhases_,0.0);
         if (verbose_) {
@@ -873,8 +870,6 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 {
     xmlChar *key;
 
-    string poreSizeFileName;
-
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
 
@@ -915,19 +910,6 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(phaseData.porosity,st);
-            xmlFree(key);
-        }
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizefilename"))) {
-            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-            string st((char *)key);
-            from_string(poreSizeFileName,st);
-            try {
-                parsePoreSizeDistribution(poreSizeFileName, phaseData);
-            }
-            catch (FileException fex) {
-               fex.printException();
-               cout << endl;
-            }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
@@ -978,8 +960,6 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
 
     porosity_.push_back(phaseData.porosity);
-    poreSizeDistribution_.push_back(phaseData.poreSizeDist);
-    phaseData.poreSizeDist.clear();
     grayscale_.push_back(phaseData.gray);
     color_.push_back(phaseData.colors);
     k2o_.push_back(phaseData.k2o);
@@ -996,62 +976,6 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         cout.flush();
     }
 
-    return;
-}
-
-void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
-                                               PhaseData &phaseData)
-{
-    if (verbose_) {
-        cout << "Reading Pore Size Distribution:" << endl;
-        cout.flush();
-    }
-
-    ifstream in(poreSizeFileName);
-    if (!in) {
-        throw FileException("ChemicalSystem","parsePoreSizeDistribution",
-                            poreSizeFileName,"Could not open");
-    }
-
-    // Read the header line
-    string headerline;
-    getline(in,headerline);
-
-    struct PoreSizeVolume datarow;
-    double diam,vfrac;
-
-    phaseData.poreSizeDist.clear();
-
-    // Now read the data row by row
-    double sum = 0.0;
-    while (!in.eof()) {
-        in >> datarow.diam >> datarow.volfrac;
-        sum += datarow.volfrac;
-        datarow.volume = 0.0;
-        phaseData.poreSizeDist.push_back(datarow);
-        if (verbose_) {
-            cout << "---> " << datarow.diam << "," << datarow.volfrac << endl;
-            cout.flush();
-        }
-        in.peek();
-    }
-
-    sum -= datarow.volfrac;
-    phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
-
-    if (verbose_) {
-        cout << "<---- sum = " << sum << endl;
-        cout.flush();
-    }
-    in.close();
-
-    // Normalize the pore size distribution in case it is not already
-    if (sum > 0.0) {
-        for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
-            phaseData.poreSizeDist[i].volfrac *= (1.0/sum);
-        }
-    }
-   
     return;
 }
 
@@ -1312,7 +1236,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
     microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
     porosity_ = obj.getPorosity();
-    poreSizeDistribution_ = obj.getPoreSizeDistribution();
     k2o_ = obj.getK2o();
     na2o_ = obj.getNa2o();
     mgo_ = obj.getMgo();
@@ -1360,14 +1283,12 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     nodeHandle_ = obj.getNodeHandle();
     nodeStatus_ = obj.getNodeStatus();
     iterDone_ = obj.getIterDone();
-    microPhaseVolumeFraction_ = obj.getMicroPhaseVolumeFraction();
     microPhaseVolume_ = obj.getMicroPhaseVolume();
     microVolume_ = obj.getMicroVolume();
     microInitVolume_ = obj.getMicroInitVolume();
     microPhaseMass_ = obj.getMicroPhaseMass();
     microPhaseMassDissolved_ = obj.getMicroPhaseMassDissolved();
     microVoidVolume_ = obj.getMicroVoidVolume();
-    microVoidVolumeFraction_ = obj.getMicroVoidVolumeFraction();
     verbose_ = obj.getVerbose();
     debug_ = obj.getDebug();
     warning_ = obj.getWarning();
@@ -1405,7 +1326,6 @@ ChemicalSystem::~ChemicalSystem (void)
     microPhaseMassDissolved_.clear();
     microPhaseDCMembers_.clear();
     porosity_.clear();
-    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();
@@ -1839,17 +1759,22 @@ int ChemicalSystem::calculateState (double time,
              << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
     }
 
-    /// JWB: 2020 December 22
-    /// Testing a change to the way we handle CSH molar volume adjustments
-    /// Will let GEMS (thermodynamics) determine volumes of CSH and water
-    /// Will adjust volume FRACTIONS of CSH and capillary porosity in the lattice part
-    ///
-    
+    /// JWB 2023-04-14
+    /// Account for subvoxel porosity within each microstructure phase here
+    /// We used to do this in the Lattice class but it is cleaner here
+   
+    double phi;  // local variable to store subvoxel volume fraction of pores of a phase
+                 // 0 <= phi <= 1
+                 
     for (unsigned int i = 1; i < numMicroPhases_; i++) {
         if (verbose_) {
             cout << "Setting microPhase amounts for "
                  << i << " = " << microPhaseName_[i] << endl;
             cout.flush();
+        }
+        phi = 0.0;
+        if ((i != ELECTROLYTEID) && (i != VOIDID)) {
+            phi = getPorosity(i);
         }
         if (!isKinetic(i)) {
             microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
@@ -1866,13 +1791,12 @@ int ChemicalSystem::calculateState (double time,
                 }
                 microPhaseMass_[i] +=
                      GEMPhaseMass_[microPhaseMembers_[i][j]];
+
+                /// Here is where the subvoxel porosity is included
                 microPhaseVolume_[i] +=
-                     GEMPhaseVolume_[microPhaseMembers_[i][j]];
+                     (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
             }
             microVolume_ += microPhaseVolume_[i];
-
-      /// End of test JWB: 2020 December 22
-      ///
 
         } else {
             if (verbose_) {
@@ -1888,7 +1812,7 @@ int ChemicalSystem::calculateState (double time,
             /// already set in KineticModel::calculateKineticStep
             ///
 
-            microVolume_ += microPhaseVolume_[i];
+            microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
         }
     }
 
@@ -1899,6 +1823,7 @@ int ChemicalSystem::calculateState (double time,
                  << "porosity." << endl;
         }
   
+        double water_molarv, water_molesincr;
         if (microInitVolume_ > microVolume_) {
             double water_molarv, water_molesincr;
             for (int i = 0; i < numMicroPhases_; i++) {
@@ -1928,14 +1853,6 @@ int ChemicalSystem::calculateState (double time,
              << 100.0 * (microVolume_ - microInitVolume_)/(microInitVolume_)
              << " %" << endl;
         cout.flush();
-    }
-
-    ///
-    /// Calculate microstructure phase volume fractions
-    ///
-    
-    for (int i = 0; i < numMicroPhases_; i++) {
-        microPhaseVolumeFraction_[i] = microPhaseVolume_[i] / microVolume_;
     }
 
     setGEMPhaseStoich();

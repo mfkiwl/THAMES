@@ -621,7 +621,7 @@ void KineticModel::setInitialPhaseVolumeFractions()
                 cout << "    Density = " << density << " g/cm3" << endl;
                 cout.flush();
                 microPhaseMass[microPhaseId] = volumeFraction * density;
-                if (microPhaseId != WATERID) {
+                if (microPhaseId != ELECTROLYTEID) {
                     solidMass += microPhaseMass[microPhaseId];
                 }
                 cout << "    Mass = " << microPhaseMass[microPhaseId] << " g" << endl;
@@ -636,7 +636,7 @@ void KineticModel::setInitialPhaseVolumeFractions()
                     density = molarMass / molarVolume / 1.0e6;          // g/cm3
                 }  
                 microPhaseMass[microPhaseId] = volumeFraction * density;
-                if (microPhaseId != WATERID) {
+                if (microPhaseId != ELECTROLYTEID) {
                     solidMass += microPhaseMass[microPhaseId];
                 }
             }
@@ -645,11 +645,11 @@ void KineticModel::setInitialPhaseVolumeFractions()
 
     // The water/solids mass ratio follows from that
    
-    wcRatio_ = microPhaseMass[WATERID] / solidMass;
+    wcRatio_ = microPhaseMass[ELECTROLYTEID] / solidMass;
 
     if (verbose_) {
         cout << "Microstructure w/c = " << wcRatio_ << endl;
-        cout << "(Mass of water = " << microPhaseMass[WATERID]
+        cout << "(Mass of water = " << microPhaseMass[ELECTROLYTEID]
              << ", mass of solids = " << solidMass << ")" << endl;
         cout.flush();
     }
@@ -667,7 +667,7 @@ void KineticModel::normalizePhaseMasses(vector<double> microPhaseMass,
 
     for (int i = 0; i < microPhaseId_.size(); i++) {
         microPhaseId = microPhaseId_[i];
-        if (microPhaseId == WATERID) {
+        if (microPhaseId == ELECTROLYTEID) {
             int waterId = chemSys_->getDCId("H2O@");
             double waterMolarMass = chemSys_->getDCMolarMass(waterId);
             pscaledMass = wcRatio_ * 100.0;  // Mass of solids scaled to 100 g now
@@ -679,11 +679,11 @@ void KineticModel::normalizePhaseMasses(vector<double> microPhaseMass,
             chemSys_->setDCMoles(waterId,(pscaledMass / waterMolarMass));
             if (verbose_) {
                 cout << "Setting initial micphase mass and volume of "
-                     << chemSys_->getMicroPhaseName(WATERID) << endl;
+                     << chemSys_->getMicroPhaseName(ELECTROLYTEID) << endl;
                 cout.flush();
             }
-            chemSys_->setMicroPhaseMass(WATERID,pscaledMass);
-            chemSys_->setMicroPhaseMassDissolved(WATERID,0.0);
+            chemSys_->setMicroPhaseMass(ELECTROLYTEID,pscaledMass);
+            chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID,0.0);
 
         } else if (microPhaseId != VOIDID) {
 
@@ -1052,7 +1052,7 @@ void KineticModel::calculateKineticStep (const double timestep,
 
           // RH factor is the same for all clinker phases
           double vfvoid = lattice_->getVolumefraction(VOIDID);
-          double vfh2o = lattice_->getVolumefraction(WATERID);
+          double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
 
           // This is a big kluge for internal relative humidity
           // @todo Fix the relative humidity calculation

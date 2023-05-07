@@ -6,7 +6,7 @@ threads=1
 BRANCH_GEMS3K=trunk
 BuildType=Release
 #BuildType=Debug
-InstallPrefix=../Resources
+InstallPrefix=../../Resources
 #InstallPrefix=/home/sveta/tmp
 workfolder=${PWD}
 
