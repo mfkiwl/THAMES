@@ -16,7 +16,7 @@
 #include <map>
 #include <algorithm>
 
-#include "../GEMS3K-standalone/Resources/include/GEMS3K/node.h"
+#include "../Resources/include/GEMS3K/node.h"
 // #include <GEMS3K/io_arrays.h>
 
 #include "global.h"

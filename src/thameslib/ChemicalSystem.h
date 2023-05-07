@@ -31,7 +31,7 @@ possible.
 #include <fstream>
 #include <vector>
 #include <map>
-#include "../GEMS3K-standalone/Resources/include/GEMS3K/node.h"
+#include "../Resources/include/GEMS3K/node.h"
 // #include <GEMS3K/io_arrays.h>
 #include <string>
 #include <iomanip>
