@@ -329,6 +329,14 @@ void KineticModel::parseDoc (const string &docName)
             cur = cur->next;
         }
 
+        /// Set the Blaine correction factor
+
+        if (refBlaine_ > 0.0) {
+            blaineFactor_ = blaine_ / refBlaine_;
+        } else {
+            blaineFactor_ = 1.0;
+        }
+
         /// Push a copy of the isKinetic vector to the ChemicalSystem
         
         chemSys_->setIsKinetic(isKinetic_);
@@ -755,6 +763,7 @@ void KineticModel::calculateKineticStep (const double timestep,
     double wcFactor = 1.0;
     double rhFactor = 1.0;
     double DOH = 0.0;
+    double cDOH = 0.0;
     double arrhenius = 1.0;
 
     double ngrate = 1.0e-10;          // Nucleation and growth rate
@@ -1087,8 +1096,18 @@ void KineticModel::calculateKineticStep (const double timestep,
                              "initScaledMass_ = 0.0");
                 }
 
+                cDOH = 1.333 * wcRatio_;
+                wcFactor = 1.0;
+                if (DOH > cDOH) {
+                    wcFactor += (4.444 * wcRatio_) -
+                                 3.333 * cDOH;
+                    wcFactor = pow(wcFactor,4.0);
+                }
+
+                /*
                 wcFactor = 1.0 + (3.333 *
                        (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
+                */
 
                 arrhenius = exp((activationEnergy_[i]/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
 
@@ -1175,8 +1194,13 @@ void KineticModel::calculateKineticStep (const double timestep,
                     // @todo BULLARD PLACEHOLDER ... to here
                     
                     } else {
-
-                        wcFactor = 1.0 + (3.333 * (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
+                        cDOH = 1.333 * wcRatio_;
+                        wcFactor = 1.0;
+                        if (DOH > cDOH) {
+                            wcFactor += (4.444 * wcRatio_) -
+                                         3.333 * cDOH;
+                            wcFactor = pow(wcFactor,4.0);
+                        }
 
                         // Normal Parrott and Killoh implementation here
                         

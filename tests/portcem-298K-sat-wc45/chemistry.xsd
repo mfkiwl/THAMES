@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+
+  <!-- definition of simple types -->
+  <xs:simpleType name="stringtype">
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="integertype">
+    <xs:restriction base="xs:integer"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="positiveIntegertype">
+    <xs:restriction base="xs:positiveInteger"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="doubletype">
+    <xs:restriction base="xs:double"/>
+  </xs:simpleType>
+
+  <xs:simpleType name="positiveDoubletype">
+    <xs:restriction base="xs:double">
+      <xs:minInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="kineticTypetype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="kinetic"/>
+      <xs:enumeration value="soluble"/>
+      <xs:enumeration value="thermo"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="elementtype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="K"/>
+      <xs:enumeration value="Na"/>
+      <xs:enumeration value="S"/>
+      <xs:enumeration value="Al"/>
+      <xs:enumeration value="C"/>
+      <xs:enumeration value="Ca"/>
+      <xs:enumeration value="Si"/>
+      <xs:enumeration value="Mg"/>
+      <xs:enumeration value="Fe"/>
+      <xs:enumeration value="P"/>
+      <xs:enumeration value="N"/>
+      <xs:enumeration value="O"/>
+      <xs:enumeration value="Cl"/>
+      <xs:enumeration value="F"/>
+      <xs:enumeration value="Li"/>
+      <xs:enumeration value="B"/>
+      <xs:enumeration value="Cr"/>
+      <xs:enumeration value="Mn"/>
+      <xs:enumeration value="Co"/>
+      <xs:enumeration value="Sr"/>
+      <xs:enumeration value="Ba"/>
+      <xs:enumeration value="Y"/>
+      <xs:enumeration value="Ti"/>
+      <xs:enumeration value="Be"/>
+      <xs:enumeration value="Nb"/>
+      <xs:enumeration value="Cd"/>
+      <xs:enumeration value="Zn"/>
+      <xs:enumeration value="Sc"/>
+      <xs:enumeration value="Cu"/>
+      <xs:enumeration value="V"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- definition of complex types -->
+  <xs:complexType name="iccomptype">
+    <xs:sequence>
+      <xs:element name="name" type="stringtype"/>
+      <xs:element name="conc" type="doubletype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+ <xs:complexType name="solutioncomptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="affinitytype">
+    <xs:sequence>
+      <xs:element name="affinityphase" type="stringtype"/>
+      <xs:element name="affinityvalue" type="integertype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType mixed="true" name="interface_datatype">
+    <xs:sequence>
+      <xs:element name="randomgrowth" type="doubletype"/>
+     <xs:element minOccurs="0" maxOccurs="unbounded" name="affinity" type="affinitytype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType mixed="true" name="impurity_datatype">
+    <xs:sequence>
+      <xs:element name="k2ocoeff" type="positiveDoubletype"/>
+      <xs:element name="na2ocoeff" type="positiveDoubletype"/>
+      <xs:element name="mgocoeff" type="positiveDoubletype"/>
+     <xs:element name="so3coeff" type="positiveDoubletype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType mixed="true" name="Rdtype">
+    <xs:sequence>
+      <xs:element name="Rdelement" type="elementtype"/>
+      <xs:element name="Rdvalue" type="positiveDoubletype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType mixed = "true" name="kinetic_datatype">
+    <xs:sequence>
+      <xs:element name="type" type="kineticTypetype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="scaledmass" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k1" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k2" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="n1" type="positiveDoubletype"/>
+     <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="Ea" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="display_datatype">
+    <xs:sequence>
+      <xs:element name="red" type="positiveDoubletype"/>
+      <xs:element name="green" type="positiveDoubletype"/>
+      <xs:element name="blue" type="positiveDoubletype"/>
+      <xs:element name="gray" type="positiveDoubletype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+ <xs:complexType name="gemphase_datatype">
+    <xs:sequence>
+      <xs:element name="gemphasename" type="stringtype"/>
+      <xs:element maxOccurs="unbounded" name="gemdcname" type="stringtype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="phasetype">
+    <xs:sequence>
+      <xs:element name="thamesname" type="stringtype"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="gemphase_data" type="gemphase_datatype"/>
+      <xs:element name="id" type="integertype"/>
+      <xs:element minOccurs="0" name="interface_data" type="interface_datatype"/>
+      <xs:element maxOccurs="1" name="porosity" type="doubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="poresizefilename" type="stringtype"/>
+      <xs:element minOccurs="0" name="impurity_data" type="impurity_datatype"/>
+      <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="stresscalc" type="integertype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="weak" type="integertype"/>
+      <xs:element name="display_data" type="display_datatype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- definition of root element -->
+
+  <xs:element name="chemistry_data">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="numentries" type="positiveIntegertype"/>
+        <xs:element name="blaine" type="positiveDoubletype"/>
+        <xs:element name="refblaine" type="positiveDoubletype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="wcRatio" type="positiveDoubletype"/>
+        <xs:element name="temperature" type="positiveDoubletype"/>
+        <xs:element name="reftemperature" type="positiveDoubletype"/>
+        <xs:element name="saturated" type="integertype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="solution" type="solutioncomptype"/>
+        <xs:element maxOccurs="unbounded" name="phase" type="phasetype"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

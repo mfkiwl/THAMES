@@ -1,0 +1,11 @@
+THAMES job newalite-01 initialized on Sat May 13 16:41:50 2023
+
+
+INPUT FILES USED:
+   Microstructure file name: alite-w35-thames.img
+        GEM input file name: alite-dat.lst
+
+OUTPUT FILES GENERATED:
+     Global phase fractions: newalite-01.stats
+
+
