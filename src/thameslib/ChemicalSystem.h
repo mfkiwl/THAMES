@@ -43,6 +43,17 @@ using namespace std;
 #define CHEMSYSDATASTRUCT
 
 /**
+@struct PoreSizeVolume
+@brief Volume fraction of a sub-voxel pore of a giveen effective diameter
+*/
+
+struct PoreSizeVolume {
+    double diam;
+    double volume;
+    double volfrac;
+};
+
+/**
 @struct PhaseData
 @brief Stores data about each phase possible in the system for ease of parsing the input files.
 
@@ -229,6 +240,11 @@ map<int,vector<double> > microPhaseMemberVolumeFraction_;
 
 vector<double> microPhasePorosity_;                 /**< The sub-voxel porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
+
+/**
+@brief Sub-voxel pore size distribution (volume basis) of each phase
+*/
+vector<vector<struct PoreSizeVolume> > poreSizeDistribution_;
 
 vector<double> k2o_;                      /**< Mass fraction of K<sub>2</sub>O dissolved in
                                                 each phase, in units of

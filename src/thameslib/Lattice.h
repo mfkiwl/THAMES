@@ -946,6 +946,17 @@ void adjustMicrostructureVolFracs (vector<string> &names,
                                    vector<double> &vfrac);
     
 /**
+@brief Write the pore size distribution data to a file
+
+@param curtime is the current time in days
+@param simtype is the sumulation tyupe
+@param root is the root name of the output file to create
+*/
+void writePoreSizeDistribution (double curtime,
+                                const int simtype,
+                                const string &root);
+
+/**
 @brief Write the 3D microstructure to a file.
 
 The microstructure output file will indicate the phase id at each site.

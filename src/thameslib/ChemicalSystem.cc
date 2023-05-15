@@ -871,6 +871,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 {
     xmlChar *key;
 
+    string poreSizeFileName;
+
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
 
@@ -1009,6 +1011,62 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         cout.flush();
     }
 
+    return;
+}
+
+void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
+                                               PhaseData &phaseData)
+{
+    if (verbose_) {
+        cout << "Reading Pore Size Distribution:" << endl;
+        cout.flush();
+    }
+
+    ifstream in(poreSizeFileName);
+    if (!in) {
+        throw FileException("ChemicalSystem","parsePoreSizeDistribution",
+                            poreSizeFileName,"Could not open");
+    }
+
+    // Read the header line
+    string headerline;
+    getline(in,headerline);
+
+    struct PoreSizeVolume datarow;
+    double diam,vfrac;
+
+    phaseData.poreSizeDist.clear();
+
+    // Now read the data row by row
+    double sum = 0.0;
+    while (!in.eof()) {
+        in >> datarow.diam >> datarow.volfrac;
+        sum += datarow.volfrac;
+        datarow.volume = 0.0;
+        phaseData.poreSizeDist.push_back(datarow);
+        if (verbose_) {
+            cout << "---> " << datarow.diam << "," << datarow.volfrac << endl;
+            cout.flush();
+        }
+        in.peek();
+    }
+
+    sum -= datarow.volfrac;
+    phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
+
+    if (verbose_) {
+        cout << "<---- sum = " << sum << endl;
+        cout.flush();
+    }
+    in.close();
+
+    // Normalize the pore size distribution in case it is not already
+    if (sum > 0.0) {
+        for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
+            phaseData.poreSizeDist[i].volfrac *= (1.0/sum);
+        }
+    }
+   
     return;
 }
 
