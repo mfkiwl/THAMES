@@ -32,61 +32,72 @@ its applications can also be found in the following references:
 To install THAMES, you need 'cmake'.  Creation of the API documentation also
 requires 'doxygen'.
 
-    * CMake (>= 3.0), the build system used by THAMES
-        * Required for building THAMES
+* CMake (>= 3.0), the build system used by THAMES
+ * Required for building THAMES
 
-    * Doxygen (>= 1.8.13), the API documentation software
-        * Required for creating the API documentation
+* Doxygen (>= 1.8.13), the API documentation software
+ * Required for creating the API documentation
 
-    * LaTeX 2e, the document preparation system
-        * Required only for creating the PDF version of the API documentation
+* LaTeX 2e, the document preparation system
+ * Required only for creating the PDF version of the API documentation
 
-    * GEMS3K standalone library (>= 3.8)
-        * Source code available at https://bitbucket.org/gems4/gems3k.git
+* GEM-Selektor
+ * Needed for producing input data files for thermodynamic calculations.
+ * Source code available at https://bitbucket.org/gems4/gems3gui.git
+ * Binaries available at https://gems.web.psi.ch
 
-    * GEM-Selektor
-        * Needed for producing input data files for thermodynamic calculations.
-        * Source code available at https://bitbucket.org/gems4/gems3gui.git
+* libxml2
+
+* Imagemagick (optional, for creating PNG image files for the microstructures)
 
 ## BUILDING
 
 This section assumes that all the prerequisites are already installed on
-your system.  In particular, on Mac OS and Linux systems, the GEMS3K standalone
-library must be installed in /usr/local, which will be accomplished
-automatically if you use the install.sh script that comes with the source code.
+your system.  We also assume that your THAMES distribution is installed at /PathToTHAMES/THAMES.
 
-The recommended way to configure THAMES is to do an out-of-source build,
-which means that the original files and directories are left untouched.
-Doing this makes the re-compiling and cleaning of the installation files
+### Mac OS and Unix
+
+First build and install the GEMS3K library:
+
+1. cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
+2. ./install.sh
+
+Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source build,
+which means that the original files and directories are left untouched. Doing this makes the re-compiling and cleaning of the installation files
 much simpler.
 
-From the directory that contains this INSTALL file, execute the following
-two commands:
+1. cd /PathToTHAMES/THAMES/build
+2. cmake ..
+3. make
+4. make install
+5. make doc
 
-    cd build
-    cmake ..
+This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
+static libraries in the PathToTHAMES/lib directory.
 
-The cmake command will assess your operating system's and C++ compilers
-and will automatically create the Makefiles needed to build THAMES.  When
-this step is complete, then you can build the libraries and executables
-from the same directory by executing the command
+### Windows
 
-    make                    (or nmake in a Windows command prompt)
+Windows does not come prebuilt with any kind
+of system for compiling C/C++ code.  Therefore
+you must first install **MinGW** and **MSYS**. Assuming these are installed, execute the following steps.
 
-All of the libraries and the executable will be in the build directory and
-its subdirectories.  You can install the executable and libraries in the
-top-level directories of your working directory by executing the command
+1. Open mingw64 shell at C:\msys64\mingw64.exe
+2. Build GEMS3K library
+	* cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
+	* mkdir build
+	* cd build
+	* cmake .. -G "MinGW Makefile" -DCMAKE\_CSS\_FLAGS=-fPIC -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../Resources
+	* mingw32-make.exe
+	* mingw32-make.exe install
+3. Build THAMES
+	* cd /PathToTHAMES/THAMES/build
+	* cmake .. -G "MinGW Makefile" -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../bin
+	* mingw32-make.exe
+	* mingw32-make.exe install
+	* mingw32-make.exe doc
 
-    make install            (or nmake install in a Windows command prompt)
-
-This will install the "thames" executable in the bin/ directory, and the
-static libraries in the lib/ directory.
-
-Finally, to create the documentation for the THAMES API, execute the command
-
-    make doc                (or nmake doc in a Windows command prompt)
-
-
+This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
+static libraries in the PathToTHAMES/lib directory.
 
 ## UNINSTALLING
 

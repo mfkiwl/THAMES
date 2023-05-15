@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
 | May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
