@@ -2344,6 +2344,23 @@ vector<double> getMicroPhasePorosity() const
 }
 
 /**
+@brief Get the list of sub-voxel pore size distributions.
+
+A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
+at the microstructure scale, so these phases are given a property of their pore
+size distribution as a probability density function. These data are used
+to provide better refinement to the moisture distribution in a partially
+saturated microstructure.
+
+@return the list of pore size distributions of all microstructure phases
+at the scale of one voxel
+*/
+vector<vector<struct PoreSizeVolume> > getPoreSizeDistribution() const
+{
+    return poreSizeDistribution_;
+}
+
+/**
 @brief Set the list of all GEM CSD phases that are associated with a given microstructure phase.
 
 @note NOT USED.
