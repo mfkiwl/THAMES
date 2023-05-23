@@ -242,8 +242,12 @@ bool isSolid(int i, int j, int k)
     int id = Mic[toIndex(i,j,k)];
 
 //  cout << "Mic(" << i << "," << j << "," << k << ") = " << id;
-    if (id != (int)POROSITY && id <= (int)NSPHASES) {
-        result = true;
+    if (TypeName == "thames") {
+        if (id > 1) result = true;
+    } else {
+        if (id != (int)POROSITY && id <= (int)NSPHASES) {
+            result = true;
+        }
     }
 //  cout << "; result = " << result << endl;
 
@@ -514,12 +518,12 @@ void getTcolors(vector<float> &red,
                 green[i] = (float)(R_CHARCOAL)/(float)(SAT); 
                 blue[i] = (float)(R_CHARCOAL)/(float)(SAT); 
                 break;
-            case 13:  // THAMES portlandite
+            case 14:  // THAMES portlandite
                 red[i] = (float)(R_BLUE)/(float)(SAT); 
                 green[i] = (float)(G_BLUE)/(float)(SAT);
                 blue[i] = (float)(B_BLUE)/(float)(SAT);
                 break;
-            case 12:  // THAMES CSH
+            case 11:  // THAMES CSH
                 red[i] = (float)(R_WHEAT)/(float)(SAT); 
                 green[i] = (float)(G_WHEAT)/(float)(SAT);
                 blue[i] = (float)(B_WHEAT)/(float)(SAT);
@@ -534,7 +538,7 @@ void getTcolors(vector<float> &red,
                 green[i] = (float)(G_CFBLUE)/(float)(SAT);
                 blue[i] = (float)(B_CFBLUE)/(float)(SAT);
                 break;
-            case 15: // THAMES calcite 
+            case 12: // THAMES calcite 
                 red[i] = (float)(R_CFBLUE)/(float)(SAT); 
                 green[i] = (float)(G_CFBLUE)/(float)(SAT);
                 blue[i] = (float)(B_CFBLUE)/(float)(SAT);
@@ -549,12 +553,12 @@ void getTcolors(vector<float> &red,
                 green[i] = (float)(G_WHITE)/(float)(SAT);
                 blue[i] = (float)(B_WHITE)/(float)(SAT);
                 break;
-            case 9:  // THAMES arcanite
-                red[i] = (float)(R_RED)/(float)(SAT); 
-                green[i] = (float)(G_RED)/(float)(SAT);
-                blue[i] = (float)(B_RED)/(float)(SAT);
-                break;
-            case 11: // THAMES thenardite
+//          case 8:  // THAMES arcanite
+//              red[i] = (float)(R_RED)/(float)(SAT); 
+//              green[i] = (float)(G_RED)/(float)(SAT);
+//              blue[i] = (float)(B_RED)/(float)(SAT);
+//              break;
+            case 10: // THAMES thenardite
                 red[i] = (float)(R_SALMON)/(float)(SAT); 
                 green[i] = (float)(G_SALMON)/(float)(SAT);
                 blue[i] = (float)(B_SALMON)/(float)(SAT);
@@ -564,16 +568,16 @@ void getTcolors(vector<float> &red,
                 green[i] = (float)(G_YELLOW)/(float)(SAT);
                 blue[i] = (float)(B_YELLOW)/(float)(SAT);
                 break;
-            case 10: // THAMES hemihydrate
+            case 9: // THAMES hemihydrate
                 red[i] = (float)(R_LYELLOW)/(float)(SAT); 
                 green[i] = (float)(G_LYELLOW)/(float)(SAT);
                 blue[i] = (float)(B_LYELLOW)/(float)(SAT);
                 break;
-            case 14: // THAMES hemianh
-                red[i] = (float)(R_LYELLOW)/(float)(SAT); 
-                green[i] = (float)(G_LYELLOW)/(float)(SAT);
-                blue[i] = (float)(B_LYELLOW)/(float)(SAT);
-                break;
+//          case 14: // THAMES hemianh
+//              red[i] = (float)(R_LYELLOW)/(float)(SAT); 
+//              green[i] = (float)(G_LYELLOW)/(float)(SAT);
+//              blue[i] = (float)(B_LYELLOW)/(float)(SAT);
+//              break;
             case 4:  // THAMES anhydrite.
                 red[i] = (float)(R_GOLD)/(float)(SAT); 
                 green[i] = (float)(G_GOLD)/(float)(SAT);
@@ -584,12 +588,12 @@ void getTcolors(vector<float> &red,
                 green[i] = (float)(G_AQUA)/(float)(SAT);
                 blue[i] = (float)(B_AQUA)/(float)(SAT);
                 break;
-            case 16:  // THAMES AFT
+            case 15:  // THAMES AFT
                 red[i] = (float)(127.0)/(float)(SAT); 
                 green[i] = (float)(0.0)/(float)(SAT);
                 blue[i] = (float)(255.0)/(float)(SAT);
                 break;
-            case 17:    // THAMES MONOSULF
+            case 16:    // THAMES MONOSULF
                 red[i] = (float)(238.0)/(float)(SAT); 
                 green[i] = (float)(174.0)/(float)(SAT);
                 blue[i] = (float)(238.0)/(float)(SAT);
@@ -609,7 +613,7 @@ void getTcolors(vector<float> &red,
 //              green[i] = (float)(103.0)/(float)(SAT);
 //              blue[i] = (float)(26.0)/(float)(SAT);
 //              break;
-            case 20:  // THAMES HYDROTALC
+            case 13:  // THAMES HYDROTALC
                 red[i] = (float)(200.0)/(float)(SAT); 
                 green[i] = (float)(200.0)/(float)(SAT);
                 blue[i] = (float)(208.0)/(float)(SAT);

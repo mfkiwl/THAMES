@@ -14,31 +14,125 @@
 #include <getopt.h>
 
 // Preprocessor defines
-#define VOID   		    0
-#define POROSITY 		1
-#define C3S				2
-#define C3A				3
-#define ANHYDRITE		4
-#define C2S			    5
-#define C4AF			6
-#define GYPSUM			7
-#define SFUME			8
-#define K2SO4           9
-#define HEMIHYD			10
-#define NA2SO4          11
-#define CSH             12
-#define CH              13
-#define HEMIANH         14
-#define CACO3           15
-#define ETTR            16
-#define MONOSULF        17
-#define AFM             18
-#define AFMC            19
-#define HYDROTALC       20
+// VCCTL phase codes
+#define POROSITY 		0					/* 0 */
+#define C3S				POROSITY + 1		/* 1 */
+#define C2S				C3S + 1				/* 2 */
+#define C3A				C2S + 1				/* 3 */
+#define C4AF			C3A + 1				/* 4 */
+#define K2SO4           C4AF + 1            /* 5 */
+#define NA2SO4          K2SO4 + 1           /* 6 */
+#define GYPSUM			NA2SO4 + 1			/* 7 */
+#define HEMIHYD			GYPSUM + 1			/* 8 */
+#define ANHYDRITE		HEMIHYD + 1			/* 9 */
+#define SFUME			ANHYDRITE + 1		/* 10 */
+#define INERT			SFUME + 1			/* 11 */
+#define SLAG			INERT + 1			/* 12 */
+#define INERTAGG		SLAG + 1			/* 13 */
+#define ASG				INERTAGG + 1		/* 14 */
+#define CAS2			ASG + 1				/* 15 */
+#define AMSIL			CAS2 + 1			/* 16 */
+#define FAC3A			AMSIL + 1			/* 17 */
 
-#define NSPHASES		19
+#define FLYASH			FAC3A + 1			/* 18 */
+#define CH				FLYASH + 1			/* 19 */
+#define CSH				CH + 1				/* 20 */
+#define C3AH6			CSH + 1				/* 21 */
+#define ETTR			C3AH6 + 1			/* 22 */
+#define ETTRC4AF		ETTR + 1 			/* 23 */
 
-#define NPHASES		    21
+#define AFM				ETTRC4AF + 1		/* 24 */
+#define FH3				AFM + 1				/* 25 */
+#define POZZCSH			FH3 + 1				/* 26 */
+#define SLAGCSH			POZZCSH + 1			/* 27 */
+#define CACL2			SLAGCSH + 1			/* 28 */
+/* Friedel's salt */
+#define FRIEDEL			CACL2 + 1			/* 29 */
+
+/* Stratlingite (C2ASH8) */
+#define STRAT			FRIEDEL + 1			/* 30 */
+
+/* Gypsum formed from hemihydrate and anhydrite */
+#define GYPSUMS			STRAT + 1			/* 31 */
+#define ABSGYP			GYPSUMS + 1			/* 32 */
+
+#define CACO3			ABSGYP + 1			/* 33 */
+#define AFMC			CACO3 + 1			/* 34 */
+
+/***
+*	Phases for chloride ingress model and
+*	sulfate attack model
+***/
+#define BRUCITE			AFMC + 1			/* 35 */
+#define MS				BRUCITE + 1			/* 36 */
+
+/* Free lime */
+#define FREELIME		MS + 1				/* 37 */
+
+/* Orthorhombic C3A */
+#define OC3A			FREELIME + 1		/* 38 */
+#define NSPHASES		OC3A			/* 38 */
+
+/***
+*	Diffusing species
+***/
+#define DIFFCSH		NSPHASES + 1			/* 39 */
+#define DIFFCH		DIFFCSH + 1				/* 40 */
+#define DIFFGYP		DIFFCH + 1				/* 41 */
+#define DIFFC3A		DIFFGYP + 1				/* 42 */
+#define DIFFC4A		DIFFC3A + 1				/* 43 */
+#define DIFFFH3		DIFFC4A + 1				/* 44 */
+#define DIFFETTR	DIFFFH3 + 1				/* 45 */
+#define DIFFCACO3	DIFFETTR + 1			/* 46 */
+#define DIFFAS		DIFFCACO3 + 1			/* 47 */
+#define DIFFANH		DIFFAS + 1				/* 48 */
+#define DIFFHEM		DIFFANH + 1				/* 49 */
+#define DIFFCAS2	DIFFHEM + 1				/* 50 */
+#define DIFFCACL2	DIFFCAS2 + 1			/* 51 */
+#define DIFFSO4     DIFFCACL2 + 1           /* 52 */
+
+#define NDIFFPHASES	DIFFSO4 + 1			/* 53 */
+
+/***
+*	Special types of porosity
+***/
+
+#define DRIEDP		NDIFFPHASES				/* 53 */
+#define EMPTYDP		DRIEDP + 1				/* 54 */
+
+/***
+*	Empty porosity due to self dessication
+***/
+#define EMPTYP		EMPTYDP + 1				/* 55 */
+
+/***
+*	Crack porosity, defined as the porosity
+*	created when the microstructure is cracked.
+*	Can be saturated or empty, depending on the
+*	application (24 May 2004)
+***/
+#define CRACKP		EMPTYP + 1			/* 56 */
+
+/***
+*	Offset for highlighting potentially
+*	soluble surface pixels in disrealnew
+***/
+
+#define OFFSET		CRACKP + 1				/* 57 */
+
+/***
+*	Total number of types of pixels, which
+*	INCLUDES diffusing species
+***/
+#define NDIFFUS		OFFSET
+
+#define SANDINCONCRETE  OFFSET + 3     /* 60 */
+#define COARSEAGG01INCONCRETE	SANDINCONCRETE + 1
+#define COARSEAGG02INCONCRETE	COARSEAGG01INCONCRETE + 1
+#define FINEAGG01INCONCRETE	COARSEAGG02INCONCRETE + 1
+#define FINEAGG02INCONCRETE	FINEAGG01INCONCRETE + 1
+
+#define NPHASES		FINEAGG02INCONCRETE + 1
 
 #define SAT			255
 
