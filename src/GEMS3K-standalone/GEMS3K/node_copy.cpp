@@ -238,7 +238,10 @@ long int  TNode::GEM_init( const char* ipmfiles_lst_name )
     {
         //  Syntax: -t/-b  "<DCH_DAT file name>"  "<IPM_DAT file name>"
         //       "<DBR_DAT file1 name>" [ ...  "<DBR_DAT fileN name>"]
+
+
         GEMS3KGenerator generator( ipmfiles_lst_name );
+        
         current_output_set_name = current_input_set_name = generator.set_name();
 
         switch( generator.files_mode() )
@@ -525,7 +528,6 @@ TNode::TNode( const TNode& otherNode )
   pmm->Fdev2[0] = 0.;
   pmm->Fdev2[1] = 1e-6;
 
-  cout << "copy constructor..." << endl;
 }
 
 #endif

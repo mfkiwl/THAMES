@@ -62,6 +62,7 @@ public:
     explicit GEMS3KGenerator(  const std::string& filepath ):
         ipmfiles_lst_name( filepath )
     {
+
         set_internal_data();
         load_dat_lst_file();
     }

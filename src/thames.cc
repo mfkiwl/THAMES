@@ -66,11 +66,15 @@ int main (int argc, char **argv)
     // for the aqueous solution
     //
 
+    // Read the newline character.  Wish there was a better way!
+    getline(cin,buff);
     cout << "What is the name of the GEM input file for solution? " << endl;
     // cin >> buff; // C++ >> operator does not allow spaces
     getline(cin,buff);
+    cout << "Buff is " << buff << endl;
     const string geminput_filename_solution(buff);
-    cout << geminput_filename_solution << endl;
+    cout << "geminput assignment is " << geminput_filename_solution << endl;
+    cout.flush();
 
     //
     // User must provide the name of the GEM data bridge (DBR) file
@@ -164,7 +168,6 @@ int main (int argc, char **argv)
     cout << "What is the name of the MICROSTRUCTURE file? " << endl;
     // cin >> buff; // C++ >> operator does not allow spaces
     getline(cin,buff);
-    cin >> buff;
     const string mic_filename(buff);
     cout << mic_filename << endl;
 
