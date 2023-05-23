@@ -67,7 +67,8 @@ int main (int argc, char **argv)
     //
 
     cout << "What is the name of the GEM input file for solution? " << endl;
-    cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string geminput_filename_solution(buff);
     cout << geminput_filename_solution << endl;
 
@@ -77,7 +78,8 @@ int main (int argc, char **argv)
     //
 
     cout << "What is the name of the GEM DBR file for solution? " << endl;
-    cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string geminput_dbrname_solution(buff);
     cout << geminput_dbrname_solution << endl;
 
@@ -97,7 +99,8 @@ int main (int argc, char **argv)
     //
 
     cout << "What is the name of the GEM input file? " << endl;
-    cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string geminput_filename(buff);
     cout << geminput_filename << endl;
 
@@ -107,7 +110,8 @@ int main (int argc, char **argv)
     //
 
     cout << "What is the name of the GEM DBR file? " << endl;
-    cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string geminput_dbrname(buff);
     cout << geminput_dbrname << endl;
 
@@ -118,6 +122,8 @@ int main (int argc, char **argv)
 
     cout << "What is the name of the microstructure phase definition file? " << endl;
     cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string pi_filename(buff);
     const string cement_filename(buff);
     cout << pi_filename << endl;
@@ -157,8 +163,8 @@ int main (int argc, char **argv)
     //
 
     cout << "What is the name of the MICROSTRUCTURE file? " << endl;
-    buff = "";
-    cin >> buff;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
     const string mic_filename(buff);
     cout << mic_filename << endl;
 
@@ -196,7 +202,8 @@ int main (int argc, char **argv)
 
       cout << "What is the name of the elastic modulus file?" << endl;
       buff = "";
-      cin >> buff;
+      // cin >> buff;  // C++ >> operator does not allow spaces
+      getline(cin,buff);
       const string phasemod_fileName(buff);
       cout << phasemod_fileName << endl;
 
@@ -284,13 +291,15 @@ int main (int argc, char **argv)
         cout.flush();
     }
     cout << "What is the name of the simulation parameter file? " << endl;
-    buff = "";
-    cin >> par_filename;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
+    par_filename.assign(buff);
     cout << par_filename << endl;
  
     cout << "What is the root name of this job? " << endl;
-    buff = "";
-    cin >> jobroot;
+    // cin >> buff;  // C++ >> operator does not allow spaces
+    getline(cin,buff);
+    jobroot.assign(buff);
     cout << jobroot << endl;
  
     statfilename = jobroot + ".stats";
