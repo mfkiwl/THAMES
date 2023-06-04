@@ -231,6 +231,17 @@ component (IC), and the value is the concentration of that IC in molal units
 */
 map<int,double> initialSolutionComposition_;
 
+double gasSolidRatio_;                      /**< mass ratio of gas to solids */
+
+/**
+@brief Gas phase composiion
+
+This is a map of key-value pairs.  The key is the integer value of an independent
+component (IC), and the value is the concentration of that IC in molal units
+[mol/kgw].
+*/
+map<int,double> gasComposition_;
+
 /**
 @brief Volume fraction of each GEM CSD phase associated with a THAMES phase.
 
@@ -539,6 +550,21 @@ void parseSolutionComp (xmlDocPtr doc,
                         xmlNodePtr cur);
 
 /**
+@brief Parse input about the gas phase composition from an XML document.
+
+The gas composition, if given, is parsed by this function.
+The composition will be held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the initial solution [mol/kgw]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseGasComp (xmlDocPtr doc,
+                        xmlNodePtr cur);
+
+/**
 @brief Parse input about an individual IC in the intitial solution
 
 The initial solution composition, if given, is parsed one IC at
@@ -554,6 +580,23 @@ held in an associative map of key value pairs:
 */
 void parseICInSolution (xmlDocPtr doc,
                         xmlNodePtr cur);
+
+/**
+@brief Parse input about an individual IC in the gas
+
+The gas composition, if given, is parsed one IC at
+a time by the parent function parseGasComp.  Each IC is
+parsed one at a time by this function.  The composition will be
+held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the gas [mol/kg-gas]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseICInGas (xmlDocPtr doc,
+                   xmlNodePtr cur);
 
 /**
 @brief Scan an XML document for the phase names.
@@ -5885,6 +5928,38 @@ the initial solution [mol/kgw].
 map<int,double> getInitialSolutionComposition (void)
 {
     return initialSolutionComposition_;
+}
+ 
+/**
+@brief Get the gas composition
+
+This function returns the map of molal concentrations of each IC in
+the gas [mol/kg-gas].
+
+@return the initial solute concentration map
+*/
+map<int,double> getGasComposition (void)
+{
+    return gasComposition_;
+}
+ 
+/**
+@brief Set the gas-solid mass ratio
+
+*/
+void setGasSolidRatio (const double gassolidratio)
+{
+    gasSolidRatio_ = (gassolidratio > 0.0) ? gassolidratio : 0.0;
+}
+ 
+/**
+@brief Get the gas-solid mass ratio
+
+@return the mass ratio of gas to initial solids
+*/
+double getGasSolidRatio (void)
+{
+    return gasSolidRatio_;
 }
  
 /**

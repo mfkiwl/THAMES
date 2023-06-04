@@ -885,11 +885,13 @@ void KineticModel::calculateKineticStep (const double timestep,
 
             while (p != isComp.end()) {
                 if (verbose_) {
-                    cout << "KineticModel::calculateKineticStep modifying initial pore solution" << endl;
+                    cout << "KineticModel::calculateKineticStep "
+                         << "modifying initial pore solution" << endl;
                     cout.flush();
                 }
                 #ifdef DEBUG
-                    cout << "KineticModel::calculateKineticStep --->Adding " << p->second
+                    cout << "KineticModel::calculateKineticStep "
+                         << "--->Adding " << p->second
                          << " mol/kgw of "
                          << ICName[p->first] << " to initial solution." << endl;
                     cout.flush();
@@ -901,8 +903,9 @@ void KineticModel::calculateKineticStep (const double timestep,
             // @todo BULLARD PLACEHOLDER
             // While we are still using PK model for clinker phases, we
             // must scan for and account for pozzolanic reactive components
-            // that will alter the hydration rate of clinker phases, presumably
-            // by making a denser hydration shell with slower transport
+            // that will alter the hydration rate of clinker
+            // phases, presumably by making a denser hydration shell
+            // with slower transport
 
             for (int i = 0; i < microPhaseId_.size(); i++) {
 
@@ -935,6 +938,11 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
 
+          // @todo BULLARD PLACEHOLDER
+          // First step each iteration is to equilibrate gas phase
+          // with the electrolyte, while forbidding anything new
+          // from precipitating.
+           
           #ifdef DEBUG
              cout << "KineticModel::calculateKineticStep "
                   << "Looping over kinetically controlled phases.  " << endl;
