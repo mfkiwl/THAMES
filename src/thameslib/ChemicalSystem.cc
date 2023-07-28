@@ -79,6 +79,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ICClassCode_.clear();
     DCClassCode_.clear();
     GEMPhaseClassCode_.clear();
+
     Eh_ = 0.0;
     T_ = 298.0;             // Default temperature [K]
     P_ = 101325.0;          // Default pressure in [Pa]
@@ -98,6 +99,10 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     microPhaseMass_.clear();
     microPhasePorosity_.clear();
     microPhaseMassDissolved_.clear();
+    initialSolutionComposition_.clear();
+    gasSolidRatio_ = 0.0;
+    gasComposition_.clear();
+
     SI_.clear();
       
     node_ = new TNode();
@@ -746,8 +751,10 @@ void ChemicalSystem::parseDoc (const string &docName)
             string st((char *)key);
             from_string(satstate,st);
             if (satstate == 0) isSaturated_ = false;
-        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"solution"))) {
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"electrolyte"))) {
             parseSolutionComp(doc, cur);
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"gas"))) {
+            parseGasComp(doc, cur);
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
             try {
                 parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
@@ -787,6 +794,31 @@ void ChemicalSystem::parseSolutionComp (xmlDocPtr doc,
     return;
 }
 
+void ChemicalSystem::parseGasComp (xmlDocPtr doc,
+                                        xmlNodePtr cur)
+{
+    // Clear the associative map to initialize it
+    
+    xmlChar *key;
+    double gassolidratio = 0.0;
+    gasComposition_.clear();
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            from_string(gassolidratio,(char *)key);
+            setGasSolidRatio(gassolidratio);
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+            parseICInGas(doc, cur);
+        }
+        cur = cur->next;
+    }
+
+    return;
+}
+
 void ChemicalSystem::parseICInSolution (xmlDocPtr doc,
                                         xmlNodePtr cur)
 {
@@ -818,6 +850,49 @@ void ChemicalSystem::parseICInSolution (xmlDocPtr doc,
             xmlFree(key);
             if (ICConc > 0.0 && ICId > 0) {
                 initialSolutionComposition_.insert(make_pair(ICId,ICConc));
+                ICId = -1;
+                ICConc = -1.0;
+                ICName = "Unknown";
+            }
+        }
+
+        cur = cur->next;
+    }
+
+    return;
+}
+
+void ChemicalSystem::parseICInGas (xmlDocPtr doc,
+                                   xmlNodePtr cur)
+{
+    xmlChar *key;
+    int ICId = -1;
+    string ICName;
+    double ICConc = -1.0;
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"name"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            from_string(ICName,(char *)key);
+            ICId = getICId(ICName);
+            if (ICConc > 0.0 && ICId > 0) {
+                gasComposition_.insert(make_pair(ICId,ICConc));
+                ICId = -1;
+                ICConc = -1.0;
+                ICName = "Unknown";
+            }
+
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(ICConc,st);
+            xmlFree(key);
+            if (ICConc > 0.0 && ICId > 0) {
+                gasComposition_.insert(make_pair(ICId,ICConc));
                 ICId = -1;
                 ICConc = -1.0;
                 ICName = "Unknown";

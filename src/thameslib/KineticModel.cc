@@ -899,6 +899,9 @@ void KineticModel::calculateKineticStep (const double timestep,
             }
 
             // @todo BULLARD PLACEHOLDER
+            // Still need to implement constant gas phase composition
+           
+            // @todo BULLARD PLACEHOLDER
             // While we are still using PK model for clinker phases, we
             // must scan for and account for pozzolanic reactive components
             // that will alter the hydration rate of clinker phases, presumably
@@ -935,6 +938,10 @@ void KineticModel::calculateKineticStep (const double timestep,
 
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
 
+          // @todo BULLARD PLACEHOLDER
+          // Still need to implement constant gas phase composition
+          // Will involve equilibrating gas with aqueous solution
+           
           #ifdef DEBUG
              cout << "KineticModel::calculateKineticStep "
                   << "Looping over kinetically controlled phases.  " << endl;
