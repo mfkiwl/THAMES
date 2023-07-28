@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| June 3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
 | May 23 08:18:25 2023 | Allow reading input paths with spaces included |
 | May 15 15:41:03 2023 | Updated test file input after rebase |
 | May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
