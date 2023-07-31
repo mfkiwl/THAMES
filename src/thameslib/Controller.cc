@@ -365,6 +365,12 @@ void Controller::doCycle (const string &statfilename,
     }
 
     ///
+    /// Calculate the pore size distribution and saturation
+    ///
+    
+    lattice_->calculatePoreSizeDistribution();
+
+    ///
     /// Check if there is any capillary pore water remaining.  If not then
     /// we ASSUME hydration has stopped.
     ///
@@ -385,6 +391,7 @@ void Controller::doCycle (const string &statfilename,
         }
         lattice_->writeLattice(time_[i],sim_type_,jobroot_);
         lattice_->writeLatticePNG(time_[i],sim_type_,jobroot_);
+        lattice_->writePoreSizeDistribution(time_[i],sim_type_,jobroot_);
 
         // lattice_->CheckPoint(jobroot_);
         time_index++;
@@ -393,7 +400,10 @@ void Controller::doCycle (const string &statfilename,
         #endif
     }
     
-    if (!capwater) {  // We will stop hydration
+    double watervolume = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
+
+    if (watervolume < 2.0e-18) {  // Units in m3, so this is about two voxels,
+                                   // we will stop hydration
         if (warning_) {
             cout << "Controller::doCycle WARNING: System is out of capillary pore water." << endl;
             cout << "Controller::doCycle          This version of code assumes that only capillary" << endl;

@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| July 31 12:46:53 2023 | Improved calculation of internal RH using Kelvin equation |
 | July 30 23:28:36 2023 | Merge DCPorosity branch with master, added output of enthalpy |
 | June 3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
 | May 23 10:37:38 2023 | Fixed bug in handling of spaces in path names |

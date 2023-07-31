@@ -948,6 +948,12 @@ void adjustMicrostructureVolFracs (vector<string> &names,
                                    vector<double> &vfrac);
     
 /**
+@brief Calculate the pore size distribution data
+
+*/
+void calculatePoreSizeDistribution (void);
+
+/**
 @brief Write the pore size distribution data to a file
 
 @param curtime is the current time in days
