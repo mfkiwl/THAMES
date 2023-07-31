@@ -101,7 +101,6 @@ double surfacearea_;                        /**< Total surface area [m<sup>2</su
 bool deptheffect_;                          /**< Whether or not PNG images should have
                                                     depth effect */
 bool verbose_;                              /**< Flag to determine verbose output */
-bool debug_;                                /**< Flag to determine debugging output */
 bool warning_;                              /**< Flag to determine warning message output */
 
 public:
@@ -135,14 +134,12 @@ the voxel phase assignments can be made at each site.
 @param fileName is the name of the file containing the microstructure data
 @param verbose is true if extra messages are to be printed
 @param warning is true if warning messages are to be printed
-@param debug is true if debugging output is to produced
 */
 Lattice (ChemicalSystem *cs,
         Solution *solut,
         const string &fileName,
         const bool verbose,
-        const bool warning,
-        const bool debug);
+        const bool warning);
     
 /**
 @brief Destructor.
@@ -268,6 +265,30 @@ void setInitvolumefraction (unsigned int i, double vfrac)
     }
 }
     
+/**
+@brief Set the water-solids mass ratio
+
+@param ws is the water-solids mass ratio
+*/
+void setWsratio (const double ws)
+{
+    wsratio_ = 0.0;
+    if (ws > 0.0) {
+        wsratio_ = ws;
+    }
+    return;
+}
+
+/**
+@brief Get the water-solids mass ratio
+
+@return the water-solids mass ratio
+*/
+double getWsratio (void) const
+{
+    return wsratio_;
+}
+
 /**
 @brief Get the volume fraction of a given microstructure phase.
 
@@ -648,7 +669,20 @@ void dWmc(int index,
 
 }
 
-    
+/**
+@brief Compute normalized initial microstructure phase masses
+
+Given the initial masses of all phases in the microstructure,
+this method scales them to 100 grams of solid.  In the process,
+this method also sets the initial moles of water in the
+chemical system definition.
+
+@param microPhaseMass is a vector of all the microstructure masses
+@param solidMass is the combined mass of all the solids
+*/
+void normalizePhaseMasses(vector<double> microPhaseMass,
+                          double solidMass);
+
 /**
 @brief Master method to locate the interfaces for each phase in the microstructure.
 
@@ -911,6 +945,17 @@ void adjustMicrostructureVolFracs (vector<string> &names,
                                    const vector<double> vol,
                                    vector<double> &vfrac);
     
+/**
+@brief Write the pore size distribution data to a file
+
+@param curtime is the current time in days
+@param simtype is the sumulation tyupe
+@param root is the root name of the output file to create
+*/
+void writePoreSizeDistribution (double curtime,
+                                const int simtype,
+                                const string &root);
+
 /**
 @brief Write the 3D microstructure to a file.
 
@@ -1376,27 +1421,6 @@ void setWarning (const bool iswarning)
 bool getWarning () const
 {
     return warning_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug () const
-{
-    return debug_;
 }
 
 };      // End of Lattice class

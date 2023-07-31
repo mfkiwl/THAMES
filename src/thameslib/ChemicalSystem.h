@@ -2,7 +2,7 @@
 @file ChemicalSystem.h
 @brief Declaration of the ChemicalSystem base class.
 
-A `ChemicalSystem` object contains the data
+A const `ChemicalSystem` object contains the data
 relevant to the properties of every phase known to THAMES,
 such as composition, growth characteristics, molar volume, specific
 gravity, heat capacity, etc.  
@@ -43,6 +43,17 @@ using namespace std;
 #define CHEMSYSDATASTRUCT
 
 /**
+@struct PoreSizeVolume
+@brief Volume fraction of a sub-voxel pore of a giveen effective diameter
+*/
+
+struct PoreSizeVolume {
+    double diam;
+    double volume;
+    double volfrac;
+};
+
+/**
 @struct PhaseData
 @brief Stores data about each phase possible in the system for ease of parsing the input files.
 
@@ -73,11 +84,12 @@ Most of the members have self-evident meanings:
        THAMES phase, given by name
     - `DCName` is a vector of the GEM DCs (dependent components) making up the
        THAMES phase, given by name
-    - `GEMPhaseDCMembers` is a vector of the GEM (thermodynamic) phase DCs making
-       up the THAMES phase, given by their GEM DC id number
+    - `GEMPhaseDCMembers` is a vector of the GEM (thermodynamic) phase DC
+       structures making up the THAMES phase, indexed by their GEM DC id number
     - `GEMPhaseId` is a vector of the GEM (thermodynamic) phases making up
        the THAMES phase, given by their GEM phase id number
     - `DCId` is the id of the dependent component in the GEM data base
+    - `DCPorosity` is subvoxel porosity of the dependent components
     - `growthTemplate` is a vector of the growth templates for the phase
     - `affinity` the vector of affinities of a phase for another phase
     - `colors` is the rgb colors for displaying the phase in visualizations
@@ -92,7 +104,7 @@ struct PhaseData {
     double na2o;
     double mgo;
     double so3;
-    double porosity;
+    vector<struct PoreSizeVolume> poreSizeDist;
     double red;
     double green;
     double blue;
@@ -101,6 +113,7 @@ struct PhaseData {
     vector<char * > GEMPhaseName,DCName;
     vector<int> GEMPhaseDCMembers;
     vector<int> GEMPhaseId;
+    vector<double> microPhaseDCPorosities;
     vector<int> DCId;
     vector<int> growthTemplate;
     vector<int> affinity;
@@ -202,6 +215,8 @@ map<int,vector<int> > microPhaseMembers_; /**< A list of all the CSD phase ids t
 
 map<int,vector<int> > microPhaseDCMembers_;     /**< A list of all the CSD DC ids that are
                                                 associated with a given microstructure phase */
+map<int,vector<double> > microPhaseDCPorosities_;   /**< A list of all the CSD DC porosities that are
+                                                associated with a given microstructure phase */
 map<int,vector<int> > GEMPhaseDCMembers_;   /**< A list of all the CSD DC ids that are
                                                 associated with a given CSD phase */
 
@@ -216,15 +231,31 @@ component (IC), and the value is the concentration of that IC in molal units
 */
 map<int,double> initialSolutionComposition_;
 
+double gasSolidRatio_;                      /**< mass ratio of gas to solids */
+
+/**
+@brief Gas phase composiion
+
+This is a map of key-value pairs.  The key is the integer value of an independent
+component (IC), and the value is the concentration of that IC in molal units
+[mol/kgw].
+*/
+map<int,double> gasComposition_;
+
 /**
 @brief Volume fraction of each GEM CSD phase associated with a THAMES phase.
 
-@warning This variable may not be used
+@warning This variable might not be used
 */
 map<int,vector<double> > microPhaseMemberVolumeFraction_;
 
-vector<double> porosity_;                 /**< The sub-voxel porosity of a given phase,
+vector<double> microPhasePorosity_;                 /**< The sub-voxel porosity of a given phase,
                                                 such as C-S-H (dimensionless) */
+
+/**
+@brief Sub-voxel pore size distribution (volume basis) of each phase
+*/
+vector<vector<struct PoreSizeVolume> > poreSizeDistribution_;
 
 vector<double> k2o_;                      /**< Mass fraction of K<sub>2</sub>O dissolved in
                                                 each phase, in units of
@@ -254,8 +285,6 @@ map<string,int> GEMPhaseIdLookup_;         /**< Map that returns the vector inde
                                                 GEM CSD phase name */
 
 map<int,vector<int> > microPhaseToGEMPhase_;   /**< Map that returns the GEM CSD phase for
-                                                a given microstructure phase */
-map<int,vector<int> > microPhaseToDC_;      /**< Map that returns the GEM DC for
                                                 a given microstructure phase */
 vector<vector<double> > DCStoich_;      /**< List of amount of moles of each IC in a DC */
 
@@ -443,7 +472,6 @@ vector<double> SI_;
 
 bool verbose_;                          /**< Whether to produce verbose output */
 bool warning_;                          /**< Whether to produce warning output */
-bool debug_;                            /**< Whether to produce debugging output */
 
 public:
 
@@ -466,8 +494,7 @@ ChemicalSystem (Solution *Solut,
                 const string &GEMdbrname,
                 const string &Interfacefilename,
                 const bool verbose,
-                const bool warning,
-                const bool debug = false);
+                const bool warning = false);
     
 /**
 @brief Copy constructor.
@@ -525,6 +552,21 @@ void parseSolutionComp (xmlDocPtr doc,
                         xmlNodePtr cur);
 
 /**
+@brief Parse input about the gas phase composition from an XML document.
+
+The gas composition, if given, is parsed by this function.
+The composition will be held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the initial solution [mol/kgw]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseGasComp (xmlDocPtr doc,
+                        xmlNodePtr cur);
+
+/**
 @brief Parse input about an individual IC in the intitial solution
 
 The initial solution composition, if given, is parsed one IC at
@@ -540,6 +582,23 @@ held in an associative map of key value pairs:
 */
 void parseICInSolution (xmlDocPtr doc,
                         xmlNodePtr cur);
+
+/**
+@brief Parse input about an individual IC in the gas
+
+The gas composition, if given, is parsed one IC at
+a time by the parent function parseGasComp.  Each IC is
+parsed one at a time by this function.  The composition will be
+held in an associative map of key value pairs:
+
+* key = integer id of a GEM independent component
+* value = molal concentration of that component in the gas [mol/kg-gas]
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+*/
+void parseICInGas (xmlDocPtr doc,
+                   xmlNodePtr cur);
 
 /**
 @brief Scan an XML document for the phase names.
@@ -577,6 +636,31 @@ void parsePhase (xmlDocPtr doc,
 void parseGEMPhaseData (xmlDocPtr doc,
                         xmlNodePtr cur,
                         PhaseData &phaseData);
+
+/**
+@brief Parse input about a GEM DC associated with a CSD phase from an XML document.
+
+@param doc points to the XML file
+@param cur points to the current location within the XML file
+@param phaseData holds the structure of collected phase data from the document
+*/
+void parseGEMPhaseDCData (xmlDocPtr doc,
+                        xmlNodePtr cur,
+                        PhaseData &phaseData);
+
+/**
+@brief Parse a phase's sub-voxel pore size distribution from a file
+
+The file must have a header line that will be discarded.  The rest of
+the file must be two column csv with pore diameter in the first column
+(nanometers) and the volume fraction in the second column.  After
+the data are read the volume fraction is normalized.
+
+@param poreSizeFilename is the name of the file containing the data
+@param phaseData holds the structure of collected phase data from the document
+*/
+void parsePoreSizeDistribution(string poreSizeFilename,
+                               PhaseData &phaseData);
 
 /**
 @brief Parse input about how to render a phase in an image.
@@ -1571,87 +1655,6 @@ vector<int> getMicroPhaseToGEMPhase (const int i)
 }
 
 /**
-@brief Get the integer id of a GEM DC associated with a microstructure phase id.
-
-@param i is integer id of the microstructure phase
-@param idx is element position in the vector of associated DCs for that
-        microstructure phase
-@return the integer id  of the DC stored at position idx in the list
-*/
-int getMicroPhaseToDC (const int i,
-                const unsigned int idx)
-{
-    string msg;
-    map<int,vector<int> >::iterator p = microPhaseToDC_.find(i);
-    if (p != microPhaseToDC_.end()) {
-        if (idx < (p->second).size()) {
-            return (p->second)[idx];
-        } else {
-            msg = "microPhaseToDC_";
-            EOBException ex("ChemicalSystem","getMicroPhaseToDC",
-                            msg,(p->second).size(),idx);
-            ex.printException();
-            exit(1);
-        }
-    } else {
-        msg = "Could not find microPhaseToDC_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseToDC",
-                        msg,microPhaseToDC_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the list of integer ids of DCs associated with a microstructure phase id.
-
-@note NOT USED.
-
-@param i is integer id of the microstructure phase
-@return the vector of integer ids of the DCs for that microstructure phase
-*/
-vector<int> getMicroPhaseToDC (const int i)
-{
-    string msg;
-    map<int,vector<int> >::iterator p = microPhaseToDC_.find(i);
-    if (p != microPhaseToDC_.end()) {
-        return p->second;
-    } else {
-        msg = "Could not find microPhaseToDC_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseToDC",
-                        msg,microPhaseToDC_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Set the integer id of a GEM DC associated with a microstructure phase id.
-
-@note NOT USED.
-
-@param microPhaseid is integer id of the microstructure phase
-@param DCid is the integer id of the DC
-*/
-void setMicroPhaseToDC (const int microPhaseid,
-                    const int DCid)
-{
-    map<int,vector<int> >::iterator p = microPhaseToDC_.find(microPhaseid);
-    if (p == microPhaseToDC_.end()) {
-        vector<int> DCvector;
-        DCvector.clear();
-        DCvector.push_back(DCid);
-        microPhaseToDC_.insert(make_pair(microPhaseid,DCvector));
-    } else {
-        bool found = false;
-        for (unsigned int i = 0; (i < (p->second).size()) && (!found); i++) {
-            if ((p->second)[i] == DCid) found = true;
-        }
-        if (!found) (p->second).push_back(DCid);
-    }
-}
-
-/**
 @brief Set the integer id of a GEM phase associated with a microstructure phase id.
 
 @note NOT USED.
@@ -1701,18 +1704,6 @@ vector<int> getMicroPhaseToGEMPhase (const string &microPhasename)
 map<int,vector<int> > getMicroPhaseToGEMPhase (void) const
 {
     return microPhaseToGEMPhase_;
-}
-
-/**
-@brief Get the map relating every microstructure phase to a list of its DCs.
-
-@note Used only in this class's copy constructor.
-
-@return the map relating every microstructure phase to a list of its DCs
-*/
-map<int,vector<int> > getMicroPhaseToDC (void) const
-{
-    return microPhaseToDC_;
 }
 
 /**
@@ -2303,7 +2294,7 @@ vector<double> getSo3 (void) const
 }
 
 /**
-@brief Set the internal porosity of a microstructure phases.
+@brief Set the internal porosity of a microstructure phase.
 
 A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
 at the microstructure scale, so these phases are given a property of their average
@@ -2315,21 +2306,18 @@ value of the molar volume and density of such phases.
 @warning Each version of the GEMIPM library
 needs to be checked to see what the convention ensures compatibility with that library.
 
-@note NOT USED.
-
 @param idx is the microstructure phase with internal porosity
-@param pval is the value of the volume fraction of pores to assign at the scale of one
-       micrometer
+@param pval is the value of the volume fraction of subvoxel pores to assign
 */
-void setPorosity (const unsigned int idx,
-                  double pval)
+void setMicroPhasePorosity (const unsigned int idx,
+                            double pval)
 {
     try {
-        porosity_.at(idx) = pval;
+        microPhasePorosity_.at(idx) = pval;
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setPorosity","porosity_",
-                        porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","setMicroPhasePorosity","microPhasePorosity_",
+                        microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2346,7 +2334,7 @@ of a microstructure phase.
 Water or aqueous solution has a porosity of 1. In addition,
 a few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
 at the microstructure scale, so these phases are given a property of their average
-internal porosity on a scale of one micrometer.  This has important implications
+internal porosity (subvoxel scale).  This has important implications
 when converting mass fractions of a phase to volume fractions within a microstructure,
 because the GEM thermodynamic phase may or may not include such porosity in its
 value of the molar volume and density of such phases.
@@ -2354,17 +2342,17 @@ value of the molar volume and density of such phases.
 @warning Each version of the GEMIPM library
 needs to be checked to see what the convention ensures compatibility with that library.
 
-@param idx is the microstructure phase with internal porosity
-@return the volume fraction of the phase occupied by pores at the scale of one micrometer
+@param idx is the microstructure phase with internal (subvoxel) porosity
+@return the subvoxel pore volume fraction of the phase
 */
-double getPorosity (const unsigned int idx)
+double getMicroPhasePorosity (const unsigned int idx)
 {
     try {
-        return porosity_.at(idx);
+        return microPhasePorosity_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPorosity",
-                        "porosity_",porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhasePorosity",
+                        "microPhasePorosity_",microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2376,18 +2364,18 @@ double getPorosity (const unsigned int idx)
 @warning Each version of the GEMIPM library
 needs to be checked to see what the convention ensures compatibility with that library.
 
-@param str is the name of the microstructure phase with internal porosity
+@param str is the name of the microstructure phase with internal (subvoxel) porosity
 @return the volume fraction of the phase occupied by pores at the scale of one micrometer
 */
-double getPorosity (const string &str)
+double getMicroPhasePorosity (const string &str)
 {
     int idx = getMicroPhaseId(str);
     try {
-        return porosity_.at(idx);
+        return getMicroPhasePorosity(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","getPorosity",
-                        "porosity_",porosity_.size(),idx);
+        EOBException ex("ChemicalSystem","getMicroPhasePorosity",
+                        "microPhasePorosity_",microPhasePorosity_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -2411,9 +2399,26 @@ needs to be checked to see what the convention ensures compatibility with that l
 @return the list of porosities of all microstructure phases at the scale of one
 micrometer
 */
-vector<double> getPorosity() const
+vector<double> getMicroPhasePorosity() const
 {
-    return porosity_;
+    return microPhasePorosity_;
+}
+
+/**
+@brief Get the list of sub-voxel pore size distributions.
+
+A few phases, mainly C-S-H gel, have finely dispersed porosity that is not resolved
+at the microstructure scale, so these phases are given a property of their pore
+size distribution as a probability density function. These data are used
+to provide better refinement to the moisture distribution in a partially
+saturated microstructure.
+
+@return the list of pore size distributions of all microstructure phases
+at the scale of one voxel
+*/
+vector<vector<struct PoreSizeVolume> > getPoreSizeDistribution() const
+{
+    return poreSizeDistribution_;
 }
 
 /**
@@ -2770,8 +2775,13 @@ unsigned int getMicroPhaseDCMembers (const unsigned int idx,
                               const unsigned int jdx)
 {
     string msg;
+    
     map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
     if (p != microPhaseDCMembers_.end()) {
+        if (verbose_) {
+            cout << "micro phase id " << idx << " looking for dc index " << jdx << endl;
+            cout.flush();
+        }
         if (jdx < (p->second).size()) {
             return (p->second)[jdx];
         } else {
@@ -2837,6 +2847,51 @@ map<int, vector<int> > getMicroPhaseDCMembers (void) const
 }
 
 /**
+@brief Get the map of DC component ids associated with a given GEM CSD phase id.
+
+@note Used only in this class's copy constructor
+
+@return the map of all DC member ids for that GEM phase
+*/
+map<int, vector<int> > getGEMPhaseDCMembers (void) const
+{
+    return GEMPhaseDCMembers_;
+} 
+
+/**
+@brief Get the map of DC porosities
+
+@note Used only in this class's copy constructor
+
+@return the map of all DC member porosities
+*/
+map<int, vector<double> > getMicroPhaseDCPorosities (void) const
+{
+    return microPhaseDCPorosities_;
+} 
+
+/**
+@brief Get the map of DC porosities associated with a given microstructure phase id.
+
+@param idx is the index of the microstructure phase
+@return the vector of all DC member porosities for that microstructure phase
+*/
+vector<double> getMicroPhaseDCPorosities (const int idx)
+{
+    string msg;
+    map<int,vector<double> >::iterator p = microPhaseDCPorosities_.find(idx);
+    if (p != microPhaseDCPorosities_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find microPhaseDCPorosities_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseDCPorosities",
+                        msg,microPhaseDCPorosities_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+} 
+
+/**
 @brief Get the list of DC component ids associated with a given GEM CSD phase id.
 
 @param idx is the GEM phase id in question
@@ -2872,38 +2927,6 @@ vector<int> getGEMPhaseDCMembers (const string &str)
     map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(pidx);
     if (p != GEMPhaseDCMembers_.end()) {
         return p->second;
-    } else {
-        msg = "Could not find GEMPhaseDCMembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
-                        msg,GEMPhaseDCMembers_.size(),0);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get one of the DC component ids for a given GEM CSD phase id.
-
-@note NOT USED.
-
-@param idx is the GEM phase id in question
-@param jdx is the element position in the list of all DCs for GEM phase idx
-@return the DC component id to set at that position in the list
-*/
-unsigned int getGEMPhaseDCMembers (const unsigned int idx,
-                                const unsigned int jdx)
-{
-    string msg;
-    map<int,vector<int> >::iterator p = GEMPhaseDCMembers_.find(idx);
-    if (p != GEMPhaseDCMembers_.end()) {
-        if (jdx < (p->second).size()) {
-           return (p->second)[jdx];
-        } else {
-           EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
-                           "GEMPhaseDCMembers_",(p->second).size(),jdx);
-           ex.printException();
-           exit(1);
-        }
     } else {
         msg = "Could not find GEMPhaseDCMembers_ match to index provided";
         EOBException ex("ChemicalSystem","getGEMPhaseDCMembers",
@@ -3632,6 +3655,19 @@ void setPrevGEMPhaseVolume (void)
 }
 
 /**
+@brief Get the subvoxel porosity of every GEM CSD phase in the system in the previous time step.
+
+@note Does nothing for now, just a placeholder in case it is needed later
+*/
+void setPrevGEMPhasePorosity (void)
+{
+    // for (long int i = 0; i < numGEMPhases_; i++) {
+    //     prevGEMPhaseVolume_[i] = GEMPhaseVolume_[i];
+    // }
+    return;
+}
+
+/**
 @brief Get the volume of every GEM CSD phase in the system in the previous time step.
 
 @note Used only in this class's copy constructor.
@@ -3800,7 +3836,7 @@ double getSurfaceArea (const unsigned int idx)
 @param val is the volume to assign to that microstructure phase
 */
 void setMicroPhaseVolume (const unsigned int idx,
-                        const double val)
+                          const double val)
 {
     try {
         microPhaseVolume_.at(idx) = val;
@@ -3811,8 +3847,26 @@ void setMicroPhaseVolume (const unsigned int idx,
         ex.printException();
         exit(1);
     }
+
+    // Calculate the subvoxel porosity of this phase as well
+
+    if (idx != VOIDID) {
+        if (verbose_) {
+            cout << "Going into calcMicroPhasePorosity(" << idx << ")" << endl;
+            cout.flush();
+        }
+        calcMicroPhasePorosity(idx);
+    }
+
     return;
 }
+
+/**
+@brief Calculate the subvoxel porosity of a microstructure phase (by id).
+
+@param idx is the microstructure phase id
+*/
+void calcMicroPhasePorosity (const unsigned int idx);
 
 /**
 @brief Get the volumes of all microstructure phases.
@@ -3850,38 +3904,7 @@ double getMicroPhaseVolume(const unsigned int idx)
 @param val is the mass to assign to that microstructure phase
 */
 void setMicroPhaseMass (const unsigned int idx,
-                      const double val)
-{
-    try {
-        microPhaseMass_.at(idx) = val;
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ChemicalSystem","setMicroPhaseMass",
-                           "microPhaseMass_",microPhaseMass_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-    double v0 = node_->DC_V0(getMicroPhaseToDC(idx,0),P_,T_);
-    double dcmm = getDCMolarMass(getMicroPhaseToDC(idx,0));
-    if (verbose_) {
-        cout << "    " << microPhaseName_[idx] << ": v0 = "
-             << v0 << ", dcmm = " << dcmm
-             << ", so volume = ";
-    }
-    if (dcmm < 1.0e-9) {
-        if (verbose_) cout << " not defined" << endl;
-        FloatException fex("ChemicalSystem","setMicroPhaseMass",
-                           "Divide by zero (dcmm)");
-        fex.printException();
-        exit(1);
-    }
-    if (verbose_) cout << (val*v0/dcmm) << endl;
-
-    setMicroPhaseVolume(idx,(val*v0/dcmm));
-
-    return;
-}
-
+                        const double val);
 /**
 @brief Get the masses of all microstructure phases.
 
@@ -3896,8 +3919,6 @@ vector<double> getMicroPhaseMass (void) const
 
 /**
 @brief Get the mass of a microstructure phase (by id).
-
-@note NOT USED.
 
 @param idx is the microstructure phase id
 @return the mass assigned to that microstructure phase
@@ -6009,6 +6030,38 @@ map<int,double> getInitialSolutionComposition (void)
 }
  
 /**
+@brief Get the gas composition
+
+This function returns the map of molal concentrations of each IC in
+the gas [mol/kg-gas].
+
+@return the initial solute concentration map
+*/
+map<int,double> getGasComposition (void)
+{
+    return gasComposition_;
+}
+ 
+/**
+@brief Set the gas-solid mass ratio
+
+*/
+void setGasSolidRatio (const double gassolidratio)
+{
+    gasSolidRatio_ = (gassolidratio > 0.0) ? gassolidratio : 0.0;
+}
+ 
+/**
+@brief Get the gas-solid mass ratio
+
+@return the mass ratio of gas to initial solids
+*/
+double getGasSolidRatio (void)
+{
+    return gasSolidRatio_;
+}
+ 
+/**
 @brief Set the jsonFormat_ flag
 
 @param jsonFormat is true if input files are in JSON format
@@ -6049,27 +6102,6 @@ void setVerbose (const bool isverbose)
 bool getVerbose (void) const
 {
     return verbose_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug (void) const
-{
-    return debug_;
 }
 
 /**

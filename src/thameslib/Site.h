@@ -1,7 +1,6 @@
 /**
 @file Site.h
 @brief Declaration of the Site class.
-
 */
 
 #ifndef SITEH

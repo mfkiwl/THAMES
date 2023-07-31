@@ -12,25 +12,32 @@ ElasticModel::ElasticModel (int nx,
                             int nphase,
                             int npoints,
                             const bool verbose,
-                            const bool warning,
-                            const bool debug) 
+                            const bool warning)
 {
     ///
     /// Assign the dimensions of the finite element (FE) mesh
     ///
 
-    verbose_ = verbose;
-    warning_ = warning;
-    debug_ = debug;
+    #ifdef DEBUG
+        verbose_ = true;
+        warning_ = true;
+    #else
+        verbose_ = verbose;
+        warning_ = warning;
+    #endif
 
     nx_ = nx;
     ny_ = ny;
     nz_ = nz;
     ns_ = nx_ * ny_ * nz_;
 
-    if (verbose_) cout << "nx_ = " << nx_ << " ny_ = " << ny_
-                       << " nz_ = " << nz_ << " ns_ = " << ns_
-                       << endl;
+    #ifdef DEBUG
+        cout << "ElasticModel::ElasticModel Constructor nx_ = "
+             << nx_ << " ny_ = " << ny_
+             << " nz_ = " << nz_ << " ns_ = " << ns_
+             << endl;
+        cout.flush();
+    #endif
 
     ///
     /// Initialize the prescribed stresses and strains
@@ -196,7 +203,10 @@ ElasticModel::ElasticModel (int nx,
 
 void ElasticModel::BuildNeighbor () 
 {
-    if (verbose_) cout << "now in the BuildNeighbor function." << endl;
+    #ifdef DEBUG
+        cout << "ElasticModel::BuildNeighbor" << endl;
+        cout.flush();
+    #endif
 
     ///
     /// First construct the 27 neighbor table in terms of delta i, delta j, and    
@@ -276,7 +286,10 @@ void ElasticModel::BuildNeighbor ()
       }
     }
 
-    if (verbose_) cout << "after building the neighbors." << endl;
+    #ifdef DEBUG
+        cout << "ElasticModel::BuildNeighbor Exiting" << endl;
+        cout.flush();
+    #endif
     return;
 }
 
@@ -291,8 +304,8 @@ void ElasticModel::ElasModul (string phasemod_fileName,
 
     ifstream in(phasemod_fileName.c_str());
     if(!in) {
-      cout << "can't open the file: " << phasemod_fileName << endl;
-      cerr << "can't open the file: " << phasemod_fileName << endl;
+      cout << "ElasticModel::ElasModul can't open the file: " << phasemod_fileName << endl;
+      cout.flush();
       exit(1);
     } else {
       string buff;
@@ -712,7 +725,10 @@ void ElasticModel::writeStress (string &root,
                                 int index)
 {
     if (index >= 0 && index < 6) {
-      if (verbose_) cout << "writing ppm file..." << endl;
+      #ifdef DEBUG
+          cout << "ElasticModel::writeStress writing ppm file" << endl;
+          cout.flush();
+      #endif
       double min,max;
       min = max = 0.0;
 
@@ -776,10 +792,15 @@ void ElasticModel::writeStress (string &root,
           if (max < elestress_[m][index]) max = elestress_[m][index];
         }
       }
-      if (verbose_) {
-          cout << "minimum stress-" << index << " is: " << min << endl;
-          cout << "maximum stress-" << index << " is: " << max << endl;
-      }
+
+      #ifdef DEBUG
+          cout << "ElasticModel::writeStress minimum stress-"
+               << index << " is: " << min << endl;
+          cout << "ElasticModel::writeStress maximum stress-"
+               << index << " is: " << max << endl;
+          cout.flush();
+      #endif
+
       for (int k = 0; k < nz_; k++) {
         for (int j = 0; j < nz_; j++) {
           int m = nx_ * ny_ * k + nx_ * j + slice;
@@ -813,7 +834,12 @@ void ElasticModel::writeStrain (string &root,
                                 int index)
 {
     if (index >= 0 && index < 6) {
-      if (verbose_) cout << "writing ppm file..." << endl;
+       
+      #ifdef DEBUG
+          cout << "ElasticModel::writeStrain" << endl;
+          cout.flush();
+      #endif
+
       double min,max;
       min = max = 0.0;
 
@@ -877,8 +903,14 @@ void ElasticModel::writeStrain (string &root,
           if (max < elestrain_[m][index]) max = elestrain_[m][index];
         }
       }
-      if (verbose_) cout << "minimum strain-" << index << " is: " << min << endl;
-      if (verbose_) cout << "maximum strain-" << index << " is: " << max << endl;
+      #ifdef DEBUG
+          cout << "ElasticModel::writeStrain minimum strain-"
+               << index << " is: " << min << endl;
+          cout << "ElasticModel::writeStrain maximum strain-"
+               << index << " is: " << max << endl;
+          cout.flush();
+      #endif
+
       for (int k = 0; k < nz_; k++) {
         for (int j = 0; j < nz_; j++) {
           int m = nx_ * ny_ * k + nx_ * j + slice;
@@ -910,7 +942,11 @@ void ElasticModel::writeStrain (string &root,
 void ElasticModel::writeDisp (string &root,
                               double time)
 {
-  if (verbose_) cout << "writing displacement file..." << endl;
+
+  #ifdef DEBUG
+      cout << "ElasticModel::writeDisp" << endl;
+      cout.flush();
+  #endif
 
   ///
   /// Specify the file name and open the output stream
@@ -945,7 +981,11 @@ void ElasticModel::writeDisp (string &root,
 void ElasticModel::writeStrainEngy (string &root,
                                     double time)
 {
-    if (verbose_) cout << "writing ppm file..." << endl;
+    #ifdef DEBUG
+        cout << "ElasticModel::writeStrainEngy" << endl;
+        cout.flush();
+    #endif
+
     double min,max;
     min = max = 0.0;
 
@@ -991,10 +1031,15 @@ void ElasticModel::writeStrainEngy (string &root,
         if (max < strainengy_[m]) max = strainengy_[m];
       }
     }
-    if (verbose_) {
-        cout << "minimum strainengy is: " << min << endl;
-        cout << "maximum strainengy is: " << max << endl;
-    }
+
+    #ifdef DEBUG
+        cout << "ElasticModel::writeStrainEngy minimum strainengy is "
+             << min << endl;
+        cout << "ElasticModel::writeStrainEngy maximum strainengy is "
+             << max << endl;
+        cout.flush();
+    #endif
+
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
         int m = nx_ * ny_ * k + nx_ * j + slice;

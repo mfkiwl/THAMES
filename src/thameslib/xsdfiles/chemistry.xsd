@@ -75,7 +75,13 @@
     </xs:sequence>
   </xs:complexType>
    
-  <xs:complexType name="solutioncomptype">
+  <xs:complexType name="electrolytecomptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="gascomptype">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
     </xs:sequence>
@@ -135,10 +141,17 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="gemdc_datatype">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="gemdcname" type="stringtype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="gemdcporosity" type="stringtype"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="gemphase_datatype">
     <xs:sequence>
       <xs:element name="gemphasename" type="stringtype"/>
-      <xs:element maxOccurs="unbounded" name="gemdcname" type="stringtype"/>
+      <xs:element maxOccurs="unbounded" name="gemdc" type="gemdc_datatype"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -148,7 +161,6 @@
       <xs:element minOccurs="0" maxOccurs="unbounded" name="gemphase_data" type="gemphase_datatype"/>
       <xs:element name="id" type="integertype"/>
       <xs:element minOccurs="0" name="interface_data" type="interface_datatype"/>
-      <xs:element maxOccurs="1" name="porosity" type="doubletype"/>
       <xs:element minOccurs='0' maxOccurs="1" name="poresizefilename" type="stringtype"/>
       <xs:element minOccurs="0" name="impurity_data" type="impurity_datatype"/>
       <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype"/>
@@ -170,7 +182,8 @@
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
         <xs:element name="saturated" type="integertype"/>
-        <xs:element minOccurs="0" maxOccurs="1" name="solution" type="solutioncomptype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="gas" type="gascomptype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="electrolyte" type="electrolytecomptype"/>
         <xs:element maxOccurs="unbounded" name="phase" type="phasetype"/>
       </xs:sequence>
     </xs:complexType>

@@ -16,8 +16,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
                                 const string &GEMdbrname,
                                 const string &interfaceFileName,
                                 const bool verbose,
-                                const bool warning,
-                                const bool debug) : solut_(Solut)
+                                const bool warning) : solut_(Solut)
 {
     unsigned int i,j;
     double *amat;
@@ -43,7 +42,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     ///
  
     verbose_ = verbose;
-    debug_ = debug;
     jsonFormat_ = false;
     warning_ = warning;
     numMicroPhases_ = numGEMPhases_ = numSolutionPhases_ = 0;
@@ -62,23 +60,26 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     randomGrowth_.clear();
     growthTemplate_.clear();
     affinity_.clear();
-    porosity_.clear();
+    microPhasePorosity_.clear();
+    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();
     so3_.clear();
     color_.clear();
     GEMPhaseStoich_.clear();
+    GEMPhaseDCMembers_.clear();
+    microPhaseDCPorosities_.clear();
     microPhaseIdLookup_.clear();
     ICIdLookup_.clear();
     DCIdLookup_.clear();
     GEMPhaseIdLookup_.clear();
     microPhaseToGEMPhase_.clear();
-    microPhaseToDC_.clear();
     DCStoich_.clear();
     ICClassCode_.clear();
     DCClassCode_.clear();
     GEMPhaseClassCode_.clear();
+
     Eh_ = 0.0;
     T_ = 298.0;             // Default temperature [K]
     P_ = 101325.0;          // Default pressure in [Pa]
@@ -96,7 +97,12 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     GEMPhaseIdLookup_.clear();
     microPhaseVolume_.clear();
     microPhaseMass_.clear();
+    microPhasePorosity_.clear();
     microPhaseMassDissolved_.clear();
+    initialSolutionComposition_.clear();
+    gasSolidRatio_ = 0.0;
+    gasComposition_.clear();
+
     SI_.clear();
       
     node_ = new TNode();
@@ -510,6 +516,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
           
         microPhaseVolume_.resize(numMicroPhases_,0.0);
         microPhaseMass_.resize(numMicroPhases_,0.0);
+        microPhasePorosity_.resize(numMicroPhases_,0.0);
         if (verbose_) {
             cout << " Setting microPhaseMass size to "
                  << numMicroPhases_ << endl;
@@ -533,7 +540,6 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     microInitVolume_ = 0.0;
     for (unsigned int i = 0; i < numMicroPhases_; i++) {
       microPhaseToGEMPhase_.insert(make_pair((int)i,microPhaseMembers_[i]));
-      microPhaseToDC_.insert(make_pair((int)i,microPhaseDCMembers_[i]));
     }
 
     ///
@@ -638,7 +644,7 @@ vector<double> ChemicalSystem::getSolution (void)
                  * DCMolarMass_[getDCId("H2O@")];
 
   if (verbose_) {
-      cout << "water mass at the end of hydration is: "
+      cout << "water mass is: "
            << waterMass << endl;
   }
   vector<double> tempICMoles;
@@ -753,8 +759,10 @@ void ChemicalSystem::parseDoc (const string &docName)
             string st((char *)key);
             from_string(satstate,st);
             if (satstate == 0) isSaturated_ = false;
-        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"solution"))) {
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"electrolyte"))) {
             parseSolutionComp(doc, cur);
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"gas"))) {
+            parseGasComp(doc, cur);
         } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
             try {
                 parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
@@ -794,6 +802,31 @@ void ChemicalSystem::parseSolutionComp (xmlDocPtr doc,
     return;
 }
 
+void ChemicalSystem::parseGasComp (xmlDocPtr doc,
+                                        xmlNodePtr cur)
+{
+    // Clear the associative map to initialize it
+    
+    xmlChar *key;
+    double gassolidratio = 0.0;
+    gasComposition_.clear();
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            from_string(gassolidratio,(char *)key);
+            setGasSolidRatio(gassolidratio);
+        } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+            parseICInGas(doc, cur);
+        }
+        cur = cur->next;
+    }
+
+    return;
+}
+
 void ChemicalSystem::parseICInSolution (xmlDocPtr doc,
                                         xmlNodePtr cur)
 {
@@ -825,6 +858,49 @@ void ChemicalSystem::parseICInSolution (xmlDocPtr doc,
             xmlFree(key);
             if (ICConc > 0.0 && ICId > 0) {
                 initialSolutionComposition_.insert(make_pair(ICId,ICConc));
+                ICId = -1;
+                ICConc = -1.0;
+                ICName = "Unknown";
+            }
+        }
+
+        cur = cur->next;
+    }
+
+    return;
+}
+
+void ChemicalSystem::parseICInGas (xmlDocPtr doc,
+                                   xmlNodePtr cur)
+{
+    xmlChar *key;
+    int ICId = -1;
+    string ICName;
+    double ICConc = -1.0;
+
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"name"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            from_string(ICName,(char *)key);
+            ICId = getICId(ICName);
+            if (ICConc > 0.0 && ICId > 0) {
+                gasComposition_.insert(make_pair(ICId,ICConc));
+                ICId = -1;
+                ICConc = -1.0;
+                ICName = "Unknown";
+            }
+
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(ICConc,st);
+            xmlFree(key);
+            if (ICConc > 0.0 && ICId > 0) {
+                gasComposition_.insert(make_pair(ICId,ICConc));
                 ICId = -1;
                 ICConc = -1.0;
                 ICName = "Unknown";
@@ -878,6 +954,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
 {
     xmlChar *key;
 
+    string poreSizeFileName;
+
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
 
@@ -889,6 +967,7 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     phaseData.GEMPhaseId.clear();
     phaseData.DCId.clear();
     phaseData.GEMPhaseName.clear();
+    phaseData.microPhaseDCPorosities.clear();
     phaseData.DCName.clear();
     phaseData.stressCalc = 0;
     phaseData.weak = 0;
@@ -914,10 +993,17 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphase_data"))) {
             parseGEMPhaseData(doc, cur, phaseData);
         }
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"porosity"))) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizefilename"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(phaseData.porosity,st);
+            from_string(poreSizeFileName,st);
+            try {
+                parsePoreSizeDistribution(poreSizeFileName, phaseData);
+            }
+            catch (FileException fex) {
+               fex.printException();
+               cout << endl;
+            }
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
@@ -953,10 +1039,27 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         weakPhaseName_.push_back(phaseData.thamesName);
         weakPhaseId_.push_back(phaseData.id);
     }
-    if (phaseData.porosity < 1.0 && phaseData.porosity > 0.0) {
-        porousPhaseName_.push_back(phaseData.thamesName);
-        porousPhaseId_.push_back(phaseData.id);
+
+    // Figure out if this is a porous phase or not
+    // The criterion is that at least one of the constituent GEM phases
+    // shall have at least one DC with porosity between 0.0 and 1.0
+    
+    bool done = false;
+    for (int i = 0; i < phaseData.microPhaseDCPorosities.size() && !done; ++i) {
+        if (phaseData.microPhaseDCPorosities[i] > 0.0 && phaseData.microPhaseDCPorosities[i] < 1.0) {
+            porousPhaseName_.push_back(phaseData.thamesName);
+            porousPhaseId_.push_back(phaseData.id);
+            done = true;
+        }
     }
+
+    // The following is a lookup table that will return
+    // the ordered list of DC porosities for a given microstructure phase id
+  
+    microPhaseDCPorosities_.insert(make_pair(phaseData.id,phaseData.microPhaseDCPorosities));
+
+    phaseData.microPhaseDCPorosities.clear();
+
     microPhaseName_.push_back(phaseData.thamesName);
     microPhaseId_.push_back(phaseData.id);
     microPhaseIdLookup_.insert(make_pair(phaseData.thamesName,phaseData.id));
@@ -967,7 +1070,14 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     
     growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
 
-    porosity_.push_back(phaseData.porosity);
+    poreSizeDistribution_.push_back(phaseData.poreSizeDist);
+    if (verbose_) {
+        cout << "Pushed pore size distribution data for phase " << phaseData.thamesName << endl;
+        cout << "This phase distribution has " << phaseData.poreSizeDist.size() << " entries" << endl;
+        cout << "Have now registered " << poreSizeDistribution_.size() << " PSDs" << endl;
+        cout.flush();
+    }
+    phaseData.poreSizeDist.clear();
     grayscale_.push_back(phaseData.gray);
     color_.push_back(phaseData.colors);
     k2o_.push_back(phaseData.k2o);
@@ -987,6 +1097,62 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     return;
 }
 
+void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
+                                               PhaseData &phaseData)
+{
+    if (verbose_) {
+        cout << "Reading Pore Size Distribution:" << endl;
+        cout.flush();
+    }
+
+    ifstream in(poreSizeFileName);
+    if (!in) {
+        throw FileException("ChemicalSystem","parsePoreSizeDistribution",
+                            poreSizeFileName,"Could not open");
+    }
+
+    // Read the header line
+    string headerline;
+    getline(in,headerline);
+
+    struct PoreSizeVolume datarow;
+    double diam,vfrac;
+
+    phaseData.poreSizeDist.clear();
+
+    // Now read the data row by row
+    double sum = 0.0;
+    while (!in.eof()) {
+        in >> datarow.diam >> datarow.volfrac;
+        sum += datarow.volfrac;
+        datarow.volume = 0.0;
+        phaseData.poreSizeDist.push_back(datarow);
+        if (verbose_) {
+            cout << "---> " << datarow.diam << "," << datarow.volfrac << endl;
+            cout.flush();
+        }
+        in.peek();
+    }
+
+    sum -= datarow.volfrac;
+    phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
+
+    if (verbose_) {
+        cout << "<---- sum = " << sum << endl;
+        cout.flush();
+    }
+    in.close();
+
+    // Normalize the pore size distribution in case it is not already
+    if (sum > 0.0) {
+        for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
+            phaseData.poreSizeDist[i].volfrac *= (1.0/sum);
+        }
+    }
+   
+    return;
+}
+
 void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
                                         xmlNodePtr cur,
                                         PhaseData &phaseData)
@@ -996,7 +1162,7 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
 
     int GEMPhaseId = 0;
     int dcid = 0;
-    string mypstr,mydcstr;
+    string mypstr;
     phaseData.GEMPhaseDCMembers.clear();
     bool scrapeWaterDCs = false;
 
@@ -1027,7 +1193,31 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
             phaseData.GEMPhaseId.push_back(GEMPhaseId);
             xmlFree(key);
         }
-        if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdcname"))) {
+        if ((!xmlStrcmp(cur->name,(const xmlChar *)"gemdc"))) {
+            parseGEMPhaseDCData(doc, cur, phaseData);
+        }
+        cur = cur->next;
+    } 
+    GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId,phaseData.GEMPhaseDCMembers));   
+
+    return;
+
+}
+
+void ChemicalSystem::parseGEMPhaseDCData (xmlDocPtr doc,
+                                       xmlNodePtr cur,
+                                       PhaseData &phaseData)
+{
+    xmlChar *key;
+    string mydcstr;
+    cur = cur->xmlChildrenNode;
+
+    int dcid = 0;
+    double porosity = 0.0;
+    bool scrapeWaterDCs = false;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcname"))) {
             key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
             phaseData.DCName.push_back((char *)key);
             mydcstr = (char *)key;
@@ -1049,13 +1239,29 @@ void ChemicalSystem::parseGEMPhaseData (xmlDocPtr doc,
                 cout << "GEM DC id = " << dcid
                      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
             }
+            // Make certain that there will be a porosity associated
+            // with this DC
+            if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
+                phaseData.microPhaseDCPorosities.push_back(0.0);
+            }
             xmlFree(key);
         }
-        cur = cur->next;
-    } 
-    GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId,phaseData.GEMPhaseDCMembers));   
-    return;
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcporosity"))) {
+            key = xmlNodeListGetString(doc,cur->xmlChildrenNode,1);
+            string st((char *)key);
+            from_string(porosity,st);
+            // Make certain that there will be a porosity associated
+            // with this DC
+            if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
+                phaseData.microPhaseDCPorosities.push_back(porosity);
+            } else {
+                phaseData.microPhaseDCPorosities.at(phaseData.microPhaseDCPorosities.size()-1) = porosity;
+            }
+            xmlFree(key);
+        }
 
+        cur = cur->next;
+    }
 }
 
 void ChemicalSystem::parseDisplayData (xmlDocPtr doc,
@@ -1231,6 +1437,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     ICName_ = obj.getICName();
     DCName_ = obj.getDCName();
     GEMPhaseName_ = obj.getGEMPhaseName();
+    GEMPhaseDCMembers_ = obj.getGEMPhaseDCMembers();
     microPhaseId_ = obj.getMicroPhaseId();
     isKinetic_ = obj.getIsKinetic();
     randomGrowth_ = obj.getRandomGrowth();
@@ -1243,7 +1450,8 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMembers_ = obj.getMicroPhaseMembers();
     microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
     microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
-    porosity_ = obj.getPorosity();
+    microPhasePorosity_ = obj.getMicroPhasePorosity();
+    poreSizeDistribution_ = obj.getPoreSizeDistribution();
     k2o_ = obj.getK2o();
     na2o_ = obj.getNa2o();
     mgo_ = obj.getMgo();
@@ -1255,7 +1463,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     DCIdLookup_ = obj.getDCIdLookup();
     GEMPhaseIdLookup_ = obj.getGEMPhaseIdLookup();
     microPhaseToGEMPhase_ = obj.getMicroPhaseToGEMPhase();
-    microPhaseToDC_ = obj.getMicroPhaseToDC();
     ICClassCode_ = obj.getICClassCode();
     DCClassCode_ = obj.getDCClassCode();
     GEMPhaseClassCode_ = obj.getGEMPhaseClassCode();
@@ -1298,7 +1505,6 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     microPhaseMassDissolved_ = obj.getMicroPhaseMassDissolved();
     microVoidVolume_ = obj.getMicroVoidVolume();
     verbose_ = obj.getVerbose();
-    debug_ = obj.getDebug();
     warning_ = obj.getWarning();
 }
 
@@ -1313,7 +1519,6 @@ ChemicalSystem::~ChemicalSystem (void)
     ICIdLookup_.clear();
     GEMPhaseIdLookup_.clear();
     microPhaseToGEMPhase_.clear();
-    microPhaseToDC_.clear();
 
     ///
     /// Clear out the vectors
@@ -1333,7 +1538,8 @@ ChemicalSystem::~ChemicalSystem (void)
     microPhaseMass_.clear();
     microPhaseMassDissolved_.clear();
     microPhaseDCMembers_.clear();
-    porosity_.clear();
+    microPhasePorosity_.clear();
+    poreSizeDistribution_.clear();
     k2o_.clear();
     na2o_.clear();
     mgo_.clear();
@@ -1459,7 +1665,7 @@ void ChemicalSystem::writeMember (const unsigned int i,
     stream << "DATA FOR MATERIAL " << i << ":" << endl;
     stream << "       Name = " << microPhaseName_[i] << endl;
     stream << "         Id = " << microPhaseId_[i] << endl;
-    stream << "   Porosity = " << porosity_[i] << endl;
+    stream << "   Porosity = " << microPhasePorosity_[i] << endl;
     stream << "------------------------------------------------------" << endl;
 }
 
@@ -1508,12 +1714,166 @@ void ChemicalSystem::writeChemSys (void)
             out << "        growthTemplate: "
                 << growthTemplate_[i][j] << endl;
         }
-        out << "         porosity: " << porosity_[i] << endl;
+        out << "         porosity: " << microPhasePorosity_[i] << endl;
         out << "              k2o: " << k2o_[i] << endl;
         out << "             na2o: " << na2o_[i] << endl;
         out << "              mgo: " << mgo_[i] << endl;
         out << "              so3: " << so3_[i] << endl;
     }
+
+    return;
+}
+
+void ChemicalSystem::setMicroPhaseMass (const unsigned int idx,
+                                        const double val)
+{
+    try {
+        microPhaseMass_.at(idx) = val;
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","setMicroPhaseMass",
+                           "microPhaseMass_",microPhaseMass_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+
+    int DCId = 0;
+    if (idx == ELECTROLYTEID) {
+        DCId = getDCId("H2O@");
+    } else if (idx != VOIDID) {
+        DCId = getMicroPhaseDCMembers(idx,0);
+    }
+    if (idx != VOIDID) {
+        double v0 = node_->DC_V0(DCId,P_,T_);
+        double dcmm = getDCMolarMass(DCId);
+        if (verbose_) {
+            cout << "    " << microPhaseName_[idx] << ", DC " << getDCName(DCId) << ": v0 = "
+                 << v0 << ", dcmm = " << dcmm
+                 << ", so volume = ";
+            cout.flush();
+        }
+        if (dcmm < 1.0e-9) {
+            FloatException fex("ChemicalSystem","setMicroPhaseMass",
+                               "Divide by zero (dcmm)");
+            fex.printException();
+            exit(1);
+        }
+        if (verbose_) {
+            cout << (val*v0/dcmm) << endl;
+            cout << "Setting volume of microphase " << idx << " to "
+                 << (val*v0/dcmm) << " (VOIDID = " << VOIDID
+                  << ")" << endl;
+            cout.flush();
+        }
+        setMicroPhaseVolume(idx,(val*v0/dcmm));
+    }
+
+    return;
+}
+
+void ChemicalSystem::calcMicroPhasePorosity (const unsigned int idx)
+{
+
+    // No point in doing this if the phase is not present
+
+    double porosity = 0.0;
+
+    // Get the first GEM phase for this microstructure phase
+   
+    /// @todo Generalize calcMicroPhasePorosity so that we
+    /// don't just check the first GEM Phase listed as part
+    /// of this microstructure phase
+ 
+    unsigned int gemphaseid = getMicroPhaseToGEMPhase (idx,0);
+
+    // Find all the DC ids for this GEM phase
+
+    vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
+
+    // Get the porosities for each DC in the microstructure phase
+
+    vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
+    
+    if (verbose_) {
+        cout << "ChemicalSystem::calcMicroPhasePorosity for "
+             << getMicroPhaseName(idx) << endl;
+        cout << "    This phase's GEM phase id = " << gemphaseid
+             << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
+        cout << "    The DC members for this GEM phase are:" << endl;
+        for (int ii = 0; ii < DClist.size(); ++ii) {
+            cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii])
+                 << ")" << endl;
+            cout.flush();
+        }
+    }
+
+    /// @todo Do we need to check that DClist and DCporosities are the same size?
+    /// @todo Do we need to check that DClist and DCporosities are in the same order?
+    /// @note I think this is already guaranteed when we parse the phase data
+    
+
+    // Loop over them one by one and get each one's volume and
+    // subvoxel porosity.  Create a volume weighted average
+    // of porosities
+
+    /// @todo Will this work for capillary porosity?  Conc will be molal
+
+    double conc = 0.0; // Temporary variable for holding concentrations
+                       // For solid phases this will be mole fraction
+
+    int DCId = 0;
+    double vol = 0.0;
+    double sumvol = 0.0;
+    double weightedporosities = 0.0;
+
+    // JWB (2023-Apr-22) This algorithm works ONLY if there are no
+    // solid solutions that are kinetic phases.  But THAMES is not
+    // set up for that in all sorts of ways and this is not the
+    // biggest of them.
+       
+    if (DClist.size() == 1) {
+        DCId = DClist[0];
+        porosity = DCporosities[0];
+        conc = 1.0;
+        vol = conc * getDCMolarVolume(DCId);
+        if (verbose_) {
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") concentration = " << conc << endl;
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") porosity = " << porosity << endl;
+            cout << "    " << getDCName(DCId) << " (" << DCId
+                 << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+            cout << "****" << endl;
+            cout.flush();
+        }
+    } else {
+        for (int i = 0; i < DClist.size(); ++i) {
+            DCId = DClist[i];
+            conc = getDCConcentration(DCId);
+            porosity = DCporosities[i];
+            vol = conc * getDCMolarVolume(DCId);
+            weightedporosities += (vol * porosity);
+            sumvol += vol;
+            if (verbose_) {
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") concentration = " << conc << endl;
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") porosity = " << porosity << endl;
+                cout << "    " << getDCName(DCId) << " (" << DCId << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+                cout << "****" << endl;
+                cout.flush();
+            }
+        }
+        if (sumvol > 0.0) {
+            porosity = (weightedporosities / sumvol);
+        } else {
+            porosity = 0.0;
+        }
+        if (verbose_) {
+            cout << "    " << getMicroPhaseName(idx) << " subvoxel porosity = " << porosity << endl;
+            cout.flush();
+        }
+    }
+
+    setMicroPhasePorosity(idx,porosity);
 
     return;
 }
@@ -1789,13 +2149,14 @@ int ChemicalSystem::calculateState (double time,
                  << i << " = " << microPhaseName_[i] << endl;
             cout.flush();
         }
-        phi = 0.0;
-        if ((i != ELECTROLYTEID) && (i != VOIDID)) {
-            phi = getPorosity(i);
-        }
         if (!isKinetic(i)) {
+            calcMicroPhasePorosity(i);
+            phi = getMicroPhasePorosity(i);
             microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
             for (unsigned int j = 0; j < microPhaseMembers_[i].size(); j++) {
+                microPhaseMass_[i] +=
+                     GEMPhaseMass_[microPhaseMembers_[i][j]];
+
                 if (verbose_) {
                     cout << "    Is NOT a KINETIC phase: is composed of "
                          << GEMPhaseName_[microPhaseMembers_[i][j]]
@@ -1803,20 +2164,33 @@ int ChemicalSystem::calculateState (double time,
                          << GEMPhaseMass_[microPhaseMembers_[i][j]]
                          << " and volume = "
                          << GEMPhaseVolume_[microPhaseMembers_[i][j]]
+                         << " and porosity = " << phi
                          << endl;
                     cout.flush();
                 }
-                microPhaseMass_[i] +=
-                     GEMPhaseMass_[microPhaseMembers_[i][j]];
 
                 /// Here is where the subvoxel porosity is included
-                microPhaseVolume_[i] +=
-                     (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
+                /// @todo Need a more disciplined approach to making sure
+                /// these are solid phases and not capillary porosity
+              
+                if (i == ELECTROLYTEID) {
+                    microPhaseVolume_[i] += GEMPhaseVolume_[microPhaseMembers_[i][j]];
+                } else if (i != VOIDID && phi < 1.0) {
+                    microPhaseVolume_[i] +=
+                         (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
+                } else {
+                    cout << "WARNING: A solid phase with porosity = 1.0?" << endl;
+                    cout.flush();
+                    microPhaseVolume_[i] +=
+                         (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (0.001));
+                }
             }
             microVolume_ += microPhaseVolume_[i];
-
         } else {
             if (verbose_) {
+                calcMicroPhasePorosity(i);
+                phi = getMicroPhasePorosity(i);
+
                 cout << "    IS a KINETIC phase: is composed of "
                      << GEMPhaseName_[microPhaseMembers_[i][0]]
                      << "  having mass = " << microPhaseMass_[i]
@@ -1845,7 +2219,7 @@ int ChemicalSystem::calculateState (double time,
             double water_molarv, water_molesincr;
             for (int i = 0; i < numMicroPhases_; i++) {
                 if (microPhaseName_[i] == "H2O") {
-                    water_molarv = node_->DC_V0(getMicroPhaseToDC(i,0), P_, T_);
+                    water_molarv = node_->DC_V0(getMicroPhaseMembers(i,0), P_, T_);
                     water_molesincr = (microInitVolume_ - microVolume_) / water_molarv;
                     if (verbose_) {
                         cout << "water_molarv = "

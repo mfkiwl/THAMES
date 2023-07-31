@@ -36,7 +36,11 @@ Site::Site (unsigned int xp,
     y_ = yp;
     z_ = zp;
 
-    verbose_ = verbose;
+    #ifdef DEBUG
+        verbose_ = true;
+    #else
+        verbose_ = verbose;
+    #endif
 
     dissolution_.clear();
     growth_.clear();
@@ -52,8 +56,8 @@ Site::Site (unsigned int xp,
 
 void Site::calcWmc(void)
 {
-    wmc_ = chemSys_->getPorosity(getMicroPhaseId());
+    wmc_ = chemSys_->getMicroPhasePorosity(getMicroPhaseId());
     for (unsigned int i = 0; i < nb_.size(); i++) {
-        wmc_ += chemSys_->getPorosity(nb_[i]->getMicroPhaseId());
+        wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
     }
 }

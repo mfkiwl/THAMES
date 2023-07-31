@@ -21,86 +21,295 @@
             <gray>0.0</gray>
         </display_data>
     </phase>
-    <phase>
+        <phase>
         <thamesname>aq_gen</thamesname>
         <gemphase_data>
             <gemphasename>aq_gen</gemphasename>
-            <gemdcname>Al(SO4)+</gemdcname>
-            <gemdcname>Al(SO4)2-</gemdcname>
-            <gemdcname>Al+3</gemdcname>
-            <gemdcname>AlO+</gemdcname>
-            <gemdcname>AlO2-</gemdcname>
-            <gemdcname>AlO2H@</gemdcname>
-            <gemdcname>AlOH+2</gemdcname>
-            <gemdcname>AlHSiO3+2</gemdcname>
-            <gemdcname>AlSiO5-3</gemdcname>
-            <gemdcname>Ca(CO3)@</gemdcname>
-            <gemdcname>Ca(HCO3)+</gemdcname>
-            <gemdcname>Ca(SO4)@</gemdcname>
-            <gemdcname>Ca+2</gemdcname>
-            <gemdcname>CaOH+</gemdcname>
-            <gemdcname>Ca(HSiO3)+</gemdcname>
-            <gemdcname>CaSiO3@</gemdcname>
-            <gemdcname>Fe(CO3)@</gemdcname>
-            <gemdcname>Fe(HCO3)+</gemdcname>
-            <gemdcname>Fe(HSO4)+</gemdcname>
-            <gemdcname>Fe(SO4)@</gemdcname>
-            <gemdcname>Fe+2</gemdcname>
-            <gemdcname>FeOH+</gemdcname>
-            <gemdcname>Fe(HSO4)+2</gemdcname>
-            <gemdcname>Fe(SO4)+</gemdcname>
-            <gemdcname>Fe(SO4)2-</gemdcname>
-            <gemdcname>Fe+3</gemdcname>
-            <gemdcname>Fe2(OH)2+4</gemdcname>
-            <gemdcname>Fe3(OH)4+5</gemdcname>
-            <gemdcname>FeO+</gemdcname>
-            <gemdcname>FeO2-</gemdcname>
-            <gemdcname>FeO2H@</gemdcname>
-            <gemdcname>FeOH+2</gemdcname>
-            <gemdcname>FeHSiO3+2</gemdcname>
-            <gemdcname>K(SO4)-</gemdcname>
-            <gemdcname>K+</gemdcname>
-            <gemdcname>KOH@</gemdcname>
-            <gemdcname>Mg(CO3)@</gemdcname>
-            <gemdcname>Mg(HCO3)+</gemdcname>
-            <gemdcname>Mg+2</gemdcname>
-            <gemdcname>MgOH+</gemdcname>
-            <gemdcname>MgSO4@</gemdcname>
-            <gemdcname>Mg(HSiO3)+</gemdcname>
-            <gemdcname>MgSiO3@</gemdcname>
-            <gemdcname>Na(CO3)-</gemdcname>
-            <gemdcname>Na(HCO3)@</gemdcname>
-            <gemdcname>Na(SO4)-</gemdcname>
-            <gemdcname>Na+</gemdcname>
-            <gemdcname>NaOH@</gemdcname>
-            <gemdcname>HSiO3-</gemdcname>
-            <gemdcname>Si4O10-4</gemdcname>
-            <gemdcname>SiO2@</gemdcname>
-            <gemdcname>SiO3-2</gemdcname>
-            <gemdcname>CO2@</gemdcname>
-            <gemdcname>CO3-2</gemdcname>
-            <gemdcname>HCO3-</gemdcname>
-            <gemdcname>CH4@</gemdcname>
-            <gemdcname>H2@</gemdcname>
-            <gemdcname>N2@</gemdcname>
-            <gemdcname>O2@</gemdcname>
-            <gemdcname>S2O3-2</gemdcname>
-            <gemdcname>HSO3-</gemdcname>
-            <gemdcname>SO3-2</gemdcname>
-            <gemdcname>HSO4-</gemdcname>
-            <gemdcname>SO4-2</gemdcname>
-            <gemdcname>H2S@</gemdcname>
-            <gemdcname>HS-</gemdcname>
-            <gemdcname>S-2</gemdcname>
-            <gemdcname>OH-</gemdcname>
-            <gemdcname>H+</gemdcname>
-            <gemdcname>H2O@</gemdcname>
+            <gemdc>
+              <gemdcname>Al(SO4)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Al(SO4)2-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Al+3</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlO+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlO2-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlO2H@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlOH+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlHSiO3+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>AlSiO5-3</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Ca(CO3)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Ca(HCO3)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Ca(SO4)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Ca+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>CaOH+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Ca(HSiO3)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>CaSiO3@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(CO3)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(HCO3)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(HSO4)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(SO4)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeOH+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(HSO4)+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(SO4)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe(SO4)2-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe+3</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe2(OH)2+4</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe3(OH)4+5</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeO+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeO2-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeO2H@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeOH+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>FeHSiO3+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>K(SO4)-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>K+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>KOH@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Mg(CO3)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Mg(HCO3)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Mg+2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>MgOH+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>MgSO4@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Mg(HSiO3)+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>MgSiO3@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Na(CO3)-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Na(HCO3)@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Na(SO4)-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Na+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>NaOH@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>HSiO3-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Si4O10-4</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>SiO2@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>SiO3-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>CO2@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>CO3-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>HCO3-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>CH4@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>H2@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>N2@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>O2@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>S2O3-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>HSO3-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>SO3-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>HSO4-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>SO4-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>H2S@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>HS-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>S-2</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>OH-</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>H+</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
+            <gemdc>
+              <gemdcname>H2O@</gemdcname>
+              <gemdcporosity>1.0</gemdcporosity>
+            </gemdc>
         </gemphase_data>
         <id>1</id>
         <interface_data>
             <randomgrowth>0.000</randomgrowth>
         </interface_data>
-        <porosity>1.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -111,11 +320,13 @@
             <gray>25.0</gray>
         </display_data>
     </phase>
-    <phase>
+        <phase>
         <thamesname>Alite</thamesname>
         <gemphase_data>
             <gemphasename>Alite</gemphasename>
-            <gemdcname>C3S</gemdcname>
+            <gemdc>
+                <gemdcname>C3S</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>2</id>
         <interface_data>
@@ -125,7 +336,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <impurity_data>
             <k2ocoeff>0.00087000</k2ocoeff>
             <na2ocoeff>0.00000000</na2ocoeff>
@@ -153,7 +363,9 @@
         <thamesname>Anhydrite</thamesname>
         <gemphase_data>
             <gemphasename>Anhydrite</gemphasename>
-            <gemdcname>Anh</gemdcname>
+            <gemdc>
+                <gemdcname>Anh</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>3</id>
         <interface_data>
@@ -163,7 +375,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>soluble</type>
         </kinetic_data>
@@ -178,7 +389,9 @@
         <thamesname>Belite</thamesname>
         <gemphase_data>
             <gemphasename>Belite</gemphasename>
-            <gemdcname>C2S</gemdcname>
+            <gemdc>
+              <gemdcname>C2S</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>4</id>
         <interface_data>
@@ -188,7 +401,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <impurity_data>
             <k2ocoeff>0.01152000</k2ocoeff>
             <na2ocoeff>0.00000000</na2ocoeff>
@@ -216,7 +428,9 @@
         <thamesname>Ferrite</thamesname>
         <gemphase_data>
             <gemphasename>Ferrite</gemphasename>
-            <gemdcname>C4AF</gemdcname>
+            <gemdc>
+              <gemdcname>C4AF</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>5</id>
         <interface_data>
@@ -226,7 +440,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <impurity_data>
             <k2ocoeff>0.00272000</k2ocoeff>
             <na2ocoeff>0.00000000</na2ocoeff>
@@ -254,7 +467,9 @@
         <thamesname>Gypsum</thamesname>
         <gemphase_data>
             <gemphasename>Gypsum</gemphasename>
-            <gemdcname>Gp</gemdcname>
+            <gemdc>
+              <gemdcname>Gp</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>6</id>
         <interface_data>
@@ -264,7 +479,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>soluble</type>
         </kinetic_data>
@@ -279,7 +493,9 @@
         <thamesname>Silica-amorph</thamesname>
         <gemphase_data>
             <gemphasename>Silica-amorph</gemphasename>
-            <gemdcname>Amor-Sl</gemdcname>
+            <gemdc>
+              <gemdcname>Amor-Sl</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>7</id>
         <interface_data>
@@ -297,7 +513,6 @@
                 <affinityvalue>-10</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>kinetic</type>
             <k1>18.1</k1>
@@ -319,7 +534,9 @@
         <thamesname>hemihydrate</thamesname>
         <gemphase_data>
             <gemphasename>hemihydrate</gemphasename>
-            <gemdcname>hemihydrate</gemdcname>
+            <gemdc>
+              <gemdcname>hemihydrate</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>8</id>
         <interface_data>
@@ -329,7 +546,6 @@
                 <affinityvalue>1</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>soluble</type>
         </kinetic_data>
@@ -340,16 +556,34 @@
             <gray>140.0</gray>
         </display_data>
     </phase>
-    <phase>
+        <phase>
         <thamesname>CSHQ</thamesname>
         <gemphase_data>
             <gemphasename>CSHQ</gemphasename>
-            <gemdcname>CSHQ-JenD</gemdcname>
-            <gemdcname>CSHQ-JenH</gemdcname>
-            <gemdcname>CSHQ-TobD</gemdcname>
-            <gemdcname>CSHQ-TobH</gemdcname>
-            <gemdcname>KSiOH</gemdcname>
-            <gemdcname>NaSiOH</gemdcname>
+            <gemdc>
+                <gemdcname>CSHQ-JenD</gemdcname>
+                <gemdcporosity>0.4935</gemdcporosity>
+            </gemdc>
+            <gemdc>
+                <gemdcname>CSHQ-JenH</gemdcname>
+                <gemdcporosity>0.4935</gemdcporosity>
+            </gemdc>
+            <gemdc>
+                <gemdcname>CSHQ-TobD</gemdcname>
+                <gemdcporosity>0.2004</gemdcporosity>
+            </gemdc>
+            <gemdc>
+                <gemdcname>CSHQ-TobH</gemdcname>
+                <gemdcporosity>0.2004</gemdcporosity>
+            </gemdc>
+            <gemdc>
+                <gemdcname>KSiOH</gemdcname>
+                <gemdcporosity>0.1825</gemdcporosity>
+            </gemdc>
+            <gemdc>
+                <gemdcname>NaSiOH</gemdcname>
+                <gemdcporosity>0.1825</gemdcporosity>
+            </gemdc>
         </gemphase_data>
         <id>9</id>
         <interface_data>
@@ -367,7 +601,7 @@
                 <affinityvalue>4</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.5</porosity>
+        <poresizefilename>CSH-PoreSizeDistribution.csv</poresizefilename>
         <kinetic_data>
             <type>thermo</type>
             <Rd>
@@ -390,7 +624,9 @@
         <thamesname>Portlandite</thamesname>
         <gemphase_data>
             <gemphasename>Portlandite</gemphasename>
-            <gemdcname>Portlandite</gemdcname>
+            <gemdc>
+              <gemdcname>Portlandite</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>10</id>
         <interface_data>
@@ -408,7 +644,6 @@
                 <affinityvalue>-10</affinityvalue>
             </affinity>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -420,32 +655,41 @@
         </display_data>
     </phase>
     <phase>
-        <thamesname>AFMc</thamesname>
+        <thamesname>AFmc</thamesname>
         <gemphase_data>
             <gemphasename>C4Ac0.5H105</gemphasename>
-            <gemdcname>hemicarbonat10.5</gemdcname>
+            <gemdc>
+              <gemdcname>hemicarbonat10.5</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4Ac0.5H12</gemphasename>
-            <gemdcname>hemicarbonate</gemdcname>
+            <gemdc>
+              <gemdcname>hemicarbonate</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4Ac0.5H9</gemphasename>
-            <gemdcname>hemicarbonate9</gemdcname>
+            <gemdc>
+              <gemdcname>hemicarbonate9</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AcH11</gemphasename>
-            <gemdcname>monocarbonate</gemdcname>
+            <gemdc>
+              <gemdcname>monocarbonate</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AcH9</gemphasename>
-            <gemdcname>monocarbonate9</gemdcname>
+            <gemdc>
+              <gemdcname>monocarbonate9</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>11</id>
         <interface_data>
             <randomgrowth>0.800</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -457,24 +701,29 @@
         </display_data>
     </phase>
     <phase>
-        <thamesname>AFM</thamesname>
+        <thamesname>AFm</thamesname>
         <gemphase_data>
             <gemphasename>C4AH11</gemphasename>
-            <gemdcname>C4AH11</gemdcname>
+            <gemdc>
+              <gemdcname>C4AH11</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AH13</gemphasename>
-            <gemdcname>C4AH13</gemdcname>
+            <gemdc>
+              <gemdcname>C4AH13</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AH19</gemphasename>
-            <gemdcname>C4AH19</gemdcname>
+            <gemdc>
+              <gemdcname>C4AH19</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>12</id>
         <interface_data>
             <randomgrowth>0.500</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -486,42 +735,59 @@
         </display_data>
     </phase>
     <phase>
-        <thamesname>MONOSULF</thamesname>
+        <thamesname>Monosulf</thamesname>
         <gemphase_data>
             <gemphasename>C4AsH105</gemphasename>
-            <gemdcname>monosulphate10.5</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate10.5</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AsH12</gemphasename>
-            <gemdcname>monosulphate12</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate12</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AsH14</gemphasename>
-            <gemdcname>monosulphate14</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate14</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AsH16</gemphasename>
-            <gemdcname>monosulphate16</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate16</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C4AsH9</gemphasename>
-            <gemdcname>monosulphate9</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate9</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>OH_SO4_AFm</gemphasename>
-            <gemdcname>C4AH13</gemdcname>
-            <gemdcname>monosulphate12</gemdcname>
+            <gemdc>
+              <gemdcname>C4AH13</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>monosulphate12</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>monosulph-AlFe</gemphasename>
-            <gemdcname>monosulphate1205</gemdcname>
-            <gemdcname>Fe-monosulph05</gemdcname>
+            <gemdc>
+              <gemdcname>monosulphate1205</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe-monosulph05</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>13</id>
         <interface_data>
             <randomgrowth>0.900</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -533,35 +799,50 @@
         </display_data>
     </phase>
     <phase>
-        <thamesname>AFT</thamesname>
+        <thamesname>AFt</thamesname>
         <gemphase_data>
             <gemphasename>C6AsH13</gemphasename>
-            <gemdcname>ettringite13</gemdcname>
+            <gemdc>
+              <gemdcname>ettringite13</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>C6AsH9</gemphasename>
-            <gemdcname>ettringite9</gemdcname>
+            <gemdc>
+              <gemdcname>ettringite9</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>SO4_CO3_AFt</gemphasename>
-            <gemdcname>tricarboalu03</gemdcname>
-            <gemdcname>ettringite03_ss</gemdcname>
+            <gemdc>
+              <gemdcname>tricarboalu03</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>ettringite03_ss</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>ettringite</gemphasename>
-            <gemdcname>ettringite</gemdcname>
-            <gemdcname>ettringite30</gemdcname>
+            <gemdc>
+              <gemdcname>ettringite</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>ettringite30</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>ettringite-AlFe</gemphasename>
-            <gemdcname>ettringite05</gemdcname>
-            <gemdcname>Fe-ettringite05</gemdcname>
+            <gemdc>
+              <gemdcname>ettringite05</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Fe-ettringite05</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>14</id>
         <interface_data>
             <randomgrowth>0.900</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -576,18 +857,23 @@
         <thamesname>HYDROTALC</thamesname>
         <gemphase_data>
             <gemphasename>OH-hydrotalcite</gemphasename>
-            <gemdcname>hydrotalcite</gemdcname>
+            <gemdc>
+              <gemdcname>hydrotalcite</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>hydrotalc-pyro</gemphasename>
-            <gemdcname>Mg3AlC0.5OH</gemdcname>
-            <gemdcname>Mg3FeC0.5OH</gemdcname>
+            <gemdc>
+              <gemdcname>Mg3AlC0.5OH</gemdcname>
+            </gemdc>
+            <gemdc>
+              <gemdcname>Mg3FeC0.5OH</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>15</id>
         <interface_data>
             <randomgrowth>0.400</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>
@@ -602,29 +888,38 @@
         <thamesname>ZEOLITES</thamesname>
         <gemphase_data>
             <gemphasename>Chabazite</gemphasename>
-            <gemdcname>chabazite</gemdcname>
+            <gemdc>
+              <gemdcname>chabazite</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>Natrolite</gemphasename>
-            <gemdcname>natrolite</gemdcname>
+            <gemdc>
+              <gemdcname>natrolite</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>ZeoliteP</gemphasename>
-            <gemdcname>zeoliteP_Ca</gemdcname>
+            <gemdc>
+              <gemdcname>zeoliteP_Ca</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>ZeoliteX</gemphasename>
-            <gemdcname>zeoliteX</gemdcname>
+            <gemdc>
+              <gemdcname>zeoliteX</gemdcname>
+            </gemdc>
         </gemphase_data>
         <gemphase_data>
             <gemphasename>ZeoliteY</gemphasename>
-            <gemdcname>zeoliteY</gemdcname>
+            <gemdc>
+              <gemdcname>zeoliteY</gemdcname>
+            </gemdc>
         </gemphase_data>
         <id>16</id>
         <interface_data>
             <randomgrowth>0.900</randomgrowth>
         </interface_data>
-        <porosity>0.0</porosity>
         <kinetic_data>
             <type>thermo</type>
         </kinetic_data>

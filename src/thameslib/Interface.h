@@ -59,7 +59,6 @@ private:
     vector<Isite> dissolutionSites_;   /**< The list of sites eligible for self-dissolution */
     RanGen *rg_;                        /**< The random number generator object */
     bool verbose_;                      /**< Flag for verbose output */
-    bool debug_;                        /**< Flag for debugging output */
 
 public:
     
@@ -75,11 +74,9 @@ Interface ();
 
 @param rg is a pointer to the random number generator object to assign
 @param verbose is true if verbose output should be produced
-@param debug is true if debugging output should be produced
 */
 Interface (RanGen *rg,
-           const bool verbose,
-           const bool debug);
+           const bool verbose);
 
 /**
 @brief Overloaded constructor, initializing all members to prescribed values.
@@ -90,15 +87,13 @@ Interface (RanGen *rg,
 @param dv is the list of pointers to dissolution sites of this interface
 @param pid is the integer id of the phase associated with this interface
 @param verbose is true if verbose output should be produced
-@param debug is true if debugging output should be produced
 */
 Interface (ChemicalSystem *csys,
            RanGen *rg,
            vector<Site *> gv,
            vector<Site *> dv,
            unsigned int pid,
-           const bool verbose,
-           const bool debug);
+           const bool verbose);
     
 /**
 @brief Destructor for the Interface class.
@@ -237,27 +232,6 @@ void setVerbose (const bool isverbose)
 bool getVerbose (void) const
 {
     return verbose_;
-}
-
-/**
-@brief Set the debug flag
-
-@param isdebug is true if debug output should be produced
-*/
-void setDebug (const bool isdebug)
-{
-    debug_ = isdebug;
-    return;
-}
-
-/**
-@brief Get the debug flag
-
-@return the debug flag
-*/
-bool getDebug (void) const
-{
-    return debug_;
 }
 
 };      // End of Interface class

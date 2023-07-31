@@ -4,11 +4,23 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| June 3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
 | May 23 10:37:38 2023 | Fixed bug in handling of spaces in path names |
 | May 23 08:05:26 2023 | Allow path and file names that include spaces |
+| May 15 15:41:03 2023 | Updated test file input after rebase |
 | May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
 | May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
+| Apr 25 21:45:58 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
+| Apr 30 20:59:06 2023 | Fuller implementation of global DEBUG preprocessor define |
+| Apr 27 17:47:31 2023 | Removed debug as class variables and now have a global DEBUG preprocessor define |
+| Apr 25 21:17:23 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
+| Apr 24 21:45:58 2023 | Fixed one error in Lattice::writePoreSizeDistribution. Phase porosity still not being calculated |
+| Apr 22 21:45:58 2023 | Fixed more runtime errors. Almost working but won't empty pores |
+| Apr 21 17:46:33 2023 | Fixed multiple runtime errors, but still has some |
+| Apr 20 14:19:42 2023 | Composition-dependent subvoxel porosity compiles; need to test runtime behavior |
+| Apr 19 18:21:20 2023 | Created a branch for composition-dependent subvoxel porosity |
+| Apr 14 23:54:13 2023 | Accounting for subvoxel porosity of microstructure phases |
 | Mar 30 16:21:47 2023 | Adjust microstructure molar volumes based on interhydrate porosity |
 | Jan 14 17:12:41 2023 | Corrected local path for GEMS-3K node.h include file |
 | Jan  3 13:52:07 2023 | Tagged as version 2.6 |
