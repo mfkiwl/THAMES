@@ -18,6 +18,7 @@ Lattice::Lattice (ChemicalSystem *cs,
   resolution_ = REFRES;     // in micrometers (see global.h)
   site_.clear();
   deptheffect_ = false;
+  masterporevolume_.clear();
   #ifdef DEBUG
     verbose_ = true;
   #else
@@ -49,6 +50,7 @@ Lattice::Lattice (ChemicalSystem *cs,
   resolution_ = REFRES;     // in micrometers (see global.h)
   site_.clear();
   deptheffect_ = true;
+  masterporevolume_.clear();
     
   #ifdef DEBUG
     verbose_ = true;
@@ -486,6 +488,7 @@ Lattice::~Lattice ()
 {
     interface_.clear();
     site_.clear();
+    masterporevolume_.clear();
     delete rg_;
 }
 
@@ -2315,41 +2318,41 @@ void Lattice::writePoreSizeDistribution (double curtime,
     // Combine them into a single distribution for all phases
    
     double totsubvoxel_volume = 0.0;
-    vector<struct PoreSizeVolume> masterporevolume;
     struct PoreSizeVolume dumps;
     dumps.diam = 0.0;
     dumps.volfrac = 0.0;
     dumps.volume = 0.0;
-    masterporevolume.resize(int(maxmaxsize)-1,dumps);
+    masterporevolume_.clear();
+    masterporevolume_.resize(int(maxmaxsize)-1,dumps);
    
     for (int i = 0; i < binnedporevolume.size(); ++i) {
         cumulative_volume = 0.0;
         cumulative_volfrac = 0.0;
         for (int j = 0; j < binnedporevolume[i].size(); ++j) {
-            masterporevolume[j].diam = binnedporevolume[i][j].diam;
-            masterporevolume[j].volume += binnedporevolume[i][j].volume;
+            masterporevolume_[j].diam = binnedporevolume[i][j].diam;
+            masterporevolume_[j].volume += binnedporevolume[i][j].volume;
             totsubvoxel_volume += binnedporevolume[i][j].volume;
-            masterporevolume[j].volfrac = 0.0;
+            masterporevolume_[j].volfrac = 0.0;
         }
     }
 
     // Normalize the pore volume distribution relative to the
     // total subvoxel pore volume, stored already in totsubvoxel_volume
     
-    // for (int i = 0; i < masterporevolume.size(); ++i) {
-    //     masterporevolume[i].volume = masterporevolume[i].volume
+    // for (int i = 0; i < masterporevolume_.size(); ++i) {
+    //     masterporevolume_[i].volume = masterporevolume_[i].volume
     //                                    / totsubvoxel_volume;
     // }
 
     #ifdef DEBUG
         cout << "Lattice::writePoreSizeDistribution  Master pore "
              << "size volume fractions" << endl;
-        for (int i = 0; i < masterporevolume.size(); ++i) {
-            if (masterporevolume[i].volume > 0.0) {
+        for (int i = 0; i < masterporevolume_.size(); ++i) {
+            if (masterporevolume_[i].volume > 0.0) {
                 cout << "Lattice::writePoreSizeDistribution diam = "
-                     << masterporevolume[i].diam << " nm,"
-                     << " volume = " << masterporevolume[i].volume << ","
-                     << " volfrac = " << masterporevolume[i].volfrac << endl << endl;
+                     << masterporevolume_[i].diam << " nm,"
+                     << " volume = " << masterporevolume_[i].volume << ","
+                     << " volfrac = " << masterporevolume_[i].volfrac << endl << endl;
             }
         }
         cout.flush();
@@ -2472,22 +2475,22 @@ void Lattice::writePoreSizeDistribution (double curtime,
                  << "Master pore size volume filling" << endl;
             cout.flush();
         #endif
-        for (int i = 0; i < masterporevolume.size(); ++i) {
-            volfrac_avail = masterporevolume[i].volume * subvoxelporevolumefraction_;
+        for (int i = 0; i < masterporevolume_.size(); ++i) {
+            volfrac_avail = masterporevolume_[i].volume * subvoxelporevolumefraction_;
             volfrac_filled = water_volfrac / volfrac_avail;
             if (volfrac_filled > 1.0)  volfrac_filled = 1.0;
-            masterporevolume[i].volfrac = volfrac_filled;
+            masterporevolume_[i].volfrac = volfrac_filled;
             if (!(chemSys_->isSaturated())) {   // System is sealed
                 water_volfrac -= volfrac_avail;
                 if (water_volfrac < 0.0) water_volfrac = 0.0;
             }
             #ifdef DEBUG
-            if (masterporevolume[i].volume > 0.0) {
+            if (masterporevolume_[i].volume > 0.0) {
                 cout << "Lattice::writePoreSizeDistribution diam = "
-                     << masterporevolume[i].diam << " nm,"
+                     << masterporevolume_[i].diam << " nm,"
                      << " vfrac avail = " << volfrac_avail << ","
-                     << " volume = " << masterporevolume[i].volume << ","
-                     << " volfilled = " << masterporevolume[i].volfrac << ","
+                     << " volume = " << masterporevolume_[i].volume << ","
+                     << " volfilled = " << masterporevolume_[i].volfrac << ","
                      << " waterfrac left = " << water_volfrac << endl;
                 cout.flush();
             }
@@ -2535,11 +2538,11 @@ void Lattice::writePoreSizeDistribution (double curtime,
     cout << "Total void volume fraction = " << volumefraction_.at(VOIDID) << endl;
     out << "Pore size saturation data:" << endl;
     out << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
-    for (int i = 0; i < masterporevolume.size(); ++i) {
-        if (masterporevolume[i].volume > 0.0) {
-            out << masterporevolume[i].diam << ","
-                << masterporevolume[i].volume << ","
-                << masterporevolume[i].volfrac << endl;
+    for (int i = 0; i < masterporevolume_.size(); ++i) {
+        if (masterporevolume_[i].volume > 0.0) {
+            out << masterporevolume_[i].diam << ","
+                << masterporevolume_[i].volume << ","
+                << masterporevolume_[i].volfrac << endl;
         }
     }
 
@@ -2551,7 +2554,7 @@ void Lattice::writePoreSizeDistribution (double curtime,
     double capvoid_volfrac = volumefraction_.at(VOIDID)
                            + (volumefraction_.at(ELECTROLYTEID) - water_volfrac);
     double capspace_volfrac = capvoid_volfrac + capwater_volfrac;
-    out << ">" << masterporevolume[masterporevolume.size()-1].diam << ","
+    out << ">" << masterporevolume_[masterporevolume_.size()-1].diam << ","
         << capspace_volfrac << ","
         << (1.0 - volumefraction_.at(VOIDID)) << endl;
 

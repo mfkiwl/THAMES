@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| July 30 23:28:36 2023 | Merge DCPorosity branch with master, added output of enthalpy |
 | June 3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
 | May 23 10:37:38 2023 | Fixed bug in handling of spaces in path names |
 | May 23 08:05:26 2023 | Allow path and file names that include spaces |

@@ -963,16 +963,30 @@ void KineticModel::calculateKineticStep (const double timestep,
           double vfvoid = lattice_->getVolumefraction(VOIDID);
           double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
 
-          // This is a big kluge for internal relative humidity
-          // @todo Fix the relative humidity calculation
+          /// This is a big kluge for internal relative humidity
+          /// @note Using new gel and interhydrate pore size distribution model
+          ///       which is currently contained in the Lattice object.
+          ///
+          /// Surface tension of water is gamma = 0.072 J/m2
+          /// Molar volume of water is Vm = 1.8e-5 m3/mole
+          /// The Kelvin equation is 
+          ///    p/p0 = exp (-4 gamma Vm / d R T) = exp (-6.23527e-7 / (d T))
+          ///
+          ///    where d is the pore diameter in meters and T is absolute temperature
           
-          double rh = 1.0 - (vfvoid/vfh2o);
-          rh = rh > 0.55 ? rh : 0.55;
-          // Next commented line is original PK idea
-          //rhFactor = pow(((rh - 0.55)/0.45),3.0);
+          /// Assume a zero contact angle for now.
+          /// @todo revisit the contact angle issue
           
-          // Next line is trial version
-          rhFactor = pow(((rh - 0.55)/0.45),2.0);
+          double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+          critporediam *= 1.0e-9;                                    // in m
+          double rh = exp(-6.23527e-7/critporediam/T);
+
+          /// Assume a zero contact angle for now.
+          /// @todo revisit the contact angle issue
+          
+          rh = rh > 0.55 ? rh : 0.551;
+          rhFactor = pow(((rh - 0.55)/0.45),4.0);
+          
 
           for (int i = 0; i < microPhaseId_.size(); i++) {
             microPhaseId = microPhaseId_[i];

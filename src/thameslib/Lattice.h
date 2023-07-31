@@ -88,6 +88,8 @@ double capillaryporevolumefraction_;       /**< Total volume fraction of capilla
 double subvoxelporevolume_;               /**< Total volume of subvoxel pores */
 double subvoxelporevolumefraction_;               /**< Total volume fraction of subvoxel pores */
 
+vector<struct PoreSizeVolume> masterporevolume_; /**< Pore size distribution and saturation */
+
 double time_;                               /**< The current simulation time [days] */
 double temperature_;                        /**< The current simulation temperature [K] */
 double oldtemp_;                            /**< The temperature in the previous
@@ -1249,6 +1251,141 @@ fraction (microstructure basis)
 void setSubvoxelporevolumefraction (const double subvoxelporevolumefraction)
 {
     subvoxelporevolumefraction_ = subvoxelporevolumefraction;
+}
+
+/**
+@brief Set the master pore volume distribution
+
+@param masterporevolume is the pore volume distribution
+*/
+void setMasterporevolume (const vector<struct PoreSizeVolume> masterporevolume)
+{
+    masterporevolume_ = masterporevolume;
+    return;
+}
+
+/**
+@brief Set the master pore volume distribution of a particular size
+
+@param idx is the index to set
+@param diam is the diameter in nm
+@param volume is the volume of pores this size, in nm3 
+@param volfrac is the volume fraction of this size filled with electrolyte
+*/
+void setMasterporevolume (const int idx,
+                          const double diam,
+                          const double volume,
+                          const double volfrac)
+{
+    try {
+        if (idx >= masterporevolume_.size()) {
+            throw EOBException("Lattice","setMasterporevolume","masterporevolume_",
+                               masterporevolume_.size(),(int)idx);
+        }
+        masterporevolume_[idx].diam = diam;
+        masterporevolume_[idx].volume = volume;
+        masterporevolume_[idx].volfrac = volfrac;
+    }
+    catch (EOBException ex) {
+        ex.printException();
+        exit(1);
+    }
+    return;
+}
+
+/**
+@brief Get the master pore volume distribution of a particular size
+@param idx is the index to get
+@return the structure holding the pore size distribution data for that element
+*/
+struct PoreSizeVolume getMasterporevolume(const int idx)
+{
+    try {
+        if (idx >= masterporevolume_.size()) {
+            throw EOBException("Lattice","getMasterporevolume","masterporevolume_",
+                               masterporevolume_.size(),(int)idx);
+        }
+    }
+    catch (EOBException ex) {
+        ex.printException();
+        exit(1);
+    }
+    return (masterporevolume_[idx]);
+}
+
+/**
+@brief Get the diameter of the idx element of the pore volume distribution
+@param idx is the index to get
+@return the diameter of that element in the pore size distribution (nm)
+*/
+double getMasterporevolumeDiam(const int idx)
+{
+    try {
+        if (idx >= masterporevolume_.size()) {
+            throw EOBException("Lattice","getMasterporevolumeDiam","masterporevolume_",
+                               masterporevolume_.size(),(int)idx);
+        }
+    }
+    catch (EOBException ex) {
+        ex.printException();
+        exit(1);
+    }
+    return (masterporevolume_[idx].diam);
+}
+
+/**
+@brief Get the total volume of the idx element of the pore volume distribution
+@param idx is the index to get
+@return the volume of that element in the pore size distribution (nm3)
+*/
+double getMasterporevolumeVolume(const int idx)
+{
+    try {
+        if (idx >= masterporevolume_.size()) {
+            throw EOBException("Lattice","getMasterporevolumeVolume","masterporevolume_",
+                               masterporevolume_.size(),(int)idx);
+        }
+    }
+    catch (EOBException ex) {
+        ex.printException();
+        exit(1);
+    }
+    return (masterporevolume_[idx].volume);
+}
+
+/**
+@brief Get the volume fraction saturated  of the idx element of the pore volume distribution
+@param idx is the index to get
+@return the volume fraction saturated of that element in the pore size distribution
+*/
+double getMasterporevolumeVolfrac(const int idx)
+{
+    try {
+        if (idx >= masterporevolume_.size()) {
+            throw EOBException("Lattice","getMasterporevolumeVolfrac","masterporevolume_",
+                               masterporevolume_.size(),(int)idx);
+        }
+    }
+    catch (EOBException ex) {
+        ex.printException();
+        exit(1);
+    }
+    return (masterporevolume_[idx].volfrac);
+}
+
+/**
+@brief Get the largest diameter of pores containing electrolyte
+@return the diameter of the largest pore containing electrolyte
+*/
+double getLargestSaturatedPore(void)
+{
+    double capsize = 1000.0; // nm of capillary pores
+    for (int i = 0; i < masterporevolume_.size(); i++) {
+        if (masterporevolume_[i].volfrac < 1.0) {
+            return (masterporevolume_[i].diam);
+        }
+    }
+    return(capsize);
 }
 
 /**
