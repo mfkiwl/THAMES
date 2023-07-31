@@ -153,6 +153,15 @@ Controller::Controller (Lattice *msh,
     }
     out6 << endl;
     out6.close();
+
+    outfilename = jobroot_ + "_Enthalpy.csv";
+    ofstream out7(outfilename.c_str(),ios::app);
+    if (!out7) {
+        throw FileException("Controller","Controller",outfilename,"Could not append");
+    }
+    out7 << "Time(d),Enthalpy(J)" << endl;
+    out7.close();
+
   }
   catch (FileException fex) {
     throw fex;
@@ -928,6 +937,30 @@ void Controller::calculateState (double time,
     out9 << endl;
     out9.close();
 
+    outfilename = jobroot_ + "_Enthalpy.csv";
+    ofstream out10(outfilename.c_str(),ios::app);
+    if (!out10) {
+      throw FileException("Controller","calculateState",outfilename,
+                          "Could not append");
+    }
+    if (verbose_) {
+        cout << "Writing Enthalpy values...";
+        cout.flush();
+    }
+    
+    double enth = 0.0;
+    for(int i = 0; i < chemSys_->getNumDCs(); i++) {
+        enth += (chemSys_->getDCEnthalpy(i));
+    }
+
+    out10 << setprecision(5) << time;
+    out10 << "," << enth << endl;
+    if (verbose_) {
+        cout << "Done!" << endl;
+        cout.flush();
+    }
+    out10.close();
+        
     ///
     /// Now that the end of the iteration is reached, zero out the kinetic
     /// DC moles in preparation for the next iteration

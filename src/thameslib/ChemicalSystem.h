@@ -318,6 +318,8 @@ double *DCLowerLimit_;                  /**< List of lower bound on moles of eac
                                                 stability of the thermodynamic
                                                 calculations */
 
+double *DCH0_;                          /**< List of molar enthalpies of DCs */
+
 /**
 @brief List of one-letter class codes for each IC, specifying its kind.
 
@@ -3081,6 +3083,103 @@ void writeDCMoles()
     }
     cout << endl;
     cout.flush();
+}
+
+/**
+@brief Set the molar enthalpy of a given dependent component (DC) in the system.
+
+@param idx is the GEM DC id to set
+@param val is the molar enthalpy to assign to that DC (J/mol)
+*/
+void setDCH0 (const unsigned int idx, const double val)
+{
+    if (idx < numDCs_) {
+        DCH0_[idx] = val;
+    } else {
+        EOBException ex("ChemicalSystem","setDCH0","DCH0_",numDCs_,idx);
+        ex.printException();
+        exit(1);
+    }
+    return;
+}
+
+/**
+@brief Get the molar enthalpy of every dependent component (DC) in the system.
+
+@note Used only in this class's copy constructor.
+
+@return a pointer to the list of molar enthalpies assigned to each DC (J/mol)
+*/
+double *getDCH0 (void) const
+{
+    return DCH0_;
+}
+
+/**
+@brief Get the molar enthalpy of an dependent component (DC) in the system.
+
+@param idx is the GEM DC id to query
+@return the molar enthalpy assigned to that DC (J/mol)
+*/
+double getDCH0 (const unsigned int idx)
+{
+    if (idx < numDCs_) {
+        return DCH0_[idx];
+    } else {
+        EOBException ex("ChemicalSystem","getDCH0","DCH0_",numDCs_,idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the number of moles of an dependent component (DC) in the system.
+
+@param str is the GEM DC name to query
+@return the molar enthalpy assigned to that DC (J/mol)
+*/
+double getDCH0 (const string &str)
+{
+    int idx = getDCId(str);
+    if (idx < numDCs_) {
+        return DCH0_[idx];
+    } else {
+        EOBException ex("ChemicalSystem","getDCH0","DCH0_",numDCs_,idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Output the number of moles of every independent component (IC) in the system.
+
+*/
+void writeDCH0()
+{
+    cout << endl;
+    cout << "Vector of Dependent Components:" << endl;
+    for (unsigned int i = 0; i < numDCs_; i++) {
+        cout << "    " << DCName_[i] << ": " << DCH0_[i] << " J/mol" << endl;
+    }
+    cout << endl;
+    cout.flush();
+}
+
+/**
+@brief Get the total enthalpy of an dependent component (DC) in the system.
+
+@param idx is the GEM DC id to query
+@return the total enthalpy assigned to that DC (J)
+*/
+double getDCEnthalpy (const unsigned int idx)
+{
+    if (idx < numDCs_) {
+        return (DCH0_[idx] * DCMoles_[idx]);
+    } else {
+        EOBException ex("ChemicalSystem","getDCH0","DCH0_",numDCs_,idx);
+        ex.printException();
+        exit(1);
+    }
 }
 
 /**

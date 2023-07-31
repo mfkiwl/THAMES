@@ -36,7 +36,7 @@ if (LIBXML2_FOUND)
     message ("Found libxml2 include files at " ${LIBXML2_INCLUDE_DIR})
     message ("libxml2 libraries are " ${LIBXML2_LIBRARIES})
     set (EXTRA_LIBS ${EXTRA_LIBS} ${LIBXML2_LIBRARIES})
-    message ("EXTRA_LIBS" ${EXTRA_LIBS})
+    message ("EXTRA_LIBS " ${EXTRA_LIBS})
     set (XML_INCLUDE_PATH "-I${LIBXML2_INCLUDE_DIR}")
 else (LIBXML2_FOUND)
     message (FATAL_ERROR "Library libxml not installed on system.  Please install it first.")
@@ -45,7 +45,7 @@ endif (LIBXML2_FOUND)
 find_library (
     GEMS3K_LIB
     NAMES GEMS3K-static libGEMS3K-static libGEMS3K-static.a GEMS3K-static.a # what to look for
-    HINTS "${CMAKE_SOURCE_DIR}/src/GEMS3K-standalone/Resources/lib" # where to look
+    HINTS "${CMAKE_SOURCE_DIR}/src/Resources/lib" # where to look
 )
 
 # check if we found the GEMS3K library

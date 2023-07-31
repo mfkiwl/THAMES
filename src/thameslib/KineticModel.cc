@@ -1068,7 +1068,11 @@ void KineticModel::calculateKineticStep (const double timestep,
           
           double rh = 1.0 - (vfvoid/vfh2o);
           rh = rh > 0.55 ? rh : 0.55;
-          rhFactor = pow(((rh - 0.55)/0.45),4.0);
+          // Next commented line is original PK idea
+          //rhFactor = pow(((rh - 0.55)/0.45),3.0);
+          
+          // Next line is trial version
+          rhFactor = pow(((rh - 0.55)/0.45),2.0);
 
           for (int i = 0; i < microPhaseId_.size(); i++) {
             microPhaseId = microPhaseId_[i];
@@ -1099,8 +1103,8 @@ void KineticModel::calculateKineticStep (const double timestep,
                 cDOH = 1.333 * wcRatio_;
                 wcFactor = 1.0;
                 if (DOH > cDOH) {
-                    wcFactor += (4.444 * wcRatio_) -
-                                 3.333 * cDOH;
+                    wcFactor += ((4.444 * wcRatio_) -
+                                 (3.333 * DOH));
                     wcFactor = pow(wcFactor,4.0);
                 }
 
@@ -1197,8 +1201,8 @@ void KineticModel::calculateKineticStep (const double timestep,
                         cDOH = 1.333 * wcRatio_;
                         wcFactor = 1.0;
                         if (DOH > cDOH) {
-                            wcFactor += (4.444 * wcRatio_) -
-                                         3.333 * cDOH;
+                            wcFactor += ((4.444 * wcRatio_) -
+                                         (3.333 * DOH));
                             wcFactor = pow(wcFactor,4.0);
                         }
 

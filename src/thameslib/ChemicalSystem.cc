@@ -189,6 +189,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       ICChemicalPotential_ = new double [numICs_];
       exmsg = "DCMoles_";
       DCMoles_ = new double [numDCs_];
+      exmsg = "DCH0_";
+      DCH0_ = new double [numDCs_];
       exmsg = "DCActivityCoeff_";
       DCActivityCoeff_ = new double [numDCs_];
       exmsg = "GEMPhaseMoles_";
@@ -389,6 +391,12 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
       dcmolarmass++;
     }
   
+    /// Get the molar enthalpy of each DC component
+
+    for (i = 0; i < numDCs_; i++) {
+        DCH0_[i] = node_->DC_H0(i,P_,T_);
+    }
+
     int maxICnameLength = node_->getMaxICnameLength(); 
     int maxDCnameLength = node_->getMaxDCnameLength(); 
     int maxPHnameLength = node_->getMaxPHnameLength(); 
@@ -1353,6 +1361,7 @@ ChemicalSystem::~ChemicalSystem (void)
     delete[]GEMPhaseMoles_;
     delete[]DCActivityCoeff_;
     delete[]DCMoles_;
+    delete[]DCH0_;
     delete[]ICChemicalPotential_;
     delete[]ICResiduals_;
     delete[]ICMoles_;
@@ -1731,7 +1740,8 @@ int ChemicalSystem::calculateState (double time,
 
     if (verbose_) {
         cout << "Done!" << endl;
-        cout << "after GEM_to_MT...Ms_ = " << Ms_ << endl;
+        cout << "after GEM_to_MT...Ms_ = " << Ms_
+             << ", Hs_ = " << Hs_ << endl;
         cout.flush();
     }
 
@@ -1757,6 +1767,13 @@ int ChemicalSystem::calculateState (double time,
         }
         cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
              << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
+    }
+
+    /// JWB 2023-07-29
+    /// Assign the molar enthalpy of each DC
+
+    for (int i = 0; i < numDCs_; i++) {
+        DCH0_[i] = node_->DC_H0(i,P_,T_);
     }
 
     /// JWB 2023-04-14
