@@ -729,10 +729,10 @@ void KineticModel::calculateKineticStep (const double timestep,
 
             // Print out the initial volumes of microstructure phases
            
+            microPhaseId = 0;
+            double psMass,psVolume;
+            double volume = 0.0;
             if (verbose_) {
-                microPhaseId = 0;
-                double psMass,psVolume;
-                double volume = 0.0;
                 cout << "KineticModel::calculateKineticStep Initial MICROSTRUCTURE phase amounts:" << endl;
                 for (int i = 0; i < microPhaseId_.size(); ++i) {
                     microPhaseId = microPhaseId_[i];
@@ -1034,8 +1034,13 @@ void KineticModel::calculateKineticStep (const double timestep,
                         // k+ = 5.6e-9 mol m-2 s-1  in 0.05 m NaCl at 100 C and
                         // an activation enthalpy of about 71 kJ/mol
                         
-                        double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
-                                                                    //
+                        /// BULLARD placeholder
+                        /// @note playing with different base rate constants here
+                       
+                        // double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
+                                                                       //
+
+                        double baserateconst = 5.0e-4 * arrhenius;
 
                         double ca = chemSys_->getDCConcentration("Ca+2");
                         double kca = 4.0e-7; // mol m-2 s-1 ads. rate const for Ca (guess)
@@ -1076,6 +1081,12 @@ void KineticModel::calculateKineticStep (const double timestep,
                         // for quartz.  Needs to be calibrated for silica fume, but hopefully
                         // the BET area and LOI will help do that.
                        
+                        /// BULLARD
+                        /// @todo This is the rate of silica fume dissolution and it depends
+                        /// on the purity of the silica, but instead we really want the rate
+                        /// amount of silica dissolved per unit amount of silica to depend
+                        /// on the purity, not necessarily the rate of sfume dissolution itself
+
                         rate = baserateconst * ohact * area * pow(wateractivity,2.0)
                                * (1.0 - (loi/100.0)) * (sio2/100.0) * (1.0 - satindex); 
                                     
@@ -1141,18 +1152,17 @@ void KineticModel::calculateKineticStep (const double timestep,
                         rate *= (wcFactor * rhFactor * arrhenius);
                         newDOH = DOH + (rate * timestep);
 
-                        #ifdef DEBUG
-                            cout << "KineticModel::calculateKineticStep PK model for " << getName(i)
-                                 << ", ngrate = " << ngrate
-                                 << ", hsrate = " << hsrate
-                                 << ", diffrate = " << diffrate
-                                 << ", rhFactor = " << rhFactor
-                                 << ", wcFactor = " << wcFactor
-                                 << ", timestep " << timestep
-                                 << ", oldDOH = " << DOH << ", new DOH = "
-                                 << newDOH << endl;
-                            cout.flush();
-                        #endif
+                        cout << "PK model for " << getName(i)
+                             << ", ngrate = " << ngrate
+                             << ", hsrate = " << hsrate
+                             << ", diffrate = " << diffrate
+                             << ", rhFactor = " << rhFactor
+                             << ", wcFactor = " << wcFactor
+                             << ", RATE = " << rate
+                             << ", timestep " << timestep
+                             << ", oldDOH = " << DOH << ", new DOH = "
+                             << newDOH << endl;
+                        cout.flush();
 
                         /// @note This where we can figure out the volume dissolved
                         /// and link it back to the current volume to see how many

@@ -2802,8 +2802,6 @@ unsigned int getMicroPhaseDCMembers (const unsigned int idx,
 /**
 @brief Get one of the DC component ids for a given microstructure phase name.
 
-@note NOT USED.
-
 @param str is the microstructure phase name in question
 @param jdx is the element position in the list of all DCs for microstructure phase idx
 @return the DC component id to set at that position in the list
@@ -3561,9 +3559,6 @@ void setGEMPhaseVolume (void)
     setPrevGEMPhaseVolume();
     for (long int i = 0; i < numGEMPhases_; i++) {
         GEMPhaseVolume_[i] = (double)(node_->Ph_Volume(i));
-        // if (verbose_) {
-        //     cout << "GEMPhaseVolume_[" << i << "] = " << GEMPhaseVolume_[i] << endl;
-        // }
     }
 }
 

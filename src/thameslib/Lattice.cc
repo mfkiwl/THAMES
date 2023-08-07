@@ -1513,14 +1513,14 @@ void Lattice::changeMicrostructure (double time,
                       netsites.at(i) = 0;
                       count_.at(i) = newsites;
                     }        
-                    #ifdef DEBUG
-                    if (netsites.at(i) != 0) {
-                        cout << "Lattice::changeMicrostructure ****netsites["
-                             << phasenames.at(i) << "] in this state = "
-                             << netsites.at(i) << endl;
-                        cout.flush();
+                    if (verbose_) {
+                        if (netsites.at(i) != 0) {
+                            cout << "Lattice::changeMicrostructure ****netsites["
+                                 << phasenames.at(i) << "] in this state = "
+                                 << netsites.at(i) << endl;
+                            cout.flush();
+                        }
                     }
-                    #endif
                   }
             
                   ///
@@ -1600,7 +1600,7 @@ void Lattice::changeMicrostructure (double time,
                 tnetsites = (newsites - cursites);
                 netsites.at(i) = tnetsites;
                 pid.at(i) = i;
-                #ifdef DEBUG
+                // #ifdef DEBUG
                     if (netsites.at(i) != 0) {
                         cout << "Lattice::changeMicrostructure ***netsites["
                              << phasenames.at(i) << "] in this state = "
@@ -1608,7 +1608,7 @@ void Lattice::changeMicrostructure (double time,
                              << " and newsites = " << newsites << endl;
                         cout.flush();
                     }
-                #endif
+                // #endif
             }
         }
         catch (out_of_range &oor) {
@@ -2542,6 +2542,11 @@ void Lattice::writePoreSizeDistribution (double curtime,
     // pores, subvoxel pores, or squeezed outside the
     // system due to lack of porosity to contain it.
    
+    if (verbose_) {
+        cout << "In Lattice::writePoreSizeDistribution" << endl;
+        cout.flush();
+    }
+
     double water_volume = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
 
     // microvol is the absolute volume (m3) of all the defined
@@ -2615,6 +2620,22 @@ void Lattice::writePoreSizeDistribution (double curtime,
     }
 
     // Write the header
+   
+    if (verbose_) {
+        cout << "Time = " << (curtime * 24.0) << " h" << endl;
+        cout << "Capillary pore volume fraction (> 100 nm) = " << capillaryporevolumefraction_ << endl;
+        cout << "Capillary void volume fraction = " << volumefraction_.at(VOIDID) << endl;
+        cout << "Saturated capillary pore volume fraction = "
+             << capillaryporevolumefraction_ - volumefraction_.at(VOIDID) << endl;
+        cout << "Nanopore volume fraction (<= 100 nm) = " << subvoxelporevolumefraction_ << endl;
+        cout << "Total pore volume fraction = " << pore_volfrac << endl << endl;
+        cout << "Total void volume fraction = " << volumefraction_.at(VOIDID) << endl;
+        cout << "Pore size saturation data:" << endl;
+        cout << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
+        cout << "Masterporevolume size = " << masterporevolume_.size() << endl;
+        cout.flush();
+    }
+
     out << "Time = " << (curtime * 24.0) << " h" << endl;
     out << "Capillary pore volume fraction (> 100 nm) = " << capillaryporevolumefraction_ << endl;
     out << "Capillary void volume fraction = " << volumefraction_.at(VOIDID) << endl;
@@ -2622,10 +2643,17 @@ void Lattice::writePoreSizeDistribution (double curtime,
         << capillaryporevolumefraction_ - volumefraction_.at(VOIDID) << endl;
     out << "Nanopore volume fraction (<= 100 nm) = " << subvoxelporevolumefraction_ << endl;
     out << "Total pore volume fraction = " << pore_volfrac << endl << endl;
-    cout << "Total void volume fraction = " << volumefraction_.at(VOIDID) << endl;
+    out << "Total void volume fraction = " << volumefraction_.at(VOIDID) << endl;
     out << "Pore size saturation data:" << endl;
     out << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
     for (int i = 0; i < masterporevolume_.size(); ++i) {
+    #ifdef DEBUG
+        cout << "masterporevolume_[" << i << "] of " << masterporevolume_.size() << endl;
+        cout << masterporevolume_[i].diam << ","
+            << masterporevolume_[i].volume << ","
+            << masterporevolume_[i].volfrac << endl;
+        cout.flush();
+    #endif
         if (masterporevolume_[i].volume > 0.0) {
             out << masterporevolume_[i].diam << ","
                 << masterporevolume_[i].volume << ","

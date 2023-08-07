@@ -1896,11 +1896,11 @@ int ChemicalSystem::calculateState (double time,
 
     nodeStatus_ = NEED_GEM_AIA;
 
+    vector<double> microPhaseVolumes = getMicroPhaseVolume();
+    vector<string> microPhaseNames = getMicroPhaseName();
     if (verbose_) {
         cout << "    Before calculateState, "
              << "printing microPhaseVolumes" << endl;
-        vector<double> microPhaseVolumes = getMicroPhaseVolume();
-        vector<string> microPhaseNames = getMicroPhaseName();
         for (int i = 0; i < microPhaseVolumes.size(); ++i) {
             cout << "    Phase name " << microPhaseNames[i]
                  << ": volume = " << microPhaseVolumes[i] << endl;
@@ -2066,11 +2066,9 @@ int ChemicalSystem::calculateState (double time,
     }
 
     if (timesGEMFailed_ > 0) {
-        if (verbose_) {
-            cout << "Call to GEM_run has failed "
-                 << timesGEMFailed_ << " consecutive times.  "
-                 << "Attempt this step again" << endl;
-        }
+        cout << "Call to GEM_run has failed "
+             << timesGEMFailed_ << " consecutive times.  "
+             << "Attempt this step again" << endl;
         return timesGEMFailed_;
     }
 
@@ -2187,10 +2185,9 @@ int ChemicalSystem::calculateState (double time,
             }
             microVolume_ += microPhaseVolume_[i];
         } else {
+            calcMicroPhasePorosity(i);
+            phi = getMicroPhasePorosity(i);
             if (verbose_) {
-                calcMicroPhasePorosity(i);
-                phi = getMicroPhasePorosity(i);
-
                 cout << "    IS a KINETIC phase: is composed of "
                      << GEMPhaseName_[microPhaseMembers_[i][0]]
                      << "  having mass = " << microPhaseMass_[i]
