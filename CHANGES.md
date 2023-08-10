@@ -4,15 +4,16 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
-| July 31 12:46:53 2023 | Improved calculation of internal RH using Kelvin equation |
-| July 30 23:28:36 2023 | Merge DCPorosity branch with master, added output of enthalpy |
-| June 3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
+| Aug 10 17:02:31 2023 | Fixed spelling error in Interface.cc |
+| Jul 31 12:46:53 2023 | Improved calculation of internal RH using Kelvin equation |
+| Jul 30 23:28:36 2023 | Merge DCPorosity branch with master, added output of enthalpy |
+| Jun  3 22:55:14 2023 | Specify and read gas phase composition.  Does not do anything with it yet |
 | May 23 10:37:38 2023 | Fixed bug in handling of spaces in path names |
 | May 23 08:05:26 2023 | Allow path and file names that include spaces |
 | May 15 15:41:03 2023 | Updated test file input after rebase |
 | May 15 10:52:34 2023 | Updated tag to 2.6.1; updated install instructions |
 | May 13 14:05:20 2023 | Fixed minor calculation error in w/c effect of the PK model; cleaned up test cases |
-| May 6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
+| May  6 16:37:11 2023 | Fix behavior when GEM_run fail happens on first try |
 | Apr 25 21:45:58 2023 | Fixed error that mistakenly "corrected" capillary pore volume for its porosity |
 | Apr 30 20:59:06 2023 | Fuller implementation of global DEBUG preprocessor define |
 | Apr 27 17:47:31 2023 | Removed debug as class variables and now have a global DEBUG preprocessor define |

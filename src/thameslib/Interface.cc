@@ -401,10 +401,10 @@ bool Interface::removeDissolutionSite (Site *loc)
         cout.flush();
         bool found = false;
         cout << "Interface::removeDissolutionSite Trying to "
-             << "declare iterator to Isite vector";
+             << "declare iterator to Isite vector ...";
         cout.flush();
         vector<Isite>::iterator p;
-        cout << "Inrterface::removeDissolutionSite Trying to "
+        cout << "Interface::removeDissolutionSite Trying to "
              << "set it to beginning of dissolutionSites_ ... ";
         cout.flush();
         p = dissolutionSites_.begin();
