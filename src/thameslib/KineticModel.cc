@@ -34,7 +34,7 @@ KineticModel::KineticModel ()
 
     name_.clear();
     isKinetic_.clear();
-    isPK_.clear();
+    isParrotKilloh_.clear();
     isThermo_.clear();
     isSoluble_.clear();
     microPhaseId_.clear();
@@ -125,7 +125,7 @@ KineticModel::KineticModel (ChemicalSystem *cs,
 
     name_.clear();
     isKinetic_.clear();
-    isPK_.clear();
+    isParrotKilloh_.clear();
     isThermo_.clear();
     isSoluble_.clear();
     microPhaseId_.clear();
@@ -338,8 +338,8 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     int testgemid,testdcid;
     string testname;
     bool kineticfound = false;
-    bool iskin = false;
-    bool isPK = false;
+    bool ispozz = false;
+    bool isParrotKilloh = false;
     bool istherm = false;
     bool issol = false;
 
@@ -375,9 +375,9 @@ void KineticModel::parsePhase (xmlDocPtr doc,
 
     if (kineticfound) {
 
-        if (kineticData.type == "kinetic") {
+        if (kineticData.type == "parrotkilloh") {
             #ifdef DEBUG
-                cout << "KineticModel::parsePhase Kinetic Phase " << kineticData.name
+                cout << "KineticModel::parsePhase PK " << kineticData.name
                      << ", id = "
                      << kineticData.microPhaseId << endl;
                 cout << "KineticModel::parsePhase   (k1,k2,k3) =  " << kineticData.k1
@@ -388,27 +388,52 @@ void KineticModel::parsePhase (xmlDocPtr doc,
                 cout << "KineticModel::parsePhase   Ea = " << kineticData.Ea << endl;
                 cout.flush();
             #endif
-            iskin = true;
+            isParrotKilloh = true;
+            ispozz = false;
             istherm = false;
             issol = false;
+
+        } else if (kineticData.type == "pozzolanic") {
+            #ifdef DEBUG
+                cout << "KineticModel::parsePhase pozzolanic " << kineticData.name
+                     << ", id = "
+                     << kineticData.microPhaseId << endl;
+                cout << "KineticModel::parsePhase   (k1,k2,k3) =  " << kineticData.k1
+                     << "," << kineticData.k2
+                     << "," << kineticData.k3 << endl;
+                cout << "KineticModel::parsePhase   (n1,n3) =  " << kineticData.n1 << ","
+                     << kineticData.n3 << endl;
+                cout << "KineticModel::parsePhase   Ea = " << kineticData.Ea << endl;
+                cout.flush();
+            #endif
+            isParrotKilloh = false;
+            ispozz = true;
+            istherm = false;
+            issol = false;
+
 
         } else if (kineticData.type == "soluble") {
 
             iskin = false;
+            ispozz = false;
             istherm = true;
             issol = true;
 
         } else {
 
             iskin = false;
+            ispozz = false;
             istherm = true;
             issol = false;
         }
     } else {
-        iskin = istherm = issol = false;
+        isParrotKilloh = ispozz = istherm = issol = false;
     }
     
-    isKinetic_.push_back(iskin);
+    isParrotKilloh_.push_back(isParrotKilloh);
+    isPozzolanic_.push_back(ispozz);
+    isThermo_.push_back(istherm);
+    isSoluble_.push_back(issol);
 
     // @todo BULLARD PLACEHOLDER
     // Special kluges here for silica fume, which we have to call Silica-amorph
@@ -420,9 +445,9 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     string siamorph("Silica-amorph");
     if (kineticData.name == sfume || kineticData.name == siamorph) {
         kineticData.name = siamorph;
-        isPK_.push_back(false);
+        isParrotKilloh_.push_back(false);
     } else {
-        isPK_.push_back(iskin);
+        isParrotKilloh_.push_back(iskin);
     }
     isThermo_.push_back(istherm);
     isSoluble_.push_back(issol);
@@ -934,7 +959,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                   // critDOH = silica content in PERCENT BY MASS of silica fume
                   
                   for (int ii = 0; ii < microPhaseId_.size(); ii++) {
-                      if (isPK(ii)) {
+                      if (isParrotKilloh(ii)) {
                           pfk1_ = pfk2_ = pfk3_ = ((betarea/24.0) * (sio2/94.0) * (sio2/94.0));
                       }
                   }
@@ -998,7 +1023,7 @@ void KineticModel::calculateKineticStep (const double timestep,
                 if (initScaledMass_[i] > 0.0) {
                   DOH = (initScaledMass_[i] - scaledMass_[i]) /
                         (initScaledMass_[i]);
-                  if (!isPK(i)) {
+                  if (!isParrotKilloh(i)) {
                       DOH = min(DOH,0.99);  // prevents DOH from prematurely stopping PK calculations
                   }
                 } else {

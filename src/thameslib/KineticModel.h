@@ -219,8 +219,8 @@ This member may be obsolete.  Values for this quantity are read from a file.
 vector<double> SO4Target_;
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
-vector<bool> isKinetic_;        /**< List of ids of phases that are kinetically controlled */
-vector<bool> isPK_;             /**< List of ids of phases that are PK-model controlled */
+vector<bool> isPozzolanic_;        /**< List of ids of phases that are kinetically controlled */
+vector<bool> isParrotKilloh_;             /**< List of ids of phases that are PK-model controlled */
 vector<bool> isThermo_;         /**< List of ids of phases that are thermodynamically
                                         controlled */
 vector<bool> isSoluble_;        /**< List of ids of phases that are instantly dissolved */
@@ -448,15 +448,27 @@ int getNumPhases () const
 }
 
 /**
-@brief Get the kinetic status of every microstructure phase
+@brief Get the Parrot-Killoh model status of every microstructure phase
 
 @note NOT USED.
 
-@return the list of kinetic status for all microstructure phases
+@return the list of Parrot-Killoh model status for all microstructure phases
 */
-vector<bool> isKinetic () const
+vector<bool> isParrotKilloh () const
 {
-    return isKinetic_;
+    return isParrotKilloh_;
+}
+
+/**
+@brief Get the pozzolanic model status of every microstructure phase
+
+@note NOT USED.
+
+@return the list of pozzolanic model status for all microstructure phases
+*/
+vector<bool> isPozzolanic () const
+{
+    return isPozzolanic_;
 }
 
 /**
@@ -484,80 +496,80 @@ vector<bool> isSoluble () const
 }
 
 /**
-@brief Get the kinetic status of a microstructure phase by its id
+@brief Get the Parrot-Killoh model status of a microstructure phase by its id
+
+@param idx is a microstructure id number
+@return true if it is Parrot-Killoh controlled
+*/
+bool isParrotKilloh (const unsigned int idx)
+{
+    try { return isParrotKilloh_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","isParrotKilloh",
+                           "isParrotKilloh_",isParrotKilloh_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the pozzolanic status of a microstructure phase by its id
 
 @note NOT USED.
 
 @param idx is a microstructure id number
-@return true if it is kinetically controlled
+@return true if it is kinetically pozzolanic
 */
-bool isKinetic (const unsigned int idx)
+bool isPozzolanic (const unsigned int idx)
 {
-    try { return isKinetic_.at(idx); }
+    try { return isPozzolanic_.at(idx); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isKinetic",
-                           "isKinetic_",isKinetic_.size(),idx);
+        EOBException ex("KineticModel","isPozzolanic",
+                           "isPozzolanic_",isPozzolanic_.size(),idx);
         ex.printException();
         exit(1);
     }
 }
 
 /**
-@brief Get the kinetic status of a microstructure phase by its name
+@brief Get the Parrot-Killoh model status of a microstructure phase by its name
+
+@param micname is the name of a microstructure phase
+@return true if it is Parrot-Killoh controlled
+*/
+bool isParrotKilloh (const string micname)
+{
+    int idx;
+    try {
+        idx = chemSys_->getMicroPhaseId(micname);
+        return isParrotKilloh_.at(idx);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","isParrotKilloh",
+                           "isParrotKilloh_",isParrotKilloh_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the pozzolanic model status of a microstructure phase by its name
 
 @note NOT USED.
 
 @param micname is the name of a microstructure phase
-@return true if it is kinetically controlled
+@return true if it is kinetically pozzolanic
 */
-bool isKinetic (const string micname)
+bool isPozzolanic (const string micname)
 {
     int idx;
     try {
         idx = chemSys_->getMicroPhaseId(micname);
-        return isKinetic_.at(idx);
+        return isPozzolanic_.at(idx);
     }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isKinetic",
-                           "isKinetic_",isKinetic_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the Parrott and Killoh model status of a microstructure phase by its id
-
-@param idx is a microstructure id number
-@return true if it is kinetically controlled by PK model
-*/
-bool isPK (const unsigned int idx)
-{
-    try { return isPK_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isPK",
-                           "isPK_",isPK_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the Parrott and Killoh model status of a microstructure phase by its name
-
-@param micname is the name of a microstructure phase
-@return true if it is kinetically controlled by PK model
-*/
-bool isPK (const string micname)
-{
-    int idx;
-    try {
-        idx = chemSys_->getMicroPhaseId(micname);
-        return isPK_.at(idx);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","isPK",
-                           "isPK_",isPK_.size(),idx);
+        EOBException ex("KineticModel","isPozzolanic",
+                           "isPozzolanic_",isPozzolanic_.size(),idx);
         ex.printException();
         exit(1);
     }
