@@ -413,6 +413,8 @@ void KineticModel::parsePhase (xmlDocPtr doc,
     // @todo BULLARD PLACEHOLDER
     // Special kluges here for silica fume, which we have to call Silica-amorph
     // for now to make it compatible with the user interface as of 2022 Dec 29
+    //
+    // @todo Find a way to make this general to all pozzolans
    
     string sfume("SFUME");
     string siamorph("Silica-amorph");
@@ -918,6 +920,8 @@ void KineticModel::calculateKineticStep (const double timestep,
               // Currently silica fume is the only pozzolanically reactive
               // component
             
+              // @todo Find a way to make this general to all pozzolans
+              
               if (chemSys_->getMicroPhaseName(microPhaseId) == "Silica-amorph") {
                   double betarea = k1_[i];
                   double area = betarea * scaledMass_[i];
