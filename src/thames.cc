@@ -33,7 +33,7 @@ int main (int argc, char **argv)
     ThermalStrain *ThermalStrainSolver;
     AppliedStrain *AppliedStrainSolver;
 
-    KineticModel *KMod;
+    KineticController *KController;
     
     //
     // Main menu where user decides what kind of simulation this will be.
@@ -257,20 +257,20 @@ int main (int argc, char **argv)
     string jobroot,par_filename,statfilename;
     Controller *Ctrl;
     if (VERBOSE) {
-        cout << "About to enter KineticModel constructor" << endl;
+        cout << "About to enter KineticController constructor" << endl;
         cout.flush();
     }
 
     //
-    // Create the KineticModel object
+    // Create the KineticController object
     //
 
     try {
-        KMod = new KineticModel(ChemSys, Solut, Mic, cement_filename,
+        KController = new KineticController(ChemSys, Solut, Mic, cement_filename,
                                 VERBOSE,WARNING);
     }
     catch (bad_alloc &ba) {
-        cout << "Bad memory allocation in KineticModel constructor: "
+        cout << "Bad memory allocation in KineticController constructor: "
              << ba.what() << endl;
         if (choice == SULFATE_ATTACK) {
             delete AppliedStrainSolver;
@@ -284,7 +284,7 @@ int main (int argc, char **argv)
     }
 
     if (VERBOSE) {
-        cout << "Finished constructing KineticModel KMod" << endl;
+        cout << "Finished constructing KineticController KController" << endl;
         cout.flush();
     }
     cout << "What is the name of the simulation parameter file? " << endl;
@@ -307,7 +307,7 @@ int main (int argc, char **argv)
 
     try {
       Ctrl = new Controller(Mic,
-                            KMod,
+                            KController,
                             ChemSys,
                             Solut,
                             ThermalStrainSolver,
@@ -319,7 +319,7 @@ int main (int argc, char **argv)
     catch (bad_alloc &ba) {
       cout << "Bad memory allocation in Controller constructor: "
            << ba.what() << endl;
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -332,7 +332,7 @@ int main (int argc, char **argv)
     }
     catch (FileException fex) {
       fex.printException();
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -365,7 +365,7 @@ int main (int argc, char **argv)
     }
     catch (GEMException gex) {
       gex.printException();
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -379,7 +379,7 @@ int main (int argc, char **argv)
     }
     catch (DataException dex) {
       dex.printException();
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -393,7 +393,7 @@ int main (int argc, char **argv)
     }
     catch (EOBException ex) {
       ex.printException();
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -407,7 +407,7 @@ int main (int argc, char **argv)
     }
     catch (MicrostructureException mex) {
       mex.printException();
-      delete KMod;
+      delete KController;
       if (choice == SULFATE_ATTACK) {
           delete AppliedStrainSolver;
           delete ThermalStrainSolver;
@@ -446,9 +446,9 @@ int main (int argc, char **argv)
         cout << "Done!" << endl;
         cout.flush();
 
-        cout << "About to delete KMod pointer... ";
+        cout << "About to delete KController pointer... ";
         cout.flush();
-        delete KMod;
+        delete KController;
         cout << "Done!" << endl;
 
         cout << "About to delete Mic pointer... ";
@@ -463,7 +463,7 @@ int main (int argc, char **argv)
         cout.flush();
     } else {
         delete Ctrl;
-        delete KMod;
+        delete KController;
         delete Mic;
         delete ChemSys;
     }

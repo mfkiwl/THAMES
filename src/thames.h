@@ -104,7 +104,7 @@ THAMES are contained in library files.
 #include "thameslib/Interface.h"
 #include "thameslib/Site.h"
 #include "thameslib/Lattice.h"
-#include "thameslib/KineticModel.h"
+#include "thameslib/KineticController.h"
 #include "thameslib/AppliedStrain.h"
 #include "thameslib/ThermalStrain.h"
 #include "thameslib/StrainEnergy.h"

@@ -6,7 +6,7 @@
 #include "Controller.h"
 
 Controller::Controller (Lattice *msh,
-                        KineticModel *km,
+                        KineticController *kc,
                         ChemicalSystem *cs,
                         Solution *solut,
                         ThermalStrain *thmstr,
@@ -16,7 +16,7 @@ Controller::Controller (Lattice *msh,
                         const bool verbose,
                         const bool warning)
     :lattice_(msh),
-     kineticmodel_(km),
+     kineticController_(kc),
      chemSys_(cs),
      solut_(solut),
      sim_type_(simtype),
@@ -216,8 +216,8 @@ void Controller::doCycle (const string &statfilename,
   } 
 
   /*
-  kineticmodel_->setSattack_time(sattack_time_);
-  kineticmodel_->setLeach_time(leach_time_);
+  kineticController_->setSattack_time(sattack_time_);
+  kineticController_->setLeach_time(leach_time_);
   */
 
   chemSys_->setSulfateAttackTime(sattack_time_);
@@ -710,15 +710,15 @@ void Controller::calculateState (double time,
 
     double T = lattice_->getTemperature();
     #ifdef DEBUG
-        cout << "Controller::calculateState Entering KineticModel::calculateKineticStep"
+        cout << "Controller::calculateState Entering KineticController::calculateKineticStep"
              << endl;
         cout.flush();
     #endif
 
-    kineticmodel_->calculateKineticStep(dt,T,isFirst);
+    kineticController_->calculateKineticStep(dt,T,isFirst);
 
     #ifdef DEBUG
-        cout << "Controller::calculateState Returned from KineticModel::calculateKineticStep"
+        cout << "Controller::calculateState Returned from KineticController::calculateKineticStep"
              << endl;
         cout.flush();
     #endif
@@ -868,7 +868,7 @@ void Controller::calculateState (double time,
         cout << "Controller::calculateState Entering setKineticDCMoles" << endl;
         cout.flush();
     #endif
-    kineticmodel_->setKineticDCMoles();
+    kineticController_->setKineticDCMoles();
     #ifdef DEBUG
         cout << "Controller::calculateState Returned from setKineticDCMoles" << endl;
         cout.flush();
@@ -1087,7 +1087,7 @@ void Controller::calculateState (double time,
     /// @todo Find out what this is doing and why it is needed
     ///
 
-    kineticmodel_->zeroKineticDCMoles();
+    kineticController_->zeroKineticDCMoles();
   }
   catch (FileException fex) {
     fex.printException();

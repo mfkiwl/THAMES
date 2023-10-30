@@ -1,13 +1,10 @@
 /**
-@file KineticModel.h
-@brief Declaration of the KineticModel class.
+@file KineticController.h
+@brief Declaration of the KineticController class.
 
 @section Introduction
-
-In THAMES, the `KineticModel` class can be perceived as the engine that calculates
-the kinetic changes in the system during a given time increment.  The primary
-kinetic aspect that is calculated is the extent of dissolution of mineral phases in
-the original cement.  This is just the base class.  It is not used.
+The `KineticController` class keeps track of all the
+different kinetic models that govern the rate of hydration.
 
 */
 
@@ -32,10 +29,6 @@ using namespace std;
 /**
 @struct KineticData
 @brief Stores data about each phase possible in the system for ease of parsing the input files.
-
-THAMES has different kinetic models for different materials, but the
-data for all of them are stored in this structure to maintain portability
-and polymorphism as much as possible for derived classes.
 
 In THAMES, phases are identified either thermodynamically--- in the 
 GEM data repository--- or microstructurally.  A microstructural phase can
@@ -75,28 +68,34 @@ struct KineticData {
     int DCId;               /**< Integer id of the DC making up the phase */
     string type;            /**< Specifies kinetic or thermodynamic control */
     double scaledMass;        /**< Mass percent on a total solids basis */
+    double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
+    double k2;                /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
+    double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
+    double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
+    double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
     double Ea;                /**< Apparent activation energy [J/mol/K] */
+    double critDOH;           /**< Critical degree of hydration for w/c effect */
     vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
     vector<double> RdVal;     /**< Vector of Rd values for each IC */
 };
 #endif
 
 /**
-@class KineticModel
-@brief Base class for all kinetic models
+@class KineticController
+@brief Manages kinetic models
 
 THAMES allows some flexibility in defining different types of kinetic models.
 */
 
-class KineticModel {
+class KineticController {
 
-protected:
+private:
     
 int numPhases_;             /**< Total number of phases in the kinetic model */
 ChemicalSystem *chemSys_;   /**< Pointer to the ChemicalSystem object for this simulation */
 Solution *solut_;           /**< Pointer to the aqueous phase object for this simulation */
 Lattice *lattice_;          /**< Pointer to the lattice object holding the microstructure */
-double initSolidMass_;      /**< initial total mass of solids [g] */
+vector<KineticModel * > phaseKineticModel_;  /***< Kinetic model for each phase */
 double temperature_;        /**< Temperature [K] */
 double refT_;               /**< Reference temperature for PK model [K] */
 double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts [days] */
@@ -104,15 +103,6 @@ double leachTime_;          /**< Time at which leaching simulation starts [days]
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
 vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
-vector<int> DCId_;              /**< List of DC ids from the ChemicalSystem object */
-vector<int> GEMPhaseId_;        /**< List of phase ids from the ChemicalSystem object */
-vector<vector<int> > RdICId_;   /**< List of IC ids for each phase */
-vector<vector<double> > Rd_;    /**< List of Rd values for each IC in each kinetic phase */
-vector<double> scaledMass_;     /**< List of phase mass percents, total solids basis */
-vector<double> initScaledMass_; /**< List of initial phase mass percents */
-vector<double> activationEnergy_;  /**< List of apparent activation energies for each
-                                    kinetic phase [J/mol/K] */
-vector<bool> isKinetic_;
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
 
@@ -126,13 +116,31 @@ all the member variables.
 
 @note NOT USED.
 */
-KineticModel ();
+KineticController ();
 
+/**
+@brief Overloaded constructor.
+
+This constructor is used in THAMES.
+
+@param cs is a pointer to the ChemicalSystem object for the simulation
+@param solut is a pointer to the aqeuous solution object for the simulation
+@param lattic is a pointer to the Lattice object holding the microstructure
+@param fileName is the name of the XML file with the input for the kinetic model
+@param verbose is true if verbose output should be produced
+@param warning is false if suppressing warning output
+*/
+KineticController::KineticController (ChemicalSystem *cs,
+                                      Solution *solut,
+                                      Lattice *lattice,
+                                      const string &fileName,
+                                      const bool verbose,
+                                      const bool warning);
      
 /**
 @brief Destructor does nothing.
 */
-virtual ~KineticModel() {};
+virtual ~KineticController() {};
 
 
 /**
@@ -145,7 +153,23 @@ void parseDoc (const string &docName);
 /**
 @brief Parse the input data for one phase in the XML input file.
 
-Pure virtual function, must be defined by each derived class.
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param numEntry is the number of solid entries in the XML file, will be incremented
+@param kineticData is a structure that can store all kinetic data for a phase
+@param kineticData is a reference to the KineticData structure for temporarily storing
+            the input parameters.
+*/
+void parsePhase (xmlDocPtr doc,
+                 xmlNodePtr cur,
+                 int &numEntry,
+                 KineticData &kineticData);
+
+/**
+@brief Make a kinetic model for a given phase
+
 This method uses the libxml library, so this must be included.
 
 @param doc is a libxml pointer to the document head
@@ -154,143 +178,21 @@ This method uses the libxml library, so this must be included.
 @param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
-virtual void parsePhase (xmlDocPtr doc,
-                 xmlNodePtr cur,
-                 int &numEntry,
-                 KineticData &kineticData);
+void makeModel (xmlDocPtr doc,
+                xmlNodePtr cur,
+                int &numEntry,
+                KineticData &kineticData);
 
 /**
-@brief Parse the kinetic data for one phase in the XML input file.
-
-Pure virtual function, must be defined by each derived class.
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters.
-*/
-virtual void parseKineticData (xmlDocPtr doc,
-                       xmlNodePtr cur,
-                       KineticData &kineticData) = 0;
-
-/**
-@brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
-
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters
-*/
-void parseRdData (xmlDocPtr doc,
-                  xmlNodePtr cur,
-                  KineticData &kineticData);
-    
-/**
-@brief Compute normalized initial microstructure phase masses
-
-Given the initial masses of all phases in the microstructure,
-this method scales them to 100 grams of solid.  In the process,
-this method also sets the initial moles of water in the
-chemical system definition.
-*/
-
-void getPhaseMasses (void);
-
-/**
-@brief Set the initial total microstructure volume
-
-This method computes the sums of all microstructure phase volumes
-and assigns the total.
-*/
-void setInitialTotalVolume(void);
-
-/**
-@brief Set the initial moles of water
-
-This method uses the mass of water and the molar mass
-of water as defined in the CSD to calculate the moles
-of water in the system.
-*/
-void setInitialWaterMoles(void);
-
-/**
-@brief Get the list of all microstructure ids in the KineticModel.
-
-Usually this will be all of the ChemicalSystem microstructure phases
-except for VOID and H2O.
-
-@return the list of all microstructure ids.
-*/
-vector<int> getMicroPhaseId () const
-{
-    return microPhaseId_;
-}
-  
-/**
-@brief Get a microstructure id in the KineticModel.
-
-@param idx is the the index of all the phases in the kinetic model
-@return the microstructure id of that phase
-*/
-int getMicroPhaseId (const int idx)
-{
-    try { return microPhaseId_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getMicroPhaseId",
-                           "microPhaseId_",microPhaseId_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-  
-/**
-@brief Set the total number of phases in the kinetic model.
+@brief Get the ChemicalSystem object for the simulation used by the kinetic model.
 
 @note NOT USED.
 
-@param numphases is the total number of phases in the kinetic model
+@return a pointer to the ChemicalSystem object
 */
-void setNumPhases (const unsigned int numphases)
+ChemicalSystem *getChemSys () const
 {
-    numPhases_ = numphases;
-}
-
-/**
-@brief Get the total number of phases in the kinetic model.
-
-@note NOT USED.
-
-@return the total number of phases in the kinetic model
-*/
-int getNumPhases () const
-{
-    return numPhases_;
-}
-
-/**
-@brief Initialize a kinetic data structure 
-*/
-void initKineticData(struct KineticData &kd)
-{
-    kd.name.clear();
-    kd.microPhaseId = 0;
-    kd.GEMPhaseId = 0;
-    kd.DCId = 0;
-    kd.type.clear();
-    kd.scaledMass = 0.0;
-    kd.k1 = 0.0;
-    kd.k2 = 0.0;
-    kd.k3 = 0.0;
-    kd.n1 = 0.0;
-    kd.n3 = 0.0;
-    kd.Ea = 0.0;
-    kd.critDOH = 0.0;
-    kd.RdId.clear();
-    kd.RdVal.clear();
-    return;
+    return chemSys_;
 }
 
 /**
@@ -359,66 +261,12 @@ string getName (const unsigned int i) const
 {
     try { return name_.at(i); }
     catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getName","name_",
+        EOBException ex("KineticController","getName","name_",
                            name_.size(),i);
         ex.printException();
         exit(1);
     }
 }
-
-
-/**
-@brief Get the list of scaled <i>initial</i> masses for the phases in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@return the vector of initial scaled masses [percent solids]
-*/
-vector<double> getInitScaledMass () const
-{
-    return initScaledMass_;
-}
-
-/**
-@brief Get the initial scaled mass of a particular clinker phase in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the initial scaled mass of the phase [percent solids]
-*/
-double getInitScaledMass (const unsigned int i) const
-{
-    try { return initScaledMass_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getInitScaledMass",
-                           "initScaledMass_",initScaledMass_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the activation energy of a clinker phase in the kinetic model.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the activation energy of the phase [J/mol/K]
-*/
-double getActivationEnergy (const unsigned int i) const
-{
-    try { return activationEnergy_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getActivationEnergy",
-                        "activationEnergy_",activationEnergy_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-
 
 /**
 @brief Master method for implementing one kinetic time step.
@@ -445,27 +293,10 @@ should be made more general.
 @param temperature is the absolute temperature during this step [K]
 @param isFirst is true if this is the first time step of the simulation, false otherwise
 */
-virtual void calculateKineticStep (const double timestep,
+void calculateKineticStep (const double timestep,
                                    const double temperature,
-                                   bool isFirst) = 0;
+                                   bool isFirst);
      
-/**
-@brief Set up the number of moles of dependent components in the kinetic phases.
-
-This method loops over the <i>kinetically</i> controlled phases in the kinetic
-model, gets the DC stoichiometry of each phase, and determines the number of moles
-of each DC component based on the number of moles of the kinetically controlled phases.
-*/
-void setKineticDCMoles ();
-
-/**
-@brief Set the number of moles of dependent components to zero.
-
-This method loops over the <i>kinetically</i> controlled phases in the kinetic
-model, and sets the number of moles of each DC component of that phase to zero.
-*/
-void zeroKineticDCMoles ();
-
 /**
 @brief Set the verbose flag
 
@@ -508,6 +339,6 @@ bool getWarning () const
     return warning_;
 }
 
-};      // End of KineticModel class
+};      // End of KineticController class
 
 #endif

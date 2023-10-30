@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Oct 29 21:13:00 2023 | Setting up multiple kinetic models; compile not checked |
 | Oct 27 17:15:10 2023 | Distinguishing pozzolanic kinetics from Parrot-Killoh kinetics; compile not checked |
 | Oct 27 16:48:36 2023 | Created branch pozzolan for kinetically modeling pozzolan glasses |
 | Aug 10 17:02:31 2023 | Fixed spelling error in Interface.cc |

@@ -32,17 +32,30 @@ KineticModel::KineticModel ()
     /// XML input file
     ///
 
-    numPhases_ = 0;
     name_.clear();
+    isKinetic_.clear();
+    isParrotKilloh_.clear();
+    isThermo_.clear();
+    isSoluble_.clear();
     microPhaseId_.clear();
     DCId_.clear();
     GEMPhaseId_.clear();
     RdICId_.clear();
+    k1_.clear();
+    k2_.clear();
+    k3_.clear();
+    n1_.clear();
+    n3_.clear();
     Rd_.clear();
     activationEnergy_.clear();
     scaledMass_.clear();
     initScaledMass_.clear();
-    isKinetic_.clear();
+    critDOH_.clear();
+    degreeOfHydration_.clear();
+    NaTarget_.clear();
+    KTarget_.clear();
+    MgTarget_.clear();
+    SO4Target_.clear();
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -52,6 +65,8 @@ KineticModel::KineticModel ()
 
     sulfateAttackTime_ = 1.0e10;
     leachTime_ = 1.0e10;
+
+    pfk1_ = pfk2_ = pfk3_ = 1.0;  // Default PK pozzolanic factors for no pozzolans
 
     return;
 }
@@ -108,17 +123,30 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     /// XML input file
     ///
 
-    numPhases_ = 0;
     name_.clear();
+    isKinetic_.clear();
+    isParrotKilloh_.clear();
+    isThermo_.clear();
+    isSoluble_.clear();
     microPhaseId_.clear();
     DCId_.clear();
     GEMPhaseId_.clear();
     RdICId_.clear();
+    k1_.clear();
+    k2_.clear();
+    k3_.clear();
+    n1_.clear();
+    n3_.clear();
     Rd_.clear();
     activationEnergy_.clear();
     scaledMass_.clear();
     initScaledMass_.clear();
-    isKinetic_.clear();
+    critDOH_.clear();
+    degreeOfHydration_.clear();
+    NaTarget_.clear();
+    KTarget_.clear();
+    MgTarget_.clear();
+    SO4Target_.clear();
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -162,6 +190,11 @@ KineticModel::KineticModel (ChemicalSystem *cs,
                 cout << "KineticModel::KineticModel kinetic phase " << microPhaseId << endl;
                 cout << "KineticModel::KineticModel     name = " << chemSys_->getMicroPhaseName(microPhaseId)
                      << endl;
+                cout << "KineticModel::KineticModel     k1 =  " << k1_[i] << endl;
+                cout << "KineticModel::KineticModel     k2 =  " << k2_[i] << endl;
+                cout << "KineticModel::KineticModel     k3 =  " << k3_[i] << endl;
+                cout << "KineticModel::KineticModel     n1 =  " << n1_[i] << endl;
+                cout << "KineticModel::KineticModel     n3 =  " << n3_[i] << endl;
                 cout << "KineticModel::KineticModel     Ea =  " << activationEnergy_[i] << endl;
             }
         }
@@ -175,6 +208,8 @@ KineticModel::KineticModel (ChemicalSystem *cs,
     
     getPhaseMasses();
 
+    pfk1_ = pfk2_ = pfk3_ = 1.0;   // Default PK factors for no pozzolanic material
+                                   
     return;
 }
 
@@ -270,6 +305,14 @@ void KineticModel::parseDoc (const string &docName)
                 parsePhase(doc, cur, numEntry, kineticData);
             }
             cur = cur->next;
+        }
+
+        /// Set the Blaine correction factor
+
+        if (refBlaine_ > 0.0) {
+            blaineFactor_ = blaine_ / refBlaine_;
+        } else {
+            blaineFactor_ = 1.0;
         }
 
         /// Push a copy of the isKinetic vector to the ChemicalSystem

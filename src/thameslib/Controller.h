@@ -14,7 +14,7 @@
 #include <map>
 #include <ctime>
 #include "Lattice.h"
-#include "KineticModel.h"
+#include "KineticController.h"
 #include "ThermalStrain.h"
 #include "Site.h"
 #include "global.h"
@@ -27,7 +27,7 @@ using namespace std;
 
 The `Controller` class is the hub for THAMES simulations.  It has pointers
 to all the other major objects that are instantiated by THAMES, including
-the KineticModel, the ThermalStrain, the ChemicalSystem, and the Lattice
+the KineticController, the ThermalStrain, the ChemicalSystem, and the Lattice
 that are associated with the system.
 
 The `Controller` object is also responsible for running each iteration
@@ -59,7 +59,7 @@ protected:
     
 string jobroot_;                    /**< Root name for all output files */
 Lattice *lattice_;                  /**< Pointer to microstructure lattice object */
-KineticModel *kineticmodel_;        /**< Pointer to kinetic model object */
+KineticController *kineticController_;        /**< Pointer to kinetic controller object */
 ThermalStrain *thermalstr_;         /**< Pointer to the finite element model object */
 
 /**
@@ -105,7 +105,7 @@ auxiliary objects be defined already, including
     - The finite element model for tracking strain and stress
 
 @param msh is a pointer to the already-instantiated `Lattice` object
-@param km is a pointer to the already-instantiated `KineticModel` object
+@param kc is a pointer to the already-instantiated `KineticController`
 @param cs is a pointer to the already-instantiated `ChemicalSystem` object
 @param solut is a pointer to the already-instantiated `Solution` object
 @param thmstr is a pointer to the already-instantiated `ThermalStrain` object
@@ -116,7 +116,7 @@ auxiliary objects be defined already, including
 @param warning is true if warning output should be produced
 */
 Controller (Lattice *msh,
-            KineticModel *km,
+            KineticController *kc,
             ChemicalSystem *cs,
             Solution *solut,
             ThermalStrain *thmstr,
@@ -131,7 +131,7 @@ Controller (Lattice *msh,
 
 This method launches one computational iteration, which includes
 
-    - Consulting the kinetic model to determine the number of moles of
+    - Consulting the kinetic controller to determine the number of moles of
         each independent component (IC) to add or subtract from the system
     - Running the GEM thermodynamic calculation
     - Running the finite element code (optionally) to update stress and strain states
