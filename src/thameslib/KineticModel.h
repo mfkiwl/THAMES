@@ -22,64 +22,11 @@ the original cement.  This is just the base class.  It is not used.
 #include <map>
 #include <ctime>
 #include "ChemicalSystem.h"
+#include "KineticController.h"
 #include "Lattice.h"
-#include "ParrotKillohModel.h"
-#include "PozzolanicModel.h"
 #include "global.h"
 
 using namespace std;
-
-/**
-@struct KineticData
-@brief Stores data about each phase possible in the system for ease of parsing the input files.
-
-THAMES has different kinetic models for different materials, but the
-data for all of them are stored in this structure to maintain portability
-and polymorphism as much as possible for derived classes.
-
-In THAMES, phases are identified either thermodynamically--- in the 
-GEM data repository--- or microstructurally.  A microstructural phase can
-be one, or a combination of more than on, thermodynamically defined phase.
-
-The structure is defined to make it easier to parse the input file for the
-kinetic model. It is not used elsewhere in the code.  In fact,
-the same members are identified as class variables in the `KineticModel` class.
-
-Most of the members have self-evident meanings:
-    - `name` is the name of the microstructure phase
-    - `microPhaseId` is the integer id for the phase in the microstructure
-    - `GEMPhaseId` is the integer id of the same phase in the GEM Chemical System
-        Definition (CSD) 
-    - `DCId` is the integer id of the GEM dependent component making up the phase
-    - `type` is a string specifying whether the phase is under kinetic control
-        or thermodynamic control
-    - `scaledMass` is the number of grams of the phase per 100 grams of solid
-    - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
-    - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
-    - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
-    - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
-    - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
-    - `Ea` is the activation energy [J/mol/K]
-    - `critDOH` is the critical degree of hydration used in the equation for
-        calculating the influence of w/c ratio.
-    - `RdId` is a vector of GEM CSD independent component (IC) ids
-    - `RdVal` is a vector of the Rd values for each IC
-*/
-
-#ifndef KINETICDATASTRUCT
-#define KINETICDATASTRUCT
-struct KineticData {
-    string name;            /**< Name of the microstructure phase */
-    int microPhaseId;       /**< Integer id of the microstructure phase */
-    int GEMPhaseId;         /**< Integer id of the phase in the GEM CSD */
-    int DCId;               /**< Integer id of the DC making up the phase */
-    string type;            /**< Specifies kinetic or thermodynamic control */
-    double scaledMass;        /**< Mass percent on a total solids basis */
-    double Ea;                /**< Apparent activation energy [J/mol/K] */
-    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
-    vector<double> RdVal;     /**< Vector of Rd values for each IC */
-};
-#endif
 
 /**
 @class KineticModel
@@ -96,14 +43,14 @@ int numPhases_;             /**< Total number of phases in the kinetic model */
 ChemicalSystem *chemSys_;   /**< Pointer to the ChemicalSystem object for this simulation */
 Solution *solut_;           /**< Pointer to the aqueous phase object for this simulation */
 Lattice *lattice_;          /**< Pointer to the lattice object holding the microstructure */
-double initSolidMass_;      /**< initial total mass of solids [g] */
+double initSolidMass_;      /**< initial total mass of solids controlled by this model [g] */
 double temperature_;        /**< Temperature [K] */
 double refT_;               /**< Reference temperature for PK model [K] */
 double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts [days] */
 double leachTime_;          /**< Time at which leaching simulation starts [days] */
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
-vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
+vector<int> microPhaseId_;      /**< List of microstructure ids that are controlled by this model */
 vector<int> DCId_;              /**< List of DC ids from the ChemicalSystem object */
 vector<int> GEMPhaseId_;        /**< List of phase ids from the ChemicalSystem object */
 vector<vector<int> > RdICId_;   /**< List of IC ids for each phase */
@@ -135,59 +82,6 @@ KineticModel ();
 virtual ~KineticModel() {};
 
 
-/**
-@brief Master method controlling the parsing of XML input to the kinetic model.
-
-@param docName is the name of the (purported) XML input file
-*/
-void parseDoc (const string &docName);
-
-/**
-@brief Parse the input data for one phase in the XML input file.
-
-Pure virtual function, must be defined by each derived class.
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param numEntry is the number of solid entries in the XML file, will be incremented
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters.
-*/
-virtual void parsePhase (xmlDocPtr doc,
-                 xmlNodePtr cur,
-                 int &numEntry,
-                 KineticData &kineticData);
-
-/**
-@brief Parse the kinetic data for one phase in the XML input file.
-
-Pure virtual function, must be defined by each derived class.
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters.
-*/
-virtual void parseKineticData (xmlDocPtr doc,
-                       xmlNodePtr cur,
-                       KineticData &kineticData) = 0;
-
-/**
-@brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
-
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters
-*/
-void parseRdData (xmlDocPtr doc,
-                  xmlNodePtr cur,
-                  KineticData &kineticData);
-    
 /**
 @brief Compute normalized initial microstructure phase masses
 
@@ -268,29 +162,6 @@ void setNumPhases (const unsigned int numphases)
 int getNumPhases () const
 {
     return numPhases_;
-}
-
-/**
-@brief Initialize a kinetic data structure 
-*/
-void initKineticData(struct KineticData &kd)
-{
-    kd.name.clear();
-    kd.microPhaseId = 0;
-    kd.GEMPhaseId = 0;
-    kd.DCId = 0;
-    kd.type.clear();
-    kd.scaledMass = 0.0;
-    kd.k1 = 0.0;
-    kd.k2 = 0.0;
-    kd.k3 = 0.0;
-    kd.n1 = 0.0;
-    kd.n3 = 0.0;
-    kd.Ea = 0.0;
-    kd.critDOH = 0.0;
-    kd.RdId.clear();
-    kd.RdVal.clear();
-    return;
 }
 
 /**
@@ -449,6 +320,21 @@ virtual void calculateKineticStep (const double timestep,
                                    const double temperature,
                                    bool isFirst) = 0;
      
+/**
+@brief Calculate the change in phase moles
+
+Pure virtual function must be defined for each child class
+
+@param microPhaseId is the identity of the phase that is changing
+@param rateconst is the rate constant (mol/m2/s)
+@param dfexp is the exponent on the driving force term (1 - beta)
+@param timestep is the time interval over which to calculate the change
+*/
+virtual void calculatePhaseChange (const int microPhaseId,
+                           double rateconst,
+                           double dfexp,
+                           double timestep) = 0;
+
 /**
 @brief Set up the number of moles of dependent components in the kinetic phases.
 

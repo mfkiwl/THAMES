@@ -1,13 +1,9 @@
 /**
-@file KineticModel.h
-@brief Declaration of the KineticModel class.
+@file ParrotKillohModel.h
+@brief Declaration of the ParrotKillohModel class.
 
 @section Introduction
-In THAMES, the `KineticModel` class can be perceived as the engine that calculates
-the kinetic changes in the system during a given time increment.  The primary
-kinetic aspect that is calculated is the extent of dissolution of mineral phases in
-the original clinker.
-As of March 2017, the kinetic model implements the Parrot and Killoh (PK) model of
+This class implements the Parrot and Killoh (PK) model of
 1984 [1]---in the same way as described by Lothenbach and
 Winnefeld [2]---for cement clinker phases.
 
@@ -79,8 +75,8 @@ to the difference equation
 
 */
 
-#ifndef KINETICSH
-#define KINETICSH
+#ifndef PARROTKILLOHH
+#define PARROTKILLOHH
 
 #include <iostream>
 #include <iomanip>
@@ -89,6 +85,8 @@ to the difference equation
 #include <fstream>
 #include <map>
 #include <ctime>
+#include "KineticController.h"
+#include "KineticModel.h"
 #include "ChemicalSystem.h"
 #include "Lattice.h"
 #include "global.h"
@@ -96,70 +94,16 @@ to the difference equation
 using namespace std;
 
 /**
-@struct KineticData
-@brief Stores data about each phase possible in the system for ease of parsing the input files.
+@class ParrotKillohModel
+@brief Handles the Parrot and Killoh(1984) kinetic model of clinker ractions
 
-In THAMES, phases are identified either thermodynamically--- in the 
-GEM data repository--- or microstructurally.  A microstructural phase can
-be one, or a combination of more than on, thermodynamically defined phase.
-
-The structure is defined to make it easier to parse the input file for the
-kinetic model. It is not used elsewhere in the code.  In fact,
-the same members are identified as class variables in the `KineticModel` class.
-
-Most of the members have self-evident meanings:
-    - `name` is the name of the microstructure phase
-    - `microPhaseId` is the integer id for the phase in the microstructure
-    - `GEMPhaseId` is the integer id of the same phase in the GEM Chemical System
-        Definition (CSD) 
-    - `DCId` is the integer id of the GEM dependent component making up the phase
-    - `type` is a string specifying whether the phase is under kinetic control
-        or thermodynamic control
-    - `scaledMass` is the number of grams of the phase per 100 grams of solid
-    - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
-    - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
-    - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
-    - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
-    - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
-    - `Ea` is the activation energy [J/mol/K]
-    - `critDOH` is the critical degree of hydration used in the equation for
-        calculating the influence of w/c ratio.
-    - `RdId` is a vector of GEM CSD independent component (IC) ids
-    - `RdVal` is a vector of the Rd values for each IC
-*/
-
-#ifndef KINETICDATASTRUCT
-#define KINETICDATASTRUCT
-struct KineticData {
-    string name;            /**< Name of the microstructure phase */
-    int microPhaseId;       /**< Integer id of the microstructure phase */
-    int GEMPhaseId;         /**< Integer id of the phase in the GEM CSD */
-    int DCId;               /**< Integer id of the DC making up the phase */
-    string type;            /**< Specifies kinetic or thermodynamic control */
-    double scaledMass;        /**< Mass percent on a total solids basis */
-    double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
-    double k2;                /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
-    double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
-    double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
-    double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
-    double Ea;                /**< Apparent activation energy [J/mol/K] */
-    double critDOH;           /**< Critical degree of hydration for w/c effect */
-    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
-    vector<double> RdVal;     /**< Vector of Rd values for each IC */
-};
-#endif
-
-/**
-@class KineticModel
-@brief Handles the kinetically controlled phase dissolution and growth.
-
-For now, the Parrot and Killoh model [1] is used to empirically estimate the
+The Parrot and Killoh model [1] is used to empirically estimate the
 mass fraction of each clinker phase that dissolves in a unit time.  Eventually
 this can be expanded to handle other kinetically controlled phases outside the
 Parrot and Killoh model, such as the growth of portlandite or C--S--H.
 */
 
-class KineticModel {
+class ParrotKillohModel : public KineticModel {
 
 protected:
     

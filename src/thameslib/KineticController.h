@@ -8,8 +8,8 @@ different kinetic models that govern the rate of hydration.
 
 */
 
-#ifndef KINETICSH
-#define KINETICSH
+#ifndef KINETICCONTROLLERH
+#define KINETICCONTROLLERH
 
 #include <iostream>
 #include <iomanip>
@@ -20,6 +20,7 @@ different kinetic models that govern the rate of hydration.
 #include <ctime>
 #include "ChemicalSystem.h"
 #include "Lattice.h"
+#include "KineticModel.h"
 #include "ParrotKillohModel.h"
 #include "PozzolanicModel.h"
 #include "global.h"
@@ -52,6 +53,10 @@ Most of the members have self-evident meanings:
     - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
     - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
     - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
+    - `rateconst` is a generic rate constant for dissolution or growth (flux units)
+    - `siexp` is the exponent on the saturation index in the rate equation
+    - `dfexp` is the exponent on the driving force term in the rate equation
+    - `ohexp` is the exponent on the hydroxyl ion activity in the rate equation
     - `Ea` is the activation energy [J/mol/K]
     - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
@@ -68,11 +73,19 @@ struct KineticData {
     int DCId;               /**< Integer id of the DC making up the phase */
     string type;            /**< Specifies kinetic or thermodynamic control */
     double scaledMass;        /**< Mass percent on a total solids basis */
+    double blaine;            /**< Blaine fineness [m2/kg] */
+    double refblaine;         /**< Reference Blaine fineness [m2/kg] */
+    double temperature;       /**< Temperature [K] */
+    double reftemperature;    /**< Reference temperature [K] */
     double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
     double k2;                /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
     double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
     double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
     double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
+    double rateconst;         /**< Generic rate constant [mol/m2/s] */
+    double siexp;             /**< Exponent on saturation index [unitless] */
+    double dfexp;             /**< Exponent on driving force [unitless] */
+    double ohexp;             /**< Exponent on OH ion activity [unitless] */
     double Ea;                /**< Apparent activation energy [J/mol/K] */
     double critDOH;           /**< Critical degree of hydration for w/c effect */
     vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
@@ -166,6 +179,35 @@ void parsePhase (xmlDocPtr doc,
                  xmlNodePtr cur,
                  int &numEntry,
                  KineticData &kineticData);
+
+/**
+@brief Parse the kinetic data for one phase in the XML input file.
+
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param kineticData is a reference to the KineticData structure for temporarily storing
+            the input parameters.
+*/
+void parseKineticData (xmlDocPtr doc,
+                       xmlNodePtr cur,
+                       KineticData &kineticData);
+
+/**
+@brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
+
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param kineticData is a reference to the KineticData structure for temporarily storing
+            the input parameters
+*/
+void parseRdData (xmlDocPtr doc,
+                  xmlNodePtr cur,
+                  KineticData &kineticData);
+
 
 /**
 @brief Make a kinetic model for a given phase
@@ -267,7 +309,38 @@ string getName (const unsigned int i) const
         exit(1);
     }
 }
+/**
+@brief Initialize a kinetic data structure 
+*/
+void initKineticData(struct KineticData &kd)
+{
+    kd.name.clear();
+    kd.microPhaseId = 0;
+    kd.GEMPhaseId = 0;
+    kd.DCId = 0;
+    kd.type.clear();
+    kd.scaledMass = 0.0;
+    kd.k1 = 0.0;
+    kd.k2 = 0.0;
+    kd.k3 = 0.0;
+    kd.n1 = 0.0;
+    kd.n3 = 0.0;
+    kd.Ea = 0.0;
+    kd.critDOH = 0.0;
+    kd.RdId.clear();
+    kd.RdVal.clear();
+    kd.blaine = 385.0;         
+    kd.refblaine = 385.0;       
+    kd.temperature = 296.0;     
+    kd.reftemperature = 296.0;  
+    kd.rateconst = 0.0;       
+    kd.siexp = 0.0;          
+    kd.dfexp = 0.0;         
+    kd.ohexp = 0.0;        
 
+    return;
+}
+ 
 /**
 @brief Master method for implementing one kinetic time step.
 

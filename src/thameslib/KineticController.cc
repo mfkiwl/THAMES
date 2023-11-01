@@ -263,6 +263,8 @@ void KineticController::parsePhase (xmlDocPtr doc,
             /// so there is a method written just for parsing that grouping
             ///
 
+            parseKineticData(doc, cur, kineticData);
+
             makeModel(doc, cur, kineticData);
 
             /// STOPPED HERE
@@ -376,6 +378,141 @@ void KineticController::parsePhase (xmlDocPtr doc,
     return;
 }
 
+void KineticModel::parseKineticData (xmlDocPtr doc,
+                                     xmlNodePtr cur,
+                                     KineticData &kineticData)
+{
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"type"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            kineticData.type = st;
+            xmlFree(key);
+        }
+        // Parrot-Killoh k1 parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.k1,st);
+            xmlFree(key);
+        }
+        // Parrot-Killoh k2 parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.k2,st);
+            xmlFree(key);
+        }
+        // Parrot-Killoh k3 parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"k3"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.k3,st);
+            xmlFree(key);
+        }
+        // Parrot-Killoh n1 parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"n1"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.n1,st);
+            xmlFree(key);
+        }
+        // Parrot-Killoh n3 parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"n3"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.n3,st);
+            xmlFree(key);
+        }
+        // Parrot-Killoh critical DOH parameter
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.critDOH,st);
+            xmlFree(key);
+        }
+        // Generic flux-like rate constant for dissolution or precipitation
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"rateconst"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.rateconst,st);
+            xmlFree(key);
+        }
+        // Exponent on  the saturation index in the rate equation
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"siexp"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.rateconst,st);
+            xmlFree(key);
+        }
+        // Exponent on  the driving force term in the rate equation
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"dfexp"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.rateconst,st);
+            xmlFree(key);
+        }
+        // Exponent on  the hydroxy ion activity in the rate equation
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"ohexp"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.rateconst,st);
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.Ea,st);
+            xmlFree(key);
+        }
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
+
+            ///
+            /// The data about partitioning of impurities among the clinker
+            /// phases are grouped within a complex field in the input XML
+            /// file, so we have a special method to parse it.
+            ///
+
+            parseRdData(doc, cur, kineticData);
+        }
+        cur = cur->next;
+    }
+
+    return;
+}
+
+void KineticModel::parseRdData(xmlDocPtr doc,
+                               xmlNodePtr cur,
+                               KineticData &kineticData) 
+{
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+    int RdId;
+    double RdVal;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            RdId = chemSys_->getICId(st);
+            kineticData.RdId.push_back(RdId);
+            xmlFree(key);
+        }
+
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(RdVal,st);
+            kineticData.RdVal.push_back(RdVal);
+            xmlFree(key);
+        }
+        cur = cur->next;
+    }
+}
+
 void KineticController::makeModel (xmlDocPtr doc,
                                    xmlNodePtr cur,
                                    int &numEntry,
@@ -384,10 +521,13 @@ void KineticController::makeModel (xmlDocPtr doc,
     KineticModel *km = NULL;
 
     if (kineticData.type == "parrotkilloh") {
+        // Read remaining Parrot and Killoh model parameters
         km = new ParrotKillohModel(kineticData);
     } else if (kineticData.type == "pozzolanic") {
+        // Read remaining pozzolanic model parameters
         km = new PozzolanicModel(kineticData);
     } else if (kineticData.type == "ordinary") {
+        // Read remaining ordinary model parameters
         km = new OrdinaryModel(kineticData);
     }
 
