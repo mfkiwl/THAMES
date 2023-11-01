@@ -81,6 +81,17 @@ KineticModel ();
 */
 virtual ~KineticModel() {};
 
+/**
+@brief Get the ChemicalSystem object for the simulation used by the kinetic model.
+
+@note NOT USED.
+
+@return a pointer to the ChemicalSystem object
+*/
+ChemicalSystem *getChemSys () const
+{
+    return chemSys_;
+}
 
 /**
 @brief Compute normalized initial microstructure phase masses
@@ -272,6 +283,18 @@ double getInitScaledMass (const unsigned int i) const
 }
 
 /**
+@brief Get the list of activation energies for the phases in the kinetic model.
+
+@note NOT USED.
+
+@return the vector of activation energies [J/mol/K]
+*/
+vector<double> getActivationEnergy () const
+{
+    return activationEnergy_;
+}
+
+/**
 @brief Get the activation energy of a clinker phase in the kinetic model.
 
 @note NOT USED.
@@ -290,6 +313,231 @@ double getActivationEnergy (const unsigned int i) const
     }
 }
 
+/**
+@brief Set the absolute temperature.
+
+@note NOT USED.
+
+@param tval is the absolute temperature [K]
+*/
+void setTemperature (double tval)
+{
+    temperature_ = tval;
+}
+
+/**
+@brief Get the absolute temperature.
+
+@note NOT USED.
+
+@return the absolute temperature [K]
+*/
+double getTemperature () const
+{
+    return temperature_;
+}
+
+/**
+@brief Set the model reference temperature.
+
+@note NOT USED.
+
+@param rtval is the reference temperature [K]
+*/
+void setRefT (double rtval)
+{
+    refT_ = rtval;
+}
+
+/**
+@brief Get the model reference temperature.
+
+@note NOT USED.
+
+@return the reference temperature [K]
+*/
+double getRefT () const
+{
+    return refT_;
+}
+
+/**
+@brief Get the list of scaled masses for the phases in the kinetic model.
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@note NOT USED.
+
+@return the vector of scaled masses [percent solids]
+*/
+vector<double> getScaledMass () const
+{
+    return scaledMass_;
+}
+
+/**
+@brief Get the scaled mass of a particular clinker phase in the kinetic model.
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@note NOT USED.
+
+@param i is the index of the phase in the kinetic model
+@return the scaled mass of the phase [percent solids]
+*/
+double getScaledMass (const unsigned int i) const
+{
+    try { return scaledMass_.at(i); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getScaledMass",
+                           "scaledMass_",scaledMass_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the list of scaled <i>initial</i> masses for the phases in the kinetic model.
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@return the vector of initial scaled masses [percent solids]
+*/
+vector<double> getInitScaledMass () const
+{
+    return initScaledMass_;
+}
+
+/**
+@brief Get the initial scaled mass of a particular clinker phase in the kinetic model.
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@note NOT USED.
+
+@param i is the index of the phase in the kinetic model
+@return the initial scaled mass of the phase [percent solids]
+*/
+double getInitScaledMass (const unsigned int i) const
+{
+    try { return initScaledMass_.at(i); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getInitScaledMass",
+                           "initScaledMass_",initScaledMass_.size(),i);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the list of independent components (ICs) for each phase in the kinetic model.
+
+@note NOT USED.
+
+@return the vector of lists of ICs for the phases in the kinetic model
+*/
+vector<vector<int> > getRdICId () const
+{
+    return RdICId_;
+}
+
+/**
+@brief Get the list of Rd values for the independent components (ICs) for each phase in the kinetic model.
+
+The Rd values for each phase are the partionings of impurities in the clinker phases.
+
+@note NOT USED.
+
+@return the vector of Rd values of the ICs for the phases in the kinetic model
+*/
+vector<vector<double> > getRd () const
+{
+    return Rd_;
+}
+
+/**
+@brief Get the ids of all ICs of a particular phase in the kinetic model.
+
+@note NOT USED.
+
+@param idx is the index of the phase in the kinetic model
+@return the list of IC ids in that phase.
+*/
+vector<int> getRdICId (const unsigned int idx)
+{
+    try { return RdICId_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getRdICId",
+                           "RdICId_",RdICId_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the list of Rd values for the independent components (ICs) in a phase in the kinetic model.
+
+The Rd values for each phase are the partionings of impurities in the clinker phases.
+
+@note NOT USED.
+
+@param idx is the index of the phase in the kinetic model
+@return the vector of Rd values of the ICs for the phase specified by idx
+*/
+vector<double> getRd (const unsigned int idx)
+{
+    try { return Rd_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getRd",
+                           "Rd_",Rd_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the id of one IC of a particular phase in the kinetic model.
+
+@note NOT USED.
+
+@param idx1 is the index of the phase in the kinetic model
+@param idx2 is the element location of the IC for that phase
+@return the IC id value
+*/
+unsigned int getRdICId (const unsigned int idx1,
+                        const unsigned int idx2)
+{
+    try { return RdICId_.at(idx1).at(idx2); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getRdICId",
+                           "RdICId_",RdICId_.size(),idx1);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the Rd of one IC of a particular phase in the kinetic model.
+
+The Rd values for each phase are the partionings of impurities in the clinker phases.
+
+@note NOT USED.
+
+@param idx1 is the index of the phase in the kinetic model
+@param idx2 is the element location of the IC for that phase
+@return the IC id value
+*/
+double getRd (const unsigned int idx1,
+              const unsigned int idx2)
+{
+    try { return Rd_.at(idx1).at(idx2); }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticModel","getRd",
+                           "Rd_",Rd_.size(),idx1);
+        ex.printException();
+        exit(1);
+    }
+}
 
 /**
 @brief Master method for implementing one kinetic time step.
