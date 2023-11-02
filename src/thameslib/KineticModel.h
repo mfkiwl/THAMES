@@ -49,19 +49,17 @@ double refT_;               /**< Reference temperature for PK model [K] */
 double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts [days] */
 double leachTime_;          /**< Time at which leaching simulation starts [days] */
 
-vector<string> name_;           /**< List of names of phases in the kinetic model */
-vector<int> microPhaseId_;      /**< List of microstructure ids that are controlled by this model */
-vector<int> DCId_;              /**< List of DC ids from the ChemicalSystem object */
-vector<int> GEMPhaseId_;        /**< List of phase ids from the ChemicalSystem object */
-vector<vector<int> > RdICId_;   /**< List of IC ids for each phase */
-vector<vector<double> > Rd_;    /**< List of Rd values for each IC in each kinetic phase */
-vector<double> scaledMass_;     /**< List of phase mass percents, total solids basis */
-vector<double> initScaledMass_; /**< List of initial phase mass percents */
-vector<double> activationEnergy_;  /**< List of apparent activation energies for each
-                                    kinetic phase [J/mol/K] */
-vector<bool> isKinetic_;
-bool verbose_;                  /**< Flag for verbose output */
-bool warning_;                  /**< Flag for warnining output */
+string name_;               /**< Name of phase controlled by this kinetic model */
+int microPhaseId_;          /**< Microstructure id controlled by this model */
+int DCId_;                  /**< List of DC ids from the ChemicalSystem object */
+int GEMPhaseId_;            /**< List of phase ids from the ChemicalSystem object */
+vector<int> RdICId_;        /**< List of IC ids for this phase */
+ector<double> Rd_;          /**< Rd values for each IC in this phase */
+double scaledMass_;         /**< Phase mass percent, total solids basis */
+double initScaledMass_;     /**< Initial phase mass percents */
+double activationEnergy_;   /**< Apparent activation energy for the reaction [J/mol/K] */
+bool verbose_;              /**< Flag for verbose output */
+bool warning_;              /**< Flag for warnining output */
 
 public:
     
@@ -129,26 +127,9 @@ except for VOID and H2O.
 
 @return the list of all microstructure ids.
 */
-vector<int> getMicroPhaseId () const
+int getMicroPhaseId () const
 {
     return microPhaseId_;
-}
-  
-/**
-@brief Get a microstructure id in the KineticModel.
-
-@param idx is the the index of all the phases in the kinetic model
-@return the microstructure id of that phase
-*/
-int getMicroPhaseId (const int idx)
-{
-    try { return microPhaseId_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getMicroPhaseId",
-                           "microPhaseId_",microPhaseId_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
 }
   
 /**
@@ -226,26 +207,9 @@ double getLeachTime (void) const
 
 @return the vector of names of phases in the kinetic model
 */
-vector<string> getName () const
+string getName () const
 {
     return name_;
-}
-
-/**
-@brief Get the name of phase with a given index in the kinetic model.
-
-@param i is the index of the phase in the kinetic model
-@return the name of the phase with index i
-*/
-string getName (const unsigned int i) const
-{
-    try { return name_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getName","name_",
-                           name_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 
@@ -256,30 +220,9 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 
 @return the vector of initial scaled masses [percent solids]
 */
-vector<double> getInitScaledMass () const
+double getInitScaledMass () const
 {
     return initScaledMass_;
-}
-
-/**
-@brief Get the initial scaled mass of a particular clinker phase in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the initial scaled mass of the phase [percent solids]
-*/
-double getInitScaledMass (const unsigned int i) const
-{
-    try { return initScaledMass_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getInitScaledMass",
-                           "initScaledMass_",initScaledMass_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -289,28 +232,9 @@ double getInitScaledMass (const unsigned int i) const
 
 @return the vector of activation energies [J/mol/K]
 */
-vector<double> getActivationEnergy () const
+double getActivationEnergy () const
 {
     return activationEnergy_;
-}
-
-/**
-@brief Get the activation energy of a clinker phase in the kinetic model.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the activation energy of the phase [J/mol/K]
-*/
-double getActivationEnergy (const unsigned int i) const
-{
-    try { return activationEnergy_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getActivationEnergy",
-                        "activationEnergy_",activationEnergy_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -370,30 +294,9 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 
 @return the vector of scaled masses [percent solids]
 */
-vector<double> getScaledMass () const
+double getScaledMass () const
 {
     return scaledMass_;
-}
-
-/**
-@brief Get the scaled mass of a particular clinker phase in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the scaled mass of the phase [percent solids]
-*/
-double getScaledMass (const unsigned int i) const
-{
-    try { return scaledMass_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getScaledMass",
-                           "scaledMass_",scaledMass_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -403,30 +306,9 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 
 @return the vector of initial scaled masses [percent solids]
 */
-vector<double> getInitScaledMass () const
+double getInitScaledMass () const
 {
     return initScaledMass_;
-}
-
-/**
-@brief Get the initial scaled mass of a particular clinker phase in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
-@return the initial scaled mass of the phase [percent solids]
-*/
-double getInitScaledMass (const unsigned int i) const
-{
-    try { return initScaledMass_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getInitScaledMass",
-                           "initScaledMass_",initScaledMass_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -436,7 +318,7 @@ double getInitScaledMass (const unsigned int i) const
 
 @return the vector of lists of ICs for the phases in the kinetic model
 */
-vector<vector<int> > getRdICId () const
+vector<int> getRdICId () const
 {
     return RdICId_;
 }
@@ -450,67 +332,25 @@ The Rd values for each phase are the partionings of impurities in the clinker ph
 
 @return the vector of Rd values of the ICs for the phases in the kinetic model
 */
-vector<vector<double> > getRd () const
+vector<double> getRd () const
 {
     return Rd_;
 }
 
 /**
-@brief Get the ids of all ICs of a particular phase in the kinetic model.
+@brief Get the id of one IC of the phase in the kinetic model.
 
 @note NOT USED.
 
-@param idx is the index of the phase in the kinetic model
-@return the list of IC ids in that phase.
+@param idx is the element location of the IC for that phase
+@return the IC id value
 */
-vector<int> getRdICId (const unsigned int idx)
+unsigned int getRdICId (const unsigned int idx)
 {
-    try { return RdICId_.at(idx); }
+    try { return RdICId_.at(idx2); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","getRdICId",
                            "RdICId_",RdICId_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the list of Rd values for the independent components (ICs) in a phase in the kinetic model.
-
-The Rd values for each phase are the partionings of impurities in the clinker phases.
-
-@note NOT USED.
-
-@param idx is the index of the phase in the kinetic model
-@return the vector of Rd values of the ICs for the phase specified by idx
-*/
-vector<double> getRd (const unsigned int idx)
-{
-    try { return Rd_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRd",
-                           "Rd_",Rd_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the id of one IC of a particular phase in the kinetic model.
-
-@note NOT USED.
-
-@param idx1 is the index of the phase in the kinetic model
-@param idx2 is the element location of the IC for that phase
-@return the IC id value
-*/
-unsigned int getRdICId (const unsigned int idx1,
-                        const unsigned int idx2)
-{
-    try { return RdICId_.at(idx1).at(idx2); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRdICId",
-                           "RdICId_",RdICId_.size(),idx1);
         ex.printException();
         exit(1);
     }
@@ -523,17 +363,15 @@ The Rd values for each phase are the partionings of impurities in the clinker ph
 
 @note NOT USED.
 
-@param idx1 is the index of the phase in the kinetic model
-@param idx2 is the element location of the IC for that phase
+@param idx is the element location of the IC for that phase
 @return the IC id value
 */
-double getRd (const unsigned int idx1,
-              const unsigned int idx2)
+double getRd (const unsigned int idx)
 {
-    try { return Rd_.at(idx1).at(idx2); }
+    try { return Rd_.at(idx); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","getRd",
-                           "Rd_",Rd_.size(),idx1);
+                           "Rd_",Rd_.size(),idx);
         ex.printException();
         exit(1);
     }
@@ -571,17 +409,13 @@ virtual void calculateKineticStep (const double timestep,
 /**
 @brief Calculate the change in phase moles
 
-Pure virtual function must be defined for each child class
-
-@param microPhaseId is the identity of the phase that is changing
 @param rateconst is the rate constant (mol/m2/s)
 @param dfexp is the exponent on the driving force term (1 - beta)
 @param timestep is the time interval over which to calculate the change
 */
-virtual void calculatePhaseChange (const int microPhaseId,
-                           double rateconst,
-                           double dfexp,
-                           double timestep) = 0;
+virtual void calculatePhaseChange (double rateconst,
+                                   double dfexp,
+                                   double timestep);
 
 /**
 @brief Set up the number of moles of dependent components in the kinetic phases.

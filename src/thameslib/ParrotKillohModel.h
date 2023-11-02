@@ -142,17 +142,17 @@ various other objects for the simulation are allocated and constructed.
 
 @param cs is a pointer to the ChemicalSystem object for the simulation
 @param solut is a pointer to the aqeuous solution object for the simulation
-@param lattic is a pointer to the Lattice object holding the microstructure
-@param fileName is the name of the XML file with the input for the kinetic model
+@param lattice is a pointer to the Lattice object holding the microstructure
+@param kineticData is the collection of kinetic parameters already stored
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
 */
-ParrotKillohModel (ChemicalSystem *cs,
-                   Solution *solut,
-                   Lattice *lattic,
-                   const string &fileName,
-                   const bool verbose,
-                   const bool warning);
+ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
+                                      Solution *solut,
+                                      Lattice *lattice,
+                                      KineticData &kineticData,
+                                      const bool verbose,
+                                      const bool warning)
      
 /**
 @brief Set the w/c mass ratio of the system for the kinetic model equations.
@@ -480,26 +480,6 @@ void calculateKineticStep (const double timestep,
                            const double temperature,
                            bool isFirst);
      
-/**
-@brief Determine the change in moles of a given kinetically controlled phase.
-
-This method is called by the `calculateKineticStep` method, to calculate the change
-in moles of a given kinetically controlled phase during a given time interval.
-
-@note NOT USED.
-
-@todo Generalize the rate equation for other phases more than it is.
-@todo Change the variable names to be more descriptive
-
-@param pid is the id of the microstructure phase to change
-@param k is the effective rate constant in the rate equation
-@param gamma is the exponent for the driving force term, (SI - 1)
-@param timestep is the time interval to simulate [days]
-*/
-void calculatePhaseChange (int pid,
-                           double k,
-                           double gamma,
-                           double timestep);
  
 };      // End of ParrotKillohModel class
 

@@ -13,16 +13,15 @@ KineticModel::KineticModel ()
     ///
 
     numPhases_ = 0;
-    name_.clear();
-    microPhaseId_.clear();
-    DCId_.clear();
-    GEMPhaseId_.clear();
+    name_ = "";
+    microPhaseId_ = 0;
+    DCId_ = 0;
+    GEMPhaseId_ = 0;
     RdICId_.clear();
     Rd_.clear();
-    activationEnergy_.clear();
-    scaledMass_.clear();
-    initScaledMass_.clear();
-    isKinetic_.clear();
+    activationEnergy_ = 0.0;
+    scaledMass_ = 0.0;
+    initScaledMass_ = 0.0;
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -36,29 +35,112 @@ KineticModel::KineticModel ()
     return;
 }
 
+void KineticModel::calculatePhaseChange (double k,
+                                         double gamma,
+                                         double timestep)
+{
+    ///
+    /// Initialize local variables
+    ///
+
+    double DCChange = 0.0;
+    vector<int> GEMPhaseIndex;
+    GEMPhaseIndex.clear();
+    GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_);
+
+    ///
+    /// Should the next block be only for verbose output
+    ///
+
+    #ifdef DEBUG
+        cout << "ParrotKillohModel::calculatePhaseChange Microphase "
+             << chemSys_->getMicroPhaseName(microPhaseId_) << " contains phases: "
+             << endl;
+        for (int i = 0; i < GEMPhaseIndex.size(); i++) {
+            cout << "ParrotKillohModel::calculatePhaseChange            "
+                 << chemSys_->getGEMPhaseName(i) << endl;
+        }    
+        cout.flush();
+    #endif
+
+    double GEMPhaseMoles = 0.0;
+    double *GEMPhaseMolesArray = chemSys_->getGEMPhaseMoles();
+    for (int i = 0; i < GEMPhaseIndex.size(); i++) {
+      GEMPhaseMoles += GEMPhaseMolesArray[i];
+    }
+
+    vector<double> GEMPhaseFrac;
+    GEMPhaseFrac.clear();
+    GEMPhaseFrac.resize(GEMPhaseIndex.size(), 0.0);
+
+    for (int i = 0; i < GEMPhaseIndex.size(); i++) {
+      double A = 0.0; // A is the surface area
+      GEMPhaseFrac[i] = chemSys_->getGEMPhaseMoles(GEMPhaseIndex[i]) / GEMPhaseMoles;
+      A = lattice_->getSurfaceArea(microPhaseId) * GEMPhaseFrac[i];
+      double SI = 0.0; // SI is the saturation index for the phase i
+      SI = solut_->getSI(GEMPhaseIndex[i]);
+      
+      vector<int> DCIndex;
+      DCIndex.clear();
+      DCIndex = chemSys_->getGEMPhaseDCMembers(GEMPhaseIndex[i]);
+      #ifdef DEBUG
+          cout << "ParrotKillohModel::calculatePhaseChange Phase "
+               << chemSys_->getGEMPhaseName(GEMPhaseIndex[i]) 
+               << " contains DC members: " << endl;
+      #endif
+      for (int j = 0; j < DCIndex.size(); j++) {
+        chemSys_->getDCName(DCIndex[j]);
+      }
+      
+
+      vector<double> DCFrac;
+      DCFrac.clear();
+      DCFrac.resize(DCIndex.size(), 0.0);
+      double DCMoles = 0.0;
+      for (int j = 0; j < DCIndex.size(); j++) {
+        DCMoles += chemSys_->getDCMoles(DCIndex[j]);
+      }
+      
+      double surfaceArea = 0.0;
+      for (int j = 0; j < DCIndex.size(); j++) {
+        DCFrac[j] = chemSys_->getDCMoles(DCIndex[j]) / DCMoles;
+        surfaceArea = A * DCFrac[j];
+        DCChange = k * surfaceArea * pow((SI - 1),gamma);
+
+        ///
+        /// Convert time step from days to seconds, because DCChange
+        /// has units of mol/s
+        ///
+
+        DCChange = DCChange * timestep * 24.0 * 60.0 * 60.0; // DCChange unit: moles/s
+
+        double newDCMoles = chemSys_->getDCMoles(DCIndex[j]) + DCChange;
+        chemSys_->setDCUpperLimit(DCIndex[j],newDCMoles);
+        chemSys_->setDCLowerLimit(DCIndex[j],newDCMoles);
+
+      }
+    }
+
+    return;
+}
+
 void KineticModel::getPhaseMasses(void)
 {
     int microPhaseId;
     double pscaledMass = 0.0;
 
-    wcRatio_ = lattice_->getWsratio();
+    if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
+        scaledMass_ = chemSys_->getMicroPhaseMass(microPhaseId);
+        initScaledMass_ = scaledMass_;
 
-    for (int i = 0; i < microPhaseId_.size(); i++) {
-        microPhaseId = microPhaseId_[i];
-        if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
-            pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
-            scaledMass_[i] = pscaledMass;
-            initScaledMass_[i] = pscaledMass;
-
-            // Setting the phase mass will also automatically calculate the phase volume
+        // Setting the phase mass will also automatically calculate the phase volume
             
-            #ifdef DEBUG
-                cout << "KineticModel::getPhaseMasses Kinetic model reads solid micphase mass of "
-                     << chemSys_->getMicroPhaseName(microPhaseId)
-                     << " as " << initScaledMass_[i] << endl;
-                cout.flush();
-            #endif
-        }
+        #ifdef DEBUG
+            cout << "KineticModel::getPhaseMasses Kinetic model reads solid micphase mass of "
+                 << chemSys_->getMicroPhaseName(microPhaseId)
+                 << " as " << initScaledMass_ << endl;
+            cout.flush();
+        #endif
     }
 
     return;
@@ -83,22 +165,18 @@ void KineticModel::setKineticDCMoles ()
                  << ", Molar mass = " << waterMolarMass << endl;
             cout.flush();
         #endif
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                if (chemSys_->getDCMolarMass(DCId_[i]) <= 0.0) {
-                    throw FloatException("KineticModel","setKineticDCmoles",
-                                         "Divide by zero error");
-                }
-                #ifdef DEBUG
-                    cout << "KineticModel::setKineticDCmoles        Clinker phase "
-                         << name_[i] << ": Mass = " << scaledMass_[i]
-                         << ", Molar mass = " << chemSys_->getDCMolarMass(DCId_[i])
-                         << endl;
-                #endif
-                chemSys_->setDCMoles(DCId_[i],(scaledMass_[i]
-                                 / chemSys_->getDCMolarMass(DCId_[i])));
-            } // END OF IF KINETIC
+        if (chemSys_->getDCMolarMass(DCId_) <= 0.0) {
+            throw FloatException("KineticModel","setKineticDCmoles",
+                                 "Divide by zero error");
         }
+        #ifdef DEBUG
+            cout << "KineticModel::setKineticDCmoles        Clinker phase "
+                 << name_ << ": Mass = " << scaledMass_
+                 << ", Molar mass = " << chemSys_->getDCMolarMass(DCId)
+                 << endl;
+        #endif
+        chemSys_->setDCMoles(DCId_,(scaledMass_
+                             / chemSys_->getDCMolarMass(DCId_)));
     }
     catch (EOBException eex) {
         eex.printException();
@@ -120,11 +198,7 @@ void KineticModel::setKineticDCMoles ()
 void KineticModel::zeroKineticDCMoles ()
 {
     try {
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                chemSys_->setDCMoles(DCId_[i],0.0);
-            }
-        }
+        chemSys_->setDCMoles(DCId_,0.0);
     }
     catch (EOBException eex) {
         eex.printException();

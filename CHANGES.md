@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Nov 02 01:34:03 2023 | Completed ParrotKillohModel.cc; still no compile check |
 | Nov 01 11:38:14 2023 | Completed ParrotKillohModel.h; still need ParrotKillohModel.cc |
 | Nov 01 11:00:08 2023 | Completed KineticModel and KineticController; compile not checked |
 | Oct 29 21:13:00 2023 | Setting up multiple kinetic models; compile not checked |

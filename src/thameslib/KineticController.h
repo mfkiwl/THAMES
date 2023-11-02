@@ -116,6 +116,7 @@ double leachTime_;          /**< Time at which leaching simulation starts [days]
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
 vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
+vector<bool> isKinetic_;
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
 
@@ -155,6 +156,25 @@ KineticController::KineticController (ChemicalSystem *cs,
 */
 virtual ~KineticController() {};
 
+/**
+@brief Initialize the kinetic data structure
+*/
+void initKineticData()
+{
+    name = "";
+    microPhaseId = GEMPhaseId = DCId = 0; 
+    type = "thermo";
+    scaledMass = 0.0;
+    blaine = refblaine = 385.0;
+    temperature = reftemperature = 293.15;
+    k1 = k2 = k3 = n1 = n3 = 1.0;
+    rateconst = 0.0;
+    siexp = dfexp = ohexp = 0.0;
+    Ea = 0.0;
+    critDOH = 0.0;
+    RdId.clear();
+    RdVal.clear();
+}
 
 /**
 @brief Master method controlling the parsing of XML input to the kinetic model.
@@ -314,10 +334,10 @@ string getName (const unsigned int i) const
 */
 void initKineticData(struct KineticData &kd)
 {
-    kd.name.clear();
+    kd.name = "";
     kd.microPhaseId = 0;
-    kd.GEMPhaseId = 0;
-    kd.DCId = 0;
+    kd.GEMPhaseId.clear();
+    kd.DCId.clear();
     kd.type.clear();
     kd.scaledMass = 0.0;
     kd.k1 = 0.0;

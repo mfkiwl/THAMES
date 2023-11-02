@@ -20,6 +20,7 @@ KineticController::KineticController ()
     lattice_ = NULL;
     phaseKineticModel_.clear();
     name_.clear();
+    isKinetic_.clear();
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -50,6 +51,7 @@ KineticController::KineticController (ChemicalSystem *cs,
     numPhases_ = 0;
     phaseKineticModel_.clear();
     name_.clear();
+    isKinetic_.clear();
     
     // Set the verbose and warning flags
    
@@ -205,7 +207,7 @@ void KineticController::parseDoc (const string &docName)
                 /// Each phase is a more complicated grouping of data that
                 /// has a separate method for parsing.
                 
-                parsePhase(doc, cur, numEntry);
+                parsePhase(doc, cur, numEntry, kineticData);
             }
             cur = cur->next;
         }
@@ -242,6 +244,8 @@ void KineticController::parsePhase (xmlDocPtr doc,
 
     cur = cur->xmlChildrenNode;
 
+    isKinetic_.push_back(false);
+
     while (cur != NULL) {
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -253,6 +257,7 @@ void KineticController::parsePhase (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"kinetic_data"))) {
             numEntry += 1;
             kineticfound = true;
+            isKinetic_[isKinetic_.size()-1] = true;
             kineticData.GEMPhaseId =
                 chemSys_->getMicroPhaseToGEMPhase(kineticData.microPhaseId,0);
             kineticData.DCId =
@@ -264,116 +269,15 @@ void KineticController::parsePhase (xmlDocPtr doc,
             ///
 
             parseKineticData(doc, cur, kineticData);
+            kineticData.temperature = temperature_;
+            kineticData.reftemperature = refT_;
 
             makeModel(doc, cur, kineticData);
 
-            /// STOPPED HERE
         }
         cur = cur->next;
     }
 
-    if (kineticfound) {
-
-        if (kineticData.type == "parrotkilloh") {
-            
-            #ifdef DEBUG
-                cout << "KineticControllerl::parsePhase PK " << kineticData.name
-                     << ", id = "
-                     << kineticData.microPhaseId << endl;
-                cout << "KineticController::parsePhase   (k1,k2,k3) =  " << kineticData.k1
-                     << "," << kineticData.k2
-                     << "," << kineticData.k3 << endl;
-                cout << "KineticController::parsePhase   (n1,n3) =  " << kineticData.n1 << ","
-                     << kineticData.n3 << endl;
-                cout << "KineticModel::parsePhase   Ea = " << kineticData.Ea << endl;
-                cout.flush();
-            #endif
-            isParrotKilloh = true;
-            ispozz = false;
-            istherm = false;
-            issol = false;
-
-        } else if (kineticData.type == "pozzolanic") {
-            #ifdef DEBUG
-                cout << "KineticModel::parsePhase pozzolanic " << kineticData.name
-                     << ", id = "
-                     << kineticData.microPhaseId << endl;
-                cout << "KineticModel::parsePhase   (k1,k2,k3) =  " << kineticData.k1
-                     << "," << kineticData.k2
-                     << "," << kineticData.k3 << endl;
-                cout << "KineticModel::parsePhase   (n1,n3) =  " << kineticData.n1 << ","
-                     << kineticData.n3 << endl;
-                cout << "KineticModel::parsePhase   Ea = " << kineticData.Ea << endl;
-                cout.flush();
-            #endif
-            isParrotKilloh = false;
-            ispozz = true;
-            istherm = false;
-            issol = false;
-
-
-        } else if (kineticData.type == "soluble") {
-
-            iskin = false;
-            ispozz = false;
-            istherm = true;
-            issol = true;
-
-        } else {
-
-            iskin = false;
-            ispozz = false;
-            istherm = true;
-            issol = false;
-        }
-    } else {
-        isParrotKilloh = ispozz = istherm = issol = false;
-    }
-    
-    isParrotKilloh_.push_back(isParrotKilloh);
-    isPozzolanic_.push_back(ispozz);
-    isThermo_.push_back(istherm);
-    isSoluble_.push_back(issol);
-
-    // @todo BULLARD PLACEHOLDER
-    // Special kluges here for silica fume, which we have to call Silica-amorph
-    // for now to make it compatible with the user interface as of 2022 Dec 29
-    //
-    // @todo Find a way to make this general to all pozzolans
-   
-    string sfume("SFUME");
-    string siamorph("Silica-amorph");
-    if (kineticData.name == sfume || kineticData.name == siamorph) {
-        kineticData.name = siamorph;
-        isParrotKilloh_.push_back(false);
-    } else {
-        isParrotKilloh_.push_back(iskin);
-    }
-    isThermo_.push_back(istherm);
-    isSoluble_.push_back(issol);
-    initScaledMass_.push_back(0.0);
-    scaledMass_.push_back(0.0);
-    name_.push_back(kineticData.name);
-    microPhaseId_.push_back(kineticData.microPhaseId);
-    DCId_.push_back(kineticData.DCId);
-    GEMPhaseId_.push_back(kineticData.GEMPhaseId);
-    RdICId_.push_back(kineticData.RdId);
-    Rd_.push_back(kineticData.RdVal);
-
-    /// @note k1, k2, k3, n1, n3, and critDOH are all
-    /// specific to PK model.
-    
-    /// Not knowing the order in which the clinker
-    /// phases will appear, we must figure that out
-    /// now.
-    
-    k1_.push_back(kineticData.k1);
-    k2_.push_back(kineticData.k2);
-    k3_.push_back(kineticData.k3);
-    n1_.push_back(kineticData.n1);
-    n3_.push_back(kineticData.n3);
-    activationEnergy_.push_back(kineticData.Ea);
-    critDOH_.push_back(kineticData.critDOH);
 
     return;
 }
@@ -522,13 +426,10 @@ void KineticController::makeModel (xmlDocPtr doc,
 
     if (kineticData.type == "parrotkilloh") {
         // Read remaining Parrot and Killoh model parameters
-        km = new ParrotKillohModel(kineticData);
+        km = new ParrotKillohModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
     } else if (kineticData.type == "pozzolanic") {
         // Read remaining pozzolanic model parameters
-        km = new PozzolanicModel(kineticData);
-    } else if (kineticData.type == "ordinary") {
-        // Read remaining ordinary model parameters
-        km = new OrdinaryModel(kineticData);
+        km = new PozzolanicModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
     }
 
     phaseKineticModel_.push_back(km);
