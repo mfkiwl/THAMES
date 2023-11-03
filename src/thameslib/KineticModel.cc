@@ -22,6 +22,12 @@ KineticModel::KineticModel ()
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;
+    waterId_ = 1;
+    ICNum_ = 0;
+    DCNum_ = 0;
+    ICName_.clear();
+    DCName_.clear();
+    GEMPhaseNum_ = 0;
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default

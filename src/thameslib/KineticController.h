@@ -72,9 +72,9 @@ struct KineticData {
     int GEMPhaseId;         /**< Integer id of the phase in the GEM CSD */
     int DCId;               /**< Integer id of the DC making up the phase */
     string type;            /**< Specifies kinetic or thermodynamic control */
-    double scaledMass;        /**< Mass percent on a total solids basis */
-    double blaine;            /**< Blaine fineness [m2/kg] */
-    double refblaine;         /**< Reference Blaine fineness [m2/kg] */
+    double scaledMass;      /**< Mass percent on a total solids basis */
+    double ssa;             /**< Specific surface area [m2/kg] */
+    double refssa;          /**< Reference specific surface area [m2/kg] */
     double temperature;       /**< Temperature [K] */
     double reftemperature;    /**< Reference temperature [K] */
     double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
@@ -115,8 +115,14 @@ double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts 
 double leachTime_;          /**< Time at which leaching simulation starts [days] */
 
 vector<string> name_;           /**< List of names of phases in the kinetic model */
+vector<string> ICName_;
+vector<string> DCName_;
 vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
 vector<bool> isKinetic_;
+int waterId_;                   /**< DC index for liquid water */
+int ICNum_;                     /**< Number of ICs in chemical system */
+int DCNum_;                     /**< Number of DCs in chemical system */
+int GEMPhaseNum_;               /**< Number of GEM phases in chemical system */
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
 
@@ -165,7 +171,7 @@ void initKineticData()
     microPhaseId = GEMPhaseId = DCId = 0; 
     type = "thermo";
     scaledMass = 0.0;
-    blaine = refblaine = 385.0;
+    ssa = refssa = 385.0;
     temperature = reftemperature = 293.15;
     k1 = k2 = k3 = n1 = n3 = 1.0;
     rateconst = 0.0;
@@ -349,8 +355,8 @@ void initKineticData(struct KineticData &kd)
     kd.critDOH = 0.0;
     kd.RdId.clear();
     kd.RdVal.clear();
-    kd.blaine = 385.0;         
-    kd.refblaine = 385.0;       
+    kd.ssa = 385.0;         
+    kd.refssa = 385.0;       
     kd.temperature = 296.0;     
     kd.reftemperature = 296.0;  
     kd.rateconst = 0.0;       

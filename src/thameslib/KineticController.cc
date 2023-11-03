@@ -21,6 +21,12 @@ KineticController::KineticController ()
     phaseKineticModel_.clear();
     name_.clear();
     isKinetic_.clear();
+    waterId_ = 1;
+    ICNum_ = 0;
+    ICName_.clear();
+    DCNum_ = 0;
+    DCName_.clear();
+    GEMPhaseNum_ = 0;
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -126,6 +132,14 @@ KineticController::KineticController (ChemicalSystem *cs,
         }
         cout.flush();
     #endif
+
+    // Assign the DC index for water
+
+    waterId_ = chemSys_->getDCId(WaterDCName);
+    ICNum_ = chemSys_->getNumICs();
+    ICName_ = chemSys_->getICName();
+    DCName_ = chemSys_->getDCName();
+    GEMPhaseNum_ = chemSys_->getNumGEMPhases();
 
     // The ChemicalSystem and Lattice objects were constructed before we get
     // here, so now we know nearly everything we need to know about the
@@ -429,18 +443,339 @@ void KineticController::makeModel (xmlDocPtr doc,
         km = new ParrotKillohModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
     } else if (kineticData.type == "pozzolanic") {
         // Read remaining pozzolanic model parameters
-        km = new PozzolanicModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
+        km = new KineticController(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
     }
 
     phaseKineticModel_.push_back(km);
 
     return;
 }
-
 void KineticController::calculateKineticStep (const double timestep,
                                               const double temperature,
                                               bool isFirst)
 {
-    cout << "Whoop!!" << endl;
-}
+    ///
+    /// Initialize local variables
+    ///
 
+    double T = temperature;
+    double arrhenius = 1.0;
+
+    double rate = 1.0e-10;            // Selected rate
+
+    double massDissolved = 0.0;
+
+    ///
+    /// Determine if this is a normal step or a necessary
+    /// tweak from a failed GEM_run call
+    ///
+    
+    bool doTweak = (chemSys_->getTimesGEMFailed() > 0) ? true : false;
+
+    static double hyd_time = 0.0;
+    if (!doTweak) hyd_time = hyd_time + timestep;
+
+    #ifdef DEBUG
+        cout << "KineticController::calculateKineticStep Hydration Time = "
+             << hyd_time << endl;
+        cout.flush();
+    #endif
+
+    try {
+        static int conc_index = 0;     
+        int microPhaseId,DCId,ICId;
+        double molarMass,Rd;
+        vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
+        vector<double> tICMoles,tsolutICMoles,tDCMoles,tGEMPhaseMoles;
+        ICMoles.clear();
+        ICMoles.resize(ICNum_,0.0);
+        solutICMoles.clear();
+        solutICMoles.resize(ICNum_,0.0);
+        DCMoles.clear();
+        DCMoles.resize(DCNum_,0.0);
+        GEMPhaseMoles.clear();
+        GEMPhaseMoles.resize(GEMPhaseNum,0.0);
+        string icn;
+
+        #ifdef DEBUG
+            cout << "KineticController::calculateKineticStep "
+                 << "ICmoles before dissolving:" << endl;
+            cout.flush();
+            for (int i = 0; i < ICNum_; i++) {
+              if (isFirst) {
+                  ICMoles[i] = 1.0e-9;
+              } else {
+                  ICMoles[i] = chemSys_->getICMoles(i);
+              }
+              cout << "KineticController::calculateKineticStep     "
+                   << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
+            }
+        #else 
+            for (int i = 0; i < ICNum_; i++) {
+              ICMoles[i] = chemSys_->getICMoles(i);
+              if (isFirst) {
+                  ICMoles[i] = 1.0e-9;
+              } else {
+                  ICMoles[i] = chemSys_->getICMoles(i);
+              }
+            }
+        #endif
+
+        for (int i = 0; i < DCNum_; i++) {
+          DCMoles[i] = chemSys_->getDCMoles(i);
+        }
+        for (int i = 0; i < GEMPhaseNum_; i++) {
+          GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
+        }
+
+        solutICMoles = chemSys_->getSolution();
+
+        if (isFirst) {  // Beginning of special first-time setup tasks
+            
+            // Print out the initial volumes of microstructure phases
+           
+            microPhaseId = 0;
+            double psMass,psVolume;
+            double volume = 0.0;
+            if (verbose_) {
+                cout << "KineticController::calculateKineticStep "
+                     << "Initial MICROSTRUCTURE phase amount:" << endl;
+                psMass = chemSys_->getMicroPhaseMass(microPhaseId_);
+                psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_);
+                cout << "KineticController::calculateKineticStep     "
+                     << chemSys_->getMicroPhaseName(microPhaseId_)
+                     << " (" << microPhaseId_ << "): mass = " << psMass
+                     << ", vol = " << psVolume << endl;
+                cout.flush();
+            }
+
+            for (int i = 0; i < ICNum_.size(); i++) {
+                if (ICName_[i] == "H") {
+                    #ifdef DEBUG
+                        cout << "KineticController::calculateKineticStep "
+                             << "Previous IC moles for H is: "
+                             << ICMoles[i] << endl;
+                        cout.flush();
+                    #endif
+                    ICMoles[i] = (2.0 * waterMoles);
+                    solut_->setICMoles(i,ICMoles[i]);
+                    chemSys_->setDCMoles(waterId_,waterMoles);
+                    #ifdef DEBUG
+                    if (verbose_) {
+                        cout << "KineticController::calculateKineticStep "
+                             << "New ICmoles for H is: "
+                             << ICMoles[i] << endl;
+                        cout.flush();
+                    }
+                    #endif
+                }
+                if (ICName_[i] == "O") {
+                    #ifdef DEBUG
+                        cout << "KineticController::calculateKineticStep "
+                             << "Previous IC moles for O is: "
+                             << ICMoles[i] << endl;
+                        cout.flush();
+                    #endif
+                    ICMoles[i] = waterMoles;
+                    solut_->setICMoles(i,ICMoles[i]);
+                    #ifdef DEBUG
+                        cout << "KineticController::calculateKineticStep "
+                             << "New ICmoles for O is: "
+                             << ICMoles[i] << endl;
+                        cout.flush();
+                    #endif
+               }
+            }
+            double wmv = chemSys_->getNode()->DC_V0(chemSys_->getDCId(WaterDCName),
+                                                    chemSys_->getP(),
+                                                    chemSys_->getTemperature());
+            chemSys_->setGEMPhaseMass(chemSys_->getGEMPhaseId(WaterGEMName),waterMass);
+            chemSys_->setGEMPhaseVolume(chemSys_->getGEMPhaseId(WaterGEMName),wmv/waterMoles);
+
+
+            // Modify initial pore solution composition if desired
+            // input units are mol/kgw
+            // watermass is in units of grams, not kg
+            
+            double kgWaterMass = waterMass / 1000.0;
+            
+            map<int,double> isComp = chemSys_->getInitialSolutionComposition();
+            map<int,double>::iterator p = isComp.begin();
+
+            while (p != isComp.end()) {
+                if (verbose_) {
+                    cout << "KineticController::calculateKineticStep "
+                         << "modifying initial pore solution" << endl;
+                    cout.flush();
+                }
+                #ifdef DEBUG
+                    cout << "KineticController::calculateKineticStep "
+                         << "--->Adding " << p->second
+                         << " mol/kgw of "
+                         << ICName_[p->first] << " to initial solution." << endl;
+                    cout.flush();
+                #endif
+                ICMoles[p->first] += (p->second * kgWaterMass);
+                p++;
+            }
+
+            // @todo BULLARD PLACEHOLDER
+            // Still need to implement constant gas phase composition
+           
+            // @todo BULLARD PLACEHOLDER
+            // While we are still using PK model for clinker phases, we
+            // must scan for and account for pozzolanic reactive components
+            // that will alter the hydration rate of clinker
+            // phases, presumably by making a denser hydration shell
+            // with slower transport
+
+            // @todo BULLARD PLACEHOLDER
+            // Currently silica fume is the only pozzolanically reactive
+            // component
+            
+            // @todo Find a way to make this general to all pozzolans
+              
+        }   // End of special first-time tasks
+
+        if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
+
+            if (!doTweak) {
+                // @todo BULLARD PLACEHOLDER
+                // Still need to implement constant gas phase composition
+                // Will involve equilibrating gas with aqueous solution
+                //
+                // First step each iteration is to equilibrate gas phase
+                // with the electrolyte, while forbidding anything new
+                // from precipitating.
+           
+                #ifdef DEBUG
+                   cout << "KineticController::calculateKineticStep "
+                        << "Looping over kinetically controlled phases.  " << endl;
+                   cout.flush();
+                #endif
+
+                vector<double> impurityRelease;
+                impurityRelease.clear();
+                impurityRelease.resize(chemSys_->getNumMicroImpurities(),0.0);
+
+                // RH factor is the same for all clinker phases
+                double vfvoid = lattice_->getVolumefraction(VOIDID);
+                double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
+
+                /// This is a big kluge for internal relative humidity
+                /// @note Using new gel and interhydrate pore size distribution model
+                ///       which is currently contained in the Lattice object.
+                ///
+                /// Surface tension of water is gamma = 0.072 J/m2
+                /// Molar volume of water is Vm = 1.8e-5 m3/mole
+                /// The Kelvin equation is 
+                ///    p/p0 = exp (-4 gamma Vm / d R T) = exp (-6.23527e-7 / (d T))
+                ///
+                ///    where d is the pore diameter in meters and T is absolute temperature
+          
+                /// Assume a zero contact angle for now.
+                /// @todo revisit the contact angle issue
+          
+                double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+                critporediam *= 1.0e-9;                                    // in m
+                double rh = exp(-6.23527e-7/critporediam/T);
+
+                /// Assume a zero contact angle for now.
+                /// @todo revisit the contact angle issue
+          
+                /// Loop over all kinetic models
+
+                for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+
+                    // zero out the temporary chemical compositions before
+                    // passing them to the kinetic model
+                    tICMoles.resize(ICMoles.size(),1.0e-9);
+                    tsolutICMoles.resize(SolutICMoles.size(),1.0e-9);
+                    tDCMoles.resize(DCMoles.size(),1.0e-9);
+                    tGEMPhaseMoles.resize(GEMPhaseMoles.size(),1.0e-9);
+
+                    phaseKineticModel_[midx]->calculateKineticStep(timestep,
+                                                             temperature,
+                                                             isFirst,
+                                                             doTweak,
+                                                             rh,
+                                                             tICMoles,
+                                                             tsolutICMoles,
+                                                             tDCMoles,
+                                                             tGEMPhaseMoles);
+
+                    for (int im = 0; im < ICMoles.size(); ++im) {
+                        ICMoles[im] += tICMoles[im];
+                        SolutICMoles[im] += tsolutICMoles[im];
+                        DCMoles[im] += tDCMoles[im];
+                        GEMPhaseMoles[im] += tGEMPhaseMoles[im];
+                    }
+                }
+            } else {
+
+              ///
+              /// We will just tweak the icmoles a bit to try to
+              /// cure a previous failed convergence with GEM_run
+              ///
+             
+              for (int ii = 0; ii < ICMoles.size(); ii++) {
+                  if (ICName_[ii] != "H" && ICName_[ii] != "O" && ICName_[ii] != "Zz") {
+                      ICMoles[ii] *= 1.01;
+                  }
+              }
+
+            }   
+
+            if (!doTweak) {
+                cout << "KineticController::calculateKineticStep ICmoles after dissolving:" << endl;
+            } else {
+                cout << "KineticController::calculateKineticStep ICmoles after tweaking:" << endl;
+            }
+            for (int i = 0; i < ICNum_; i++) {
+              cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
+            }
+            cout.flush();
+          #endif
+
+          if (doTweak) {
+              for (int ii = 0; ii < ICMoles.size(); ii++) {
+                  chemSys_->setICMoles(ii,ICMoles[ii]);
+              }
+              return;
+          }
+
+          for (int ii = 0; ii < ICMoles.size(); ii++) {
+              chemSys_->setICMoles(ii,ICMoles[ii]);
+              #ifdef DEBUG
+                  cout << "KineticController::calculateKineticStep ICmoles of " << ICName_[ii]
+                       << " is: " << ICMoles[ii] << endl;
+                  cout.flush();
+              #endif
+          }
+
+        } // End of normal hydration block
+    }     // End of try block
+
+
+    catch (EOBException eex) {
+        eex.printException();
+        exit(1);
+    }
+    catch (DataException dex) { 
+        dex.printException();
+        exit(1);
+    }
+    catch (FloatException fex) {
+        fex.printException();
+        exit(1);
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("KineticController","calculateKineticStep",
+                           oor.what(),0,0);
+        ex.printException();
+        exit(1);
+    }
+
+	
+    return;
+}

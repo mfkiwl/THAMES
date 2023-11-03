@@ -49,17 +49,26 @@ double refT_;               /**< Reference temperature for PK model [K] */
 double sulfateAttackTime_;  /**< Time at which sulfate attack simulation starts [days] */
 double leachTime_;          /**< Time at which leaching simulation starts [days] */
 
-string name_;               /**< Name of phase controlled by this kinetic model */
-int microPhaseId_;          /**< Microstructure id controlled by this model */
-int DCId_;                  /**< List of DC ids from the ChemicalSystem object */
-int GEMPhaseId_;            /**< List of phase ids from the ChemicalSystem object */
-vector<int> RdICId_;        /**< List of IC ids for this phase */
-ector<double> Rd_;          /**< Rd values for each IC in this phase */
-double scaledMass_;         /**< Phase mass percent, total solids basis */
-double initScaledMass_;     /**< Initial phase mass percents */
-double activationEnergy_;   /**< Apparent activation energy for the reaction [J/mol/K] */
-bool verbose_;              /**< Flag for verbose output */
-bool warning_;              /**< Flag for warnining output */
+string name_;                   /**< Name of phase controlled by this kinetic model */
+int microPhaseId_;              /**< Microstructure id controlled by this model */
+int DCId_;                      /**< List of DC ids from the ChemicalSystem object */
+int GEMPhaseId_;                /**< List of phase ids from the ChemicalSystem object */
+int waterId_;                   /**< DC index for liquid water */
+int ICNum_;                     /**< Number of ICs in chemical system */
+int DCNum_;                     /**< Number of DCs in chemical system */
+int GEMPhaseNum_;               /**< Number of GEM phases in chemical system */
+vector<string> ICName_;         /**< Names of ICs */
+vector<string> DCName_;         /**< Names of DCs */
+vector<int> RdICId_;            /**< List of IC ids for this phase */
+vector<double> Rd_;             /**< Rd values for each IC in this phase */
+double scaledMass_;             /**< Phase mass percent, total solids basis */
+double initScaledMass_;         /**< Initial phase mass percents */
+double activationEnergy_;       /**< Apparent activation energy for the reaction [J/mol/K] */
+double specificSurfaceArea_;    /**< Specific surface area (m2/kg) */
+double refSpecificSurfaceArea_; /**< Reference specific surface area (m2/kg) */
+double ssaFactor_;              /**< Reference specific surface area (m2/kg) */
+bool verbose_;                  /**< Flag for verbose output */
+bool warning_;                  /**< Flag for warnining output */
 
 public:
     
@@ -89,6 +98,81 @@ virtual ~KineticModel() {};
 ChemicalSystem *getChemSys () const
 {
     return chemSys_;
+}
+
+/**
+@brief Set the specific surface area
+
+@note NOT USED.
+
+@param sval is the specific surface area [m<sup>2</sup>/kg]
+*/
+void setSpecificSurfaceArea (double sval)
+{
+    specificSurfaceArea_ = sval;
+}
+
+/**
+@brief Get the specific surface area.
+
+@note NOT USED.
+
+@return the specific surface area fineness [m<sup>2</sup>/kg]
+*/
+double getSpecificSurfaceArea () const
+{
+    return specificSurfaceArea_;
+}
+
+/**
+@brief Set the reference specific surface area.
+
+The value set in the Parrot and Killoh model is 385 m<sup>2</sup>/kg, and there
+is no particular reason to change it.
+
+@note NOT USED.
+
+@param rsval is the reference specific surface area [m<sup>2</sup>/kg]
+*/
+void setRefSpecificSurfaceArea (double rsval)
+{
+    refSpecificSurfaceArea_ = rsval;
+}
+
+/**
+@brief Get the reference specific surface area.
+
+@note NOT USED.
+
+@return the reference specific surface area [m<sup>2</sup>/kg]
+*/
+double getRefSpecificSurfaceArea () const
+{
+    return refSpecificSurfaceArea_;
+}
+
+/**
+@brief Set the ratio of the true specific surface area to the model reference value.
+
+@note NOT USED.
+
+@param sfact is the ratio of the actual specific surface area to the reference value
+*/
+void setSsaFactor (double sfact)
+{
+    ssaFactor_ = sfact;
+}
+
+/**
+@brief Get the ratio of the true specific surface area to the model reference value.
+
+@note NOT USED.
+
+@return the ratio of the actual specific surface area to the reference value
+*/
+double getSsaFactor () const
+{
+    return ssaFactor_;
 }
 
 /**
@@ -133,6 +217,138 @@ int getMicroPhaseId () const
 }
   
 /**
+@brief Set the DC index for liquid water
+
+@note NOT USED.
+
+@param waterid is the index value to use
+*/
+void setWaterId (const int waterid)
+{
+    waterId_ = waterid;
+}
+
+/**
+@brief Get the DC index for liquid water
+
+@return the DC index for liquid water
+*/
+int getWaterId () const
+{
+    return waterId_;
+}
+  
+/**
+@brief Set the number of ICs
+
+@note NOT USED.
+
+@param icnum is the number of ICs to specify
+*/
+void setICNum (const int icnum)
+{
+    ICNum_ = icnum;
+}
+
+/**
+@brief Get the number of ICs
+
+@return the number of ICs
+*/
+int getICNum () const
+{
+    return ICNum_;
+}
+  
+/**
+@brief Set the number of DCs
+
+@note NOT USED.
+
+@param dcnum is number of DCs to specify
+*/
+void setDCNum (const int dcnum)
+{
+    DCNum_ = dcnum;
+}
+
+/**
+@brief Get the number of DCs
+
+@return the number of DCs
+*/
+int getDCNum () const
+{
+    return DCNum_;
+}
+  
+/**
+@brief Set the number of GEM phases 
+
+@note NOT USED.
+
+@param gpnum is number of GEM phases to specify
+*/
+void setGEMPhaseNum (const int gpnum)
+{
+    GEMPhaseNum_ = gpnum;
+}
+
+/**
+@brief Get the number of GEM phases
+
+@return the number of GEM phases
+*/
+int getGEMPhaseNum () const
+{
+    return GEMPhaseNum_;
+}
+  
+/**
+@brief Set the IC names
+
+@note NOT USED.
+
+@param icname is the list of IC names
+*/
+void setICName (vector<string> icname)
+{
+    ICName_ = icname;
+}
+
+/**
+@brief Get the IC names
+
+@return the list of IC names
+*/
+vector<string> getICName () const
+{
+    return ICName_;
+}
+  
+/**
+@brief Set the DC names
+
+@note NOT USED.
+
+@param dcname is the list of DC names
+*/
+void setDCName (vector<string> dcname)
+{
+    DCName_ = dcname;
+}
+
+/**
+@brief Get the DC names
+
+@return the list of DC names
+*/
+vector<string> getDCName () const
+{
+    return DCName_;
+}
+  
+/**
 @brief Set the total number of phases in the kinetic model.
 
 @note NOT USED.
@@ -143,7 +359,7 @@ void setNumPhases (const unsigned int numphases)
 {
     numPhases_ = numphases;
 }
-
+k
 /**
 @brief Get the total number of phases in the kinetic model.
 
@@ -401,10 +617,22 @@ should be made more general.
 @param timestep is the time interval to simulate [days]
 @param temperature is the absolute temperature during this step [K]
 @param isFirst is true if this is the first time step of the simulation, false otherwise
+@param doTweak is true if trying to recover from failed convergence
+@param rh is the internal relative humidity
+@param ICMoles is the vector of moles of each IC
+@param solutICMoles is the vector of moles of each IC in solution
+@param DCMoles is the vector of moles of each DC
+@param GEMPhaseMoles is the vector of moles of each phase in GEMS
 */
 virtual void calculateKineticStep (const double timestep,
                                    const double temperature,
-                                   bool isFirst) = 0;
+                                   bool isFirst,
+                                   bool doTweak,
+                                   double rh,
+                                   vector<double> &ICMoles,
+                                   vector<double> &solutICMoles,
+                                   vector<double> &DCMoles,
+                                   vector<double> &GEMPhaseMoles) = 0;
      
 /**
 @brief Calculate the change in phase moles

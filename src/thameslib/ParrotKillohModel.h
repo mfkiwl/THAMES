@@ -75,8 +75,8 @@ to the difference equation
 
 */
 
-#ifndef PARROTKILLOHH
-#define PARROTKILLOHH
+#ifndef PARROTKILLOHMODELH
+#define PARROTKILLOHMODELH
 
 #include <iostream>
 #include <iomanip>
@@ -108,19 +108,15 @@ class ParrotKillohModel : public KineticModel {
 protected:
     
 double wcRatio_;            /**< water-cement mass ratio */
-double blaine_;             /**< Blaine fineness [m<sup>2</sup>/kg] */
-double refBlaine_;          /**< Reference Blaine value for PK model,
-                                    usually 385.0 m<sup>2</sup>/kg */
-double blaineFactor_;       /**< `blaine_`/`refBlaine_` */
 
-vector<double> k1_;             /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
-vector<double> k2_;             /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
-vector<double> k3_;             /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
-vector<double> n1_;             /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
-vector<double> n3_;             /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
-vector<double> critDOH_;        /**< List of critical degrees of hydration for w/c
+double k1_;             /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
+double k2_;             /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
+double k3_;             /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
+double n1_;             /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
+double n3_;             /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
+double critDOH_;        /**< List of critical degrees of hydration for w/c
                                         effect in the Parrot and Killoh model */
-vector<double> degreeOfHydration_; /**< Degree of hydration of each kinetic (clinker) phase */
+double degreeOfHydration_; /**< Degree of hydration of each kinetic (clinker) phase */
 
 public:
     
@@ -177,108 +173,15 @@ double getWcRatio () const
 }
 
 /**
-@brief Set the Blaine fineness of the cement.
-
-@note NOT USED.
-
-@param bval is the Blaine fineness [m<sup>2</sup>/kg]
-*/
-void setBlaine (double bval)
-{
-    blaine_ = bval;
-}
-
-/**
-@brief Get the Blaine fineness of the cement.
-
-@note NOT USED.
-
-@return the Blaine fineness [m<sup>2</sup>/kg]
-*/
-double getBlaine () const
-{
-    return blaine_;
-}
-
-/**
-@brief Set the reference Blaine fineness parameter for the Parrot and Killoh model.
-
-The value set in the Parrot and Killoh model is 385 m<sup>2</sup>/kg, and there
-is no particular reason to change it.
-
-@note NOT USED.
-
-@param rbval is the reference Blaine fineness [m<sup>2</sup>/kg]
-*/
-void setRefBlaine (double rbval)
-{
-    refBlaine_ = rbval;
-}
-
-/**
-@brief Get the reference Blaine fineness parameter for the Parrot and Killoh model.
-
-@note NOT USED.
-
-@return the reference Blaine fineness [m<sup>2</sup>/kg]
-*/
-double getRefBlaine () const
-{
-    return refBlaine_;
-}
-
-/**
-@brief Set the ratio of the true Blaine fineness to the model reference value.
-
-@note NOT USED.
-
-@param bfact is the ratio of the actual Blaine fineness to the reference value
-*/
-void setBlaineFactor (double bfact)
-{
-    blaineFactor_ = bfact;
-}
-
-/**
-@brief Get the ratio of the true Blaine fineness to the model reference value.
-
-@note NOT USED.
-
-@return the ratio of the actual Blaine fineness to the reference value
-*/
-double getBlaineFactor () const
-{
-    return blaineFactor_;
-}
-
-/**
 @brief Get the list of <i>K</i><sub>1</sub> values for clinker phases in the PK model.
 
 @note NOT USED.
 
-@return the vector of <i>K</i><sub>1</sub> values for clinker phases in the PK model
+@return the <i>K</i><sub>1</sub> value for the phase in the PK model
 */
-vector<double> getK1 () const
+double getK1 () const
 {
     return k1_;
-}
-
-/**
-@brief Get the <i>K</i><sub>1</sub> value for a particular clinker phase in the PK model.
-
-@note NOT USED.
-
-@param i is the index of the clinker phase in the kinetic model
-@return the <i>K</i><sub>1</sub> value for the clinker phase in the PK model
-*/
-double getK1 (const unsigned int i) const
-{
-    try { return k1_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getK1","k1_",k1_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -286,29 +189,11 @@ double getK1 (const unsigned int i) const
 
 @note NOT USED.
 
-@return the vector of <i>K</i><sub>2</sub> values for clinker phases in the PK model
+@return the <i>K</i><sub>2</sub> value for the phase in the PK model
 */
-vector<double> getK2 () const
+double> getK2 () const
 {
     return k2_;
-}
-
-/**
-@brief Get the <i>K</i><sub>2</sub> value for a particular clinker phase in the PK model.
-
-@note NOT USED.
-
-@param i is the index of the clinker phase in the kinetic model
-@return the <i>K</i><sub>2</sub> value for the clinker phase in the PK model
-*/
-double getK2 (const unsigned int i) const
-{
-    try { return k2_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getK2","k2_",k2_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -316,29 +201,11 @@ double getK2 (const unsigned int i) const
 
 @note NOT USED.
 
-@return the vector of <i>K</i><sub>3</sub> values for clinker phases in the PK model
+@return the <i>K</i><sub>2</sub> value for the phase in the PK model
 */
-vector<double> getK3 () const
+double getK3 () const
 {
     return k3_;
-}
-
-/**
-@brief Get the <i>K</i><sub>3</sub> value for a particular clinker phase in the PK model.
-
-@note NOT USED.
-
-@param i is the index of the clinker phase in the kinetic model
-@return the <i>K</i><sub>3</sub> value for the clinker phase in the PK model
-*/
-double getK3 (const unsigned int i) const
-{
-    try { return k3_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getK3","k3_",k3_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -346,29 +213,11 @@ double getK3 (const unsigned int i) const
 
 @note NOT USED.
 
-@return the vector of <i>N</i><sub>1</sub> values for clinker phases in the PK model
+@return the <i>N</i><sub>2</sub> value for the phase in the PK model
 */
-vector<double> getN1 () const
+double getN1 () const
 {
     return n1_;
-}
-
-/**
-@brief Get the <i>N</i><sub>1</sub> value for a particular clinker phase in the PK model.
-
-@note NOT USED.
-
-@param i is the index of the clinker phase in the kinetic model
-@return the <i>N</i><sub>1</sub> value for the clinker phase in the PK model
-*/
-double getN1 (const unsigned int i) const
-{
-    try { return n1_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getN1","n1_",n1_.size(),i);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
@@ -376,91 +225,35 @@ double getN1 (const unsigned int i) const
 
 @note NOT USED.
 
-@return the vector of <i>N</i><sub>3</sub> values for clinker phases in the PK model
+@return the <i>N</i><sub>3</sub> value for the phase in the PK model
 */
-vector<double> getN3 () const
+double getN3 () const
 {
     return n3_;
 }
 
 /**
-@brief Get the <i>N</i><sub>3</sub> value for a particular clinker phase in the PK model.
+@brief Get the critical degrees of hydration for w/c effects in the kinetic model.
 
 @note NOT USED.
 
-@param i is the index of the clinker phase in the kinetic model
-@return the <i>N</i><sub>3</sub> value for the clinker phase in the PK model
+@return the critical degree of hydration for this phase
 */
-double getN3 (const unsigned int i) const
-{
-    try { return n3_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getN3","n3_",n3_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the list of critical degrees of hydration for w/c effects in the kinetic model.
-
-@note NOT USED.
-
-@return the vector of critical degrees of hydration for the phases
-*/
-vector<double> getCritDOH () const
+double getCritDOH () const
 {
     return critDOH_;
 }
 
 /**
-@brief Get the critical degree of hydration for a particular clinker phase in the kinetic model.
+@brief Get the degree of hydration for the phase.
 
 @note NOT USED.
 
-@param i is the index of the phase in the kinetic model
-@return the critical degree of hydration of the phase
-*/
-double getCritDOH (const unsigned int i) const
-{
-    try { return critDOH_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getCritDOH",
-                           "critDOH_",critDOH_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the list of degrees of hydration for clinker phases in the kinetic model.
-
-@note NOT USED.
-
-@return the vector of degrees of hydration of the clinker phases
-*/
-vector<double> getDegreeOfHydration () const
-{
-    return degreeOfHydration_;
-}
-
-/**
-@brief Get the degree of hydration for a particular clinker phase in the kinetic model.
-
-@note NOT USED.
-
-@param i is the index of the phase in the kinetic model
 @return the degree of hydration of the phase
 */
-double getDegreeOfHydration (const unsigned int i) const
+double getDegreeOfHydration () const
 {
-    try { return degreeOfHydration_.at(i); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getDegreeOfHydration","degreeOfHydration_",
-                           degreeOfHydration_.size(),i);
-        ex.printException();
-        exit(1);
-    }
+    return degreeOfHydration_;
 }
 
 /**
@@ -475,12 +268,23 @@ Overloaded from base class to handle Parrot and Killoh model.
 @param timestep is the time interval to simulate [days]
 @param temperature is the absolute temperature during this step [K]
 @param isFirst is true if this is the first time step of the simulation, false otherwise
+@param doTweak is true if trying to recover from failed convergence
+@param rh is the internal relative humidity
+@param ICMoles is the vector of moles of each IC
+@param solutICMoles is the vector of moles of each IC in solution
+@param DCMoles is the vector of moles of each DC
+@param GEMPhaseMoles is the vector of moles of each phase in GEMS
 */
-void calculateKineticStep (const double timestep,
-                           const double temperature,
-                           bool isFirst);
-     
- 
+virtual void calculateKineticStep (const double timestep,
+                                   const double temperature,
+                                   bool isFirst,
+                                   bool doTweak,
+                                   double rh,
+                                   vector<double> &ICMoles,
+                                   vector<double> &solutICMoles,
+                                   vector<double> &DCMoles,
+                                   vector<double> &GEMPhaseMoles);
+
 };      // End of ParrotKillohModel class
 
 #endif
