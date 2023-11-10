@@ -143,12 +143,12 @@ various other objects for the simulation are allocated and constructed.
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
 */
-ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
-                                      Solution *solut,
-                                      Lattice *lattice,
-                                      KineticData &kineticData,
-                                      const bool verbose,
-                                      const bool warning)
+ParrotKillohModel (ChemicalSystem *cs,
+                   Solution *solut,
+                   Lattice *lattice,
+                   struct KineticData &kineticData,
+                   const bool verbose,
+                   const bool warning);
      
 /**
 @brief Set the w/c mass ratio of the system for the kinetic model equations.
@@ -191,7 +191,7 @@ double getK1 () const
 
 @return the <i>K</i><sub>2</sub> value for the phase in the PK model
 */
-double> getK2 () const
+double getK2 () const
 {
     return k2_;
 }

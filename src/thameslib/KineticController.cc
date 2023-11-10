@@ -161,7 +161,7 @@ void KineticController::parseDoc (const string &docName)
     /// for a given phase before the data are loaded permanently into class members.
     ///
 
-    KineticData kineticData;
+    struct KineticData kineticData;
 
     ///
     /// This method uses the libxml library, so it needs to be added and linked
@@ -242,7 +242,7 @@ void KineticController::parseDoc (const string &docName)
 void KineticController::parsePhase (xmlDocPtr doc,
                                     xmlNodePtr cur,
                                     int &numEntry
-                                    KineticData &kineticData)
+                                    struct KineticData &kineticData)
 {
     xmlChar *key;
     int proposedgemphaseid,proposedDCid;
@@ -298,18 +298,52 @@ void KineticController::parsePhase (xmlDocPtr doc,
 
 void KineticModel::parseKineticData (xmlDocPtr doc,
                                      xmlNodePtr cur,
-                                     KineticData &kineticData)
+                                     struct KineticData &kineticData)
+{
+    bool typefound = false;
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+
+    try {
+        while (cur != NULL) {
+            if ((!xmlStrcmp(cur->name, (const xmlChar *)"type"))) {
+                key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+                string st((char *)key);
+                kineticData.type = st;
+                if (kineticData.type == ParrotKillohType) {
+                    typefound = true;
+                    parseKineticDataForParrotKilloh(doc,cur,kineticData);
+                } else if (kineticData.type == PozzolanicType) {
+                    typefound = true;
+                    parseKineticDataForPozzolanic(doc,cur,kineticData);
+                } else {
+                    xmlFree(key);
+                    throw HandleException("KineticController","parseKineticData","type","Model type not found");
+                }
+                xmlFree(key);
+            } 
+            cur = cur->next;
+        }
+
+        if (!typefound) {
+            throw HandleException("KineticController","parseKineticData","type","Model type not specified");
+        }
+    }
+    catch (HandleException hex) {
+        hex.printException();
+    }
+
+    return;
+}
+
+void KineticModel::parseKineticDataForParrotKilloh (xmlDocPtr doc,
+                                                    xmlNodePtr cur,
+                                                    struct KineticData &kineticData)
 {
     xmlChar *key;
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"type"))) {
-            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-            string st((char *)key);
-            kineticData.type = st;
-            xmlFree(key);
-        }
         // Parrot-Killoh k1 parameter
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -352,7 +386,38 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             from_string(kineticData.critDOH,st);
             xmlFree(key);
         }
-        // Generic flux-like rate constant for dissolution or precipitation
+        // Activation energy
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.Ea,st);
+            xmlFree(key);
+        }
+        // Impurity partitioning data
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
+
+            ///
+            /// The data about partitioning of impurities among the clinker
+            /// phases are grouped within a complex field in the input XML
+            /// file, so we have a special method to parse it.
+            ///
+
+            parseRdData(doc, cur, kineticData);
+        }
+        cur = cur->next;
+    }
+
+    return;
+}
+
+void KineticModel::parseKineticDataForPozzolanic (xmlDocPtr doc,
+                                     xmlNodePtr cur,
+                                     struct KineticData &kineticData)
+{
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+
+    while (cur != NULL) {
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"rateconst"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
@@ -380,6 +445,34 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
             from_string(kineticData.rateconst,st);
             xmlFree(key);
         }
+        // SiO2 mass fraction in the material
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"sio2"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.sio2,st);
+            xmlFree(key);
+        }
+        // Al2O3 mass fraction in the material
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"al2o3"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.al2o3,st);
+            xmlFree(key);
+        }
+        // CaO mass fraction in the material
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"cao"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.cao,st);
+            xmlFree(key);
+        }
+        // Loss on ignition of the material
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"loi"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.loi,st);
+            xmlFree(key);
+        }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
@@ -404,7 +497,7 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
 
 void KineticModel::parseRdData(xmlDocPtr doc,
                                xmlNodePtr cur,
-                               KineticData &kineticData) 
+                               struct KineticData &kineticData) 
 {
     xmlChar *key;
     cur = cur->xmlChildrenNode;
@@ -434,16 +527,16 @@ void KineticModel::parseRdData(xmlDocPtr doc,
 void KineticController::makeModel (xmlDocPtr doc,
                                    xmlNodePtr cur,
                                    int &numEntry,
-                                   KineticData &kineticData)
+                                   struct KineticData &kineticData)
 {
     KineticModel *km = NULL;
 
-    if (kineticData.type == "parrotkilloh") {
+    if (kineticData.type == ParrotKillohType) {
         // Read remaining Parrot and Killoh model parameters
         km = new ParrotKillohModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
-    } else if (kineticData.type == "pozzolanic") {
+    } else if (kineticData.type == PozzolanicType) {
         // Read remaining pozzolanic model parameters
-        km = new KineticController(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
+        km = new PozzolanicModel(chemSys_,solut_,lattice_,kineticData,verbose_,warning_);
     }
 
     phaseKineticModel_.push_back(km);

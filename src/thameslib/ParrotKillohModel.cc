@@ -70,7 +70,7 @@ ParrotKillohModel::ParrotKillohModel ()
 ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
                                       Solution *solut,
                                       Lattice *lattice,
-                                      KineticData &kineticData,
+                                      struct KineticData &kineticData,
                                       const bool verbose,
                                       const bool warning)
 :chemSys_(cs),solut_(solut),lattice_(lattice)
@@ -488,74 +488,5 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
     }
 
 	
-    return;
-}
- 
-
-void ParrotKillohModel::setKineticDCMoles ()
-{
-
-    #ifdef DEBUG
-        cout << "ParrotKillohModel::setKineMicDCmoles" << endl;
-        cout.flush();
-    #endif
-
-    try {
-        double waterMoles = chemSys_->getDCMoles(waterId_);
-        double waterMolarMass = chemSys_->getDCMolarMass(waterId_);
-        double waterMass = waterMoles * waterMolarMass;
-        #ifdef DEBUG
-            cout << "ParrotKillohModel::setKineticDCmoles        "
-                 << DCName_[waterId_] << ": Mass = " << waterMass
-                 << ", Molar mass = " << waterMolarMass << endl;
-            cout.flush();
-        #endif
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                if (chemSys_->getDCMolarMass(DCId_[i]) <= 0.0) {
-                    throw FloatException("ParrotKillohModel","setKineticDCmoles",
-                                         "Divide by zero error");
-                }
-                #ifdef DEBUG
-                    cout << "ParrotKillohModel::setKineticDCmoles        Clinker phase "
-                         << name_[i] << ": Mass = " << scaledMass_[i]
-                         << ", Molar mass = " << chemSys_->getDCMolarMass(DCId_[i])
-                         << endl;
-                #endif
-                chemSys_->setDCMoles(DCId_[i],(scaledMass_[i]
-                                 / chemSys_->getDCMolarMass(DCId_[i])));
-            } // END OF IF KINETIC
-        }
-    }
-    catch (EOBException eex) {
-        eex.printException();
-        exit(1);
-    }
-    catch (FloatException fex) {
-        fex.printException();
-        exit(1);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("ParrotKillohModel","setKineticDCMoles",
-                           oor.what(),0,0);
-        ex.printException();
-        exit(1);
-    }
-    return;
-}
-
-void ParrotKillohModel::zeroKineticDCMoles ()
-{
-    try {
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                chemSys_->setDCMoles(DCId_[i],0.0);
-            }
-        }
-    }
-    catch (EOBException eex) {
-        eex.printException();
-        exit(0);
-    }
     return;
 }

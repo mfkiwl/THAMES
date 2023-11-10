@@ -359,7 +359,7 @@ void setNumPhases (const unsigned int numphases)
 {
     numPhases_ = numphases;
 }
-k
+
 /**
 @brief Get the total number of phases in the kinetic model.
 
@@ -426,19 +426,6 @@ double getLeachTime (void) const
 string getName () const
 {
     return name_;
-}
-
-
-/**
-@brief Get the list of scaled <i>initial</i> masses for the phases in the kinetic model.
-
-The scaled mass of a phase is its mass percent on a total solids basis.
-
-@return the vector of initial scaled masses [percent solids]
-*/
-double getInitScaledMass () const
-{
-    return initScaledMass_;
 }
 
 /**
@@ -563,7 +550,7 @@ vector<double> getRd () const
 */
 unsigned int getRdICId (const unsigned int idx)
 {
-    try { return RdICId_.at(idx2); }
+    try { return RdICId_.at(idx); }
     catch (out_of_range &oor) {
         EOBException ex("KineticModel","getRdICId",
                            "RdICId_",RdICId_.size(),idx);

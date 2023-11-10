@@ -1,3 +1,4 @@
+/**
 @file  PozzolanicModel.cc
 @brief Method definitions for the PozzolanicModel class.
 
@@ -34,6 +35,9 @@ PozzolanicModel::PozzolanicModel ()
     siexp_ = 1.0;
     dfexp_ = 1.0;
     ohexp_ = 0.0;
+    sio2_ = 1.0;
+    al2o3_ = cao_ = 0.0;
+    loi_ = 0.0;
 
     name_ = "";
     microPhaseId = 2;
@@ -62,7 +66,7 @@ PozzolanicModel::PozzolanicModel ()
 PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
                                       Solution *solut,
                                       Lattice *lattice,
-                                      KineticData &kineticData,
+                                      struct KineticData &kineticData,
                                       const bool verbose,
                                       const bool warning)
 :chemSys_(cs),solut_(solut),lattice_(lattice)
@@ -88,6 +92,14 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     specificSurfaceArea_ = kineticData.ssa;
     refSpecificSurfaceArea_ = kineticData.refssa;
     ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
+    setSio2(kineticData.sio2);
+    setAl2o3(kineticData.al2o3);
+    setCao(kineticData.cao);
+    setLoi(kineticData.loi);
+    setRateconst(kineticData.rateconst);
+    setSiexp(kineticData.siexp);
+    setDfexp(kineticData.dfexp);
+    setOhexp(kineticData.ohexp);
 
     ///
     /// Default initial solid mass is 100 g
@@ -113,11 +125,6 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     initScaledMass_ kineticData.initScaledMass;
     degreeOfHydration_ = 0.0;
 
-    rateconst_ = kineticData.rateconst;
-    siexp_ = kineticData.siexp;
-    dfexp_ = kineticData.dfexp;
-    ohexp_ = kineticData.ohexp;
-    
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
     /// time for initiating these simulations to an absurdly large value: 10 billion
@@ -683,75 +690,5 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     }
 
 	
-    return;
-}
- 
-
-void PozzolanicModel::setKineticDCMoles ()
-{
-
-    #ifdef DEBUG
-        cout << "PozzolanicModel::setKineMicDCmoles" << endl;
-        cout.flush();
-    #endif
-
-    try {
-        int waterId = chemSys_->getDCId("H2O@");
-        double waterMoles = chemSys_->getDCMoles(waterId);
-        double waterMolarMass = chemSys_->getDCMolarMass(waterId);
-        double waterMass = waterMoles * waterMolarMass;
-        #ifdef DEBUG
-            cout << "PozzolanicModel::setKineticDCmoles        "
-                 << chemSys_->getDCName(waterId) << ": Mass = " << waterMass
-                 << ", Molar mass = " << waterMolarMass << endl;
-            cout.flush();
-        #endif
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                if (chemSys_->getDCMolarMass(DCId_[i]) <= 0.0) {
-                    throw FloatException("PozzolanicModel","setKineticDCmoles",
-                                         "Divide by zero error");
-                }
-                #ifdef DEBUG
-                    cout << "PozzolanicModel::setKineticDCmoles        Clinker phase "
-                         << name_[i] << ": Mass = " << scaledMass_[i]
-                         << ", Molar mass = " << chemSys_->getDCMolarMass(DCId_[i])
-                         << endl;
-                #endif
-                chemSys_->setDCMoles(DCId_[i],(scaledMass_[i]
-                                 / chemSys_->getDCMolarMass(DCId_[i])));
-            } // END OF IF KINETIC
-        }
-    }
-    catch (EOBException eex) {
-        eex.printException();
-        exit(1);
-    }
-    catch (FloatException fex) {
-        fex.printException();
-        exit(1);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("PozzolanicModel","setKineticDCMoles",
-                           oor.what(),0,0);
-        ex.printException();
-        exit(1);
-    }
-    return;
-}
-
-void PozzolanicModel::zeroKineticDCMoles ()
-{
-    try {
-        for (int i = 0; i < microPhaseId_.size(); i++) {
-            if (isKinetic(i)) {
-                chemSys_->setDCMoles(DCId_[i],0.0);
-            }
-        }
-    }
-    catch (EOBException eex) {
-        eex.printException();
-        exit(0);
-    }
     return;
 }

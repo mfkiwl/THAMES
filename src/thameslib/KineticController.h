@@ -82,12 +82,16 @@ struct KineticData {
     double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
     double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
     double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
+    double critDOH;           /**< Critical degree of hydration for w/c effect */
     double rateconst;         /**< Generic rate constant [mol/m2/s] */
     double siexp;             /**< Exponent on saturation index [unitless] */
     double dfexp;             /**< Exponent on driving force [unitless] */
     double ohexp;             /**< Exponent on OH ion activity [unitless] */
+    double loi;               /**< Loss on ignition [unitless] */
+    double sio2;              /**< Mass fraction SiO2 in material */
+    double al2o3;             /**< Mass fraction Al2O3 in material */
+    double cao;               /**< Mass fraction CaO in material */
     double Ea;                /**< Apparent activation energy [J/mol/K] */
-    double critDOH;           /**< Critical degree of hydration for w/c effect */
     vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
     vector<double> RdVal;     /**< Vector of Rd values for each IC */
 };
@@ -150,12 +154,12 @@ This constructor is used in THAMES.
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
 */
-KineticController::KineticController (ChemicalSystem *cs,
-                                      Solution *solut,
-                                      Lattice *lattice,
-                                      const string &fileName,
-                                      const bool verbose,
-                                      const bool warning);
+KineticController (ChemicalSystem *cs,
+                   Solution *solut,
+                   Lattice *lattice,
+                   const string &fileName,
+                   const bool verbose,
+                   const bool warning);
      
 /**
 @brief Destructor does nothing.
@@ -165,21 +169,23 @@ virtual ~KineticController() {};
 /**
 @brief Initialize the kinetic data structure
 */
-void initKineticData()
+void initKineticData(struct KineticData &kineticData)
 {
-    name = "";
-    microPhaseId = GEMPhaseId = DCId = 0; 
-    type = "thermo";
-    scaledMass = 0.0;
-    ssa = refssa = 385.0;
-    temperature = reftemperature = 293.15;
-    k1 = k2 = k3 = n1 = n3 = 1.0;
-    rateconst = 0.0;
-    siexp = dfexp = ohexp = 0.0;
-    Ea = 0.0;
-    critDOH = 0.0;
-    RdId.clear();
-    RdVal.clear();
+    kineticData.name = "";
+    kineticData.microPhaseId = kineticData.GEMPhaseId = kineticData.DCId = 0; 
+    kineticData.type = "thermo";
+    kineticData.scaledMass = 0.0;
+    kineticData.ssa = kineticData.refssa = 385.0;
+    kineticData.temperature = kineticData.reftemperature = 293.15;
+    kineticData.k1 = kineticData.k2 = kineticData.k3 = 1.0;
+    kineticData.n1 = kineticData.n3 = 1.0;
+    kineticData.critDOH = 0.0;
+    kineticData.rateconst = 0.0;
+    kineticData.siexp = kineticData.dfexp = kineticData.ohexp = 0.0;
+    kineticData.Ea = 0.0;
+    kineticData.loi = kineticData.sio2 = kineticData.al2o3 = kineticData.cao = 0.0;
+    kineticData.RdId.clear();
+    kineticData.RdVal.clear();
 }
 
 /**
@@ -197,14 +203,13 @@ This method uses the libxml library, so this must be included.
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
 @param numEntry is the number of solid entries in the XML file, will be incremented
-@param kineticData is a structure that can store all kinetic data for a phase
 @param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
 void parsePhase (xmlDocPtr doc,
                  xmlNodePtr cur,
                  int &numEntry,
-                 KineticData &kineticData);
+                 struct KineticData &kineticData);
 
 /**
 @brief Parse the kinetic data for one phase in the XML input file.
@@ -218,7 +223,35 @@ This method uses the libxml library, so this must be included.
 */
 void parseKineticData (xmlDocPtr doc,
                        xmlNodePtr cur,
-                       KineticData &kineticData);
+                       struct KineticData &kineticData);
+
+/**
+@brief Parse the kinetic data for the Parrot-Killoh kinetic model.
+
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param kineticData is a reference to the KineticData structure for temporarily storing
+            the input parameters.
+*/
+void parseKineticDataForParrotKilloh (xmlDocPtr doc,
+                                      xmlNodePtr cur,
+                                      struct KineticData &kineticData);
+
+/**
+@brief Parse the kinetic data for the pozzolanic kinetic model.
+
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param kineticData is a reference to the KineticData structure for temporarily storing
+            the input parameters.
+*/
+void parseKineticDataForPozzolanic (xmlDocPtr doc,
+                                    xmlNodePtr cur,
+                                    struct KineticData &kineticData);
 
 /**
 @brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
@@ -232,7 +265,7 @@ This method uses the libxml library, so this must be included.
 */
 void parseRdData (xmlDocPtr doc,
                   xmlNodePtr cur,
-                  KineticData &kineticData);
+                  struct KineticData &kineticData);
 
 
 /**
@@ -249,7 +282,7 @@ This method uses the libxml library, so this must be included.
 void makeModel (xmlDocPtr doc,
                 xmlNodePtr cur,
                 int &numEntry,
-                KineticData &kineticData);
+                struct KineticData &kineticData);
 
 /**
 @brief Get the ChemicalSystem object for the simulation used by the kinetic model.
@@ -335,38 +368,31 @@ string getName (const unsigned int i) const
         exit(1);
     }
 }
+ 
 /**
-@brief Initialize a kinetic data structure 
-*/
-void initKineticData(struct KineticData &kd)
-{
-    kd.name = "";
-    kd.microPhaseId = 0;
-    kd.GEMPhaseId.clear();
-    kd.DCId.clear();
-    kd.type.clear();
-    kd.scaledMass = 0.0;
-    kd.k1 = 0.0;
-    kd.k2 = 0.0;
-    kd.k3 = 0.0;
-    kd.n1 = 0.0;
-    kd.n3 = 0.0;
-    kd.Ea = 0.0;
-    kd.critDOH = 0.0;
-    kd.RdId.clear();
-    kd.RdVal.clear();
-    kd.ssa = 385.0;         
-    kd.refssa = 385.0;       
-    kd.temperature = 296.0;     
-    kd.reftemperature = 296.0;  
-    kd.rateconst = 0.0;       
-    kd.siexp = 0.0;          
-    kd.dfexp = 0.0;         
-    kd.ohexp = 0.0;        
+@brief Set kinetic model DC moles
 
+*/
+void setKineticDCMoles ()
+{
+    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+        phaseKineticModel_[i]->setKineticDCMoles();
+    }
     return;
 }
- 
+
+/**
+@brief Zero kinetic model DC moles
+
+*/
+void zeroKineticDCMoles ()
+{
+    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+        phaseKineticModel_[i]->zeroKineticDCMoles();
+    }
+    return;
+}
+
 /**
 @brief Master method for implementing one kinetic time step.
 

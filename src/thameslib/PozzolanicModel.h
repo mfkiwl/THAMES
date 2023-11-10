@@ -48,6 +48,10 @@ double rateconst_;               /**< Rate constant for reaction (mol/m2/s) */
 double siexp_;                   /**< Exponent on saturation index (unitless) */
 double dfexp_;                   /**< Exponent on driving force (unitless) */
 double ohexp_;                   /**< Exponent on OH ion activity (unitless) */
+double sio2_;                    /**< Mass fraction of SiO2 (unitless) */
+double al2o3_;                   /**< Mass fraction of Al2O3 (unitless) */
+double cao_;                     /**< Mass fraction of CaO (unitless) */
+double loi_;                     /**< Loss on ignition (unitless) */
 
 public:
     
@@ -74,14 +78,13 @@ various other objects for the simulation are allocated and constructed.
 @param verbose is true if verbose output should be produced
 @param warning is false if suppressing warning output
 */
-PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
-                                      Solution *solut,
-                                      Lattice *lattice,
-                                      KineticData &kineticData,
-                                      const bool verbose,
-                                      const bool warning)
+PozzolanicModel (ChemicalSystem *cs,
+                 Solution *solut,
+                 Lattice *lattice,
+                 struct KineticData &kineticData,
+                 const bool verbose,
+                 const bool warning);
      
-
 /**
 @brief Set the rate constant
 
@@ -176,6 +179,106 @@ void setOhexp (const double ohexp)
 double getOhexp () const
 {
     return ohexp_;
+}
+
+/**
+@brief Set the mass fraction of SiO2
+
+@note NOT USED.
+
+@param sio2 is the mass fraction of SiO2 
+*/
+void setSio2 (const double sio2)
+{
+    sio2_ = max(sio2,0.0);
+    if (sio2_ > 1.0) sio2_ = 1.0;
+}
+
+/**
+@brief Get the SiO2 mass fraction
+
+@note NOT USED.
+
+@return the SiO2 mass fraction 
+*/
+double getSio2 () const
+{
+    return sio2_;
+}
+
+/**
+@brief Set the mass fraction of Al2O3
+
+@note NOT USED.
+
+@param al2o3 is the mass fraction of Al2O3
+*/
+void setAl2o3 (const double al2o3)
+{
+    al2o3_ = max(al2o3,0.0);
+    if (al2o3_ > 1.0) al2o3_ = 1.0;
+}
+
+/**
+@brief Get the Al2O3 mass fraction
+
+@note NOT USED.
+
+@return the Al2O3 mass fraction 
+*/
+double getAl2o3 () const
+{
+    return al2o3_;
+}
+
+/**
+@brief Set the mass fraction of CaO
+
+@note NOT USED.
+
+@param cao is the mass fraction of CaO
+*/
+void setCao (const double cao)
+{
+    cao_ = max(cao,0.0);
+    if (cao_ > 1.0) cao_ = 1.0;
+}
+
+/**
+@brief Get the CaO mass fraction
+
+@note NOT USED.
+
+@return the CaO mass fraction 
+*/
+double getCao () const
+{
+    return cao_;
+}
+
+/**
+@brief Set the loss on ignition
+
+@note NOT USED.
+
+@param loi is the loss on ignition
+*/
+void setLoi (const double loi)
+{
+    loi_ = max(loi,0.0);
+    if (loi_ > 1.0) loi_ = 1.0;
+}
+
+/**
+@brief Get the loss on ignition
+
+@note NOT USED.
+
+@return the loss on ignition
+*/
+double getLoi () const
+{
+    return loi_;
 }
 
 /**

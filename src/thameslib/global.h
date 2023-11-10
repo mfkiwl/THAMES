@@ -57,6 +57,12 @@ const string MonocarbGEMName("C4AcH11");
 // @todo Make this general somehow
 const string HydrotalcGEMName("OH-hydrotalcite");
 
+// String indicating the Parrot Killoh Model
+const string ParrotKillohType("ParrotKilloh");
+
+// String indicating the Pozzolanic Reaction Model
+const string PozzolanicType("Pozzolanic");
+
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
 
