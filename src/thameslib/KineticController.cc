@@ -20,6 +20,8 @@ KineticController::KineticController ()
     lattice_ = NULL;
     phaseKineticModel_.clear();
     name_.clear();
+    initScaledMass_.clear();
+    scaledMass_.clear();
     isKinetic_.clear();
     waterId_ = 1;
     ICNum_ = 0;
@@ -124,7 +126,7 @@ KineticController::KineticController (ChemicalSystem *cs,
         cout << "KineticController::KineticController Finished reading chemistry.xml file" << endl;
         for (int i = 0; i < microPhaseId_.size(); ++i) {
             microPhaseId = microPhaseId_[i];
-            if (isKinetic(i)) {
+            if (isKinetic_[i]) {
                 cout << "KineticController::KineticController kinetic phase " << microPhaseId << endl;
                 cout << "KineticController::KineticController     name = " << chemSys_->getMicroPhaseName(microPhaseId)
                      << endl;
@@ -141,11 +143,7 @@ KineticController::KineticController (ChemicalSystem *cs,
     DCName_ = chemSys_->getDCName();
     GEMPhaseNum_ = chemSys_->getNumGEMPhases();
 
-    // The ChemicalSystem and Lattice objects were constructed before we get
-    // here, so now we know nearly everything we need to know about the
-    // microstructure.  The only thing left to do is to populate the scaled
-    // phase masses and read the w/s ratio, which the kinetic model needs
-    
+
     getPhaseMasses();
 
     return;
@@ -241,7 +239,7 @@ void KineticController::parseDoc (const string &docName)
 
 void KineticController::parsePhase (xmlDocPtr doc,
                                     xmlNodePtr cur,
-                                    int &numEntry
+                                    int &numEntry,
                                     struct KineticData &kineticData)
 {
     xmlChar *key;
@@ -296,7 +294,7 @@ void KineticController::parsePhase (xmlDocPtr doc,
     return;
 }
 
-void KineticModel::parseKineticData (xmlDocPtr doc,
+void KineticController::parseKineticData (xmlDocPtr doc,
                                      xmlNodePtr cur,
                                      struct KineticData &kineticData)
 {
@@ -336,7 +334,7 @@ void KineticModel::parseKineticData (xmlDocPtr doc,
     return;
 }
 
-void KineticModel::parseKineticDataForParrotKilloh (xmlDocPtr doc,
+void KineticController::parseKineticDataForParrotKilloh (xmlDocPtr doc,
                                                     xmlNodePtr cur,
                                                     struct KineticData &kineticData)
 {
@@ -387,10 +385,10 @@ void KineticModel::parseKineticDataForParrotKilloh (xmlDocPtr doc,
             xmlFree(key);
         }
         // Activation energy
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.Ea,st);
+            from_string(kineticData.activationEnergy,st);
             xmlFree(key);
         }
         // Impurity partitioning data
@@ -410,7 +408,7 @@ void KineticModel::parseKineticDataForParrotKilloh (xmlDocPtr doc,
     return;
 }
 
-void KineticModel::parseKineticDataForPozzolanic (xmlDocPtr doc,
+void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
                                      xmlNodePtr cur,
                                      struct KineticData &kineticData)
 {
@@ -473,10 +471,10 @@ void KineticModel::parseKineticDataForPozzolanic (xmlDocPtr doc,
             from_string(kineticData.loi,st);
             xmlFree(key);
         }
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Ea"))) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.Ea,st);
+            from_string(kineticData.activationEnergy,st);
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
@@ -495,7 +493,48 @@ void KineticModel::parseKineticDataForPozzolanic (xmlDocPtr doc,
     return;
 }
 
-void KineticModel::parseRdData(xmlDocPtr doc,
+void KineticController::getPhaseMasses (void)
+{
+    int microPhaseId;
+    double pscaledMass = 0.0;
+
+    for (int i = 0; i < microPhaseId_.size(); i++) {
+        microPhaseId = microPhaseId_[i];
+        if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
+            pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
+            scaledMass_[i] = pscaledMass;
+            initScaledMass_[i] = pscaledMass;
+
+            // Setting the phase mass will also automatically calculate the phase volume
+            
+            #ifdef DEBUG
+                cout << "KineticController::getPhaseMasses reads solid micphase mass of "
+                     << chemSys_->getMicroPhaseName(microPhaseId)
+                     << " as " << initScaledMass_[i] << endl;
+                cout.flush();
+            #endif
+        }
+    }
+
+    return;
+}
+
+double KineticController::getSolidMass (void)
+{
+    int microPhaseId;
+    double totmass = 0.0;
+
+    for (int i = 0; i < microPhaseId_.size(); i++) {
+        microPhaseId = microPhaseId_[i];
+        if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
+            totmass += chemSys_->getMicroPhaseMass(microPhaseId);
+        }
+    }
+
+    return(totmass);
+}
+
+void KineticController::parseRdData(xmlDocPtr doc,
                                xmlNodePtr cur,
                                struct KineticData &kineticData) 
 {
@@ -526,7 +565,6 @@ void KineticModel::parseRdData(xmlDocPtr doc,
 
 void KineticController::makeModel (xmlDocPtr doc,
                                    xmlNodePtr cur,
-                                   int &numEntry,
                                    struct KineticData &kineticData)
 {
     KineticModel *km = NULL;
@@ -587,7 +625,7 @@ void KineticController::calculateKineticStep (const double timestep,
         DCMoles.clear();
         DCMoles.resize(DCNum_,0.0);
         GEMPhaseMoles.clear();
-        GEMPhaseMoles.resize(GEMPhaseNum,0.0);
+        GEMPhaseMoles.resize(GEMPhaseNum_,0.0);
         string icn;
 
         #ifdef DEBUG
@@ -627,22 +665,28 @@ void KineticController::calculateKineticStep (const double timestep,
             
             // Print out the initial volumes of microstructure phases
            
+            double waterMass = getSolidMass() * lattice_->getWsratio();
+            double waterMolarMass = chemSys_->getDCMolarMass(waterId_);
+            double waterMoles = waterMass / waterMolarMass;
+
             microPhaseId = 0;
             double psMass,psVolume;
             double volume = 0.0;
             if (verbose_) {
-                cout << "KineticController::calculateKineticStep "
-                     << "Initial MICROSTRUCTURE phase amount:" << endl;
-                psMass = chemSys_->getMicroPhaseMass(microPhaseId_);
-                psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_);
-                cout << "KineticController::calculateKineticStep     "
-                     << chemSys_->getMicroPhaseName(microPhaseId_)
-                     << " (" << microPhaseId_ << "): mass = " << psMass
-                     << ", vol = " << psVolume << endl;
-                cout.flush();
+                for (int i = 0; i < microPhaseId_.size(); ++i) {
+                    cout << "KineticController::calculateKineticStep "
+                         << "Initial MICROSTRUCTURE phase amount:" << endl;
+                    psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
+                    psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
+                    cout << "KineticController::calculateKineticStep     "
+                         << chemSys_->getMicroPhaseName(microPhaseId_[i])
+                         << " (" << microPhaseId_[i] << "): mass = " << psMass
+                         << ", vol = " << psVolume << endl;
+                    cout.flush();
+                }
             }
 
-            for (int i = 0; i < ICNum_.size(); i++) {
+            for (int i = 0; i < ICNum_; i++) {
                 if (ICName_[i] == "H") {
                     #ifdef DEBUG
                         cout << "KineticController::calculateKineticStep "
@@ -783,7 +827,7 @@ void KineticController::calculateKineticStep (const double timestep,
                     // zero out the temporary chemical compositions before
                     // passing them to the kinetic model
                     tICMoles.resize(ICMoles.size(),1.0e-9);
-                    tsolutICMoles.resize(SolutICMoles.size(),1.0e-9);
+                    tsolutICMoles.resize(solutICMoles.size(),1.0e-9);
                     tDCMoles.resize(DCMoles.size(),1.0e-9);
                     tGEMPhaseMoles.resize(GEMPhaseMoles.size(),1.0e-9);
 
@@ -799,7 +843,7 @@ void KineticController::calculateKineticStep (const double timestep,
 
                     for (int im = 0; im < ICMoles.size(); ++im) {
                         ICMoles[im] += tICMoles[im];
-                        SolutICMoles[im] += tsolutICMoles[im];
+                        solutICMoles[im] += tsolutICMoles[im];
                         DCMoles[im] += tDCMoles[im];
                         GEMPhaseMoles[im] += tGEMPhaseMoles[im];
                     }
@@ -828,23 +872,22 @@ void KineticController::calculateKineticStep (const double timestep,
               cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
             }
             cout.flush();
-          #endif
 
-          if (doTweak) {
-              for (int ii = 0; ii < ICMoles.size(); ii++) {
-                  chemSys_->setICMoles(ii,ICMoles[ii]);
-              }
-              return;
-          }
+            if (doTweak) {
+                for (int ii = 0; ii < ICMoles.size(); ii++) {
+                    chemSys_->setICMoles(ii,ICMoles[ii]);
+                }
+                return;
+            }
 
-          for (int ii = 0; ii < ICMoles.size(); ii++) {
-              chemSys_->setICMoles(ii,ICMoles[ii]);
-              #ifdef DEBUG
-                  cout << "KineticController::calculateKineticStep ICmoles of " << ICName_[ii]
-                       << " is: " << ICMoles[ii] << endl;
-                  cout.flush();
-              #endif
-          }
+            for (int ii = 0; ii < ICMoles.size(); ii++) {
+                chemSys_->setICMoles(ii,ICMoles[ii]);
+                #ifdef DEBUG
+                    cout << "KineticController::calculateKineticStep ICmoles of " << ICName_[ii]
+                         << " is: " << ICMoles[ii] << endl;
+                    cout.flush();
+                #endif
+            }
 
         } // End of normal hydration block
     }     // End of try block

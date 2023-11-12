@@ -40,7 +40,7 @@ PozzolanicModel::PozzolanicModel ()
     loi_ = 0.0;
 
     name_ = "";
-    microPhaseId = 2;
+    microPhaseId_ = 2;
     DCId_ = 2;
     GEMPhaseId_ = 2;
     RdICId_.clear();
@@ -48,7 +48,6 @@ PozzolanicModel::PozzolanicModel ()
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;
-    degreeOfHydration_ = 0.0;
 
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -64,13 +63,13 @@ PozzolanicModel::PozzolanicModel ()
 }
 
 PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
-                                      Solution *solut,
-                                      Lattice *lattice,
-                                      struct KineticData &kineticData,
-                                      const bool verbose,
-                                      const bool warning)
-:chemSys_(cs),solut_(solut),lattice_(lattice)
+                 Solution *solut,
+                 Lattice *lattice,
+                 struct KineticData &kineticData,
+                 const bool verbose,
+                 const bool warning)
 {
+
     // Set the verbose and warning flags
    
     verbose_ = verbose;
@@ -78,12 +77,17 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     #ifdef DEBUG
         verbose_ = true;
         warning_ = true;
-        cout << "PozzolanicModel::PozzolanicModel Constructor" << endl;
+        cout << "ParrotKillohModel::ParrotKillohModel Constructor" << endl;
         cout.flush();
     #else
         verbose_ = verbose;
         warning_ = warning;
     #endif
+
+    chemSys_ = cs;
+    solut_ = solut;
+    lattice_ = lattice;
+
 
     ///
     /// Default value for specific surface area in PK model is 385 m<sup>2</sup>/kg
@@ -96,7 +100,7 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     setAl2o3(kineticData.al2o3);
     setCao(kineticData.cao);
     setLoi(kineticData.loi);
-    setRateconst(kineticData.rateconst);
+    setRateconstant(kineticData.rateconst);
     setSiexp(kineticData.siexp);
     setDfexp(kineticData.dfexp);
     setOhexp(kineticData.ohexp);
@@ -118,12 +122,11 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     microPhaseId_ = kineticData.microPhaseId;
     DCId_ = kineticData.DCId;
     GEMPhaseId_ = kineticData.GEMPhaseId;;
-    Rd_ = kineticData.Rd;
-    RdICId_ = kineticData.RdICId;
+    Rd_ = kineticData.RdVal;
+    RdICId_ = kineticData.RdId;
     activationEnergy_ = kineticData.activationEnergy;
     scaledMass_ = kineticData.scaledMass;
-    initScaledMass_ kineticData.initScaledMass;
-    degreeOfHydration_ = 0.0;
+    initScaledMass_ = kineticData.scaledMass;
 
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default
@@ -164,8 +167,6 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     /// tweak from a failed GEM_run call
     ///
     
-    bool doTweak = (chemSys_->getTimesGEMFailed() > 0) ? true : false;
-
     static double hyd_time = 0.0;
     if (!doTweak) hyd_time = hyd_time + timestep;
 
@@ -180,7 +181,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
         int ICNum = chemSys_->getNumICs();
         int DCNum = chemSys_->getNumDCs();
         int numGEMPhases = chemSys_->getNumGEMPhases();
-        int microPhaseId,DCId,ICId;
+        int DCId,ICId;
         double molarMass,Rd;
         vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
         ICMoles.clear();
@@ -233,137 +234,6 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
         solutICMoles = chemSys_->getSolution();
 
-        if (isFirst) {  // Beginning of special first-time setup tasks
-            
-            // Set the proper amount of water for the total solid mass
-            // and the water-solid ratio
-            
-            // Determine total initial solid mass
-            double solidMass = 0.0;
-            vector<double> initSolidMasses = getInitScaledMass();
-            for (int i = 0; i < initSolidMasses.size(); i++) {
-                solidMass += initSolidMasses[i];
-            }
-            double waterMass = solidMass * getWcRatio();
-            double waterMolarMass = chemSys_->getDCMolarMass(waterId);
-            double waterMoles = waterMass / waterMolarMass;
-            if (verbose_) {
-                cout << "PozzolanicModel::calculateKineticStep *** Initial solid mass = "
-                     << solidMass << endl;
-                cout << "PozzolanicModel::calculateKineticStep *** w/s ratio = "
-                     << getWcRatio() << endl;
-                cout << "PozzolanicModel::calculateKineticStep *** Initial water mass = "
-                     << waterMass << endl;
-                cout << "PozzolanicModel::calculateKineticStep *** Initial water moles = "
-                     << waterMoles << endl;
-                cout << "PozzolanicModel::calculateKineticStep ***" << endl;
-                cout.flush();
-            }
-
-            if (waterMass <= 0.0) {
-                throw FloatException("Controller","calculateState",
-                                     "Divide by zero error");
-            }
-
-            // Print out the initial volumes of microstructure phases
-           
-            microPhaseId = 0;
-            double psMass,psVolume;
-            double volume = 0.0;
-            if (verbose_) {
-                cout << "PozzolanicModel::calculateKineticStep Initial MICROSTRUCTURE phase amount:" << endl;
-                psMass = chemSys_->getMicroPhaseMass(microPhaseId_);
-                psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_);
-                cout << "PozzolanicModel::calculateKineticStep     " << chemSys_->getMicroPhaseName(microPhaseId_)
-                     << " (" << microPhaseId_ << "): mass = " << psMass
-                     << ", vol = " << psVolume << endl;
-                cout.flush();
-            }
-
-            for (int i = 0; i < ICMoles.size(); i++) {
-                if (ICName[i] == "H") {
-                    #ifdef DEBUG
-                        cout << "PozzolanicModel::calculateKineticStep Previous IC moles for H is: "
-                             << ICMoles[i] << endl;
-                        cout.flush();
-                    #endif
-                    ICMoles[i] = (2.0 * waterMoles);
-                    solut_->setICMoles(i,ICMoles[i]);
-                    chemSys_->setDCMoles(waterId,waterMoles);
-                    #ifdef DEBUG
-                    if (verbose_) {
-                        cout << "PozzolanicModel::calculateKineticStep New ICmoles for H is: "
-                             << ICMoles[i] << endl;
-                        cout.flush();
-                    }
-                    #endif
-                }
-                if (ICName[i] == "O") {
-                    #ifdef DEBUG
-                        cout << "PozzolanicModel::calculateKineticStep Previous IC moles for O is: "
-                             << ICMoles[i] << endl;
-                        cout.flush();
-                    #endif
-                    ICMoles[i] = waterMoles;
-                    solut_->setICMoles(i,ICMoles[i]);
-                    #ifdef DEBUG
-                        cout << "PozzolanicModel::calculateKineticStep New ICmoles for O is: "
-                             << ICMoles[i] << endl;
-                        cout.flush();
-                    #endif
-               }
-            }
-            double wmv = chemSys_->getNode()->DC_V0(chemSys_->getDCId("H2O@"),
-                                                    chemSys_->getP(),
-                                                    chemSys_->getTemperature());
-            chemSys_->setGEMPhaseMass(chemSys_->getGEMPhaseId("aq_gen"),waterMass);
-            chemSys_->setGEMPhaseVolume(chemSys_->getGEMPhaseId("aq_gen"),wmv/waterMoles);
-
-
-            // Modify initial pore solution composition if desired
-            // input units are mol/kgw
-            // watermass is in units of grams, not kg
-            
-            double kgWaterMass = waterMass / 1000.0;
-            
-            map<int,double> isComp = chemSys_->getInitialSolutionComposition();
-            map<int,double>::iterator p = isComp.begin();
-
-            while (p != isComp.end()) {
-                if (verbose_) {
-                    cout << "PozzolanicModel::calculateKineticStep "
-                         << "modifying initial pore solution" << endl;
-                    cout.flush();
-                }
-                #ifdef DEBUG
-                    cout << "PozzolanicModel::calculateKineticStep "
-                         << "--->Adding " << p->second
-                         << " mol/kgw of "
-                         << ICName[p->first] << " to initial solution." << endl;
-                    cout.flush();
-                #endif
-                ICMoles[p->first] += (p->second * kgWaterMass);
-                p++;
-            }
-
-            // @todo BULLARD PLACEHOLDER
-            // Still need to implement constant gas phase composition
-           
-            // @todo BULLARD PLACEHOLDER
-            // While we are still using PK model for clinker phases, we
-            // must scan for and account for pozzolanic reactive components
-            // that will alter the hydration rate of clinker
-            // phases, presumably by making a denser hydration shell
-            // with slower transport
-
-            // @todo BULLARD PLACEHOLDER
-            // Currently silica fume is the only pozzolanically reactive
-            // component
-            
-            // @todo Find a way to make this general to all pozzolans
-              
-        }   // End of special first-time tasks
-
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
 
           // @todo BULLARD PLACEHOLDER
@@ -410,10 +280,13 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           /// @todo revisit the contact angle issue
           
           rh = rh > 0.55 ? rh : 0.551;
-          rhFactor = pow(((rh - 0.55)/0.45),4.0);
+          double rhFactor = rh;
+          // rhFactor = pow(((rh - 0.55)/0.45),4.0);
           
+          double DOH = 0.0;
+          double newDOH = 0.0;
 
-          if (initScaledMass > 0.0) {
+          if (initScaledMass_ > 0.0) {
               DOH = (initScaledMass_ - scaledMass_) /
                         (initScaledMass_);
               DOH = min(DOH,0.99);  // prevents DOH from prematurely stopping PK calculations
@@ -422,93 +295,15 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                              "initScaledMass_ = 0.0");
           }
 
-          cDOH = 1.333 * wcRatio_;
-          wcFactor = 1.0;
-          if (DOH > cDOH) {
-              wcFactor += ((4.444 * wcRatio_) -
-                           (3.333 * DOH));
-              wcFactor = pow(wcFactor,4.0);
-          }
-
-          /*
-          wcFactor = 1.0 + (3.333 *
-                 (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
-          */
-
           arrhenius = exp((activationEnergy_/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
 
           if (DOH < 1.0 && !doTweak) {
                     
-              // @todo BULLARD PLACEHOLDER
-              // Handle silica fume as a special case here:
-              // Only for silica fume, we let k1 = BET surface area in m2/g,
-              // k2 = LOI in percent by solid mass.
-              // critDOH = silica content in PERCENT BY MASS of silica fume
-              //
-              // This is a TOTAL KLUGE right now from here...
+              /// @todo Make a rate equation here ...
 
-              cDOH = 1.333 * wcRatio_;
-              wcFactor = 1.0;
-              if (DOH > cDOH) {
-                  wcFactor += ((4.444 * wcRatio_) -
-                               (3.333 * DOH));
-                  wcFactor = pow(wcFactor,4.0);
-              }
+              newDOH = 0.5;
 
-              // Normal Parrott and Killoh implementation here
-                    
-              // @todo BULLARD PLACEHOLDER pfk1_, pfk2_, pfk3_ are
-              // pozzolanic modification factors for the Parrott and Killoh
-              // rate constants k1, k2, and k3.
-        
-              if (fabs(n1_) > 0.0) {
-                  ngrate = (k1_/n1_) * (1.0 - DOH)
-                                 * pow((-log(1.0 - DOH)),(1.0 - n1_));
-                  ngrate *= (ssaFactor_);  // only used for the N+G rate
-              
-                  if (ngrate < 1.0e-10) ngrate = 1.0e-10;
-              } else {
-                  throw FloatException("PozzolanicModel","calculateKineticStep",
-                                         "n1_ = 0.0");
-              }
-        
-              hsrate = k3_ * pow((1.0 - DOH),n3_[i]);
-              if (hsrate < 1.0e-10) hsrate = 1.0e-10;
-
-              if (DOH > 0.0) {
-                  diffrate = (k2_ * pow((1.0 - DOH),(2.0/3.0))) /
-                                       (1.0 - pow((1.0 - DOH),(1.0/3.0)));
-                  if (diffrate < 1.0e-10) diffrate = 1.0e-10;
-              } else {
-                  diffrate = 1.0e9;
-              }
-
-              rate = (ngrate < hsrate) ? ngrate : hsrate;
-              if (diffrate < rate) rate = diffrate;
-              rate *= (wcFactor * rhFactor * arrhenius);
-              newDOH = DOH + (rate * timestep);
-
-              cout << "PK model for " << name_
-                   << ", ngrate = " << ngrate
-                   << ", hsrate = " << hsrate
-                   << ", diffrate = " << diffrate
-                   << ", rhFactor = " << rhFactor
-                   << ", wcFactor = " << wcFactor
-                   << ", RATE = " << rate
-                   << ", timestep " << timestep
-                   << ", oldDOH = " << DOH << ", new DOH = "
-                   << newDOH << endl;
-              cout.flush();
-
-              /// @note This where we can figure out the volume dissolved
-              /// and link it back to the current volume to see how many
-              /// voxels need to dissolve
-              ///
-
-              /// @note This all depends on concept of degree of
-              /// hydration as defined by the PK model 
-
-              /// @todo Make this independent of PK model
+              /// ... to here
                     
               scaledMass_ = initScaledMass_ * (1.0 - newDOH);
               massDissolved = (newDOH - DOH) * initScaledMass_;

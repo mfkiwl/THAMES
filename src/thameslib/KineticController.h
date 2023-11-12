@@ -23,79 +23,11 @@ different kinetic models that govern the rate of hydration.
 #include "KineticModel.h"
 #include "ParrotKillohModel.h"
 #include "PozzolanicModel.h"
+#include "KineticData.h"
 #include "global.h"
 
 using namespace std;
 
-/**
-@struct KineticData
-@brief Stores data about each phase possible in the system for ease of parsing the input files.
-
-In THAMES, phases are identified either thermodynamically--- in the 
-GEM data repository--- or microstructurally.  A microstructural phase can
-be one, or a combination of more than on, thermodynamically defined phase.
-
-The structure is defined to make it easier to parse the input file for the
-kinetic model. It is not used elsewhere in the code.  In fact,
-the same members are identified as class variables in the `KineticModel` class.
-
-Most of the members have self-evident meanings:
-    - `name` is the name of the microstructure phase
-    - `microPhaseId` is the integer id for the phase in the microstructure
-    - `GEMPhaseId` is the integer id of the same phase in the GEM Chemical System
-        Definition (CSD) 
-    - `DCId` is the integer id of the GEM dependent component making up the phase
-    - `type` is a string specifying whether the phase is under kinetic control
-        or thermodynamic control
-    - `scaledMass` is the number of grams of the phase per 100 grams of solid
-    - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
-    - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
-    - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
-    - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
-    - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
-    - `rateconst` is a generic rate constant for dissolution or growth (flux units)
-    - `siexp` is the exponent on the saturation index in the rate equation
-    - `dfexp` is the exponent on the driving force term in the rate equation
-    - `ohexp` is the exponent on the hydroxyl ion activity in the rate equation
-    - `Ea` is the activation energy [J/mol/K]
-    - `critDOH` is the critical degree of hydration used in the equation for
-        calculating the influence of w/c ratio.
-    - `RdId` is a vector of GEM CSD independent component (IC) ids
-    - `RdVal` is a vector of the Rd values for each IC
-*/
-
-#ifndef KINETICDATASTRUCT
-#define KINETICDATASTRUCT
-struct KineticData {
-    string name;            /**< Name of the microstructure phase */
-    int microPhaseId;       /**< Integer id of the microstructure phase */
-    int GEMPhaseId;         /**< Integer id of the phase in the GEM CSD */
-    int DCId;               /**< Integer id of the DC making up the phase */
-    string type;            /**< Specifies kinetic or thermodynamic control */
-    double scaledMass;      /**< Mass percent on a total solids basis */
-    double ssa;             /**< Specific surface area [m2/kg] */
-    double refssa;          /**< Reference specific surface area [m2/kg] */
-    double temperature;       /**< Temperature [K] */
-    double reftemperature;    /**< Reference temperature [K] */
-    double k1;                /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
-    double k2;                /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
-    double k3;                /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
-    double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
-    double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
-    double critDOH;           /**< Critical degree of hydration for w/c effect */
-    double rateconst;         /**< Generic rate constant [mol/m2/s] */
-    double siexp;             /**< Exponent on saturation index [unitless] */
-    double dfexp;             /**< Exponent on driving force [unitless] */
-    double ohexp;             /**< Exponent on OH ion activity [unitless] */
-    double loi;               /**< Loss on ignition [unitless] */
-    double sio2;              /**< Mass fraction SiO2 in material */
-    double al2o3;             /**< Mass fraction Al2O3 in material */
-    double cao;               /**< Mass fraction CaO in material */
-    double Ea;                /**< Apparent activation energy [J/mol/K] */
-    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
-    vector<double> RdVal;     /**< Vector of Rd values for each IC */
-};
-#endif
 
 /**
 @class KineticController
@@ -122,6 +54,8 @@ vector<string> name_;           /**< List of names of phases in the kinetic mode
 vector<string> ICName_;
 vector<string> DCName_;
 vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
+vector<double> initScaledMass_; /**< List of initial scaled masses */
+vector<double> scaledMass_;     /**< List of scaled masses */
 vector<bool> isKinetic_;
 int waterId_;                   /**< DC index for liquid water */
 int ICNum_;                     /**< Number of ICs in chemical system */
@@ -182,7 +116,7 @@ void initKineticData(struct KineticData &kineticData)
     kineticData.critDOH = 0.0;
     kineticData.rateconst = 0.0;
     kineticData.siexp = kineticData.dfexp = kineticData.ohexp = 0.0;
-    kineticData.Ea = 0.0;
+    kineticData.activationEnergy = 0.0;
     kineticData.loi = kineticData.sio2 = kineticData.al2o3 = kineticData.cao = 0.0;
     kineticData.RdId.clear();
     kineticData.RdVal.clear();
@@ -267,6 +201,24 @@ void parseRdData (xmlDocPtr doc,
                   xmlNodePtr cur,
                   struct KineticData &kineticData);
 
+/**
+@brief Compute normalized initial microstructure phase masses
+
+Given the initial masses of all phases in the microstructure,
+this method scales them to 100 grams of solid.  In the process,
+this method also sets the initial moles of water in the
+chemical system definition.
+*/
+
+void getPhaseMasses (void);
+
+/**
+@brief Get sum of phase masses
+
+*/
+
+double getSolidMass (void);
+
 
 /**
 @brief Make a kinetic model for a given phase
@@ -275,13 +227,11 @@ This method uses the libxml library, so this must be included.
 
 @param doc is a libxml pointer to the document head
 @param cur is a libxml pointer to the current node being parsed
-@param numEntry is the number of solid entries in the XML file, will be incremented
 @param kineticData is a reference to the KineticData structure for temporarily storing
             the input parameters.
 */
 void makeModel (xmlDocPtr doc,
                 xmlNodePtr cur,
-                int &numEntry,
                 struct KineticData &kineticData);
 
 /**

@@ -85,10 +85,11 @@ to the difference equation
 #include <fstream>
 #include <map>
 #include <ctime>
-#include "KineticController.h"
 #include "KineticModel.h"
+// #include "KineticController.h"
 #include "ChemicalSystem.h"
 #include "Lattice.h"
+#include "KineticData.h"
 #include "global.h"
 
 using namespace std;

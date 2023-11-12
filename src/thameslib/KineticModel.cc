@@ -82,7 +82,7 @@ void KineticModel::calculatePhaseChange (double k,
     for (int i = 0; i < GEMPhaseIndex.size(); i++) {
       double A = 0.0; // A is the surface area
       GEMPhaseFrac[i] = chemSys_->getGEMPhaseMoles(GEMPhaseIndex[i]) / GEMPhaseMoles;
-      A = lattice_->getSurfaceArea(microPhaseId) * GEMPhaseFrac[i];
+      A = lattice_->getSurfaceArea(microPhaseId_) * GEMPhaseFrac[i];
       double SI = 0.0; // SI is the saturation index for the phase i
       SI = solut_->getSI(GEMPhaseIndex[i]);
       
@@ -130,28 +130,6 @@ void KineticModel::calculatePhaseChange (double k,
     return;
 }
 
-void KineticModel::getPhaseMasses(void)
-{
-    int microPhaseId;
-    double pscaledMass = 0.0;
-
-    if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
-        scaledMass_ = chemSys_->getMicroPhaseMass(microPhaseId);
-        initScaledMass_ = scaledMass_;
-
-        // Setting the phase mass will also automatically calculate the phase volume
-            
-        #ifdef DEBUG
-            cout << "KineticModel::getPhaseMasses Kinetic model reads solid micphase mass of "
-                 << chemSys_->getMicroPhaseName(microPhaseId)
-                 << " as " << initScaledMass_ << endl;
-            cout.flush();
-        #endif
-    }
-
-    return;
-}
-
 void KineticModel::setKineticDCMoles ()
 {
 
@@ -178,7 +156,7 @@ void KineticModel::setKineticDCMoles ()
         #ifdef DEBUG
             cout << "KineticModel::setKineticDCmoles        Clinker phase "
                  << name_ << ": Mass = " << scaledMass_
-                 << ", Molar mass = " << chemSys_->getDCMolarMass(DCId)
+                 << ", Molar mass = " << chemSys_->getDCMolarMass(DCId_)
                  << endl;
         #endif
         chemSys_->setDCMoles(DCId_,(scaledMass_

@@ -126,8 +126,16 @@
       <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="n1" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" maxOccurs="1" name="Ea" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="activationEnergy" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="rateconst" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="siexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dfexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="ohexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="sio2" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="al2o3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="cao" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="loi" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype"/>
     </xs:sequence>
   </xs:complexType>

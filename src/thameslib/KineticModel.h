@@ -22,8 +22,9 @@ the original cement.  This is just the base class.  It is not used.
 #include <map>
 #include <ctime>
 #include "ChemicalSystem.h"
-#include "KineticController.h"
+// #include "KineticController.h"
 #include "Lattice.h"
+#include "KineticData.h"
 #include "global.h"
 
 using namespace std;
@@ -187,27 +188,8 @@ chemical system definition.
 void getPhaseMasses (void);
 
 /**
-@brief Set the initial total microstructure volume
+@brief Get the microstructure id in the KineticModel.
 
-This method computes the sums of all microstructure phase volumes
-and assigns the total.
-*/
-void setInitialTotalVolume(void);
-
-/**
-@brief Set the initial moles of water
-
-This method uses the mass of water and the molar mass
-of water as defined in the CSD to calculate the moles
-of water in the system.
-*/
-void setInitialWaterMoles(void);
-
-/**
-@brief Get the list of all microstructure ids in the KineticModel.
-
-Usually this will be all of the ChemicalSystem microstructure phases
-except for VOID and H2O.
 
 @return the list of all microstructure ids.
 */
@@ -489,7 +471,7 @@ double getRefT () const
 }
 
 /**
-@brief Get the list of scaled masses for the phases in the kinetic model.
+@brief Get the scaled mass of the phase in the kinetic model.
 
 The scaled mass of a phase is its mass percent on a total solids basis.
 
@@ -503,7 +485,7 @@ double getScaledMass () const
 }
 
 /**
-@brief Get the list of scaled <i>initial</i> masses for the phases in the kinetic model.
+@brief Get the <i>initial</i> mass of the phase in the kinetic model.
 
 The scaled mass of a phase is its mass percent on a total solids basis.
 

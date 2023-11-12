@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Nov 11 22:42:13 2023 | Compile-time errors fixed; need to complete Pozzolanic model |
 | Nov 10 17:48:17 2023 | Fixed several compile-time errors; some need to still be fixed |
 | Nov 03 17:14:04 2023 | Making KineticController handle the models; still no compile check |
 | Nov 02 01:34:03 2023 | Completed ParrotKillohModel.cc; still no compile check |

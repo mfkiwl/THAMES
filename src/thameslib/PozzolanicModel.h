@@ -26,6 +26,7 @@ amorphous silicates [1].
 #include "KineticModel.h"
 #include "ChemicalSystem.h"
 #include "Lattice.h"
+#include "KineticData.h"
 #include "global.h"
 
 using namespace std;

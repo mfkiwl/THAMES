@@ -33,7 +33,7 @@ ParrotKillohModel::ParrotKillohModel ()
     ///
 
     name_ = "";
-    microPhaseId = 2;
+    microPhaseId_ = 2;
     DCId_ = 2;
     GEMPhaseId_ = 2;
     RdICId_.clear();
@@ -73,7 +73,6 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
                                       struct KineticData &kineticData,
                                       const bool verbose,
                                       const bool warning)
-:chemSys_(cs),solut_(solut),lattice_(lattice)
 {
     // Set the verbose and warning flags
    
@@ -88,6 +87,10 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
         verbose_ = verbose;
         warning_ = warning;
     #endif
+
+    chemSys_ = cs;
+    solut_ = solut;
+    lattice_ = lattice;
 
     ///
     /// Default value for specific surface area in PK model is 385 m<sup>2</sup>/kg
@@ -129,7 +132,7 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     RdICId_ = kineticData.RdId;
     activationEnergy_ = kineticData.activationEnergy;
     scaledMass_ = kineticData.scaledMass;
-    initScaledMass_ kineticData.scaledMass;
+    initScaledMass_ = kineticData.scaledMass;
     critDOH_ = kineticData.critDOH;
     degreeOfHydration_ = 0.0;
     
@@ -230,7 +233,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
         rh = rh > 0.55 ? rh : 0.551;
         rhFactor = pow(((rh - 0.55)/0.45),4.0);
           
-        if (initScaledMass > 0.0) {
+        if (initScaledMass_ > 0.0) {
             DOH = (initScaledMass_ - scaledMass_) /
                       (initScaledMass_);
             DOH = min(DOH,0.99);  // prevents DOH from prematurely
@@ -270,7 +273,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                                        "n1_ = 0.0");
             }
         
-            hsrate = k3_ * pow((1.0 - DOH),n3_[i]);
+            hsrate = k3_ * pow((1.0 - DOH),n3_);
             if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
             if (DOH > 0.0) {
