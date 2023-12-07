@@ -73,6 +73,11 @@ Most of the members have self-evident meanings:
     - `weak` determines whether or not the phase can be damaged by stress
     - `k2o`, `na2o`, `mgo`, and `so3` are the mass fractions of potassium,
        sodium, magnesium, and sulfur oxides dissolved within the phase.
+    - 'RdId' is a vector of all the ICs that can be incorporated into
+         growing phases
+    - 'RdVal' is a vector of maximum mass fractions of ICs that can be incorporated into
+      growing phases
+         growing phases
     - `porosity` is the volume fraction of internal porosity in the phase,
        (e.g., C-S-H)
     - `red`, `green`, and `blue` are the rgb values for the color that the
@@ -118,6 +123,8 @@ struct PhaseData {
     vector<int> growthTemplate;
     vector<int> affinity;
     vector<double> colors;
+    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
+    vector<double> RdVal;     /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -202,6 +209,8 @@ vector<double> randomGrowth_;             /**< One real number for each microstr
                                           that indicates the tendency for growth in random
                                           directions (ballistic or diffusion-limited
                                           aggregation) as opposed to compact growth */
+vector<int> RdICId_;                    /**< List of IC ids for this phase */
+vector<double> Rd_;                     /**< Rd values for each IC in this phase */
 vector<double> ICMolarMass_;              /**< One molar mass for each IC [g/mm3ol] */
 vector<double> DCMolarMass_;              /**< One molar mass for each DC [g/mol] */
 vector<double> GEMPhaseMolarMass_;           /**< One molar mass for each GEM phase [g/mol] */
@@ -661,6 +670,20 @@ the data are read the volume fraction is normalized.
 */
 void parsePoreSizeDistribution(string poreSizeFilename,
                                PhaseData &phaseData);
+
+/**
+@brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
+
+This method uses the libxml library, so this must be included.
+
+@param doc is a libxml pointer to the document head
+@param cur is a libxml pointer to the current node being parsed
+@param phaseData is a reference to the PhaseData structure for temporarily storing
+            the input parameters
+*/
+void parseRdData (xmlDocPtr doc,
+                  xmlNodePtr cur,
+                  struct PhaseData &phaseData);
 
 /**
 @brief Parse input about how to render a phase in an image.
@@ -1410,6 +1433,60 @@ int getMicroPhaseId (const string &micname)
         msg = "Could not find microPhaseId_ match to " + micname;
         EOBException ex("ChemicalSystem","getMicroPhaseId",
                         msg,microPhaseId_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the list of all IC ids that can partition into a phase.
+
+@return the vector holding phase id numbers
+*/
+vector<int> getRdICId (void) const
+{
+    return RdICId_;
+}
+
+/**
+@brief Get all the Rd values (partitioning of impurities).
+
+@return the vector holding the Rd values
+*/
+vector<double> getRd (void) const
+{
+    return Rd_;
+}
+
+/**
+@brief Get IC id of a particular element in the RdICId_ vector
+
+@param idx is the location in the RdICId_ vector
+@return the IC id at the requested element
+*/
+unsigned int getRdICId (const unsigned int idx)
+{
+    try { return RdICId_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRdICId","RdICId_",RdICId_.size(),idx);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get Rd value of a particular element in the Rd_ vector
+
+@param idx is the location in the RdICId_ vector
+@return the Rd value at the requested element
+*/
+double getRd (const unsigned int idx)
+{
+    try { return Rd_.at(idx); }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRd","Rd_",Rd_.size(),idx);
         ex.printException();
         exit(1);
     }

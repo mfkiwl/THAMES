@@ -391,17 +391,6 @@ void KineticController::parseKineticDataForParrotKilloh (xmlDocPtr doc,
             from_string(kineticData.activationEnergy,st);
             xmlFree(key);
         }
-        // Impurity partitioning data
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-
-            ///
-            /// The data about partitioning of impurities among the clinker
-            /// phases are grouped within a complex field in the input XML
-            /// file, so we have a special method to parse it.
-            ///
-
-            parseRdData(doc, cur, kineticData);
-        }
         cur = cur->next;
     }
 
@@ -477,16 +466,6 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             from_string(kineticData.activationEnergy,st);
             xmlFree(key);
         }
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-
-            ///
-            /// The data about partitioning of impurities among the clinker
-            /// phases are grouped within a complex field in the input XML
-            /// file, so we have a special method to parse it.
-            ///
-
-            parseRdData(doc, cur, kineticData);
-        }
         cur = cur->next;
     }
 
@@ -532,35 +511,6 @@ double KineticController::getSolidMass (void)
     }
 
     return(totmass);
-}
-
-void KineticController::parseRdData(xmlDocPtr doc,
-                               xmlNodePtr cur,
-                               struct KineticData &kineticData) 
-{
-    xmlChar *key;
-    cur = cur->xmlChildrenNode;
-    int RdId;
-    double RdVal;
-
-    while (cur != NULL) {
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
-            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-            string st((char *)key);
-            RdId = chemSys_->getICId(st);
-            kineticData.RdId.push_back(RdId);
-            xmlFree(key);
-        }
-
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
-            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-            string st((char *)key);
-            from_string(RdVal,st);
-            kineticData.RdVal.push_back(RdVal);
-            xmlFree(key);
-        }
-        cur = cur->next;
-    }
 }
 
 void KineticController::makeModel (xmlDocPtr doc,
@@ -615,7 +565,7 @@ void KineticController::calculateKineticStep (const double timestep,
     try {
         static int conc_index = 0;     
         int microPhaseId,DCId,ICId;
-        double molarMass,Rd;
+        double molarMass;
         vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
         vector<double> tICMoles,tsolutICMoles,tDCMoles,tGEMPhaseMoles;
         ICMoles.clear();

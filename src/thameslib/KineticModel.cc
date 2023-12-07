@@ -17,8 +17,6 @@ KineticModel::KineticModel ()
     microPhaseId_ = 0;
     DCId_ = 0;
     GEMPhaseId_ = 0;
-    RdICId_.clear();
-    Rd_.clear();
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;

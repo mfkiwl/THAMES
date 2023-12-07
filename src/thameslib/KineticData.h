@@ -31,8 +31,6 @@ Most of the members have self-evident meanings:
     - `Ea` is the activation energy [J/mol/K]
     - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
-    - `RdId` is a vector of GEM CSD independent component (IC) ids
-    - `RdVal` is a vector of the Rd values for each IC
 */
 
 #ifndef KINETICDATASTRUCT
@@ -63,8 +61,6 @@ struct KineticData {
     double sio2;              /**< Mass fraction SiO2 in material */
     double al2o3;             /**< Mass fraction Al2O3 in material */
     double cao;               /**< Mass fraction CaO in material */
-    vector<int> RdId;         /**< Vector of IC ids of the partitioned components in the phase */
-    vector<double> RdVal;     /**< Vector of Rd values for each IC */
 };
 #endif
 

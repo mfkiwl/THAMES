@@ -43,8 +43,6 @@ PozzolanicModel::PozzolanicModel ()
     microPhaseId_ = 2;
     DCId_ = 2;
     GEMPhaseId_ = 2;
-    RdICId_.clear();
-    Rd_.clear();
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;
@@ -122,8 +120,6 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     microPhaseId_ = kineticData.microPhaseId;
     DCId_ = kineticData.DCId;
     GEMPhaseId_ = kineticData.GEMPhaseId;;
-    Rd_ = kineticData.RdVal;
-    RdICId_ = kineticData.RdId;
     activationEnergy_ = kineticData.activationEnergy;
     scaledMass_ = kineticData.scaledMass;
     initScaledMass_ = kineticData.scaledMass;
@@ -182,7 +178,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
         int DCNum = chemSys_->getNumDCs();
         int numGEMPhases = chemSys_->getNumGEMPhases();
         int DCId,ICId;
-        double molarMass,Rd;
+        double molarMass;
         vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
         ICMoles.clear();
         ICMoles.resize(ICNum,0.0);

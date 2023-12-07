@@ -118,8 +118,6 @@ void initKineticData(struct KineticData &kineticData)
     kineticData.siexp = kineticData.dfexp = kineticData.ohexp = 0.0;
     kineticData.activationEnergy = 0.0;
     kineticData.loi = kineticData.sio2 = kineticData.al2o3 = kineticData.cao = 0.0;
-    kineticData.RdId.clear();
-    kineticData.RdVal.clear();
 }
 
 /**
@@ -186,20 +184,6 @@ This method uses the libxml library, so this must be included.
 void parseKineticDataForPozzolanic (xmlDocPtr doc,
                                     xmlNodePtr cur,
                                     struct KineticData &kineticData);
-
-/**
-@brief Parse the Rd data (impurity partitioning) for one phase in the XML input file.
-
-This method uses the libxml library, so this must be included.
-
-@param doc is a libxml pointer to the document head
-@param cur is a libxml pointer to the current node being parsed
-@param kineticData is a reference to the KineticData structure for temporarily storing
-            the input parameters
-*/
-void parseRdData (xmlDocPtr doc,
-                  xmlNodePtr cur,
-                  struct KineticData &kineticData);
 
 /**
 @brief Compute normalized initial microstructure phase masses

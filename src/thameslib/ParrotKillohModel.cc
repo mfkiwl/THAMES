@@ -36,13 +36,11 @@ ParrotKillohModel::ParrotKillohModel ()
     microPhaseId_ = 2;
     DCId_ = 2;
     GEMPhaseId_ = 2;
-    RdICId_.clear();
     k1_ = 1.0;
     k2_ = 1.0;
     k3_ = 1.0;
     n1_ = 1.0;
     n3_ = 1.0;
-    Rd_.clear();
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;
@@ -128,8 +126,6 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     k3_ = kineticData.k3;
     n1_ = kineticData.n1;
     n3_ = kineticData.n3;
-    Rd_ = kineticData.RdVal;
-    RdICId_ = kineticData.RdId;
     activationEnergy_ = kineticData.activationEnergy;
     scaledMass_ = kineticData.scaledMass;
     initScaledMass_ = kineticData.scaledMass;
@@ -192,7 +188,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
     try {
         static int conc_index = 0;     
         int microPhaseId,DCId,ICId;
-        double molarMass,Rd;
+        double molarMass;
         GEMPhaseMoles.resize(GEMPhaseNum_,0.0);
         string icn;
 

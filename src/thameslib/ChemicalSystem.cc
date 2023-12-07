@@ -66,6 +66,8 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     na2o_.clear();
     mgo_.clear();
     so3_.clear();
+    RdICId_.clear();
+    Rd_.clear();
     color_.clear();
     GEMPhaseStoich_.clear();
     GEMPhaseDCMembers_.clear();
@@ -969,6 +971,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     phaseData.GEMPhaseName.clear();
     phaseData.microPhaseDCPorosities.clear();
     phaseData.DCName.clear();
+    phaseData.RdId.clear();
+    phaseData.RdVal.clear();
     phaseData.stressCalc = 0;
     phaseData.weak = 0;
 
@@ -1028,6 +1032,17 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
             parseInterfaceData(doc, cur, phaseids, phaseData);
         }
+        // Impurity partitioning data
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
+
+            ///
+            /// The data about partitioning of impurities among the clinker
+            /// phases are grouped within a complex field in the input XML
+            /// file, so we have a special method to parse it.
+            ///
+
+            parseRdData(doc, cur, phaseData);
+        }
         cur = cur->next;
     }
 
@@ -1084,6 +1099,8 @@ void ChemicalSystem::parsePhase (xmlDocPtr doc,
     na2o_.push_back(phaseData.na2o);
     mgo_.push_back(phaseData.mgo);
     so3_.push_back(phaseData.so3);
+    RdICId_.push_back(phaseData.RdId);
+    Rd_.push_back(phaseData.RdVal);
     microPhaseMembers_.insert(make_pair(phaseData.id,phaseData.GEMPhaseId));
     microPhaseDCMembers_.insert(make_pair(phaseData.id,phaseData.DCId));
 
@@ -1419,6 +1436,35 @@ void ChemicalSystem::parseAffinityData (xmlDocPtr doc,
     return;
 }
 
+void ChemicalSystem::parseRdData(xmlDocPtr doc,
+                                 xmlNodePtr cur,
+                                 struct PhaseData &phaseData) 
+{
+    xmlChar *key;
+    cur = cur->xmlChildrenNode;
+    int RdId;
+    double RdVal;
+
+    while (cur != NULL) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            RdId = getICId(st);
+            phaseData.RdId.push_back(RdId);
+            xmlFree(key);
+        }
+
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(RdVal,st);
+            phaseData.RdVal.push_back(RdVal);
+            xmlFree(key);
+        }
+        cur = cur->next;
+    }
+}
+
 ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
 {
 
@@ -1456,6 +1502,8 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     na2o_ = obj.getNa2o();
     mgo_ = obj.getMgo();
     so3_ = obj.getSo3();
+    RdICId_ = obg.getRdICId();
+    Rd_ = obg.getRd();
     grayscale_ = obj.getGrayscale();
     color_ = obj.getColor();
     microPhaseIdLookup_ = obj.getMicroPhaseIdLookup();
@@ -1544,6 +1592,8 @@ ChemicalSystem::~ChemicalSystem (void)
     na2o_.clear();
     mgo_.clear();
     so3_.clear();
+    RdICId_.clear();
+    Rd_.clear();
     grayscale_.clear();
     color_.clear();
     ICClassCode_.clear();

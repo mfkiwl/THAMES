@@ -60,8 +60,6 @@ int DCNum_;                     /**< Number of DCs in chemical system */
 int GEMPhaseNum_;               /**< Number of GEM phases in chemical system */
 vector<string> ICName_;         /**< Names of ICs */
 vector<string> DCName_;         /**< Names of DCs */
-vector<int> RdICId_;            /**< List of IC ids for this phase */
-vector<double> Rd_;             /**< Rd values for each IC in this phase */
 double scaledMass_;             /**< Phase mass percent, total solids basis */
 double initScaledMass_;         /**< Initial phase mass percents */
 double activationEnergy_;       /**< Apparent activation energy for the reaction [J/mol/K] */
@@ -494,72 +492,6 @@ The scaled mass of a phase is its mass percent on a total solids basis.
 double getInitScaledMass () const
 {
     return initScaledMass_;
-}
-
-/**
-@brief Get the list of independent components (ICs) for each phase in the kinetic model.
-
-@note NOT USED.
-
-@return the vector of lists of ICs for the phases in the kinetic model
-*/
-vector<int> getRdICId () const
-{
-    return RdICId_;
-}
-
-/**
-@brief Get the list of Rd values for the independent components (ICs) for each phase in the kinetic model.
-
-The Rd values for each phase are the partionings of impurities in the clinker phases.
-
-@note NOT USED.
-
-@return the vector of Rd values of the ICs for the phases in the kinetic model
-*/
-vector<double> getRd () const
-{
-    return Rd_;
-}
-
-/**
-@brief Get the id of one IC of the phase in the kinetic model.
-
-@note NOT USED.
-
-@param idx is the element location of the IC for that phase
-@return the IC id value
-*/
-unsigned int getRdICId (const unsigned int idx)
-{
-    try { return RdICId_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRdICId",
-                           "RdICId_",RdICId_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
-
-/**
-@brief Get the Rd of one IC of a particular phase in the kinetic model.
-
-The Rd values for each phase are the partionings of impurities in the clinker phases.
-
-@note NOT USED.
-
-@param idx is the element location of the IC for that phase
-@return the IC id value
-*/
-double getRd (const unsigned int idx)
-{
-    try { return Rd_.at(idx); }
-    catch (out_of_range &oor) {
-        EOBException ex("KineticModel","getRd",
-                           "Rd_",Rd_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
 }
 
 /**
