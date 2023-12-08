@@ -4,8 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
-| Dec 07 16:17:19 2023 | Moved Rd partitioning from KineticController to
-ChemicalSystem; compile not checked |
+| Dec 07 17:40:56 2023 | Completed moved of Rd partitioning from KineticController to ChemicalSystem; compiles error-free |
+| Dec 07 16:17:19 2023 | Moved Rd partitioning from KineticController to ChemicalSystem; compile not checked |
 | Nov 11 22:42:13 2023 | Compile-time errors fixed; need to complete Pozzolanic model |
 | Nov 10 17:48:17 2023 | Fixed several compile-time errors; some need to still be fixed |
 | Nov 03 17:14:04 2023 | Making KineticController handle the models; still no compile check |

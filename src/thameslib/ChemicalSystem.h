@@ -209,8 +209,8 @@ vector<double> randomGrowth_;             /**< One real number for each microstr
                                           that indicates the tendency for growth in random
                                           directions (ballistic or diffusion-limited
                                           aggregation) as opposed to compact growth */
-vector<int> RdICId_;                    /**< List of IC ids for this phase */
-vector<double> Rd_;                     /**< Rd values for each IC in this phase */
+vector<vector<int> > RdICId_;                    /**< List of ICs that can be an impurity in each phase */
+vector<vector<double> > Rd_;                     /**< Rd values for each IC in each phase */
 vector<double> ICMolarMass_;              /**< One molar mass for each IC [g/mm3ol] */
 vector<double> DCMolarMass_;              /**< One molar mass for each DC [g/mol] */
 vector<double> GEMPhaseMolarMass_;           /**< One molar mass for each GEM phase [g/mol] */
@@ -1439,54 +1439,54 @@ int getMicroPhaseId (const string &micname)
 }
 
 /**
-@brief Get the list of all IC ids that can partition into a phase.
+@brief Get the list of all IC ids in all phases
 
 @return the vector holding phase id numbers
 */
-vector<int> getRdICId (void) const
+vector<vector<int> > getRdICId (void) const
 {
     return RdICId_;
 }
 
 /**
-@brief Get all the Rd values (partitioning of impurities).
+@brief Get all the Rd values in all phases (partitioning of impurities).
 
 @return the vector holding the Rd values
 */
-vector<double> getRd (void) const
+vector<vector<double> > getRd (void) const
 {
     return Rd_;
 }
 
 /**
-@brief Get IC id of a particular element in the RdICId_ vector
+@brief Get all IC ids for a particular phase
 
-@param idx is the location in the RdICId_ vector
-@return the IC id at the requested element
+@param pid is the index number to retrieve
+@return the vector holding phase id numbers
 */
-unsigned int getRdICId (const unsigned int idx)
+vector<int> getRdICId (const int pid)
 {
-    try { return RdICId_.at(idx); }
+    try { return RdICId_.at(pid); }
     catch (out_of_range &oor) {
         EOBException
-        ex("ChemicalSystem","getRdICId","RdICId_",RdICId_.size(),idx);
+        ex("ChemicalSystem","getRdICId","RdICId_",RdICId_.size(),pid);
         ex.printException();
         exit(1);
     }
 }
 
 /**
-@brief Get Rd value of a particular element in the Rd_ vector
+@brief Get all Rd values for a particular phase
 
-@param idx is the location in the RdICId_ vector
-@return the Rd value at the requested element
+@param pid is the index number to retrieve
+@return the vector holding phase id numbers
 */
-double getRd (const unsigned int idx)
+vector<double> getRd (const int pid)
 {
-    try { return Rd_.at(idx); }
+    try { return Rd_.at(pid); }
     catch (out_of_range &oor) {
         EOBException
-        ex("ChemicalSystem","getRd","Rd_",Rd_.size(),idx);
+        ex("ChemicalSystem","getRd","Rd_",Rd_.size(),pid);
         ex.printException();
         exit(1);
     }

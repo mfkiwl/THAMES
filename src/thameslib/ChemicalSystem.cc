@@ -1502,8 +1502,8 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     na2o_ = obj.getNa2o();
     mgo_ = obj.getMgo();
     so3_ = obj.getSo3();
-    RdICId_ = obg.getRdICId();
-    Rd_ = obg.getRd();
+    RdICId_ = obj.getRdICId();
+    Rd_ = obj.getRd();
     grayscale_ = obj.getGrayscale();
     color_ = obj.getColor();
     microPhaseIdLookup_ = obj.getMicroPhaseIdLookup();

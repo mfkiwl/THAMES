@@ -6,6 +6,7 @@ thamestests/
 
 #ignore the Mac OS X superfluous files
 .DS_Store
+.cache
 
 # ignore spreadsheets used for calculations
 *.xls
