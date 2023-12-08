@@ -1493,6 +1493,68 @@ vector<double> getRd (const int pid)
 }
 
 /**
+@brief Get the icid-th IC id for a particular phase
+
+@param pid is the phase id position to retrieve
+@param icid is the index number to retrieve
+@return the vector holding phase id numbers
+*/
+int getRdICId (const int pid, const int icid)
+{
+    vector<int> vecforphase;
+    try {
+        vecforphase = RdICId_.at(pid);
+    }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRdICId","RdICId_",RdICId_.size(),pid);
+        ex.printException();
+        exit(1);
+    }
+
+    try {
+        return vecforphase.at(icid);
+    }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRdICId","vecforphase",vecforphase.size(),icid);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
+@brief Get the icid-th Rd val for a particular phase
+
+@param pid is the phase id position to retrieve
+@param icid is the index number to retrieve
+@return the vector holding phase id numbers
+*/
+double getRd (const int pid, const int icid)
+{
+    vector<double> vecforphase;
+    try {
+        vecforphase = Rd_.at(pid);
+    }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRd","Rd_",Rd_.size(),pid);
+        ex.printException();
+        exit(1);
+    }
+
+    try {
+        return vecforphase.at(icid);
+    }
+    catch (out_of_range &oor) {
+        EOBException
+        ex("ChemicalSystem","getRd","vecforphase",vecforphase.size(),icid);
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
 @brief Get the list of all phase ids.
 
 @return the vector holding phase id numbers

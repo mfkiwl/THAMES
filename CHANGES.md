@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 08 09:50:549 2023 | Added more in-depth queries for Rd values and ICs; compiles error-free |
 | Dec 07 17:40:56 2023 | Completed moved of Rd partitioning from KineticController to ChemicalSystem; compiles error-free |
 | Dec 07 16:17:19 2023 | Moved Rd partitioning from KineticController to ChemicalSystem; compile not checked |
 | Nov 11 22:42:13 2023 | Compile-time errors fixed; need to complete Pozzolanic model |
