@@ -186,7 +186,81 @@ void parseKineticDataForPozzolanic (xmlDocPtr doc,
                                     struct KineticData &kineticData);
 
 /**
+@brief Get the scaled mass of the phase in the kinetic model.
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@return the vector of scaled masses [percent solids]
+*/
+vector<double> getScaledMass () const
+{
+    return scaledMass_;
+}
+
+/**
+@brief Get the scaled mass of one phase
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@note NOT USED.
+
+@param midx is the microstructure id of the phase to query
+@return the vector of scaled masses [percent solids]
+*/
+
+double getScaledMass (const int midx)
+{
+    try {
+      return scaledMass_.at(midx);
+   }
+   catch (out_of_range &oor) {
+      EOBException
+      ex("KineticController","getScaledMass","scaledMass_",scaledMass_.size(),midx);
+      ex.printException();
+      exit(1);
+  }
+}
+
+/**
+@brief Get the <i>initial</i> mass of the microstructure phases
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@return the vector of initial scaled masses [percent solids]
+*/
+vector<double> getInitScaledMass () const
+{
+    return initScaledMass_;
+}
+
+/**
+@brief Get the <i>initial</i> scaled mass of one microstructure phase
+
+The scaled mass of a phase is its mass percent on a total solids basis.
+
+@note NOT USED.
+
+@param midx is the microstructure id of the phase to query
+@return the initial scaled mass [percent solids]
+*/
+
+double getInitScaledMass (const int midx)
+{
+    try {
+      return initScaledMass_.at(midx);
+   }
+   catch (out_of_range &oor) {
+      EOBException
+      ex("KineticController","getInitScaledMass","initScaledMass_",initScaledMass_.size(),midx);
+      ex.printException();
+      exit(1);
+  }
+}
+
+/**
 @brief Compute normalized initial microstructure phase masses
+
+@note NOT USED
 
 Given the initial masses of all phases in the microstructure,
 this method scales them to 100 grams of solid.  In the process,
@@ -194,7 +268,7 @@ this method also sets the initial moles of water in the
 chemical system definition.
 */
 
-void getPhaseMasses (void);
+void calcPhaseMasses (void);
 
 /**
 @brief Get sum of phase masses

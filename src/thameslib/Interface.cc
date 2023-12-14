@@ -394,19 +394,30 @@ bool Interface::removeGrowthSite (Site *loc)
 
 bool Interface::removeDissolutionSite (Site *loc)
 {
-     #ifdef DEBUG
-        cout << "Interface::removeDissolutionSite " << loc->getId()
-             << ", size is " << dissolutionSites_.size()
-             << endl;
-        cout.flush();
+     // #ifdef DEBUG
+     //    cout << "Interface::removeDissolutionSite " << loc->getId()
+     //         << ", size is " << dissolutionSites_.size()
+     //         << endl;
+     //    cout.flush();
+     //    bool found = false;
+     //    cout << "Interface::removeDissolutionSite Trying to "
+     //         << "declare iterator to Isite vector ...";
+     //    cout.flush();
+     //    vector<Isite>::iterator p;
+     //    cout << "Interface::removeDissolutionSite Trying to "
+     //         << "set it to beginning of dissolutionSites_ ... ";
+     //    cout.flush();
+     //    p = dissolutionSites_.begin();
+     //    for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
+     //        if (dissolutionSites_[i].getId() == loc->getId()) {
+     //            p += i;
+     //            dissolutionSites_.erase(p);
+     //            found = true;
+     //        }
+     //    }
+    // #else
         bool found = false;
-        cout << "Interface::removeDissolutionSite Trying to "
-             << "declare iterator to Isite vector ...";
-        cout.flush();
         vector<Isite>::iterator p;
-        cout << "Interface::removeDissolutionSite Trying to "
-             << "set it to beginning of dissolutionSites_ ... ";
-        cout.flush();
         p = dissolutionSites_.begin();
         for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
             if (dissolutionSites_[i].getId() == loc->getId()) {
@@ -415,17 +426,6 @@ bool Interface::removeDissolutionSite (Site *loc)
                 found = true;
             }
         }
-    #else
-        bool found = false;
-        vector<Isite>::iterator p;
-        p = dissolutionSites_.begin();
-        for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
-            if (dissolutionSites_[i].getId() == loc->getId()) {
-                p += i;
-                dissolutionSites_.erase(p);
-                found = true;
-            }
-        }
-    #endif
+    // #endif
     return found;
 }

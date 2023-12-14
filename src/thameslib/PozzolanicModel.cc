@@ -442,6 +442,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           #endif
 
           if (doTweak) {
+              cout << "WARNING: Doing a TWEAK of IC moles for " << name_ << endl;
               for (int ii = 0; ii < ICMoles.size(); ii++) {
                   chemSys_->setICMoles(ii,ICMoles[ii]);
               }

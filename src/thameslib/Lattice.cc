@@ -348,7 +348,7 @@ Lattice::Lattice (ChemicalSystem *cs,
       site_[i].setMicroPhaseId(pid);
       count_.at(pid)++;
     }
-    
+
     ///
     /// Done with the input microstructure file, so close it.
     ///
@@ -1736,8 +1736,38 @@ void Lattice::changeMicrostructure (double time,
                         
                             vector<int> watersites;
                             watersites.clear();
+                            #ifdef DEBUG
+                              cout << "Generating water sites, there are " << site_.size()
+                                   << " total sites in the system" << endl;
+                              cout << "ELECTROLYTEID =  " << ELECTROLYTEID << endl;
+                              cout.flush();
+                              vector<int> mmyveccount;
+                              mmyveccount.resize(count_.size(),0);
+                              int mypid;
+                              for (i = 0; i < site_.size(); i++) {
+                                mypid = site_[i].getMicroPhaseId();
+                                mmyveccount.at(mypid)++;
+                              }
+
+                              for (i = 0; i < mmyveccount.size(); i++) {
+                                cout << "Number of microstructure id " << i << " = "
+                                     << mmyveccount.at(i) << endl;
+                                cout.flush();
+                              }
+                            #endif
+
+                            int mmycount = 0;
                             for (int k = 0; k < site_.size(); ++k) {
-                                if (site_[k].getMicroPhaseId() == ELECTROLYTEID) watersites.push_back(k);
+                                if (site_[k].getMicroPhaseId() == ELECTROLYTEID) {
+                                  mmycount++;
+                                  #ifdef DEBUG
+                                    cout << "  Found " << mmycount << " water sites so far, "
+                                         << "this one is site_[" << k << "] = "
+                                         << site_[k].getMicroPhaseId() << endl;
+                                    cout.flush();
+                                    watersites.push_back(k);
+                                  #endif
+                                }
                             }
                             #ifdef DEBUG
                                 cout << "Lattice::changeMicrostructure Found "
@@ -1763,11 +1793,15 @@ void Lattice::changeMicrostructure (double time,
                                 cout << "Lattice::changeMicrostructure Done with "
                                      << "shuffle" << endl;
                                 cout << "Lattice::changeMicrostructure   First ten "
-                                     << "water sites after to shuffle:" << endl;
+                                     << "water sites after shuffle:" << endl;
                                 for (int k = 0; k < 10; ++k) {
                                     cout << "Lattice::changeMicrostructure       " << k
                                          << ": " << watersites[k] << endl;
                                 }
+                                cout << "Lattice::changeMicrostructure adding growth "
+                                     << "sites with " << nuclei << " nuclei" << endl;
+                                cout << "Lattice::changeMicrostructure watersites size =  "
+                                      << watersites.size();
                                 cout.flush();
                             #endif
 
@@ -1775,8 +1809,19 @@ void Lattice::changeMicrostructure (double time,
                             // the first nuclei elements as new growth sites
                         
                             for (int k = 0; k < nuclei; ++k) {
+                                #ifdef DEBUG
+                                     cout << "    watersites[" << k << "] = " << watersites[k]
+                                          << ", while site_ size = " << site_.size() << endl;
+                                     cout.flush();
+                                #endif
                                 addGrowthSite(&site_[watersites[k]],pid.at(i));
     	                    }
+
+                            #ifdef DEBUG
+                                cout << "Lattice::changeMicrostructure Done with "
+                                     << "adding growth sites" << endl;
+                                cout.flush();
+                            #endif
                         } else {
                             if (verbose_ || warning_) {
                                 cout << "Lattice::changeMicrostructure There is no "

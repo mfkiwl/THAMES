@@ -1796,25 +1796,27 @@ void ChemicalSystem::setMicroPhaseMass (const unsigned int idx,
     if (idx != VOIDID) {
         double v0 = node_->DC_V0(DCId,P_,T_);
         double dcmm = getDCMolarMass(DCId);
-        if (verbose_) {
-            cout << "    " << microPhaseName_[idx] << ", DC " << getDCName(DCId) << ": v0 = "
-                 << v0 << ", dcmm = " << dcmm
-                 << ", so volume = ";
-            cout.flush();
-        }
+        #ifdef DEBUG
+             cout << "    " << microPhaseName_[idx] << ", DC "
+                  << getDCName(DCId) << ": v0 = "
+                  << v0 << ", dcmm = " << dcmm
+                  << ", so volume = ";
+             cout.flush();
+        #endif // DEBUG
         if (dcmm < 1.0e-9) {
             FloatException fex("ChemicalSystem","setMicroPhaseMass",
                                "Divide by zero (dcmm)");
             fex.printException();
             exit(1);
         }
-        if (verbose_) {
+        #ifdef DEBUG
             cout << (val*v0/dcmm) << endl;
             cout << "Setting volume of microphase " << idx << " to "
                  << (val*v0/dcmm) << " (VOIDID = " << VOIDID
                   << ")" << endl;
             cout.flush();
-        }
+        #endif // DEBUG
+         
         setMicroPhaseVolume(idx,(val*v0/dcmm));
     }
 
@@ -1948,8 +1950,9 @@ int ChemicalSystem::calculateState (double time,
 
     vector<double> microPhaseVolumes = getMicroPhaseVolume();
     vector<string> microPhaseNames = getMicroPhaseName();
-    if (verbose_) {
-        cout << "    Before calculateState, "
+
+    #ifdef DEBUG
+        cout << "    ~~~~>Before calculateState, "
              << "printing microPhaseVolumes" << endl;
         for (int i = 0; i < microPhaseVolumes.size(); ++i) {
             cout << "    Phase name " << microPhaseNames[i]
@@ -1959,7 +1962,7 @@ int ChemicalSystem::calculateState (double time,
 
         cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... "
              << endl;
-    }
+    #endif
 
     ///
     /// Next function loads the input data for the THAMES node into the
@@ -1980,11 +1983,11 @@ int ChemicalSystem::calculateState (double time,
           ICMoles_,DCUpperLimit_,DCLowerLimit_,surfaceArea_,
           DCMoles_,DCActivityCoeff_);
 
-    if (verbose_) {
+    #ifdef DEBUG
         cout << "Done!" << endl;
         cout << "    Going into ChemicalSystem::calculateState::GEM_set_MT (2)... ";
         cout.flush();
-    }
+    #endif
 
     /// For passing the current THAMES time and time step into the working instance
     /// of the DBR structure.
@@ -2002,14 +2005,14 @@ int ChemicalSystem::calculateState (double time,
     
     node_->GEM_from_MT_time(time,1.0);
 
-    if (verbose_) {
+    #ifdef DEBUG
         cout << "Done!" << endl
              << "    Going into "
              << "ChemicalSystem::calculateState::GEM_run() "
              << "(2), with isFirst " << isFirst << endl;
         cout.flush();
         writeICMoles();
-    }
+    #endif
 
     /*
     writeDCMoles();
@@ -2163,10 +2166,21 @@ int ChemicalSystem::calculateState (double time,
     setGEMPhaseMass();
     setGEMPhaseVolume();
     setGEMPhaseMolarMass();
-  
-    if (verbose_) {
+
+    #ifdef DEBUG
+        cout << "    ~~~~>After calculateState, "
+             << "printing microPhaseVolumes" << endl;
+        for (int i = 0; i < microPhaseVolumes.size(); ++i) {
+            cout << "    Phase name " << microPhaseNames[i]
+                 << ": volume = " << microPhaseVolumes[i] << endl;
+            cout.flush();
+        }
+
+        cout << "    Going into ChemicalSystem::calculateState::GEM_from_MT (2)... "
+             << endl;
         cout << "%%%%%%%%%% Printing GEM Masses and "
              << "Volumes in this Step %%%%%%%" << endl;
+
         for (long int myid = 0; myid < numGEMPhases_; myid++) {
             cout << "Mass and volume of GEM phase "
                  << node_->pCSD()->PHNL[myid] << " = "
@@ -2175,7 +2189,7 @@ int ChemicalSystem::calculateState (double time,
         }
         cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
              << "%%%%%%%%%%%%%%%%%%%%%%%%%%%" << endl;
-    }
+    #endif
 
     /// JWB 2023-07-29
     /// Assign the molar enthalpy of each DC
@@ -2205,7 +2219,7 @@ int ChemicalSystem::calculateState (double time,
                 microPhaseMass_[i] +=
                      GEMPhaseMass_[microPhaseMembers_[i][j]];
 
-                if (verbose_) {
+                #ifdef DEBUG
                     cout << "    Is NOT a KINETIC phase: is composed of "
                          << GEMPhaseName_[microPhaseMembers_[i][j]]
                          << " having mass = "
@@ -2215,7 +2229,7 @@ int ChemicalSystem::calculateState (double time,
                          << " and porosity = " << phi
                          << endl;
                     cout.flush();
-                }
+                #endif
 
                 /// Here is where the subvoxel porosity is included
                 /// @todo Need a more disciplined approach to making sure
@@ -2237,13 +2251,14 @@ int ChemicalSystem::calculateState (double time,
         } else {
             calcMicroPhasePorosity(i);
             phi = getMicroPhasePorosity(i);
-            if (verbose_) {
+            #ifdef DEBUG
                 cout << "    IS a KINETIC phase: is composed of "
                      << GEMPhaseName_[microPhaseMembers_[i][0]]
                      << "  having mass = " << microPhaseMass_[i]
-                     << "  and volume = " << microPhaseVolume_[i] << endl;
+                     << "  and volume = " << microPhaseVolume_[i]
+                     << "  and internal porosity = " << phi << endl;
                 cout.flush();
-            }
+            #endif
 
             ///
             /// microPhaseMass and microPhaseVolume for kinetic phases are
