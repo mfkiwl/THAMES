@@ -94,8 +94,8 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     /// Default value for specific surface area in PK model is 385 m<sup>2</sup>/kg
     ///
 
-    specificSurfaceArea_ = kineticData.ssa;
-    refSpecificSurfaceArea_ = kineticData.refssa;
+    specificSurfaceArea_ = kineticData.specificSurfaceArea;
+    refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
     ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
 
     ///

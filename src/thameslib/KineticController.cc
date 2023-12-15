@@ -22,6 +22,8 @@ KineticController::KineticController ()
     name_.clear();
     initScaledMass_.clear();
     scaledMass_.clear();
+    specificSurfaceArea_.clear();
+    refSpecificSurfaceArea_.clear();
     isKinetic_.clear();
     waterId_ = 1;
     ICNum_ = 0;
@@ -318,7 +320,7 @@ void KineticController::parseKineticData (xmlDocPtr doc,
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 kineticData.type = st;
-                #ifdef DEBUG
+            n    #ifdef DEBUG
                   cout << "===> kineticData.type = " << kineticData.type << endl;
                   cout.flush();
                 #endif
@@ -365,6 +367,28 @@ void KineticController::parseKineticDataForParrotKilloh (xmlDocPtr doc,
           cout.flush();
         #endif
         
+        // Specific surface area (m2/kg)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.specificSurfaceArea,st);
+            #ifdef DEBUG
+              cout << "     specificSurfaceArea = " << kineticData.specificSurfaceArea;
+              cout.flush();
+            #endif
+            xmlFree(key);
+        }
+        // Reference specific surface area (m2/kg)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.refSpecificSurfaceArea,st);
+            #ifdef DEBUG
+              cout << "     refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea;
+              cout.flush();
+            #endif
+            xmlFree(key);
+        }
         // Parrot-Killoh k1 parameter
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -456,6 +480,31 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
     cur = cur->next;
 
     while (cur != NULL) {
+
+        // Specific surface area (m2/kg)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.specificSurfaceArea,st);
+            #ifdef DEBUG
+              cout << "     specificSurfaceArea = " << kineticData.specificSurfaceArea;
+              cout.flush();
+            #endif
+            xmlFree(key);
+        }
+
+        // Reference specific surface area (m2/kg)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.refSpecificSurfaceArea,st);
+            #ifdef DEBUG
+              cout << "     refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea;
+              cout.flush();
+            #endif
+            xmlFree(key);
+        }
+
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"rateconst"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);

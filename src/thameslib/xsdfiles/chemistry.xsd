@@ -121,6 +121,8 @@
     <xs:sequence>
       <xs:element name="type" type="kineticTypetype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="scaledmass" type="positiveDoubletype"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="specificSurfaceArea" type="positiveDoubletype"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="refSpecificSurfaceArea" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k1" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k2" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype"/>

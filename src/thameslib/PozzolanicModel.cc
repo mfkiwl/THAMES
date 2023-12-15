@@ -154,6 +154,10 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     double T = temperature;
     double arrhenius = 1.0;
 
+    double dissrate = 1.0e-10;          // Nucleation and growth rate
+    double hsrate = 1.0e-10;          // Hydration shell rate
+    double diffrate = 1.0e-10;        // Diffusion rate
+
     double rate = 1.0e-10;            // Selected rate
 
     double massDissolved = 0.0;
@@ -279,13 +283,13 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           double rhFactor = rh;
           // rhFactor = pow(((rh - 0.55)/0.45),4.0);
           
-          double DOH = 0.0;
-          double newDOH = 0.0;
+          double DOR = 0.0;
+          double newDOR = 0.0;
 
           if (initScaledMass_ > 0.0) {
-              DOH = (initScaledMass_ - scaledMass_) /
+              DOR = (initScaledMass_ - scaledMass_) /
                         (initScaledMass_);
-              DOH = min(DOH,0.99);  // prevents DOH from prematurely stopping PK calculations
+              DOR = min(DOR,0.99);  // prevents DOR from prematurely stopping PK calculations
           } else {
               throw FloatException("PozzolanicModel","calculateKineticStep",
                              "initScaledMass_ = 0.0");
@@ -293,16 +297,56 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
           arrhenius = exp((activationEnergy_/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
 
-          if (DOH < 1.0 && !doTweak) {
+          if (DOR < 1.0 && !doTweak) {
                     
               /// @todo Make a rate equation here ...
 
-              newDOH = 0.5;
+              if (fabs(rateconst_) > 0.0) {
+                /// @todo Must replace DOR with saturation index here !!!
+                dissrrate = rateconst * ssaFactor_ * pow((1.0 - DOR),dfexp_);
+            
+                if (dissrate < 1.0e-10) dissrate = 1.0e-10;
+              } else {
+                  throw FloatException("PozzolanicModel","calculateKineticStep",
+                                       "rateconst_ = 0.0");
+              }
+        
+              /// @note Need to get some more constants in here
+              /// for diffusion coefficient, thickness, etc.
+             
+              hsrate = k3_ * pow((1.0 - DOR),n3_);
+              if (hsrate < 1.0e-10) hsrate = 1.0e-10;
+
+              if (DOR > 0.0) {
+                  diffrate = (k2_ * pow((1.0 - DOR),(2.0/3.0))) /
+                                       (1.0 - pow((1.0 - DOR),(1.0/3.0)));
+                  if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+              } else {
+                  diffrate = 1.0e9;
+              }
+
+              rate = (dissrate < hsrate) ? dissrate : hsrate;
+              if (diffrate < rate) rate = diffrate;
+              rate *= (wcFactor * rhFactor * arrhenius);
+              newDOR = DOR + (rate * timestep);
+
+              cout << "Pozzolanic model for " << name_
+                   << ", ngrate = " << ngrate
+                   << ", hsrate = " << hsrate
+                   << ", diffrate = " << diffrate
+                   << ", rhFactor = " << rhFactor
+                   << ", wcFactor = " << wcFactor
+                   << ", RATE = " << rate
+                   << ", timestep " << timestep
+                   << ", oldDOR = " << DOR << ", new DOR = "
+                   << newDOR << endl;
+              cout.flush();
+
 
               /// ... to here
                     
-              scaledMass_ = initScaledMass_ * (1.0 - newDOH);
-              massDissolved = (newDOH - DOH) * initScaledMass_;
+              scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+              massDissolved = (newDOR - DOR) * initScaledMass_;
 
                        
               chemSys_->setMicroPhaseMass(microPhaseId_,scaledMass_);
@@ -411,7 +455,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     
               }
 
-          } else if (DOH < 1.0) {
+          } else if (DOR < 1.0) {
 
               ///
               /// We will just tweak the icmoles a bit to try to
@@ -426,7 +470,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
           } else {
               throw DataException("PozzolanicModel","calculateKineticStep",
-                            "DOH >= 1.0");
+                            "DOR >= 1.0");
           }   
 
           #ifdef DEBUG

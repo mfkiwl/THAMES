@@ -19,6 +19,9 @@ Most of the members have self-evident meanings:
     - `type` is a string specifying whether the phase is under kinetic control
         or thermodynamic control
     - `scaledMass` is the number of grams of the phase per 100 grams of solid
+    - `specificSurfaceArea` is the specific surface area in m2 per kg
+    - `refSpecificSurfaceArea` is the reference specific surface area in m2 per kg
+    - `scaledMass` is the number of grams of the phase per 100 grams of solid
     - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
     - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
     - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
@@ -42,8 +45,8 @@ struct KineticData {
     int DCId;               /**< Integer id of the DC making up the phase */
     string type;            /**< Specifies kinetic or thermodynamic control */
     double scaledMass;      /**< Mass percent on a total solids basis */
-    double ssa;             /**< Specific surface area [m2/kg] */
-    double refssa;          /**< Reference specific surface area [m2/kg] */
+    double specificSurfaceArea;    /**< Specific surface area [m2/kg] */
+    double refSpecificSurfaceArea; /**< Reference specific surface area [m2/kg] */
     double temperature;       /**< Temperature [K] */
     double reftemperature;    /**< Reference temperature [K] */
     double activationEnergy;  /**< Activation energy [J/mol/ */

@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 15 16:08:51 2023 | Updating kinetic models to have initial specific surface areas for each phase; compile not checked |
 | Dec 14 16:28:39 2023 | Fixed run-time errors in KineticController that were not assigning water or solid masses initially |
 | Dec 08 09:50:54 2023 | Added more in-depth queries for Rd values and ICs; compiles error-free |
 | Dec 07 17:40:56 2023 | Completed moved of Rd partitioning from KineticController to ChemicalSystem; compiles error-free |

@@ -56,6 +56,8 @@ vector<string> DCName_;
 vector<int> microPhaseId_;      /**< List of microstructure ids that are in kinetic model */
 vector<double> initScaledMass_; /**< List of initial scaled masses */
 vector<double> scaledMass_;     /**< List of scaled masses */
+vector<double> specificSurfaceArea_;    /**< List of specific surface areas */
+vector<double> refSpecificSurfaceArea_; /**< List of reference specific surface areas */
 vector<bool> isKinetic_;
 int waterId_;                   /**< DC index for liquid water */
 int ICNum_;                     /**< Number of ICs in chemical system */
@@ -109,7 +111,7 @@ void initKineticData(struct KineticData &kineticData)
     kineticData.microPhaseId = kineticData.GEMPhaseId = kineticData.DCId = 0; 
     kineticData.type = "thermo";
     kineticData.scaledMass = 0.0;
-    kineticData.ssa = kineticData.refssa = 385.0;
+    kineticData.specificSurfaceArea = kineticData.refSpecificSurfaceArea = 385.0;
     kineticData.temperature = kineticData.reftemperature = 293.15;
     kineticData.k1 = kineticData.k2 = kineticData.k3 = 1.0;
     kineticData.n1 = kineticData.n3 = 1.0;
@@ -277,6 +279,66 @@ void calcPhaseMasses (void);
 
 double getSolidMass (void);
 
+/**
+@brief Get the list of specific surface areas
+
+@return the vector of specific surface areas [m2/kg]
+*/
+vector<double> getSpecificSurfaceArea () const
+{
+    return specificSurfaceArea_;
+}
+
+/**
+@brief Get the specific surface area of one phase
+
+
+@param midx is the microstructure id of the phase to query
+@return the specific surface area [m2/kg]
+*/
+double getSpecificSurfaceArea (const int midx)
+{
+    try {
+      return specificSurfaceArea_.at(midx);
+   }
+   catch (out_of_range &oor) {
+      EOBException
+      ex("KineticController","getSpecificSurfaceArea","specificSurfaceArea_",specificSurfaceArea_.size(),midx);
+      ex.printException();
+      exit(1);
+  }
+}
+
+/**
+@brief Get the list of reference specific surface areas
+
+@return the vector of reference specific surface areas [m2/kg]
+*/
+vector<double> getRefSpecificSurfaceArea () const
+{
+    return refSpecificSurfaceArea_;
+}
+
+
+/**
+@brief Get the reference specific surface area of one phase
+
+
+@param midx is the microstructure id of the phase to query
+@return the reference specific surface area [m2/kg]
+*/
+double getRefSpecificSurfaceArea (const int midx)
+{
+    try {
+      return refSpecificSurfaceArea_.at(midx);
+   }
+   catch (out_of_range &oor) {
+      EOBException
+      ex("KineticController","getRefSpecificSurfaceArea","refSpecificSurfaceArea_",refSpecificSurfaceArea_.size(),midx);
+      ex.printException();
+      exit(1);
+  }
+}
 
 /**
 @brief Make a kinetic model for a given phase
