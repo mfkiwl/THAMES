@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 17 15:11:00 2023 | Added two diffusion rate constants for pozzolanic reactions, akin to the k2 and k3 parameters in the Parrot-Killoh model |
 | Dec 15 16:08:51 2023 | Updating kinetic models to have initial specific surface areas for each phase; compile not checked |
 | Dec 14 16:28:39 2023 | Fixed run-time errors in KineticController that were not assigning water or solid masses initially |
 | Dec 08 09:50:54 2023 | Added more in-depth queries for Rd values and ICs; compiles error-free |

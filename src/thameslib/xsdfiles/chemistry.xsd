@@ -130,7 +130,9 @@
       <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="activationEnergy" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" maxOccurs="1" name="rateconst" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dissolutionRateConst" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstEarly" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstLate" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="siexp" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="dfexp" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="ohexp" type="positiveDoubletype"/>

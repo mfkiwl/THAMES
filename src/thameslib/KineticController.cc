@@ -320,7 +320,7 @@ void KineticController::parseKineticData (xmlDocPtr doc,
                 key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
                 string st((char *)key);
                 kineticData.type = st;
-            n    #ifdef DEBUG
+                #ifdef DEBUG
                   cout << "===> kineticData.type = " << kineticData.type << endl;
                   cout.flush();
                 #endif
@@ -505,31 +505,46 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             xmlFree(key);
         }
 
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"rateconst"))) {
+        // Dissolution rate constant (mol/m2/s)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolutionRateConst"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.rateconst,st);
+            from_string(kineticData.dissolutionRateConst,st);
+            xmlFree(key);
+        }
+        // Early-age diffusion rate constant (mol/m2/s)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"diffusionRateConstEarly"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.diffusionRateConstEarly,st);
+            xmlFree(key);
+        }
+        // Later-age diffusion rate constant (mol/m2/s)
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"diffusionRateConstLate"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.diffusionRateConstLate,st);
             xmlFree(key);
         }
         // Exponent on  the saturation index in the rate equation
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"siexp"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.rateconst,st);
+            from_string(kineticData.siexp,st);
             xmlFree(key);
         }
         // Exponent on  the driving force term in the rate equation
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"dfexp"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.rateconst,st);
+            from_string(kineticData.dfexp,st);
             xmlFree(key);
         }
         // Exponent on  the hydroxy ion activity in the rate equation
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"ohexp"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
-            from_string(kineticData.rateconst,st);
+            from_string(kineticData.ohexp,st);
             xmlFree(key);
         }
         // SiO2 mass fraction in the material

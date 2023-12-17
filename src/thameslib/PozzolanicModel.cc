@@ -23,10 +23,12 @@ PozzolanicModel::PozzolanicModel ()
     refT_ = 293.15;         // default temperature (K)
 
     ///
-    /// Default value for the rate constant
+    /// Default values for the rate constants
     ///
     
-    rateconst_ = 0.0;
+    dissolutionRateConst_ = 0.0;
+    diffusionRateConstEarly_ = 0.0;
+    diffusionRateConstLate_ = 0.0;
 
     ///
     /// Default value for the exponents in the rate equation
@@ -91,14 +93,16 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     /// Default value for specific surface area in PK model is 385 m<sup>2</sup>/kg
     ///
 
-    specificSurfaceArea_ = kineticData.ssa;
-    refSpecificSurfaceArea_ = kineticData.refssa;
+    specificSurfaceArea_ = kineticData.specificSurfaceArea;
+    refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
     ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
     setSio2(kineticData.sio2);
     setAl2o3(kineticData.al2o3);
     setCao(kineticData.cao);
     setLoi(kineticData.loi);
-    setRateconstant(kineticData.rateconst);
+    setDissolutionRateConst(kineticData.dissolutionRateConst);
+    setDiffusionRateConstEarly(kineticData.diffusionRateConstEarly);
+    setDiffusionRateConstLate(kineticData.diffusionRateConstLate);
     setSiexp(kineticData.siexp);
     setDfexp(kineticData.dfexp);
     setOhexp(kineticData.ohexp);
@@ -211,7 +215,8 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                   ICMoles[i] = chemSys_->getICMoles(i);
               }
               ICName[i] = chemSys_->getICName(i);
-              cout << "PozzolanicModel::calculateKineticStep     " << ICName[i] << ": " << ICMoles[i] << " mol" << endl;
+              cout << "PozzolanicModel::calculateKineticStep     "
+                   << ICName[i] << ": " << ICMoles[i] << " mol" << endl;
             }
         #else 
             for (int i = 0; i < ICNum; i++) {
@@ -283,6 +288,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           double rhFactor = rh;
           // rhFactor = pow(((rh - 0.55)/0.45),4.0);
           
+          double saturationIndex = lattice_->getSI(microPhaseId_);
           double DOR = 0.0;
           double newDOR = 0.0;
 
@@ -299,26 +305,26 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
           if (DOR < 1.0 && !doTweak) {
                     
-              /// @todo Make a rate equation here ...
+              /// @todo Modify dissolution rate equation for hydroxyl activity
+              /// and loi
 
-              if (fabs(rateconst_) > 0.0) {
-                /// @todo Must replace DOR with saturation index here !!!
-                dissrrate = rateconst * ssaFactor_ * pow((1.0 - DOR),dfexp_);
+              if (fabs(dissolutionRateConst_) > 0.0) {
+                dissrate = dissolutionRateConst_ * ssaFactor_ * pow((1.0 - saturationIndex),dfexp_);
             
                 if (dissrate < 1.0e-10) dissrate = 1.0e-10;
               } else {
                   throw FloatException("PozzolanicModel","calculateKineticStep",
-                                       "rateconst_ = 0.0");
+                                       "diffusionRateConst_ = 0.0");
               }
         
               /// @note Need to get some more constants in here
               /// for diffusion coefficient, thickness, etc.
              
-              hsrate = k3_ * pow((1.0 - DOR),n3_);
+              hsrate = diffusionRateConstLate_ * ssaFactor_ * (1.0 - DOR) * pow((1.0 - saturationIndex),dfexp_);
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
               if (DOR > 0.0) {
-                  diffrate = (k2_ * pow((1.0 - DOR),(2.0/3.0))) /
+                  diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - saturationIndex) * pow((1.0 - DOR),(2.0/3.0))) /
                                        (1.0 - pow((1.0 - DOR),(1.0/3.0)));
                   if (diffrate < 1.0e-10) diffrate = 1.0e-10;
               } else {
@@ -327,15 +333,14 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
               rate = (dissrate < hsrate) ? dissrate : hsrate;
               if (diffrate < rate) rate = diffrate;
-              rate *= (wcFactor * rhFactor * arrhenius);
+              rate *= (rhFactor * arrhenius);
               newDOR = DOR + (rate * timestep);
 
               cout << "Pozzolanic model for " << name_
-                   << ", ngrate = " << ngrate
+                   << ", dissrate = " << dissrate
                    << ", hsrate = " << hsrate
                    << ", diffrate = " << diffrate
                    << ", rhFactor = " << rhFactor
-                   << ", wcFactor = " << wcFactor
                    << ", RATE = " << rate
                    << ", timestep " << timestep
                    << ", oldDOR = " << DOR << ", new DOR = "

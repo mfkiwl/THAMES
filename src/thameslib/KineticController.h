@@ -116,7 +116,9 @@ void initKineticData(struct KineticData &kineticData)
     kineticData.k1 = kineticData.k2 = kineticData.k3 = 1.0;
     kineticData.n1 = kineticData.n3 = 1.0;
     kineticData.critDOH = 0.0;
-    kineticData.rateconst = 0.0;
+    kineticData.dissolutionRateConst = 0.0;
+    kineticData.diffusionRateConstEarly = 0.0;
+    kineticData.diffusionRateConstLate = 0.0;
     kineticData.siexp = kineticData.dfexp = kineticData.ohexp = 0.0;
     kineticData.activationEnergy = 0.0;
     kineticData.loi = kineticData.sio2 = kineticData.al2o3 = kineticData.cao = 0.0;

@@ -45,7 +45,9 @@ class PozzolanicModel : public KineticModel {
 
 protected:
     
-double rateconst_;               /**< Rate constant for reaction (mol/m2/s) */
+double dissolutionRateConst_;      /**< Rate constant for reaction (mol/m2/s) */
+double diffusionRateConstEarly_;   /**< Rate constant for early-age diffusion (mol/m2/s) */
+double diffusionRateConstLate_;    /**< Rate constant for later-age diffusion (mol/m2/s) */
 double siexp_;                   /**< Exponent on saturation index (unitless) */
 double dfexp_;                   /**< Exponent on driving force (unitless) */
 double ohexp_;                   /**< Exponent on OH ion activity (unitless) */
@@ -87,27 +89,75 @@ PozzolanicModel (ChemicalSystem *cs,
                  const bool warning);
      
 /**
-@brief Set the rate constant
+@brief Set the dissolution rate constant
 
 @note NOT USED.
 
-@param rc is the rate constant value to use
+@param rc is the dissolution rate constant value to use
 */
-void setRateconstant (const double rc)
+void setDissolutionRateConst (const double rc)
 {
-    rateconst_ = max(rc,0.0);
+    dissolutionRateConst_ = max(rc,0.0);
 }
 
 /**
-@brief Get the rate constant
+@brief Get the dissolution rate constant
 
 @note NOT USED.
 
 @return the rate constant
 */
-double getRateconst () const
+double getDissolutionRateConst () const
 {
-    return rateconst_;
+    return dissolutionRateConst_;
+}
+
+/**
+@brief Set the early-age diffusion rate constant
+
+@note NOT USED.
+
+@param rc is the early-age diffusion rate constant value to use
+*/
+void setDiffusionRateConstEarly (const double rc)
+{
+    diffusionRateConstEarly_ = max(rc,0.0);
+}
+
+/**
+@brief Get the dissolution rate constant
+
+@note NOT USED.
+
+@return the early-age diffusion rate constant
+*/
+double getDiffusionRateConstEarly () const
+{
+    return diffusionRateConstEarly_;
+}
+
+/**
+@brief Set the later-age diffusion rate constant
+
+@note NOT USED.
+
+@param rc is the later-age diffusion rate constant value to use
+*/
+void setDiffusionRateConstLate (const double rc)
+{
+    diffusionRateConstLate_ = max(rc,0.0);
+}
+
+/**
+@brief Get the later-age diffusion rate constant
+
+@note NOT USED.
+
+@return the later-age diffusion rate constant
+*/
+double getDiffusionRateConstLate () const
+{
+    return diffusionRateConstLate_;
 }
 
 /**

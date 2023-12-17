@@ -27,11 +27,13 @@ Most of the members have self-evident meanings:
     - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase
     - `n1` is the Parrot and Killoh <i>N</i><sub>1</sub> parameter for the phase
     - `n3` is the Parrot and Killoh <i>N</i><sub>3</sub> parameter for the phase
-    - `rateconst` is a generic rate constant for dissolution or growth (flux units)
+    - `dissolutionRateConst` is a generic rate constant for dissolution or growth (flux units)
+    - `diffusionRateConstEarly` is a generic rate constant for early-age diffusion (flux units)
+    - `diffusionRateConstLate` is a generic rate constant for later-age diffusion (flux units)
     - `siexp` is the exponent on the saturation index in the rate equation
     - `dfexp` is the exponent on the driving force term in the rate equation
     - `ohexp` is the exponent on the hydroxyl ion activity in the rate equation
-    - `Ea` is the activation energy [J/mol/K]
+    - `activationEnergy` is the activation energy [J/mol/K]
     - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
 */
@@ -56,7 +58,9 @@ struct KineticData {
     double n1;                /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
     double n3;                /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
     double critDOH;           /**< Critical degree of hydration for w/c effect */
-    double rateconst;         /**< Generic rate constant [mol/m2/s] */
+    double dissolutionRateConst;         /**< Generic rate constant [mol/m2/s] */
+    double diffusionRateConstEarly;      /**< Generic rate constant [mol/m2/s] */
+    double diffusionRateConstLate;       /**< Generic rate constant [mol/m2/s] */
     double siexp;             /**< Exponent on saturation index [unitless] */
     double dfexp;             /**< Exponent on driving force [unitless] */
     double ohexp;             /**< Exponent on OH ion activity [unitless] */
