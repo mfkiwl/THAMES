@@ -144,10 +144,9 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
 void PozzolanicModel::calculateKineticStep (const double timestep,
                                             const double temperature,
                                             bool isFirst,
-                                            bool doTweak,
                                             double rh,
-                                            vector<double> &ICMoles,
-                                            vector<double> &solutICMoles,
+                                            vector<double> &dICMoles,
+                                            vector<double> &dsolutICMoles,
                                             vector<double> &DCMoles,
                                             vector<double> &GEMPhaseMoles)
 {
@@ -172,7 +171,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     ///
     
     static double hyd_time = 0.0;
-    if (!doTweak) hyd_time = hyd_time + timestep;
+    hyd_time = hyd_time + timestep;
 
     #ifdef DEBUG
         cout << "PozzolanicModel::calculateKineticStep Hydration Time = "
@@ -187,13 +186,10 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
         int numGEMPhases = chemSys_->getNumGEMPhases();
         int DCId,ICId;
         double molarMass;
-        vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
-        ICMoles.clear();
-        ICMoles.resize(ICNum,0.0);
-        solutICMoles.clear();
-        solutICMoles.resize(ICNum,0.0);
-        DCMoles.clear();
-        DCMoles.resize(DCNum,0.0);
+        dICMoles.clear();
+        dICMoles.resize(ICNum,0.0);
+        dsolutICMoles.clear();
+        dsolutICMoles.resize(ICNum,0.0);
         GEMPhaseMoles.clear();
         GEMPhaseMoles.resize(numGEMPhases,0.0);
         string icn;
@@ -204,40 +200,17 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
         int waterId = chemSys_->getDCId("H2O@");
 
-        #ifdef DEBUG
-            cout << "PozzolanicModel::calculateKineticStep ICmoles before dissolving:" << endl;
-            cout << "PozzolanicModel::calculateKineticStep DC moles of water = " << chemSys_->getDCMoles(waterId);
-            cout.flush();
-            for (int i = 0; i < ICNum; i++) {
-              if (isFirst) {
-                  ICMoles[i] = 1.0e-9;
-              } else {
-                  ICMoles[i] = chemSys_->getICMoles(i);
-              }
-              ICName[i] = chemSys_->getICName(i);
-              cout << "PozzolanicModel::calculateKineticStep     "
-                   << ICName[i] << ": " << ICMoles[i] << " mol" << endl;
-            }
-        #else 
-            for (int i = 0; i < ICNum; i++) {
-              ICMoles[i] = chemSys_->getICMoles(i);
-              if (isFirst) {
-                  ICMoles[i] = 1.0e-9;
-              } else {
-                  ICMoles[i] = chemSys_->getICMoles(i);
-              }
-              ICName[i] = chemSys_->getICName(i);
-            }
-        #endif
-
-        for (int i = 0; i < DCNum; i++) {
-          DCMoles[i] = chemSys_->getDCMoles(i);
+        // Each component now has its own kinetic model and we
+        // just want to know the *change* in IC moles caused by
+        // this component's dissolution or growth.
+        
+        for (int i = 0; i < ICNum; i++) {
+          ICName[i] = chemSys_->getICName(i);
         }
+
         for (int i = 0; i < numGEMPhases; i++) {
           GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
         }
-
-        solutICMoles = chemSys_->getSolution();
 
         if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) { 
 
@@ -303,13 +276,16 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
 
           arrhenius = exp((activationEnergy_/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
 
-          if (DOR < 1.0 && !doTweak) {
+          if (DOR < 1.0) {
                     
               /// @todo Modify dissolution rate equation for hydroxyl activity
               /// and loi
 
               if (fabs(dissolutionRateConst_) > 0.0) {
-                dissrate = dissolutionRateConst_ * ssaFactor_ * pow((1.0 - saturationIndex),dfexp_);
+                // Need the activity of hydroxyl ions
+                double aOH = chemSys_->getActivity("OH-");
+                dissrate = dissolutionRateConst_ * ssaFactor_
+                           * pow(aOH,ohexp_) * (1.0 - pow(saturationIndex,dfexp_));
             
                 if (dissrate < 1.0e-10) dissrate = 1.0e-10;
               } else {
@@ -320,12 +296,15 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               /// @note Need to get some more constants in here
               /// for diffusion coefficient, thickness, etc.
              
-              hsrate = diffusionRateConstLate_ * ssaFactor_ * (1.0 - DOR) * pow((1.0 - saturationIndex),dfexp_);
+              hsrate = diffusionRateConstLate_ * ssaFactor_
+                     * pow((1.0 - DOR),dorexp_) * (1.0 - pow(saturationIndex,dfexp_));
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
               if (DOR > 0.0) {
-                  diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - saturationIndex) * pow((1.0 - DOR),(2.0/3.0))) /
-                                       (1.0 - pow((1.0 - DOR),(1.0/3.0)));
+                  diffrate = (diffusionRateConstEarly_
+                           * ssaFactor_ * (1.0 - pow(saturationIndex,dfexp_))
+                           * pow((1.0 - DOR),(2.0/3.0))) /
+                                 (1.0 - pow((1.0 - DOR),(1.0/3.0)));
                   if (diffrate < 1.0e-10) diffrate = 1.0e-10;
               } else {
                   diffrate = 1.0e9;
@@ -385,13 +364,13 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               impurityRelease[3] = (massDissolved *
                       chemSys_->getSo3(microPhaseId_));
 
-              for (int ii = 0; ii < ICMoles.size(); ii++) {
+              for (int ii = 0; ii < dICMoles.size(); ii++) {
 
                   /// @todo BULLARD PLACEHOLDER
                   /// Special case for Silica-amorph here to account for SiO2 < 100%
                      
 
-                  ICMoles[ii] += ((massDissolved
+                  dICMoles[ii] += ((massDissolved
                                   / chemSys_->getDCMolarMass(DCId_))
                                   * chemSys_->getDCStoich(DCId_,ii));
                       
@@ -402,7 +381,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                         molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                         icn = "O";
                         molarMass += chemSys_->getICMolarMass(icn);
-                        ICMoles[ii] += (impurityRelease[0]/molarMass);
+                        dICMoles[ii] += (impurityRelease[0]/molarMass);
                     }
                     // Dissolved Na2O in this phase
                     if (chemSys_->isIC("Na")) {
@@ -410,7 +389,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                         molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                         icn = "O";
                         molarMass += chemSys_->getICMolarMass(icn);
-                        ICMoles[ii] += (impurityRelease[1]/molarMass);
+                        dICMoles[ii] += (impurityRelease[1]/molarMass);
                     }
                     // Dissolved MgO in this phase
                     if (chemSys_->isIC("Mg")) {
@@ -418,7 +397,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                         molarMass = chemSys_->getICMolarMass(icn);
                         icn = "O";
                         molarMass += chemSys_->getICMolarMass(icn);
-                        ICMoles[ii] += (impurityRelease[2]/molarMass);
+                        dICMoles[ii] += (impurityRelease[2]/molarMass);
                     }
                     // Dissolved SO3 in this phase
                     if (chemSys_->isIC("S")) {
@@ -426,7 +405,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                         molarMass = chemSys_->getICMolarMass(icn);
                         icn = "O";
                         molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-                        ICMoles[ii] += (3.0 * (impurityRelease[3]/molarMass));
+                        dICMoles[ii] += (3.0 * (impurityRelease[3]/molarMass));
                     }
                   } else if (ICName[ii] == "S") {
                       // Dissolved SO3  in this phase
@@ -434,43 +413,30 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                       molarMass = chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-                      ICMoles[ii] += (impurityRelease[3]/molarMass);
+                      dICMoles[ii] += (impurityRelease[3]/molarMass);
                   } else if (ICName[ii] == "K") {
                       // Dissolved K2O in this phase
                       icn = "K";
                       molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (2.0 * (impurityRelease[0]/molarMass));
+                      dICMoles[ii] += (2.0 * (impurityRelease[0]/molarMass));
                   } else if (ICName[ii] == "Na") {
                       // Dissolved Na2O in this phase
                       icn = "Na";
                       molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (2.0 * (impurityRelease[1]/molarMass));
+                      dICMoles[ii] += (2.0 * (impurityRelease[1]/molarMass));
                   } else if (ICName[ii] == "Mg") {
                       // Dissolved MgO in this phase
                       icn = "Mg";
                       molarMass = chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (impurityRelease[2]/molarMass);
+                      dICMoles[ii] += (impurityRelease[2]/molarMass);
                   }
     
-              }
-
-          } else if (DOR < 1.0) {
-
-              ///
-              /// We will just tweak the icmoles a bit to try to
-              /// cure a previous failed convergence with GEM_run
-              ///
-             
-              for (int ii = 0; ii < ICMoles.size(); ii++) {
-                  if (ICName[ii] != "H" && ICName[ii] != "O" && ICName[ii] != "Zz") {
-                      ICMoles[ii] *= 1.01;
-                  }
               }
 
           } else {
@@ -479,33 +445,12 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           }   
 
           #ifdef DEBUG
-            if (!doTweak) {
-                cout << "PozzolanicModel::calculateKineticStep ICmoles after dissolving:" << endl;
-            } else {
-                cout << "PozzolanicModel::calculateKineticStep ICmoles after tweaking:" << endl;
-            }
+            cout << "PozzolanicModel::calculateKineticStep ICmoles after dissolving:" << endl;
             for (int i = 0; i < ICNum; i++) {
-              cout << "    " << ICName[i] << ": " << ICMoles[i] << " mol" << endl;
+              cout << "    " << ICName[i] << ": " << dICMoles[i] << " mol" << endl;
             }
             cout.flush();
           #endif
-
-          if (doTweak) {
-              cout << "WARNING: Doing a TWEAK of IC moles for " << name_ << endl;
-              for (int ii = 0; ii < ICMoles.size(); ii++) {
-                  chemSys_->setICMoles(ii,ICMoles[ii]);
-              }
-              return;
-          }
-
-          for (int ii = 0; ii < ICMoles.size(); ii++) {
-              chemSys_->setICMoles(ii,ICMoles[ii]);
-              #ifdef DEBUG
-                  cout << "PozzolanicModel::calculateKineticStep ICmoles of " << ICName[ii]
-                       << " is: " << ICMoles[ii] << endl;
-                  cout.flush();
-              #endif
-          }
 
         } // End of normal hydration block
     }     // End of try block

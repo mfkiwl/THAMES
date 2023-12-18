@@ -154,10 +154,9 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
 void ParrotKillohModel::calculateKineticStep (const double timestep,
                                               const double temperature,
                                               bool isFirst,
-                                              bool doTweak,
                                               double rh,
-                                              vector<double> &ICMoles,
-                                              vector<double> &solutICMoles,
+                                              vector<double> &dICMoles,
+                                              vector<double> &dsolutICMoles,
                                               vector<double> &DCMoles,
                                               vector<double> &GEMPhaseMoles)
 {
@@ -267,7 +266,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
         cout << "    Ea = " << activationEnergy_ << endl;
         cout.flush();
 
-        if (DOH < 1.0 && !doTweak) {
+        if (DOH < 1.0) {
                     
             // Normal Parrott and Killoh implementation here
                     
@@ -359,14 +358,14 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
 
 #ifdef DEBUG
             cout << "!!!Before dissolving some " << name_ << endl;
-            for (int ii = 0; ii < ICMoles.size(); ii++) {
-              cout << "IC moles of " << ICName_[ii] << " = " << ICMoles[ii] << endl;
+            for (int ii = 0; ii < dICMoles.size(); ii++) {
+              cout << "dIC moles of " << ICName_[ii] << " = " << dICMoles[ii] << endl;
             }
             cout.flush();
 #endif
-            for (int ii = 0; ii < ICMoles.size(); ii++) {
+            for (int ii = 0; ii < dICMoles.size(); ii++) {
 
-                ICMoles[ii] += ((massDissolved
+                dICMoles[ii] += ((massDissolved
                                 / chemSys_->getDCMolarMass(DCId_))
                                 * chemSys_->getDCStoich(DCId_,ii));
                       
@@ -377,7 +376,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                       molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (impurityRelease[0]/molarMass);
+                      dICMoles[ii] += (impurityRelease[0]/molarMass);
                   }
                   // Dissolved Na2O in this phase
                   if (chemSys_->isIC("Na")) {
@@ -385,7 +384,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                       molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (impurityRelease[1]/molarMass);
+                      dICMoles[ii] += (impurityRelease[1]/molarMass);
                   }
                   // Dissolved MgO in this phase
                   if (chemSys_->isIC("Mg")) {
@@ -393,7 +392,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                       molarMass = chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += chemSys_->getICMolarMass(icn);
-                      ICMoles[ii] += (impurityRelease[2]/molarMass);
+                      dICMoles[ii] += (impurityRelease[2]/molarMass);
                   }
                   // Dissolved SO3 in this phase
                   if (chemSys_->isIC("S")) {
@@ -401,7 +400,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                       molarMass = chemSys_->getICMolarMass(icn);
                       icn = "O";
                       molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-                      ICMoles[ii] += (3.0 * (impurityRelease[3]/molarMass));
+                      dICMoles[ii] += (3.0 * (impurityRelease[3]/molarMass));
                   }
                 } else if (ICName_[ii] == "S") {
                     // Dissolved SO3  in this phase
@@ -409,43 +408,30 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                     molarMass = chemSys_->getICMolarMass(icn);
                     icn = "O";
                     molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-                    ICMoles[ii] += (impurityRelease[3]/molarMass);
+                    dICMoles[ii] += (impurityRelease[3]/molarMass);
                 } else if (ICName_[ii] == "K") {
                     // Dissolved K2O in this phase
                     icn = "K";
                     molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                     icn = "O";
                     molarMass += chemSys_->getICMolarMass(icn);
-                    ICMoles[ii] += (2.0 * (impurityRelease[0]/molarMass));
+                    dICMoles[ii] += (2.0 * (impurityRelease[0]/molarMass));
                 } else if (ICName_[ii] == "Na") {
                     // Dissolved Na2O in this phase
                     icn = "Na";
                     molarMass = 2.0 * chemSys_->getICMolarMass(icn);
                     icn = "O";
                     molarMass += chemSys_->getICMolarMass(icn);
-                    ICMoles[ii] += (2.0 * (impurityRelease[1]/molarMass));
+                    dICMoles[ii] += (2.0 * (impurityRelease[1]/molarMass));
                 } else if (ICName_[ii] == "Mg") {
                     // Dissolved MgO in this phase
                     icn = "Mg";
                     molarMass = chemSys_->getICMolarMass(icn);
                     icn = "O";
                     molarMass += chemSys_->getICMolarMass(icn);
-                    ICMoles[ii] += (impurityRelease[2]/molarMass);
+                    dICMoles[ii] += (impurityRelease[2]/molarMass);
                 }
     
-            }
-
-        } else if (DOH < 1.0) {
-
-            ///
-            /// We will just tweak the icmoles a bit to try to
-            /// cure a previous failed convergence with GEM_run
-            ///
-             
-            for (int ii = 0; ii < ICMoles.size(); ii++) {
-                if (ICName_[ii] != "H" && ICName_[ii] != "O" && ICName_[ii] != "Zz") {
-                    ICMoles[ii] *= 1.01;
-                }
             }
 
         } else {
@@ -464,24 +450,6 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
 //          }
 //          cout.flush();
 //        #endif
-
-        if (doTweak) {
-            cout << "WARNING: Doing an IC mole TWEAK for " << name_ << endl;
-            cout.flush();
-            for (int ii = 0; ii < ICMoles.size(); ii++) {
-                chemSys_->setICMoles(ii,ICMoles[ii]);
-            }
-            return;
-        }
-
-        for (int ii = 0; ii < ICMoles.size(); ii++) {
-            chemSys_->setICMoles(ii,ICMoles[ii]);
-            #ifdef DEBUG
-                cout << "ParrotKillohModel::calculateKineticStep ICmoles of " << ICName_[ii]
-                     << " is: " << ICMoles[ii] << endl;
-                cout.flush();
-            #endif
-        }
 
     }     // End of try block
 

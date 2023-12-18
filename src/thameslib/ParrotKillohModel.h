@@ -269,20 +269,19 @@ Overloaded from base class to handle Parrot and Killoh model.
 @param timestep is the time interval to simulate [days]
 @param temperature is the absolute temperature during this step [K]
 @param isFirst is true if this is the first time step of the simulation, false otherwise
-@param doTweak is true if trying to recover from failed convergence
 @param rh is the internal relative humidity
-@param ICMoles is the vector of moles of each IC
-@param solutICMoles is the vector of moles of each IC in solution
+@param dICMoles is the vector of moles of each IC changed by kinetics
+@param dsolutICMoles is the vector of moles of each IC in solution changed by
+kinetics
 @param DCMoles is the vector of moles of each DC
 @param GEMPhaseMoles is the vector of moles of each phase in GEMS
 */
 virtual void calculateKineticStep (const double timestep,
                                    const double temperature,
                                    bool isFirst,
-                                   bool doTweak,
                                    double rh,
-                                   vector<double> &ICMoles,
-                                   vector<double> &solutICMoles,
+                                   vector<double> &dICMoles,
+                                   vector<double> &dsolutICMoles,
                                    vector<double> &DCMoles,
                                    vector<double> &GEMPhaseMoles);
 

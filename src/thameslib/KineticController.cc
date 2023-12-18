@@ -540,6 +540,13 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             from_string(kineticData.dfexp,st);
             xmlFree(key);
         }
+        // Exponent on  the degree of reaction term in the diffusion rate equation
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"dorexp"))) {
+            key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+            string st((char *)key);
+            from_string(kineticData.dorexp,st);
+            xmlFree(key);
+        }
         // Exponent on  the hydroxy ion activity in the rate equation
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"ohexp"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -682,7 +689,7 @@ void KineticController::calculateKineticStep (const double timestep,
         int microPhaseId,DCId,ICId;
         double molarMass;
         vector<double> ICMoles,solutICMoles,DCMoles,GEMPhaseMoles;
-        vector<double> tICMoles,tsolutICMoles,tDCMoles,tGEMPhaseMoles;
+        vector<double> dICMoles,dsolutICMoles,tDCMoles,tGEMPhaseMoles;
         ICMoles.clear();
         ICMoles.resize(ICNum_,0.0);
         solutICMoles.clear();
@@ -691,10 +698,10 @@ void KineticController::calculateKineticStep (const double timestep,
         DCMoles.resize(DCNum_,0.0);
         GEMPhaseMoles.clear();
         GEMPhaseMoles.resize(GEMPhaseNum_,0.0);
-        tICMoles.clear();
-        tICMoles.resize(ICNum_,0.0);
-        tsolutICMoles.clear();
-        tsolutICMoles.resize(ICNum_,0.0);
+        dICMoles.clear();
+        dICMoles.resize(ICNum_,0.0);
+        dsolutICMoles.clear();
+        dsolutICMoles.resize(ICNum_,0.0);
         tDCMoles.clear();
         tDCMoles.resize(DCNum_,0.0);
         tGEMPhaseMoles.clear();
@@ -919,18 +926,17 @@ void KineticController::calculateKineticStep (const double timestep,
                     // zero out the temporary chemical compositions before
                     // passing them to the kinetic model
                     
-                    fill(tICMoles.begin(),tICMoles.end(),minmoles);
-                    fill(tsolutICMoles.begin(),tsolutICMoles.end(),minmoles);
+                    fill(dICMoles.begin(),dICMoles.end(),minmoles);
+                    fill(dsolutICMoles.begin(),dsolutICMoles.end(),minmoles);
                     fill(tDCMoles.begin(),tDCMoles.end(),minmoles);
                     fill(tGEMPhaseMoles.begin(),tGEMPhaseMoles.end(),minmoles);
 
                     phaseKineticModel_[midx]->calculateKineticStep(timestep,
                                                              temperature,
                                                              isFirst,
-                                                             doTweak,
                                                              rh,
-                                                             tICMoles,
-                                                             tsolutICMoles,
+                                                             dICMoles,
+                                                             dsolutICMoles,
                                                              tDCMoles,
                                                              tGEMPhaseMoles);
 
@@ -945,12 +951,12 @@ void KineticController::calculateKineticStep (const double timestep,
                             cout << "Before moles of " << ICName_[im] << " = "
                                  << ICMoles[im] << endl;
                             cout << "Incrementing moles of " << ICName_[im]
-                                 << " by " << (tICMoles[im] - minmoles) << endl;
+                                 << " by " << (dICMoles[im] - minmoles) << endl;
                             cout.flush();
                         #endif // DEBUG
                     
-                        ICMoles[im] += (tICMoles[im] - minmoles);
-                        solutICMoles[im] += (tsolutICMoles[im] - minmoles);
+                        ICMoles[im] += (dICMoles[im] - minmoles);
+                        solutICMoles[im] += (dsolutICMoles[im] - minmoles);
 
                         #ifdef DEBUG
                             cout << "After moles of " << ICName_[im] << " = "

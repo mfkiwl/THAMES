@@ -50,6 +50,7 @@ double diffusionRateConstEarly_;   /**< Rate constant for early-age diffusion (m
 double diffusionRateConstLate_;    /**< Rate constant for later-age diffusion (mol/m2/s) */
 double siexp_;                   /**< Exponent on saturation index (unitless) */
 double dfexp_;                   /**< Exponent on driving force (unitless) */
+double dorexp_;                   /**< Exponent on degree of reaction (unitless) */
 double ohexp_;                   /**< Exponent on OH ion activity (unitless) */
 double sio2_;                    /**< Mass fraction of SiO2 (unitless) */
 double al2o3_;                   /**< Mass fraction of Al2O3 (unitless) */
@@ -209,6 +210,30 @@ double getDfexp () const
 }
 
 /**
+@brief Set the exponent on the degree of reaction in the diffusion rate equation
+
+@note NOT USED.
+
+@param dorexp is the exponent value to use
+*/
+void setDorexp (const double dorexp)
+{
+    dorexp_ = max(dorexp,0.0);
+}
+
+/**
+@brief Get the exponent on the degree of reaction in the diffusion rate equation
+
+@note NOT USED.
+
+@return the exponent on the degree of reaction
+*/
+double getDorexp () const
+{
+    return dorexp_;
+}
+
+/**
 @brief Set the exponent on the hydroxyl ion activity
 
 @note NOT USED.
@@ -344,20 +369,19 @@ Overloaded from base class to handle pozzolanic materials
 @param timestep is the time interval to simulate [days]
 @param temperature is the absolute temperature during this step [K]
 @param isFirst is true if this is the first time step of the simulation, false otherwise
-@param doTweak is true if trying to recover from failed convergence
 @param rh is the internal relative humidity
-@param ICMoles is the vector of moles of each IC
-@param solutICMoles is the vector of moles of each IC in solution
+@param dICMoles is the vector of moles of each IC changed by kinetics
+@param dsolutICMoles is the vector of moles of each IC in solution changed by
+kinetics
 @param DCMoles is the vector of moles of each DC
 @param GEMPhaseMoles is the vector of moles of each phase in GEMS
 */
 virtual void calculateKineticStep (const double timestep,
                                    const double temperature,
                                    bool isFirst,
-                                   bool doTweak,
                                    double rh,
-                                   vector<double> &ICMoles,
-                                   vector<double> &solutICMoles,
+                                   vector<double> &dICMoles,
+                                   vector<double> &dsolutICMoles,
                                    vector<double> &DCMoles,
                                    vector<double> &GEMPhaseMoles);
 

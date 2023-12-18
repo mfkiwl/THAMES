@@ -32,7 +32,11 @@ Most of the members have self-evident meanings:
     - `diffusionRateConstLate` is a generic rate constant for later-age diffusion (flux units)
     - `siexp` is the exponent on the saturation index in the rate equation
     - `dfexp` is the exponent on the driving force term in the rate equation
+    - `dorexp` is the exponent on the degree of reaction in the diffusion rate equations
     - `ohexp` is the exponent on the hydroxyl ion activity in the rate equation
+    - `sio2' is the mole fraction of SiO<sub>2</sub> in the component
+    - `al2o3' is the mole fraction of Al<sub>2</sub>O<sub>3</sub> in the component
+    - `cao' is the mole fraction of CaO in the component
     - `activationEnergy` is the activation energy [J/mol/K]
     - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
@@ -63,11 +67,12 @@ struct KineticData {
     double diffusionRateConstLate;       /**< Generic rate constant [mol/m2/s] */
     double siexp;             /**< Exponent on saturation index [unitless] */
     double dfexp;             /**< Exponent on driving force [unitless] */
+    double dorexp;             /**< Exponent on degree of reaction [unitless] */
     double ohexp;             /**< Exponent on OH ion activity [unitless] */
     double loi;               /**< Loss on ignition [unitless] */
-    double sio2;              /**< Mass fraction SiO2 in material */
-    double al2o3;             /**< Mass fraction Al2O3 in material */
-    double cao;               /**< Mass fraction CaO in material */
+    double sio2;              /**< Mole fraction SiO2 in material */
+    double al2o3;             /**< Mole fraction Al2O3 in material */
+    double cao;               /**< Mole fraction CaO in material */
 };
 #endif
 

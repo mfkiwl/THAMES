@@ -6144,6 +6144,25 @@ double getSI (const string &str)
 }
 
 /**
+@brief Get the activity of a GEM DC by its id.
+
+@param dcstr is the name of the GEM DC to query
+@return the activity of the DC
+*/
+double getActivity (const string &dcstr)
+{
+    try {
+        return node_->DC_a(getDCId(dcstr));
+    }
+    catch (out_of_range &oor) {
+        EOBException ex("ChemicalSystem","getActivity",dcstr,
+                            numDCs_,getDCId(dcstr));
+        ex.printException();
+        exit(1);
+    }
+}
+
+/**
 @brief Get the current list of IC moles in the aqueous solution.
 
 @return the vector of moles of each IC in the aqueous solution

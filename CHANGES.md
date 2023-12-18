@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 18 14:09:33 2023 | Fixed increment of IC moles for kinetic models and
+added hydroxyl activity term to pozzolanic model |
 | Dec 17 15:11:00 2023 | Added two diffusion rate constants for pozzolanic reactions, akin to the k2 and k3 parameters in the Parrot-Killoh model |
 | Dec 15 16:08:51 2023 | Updating kinetic models to have initial specific surface areas for each phase; compile not checked |
 | Dec 14 16:28:39 2023 | Fixed run-time errors in KineticController that were not assigning water or solid masses initially |

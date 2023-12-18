@@ -135,6 +135,7 @@
       <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstLate" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="siexp" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="dfexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dorexp" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="ohexp" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="sio2" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="al2o3" type="positiveDoubletype"/>
