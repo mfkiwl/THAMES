@@ -236,6 +236,30 @@ void KineticController::parseDoc (const string &docName)
         fex.printException();
         exit(1);
     }
+
+    /// All kinetic components have been parsed now.  Next, this block tries
+    /// to handle pozzolanic effects (loi, SiO2 content, etc.) on any other kinetic phases
+
+    /// @todo This is the block where the influence of some components on the
+    /// kinetic parameters of other components can be set.
+    
+    double refloi = 0.08;
+    double loi = refloi;
+    double maxloi = refloi;
+
+    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+       loi = phaseKineticModel_[midx]->getLossOnIgnition();
+       if (loi > maxloi) maxloi = loi;
+    }
+
+    /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
+    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+       if (phaseKineticModel_[midx]->getType() == ParrotKillohType) { 
+         phaseKineticModel_[midx]->setPfk(refloi/maxloi);
+       }
+    }
+
+    
     return;
 }
 

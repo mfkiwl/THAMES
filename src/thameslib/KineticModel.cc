@@ -26,6 +26,8 @@ KineticModel::KineticModel ()
     ICName_.clear();
     DCName_.clear();
     GEMPhaseNum_ = 0;
+    specificSurfaceArea_ = refSpecificSurfaceArea_ = 0.0;
+    degreeOfReaction_ = lossOnIgnition_ = 0.0;
     
     ///
     /// The default is to not have sulfate attack or leaching, so we set the default

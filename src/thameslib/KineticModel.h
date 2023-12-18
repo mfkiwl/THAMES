@@ -66,6 +66,10 @@ double activationEnergy_;       /**< Apparent activation energy for the reaction
 double specificSurfaceArea_;    /**< Specific surface area (m2/kg) */
 double refSpecificSurfaceArea_; /**< Reference specific surface area (m2/kg) */
 double ssaFactor_;              /**< Reference specific surface area (m2/kg) */
+double degreeOfReaction_;       /**< Degree of reaction of this component (mass
+basis) */
+double lossOnIgnition_;         /**< Loss on ignition of this component (ignited
+mass basis) */
 bool verbose_;                  /**< Flag for verbose output */
 bool warning_;                  /**< Flag for warnining output */
 
@@ -97,6 +101,28 @@ virtual ~KineticModel() {};
 ChemicalSystem *getChemSys () const
 {
     return chemSys_;
+}
+
+/**
+@brief Set the multiplicative adjustment to clinker phase rate constant due to
+pozzolans
+
+@param pfk is the specific surface area [m<sup>2</sup>/kg]
+*/
+virtual void setPfk (double pfk)
+{
+    // Most components do not have a pfk variable, generically return
+    return;
+}
+
+/**
+@brief Get the type of kinetic model
+
+@return a string indicating the model type
+*/
+virtual string getType () const
+{
+    return (GenericType);
 }
 
 /**
@@ -133,7 +159,7 @@ is no particular reason to change it.
 
 @param rsval is the reference specific surface area [m<sup>2</sup>/kg]
 */
-void setRefSpecificSurfaceArea (double rsval)
+void setRefSpecificSurfaceArea (const double rsval)
 {
     refSpecificSurfaceArea_ = rsval;
 }
@@ -157,7 +183,7 @@ double getRefSpecificSurfaceArea () const
 
 @param sfact is the ratio of the actual specific surface area to the reference value
 */
-void setSsaFactor (double sfact)
+void setSsaFactor (const double sfact)
 {
     ssaFactor_ = sfact;
 }
@@ -172,6 +198,54 @@ void setSsaFactor (double sfact)
 double getSsaFactor () const
 {
     return ssaFactor_;
+}
+
+/**
+@brief Set the degree of reaction of this component (mass basis)
+
+@note NOT USED.
+
+@param dor is the degree of reaction to set
+*/
+virtual void setDegreeOfReaction (const double dor)
+{
+    degreeOfReaction_ = dor;
+}
+
+/**
+@brief Get the degree of reaction of this component (mass basis)
+
+@note NOT USED.
+
+@return the degree of reaction of this component
+*/
+virtual double getDegreeOfReaction () const
+{
+    return degreeOfReaction_;
+}
+
+/**
+@brief Set the loss on ignition of this component (ignited mass basis)
+
+@note NOT USED.
+
+@param loi is the degree of reaction to set
+*/
+virtual void setLossOnIgnition (const double loi)
+{
+    lossOnIgnition_ = loi;
+}
+
+/**
+@brief Get the loss on ignition of this component (ignited mass basis)
+
+@note NOT USED.
+
+@return the loss on ignition of this component
+*/
+virtual double getLossOnIgnition () const
+{
+    return lossOnIgnition_;
 }
 
 /**

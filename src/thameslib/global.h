@@ -57,6 +57,9 @@ const string MonocarbGEMName("C4AcH11");
 // @todo Make this general somehow
 const string HydrotalcGEMName("OH-hydrotalcite");
 
+// String indicating a generic kinetic model
+const string GenericType("Generic");
+
 // String indicating the Parrot Killoh Model
 const string ParrotKillohType("ParrotKilloh");
 

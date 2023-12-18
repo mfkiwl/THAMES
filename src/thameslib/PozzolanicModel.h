@@ -90,6 +90,16 @@ PozzolanicModel (ChemicalSystem *cs,
                  const bool warning);
      
 /**
+@brief Get the type of kinetic model
+
+@return a string indicating the model type
+*/
+string getType () const
+{
+    return (PozzolanicType);
+}
+
+/**
 @brief Set the dissolution rate constant
 
 @note NOT USED.

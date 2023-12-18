@@ -11,7 +11,7 @@ ParrotKillohModel::ParrotKillohModel ()
     /// Default value for w/c ratio in PK model is 0.45
     ///
 
-    wcRatio_ = 0.45;
+    wsRatio_ = 0.45;
 
     ///
     /// Default value for specific surface area in PK model is 385 m<sup>2</sup>/kg
@@ -39,13 +39,14 @@ ParrotKillohModel::ParrotKillohModel ()
     k1_ = 1.0;
     k2_ = 1.0;
     k3_ = 1.0;
+    pfk_ = 1.0;
     n1_ = 1.0;
     n3_ = 1.0;
     activationEnergy_ = 0.0;
     scaledMass_ = 0.0;
     initScaledMass_ = 0.0;
     critDOH_ = 100.0;
-    degreeOfHydration_ = 0.0;
+    degreeOfReaction_ = 0.0;
     ICNum_ = 0;
     ICName_.clear();
     DCNum_ = 0;
@@ -102,7 +103,7 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     /// Default value for w/c ratio in PK model is 0.45
     ///
 
-    wcRatio_ = lattice_->getWsratio();
+    wsRatio_ = lattice_->getWsratio();
 
     ///
     /// Default initial solid mass is 100 g
@@ -124,13 +125,18 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     k1_ = kineticData.k1;
     k2_ = kineticData.k2;
     k3_ = kineticData.k3;
+
+    /// Default to no pozzolanic influence on clinker phases
+   
+    pfk_ = 1.0;
+
     n1_ = kineticData.n1;
     n3_ = kineticData.n3;
     activationEnergy_ = kineticData.activationEnergy;
     scaledMass_ = kineticData.scaledMass;
     initScaledMass_ = kineticData.scaledMass;
     critDOH_ = kineticData.critDOH;
-    degreeOfHydration_ = 0.0;
+    degreeOfReaction_ = 0.0;
     
     waterId_ = chemSys_->getDCId("H2O@");
     ICNum_ = chemSys_->getNumICs();
@@ -165,9 +171,9 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
     ///
 
     double T = temperature;
-    double wcFactor = 1.0;
+    double wsFactor = 1.0;
     double rhFactor = 1.0;
-    double DOH = 0.0;
+    double DOH = getDegreeOfReaction();
     double cDOH = 0.0;
     double arrhenius = 1.0;
 
@@ -176,7 +182,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
     double diffrate = 1.0e-10;        // Diffusion rate
     double rate = 1.0e-10;            // Selected rate
 
-    double newDOH = 0.0;              // Updated value of doh
+    double newDOH = DOH;              // Updated value of doh
     double massDissolved = 0.0;
 
     ///
@@ -242,17 +248,17 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
                            "initScaledMass_ = 0.0");
         }
 
-        cDOH = 1.333 * wcRatio_;
-        wcFactor = 1.0;
+        cDOH = 1.333 * wsRatio_;
+        wsFactor = 1.0;
         if (DOH > cDOH) {
-            wcFactor += ((4.444 * wcRatio_) -
+            wsFactor += ((4.444 * wsRatio_) -
                          (3.333 * DOH));
-            wcFactor = pow(wcFactor,4.0);
+            wsFactor = pow(wsFactor,4.0);
         }
 
         /*
-        wcFactor = 1.0 + (3.333 *
-               (pow(((critDOH_[i] * wcRatio_) - DOH),4.0)));
+        wsFactor = 1.0 + (3.333 *
+               (pow(((critDOH_[i] * wsRatio_) - DOH),4.0)));
         */
 
         arrhenius = exp((activationEnergy_/GASCONSTANT)*((1.0/refT_) - (1.0/T)));
@@ -261,6 +267,7 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
         cout << "    k1 = " << k1_ << endl;
         cout << "    k2 = " << k2_ << endl;
         cout << "    k3 = " << k3_ << endl;
+        cout << "    pfk = " << pfk_ << endl;
         cout << "    n1 = " << n1_ << endl;
         cout << "    n3 = " << n3_ << endl;
         cout << "    Ea = " << activationEnergy_ << endl;
@@ -294,15 +301,16 @@ void ParrotKillohModel::calculateKineticStep (const double timestep,
 
             rate = (ngrate < hsrate) ? ngrate : hsrate;
             if (diffrate < rate) rate = diffrate;
-            rate *= (wcFactor * rhFactor * arrhenius);
+            rate *= (pfk_ * wsFactor * rhFactor * arrhenius);
             newDOH = DOH + (rate * timestep);
+            setDegreeOfReaction(newDOH);
 
             cout << "PK model for " << name_
                  << ", ngrate = " << ngrate
                  << ", hsrate = " << hsrate
                  << ", diffrate = " << diffrate
                  << ", rhFactor = " << rhFactor
-                 << ", wcFactor = " << wcFactor
+                 << ", wsFactor = " << wsFactor
                  << ", RATE = " << rate
                  << ", timestep " << timestep
                  << ", oldDOH = " << DOH << ", new DOH = "

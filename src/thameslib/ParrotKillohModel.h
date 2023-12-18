@@ -108,7 +108,7 @@ class ParrotKillohModel : public KineticModel {
 
 protected:
     
-double wcRatio_;            /**< water-cement mass ratio */
+double wsRatio_;            /**< water-solid mass ratio */
 
 double k1_;             /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
 double k2_;             /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
@@ -117,8 +117,9 @@ double n1_;             /**< List of Parrot and Killoh <i>N</i><sub>1</sub> valu
 double n3_;             /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
 double critDOH_;        /**< List of critical degrees of hydration for w/c
                                         effect in the Parrot and Killoh model */
-double degreeOfHydration_; /**< Degree of hydration of each kinetic (clinker) phase */
+double pfk_;            /**< Multiplicative factor for k's to account for
 
+effects of pozzolanic additions */
 public:
     
 /**
@@ -151,26 +152,37 @@ ParrotKillohModel (ChemicalSystem *cs,
                    const bool verbose,
                    const bool warning);
      
+
 /**
-@brief Set the w/c mass ratio of the system for the kinetic model equations.
+@brief Get the type of kinetic model
 
-@note NOT USED.
-
-@param wcr is the w/c ratio to set
+@return a string indicating the model type
 */
-void setWcRatio (double wcr)
+string getType () const
 {
-    wcRatio_ = wcr;
+    return (ParrotKillohType);
 }
 
 /**
-@brief Get the w/c mass ratio of the system used by the kinetic model equations.
+@brief Set the w/s mass ratio of the system for the kinetic model equations.
 
-@return the w/c mass ratio
+@note NOT USED.
+
+@param wsr is the w/s mass ratio to set
 */
-double getWcRatio () const
+void setWsRatio (double wsr)
 {
-    return wcRatio_;
+    wsRatio_ = wsr;
+}
+
+/**
+@brief Get the w/s mass ratio of the system used by the kinetic model equations.
+
+@return the w/s mass ratio
+*/
+double getWsRatio () const
+{
+    return wsRatio_;
 }
 
 /**
@@ -210,6 +222,29 @@ double getK3 () const
 }
 
 /**
+@brief Set the multiplicative factor for k's due to pozzolanic effects
+
+@param pfk is the multiplicative factor to set.
+*/
+void setPfk (const double pfk)
+{
+    pfk_ = pfk;
+    if (pfk_ < 1.0e-5) pfk_ = 1.0e-5;
+}
+
+/**
+@brief Get the multiplicative factor for k's due to pozzolanic effects
+
+@note NOT USED.
+
+@return the pfk_ value for the phase in the PK model
+*/
+double getPfk () const
+{
+    return pfk_;
+}
+
+/**
 @brief Get the list of <i>N</i><sub>1</sub> values for clinker phases in the PK model.
 
 @note NOT USED.
@@ -243,18 +278,6 @@ double getN3 () const
 double getCritDOH () const
 {
     return critDOH_;
-}
-
-/**
-@brief Get the degree of hydration for the phase.
-
-@note NOT USED.
-
-@return the degree of hydration of the phase
-*/
-double getDegreeOfHydration () const
-{
-    return degreeOfHydration_;
 }
 
 /**
