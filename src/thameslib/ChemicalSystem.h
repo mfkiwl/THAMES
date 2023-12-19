@@ -2911,30 +2911,41 @@ vector<int> getMicroPhaseDCMembers (const string &str)
 @return the DC component id to set at that position in the list
 */
 unsigned int getMicroPhaseDCMembers (const unsigned int idx,
-                              const unsigned int jdx)
+                                     const unsigned int jdx)
 {
     string msg;
     
-    map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
-    if (p != microPhaseDCMembers_.end()) {
-        if (verbose_) {
-            cout << "micro phase id " << idx << " looking for dc index " << jdx << endl;
-            cout.flush();
-        }
-        if (jdx < (p->second).size()) {
-            return (p->second)[jdx];
-        } else {
-            EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
-                            "microPhaseDCMembers_",(p->second).size(),jdx);
-            ex.printException();
-            exit(1);
-        }
-    } else {
-        msg = "Could not find microPhaseDCMembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseDCMembers",
-                        msg,microPhaseDCMembers_.size(),0);
-        ex.printException();
-        exit(1);
+    try {
+      map<int,vector<int> >::iterator p = microPhaseDCMembers_.find(idx);
+      #ifdef DEBUG
+         cout << "ChemicalSystem::getMicroPhaseDCMembers micro phase id "
+              << idx << " looking for dc index " << jdx << endl;
+         cout << "ChemicalSystem::getMicroPhaseDCMembers size = "
+              << microPhaseDCMembers_.size() << endl;
+         cout.flush();
+      #endif
+      if (p != microPhaseDCMembers_.end()) {
+         #ifdef DEBUG 
+             cout << "micro phase id " << idx << " looking for dc index " << jdx << endl;
+             cout.flush();
+         #endif
+         if (jdx < (p->second).size()) {
+             return (p->second)[jdx];
+         } else {
+             throw EOBException("ChemicalSystem","getMicroPhaseDCMembers",
+                             "microPhaseDCMembers_",(p->second).size(),jdx);
+         }
+      } else {
+         msg = "Could not find microPhaseDCMembers_ match to index provided";
+         throw EOBException("ChemicalSystem","getMicroPhaseDCMembers",
+                         msg,microPhaseDCMembers_.size(),0);
+      }
+    }
+    catch (EOBException eex) {
+      eex.printException();
+      cout.flush();
+      cerr.flush();
+      exit(1);
     }
 }
 
@@ -2946,7 +2957,7 @@ unsigned int getMicroPhaseDCMembers (const unsigned int idx,
 @return the DC component id to set at that position in the list
 */
 unsigned int getMicroPhaseDCMembers (const string &str,
-                              const unsigned int jdx)
+                                     const unsigned int jdx)
 {
     string msg;
     int idx = getMicroPhaseId(str);

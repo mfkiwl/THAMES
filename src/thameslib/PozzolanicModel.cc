@@ -315,12 +315,14 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               rate *= (rhFactor * arrhenius);
               newDOR = DOR + (rate * timestep);
 
-              cout << "Pozzolanic model for " << name_
-                   << ", dissrate = " << dissrate
+              cout << "PozzolanicModel::calculateKineticStep for " << name_ << endl;
+              cout << ", dissrate = " << dissrate 
                    << ", hsrate = " << hsrate
-                   << ", diffrate = " << diffrate
-                   << ", rhFactor = " << rhFactor
-                   << ", RATE = " << rate
+                   << ", diffrate = " << diffrate << endl;
+              cout << ", rhFactor = " << rhFactor
+                   << ", arrhenius = " << arrhenius
+                   << ", saturationIndex = " << saturationIndex << endl;
+              cout << ", RATE = " << rate
                    << ", timestep " << timestep
                    << ", oldDOR = " << DOR << ", new DOR = "
                    << newDOR << endl;

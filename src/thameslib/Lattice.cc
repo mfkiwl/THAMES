@@ -388,6 +388,11 @@ Lattice::Lattice (ChemicalSystem *cs,
             vfrac = ((double)count_[ii])/((double)site_.size());
             setVolumefraction(microPhaseId,vfrac);
             setInitvolumefraction(microPhaseId,vfrac);
+            #ifdef DEBUG
+                cout << "Lattice::Lattice ii = " << ii << ", microPhaseId = "
+                     << microPhaseId << ", volume fraction = " << vfrac << endl;
+                cout.flush();
+            #endif // DEBUG
             if (microPhaseId == ELECTROLYTEID) {
                 DCId = chemSys_->getDCId("H2O@");
             } else if (microPhaseId != VOIDID) {
@@ -405,7 +410,7 @@ Lattice::Lattice (ChemicalSystem *cs,
                     solidMass += microPhaseMass[microPhaseId];
                 }
                 if (verbose_ && vfrac > 0.0) {
-                    cout << "Lattice::Lattice Phase " << chemSys_->getMicroPhaseName(microPhaseId);
+                    cout << "Lattice::Lattice Phase " << chemSys_->getMicroPhaseName(microPhaseId) << endl;
                     cout << "Lattice::Lattice     Molar mass = " << molarMass << " g/mol" << endl;
                     cout << "Lattice::Lattice     Molar volume = " << molarVolume << " m3/mol" << endl;
                     cout << "Lattice::Lattice     Density = " << density << " g/cm3" << endl;
@@ -2236,8 +2241,17 @@ void Lattice::calculatePoreSizeDistribution (void)
 {
     // First compose the full pore volume distribution
 
+    #ifdef DEBUG
+      cout << "Lattice::calculatePoreSizeDistribution" << endl;
+      cout.flush();
+    #endif // DEBUG
     vector<double> subpore_volume;
     subpore_volume.resize(volumefraction_.size(),0.0);
+    #ifdef DEBUG
+      cout << "Lattice::calculatePoreSizeDistribution subpore_volume.size = "
+           << subpore_volume.size() << endl;
+      cout.flush();
+    #endif // DEBUG
 
     // Following will hold the subvoxel porosity of a phase
     double phi = 0.0;
@@ -2257,6 +2271,11 @@ void Lattice::calculatePoreSizeDistribution (void)
     
     vector<vector<struct PoreSizeVolume> > porevolume;
     porevolume = chemSys_->getPoreSizeDistribution();
+    #ifdef DEBUG
+      cout << "Lattice::calculatePoreSizeDistribution porevolume.size = "
+           << porevolume.size() << endl;
+      cout.flush();
+    #endif // DEBUG
     
     // subpore_volume[i] is the non-normalized pore volume fraction
     // within all of phase i throughout the microstructure.  We
@@ -2286,6 +2305,11 @@ void Lattice::calculatePoreSizeDistribution (void)
     vector<struct PoreSizeVolume> zpsvec;
     zpsvec.clear();
     binnedporevolume.resize(porevolume.size(),zpsvec);
+    #ifdef DEBUG
+      cout << "Lattice::calculatePoreSizeDistribution binnedporevolume.size = "
+           << binnedporevolume.size() << endl;
+      cout.flush();
+    #endif // DEBUG
     // Done initializing the binned pore volume distribution
 
     double maxsize = 1.0;
@@ -2298,16 +2322,14 @@ void Lattice::calculatePoreSizeDistribution (void)
         if (i != ELECTROLYTEID && i != VOIDID) {
             maxsize = 1.0;
             int j = 0;
-            // #ifdef DEBUG
-            #if 0
+            #ifdef DEBUG
                 cout << "Lattice::calculatePoreSizeDistribution Distribution "
                      << i << " of " << (porevolume.size() - 1)
                      << " now has " << porevolume[i].size() << " elements" << endl;
                 cout.flush();
             #endif
             while (j < porevolume[i].size()) {
-                // #ifdef DEBUG
-                #if 0
+                #ifdef DEBUG
                     cout << "    " << j << " of " << (porevolume[i].size() - 1)
                          << " diameter = " << porevolume[i][j].diam << ", maxsize = "
                          << maxsize << ", binnedporevolume size = "
@@ -2331,8 +2353,8 @@ void Lattice::calculatePoreSizeDistribution (void)
         }
     }
 
-    // #ifdef DEBUG
-    #if 0
+    #ifdef DEBUG
+        cout << "Lattice::calculatePoreSizeDistribution  maxmaxsize = " << maxmaxsize << endl;
         cout << "Lattice::calculatePoreSizeDistribution  Binned pore distributions" << endl;
         for (int i = 0; i < porevolume.size(); ++i) {
             if (i != ELECTROLYTEID && i != VOIDID) {
