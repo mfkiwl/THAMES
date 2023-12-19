@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 18 23:36:31 2023 | Modified pozzolanic rate equations for diffusion and updated chemistry.xsd |
 | Dec 18 16:01:39 2023 | Added LOI influences on clinker component reaction rates |
 | Dec 18 14:09:33 2023 | Fixed increment of IC moles for kinetic models and added hydroxyl activity term to pozzolanic model |
 | Dec 17 15:11:00 2023 | Added two diffusion rate constants for pozzolanic reactions, akin to the k2 and k3 parameters in the Parrot-Killoh model |

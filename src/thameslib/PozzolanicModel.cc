@@ -285,7 +285,7 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                 // Need the activity of hydroxyl ions
                 double aOH = chemSys_->getActivity("OH-");
                 dissrate = dissolutionRateConst_ * ssaFactor_
-                           * pow(aOH,ohexp_) * (1.0 - pow(saturationIndex,dfexp_));
+                           * pow(aOH,ohexp_) * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_);
             
                 if (dissrate < 1.0e-10) dissrate = 1.0e-10;
               } else {
@@ -297,14 +297,14 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               /// for diffusion coefficient, thickness, etc.
              
               hsrate = diffusionRateConstLate_ * ssaFactor_
-                     * pow((1.0 - DOR),dorexp_) * (1.0 - pow(saturationIndex,dfexp_));
+                     * pow((1.0 - DOR),dorexp_) * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_);
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
               if (DOR > 0.0) {
                   diffrate = (diffusionRateConstEarly_
-                           * ssaFactor_ * (1.0 - pow(saturationIndex,dfexp_))
-                           * pow((1.0 - DOR),(2.0/3.0))) /
-                                 (1.0 - pow((1.0 - DOR),(1.0/3.0)));
+                           * ssaFactor_ * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_)
+                           * pow((1.0 - pow(DOR,dorexp_)),(2.0/3.0))) /
+                                 (1.0 - pow((1.0 - pow(DOR,dorexp_)),(1.0/3.0)));
                   if (diffrate < 1.0e-10) diffrate = 1.0e-10;
               } else {
                   diffrate = 1.0e9;

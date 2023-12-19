@@ -189,9 +189,6 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="numentries" type="positiveIntegertype"/>
-        <xs:element name="blaine" type="positiveDoubletype"/>
-        <xs:element name="refblaine" type="positiveDoubletype"/>
-        <xs:element minOccurs="0" maxOccurs="1" name="wcRatio" type="positiveDoubletype"/>
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
         <xs:element name="saturated" type="integertype"/>
