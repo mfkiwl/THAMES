@@ -609,17 +609,6 @@ virtual void calculateKineticStep (const double timestep,
                                    vector<double> &GEMPhaseMoles) = 0;
      
 /**
-@brief Calculate the change in phase moles
-
-@param rateconst is the rate constant (mol/m2/s)
-@param dfexp is the exponent on the driving force term (1 - beta)
-@param timestep is the time interval over which to calculate the change
-*/
-virtual void calculatePhaseChange (double rateconst,
-                                   double dfexp,
-                                   double timestep);
-
-/**
 @brief Set up the number of moles of dependent components in the kinetic phases.
 
 This method loops over the <i>kinetically</i> controlled phases in the kinetic

@@ -261,7 +261,8 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
           double rhFactor = rh;
           // rhFactor = pow(((rh - 0.55)/0.45),4.0);
           
-          double saturationIndex = lattice_->getSI(microPhaseId_);
+          int thisGEMPhase = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_,0);
+          double saturationIndex = solut_->getSI(thisGEMPhase);
           double DOR = 0.0;
           double newDOR = 0.0;
 

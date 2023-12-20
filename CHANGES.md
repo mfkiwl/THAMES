@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 19 22:51:08 2023 | Fixed retrieval of saturation index from solution object for pozzolanic kinetic step |
 | Dec 19 17:18:17 2023 | Debugging of pozzolanic kinetics; code compiles but does not run correctly |
 | Dec 18 23:36:31 2023 | Modified pozzolanic rate equations for diffusion and updated chemistry.xsd |
 | Dec 18 16:01:39 2023 | Added LOI influences on clinker component reaction rates |
