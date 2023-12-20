@@ -39,7 +39,7 @@ PozzolanicModel::PozzolanicModel ()
     ohexp_ = 0.0;
     sio2_ = 1.0;
     al2o3_ = cao_ = 0.0;
-    loi_ = 0.0;
+    lossOnIgnition_ = 0.0;
 
     name_ = "";
     microPhaseId_ = 2;
@@ -77,7 +77,8 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     #ifdef DEBUG
         verbose_ = true;
         warning_ = true;
-        cout << "ParrotKillohModel::ParrotKillohModel Constructor" << endl;
+        cout << "PozzolanicModel::PozzolanicModel Constructor sio2 value = "
+             << kineticData.sio2 << endl;
         cout.flush();
     #else
         verbose_ = verbose;
@@ -99,13 +100,13 @@ PozzolanicModel::PozzolanicModel (ChemicalSystem *cs,
     setSio2(kineticData.sio2);
     setAl2o3(kineticData.al2o3);
     setCao(kineticData.cao);
-    setLoi(kineticData.loi);
     setDissolutionRateConst(kineticData.dissolutionRateConst);
     setDiffusionRateConstEarly(kineticData.diffusionRateConstEarly);
     setDiffusionRateConstLate(kineticData.diffusionRateConstLate);
     setSiexp(kineticData.siexp);
     setDfexp(kineticData.dfexp);
     setOhexp(kineticData.ohexp);
+    lossOnIgnition_ = kineticData.loi;
 
     ///
     /// Default initial solid mass is 100 g
@@ -157,9 +158,9 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
     double T = temperature;
     double arrhenius = 1.0;
 
-    double dissrate = 1.0e-10;          // Nucleation and growth rate
-    double hsrate = 1.0e-10;          // Hydration shell rate
-    double diffrate = 1.0e-10;        // Diffusion rate
+    double dissrate = 1.0e9;          // Nucleation and growth rate
+    double hsrate = 1.0e9;          // Hydration shell rate
+    double diffrate = 1.0e9;        // Diffusion rate
 
     double rate = 1.0e-10;            // Selected rate
 
@@ -283,12 +284,68 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               /// and loi
 
               if (fabs(dissolutionRateConst_) > 0.0) {
-                // Need the activity of hydroxyl ions
-                double aOH = chemSys_->getActivity("OH-");
-                dissrate = dissolutionRateConst_ * ssaFactor_
-                           * pow(aOH,ohexp_) * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_);
-            
-                if (dissrate < 1.0e-10) dissrate = 1.0e-10;
+                
+                /// BULLARD placeholder
+                /// @note playing with different base rate constants here
+               
+                // double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
+                                                                       //
+
+                double baserateconst = dissolutionRateConst_ * arrhenius;
+
+                double ca = chemSys_->getDCConcentration("Ca+2");
+                double kca = 4.0e-7; // mol m-2 s-1 ads. rate const for Ca (guess)
+                double Kca = 10.0; // adsorption equilibrium constant is a guess
+                double na = chemSys_->getDCConcentration("Na+");
+                double kna = 6.35e-7; // mol m-2 s-1 ads. rate const from Dove and Crerar
+                double Kna = 58.3; // adsorption equilibrium constant from Dove and Crerar
+                double k = chemSys_->getDCConcentration("K+");
+                double kk = 5.6e-7; // mol m-2 s-1 ads. rate const from Dove and Crerar
+                double Kk = 46.6; // adsorption equilibrium constant from Dove and Crerar
+
+                // Langmuir adsorption isotherms assumed to be additive
+               
+                baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
+                baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
+                baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
+
+                double ohActivity = chemSys_->getDCActivity("OH-");
+                double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
+                double molarmass = chemSys_->getDCMolarMass("Amor-Sl"); // g mol-1
+                int GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_,0);
+
+                // Saturation index , but be sure that there is only one GEM Phase
+                /// @note Assumes there is only one phase in this microstructure
+                /// component
+                /// @todo Generalize to multiple phases in a component (how?)
+               
+                double saturationIndex = solut_->getSI(GEMPhaseIndex);
+
+                // activity of water
+                double waterActivity = chemSys_->getDCActivity(chemSys_->getDCId("H2O@"));
+
+                // Make sure sio2 is given in mole fraction silica fume
+                // This equation basically implements the Dove and Crerar rate equation
+                // for quartz.  Needs to be calibrated for silica fume, but hopefully
+                // the BET area and LOI will help do that.
+               
+                dissrate = baserateconst * rhFactor * pow(ohActivity,ohexp_) * area * pow(waterActivity,2.0)
+                       * (1.0 - (lossOnIgnition_/100.0)) * (sio2_)
+                       * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_); 
+                            
+                 cout << "PozzolanicModel::calculateKineticStep for " << name_ << endl;
+                 cout << "  dissrate = " << dissrate << endl;
+                 cout << "    (baserateconst = " << baserateconst << ")"  << endl;
+                 cout << "    (rhFactor = " << rhFactor << ")" << endl;
+                 cout << "    (arrhenius = " << arrhenius << ")" << endl;
+                 cout << "    (ohactivity = " << ohActivity << ")"  << endl;
+                 cout << "    (waterterm = " << pow(waterActivity,2.0) << ")"  << endl;
+                 cout << "    (area = " << area << ")"  << endl;
+                 cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
+                 cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
+                 cout << "    (sio2 = " << sio2_ << ")" << endl;
+                 cout.flush();
+                 if (dissrate < 1.0e-10) dissrate = 1.0e-10;
               } else {
                   throw FloatException("PozzolanicModel","calculateKineticStep",
                                        "diffusionRateConst_ = 0.0");
@@ -301,12 +358,14 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                      * pow((1.0 - DOR),dorexp_) * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_);
               if (hsrate < 1.0e-10) hsrate = 1.0e-10;
 
+              /// @note Temporarily eliminate early age diffusion model
               if (DOR > 0.0) {
-                  diffrate = (diffusionRateConstEarly_
-                           * ssaFactor_ * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_)
-                           * pow((1.0 - pow(DOR,dorexp_)),(2.0/3.0))) /
-                                 (1.0 - pow((1.0 - pow(DOR,dorexp_)),(1.0/3.0)));
-                  if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+                  // diffrate = (diffusionRateConstEarly_
+                  //          * ssaFactor_ * pow((1.0 - pow(saturationIndex,siexp_)),dfexp_)
+                  //          * pow((1.0 - pow(DOR,dorexp_)),(2.0/3.0))) /
+                  //                (1.0 - pow((1.0 - pow(DOR,dorexp_)),(1.0/3.0)));
+                  // if (diffrate < 1.0e-10) diffrate = 1.0e-10;
+                  diffrate = 1.0e9;
               } else {
                   diffrate = 1.0e9;
               }
@@ -316,24 +375,21 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               rate *= (rhFactor * arrhenius);
               newDOR = DOR + (rate * timestep);
 
-              cout << "PozzolanicModel::calculateKineticStep for " << name_ << endl;
-              cout << ", dissrate = " << dissrate 
-                   << ", hsrate = " << hsrate
-                   << ", diffrate = " << diffrate << endl;
-              cout << ", rhFactor = " << rhFactor
-                   << ", arrhenius = " << arrhenius
-                   << ", saturationIndex = " << saturationIndex << endl;
-              cout << ", RATE = " << rate
-                   << ", timestep " << timestep
-                   << ", oldDOR = " << DOR << ", new DOR = "
+              cout << "  hsrate = " << hsrate << endl;
+              cout << "    (baserateconst = " << diffusionRateConstLate_ << ")"  << endl;
+              cout << "    (dor = " << DOR << ")"  << endl;
+              cout << "  diffrate = " << diffrate << endl;
+              cout << "  RATE = " << rate << endl;
+              cout << "  timestep " << timestep << endl;
+              cout << "  oldDOR = " << DOR << ", new DOR = "
                    << newDOR << endl;
               cout.flush();
 
 
               /// ... to here
                     
-              scaledMass_ = initScaledMass_ * (1.0 - newDOR);
-              massDissolved = (newDOR - DOR) * initScaledMass_;
+              scaledMass_ = max(initScaledMass_ * (1.0 - newDOR),0.0);
+              massDissolved = max((newDOR - DOR) * initScaledMass_,0.0);
 
                        
               chemSys_->setMicroPhaseMass(microPhaseId_,scaledMass_);
@@ -368,10 +424,6 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
                       chemSys_->getSo3(microPhaseId_));
 
               for (int ii = 0; ii < dICMoles.size(); ii++) {
-
-                  /// @todo BULLARD PLACEHOLDER
-                  /// Special case for Silica-amorph here to account for SiO2 < 100%
-                     
 
                   dICMoles[ii] += ((massDissolved
                                   / chemSys_->getDCMolarMass(DCId_))

@@ -115,6 +115,7 @@ ParrotKillohModel::ParrotKillohModel (ChemicalSystem *cs,
     /// Default temperature in the PK model is 20 C (or 293 K)
     ///
 
+    lossOnIgnition_ = kineticData.loi;
     temperature_ = kineticData.temperature;
     refT_ = kineticData.reftemperature;
 

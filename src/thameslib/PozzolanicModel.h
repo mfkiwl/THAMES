@@ -55,7 +55,6 @@ double ohexp_;                   /**< Exponent on OH ion activity (unitless) */
 double sio2_;                    /**< Mass fraction of SiO2 (unitless) */
 double al2o3_;                   /**< Mass fraction of Al2O3 (unitless) */
 double cao_;                     /**< Mass fraction of CaO (unitless) */
-double loi_;                     /**< Loss on ignition (unitless) */
 
 public:
     
@@ -340,31 +339,6 @@ void setCao (const double cao)
 double getCao () const
 {
     return cao_;
-}
-
-/**
-@brief Set the loss on ignition
-
-@note NOT USED.
-
-@param loi is the loss on ignition
-*/
-void setLoi (const double loi)
-{
-    loi_ = max(loi,0.0);
-    if (loi_ > 1.0) loi_ = 1.0;
-}
-
-/**
-@brief Get the loss on ignition
-
-@note NOT USED.
-
-@return the loss on ignition
-*/
-double getLoi () const
-{
-    return loi_;
 }
 
 /**

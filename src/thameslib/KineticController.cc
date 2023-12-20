@@ -239,26 +239,8 @@ void KineticController::parseDoc (const string &docName)
 
     /// All kinetic components have been parsed now.  Next, this block tries
     /// to handle pozzolanic effects (loi, SiO2 content, etc.) on any other kinetic phases
-
-    /// @todo This is the block where the influence of some components on the
-    /// kinetic parameters of other components can be set.
     
-    double refloi = 0.08;
-    double loi = refloi;
-    double maxloi = refloi;
-
-    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
-       loi = phaseKineticModel_[midx]->getLossOnIgnition();
-       if (loi > maxloi) maxloi = loi;
-    }
-
-    /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
-    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
-       if (phaseKineticModel_[midx]->getType() == ParrotKillohType) { 
-         phaseKineticModel_[midx]->setPfk(refloi/maxloi);
-       }
-    }
-
+    setPozzEffectOnPK();
     
     return;
 }
@@ -534,6 +516,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.dissolutionRateConst,st);
+            #ifdef DEBUG
+              cout << "     dissolutionRateConst = " << kineticData.dissolutionRateConst;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Early-age diffusion rate constant (mol/m2/s)
@@ -541,6 +527,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.diffusionRateConstEarly,st);
+            #ifdef DEBUG
+              cout << "     diffusionRateConstEarly = " << kineticData.diffusionRateConstEarly;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Later-age diffusion rate constant (mol/m2/s)
@@ -548,6 +538,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.diffusionRateConstLate,st);
+            #ifdef DEBUG
+              cout << "     diffusionRateConstLate = " << kineticData.diffusionRateConstLate;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Exponent on  the saturation index in the rate equation
@@ -555,6 +549,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.siexp,st);
+            #ifdef DEBUG
+              cout << "     siexp = " << kineticData.siexp;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Exponent on  the driving force term in the rate equation
@@ -562,6 +560,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.dfexp,st);
+            #ifdef DEBUG
+              cout << "     dfexp = " << kineticData.dfexp;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Exponent on  the degree of reaction term in the diffusion rate equation
@@ -569,6 +571,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.dorexp,st);
+            #ifdef DEBUG
+              cout << "     dorexp = " << kineticData.dorexp;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Exponent on  the hydroxy ion activity in the rate equation
@@ -576,6 +582,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.ohexp,st);
+            #ifdef DEBUG
+              cout << "     ohexp = " << kineticData.ohexp;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // SiO2 mass fraction in the material
@@ -583,6 +593,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.sio2,st);
+            #ifdef DEBUG
+              cout << "     sio2 = " << kineticData.sio2;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Al2O3 mass fraction in the material
@@ -590,6 +604,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.al2o3,st);
+            #ifdef DEBUG
+              cout << "     al2o3 = " << kineticData.al2o3;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // CaO mass fraction in the material
@@ -597,6 +615,10 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.cao,st);
+            #ifdef DEBUG
+              cout << "     cao = " << kineticData.cao;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         // Loss on ignition of the material
@@ -604,12 +626,20 @@ void KineticController::parseKineticDataForPozzolanic (xmlDocPtr doc,
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.loi,st);
+            #ifdef DEBUG
+              cout << "     loi = " << kineticData.loi;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
             key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
             string st((char *)key);
             from_string(kineticData.activationEnergy,st);
+            #ifdef DEBUG
+              cout << "     activationEnergy = " << kineticData.activationEnergy;
+              cout.flush();
+            #endif
             xmlFree(key);
         }
         cur = cur->next;
@@ -677,6 +707,65 @@ void KineticController::makeModel (xmlDocPtr doc,
 
     return;
 }
+
+void KineticController::setPozzEffectOnPK (void)
+{
+
+    /// @todo This is the block where the influence of some components on the
+    /// kinetic parameters of other components can be set.
+    
+    double refloi = 0.8;
+    double loi = refloi;
+    double maxloi = refloi;
+    double fillareaeff = 1.0;
+    double sio2val = 0.94;
+    double refsio2val = 0.94;
+    double betval = 29.0;
+    double refbetval = 29.0;
+    double minpozzeffect = 1000.0;
+    double pozzeffect = 1.0;
+
+    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+       loi = phaseKineticModel_[midx]->getLossOnIgnition();
+       if (loi > maxloi) maxloi = loi;
+       if (phaseKineticModel_[midx]->getType() == PozzolanicType) {
+         sio2val = phaseKineticModel_[midx]->getSio2();
+         betval = phaseKineticModel_[midx]->getSpecificSurfaceArea();
+         refbetval = phaseKineticModel_[midx]->getRefSpecificSurfaceArea();
+         pozzeffect = pow((sio2val / refsio2val),2.0) * (betval/refbetval);
+         if (pozzeffect < minpozzeffect) minpozzeffect = pozzeffect;
+         cout << "KineticController::setPozzEffectOnPK for model " << midx
+              << " (" << phaseKineticModel_[midx]->getType() << ")" << endl;
+         cout << "  Ref LOI = " << loi << endl;
+         cout << "  LOI = " << refloi << endl;
+         cout << "  Max LOI = " << refloi << endl;
+         cout << "  SiO2 = " << sio2val << endl;
+         cout << "  Ref SiO2 = " << refsio2val << endl;
+         cout << "  BET = " << betval << endl;
+         cout << "  Ref BET = " << refbetval << endl;
+         cout << "  Pozz Effect = " << pozzeffect << endl;
+         cout << "  Min Pozz Effect = " << minpozzeffect << endl;
+         cout.flush();
+       }
+    }
+
+    minpozzeffect *= (refloi/maxloi);
+
+    #ifdef DEBUG
+       cout << "Pozzeffect = " << minpozzeffect << endl;
+        cout.flush();
+    #endif
+
+    /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
+    for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+       if (phaseKineticModel_[midx]->getType() == ParrotKillohType) { 
+         phaseKineticModel_[midx]->setPfk(minpozzeffect);
+       }
+    }
+
+    return;
+}
+
 void KineticController::calculateKineticStep (const double timestep,
                                               const double temperature,
                                               bool isFirst)

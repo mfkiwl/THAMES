@@ -249,6 +249,28 @@ virtual double getLossOnIgnition () const
 }
 
 /**
+@brief Set the SiO2 content of pozzolanic materials
+
+@note This is a pure virtual function
+
+@param sio2
+*/
+virtual void setSio2 (const double sio2)
+{
+    return;
+}
+
+/**
+@brief Get the SiO2 content of pozzolanic materials
+
+@return the SiO2 content (mass percent)
+*/
+virtual double getSio2 () const
+{
+  return 0.0;
+}
+
+/**
 @brief Compute normalized initial microstructure phase masses
 
 Given the initial masses of all phases in the microstructure,

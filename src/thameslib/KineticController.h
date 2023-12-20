@@ -466,6 +466,15 @@ void zeroKineticDCMoles ()
 }
 
 /**
+@brief Set the effect of pozzolans on Parrot-Killoh kinetics
+
+@param timestep is the time interval to simulate [days]
+@param temperature is the absolute temperature during this step [K]
+@param isFirst is true if this is the first time step of the simulation, false otherwise
+*/
+void setPozzEffectOnPK (void);
+     
+/**
 @brief Master method for implementing one kinetic time step.
 
 In a given time step, a certain number of moles of each clinker phase will dissolve,
