@@ -396,7 +396,8 @@ void PozzolanicModel::calculateKineticStep (const double timestep,
               chemSys_->setMicroPhaseMassDissolved(microPhaseId_,massDissolved);
 
               #ifdef DEBUG
-                  cout << "PozzolanicModel::calculateKineticStep Original scaled mass = " << initScaledMass_
+                  cout << "PozzolanicModel::calculateKineticStep Original scaled mass = "
+                       << initScaledMass_
                        << " and new scaled mass = "
                        << chemSys_->getMicroPhaseMass(microPhaseId_)
                        << " and new volume = "

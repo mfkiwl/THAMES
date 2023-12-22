@@ -539,7 +539,7 @@ ChemicalSystem::ChemicalSystem (Solution *Solut,
     /// Set up the main map that correlates microstructure phases with GEM CSD phases
     ///
 
-    microInitVolume_ = 0.0;
+    initMicroVolume_ = 0.0;
     for (unsigned int i = 0; i < numMicroPhases_; i++) {
       microPhaseToGEMPhase_.insert(make_pair((int)i,microPhaseMembers_[i]));
     }
@@ -1548,7 +1548,7 @@ ChemicalSystem::ChemicalSystem (const ChemicalSystem &obj)
     iterDone_ = obj.getIterDone();
     microPhaseVolume_ = obj.getMicroPhaseVolume();
     microVolume_ = obj.getMicroVolume();
-    microInitVolume_ = obj.getMicroInitVolume();
+    initMicroVolume_ = obj.getInitMicroVolume();
     microPhaseMass_ = obj.getMicroPhaseMass();
     microPhaseMassDissolved_ = obj.getMicroPhaseMassDissolved();
     microVoidVolume_ = obj.getMicroVoidVolume();
@@ -2277,17 +2277,17 @@ int ChemicalSystem::calculateState (double time,
         }
   
         double water_molarv, water_molesincr;
-        if (microInitVolume_ > microVolume_) {
+        if (initMicroVolume_ > microVolume_) {
             double water_molarv, water_molesincr;
             for (int i = 0; i < numMicroPhases_; i++) {
                 if (microPhaseName_[i] == "H2O") {
                     water_molarv = node_->DC_V0(getMicroPhaseMembers(i,0), P_, T_);
-                    water_molesincr = (microInitVolume_ - microVolume_) / water_molarv;
+                    water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
                     if (verbose_) {
                         cout << "water_molarv = "
                              << water_molarv << endl;
                         cout << "volume increase of water is: "
-                             << (microInitVolume_ - microVolume_) << endl;
+                             << (initMicroVolume_ - microVolume_) << endl;
                         cout << "water_molesincr = "
                              << water_molesincr << endl;
                     }
@@ -2303,7 +2303,7 @@ int ChemicalSystem::calculateState (double time,
 
     if (verbose_) {
         cout << "GEM volume change = "
-             << 100.0 * (microVolume_ - microInitVolume_)/(microInitVolume_)
+             << 100.0 * (microVolume_ - initMicroVolume_)/(initMicroVolume_)
              << " %" << endl;
         cout.flush();
     }

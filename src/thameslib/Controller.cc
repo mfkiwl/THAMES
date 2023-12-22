@@ -737,7 +737,7 @@ void Controller::calculateState (double time,
       #endif
 
       double addwatervol = lattice_->getWaterchange()
-          / lattice_->getNumsites() * chemSys_->getMicroInitVolume();
+          / lattice_->getNumsites() * chemSys_->getInitMicroVolume();
 
       ///
       /// Get the molar volume of water from the GEM node

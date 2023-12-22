@@ -466,7 +466,7 @@ vector<double> microPhaseMassDissolved_;  /**< Absolute mass dissolved of each m
 vector<double> microPhaseVolume_;         /**< Absolute volume of each microstructure phase */
 
 double microVolume_;                   /**< Absolute volume of the microstructure */
-double microInitVolume_;               /**< Initial absolute volume of the microstructure */
+double initMicroVolume_;               /**< Initial absolute volume of the microstructure */
 double microVoidVolume_;               /**< Absolute volume of void space in microstrucxture */
 
 /**
@@ -4208,9 +4208,9 @@ double getMicroVolume (void) const
 
 @param val is the initial total volume to assign to the microstructure
 */
-void setMicroInitVolume (const double val)
+void setInitMicroVolume (const double val)
 {
-    microInitVolume_ = val;
+    initMicroVolume_ = val;
 }
 
 /**
@@ -4218,9 +4218,9 @@ void setMicroInitVolume (const double val)
 
 @return the initial total volume of the microstructure
 */
-double getMicroInitVolume (void) const
+double getInitMicroVolume (void) const
 {
-    return microInitVolume_;
+    return initMicroVolume_;
 }
 
 /**

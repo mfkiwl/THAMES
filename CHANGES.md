@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 22 13:51:41 2023 | Total microstructure volume now forced constant and
+capillary porosity modified to keep it that way; actual volume still tracked |
 | Dec 20 16:43:17 2023 | Modified pozzolanic rate law; all solid phases are increasing in volume fraction (needs debug) |
 | Dec 19 22:51:08 2023 | Fixed retrieval of saturation index from solution object for pozzolanic kinetic step |
 | Dec 19 17:18:17 2023 | Debugging of pozzolanic kinetics; code compiles but does not run correctly |

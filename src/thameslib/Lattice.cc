@@ -458,11 +458,11 @@ Lattice::Lattice (ChemicalSystem *cs,
       }
 
       #ifdef DEBUG
-        cout << "Lattice::Lattice Entering ChemicalSystem::setMicroInitVolume" <<endl;
+        cout << "Lattice::Lattice Entering ChemicalSystem::setInitMicroVolume" <<endl;
         cout.flush();
       #endif
 
-      chemSys_->setMicroInitVolume(totmicvol);
+      chemSys_->setInitMicroVolume(totmicvol);
 
       // Initially assume that all free water and void space
       // is capillary volume
@@ -1399,7 +1399,7 @@ void Lattice::changeMicrostructure (double time,
         adjustMicrostructureVolumes(phasenames,vol_next);
 
         #ifdef DEBUG
-            cout << "Lattice::changeMicrostructure Afger adjustMicrostructureVolumes:" << endl;
+            cout << "Lattice::changeMicrostructure After adjustMicrostructureVolumes:" << endl;
             for (int iii = 0; iii < vol_next.size(); ++iii) {
                 cout << "Lattice::changeMicrostructure   Volume of "
                      << phasenames[iii] << " = "
@@ -1924,13 +1924,16 @@ void Lattice::changeMicrostructure (double time,
     #endif
 
     try {
+        double totcount = 0.0;
         for (i = 0; i < vfrac_next.size(); i++) {
             volumefraction_.at(i) = ((double)(count_.at(i)))/((double)(site_.size()));
+            totcount += count_.at(i);
             #ifdef DEBUG
                 cout << "Lattice::changeMicrostructure Phase " << i
                      << " Target volume fraction was "
                      << vfrac_next[i] << " and actual is "
-                     << volumefraction_.at(i) << endl;
+                     << volumefraction_.at(i) << ", and " << totcount
+                     << " of " << site_.size() << " sites claimed so far" << endl;
                 cout.flush();
             #endif
         }
@@ -1985,10 +1988,6 @@ void Lattice::adjustMicrostructureVolumes (vector<string> names,
         // The lattice has a fixed volume given by a fixed number
         // of voxels multiplied by the volume per voxel
         
-        // This is the new total microstructure volume as calculated by
-        // ChemicalSystem, already adjusted for subvoxel porosity (m3)
-        double microvol = chemSys_->getMicroVolume();
-
         // This will hold the subvoxel pore volume (m3)
         
         double totsolidvol_withpores = 0.0;
@@ -2009,9 +2008,14 @@ void Lattice::adjustMicrostructureVolumes (vector<string> names,
             }
         }
 
+        // The total amount of non-solid space in the microstructure
+        
+        double micvolume = chemSys_->getMicroVolume();
+        double initmicvolume = chemSys_->getInitMicroVolume();
+
         #ifdef DEBUG
-            cout << "Lattice::adjustMicrostructureVolumesCurrent "
-                 << "microstructure volume is " << microvol << endl;
+            cout << "Lattice::adjustMicrostructureVolumes Current "
+                 << "microstructure volume is " << micvolume << endl;
             cout.flush();
         #endif
 
@@ -2021,8 +2025,12 @@ void Lattice::adjustMicrostructureVolumes (vector<string> names,
                                 "totvolume is NOT positive");
         }
 
-        // The total amount of non-solid space in the microstructure
-        double vspace = microvol - (totsolidvol_withpores - subvoxelporevolume_);
+        double vspace = micvolume - (totsolidvol_withpores - subvoxelporevolume_);
+        
+        /// @note BULLARD trying to assign any change in total microstructure
+        /// volume to capillary porosity.  Try to do this with one line here
+
+        vspace += (initmicvolume - micvolume);
 
         // The total void volume is the volume of space minus the volume
         // of electrolyte to fill that space
@@ -2169,14 +2177,21 @@ void Lattice::adjustMicrostructureVolFracs (vector<string> &names,
        
         // Find total adjusted microstructure volume, including possibly voids
        
-        for (i = 0; i < vol.size(); ++i) {
-            totmicvolume += vol.at(i);
-            #ifdef DEBUG
-                cout << "Lattice::adjustMicrostructureVolFracs Volume("
-                     << names.at(i) << ") = " << vol.at(i) << endl;
-                cout.flush();
-            #endif
-        }
+        // for (i = 0; i < vol.size(); ++i) {
+        //     totmicvolume += vol.at(i);
+        //     #ifdef DEBUG
+        //         cout << "Lattice::adjustMicrostructureVolFracs Volume("
+        //              << names.at(i) << ") = " << vol.at(i)
+        //              << ", volfrac = " << vfrac.at(i) << endl;
+        //         cout.flush();
+        //     #endif
+        // }
+
+        /// Above block is to get the current total volume
+        /// Replacement below assumes RVE retains constant volume and makes
+        /// adjustments based on capillary porosity
+        
+        totmicvolume = chemSys_->getInitMicroVolume();
 
         #ifdef DEBUG
             cout << "Lattice::adjustMicrostructureVolFracsCalculated "
@@ -2192,7 +2207,8 @@ void Lattice::adjustMicrostructureVolFracs (vector<string> &names,
             #ifdef DEBUG
                 cout << "Lattice::adjustMicrostructureVolFracsVolume "
                      << "fraction[" << names.at(i) << "] should be "
-                     << vfrac.at(i) << ", and volume fraction NOW is "
+                     << vfrac.at(i) << ", (" << vol.at(i) << "/" << totmicvolume
+                     << ") and volume fraction NOW is "
                      << (double)(count_.at(i))/(double)(numsites_) << endl;
                 cout.flush();
             #endif
@@ -2467,7 +2483,7 @@ void Lattice::calculatePoreSizeDistribution (void)
     // microstructure phases, including subvoxel pores in
     // solid phases
     
-    double microinitvol = chemSys_->getMicroInitVolume();
+    double initmicrovol = chemSys_->getInitMicroVolume();
 
     // This is the volume fraction of liquid water whether
     // in capillary or subvoxel porosity, on a total
@@ -2508,7 +2524,7 @@ void Lattice::calculatePoreSizeDistribution (void)
         cout << "Lattice::calculatePoreSizeDistribution  "
              << "======== microvol = " << microvol << endl;
         cout << "Lattice::calculatePoreSizeDistribution  "
-             << "==== microinitvol = " << microinitvol << endl;
+             << "==== initmicrovol = " << initmicrovol << endl;
         cout << "Lattice::calculatePoreSizeDistribution  === "
              << "water_volfrac = " << water_volfrac << endl;
         cout << "Lattice::calculatePoreSizeDistribution  ==== "
@@ -2626,7 +2642,7 @@ void Lattice::writePoreSizeDistribution (double curtime,
     // microstructure phases, including subvoxel pores in
     // solid phases
     
-    double microinitvol = chemSys_->getMicroInitVolume();
+    double initmicrovol = chemSys_->getInitMicroVolume();
 
     // This is the volume fraction of liquid water whether
     // in capillary or subvoxel porosity, on a total
