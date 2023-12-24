@@ -115,6 +115,7 @@ Controller::Controller (Lattice *msh,
     for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
         out2 << "," << chemSys_->getMicroPhaseName(i);
     }   
+    out2 << ",Total Volume (m3),Chemical Shrinkage (m3)";
     out2 << endl;
     out2.close();
 
@@ -948,6 +949,9 @@ void Controller::calculateState (double time,
     for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
       out5 << "," << (lattice_->getVolumefraction(i));
     }   
+    double micvol = lattice_->getMicrostructurevolume();
+    double initmicvol = lattice_->getInitialmicrostructurevolume();
+    out5 << "," << micvol << "," << (initmicvol - micvol);
     out5 << endl;
     out5.close();
         

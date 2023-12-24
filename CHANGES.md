@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 23 22:34:19 2023 | Streamlined adjustment
+of microstructure volumes and output chemical shrinkage in Microstructure csv file |
 | Dec 22 13:51:41 2023 | Total microstructure volume now forced constant and
 capillary porosity modified to keep it that way; actual volume still tracked |
 | Dec 20 16:43:17 2023 | Modified pozzolanic rate law; all solid phases are increasing in volume fraction (needs debug) |

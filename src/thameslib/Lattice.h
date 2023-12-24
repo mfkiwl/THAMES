@@ -83,9 +83,25 @@ map<int,vector<int> > expansion_coordin_;   /**< Map of coordinates of sites wit
                                                     local expansion strain */
 double waterchange_;                        /**< How much water must be added or subtracted
                                                     due to hydration or deterioration */
+double microstructurevolume_;               /**< Microstructure volume in GEM
+volume units */
+double initialmicrostructurevolume_;        /**< Initial microstructure volume in GEM
+volume units */
 double capillaryporevolume_;               /**< Total volume of capillary pores */
 double capillaryporevolumefraction_;       /**< Total volume fraction of capillary pores */
 double subvoxelporevolume_;               /**< Total volume of subvoxel pores */
+double nonsolidvolume_;               /**< Total volume not solid */
+double solidvolumewithpores_;             /** Total solid volume including their
+internal pore volume */
+double watervolume_;                        /** volume of electrolyte in GEM
+volume units */
+double voidvolume_;                         /** volume of void in GEM volume
+units */
+double capillarywatervolume_;               /**< Volume of capillary pore water */
+double capillaryvoidvolume_;               /**< Volume of capillary void space
+(no water) */
+double subvoxelwatervolume_;               /**< Volume of water in subvoxel
+pores in GEM units */
 double subvoxelporevolumefraction_;               /**< Total volume fraction of subvoxel pores */
 
 vector<struct PoreSizeVolume> masterporevolume_; /**< Pore size distribution and saturation */
@@ -351,6 +367,51 @@ double getInitvolumefraction (unsigned int i)
     }
 }
     
+/**
+@brief Calculate the subvoxel pore volume
+
+@param vol is the array of all microstructure phase volumes
+*/
+void calcSubvoxelporevolume(vector<double> &vol);
+
+/**
+@brief Calculate the total volume of solids including
+subvoxel pore volume assigned to solids
+
+@param vol is the array of all microstructure phase volumes
+it
+*/
+void calcSolidvolumewithpores(vector<double> &vol);
+
+/**
+@brief Get the total volume of solids including
+subvoxel pore volume assigned to solids
+
+@return the solid volume including subvoxel pore volume
+*/
+double getSolidvolumewithpores(void) const
+{
+    return solidvolumewithpores_;
+}
+
+/**
+@brief Calculate the non-solid volume
+
+@param vol is the array of all microstructure phase volumes
+it
+*/
+void calcNonsolidvolume(vector<double> &vol);
+
+/**
+@brief Get or calculate the non-solid volume
+
+@return the non-solid volume
+*/
+double getNonsolidvolume(void) const
+{
+    return nonsolidvolume_;
+}
+
 /**
 @brief Get the number of neighbor sites each site has.
 
@@ -1174,6 +1235,26 @@ void setExpansionCoordin (int index,
 }
     
 /**
+@brief Get the microstructure volume
+
+@return the microstructure volume (GEMS volume units)
+*/
+double getMicrostructurevolume (void) const
+{
+    return (chemSys_->getMicroVolume());
+}
+
+/**
+@brief Get the initial microstructure volume
+
+@return the initial microstructure volume (GEMS volume units)
+*/
+double getInitialmicrostructurevolume (void) const
+{
+    return (chemSys_->getInitMicroVolume());
+}
+
+/**
 @brief Get the total capillary pore volume
 
 @return the volume of capillary pores (GEMS volume units)
@@ -1234,6 +1315,71 @@ double getSubvoxelporevolume (void) const
 void setSubvoxelporevolume (const double subvoxelporevolume)
 {
     subvoxelporevolume_ = subvoxelporevolume;
+}
+
+/**
+@brief Set the subvoxel pore volume
+
+@param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
+*/
+void setNonsolidvolume (const double nonsolidvolume)
+{
+    nonsolidvolume_ = nonsolidvolume;
+}
+
+/**
+@brief Get the capillary water volume
+
+@param vol is the volume of each microstructure phase
+*/
+void calcCapillarywatervolume (vector<double> &vol);
+
+/**
+@brief Get the capillary water volume
+
+@return the capillary water volume
+*/
+double getCapillarywatervolume (void) const
+{
+    return capillarywatervolume_;
+}
+
+/**
+@brief Set the capillary water volume
+
+@param capillarywatervolume is the capillary water volume (GEMS volume units)
+*/
+void setCapillarywatervolume (const double capillarywatervolume)
+{
+    capillarywatervolume_ = capillarywatervolume;
+}
+
+/**
+@brief Get the capillary void volume
+
+@param vol is the volume of each microstructure phase
+@param calc is true only if calculating instead of just returning
+*/
+void calcCapillaryvoidvolume (vector<double> &vol);
+
+/**
+@brief Get the capillary void volume
+
+@return the capillary void volume
+*/
+double getCapillaryvoidvolume (void) const
+{
+    return capillarywatervolume_;
+}
+
+/**
+@brief Set the capillary void volume
+
+@param capillaryvoidvolume is the capillary void volume (GEMS volume units)
+*/
+void setCapillaryvoidvolume (const double capillaryvoidvolume)
+{
+    capillaryvoidvolume_ = capillaryvoidvolume;
 }
 
 /**
