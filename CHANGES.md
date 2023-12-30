@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 29 19:21:12 2023 | Formatting uniformity and added viz to build |
 | Dec 23 22:34:19 2023 | Streamlined adjustment
 of microstructure volumes and output chemical shrinkage in Microstructure csv file |
 | Dec 22 13:51:41 2023 | Total microstructure volume now forced constant and

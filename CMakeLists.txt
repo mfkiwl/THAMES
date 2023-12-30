@@ -98,6 +98,7 @@ message ("Linked libraries are: " ${EXTRA_LIBS})
 
 add_subdirectory (${CMAKE_SOURCE_DIR}/src/thameslib)
 add_subdirectory (${CMAKE_SOURCE_DIR}/src/vcctl2thames)
+add_subdirectory (${CMAKE_SOURCE_DIR}/src/viz)
 
 file (GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/*.cc")
 

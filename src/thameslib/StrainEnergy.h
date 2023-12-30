@@ -11,8 +11,8 @@ account for elastic strain energy.
 #ifndef STRAINENERGY_H
 #define STRAINENERGY_H
 
-#include <string>
 #include <math.h>
+#include <string>
 
 using namespace std;
 

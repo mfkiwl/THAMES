@@ -33,10 +33,10 @@ coworkers [1--4] have used the kinetic model of Parrot and Killoh [5]
 for clinker phase consumption to establish the initial conditions on
 the pore solution at each time step, and then used the GEMS
 geochemical model [6,7] to predict speciation and hydration product
-mass fractions.  
+mass fractions.
 
 THAMES uses this same modeling philosophy, but adds the extra
-dimension that the microstructure itself is simulated as a function of 
+dimension that the microstructure itself is simulated as a function of
 time, using simple nucleation and dissolution/growth rules for each phase.
 The 3-D microstructure is in the form of a digital image (called a
 lattice), with each lattice site assuming a unique unsigned integer
@@ -81,33 +81,50 @@ THAMES are contained in library files.
 
 @section ref_sec References
 
--# Lothenbach, B., Winnefeld, F., Thermodynamic modelling of the hydration of Portland cement, Cement and Concrete Research 36 (2006) 209--226.
--# Lothenbach, B., Wieland, E., A thermodynamic approach to the hydration of sulphate-resisting Portland cement, Waste Management 26 (2006) 706--719.
--# Lothenbach, B., Matschei, T., Moeschner, G., Glasser, F.P., Thermodynamic modelling of the effect of temperature on the hydration and porosity of Portland cement, Cement and Concrete Resaerch 38 (2008) 1--18.
--# Lothenbach, B., Le Saout, G., Gallucci, E., Scrivener, K., Influence of limestone on the hydration of Portland cements, Cement and Concrete Research 38 (2008) 848--860.
--# Parrot, L.J., Killoh, D.C., Prediction of cement hydration, British Ceramics Proceedings 35 (1984) 41--53.
--# Kulik, D.A., Wagner, T., Dmytrieva, S.V., Kosakowski, G., Hingerl, F.F., Chudnenko, K.V., Berner, U., GEM-Selektor geochemical modeling package: revised algorithm and GEMS3K numerical kernel for coupled simulation codes, Computational Geosciences 17 (2013) 1--24.
--# Wagner, T., Kulik, D.A., Hingerl, F.F., Dmytrieva, S.V., GEM-Selektor geochemical modeling package: TSolMod library and data interface for multicomponent phase models, Canadian Mineralogist 50 (2012) 701--723.
--# Bentz, D.P., CEMHYD3D: A three-dimensional cement hydration and microstructural development modelling package, version 2.0, NISTIR 6485, U.S. Department of Commerce, April, 2000.
+-# Lothenbach, B., Winnefeld, F., Thermodynamic modelling of the hydration of
+Portland cement, Cement and Concrete Research 36 (2006) 209--226.
+-# Lothenbach, B., Wieland, E., A thermodynamic approach to the hydration of
+sulphate-resisting Portland cement, Waste Management 26 (2006) 706--719.
+-# Lothenbach, B., Matschei, T., Moeschner, G., Glasser, F.P., Thermodynamic
+modelling of the effect of temperature on the hydration and porosity of Portland
+cement, Cement and Concrete Resaerch 38 (2008) 1--18.
+-# Lothenbach, B., Le Saout, G., Gallucci, E., Scrivener, K., Influence of
+limestone on the hydration of Portland cements, Cement and Concrete Research 38
+(2008) 848--860.
+-# Parrot, L.J., Killoh, D.C., Prediction of cement hydration, British Ceramics
+Proceedings 35 (1984) 41--53.
+-# Kulik, D.A., Wagner, T., Dmytrieva, S.V., Kosakowski, G., Hingerl, F.F.,
+Chudnenko, K.V., Berner, U., GEM-Selektor geochemical modeling package: revised
+algorithm and GEMS3K numerical kernel for coupled simulation codes,
+Computational Geosciences 17 (2013) 1--24.
+-# Wagner, T., Kulik, D.A., Hingerl, F.F., Dmytrieva, S.V., GEM-Selektor
+geochemical modeling package: TSolMod library and data interface for
+multicomponent phase models, Canadian Mineralogist 50 (2012) 701--723.
+-# Bentz, D.P., CEMHYD3D: A three-dimensional cement hydration and
+microstructural development modelling package, version 2.0, NISTIR 6485, U.S.
+Department of Commerce, April, 2000.
 
 */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <ctime>
-#include <getopt.h>
-#include "thameslib/Controller.h"
-#include "thameslib/ChemicalSystem.h"
-#include "thameslib/Solution.h"
-#include "thameslib/Interface.h"
-#include "thameslib/Site.h"
-#include "thameslib/Lattice.h"
-#include "thameslib/KineticController.h"
+#ifndef THAMESH
+#define THAMESH
+
 #include "thameslib/AppliedStrain.h"
-#include "thameslib/ThermalStrain.h"
+#include "thameslib/ChemicalSystem.h"
+#include "thameslib/Controller.h"
+#include "thameslib/Interface.h"
+#include "thameslib/KineticController.h"
+#include "thameslib/Lattice.h"
+#include "thameslib/Site.h"
+#include "thameslib/Solution.h"
 #include "thameslib/StrainEnergy.h"
+#include "thameslib/ThermalStrain.h"
+#include <ctime>
+#include <fstream>
+#include <getopt.h>
+#include <iostream>
+#include <string>
+#include <vector>
 
 /**
 @brief Flag for verbose output
@@ -133,7 +150,7 @@ vector<double> strainenergy;
 @brief Print a help message for invoking the command
 
 */
-void printHelp (void);
+void printHelp(void);
 
 /**
 @brief Parse command line arguments
@@ -143,7 +160,7 @@ This functions uses the GNU getopt_long functionality
 @param argc is the number of command line arguments
 @param argv is the array of the command line arguments
 */
-void checkargs (int argc, char **argv);
+void checkargs(int argc, char **argv);
 
 /**
 @brief Write the formatted report file listing job properties and input.
@@ -161,12 +178,10 @@ through its `writeChemSys` method.
 
 If a file is not present, the file name should be given as an empty string.
 */
-void writeReport (const string &jobroot,
-                  struct tm *itime,
-                  const string &mfileName,
-                  const string &parfilename,
-                  const string &csname,
-                  ChemicalSystem *csys,
-                  Controller *ctr);
+void writeReport(const string &jobroot, struct tm *itime,
+                 const string &mfileName, const string &parfilename,
+                 const string &csname, ChemicalSystem *csys, Controller *ctr);
 
 using namespace std;
+
+#endif

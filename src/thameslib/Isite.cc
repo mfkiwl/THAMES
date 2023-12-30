@@ -7,30 +7,25 @@
 */
 #include "Isite.h"
 
-Isite::Isite ()
-{
-    affinity_ = 0;
-    id_ = 0;
-    verbose_ = false;
+Isite::Isite() {
+  affinity_ = 0;
+  id_ = 0;
+  verbose_ = false;
 }
 
-Isite::Isite (unsigned long int idval,
-              int aftyval,
-              const bool verbose)
-{
-    id_ = idval;
-    affinity_ = aftyval;
+Isite::Isite(unsigned int idval, int aftyval, const bool verbose) {
+  id_ = idval;
+  affinity_ = aftyval;
 
-    #ifdef DEBUG
-        verbose_ = true;
-    #else
-        verbose_ = verbose;
-    #endif
+#ifdef DEBUG
+  verbose_ = true;
+#else
+  verbose_ = verbose;
+#endif
 }
 
-Isite::Isite (const Isite &obj)
-{
-    id_ = obj.id_;
-    affinity_ = obj.affinity_;
-    verbose_ = obj.verbose_;
+Isite::Isite(const Isite &obj) {
+  id_ = obj.id_;
+  affinity_ = obj.affinity_;
+  verbose_ = obj.verbose_;
 }

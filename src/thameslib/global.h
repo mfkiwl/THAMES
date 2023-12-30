@@ -6,7 +6,7 @@
 #ifndef GLOBALH
 #define GLOBALH
 
-#include<string>
+#include <string>
 
 using namespace std;
 
@@ -87,7 +87,6 @@ const int EXTERNAL_KINETICS = 1;
 // Normal return condition flag (NOT USED)
 const int RETURN_NORMAL = 0;
 
-
 // Flag to indicate an element is out of bounds (NOT USED)
 const int DB_EOB = 1;
 
@@ -108,7 +107,6 @@ const int PREMATURE_EOF = 3;
 
 // Flag to indicate datum is bad or of wrong kind
 const int INVALID_INPUT = 4;
-
 
 // Special phase ids that are important and must always be the same value
 const int VOIDID = 0;

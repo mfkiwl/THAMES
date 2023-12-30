@@ -11,1708 +11,1561 @@ exists, hydrates, and possibly deteriorates.
 #ifndef LATTICEH
 #define LATTICEH
 
-#include <vector>
-#include <list>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-#include <typeinfo>
 #include <algorithm>
 #include <cmath>
-#include <map>
 #include <ctime>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <sstream>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
-#include "Site.h"
-#include "Isite.h"
+#include "AppliedStrain.h"
 #include "ChemicalSystem.h"
 #include "Interface.h"
-#include "global.h"
+#include "Isite.h"
 #include "RanGen.h"
-#include "AppliedStrain.h"
+#include "Site.h"
+#include "global.h"
 
 /**
 @struct Sitesize
 @brief Structure to catalog site domain sizes
 */
 struct Sitesize {
-	int siteid;                            /**< ID of the site in the site_ vector */
-    int nsize;                             /**< Size of the domain of the phase at that size */
+  int siteid; /**< ID of the site in the site_ vector */
+  int nsize;  /**< Size of the domain of the phase at that size */
 };
 
 using namespace std;
 
 /**
 @class Lattice
-@brief Defines and stores the 3D microstructure as a discrete lattice of voxel sites.
+@brief Defines and stores the 3D microstructure as a discrete lattice of voxel
+sites.
 
 */
 class Lattice {
 
 private:
-    
-string version_;                            /**< THAMES version for header information */
-string jobroot_;                            /**< The root name for output files */
-unsigned int xdim_;                         /**< Number of sites in the x dimension */
-unsigned int ydim_;                         /**< Number of sites in the y dimension */
-unsigned int zdim_;                         /**< Number of sites in the z dimension */
-double resolution_;                         /**< Voxel edge length [micrometers] */
-RanGen *rg_;                                /**< Pointer to random number generator object */
-vector<Site> site_;                         /**< 1D list of Site objects (site = voxel) */
-unsigned int numsites_;                     /**< Total number of sites */
-const unsigned int siteneighbors_;          /**< Number of neighbor sites to a given site */
-ChemicalSystem *chemSys_;                   /**< Pointer to simulation's ChemicalSystem */
-Solution *solut_;                           /**< Pointer to the simulation's Solution */
-AppliedStrain *FEsolver_;                   /**< Pointer to simulation's FE elastic solver */
-vector<Interface> interface_;               /**< List of the different interface objects
-                                                    in the microstructure */
-double wsratio_;                            /**< Water-to-solids mass ratio */
-vector<double> volumefraction_;             /**< Array of volume fractions of each 
-                                                    microstructure phase */
-vector<double> initvolumefraction_;         /**< Array of initial volume fractions of each 
-                                                    microstructure phase */
-/**
-@note Changed count_ from type double to type int
-*/
-vector<int> count_;                         /**< Number of sites of each different type */
-vector<double> SI_;                         /**< Current saturation index of AFt phase,
-                                                    used only for sulfate attack simulation */
-map<int,vector<double> > expansion_;        /**< Map of expansion strain of each voxel */
-map<int,vector<int> > expansion_coordin_;   /**< Map of coordinates of sites with 
-                                                    local expansion strain */
-double waterchange_;                        /**< How much water must be added or subtracted
-                                                    due to hydration or deterioration */
-double microstructurevolume_;               /**< Microstructure volume in GEM
+  string version_;        /**< THAMES version for header information */
+  string jobroot_;        /**< The root name for output files */
+  unsigned int xdim_;     /**< Number of sites in the x dimension */
+  unsigned int ydim_;     /**< Number of sites in the y dimension */
+  unsigned int zdim_;     /**< Number of sites in the z dimension */
+  double resolution_;     /**< Voxel edge length [micrometers] */
+  RanGen *rg_;            /**< Pointer to random number generator object */
+  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
+  unsigned int numsites_; /**< Total number of sites */
+  const unsigned int
+      siteneighbors_;       /**< Number of neighbor sites to a given site */
+  ChemicalSystem *chemSys_; /**< Pointer to simulation's ChemicalSystem */
+  Solution *solut_;         /**< Pointer to the simulation's Solution */
+  AppliedStrain *FEsolver_; /**< Pointer to simulation's FE elastic solver */
+  vector<Interface> interface_;   /**< List of the different interface objects
+                                          in the microstructure */
+  double wsratio_;                /**< Water-to-solids mass ratio */
+  vector<double> volumefraction_; /**< Array of volume fractions of each
+                                          microstructure phase */
+  vector<double> initvolumefraction_; /**< Array of initial volume fractions of
+                                         each microstructure phase */
+  /**
+  @note Changed count_ from type double to type int
+  */
+  vector<int> count_; /**< Number of sites of each different type */
+  vector<double> SI_; /**< Current saturation index of AFt phase,
+                              used only for sulfate attack simulation */
+  map<int, vector<double>>
+      expansion_; /**< Map of expansion strain of each voxel */
+  map<int, vector<int>> expansion_coordin_; /**< Map of coordinates of sites
+                                               with local expansion strain */
+  double waterchange_;          /**< How much water must be added or subtracted
+                                        due to hydration or deterioration */
+  double microstructurevolume_; /**< Microstructure volume in GEM
 volume units */
-double initialmicrostructurevolume_;        /**< Initial microstructure volume in GEM
+  double initialmicrostructurevolume_; /**< Initial microstructure volume in GEM
 volume units */
-double capillaryporevolume_;               /**< Total volume of capillary pores */
-double capillaryporevolumefraction_;       /**< Total volume fraction of capillary pores */
-double subvoxelporevolume_;               /**< Total volume of subvoxel pores */
-double nonsolidvolume_;               /**< Total volume not solid */
-double solidvolumewithpores_;             /** Total solid volume including their
+  double capillaryporevolume_;         /**< Total volume of capillary pores */
+  double capillaryporevolumefraction_; /**< Total volume fraction of capillary
+                                          pores */
+  double subvoxelporevolume_;          /**< Total volume of subvoxel pores */
+  double nonsolidvolume_;              /**< Total volume not solid */
+  double solidvolumewithpores_;        /** Total solid volume including their
 internal pore volume */
-double watervolume_;                        /** volume of electrolyte in GEM
+  double watervolume_;                 /** volume of electrolyte in GEM
 volume units */
-double voidvolume_;                         /** volume of void in GEM volume
+  double voidvolume_;                  /** volume of void in GEM volume
 units */
-double capillarywatervolume_;               /**< Volume of capillary pore water */
-double capillaryvoidvolume_;               /**< Volume of capillary void space
+  double capillarywatervolume_;        /**< Volume of capillary pore water */
+  double capillaryvoidvolume_;         /**< Volume of capillary void space
 (no water) */
-double subvoxelwatervolume_;               /**< Volume of water in subvoxel
+  double subvoxelwatervolume_;         /**< Volume of water in subvoxel
 pores in GEM units */
-double subvoxelporevolumefraction_;               /**< Total volume fraction of subvoxel pores */
+  double subvoxelporevolumefraction_;  /**< Total volume fraction of subvoxel
+                                          pores */
 
-vector<struct PoreSizeVolume> masterporevolume_; /**< Pore size distribution and saturation */
+  vector<struct PoreSizeVolume>
+      masterporevolume_; /**< Pore size distribution and saturation */
 
-double time_;                               /**< The current simulation time [days] */
-double temperature_;                        /**< The current simulation temperature [K] */
-double oldtemp_;                            /**< The temperature in the previous
-                                                    time step [K] */
-double sattack_time_;                       /**< Simulation time at which to begin
-                                                    simulation of sulfate attack [days] */
-double leach_time_;                         /**< Simulation time at which to begin
-                                                    simulation of leaching [days] */
-double surfacearea_;                        /**< Total surface area [m<sup>2</sup>] */
+  double time_;         /**< The current simulation time [days] */
+  double temperature_;  /**< The current simulation temperature [K] */
+  double oldtemp_;      /**< The temperature in the previous
+                                time step [K] */
+  double sattack_time_; /**< Simulation time at which to begin
+                                simulation of sulfate attack [days] */
+  double leach_time_;   /**< Simulation time at which to begin
+                                simulation of leaching [days] */
+  double surfacearea_;  /**< Total surface area [m<sup>2</sup>] */
 
-bool deptheffect_;                          /**< Whether or not PNG images should have
-                                                    depth effect */
-bool verbose_;                              /**< Flag to determine verbose output */
-bool warning_;                              /**< Flag to determine warning message output */
+  bool deptheffect_; /**< Whether or not PNG images should have
+                             depth effect */
+  bool verbose_;     /**< Flag to determine verbose output */
+  bool warning_;     /**< Flag to determine warning message output */
 
 public:
-    
-/**
-@brief Constructor without input microstructure file name.
+  /**
+  @brief Constructor without input microstructure file name.
 
-This constructor simply initializes the dimensions and time to zero, sets
-the temperature to the globally defined reference temperature, and
-sets the lattice resolution to the globally defined reference value.
+  This constructor simply initializes the dimensions and time to zero, sets
+  the temperature to the globally defined reference temperature, and
+  sets the lattice resolution to the globally defined reference value.
 
-@note Not currently used in THAMES
+  @note Not currently used in THAMES
 
-@param cs is a pointer to the ChemicalSystem object for the simulation
-@param solut is a pointer to the Solution object for the simulation
-*/
-Lattice (ChemicalSystem *cs,
-         Solution *solut);
+  @param cs is a pointer to the ChemicalSystem object for the simulation
+  @param solut is a pointer to the Solution object for the simulation
+  */
+  Lattice(ChemicalSystem *cs, Solution *solut);
 
-/**
-@brief Overloaded constructor with input microstructure file name.
+  /**
+  @brief Overloaded constructor with input microstructure file name.
 
-This constructor initializes the dimensions and time to zero, sets
-the temperature to the globally defined reference temperature, and
-sets the lattice resolution to the globally defined reference value.
-Afterward, the input microstructure file is opened and read, so that
-the voxel phase assignments can be made at each site.
+  This constructor initializes the dimensions and time to zero, sets
+  the temperature to the globally defined reference temperature, and
+  sets the lattice resolution to the globally defined reference value.
+  Afterward, the input microstructure file is opened and read, so that
+  the voxel phase assignments can be made at each site.
 
-@param cs is a pointer to the ChemicalSystem object for the simulation
-@param solut is a pointer to the Solution object for the simulation
-@param fileName is the name of the file containing the microstructure data
-@param verbose is true if extra messages are to be printed
-@param warning is true if warning messages are to be printed
-*/
-Lattice (ChemicalSystem *cs,
-        Solution *solut,
-        const string &fileName,
-        const bool verbose,
-        const bool warning);
-    
-/**
-@brief Destructor.
+  @param cs is a pointer to the ChemicalSystem object for the simulation
+  @param solut is a pointer to the Solution object for the simulation
+  @param fileName is the name of the file containing the microstructure data
+  @param verbose is true if extra messages are to be printed
+  @param warning is true if warning messages are to be printed
+  */
+  Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
+          const bool verbose, const bool warning);
 
-This destructor clears out the `interface_` and `site_` vectors, and
-also deletes the allocated memory for the random number generator object,
-since this is the class that allocated the memory for that object.
-*/
-~Lattice ();
-    
-/**
-@brief Set the number of sites in the x dimension.
+  /**
+  @brief Destructor.
 
-@param x is the number of sites in the x dimension
-*/
-void setXDim (const unsigned int x)
-{
+  This destructor clears out the `interface_` and `site_` vectors, and
+  also deletes the allocated memory for the random number generator object,
+  since this is the class that allocated the memory for that object.
+  */
+  ~Lattice();
+
+  /**
+  @brief Set the number of sites in the x dimension.
+
+  @param x is the number of sites in the x dimension
+  */
+  void setXDim(const unsigned int x) {
     xdim_ = x;
     numsites_ = (xdim_ * ydim_ * zdim_);
-}
+  }
 
-/**
-@brief Get the number of sites in the x dimension.
+  /**
+  @brief Get the number of sites in the x dimension.
 
-@return the number of sites in the x dimension
-*/
-unsigned int getXDim () const
-{
-    return xdim_;
-}
+  @return the number of sites in the x dimension
+  */
+  unsigned int getXDim() const { return xdim_; }
 
-/**
-@brief Set the number of sites in the y dimension.
+  /**
+  @brief Set the number of sites in the y dimension.
 
-@param y is the number of sites in the y dimension
-*/
-void setYDim (const unsigned int y)
-{
+  @param y is the number of sites in the y dimension
+  */
+  void setYDim(const unsigned int y) {
     ydim_ = y;
     numsites_ = (xdim_ * ydim_ * zdim_);
-}
+  }
 
-/**
-@brief Get the number of sites in the y dimension.
+  /**
+  @brief Get the number of sites in the y dimension.
 
-@return the number of sites in the y dimension
-*/
-unsigned int getYDim () const
-{
-    return ydim_;
-}
+  @return the number of sites in the y dimension
+  */
+  unsigned int getYDim() const { return ydim_; }
 
-/**
-@brief Set the number of sites in the z dimension.
+  /**
+  @brief Set the number of sites in the z dimension.
 
-@param z is the number of sites in the z dimension
-*/
-void setZDim (const unsigned int z)
-{
+  @param z is the number of sites in the z dimension
+  */
+  void setZDim(const unsigned int z) {
     zdim_ = z;
     numsites_ = (xdim_ * ydim_ * zdim_);
-}
+  }
 
-/**
-@brief Get the number of sites in the z dimension.
+  /**
+  @brief Get the number of sites in the z dimension.
 
-@return the number of sites in the z dimension
-*/
-unsigned int getZDim () const
-{
-    return zdim_;
-}
-    
-/**
-@brief Get the total number of lattice sites.
+  @return the number of sites in the z dimension
+  */
+  unsigned int getZDim() const { return zdim_; }
 
-The lattice is rectangular, so the total number of sites is
-`xdim_ * ydim_ * zdim_`, but we store this value as a class member to
-save having to compute it multiple times.
+  /**
+  @brief Get the total number of lattice sites.
 
-@return the total number of lattice sites
-*/
-unsigned int getNumsites () const
-{
-    return numsites_;
-}
-    
-/**
-@brief Set the volume fraction of a given microstructure phase.
+  The lattice is rectangular, so the total number of sites is
+  `xdim_ * ydim_ * zdim_`, but we store this value as a class member to
+  save having to compute it multiple times.
 
-@param i is the index of the microstructure phase
-@param vfrac is the volume fraction to assign on a total microstructure basis
-*/
-void setVolumefraction (unsigned int i, double vfrac)
-{
+  @return the total number of lattice sites
+  */
+  unsigned int getNumsites() const { return numsites_; }
+
+  /**
+  @brief Set the volume fraction of a given microstructure phase.
+
+  @param i is the index of the microstructure phase
+  @param vfrac is the volume fraction to assign on a total microstructure basis
+  */
+  void setVolumefraction(unsigned int i, double vfrac) {
     try {
-        volumefraction_.at(i) = vfrac;
+      volumefraction_.at(i) = vfrac;
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "setVolumefraction", "volumefraction_",
+                      volumefraction_.size(), i);
+      ex.printException();
+      exit(1);
     }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","setVolumefraction","volumefraction_",
-                        volumefraction_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brief Set the initial volume fraction of a given microstructure phase.
+  }
 
-@param i is the index of the microstructure phase
-@param vfrac is the volume fraction to assign on a total microstructure basis
-*/
-void setInitvolumefraction (unsigned int i, double vfrac)
-{
+  /**
+  @brief Set the initial volume fraction of a given microstructure phase.
+
+  @param i is the index of the microstructure phase
+  @param vfrac is the volume fraction to assign on a total microstructure basis
+  */
+  void setInitvolumefraction(unsigned int i, double vfrac) {
     try {
-        initvolumefraction_.at(i) = vfrac;
+      initvolumefraction_.at(i) = vfrac;
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "setInitialvolumefraction",
+                      "initvolumefraction_", initvolumefraction_.size(), i);
+      ex.printException();
+      exit(1);
     }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","setInitialvolumefraction","initvolumefraction_",
-                        initvolumefraction_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brief Set the water-solids mass ratio
+  }
 
-@param ws is the water-solids mass ratio
-*/
-void setWsratio (const double ws)
-{
+  /**
+  @brief Set the water-solids mass ratio
+
+  @param ws is the water-solids mass ratio
+  */
+  void setWsratio(const double ws) {
     wsratio_ = 0.0;
     if (ws > 0.0) {
-        wsratio_ = ws;
+      wsratio_ = ws;
     }
     return;
-}
+  }
 
-/**
-@brief Get the water-solids mass ratio
+  /**
+  @brief Get the water-solids mass ratio
 
-@return the water-solids mass ratio
-*/
-double getWsratio (void) const
-{
-    return wsratio_;
-}
+  @return the water-solids mass ratio
+  */
+  double getWsratio(void) const { return wsratio_; }
 
-/**
-@brief Get the volume fraction of a given microstructure phase.
+  /**
+  @brief Get the volume fraction of a given microstructure phase.
 
-This is simply the number of sites with a given phase divided by the
-total number of sites.
+  This is simply the number of sites with a given phase divided by the
+  total number of sites.
 
-@param i is the index of the microstructure phase
-@return the volume fraction of phase i on a total microstructure basis
-*/
-double getVolumefraction (unsigned int i)
-{
+  @param i is the index of the microstructure phase
+  @return the volume fraction of phase i on a total microstructure basis
+  */
+  double getVolumefraction(unsigned int i) {
     try {
-        if (numsites_ == 0) {
-            throw FloatException("Lattice","getVolumefraction",
-                                 "Divide by zero (numsites_)");
-        }
-        return (volumefraction_.at(i));
+      if (numsites_ == 0) {
+        throw FloatException("Lattice", "getVolumefraction",
+                             "Divide by zero (numsites_)");
+      }
+      return (volumefraction_.at(i));
+    } catch (FloatException flex) {
+      flex.printException();
+      exit(1);
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "getVolumefraction", "volumefraction_",
+                      volumefraction_.size(), i);
+      ex.printException();
+      exit(1);
     }
-    catch (FloatException flex) {
-        flex.printException();
-        exit(1);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","getVolumefraction","volumefraction_",
-                        volumefraction_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brief Get the initial volume fraction of a given microstructure phase.
+  }
 
-This is simply the number of sites with a given phase divided by the
-total number of sites.
+  /**
+  @brief Get the initial volume fraction of a given microstructure phase.
 
-@param i is the index of the microstructure phase
-@return the initial volume fraction of phase i on a total microstructure basis
-*/
-double getInitvolumefraction (unsigned int i)
-{
+  This is simply the number of sites with a given phase divided by the
+  total number of sites.
+
+  @param i is the index of the microstructure phase
+  @return the initial volume fraction of phase i on a total microstructure basis
+  */
+  double getInitvolumefraction(unsigned int i) {
     try {
-        if (numsites_ == 0) {
-            throw FloatException("Lattice","getInitialvolumefraction",
-                                 "Divide by zero (numsites_)");
-        }
-        return (initvolumefraction_.at(i));
+      if (numsites_ == 0) {
+        throw FloatException("Lattice", "getInitialvolumefraction",
+                             "Divide by zero (numsites_)");
+      }
+      return (initvolumefraction_.at(i));
+    } catch (FloatException flex) {
+      flex.printException();
+      exit(1);
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "getInitialvolumefraction",
+                      "initvolumefraction_", initvolumefraction_.size(), i);
+      ex.printException();
+      exit(1);
     }
-    catch (FloatException flex) {
-        flex.printException();
-        exit(1);
-    }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","getInitialvolumefraction","initvolumefraction_",
-                        initvolumefraction_.size(),i);
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brief Calculate the subvoxel pore volume
+  }
 
-@param vol is the array of all microstructure phase volumes
-*/
-void calcSubvoxelporevolume(vector<double> &vol);
+  /**
+  @brief Calculate the subvoxel pore volume
 
-/**
-@brief Calculate the total volume of solids including
-subvoxel pore volume assigned to solids
+  @param vol is the array of all microstructure phase volumes
+  */
+  void calcSubvoxelporevolume(vector<double> &vol);
 
-@param vol is the array of all microstructure phase volumes
-it
-*/
-void calcSolidvolumewithpores(vector<double> &vol);
+  /**
+  @brief Calculate the total volume of solids including
+  subvoxel pore volume assigned to solids
 
-/**
-@brief Get the total volume of solids including
-subvoxel pore volume assigned to solids
+  @param vol is the array of all microstructure phase volumes
+  it
+  */
+  void calcSolidvolumewithpores(vector<double> &vol);
 
-@return the solid volume including subvoxel pore volume
-*/
-double getSolidvolumewithpores(void) const
-{
-    return solidvolumewithpores_;
-}
+  /**
+  @brief Get the total volume of solids including
+  subvoxel pore volume assigned to solids
 
-/**
-@brief Calculate the non-solid volume
+  @return the solid volume including subvoxel pore volume
+  */
+  double getSolidvolumewithpores(void) const { return solidvolumewithpores_; }
 
-@param vol is the array of all microstructure phase volumes
-it
-*/
-void calcNonsolidvolume(vector<double> &vol);
+  /**
+  @brief Calculate the non-solid volume
 
-/**
-@brief Get or calculate the non-solid volume
+  @param vol is the array of all microstructure phase volumes
+  it
+  */
+  void calcNonsolidvolume(vector<double> &vol);
 
-@return the non-solid volume
-*/
-double getNonsolidvolume(void) const
-{
-    return nonsolidvolume_;
-}
+  /**
+  @brief Get or calculate the non-solid volume
 
-/**
-@brief Get the number of neighbor sites each site has.
+  @return the non-solid volume
+  */
+  double getNonsolidvolume(void) const { return nonsolidvolume_; }
 
-This is simply the number of sites with a given phase divided by the
-total number of sites.
+  /**
+  @brief Get the number of neighbor sites each site has.
 
-@note NOT USED.
+  This is simply the number of sites with a given phase divided by the
+  total number of sites.
 
-@return the number of neighbor sites each site has
-*/
-unsigned int getSiteneighbors () const
-{
-    return siteneighbors_;
-}
-    
-/**
-@brief Set the lattice resolution [micrometers].
+  @note NOT USED.
 
-The lattice resolution is the physical length associated with the edge
-length of a site.
+  @return the number of neighbor sites each site has
+  */
+  unsigned int getSiteneighbors() const { return siteneighbors_; }
 
-@param res is the lattice resolution [micrometers]
-*/
-void setResolution (const double res);
-    
-/**
-@brief Get the lattice resolution [micrometers].
+  /**
+  @brief Set the lattice resolution [micrometers].
 
-The lattice resolution is the physical length associated with the edge
-length of a site.
+  The lattice resolution is the physical length associated with the edge
+  length of a site.
 
-@note NOT USED.
+  @param res is the lattice resolution [micrometers]
+  */
+  void setResolution(const double res);
 
-@return the lattice resolution [micrometers]
-*/
-double getResolution () const
-{
-    return resolution_;
-}
-    
-/**
-@brief Set the simulation time [days].
+  /**
+  @brief Get the lattice resolution [micrometers].
 
-@note NOT USED.
+  The lattice resolution is the physical length associated with the edge
+  length of a site.
 
-@param tval is the simulation time [days]
-*/
-void setTime (const double tval)
-{
-    time_ = tval;
-}
-    
-/**
-@brief Get the simulation time [days].
+  @note NOT USED.
 
-@note NOT USED.
+  @return the lattice resolution [micrometers]
+  */
+  double getResolution() const { return resolution_; }
 
-@return the simulation time [days]
-*/
-double getTime () const
-{
-    return time_;
-}
+  /**
+  @brief Set the simulation time [days].
 
-/**
-@brief Get the simulation time at which to start sulfate attack simulation [days].
+  @note NOT USED.
 
-@note NOT USED.
+  @param tval is the simulation time [days]
+  */
+  void setTime(const double tval) { time_ = tval; }
 
-@return the simulation time at which to start sulfate attack [days]
-*/
-double getSattack_time () const
-{
-    return sattack_time_;
-}
+  /**
+  @brief Get the simulation time [days].
 
-/**
-@brief Set the simulation time at which to start sulfate attack simulation [days].
+  @note NOT USED.
 
-@param sattacktime is the simulation time at which to start sulfate attack [days]
-*/
-void setSattack_time (const double sattacktime)
-{
+  @return the simulation time [days]
+  */
+  double getTime() const { return time_; }
+
+  /**
+  @brief Get the simulation time at which to start sulfate attack simulation
+  [days].
+
+  @note NOT USED.
+
+  @return the simulation time at which to start sulfate attack [days]
+  */
+  double getSattack_time() const { return sattack_time_; }
+
+  /**
+  @brief Set the simulation time at which to start sulfate attack simulation
+  [days].
+
+  @param sattacktime is the simulation time at which to start sulfate attack
+  [days]
+  */
+  void setSattack_time(const double sattacktime) {
     sattack_time_ = sattacktime;
-}
+  }
 
-/**
-@brief Get the simulation time at which to start leaching simulation [days].
+  /**
+  @brief Get the simulation time at which to start leaching simulation [days].
 
-@note NOT USED.
+  @note NOT USED.
 
-@return the simulation time at which to start leaching [days]
-*/
-double getLeach_time () const
-{
-    return leach_time_;
-}
+  @return the simulation time at which to start leaching [days]
+  */
+  double getLeach_time() const { return leach_time_; }
 
-/**
-@brief Set the simulation time at which to start leaching simulation [days].
+  /**
+  @brief Set the simulation time at which to start leaching simulation [days].
 
-@param leachtime is the simulation time at which to start leaching [days]
-*/
-void setLeach_time (const double leachtime)
-{
-    leach_time_ = leachtime;
-} 
-    
-/**
-@brief Set the lattice temperature [K].
+  @param leachtime is the simulation time at which to start leaching [days]
+  */
+  void setLeach_time(const double leachtime) { leach_time_ = leachtime; }
 
-@param tmp is the temperature [K]
-*/
-void setTemperature (const double tmp)
-{
-    temperature_ = tmp;
-}
-    
-/**
-@brief Get the lattice temperature [K].
+  /**
+  @brief Set the lattice temperature [K].
 
-@return the temperature [K]
-*/
-double getTemperature () const
-{
-    return temperature_;
-}
-    
-/**
-@brief Get the version of THAMES
+  @param tmp is the temperature [K]
+  */
+  void setTemperature(const double tmp) { temperature_ = tmp; }
 
-@note NOT USED.
+  /**
+  @brief Get the lattice temperature [K].
 
-@return the version number as a string
-*/
-const string &getVersion () const
-{
-    return version_;
-}
-   
-/**
-@brief Set the root name for simulation output files.
+  @return the temperature [K]
+  */
+  double getTemperature() const { return temperature_; }
 
-@param jobname is the root name for simulation output files
-*/
-void setJobroot (string jobname)
-{
-    jobroot_ = jobname;
-}
- 
-/**
-@brief Add a site at location (xp,yp,zp) to the lattice.
+  /**
+  @brief Get the version of THAMES
 
-The site is checked for valid coordinates.  If valid a new Site object
-is created and pushed back onto the class's `site_` vector.
+  @note NOT USED.
 
-@param xp is the x coordinate of the site to add
-@param yp is the y coordinate of the site to add
-@param zp is the z coordinate of the site to add
-*/
-void addSite (const unsigned int xp,
-              const unsigned int yp,
-              const unsigned int zp);
-    
-/**
-@brief Get the x coordinate of a site with a given index in the 1D `site_` array.
+  @return the version number as a string
+  */
+  const string &getVersion() const { return version_; }
 
-@param i is the index of the site in the class's `site_` array
-@return the x coordinate
-*/
-unsigned int getX (const unsigned int i) const
-{
+  /**
+  @brief Set the root name for simulation output files.
+
+  @param jobname is the root name for simulation output files
+  */
+  void setJobroot(string jobname) { jobroot_ = jobname; }
+
+  /**
+  @brief Add a site at location (xp,yp,zp) to the lattice.
+
+  The site is checked for valid coordinates.  If valid a new Site object
+  is created and pushed back onto the class's `site_` vector.
+
+  @param xp is the x coordinate of the site to add
+  @param yp is the y coordinate of the site to add
+  @param zp is the z coordinate of the site to add
+  */
+  void addSite(const unsigned int xp, const unsigned int yp,
+               const unsigned int zp);
+
+  /**
+  @brief Get the x coordinate of a site with a given index in the 1D `site_`
+  array.
+
+  @param i is the index of the site in the class's `site_` array
+  @return the x coordinate
+  */
+  unsigned int getX(const unsigned int i) const {
     try {
-        if (i >= site_.size()) {
-            throw EOBException("Lattice","getX","site_",
-                               site_.size(),(unsigned int)i);
-        }
-        return (site_[i].getX());
+      if (i >= site_.size()) {
+        throw EOBException("Lattice", "getX", "site_", site_.size(),
+                           (unsigned int)i);
+      }
+      return (site_[i].getX());
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
-}
+  }
 
-/**
-@brief Get the y coordinate of a site with a given index in the 1D `site_` array.
+  /**
+  @brief Get the y coordinate of a site with a given index in the 1D `site_`
+  array.
 
-@param i is the index of the site in the class's `site_` array
-@return the y coordinate
-*/
-unsigned int getY (const unsigned int i) const
-{
+  @param i is the index of the site in the class's `site_` array
+  @return the y coordinate
+  */
+  unsigned int getY(const unsigned int i) const {
     try {
-        if (i >= site_.size()) {
-            throw EOBException("Lattice","getY","site_",
-                               site_.size(),(unsigned int)i);
-        }
-        return (site_[i].getY());
+      if (i >= site_.size()) {
+        throw EOBException("Lattice", "getY", "site_", site_.size(),
+                           (unsigned int)i);
+      }
+      return (site_[i].getY());
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
-}
+  }
 
-/**
-@brief Get the z coordinate of a site with a given index in the 1D `site_` array.
+  /**
+  @brief Get the z coordinate of a site with a given index in the 1D `site_`
+  array.
 
-@param i is the index of the site in the class's `site_` array
-@return the x coordinate
-*/
-unsigned int getZ (const unsigned int i) const
-{
+  @param i is the index of the site in the class's `site_` array
+  @return the x coordinate
+  */
+  unsigned int getZ(const unsigned int i) const {
     try {
-        if (i >= site_.size()) {
-            throw EOBException("Lattice","getY","site_",
-                               site_.size(),(unsigned int)i);
-        }
-        return (site_[i].getZ());
+      if (i >= site_.size()) {
+        throw EOBException("Lattice", "getY", "site_", site_.size(),
+                           (unsigned int)i);
+      }
+      return (site_[i].getZ());
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brief Get a site's index in the 1D `site_` array, given its (x,y,z) coordinates.
+  }
 
-@param ix is the x coordinate of the site
-@param iy is the x coordinate of the site
-@param iz is the x coordinate of the site
-@return the index of the site in the `site_` array
-*/
-unsigned int getIndex (int ix,
-                       int iy,
-                       int iz) const;
-    
-/**
-@brief Get the collection of site indices neighboring a given site.
+  /**
+  @brief Get a site's index in the 1D `site_` array, given its (x,y,z)
+  coordinates.
 
-@param sitenum is the index of the site in question
-@param size is the maximum distance defining the neighborhood [sites]
-@return a list of site indices for all neighbors within the maximum distance
-*/
-vector<unsigned int> getNeighborhood (const unsigned int sitenum,
-                                           const int size);
-    
+  @param ix is the x coordinate of the site
+  @param iy is the x coordinate of the site
+  @param iz is the x coordinate of the site
+  @return the index of the site in the `site_` array
+  */
+  unsigned int getIndex(int ix, int iy, int iz) const;
 
-/**
-@brief Get a pointer to a Site object at a given index in the `site_` array.
+  /**
+  @brief Get the collection of site indices neighboring a given site.
 
-@param index is the index of the Site object in the `site_` array
-@return a pointer to the Site object in question
-*/
-Site *getSite (int index)
-{
+  @param sitenum is the index of the site in question
+  @param size is the maximum distance defining the neighborhood [sites]
+  @return a list of site indices for all neighbors within the maximum distance
+  */
+  vector<unsigned int> getNeighborhood(const unsigned int sitenum,
+                                       const int size);
+
+  /**
+  @brief Get a pointer to a Site object at a given index in the `site_` array.
+
+  @param index is the index of the Site object in the `site_` array
+  @return a pointer to the Site object in question
+  */
+  Site *getSite(int index) {
     try {
-        if (index >= site_.size()) {
-            throw EOBException("Lattice","getSite","site_",
-                           site_.size(),(unsigned int)index);
-        }
-        return &site_[index];
+      if (index >= site_.size()) {
+        throw EOBException("Lattice", "getSite", "site_", site_.size(),
+                           (unsigned int)index);
+      }
+      return &site_[index];
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
-}
+  }
 
-/**
-@brief Designate a site as damaged.
+  /**
+  @brief Designate a site as damaged.
 
-The site to be damaged is specified by its index in the `site_` array.
+  The site to be damaged is specified by its index in the `site_` array.
 
-@note NOT USED.
+  @note NOT USED.
 
-@param index is the index of the Site object in the `site_` array
-*/
-void setDamage (int index)
-{
+  @param index is the index of the Site object in the `site_` array
+  */
+  void setDamage(int index) {
     try {
-        if (index >= site_.size()) {
-            throw EOBException("Lattice","setDamage","site_",
-                           site_.size(),(unsigned int)index);
-        }
-        site_[index].setDamage();
+      if (index >= site_.size()) {
+        throw EOBException("Lattice", "setDamage", "site_", site_.size(),
+                           (unsigned int)index);
+      }
+      site_[index].setDamage();
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
+  }
 
-}
+  /**
+  @brief Change the wmc (weighted mean curvature) of a site by a prescribed
+  amount.
 
-
-/**
-@brief Change the wmc (weighted mean curvature) of a site by a prescribed amount.
-
-@param index is the index of the Site object in the `site_` array
-@param dwmcval is the increment to add to the wmc
-*/
-void dWmc(int index,
-          double dwmcval)
-{
+  @param index is the index of the Site object in the `site_` array
+  @param dwmcval is the increment to add to the wmc
+  */
+  void dWmc(int index, double dwmcval) {
     try {
-        if (index >= site_.size()) {
-            throw EOBException("Lattice","dWmc","site_",
-                           site_.size(),(unsigned int)index);
-        }
-        site_[index].setWmc(site_[index].getWmc() + dwmcval);
+      if (index >= site_.size()) {
+        throw EOBException("Lattice", "dWmc", "site_", site_.size(),
+                           (unsigned int)index);
+      }
+      site_[index].setWmc(site_[index].getWmc() + dwmcval);
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
-    }
+  }
 
-}
+  /**
+  @brief Compute normalized initial microstructure phase masses
 
-/**
-@brief Compute normalized initial microstructure phase masses
+  Given the initial masses of all phases in the microstructure,
+  this method scales them to 100 grams of solid.  In the process,
+  this method also sets the initial moles of water in the
+  chemical system definition.
 
-Given the initial masses of all phases in the microstructure,
-this method scales them to 100 grams of solid.  In the process,
-this method also sets the initial moles of water in the
-chemical system definition.
+  @param microPhaseMass is a vector of all the microstructure masses
+  @param solidMass is the combined mass of all the solids
+  */
+  void normalizePhaseMasses(vector<double> microPhaseMass, double solidMass);
 
-@param microPhaseMass is a vector of all the microstructure masses
-@param solidMass is the combined mass of all the solids
-*/
-void normalizePhaseMasses(vector<double> microPhaseMass,
-                          double solidMass);
+  /**
+  @brief Master method to locate the interfaces for each phase in the
+  microstructure.
 
-/**
-@brief Master method to locate the interfaces for each phase in the microstructure.
+  */
+  void findInterfaces(void);
 
-*/
-void findInterfaces (void);
-    
-/**
-@brief Add a prescribed number of sites of a given phase to the microstructure.
+  /**
+  @brief Add a prescribed number of sites of a given phase to the
+  microstructure.
 
-This method gets a list of all the <i>potential</i> growth sites, which
-already is sorted in descending order of growth affinity.  The list is
-then visited one site at a time, switching the id of the phase at the site.
-Once this is done, the lists of growth sites and dissolution sites are
-updated to account for the new local geometry.
+  This method gets a list of all the <i>potential</i> growth sites, which
+  already is sorted in descending order of growth affinity.  The list is
+  then visited one site at a time, switching the id of the phase at the site.
+  Once this is done, the lists of growth sites and dissolution sites are
+  updated to account for the new local geometry.
 
-@param phaseid is the id of the microstructure phase to add
-@param numtoadd is the number of sites to switch to this phase
-@return the actual number of sites that were changed
-*/
-int growPhase (unsigned int phaseid,
-               int numtoadd);
-    
-/**
-@brief Remove a prescribed number of sites of a given phase from the microstructure.
+  @param phaseid is the id of the microstructure phase to add
+  @param numtoadd is the number of sites to switch to this phase
+  @return the actual number of sites that were changed
+  */
+  int growPhase(unsigned int phaseid, int numtoadd);
 
-This method gets a list of all the <i>potential</i> dissolution sites, which
-already is sorted in descending order of <i>growth</i> affinity.  The list is
-then visited in reverse order one site at a time, switching the id of the phase
-at the site.  Once this is done, the lists of growth sites and dissolution
-sites are updated to account for the new local geometry.
+  /**
+  @brief Remove a prescribed number of sites of a given phase from the
+  microstructure.
 
-@param phaseid is the id of the microstructure phase to remove
-@param numtoadd is the number of sites to switch from this phase
-@return the actual number of sites that were changed
-*/
-int dissolvePhase (unsigned int phaseid,
-                   int numtoadd);
-    
-/**
-@brief Remove the water from a prescribed number of solution-filled sites.
+  This method gets a list of all the <i>potential</i> dissolution sites, which
+  already is sorted in descending order of <i>growth</i> affinity.  The list is
+  then visited in reverse order one site at a time, switching the id of the
+  phase at the site.  Once this is done, the lists of growth sites and
+  dissolution sites are updated to account for the new local geometry.
 
-This method constructs a list of all the <i>potential</i> void sites, based
-on whether there are multiple connected solution-filled sites in a cluster.
-The list is then sorted essentially by the effective pore size.  Only then
-is the list visited and the prescribed number of sites switched to void.
+  @param phaseid is the id of the microstructure phase to remove
+  @param numtoadd is the number of sites to switch from this phase
+  @return the actual number of sites that were changed
+  */
+  int dissolvePhase(unsigned int phaseid, int numtoadd);
 
-@param numsites is the number of sites to switch to void
-@return the actual number of sites that were changed
-*/
-int emptyPorosity (int numsites);
-    
-/**
-@brief Add water to a prescribed number of empty pore sites.
+  /**
+  @brief Remove the water from a prescribed number of solution-filled sites.
 
-This method constructs a list of all the void sites, based
-on whether there are multiple connected void sites in a cluster.
-The list is then sorted essentially by the effective pore size.  Only then
-is the list visited and the prescribed number of sites switched to void.
+  This method constructs a list of all the <i>potential</i> void sites, based
+  on whether there are multiple connected solution-filled sites in a cluster.
+  The list is then sorted essentially by the effective pore size.  Only then
+  is the list visited and the prescribed number of sites switched to void.
 
-@param numsites is the number of sites to switch from void to water
-@return the actual number of sites that were changed
-*/
-int fillPorosity(int numsites);
-    
-/**
-@brief Count the number of solution sites within a box centered on a given site.
+  @param numsites is the number of sites to switch to void
+  @return the actual number of sites that were changed
+  */
+  int emptyPorosity(int numsites);
 
-@param boxsize is the linear dimension of the cubic box neighborhood
-@param siteid is the index of the queried site in the `site_` array
-@return the number of solution-filled sites in the box neighborhood
-*/
-int countBox(int boxsize,
-             unsigned int siteid);
-    
-/**
-@brief Check whether a linear coordinate is outside the lattice boundaries.
+  /**
+  @brief Add water to a prescribed number of empty pore sites.
 
-If a given coordinate is outside the lattice boundaries, then the additive
-adjustment is returned that will locate the equivalent site within the lattice,
-assuming periodic boundary conditions.
+  This method constructs a list of all the void sites, based
+  on whether there are multiple connected void sites in a cluster.
+  The list is then sorted essentially by the effective pore size.  Only then
+  is the list visited and the prescribed number of sites switched to void.
 
-@param pos is the linear coordinate to check
-@param size is the dimension of the lattice in that dimension (number of sites)
-@return the additive adjustment to locate the equivalent coordinate within
-the lattice
-*/
-int checkBC (int pos,
-             int size)
-{
-    if (pos >= size) return(-size);
-    if (pos < 0) return(size);
-    return(0);
-}
-    
-/**
-@brief Get a pointer to the ChemicalSystem object for the simulation.
+  @param numsites is the number of sites to switch from void to water
+  @return the actual number of sites that were changed
+  */
+  int fillPorosity(int numsites);
 
-@return a pointer to the ChemicalSystem object for the simulation
-*/
-ChemicalSystem* getChemSys () const
-{
-    return chemSys_;
-}
-    
-/**
-@brief Set the phase id of a given site, specified by a pointer to the Site object.
+  /**
+  @brief Count the number of solution sites within a box centered on a given
+  site.
 
-@param s is a pointer to the Site object
-@param i is the phase index to set at that site
-*/
-void setMicroPhaseId (Site *s,
-                 const unsigned int i)
-{
+  @param boxsize is the linear dimension of the cubic box neighborhood
+  @param siteid is the index of the queried site in the `site_` array
+  @return the number of solution-filled sites in the box neighborhood
+  */
+  int countBox(int boxsize, unsigned int siteid);
+
+  /**
+  @brief Check whether a linear coordinate is outside the lattice boundaries.
+
+  If a given coordinate is outside the lattice boundaries, then the additive
+  adjustment is returned that will locate the equivalent site within the
+  lattice, assuming periodic boundary conditions.
+
+  @param pos is the linear coordinate to check
+  @param size is the dimension of the lattice in that dimension (number of
+  sites)
+  @return the additive adjustment to locate the equivalent coordinate within
+  the lattice
+  */
+  int checkBC(int pos, int size) {
+    if (pos >= size)
+      return (-size);
+    if (pos < 0)
+      return (size);
+    return (0);
+  }
+
+  /**
+  @brief Get a pointer to the ChemicalSystem object for the simulation.
+
+  @return a pointer to the ChemicalSystem object for the simulation
+  */
+  ChemicalSystem *getChemSys() const { return chemSys_; }
+
+  /**
+  @brief Set the phase id of a given site, specified by a pointer to the Site
+  object.
+
+  @param s is a pointer to the Site object
+  @param i is the phase index to set at that site
+  */
+  void setMicroPhaseId(Site *s, const unsigned int i) {
     string msg;
     try {
-        count_.at(s->getMicroPhaseId())--;        
-        s->setMicroPhaseId(i);
-        count_.at(i)++;
-    }
-    catch (out_of_range &oor) {
-        msg = "Site does not exist?";
-        throw EOBException("Lattice","setMicroPhaseId",msg,count_.size(),i);
+      count_.at(s->getMicroPhaseId())--;
+      s->setMicroPhaseId(i);
+      count_.at(i)++;
+    } catch (out_of_range &oor) {
+      msg = "Site does not exist?";
+      throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
     }
     return;
-}
+  }
 
-/**
-@brief Set the phase id of a given site, specified by the site's index number.
+  /**
+  @brief Set the phase id of a given site, specified by the site's index number.
 
-@param sitenum is the index of the site in the `site_` array
-@param i is the phase index to set at that site
-*/
-void setMicroPhaseId (const int sitenum,
-                 const unsigned int i)
-{
+  @param sitenum is the index of the site in the `site_` array
+  @param i is the phase index to set at that site
+  */
+  void setMicroPhaseId(const int sitenum, const unsigned int i) {
     string msg;
     try {
-        count_.at(site_.at(sitenum).getMicroPhaseId())--;
-        site_.at(sitenum).setMicroPhaseId(i);
-        count_.at(i)++;
+      count_.at(site_.at(sitenum).getMicroPhaseId())--;
+      site_.at(sitenum).setMicroPhaseId(i);
+      count_.at(i)++;
+    } catch (out_of_range &oor) {
+      msg = "Site does not exist?";
+      throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
     }
-    catch (out_of_range &oor) {
-        msg = "Site does not exist?";
-        throw EOBException("Lattice","setMicroPhaseId",msg,count_.size(),i);
-    }
-}
+  }
 
-/**
-@brief Get the phase id of a given site, specified by the site's index number.
+  /**
+  @brief Get the phase id of a given site, specified by the site's index number.
 
-@param sitenum is the index of the site in the `site_` array
-@return the microstructure phase id at the site
-*/
-int getMicroPhaseId (const int sitenum)
-{
+  @param sitenum is the index of the site in the `site_` array
+  @return the microstructure phase id at the site
+  */
+  int getMicroPhaseId(const int sitenum) {
     try {
-        Site *ste;
-        ste = &site_[sitenum];
-        return (ste->getMicroPhaseId());
+      Site *ste;
+      ste = &site_[sitenum];
+      return (ste->getMicroPhaseId());
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "getMicroPhaseId", "sitenum", numsites_,
+                      sitenum);
+      ex.printException();
+      exit(1);
     }
-    catch(out_of_range &oor) {
-        EOBException ex("Lattice","getMicroPhaseId","sitenum",
-                        numsites_,sitenum);
-        ex.printException();
-        exit(1);
-    }
-}
-    
-/**
-@brisef Add a site to the list of sites where dissolution of a given phase can occur.
+  }
 
-@param loc is a pointer to the Site object to add to the list of potential dissolution sites
-@param pid is the microstructure phase id
-*/
-void addDissolutionSite (Site *loc,
-                         unsigned int pid);
-    
-/**
-@brief Add a site to the list of sites where growth of a given phase can occur.
+  /**
+  @brisef Add a site to the list of sites where dissolution of a given phase can
+  occur.
 
-@param loc is a pointer to the Site object to add to the list of potential growth sites
-@param pid is the microstructure phase id
-*/
-void addGrowthSite (Site *loc,
-                    unsigned int pid);
-    
-/**
-@brief Remove a site from the list of sites where dissolution of a given phase can occur.
+  @param loc is a pointer to the Site object to add to the list of potential
+  dissolution sites
+  @param pid is the microstructure phase id
+  */
+  void addDissolutionSite(Site *loc, unsigned int pid);
 
-@param loc is a pointer to the Site object to remove from the list of potential dissolution sites
-@param pid is the microstructure phase id
-*/
-void removeDissolutionSite (Site *loc,
-                            unsigned int pid);
-    
-/**
-@brief Remove a site from the list of sites where growth of a given phase can occur.
+  /**
+  @brief Add a site to the list of sites where growth of a given phase can
+  occur.
 
-@param loc is a pointer to the Site object to remove from the list of potential growth sites
-@param pid is the microstructure phase id
-*/
-void removeGrowthSite (Site *loc,
-                       unsigned int pid);
-    
-/**
-@brief Master method to update a microstructure during after a given time interval.
+  @param loc is a pointer to the Site object to add to the list of potential
+  growth sites
+  @param pid is the microstructure phase id
+  */
+  void addGrowthSite(Site *loc, unsigned int pid);
 
-Updating the microstructure includes determining how many sites of each phase to
-add and subtract from the lattice, determining which site locations will be used
-to do that, and then actually causing the switches in phase id to happen at those sites.
-The interfaces and lists of dissolution and growth sites are updated accordingly, too.
+  /**
+  @brief Remove a site from the list of sites where dissolution of a given phase
+  can occur.
 
-@note Water is assumed to be chemically reactive only if it is in capillary
-porosity (microstructure id ELECTROLYTEID).  If the capillary water is exhausted then
-some reaction can still happen with water in nanoporosity, but for now we assume
-that the nanopore water is chemically unreactive and cannot be removed.
+  @param loc is a pointer to the Site object to remove from the list of
+  potential dissolution sites
+  @param pid is the microstructure phase id
+  */
+  void removeDissolutionSite(Site *loc, unsigned int pid);
 
-@todo Generalize to allow water in nanopores to be chemically reactive
+  /**
+  @brief Remove a site from the list of sites where growth of a given phase can
+  occur.
 
-@param time is is the simulation time [days]
-@param simtype is the type of simulation (hydration, leaching, etc)
-@param isFirst is true if this is the first microstructure update, false otherwise
-@param capWater is true if there is any capillary pore water in the system.
-*/
-void changeMicrostructure (double time,
-                           const int simtype,
-                           bool isFirst,
-                           bool &capWater);
-    
-/**
-@brief Adjust GEMS calculated volumes of microstructure phases
+  @param loc is a pointer to the Site object to remove from the list of
+  potential growth sites
+  @param pid is the microstructure phase id
+  */
+  void removeGrowthSite(Site *loc, unsigned int pid);
 
-The volume fractions passed to this function are those coming directly
-from the chemical system.  But the chemical system does not account for
-occluded porosity that may be associated with a solid phase at length
-scales smaller than the lattice spatial resolution.  This method fixes
-those volume fractions, paying special attention to the water distribution.
+  /**
+  @brief Master method to update a microstructure during after a given time
+  interval.
 
-@note Water is assumed to be chemically reactive only if it is in capillary
-porosity (microstructure id ELECTROLYTEID).  If the capillary water is exhausted then
-some reaction can still happen with water in nanoporosity, but for now we assume
-that the nanopore water is chemically unreactive and cannot be removed.
+  Updating the microstructure includes determining how many sites of each phase
+  to add and subtract from the lattice, determining which site locations will be
+  used to do that, and then actually causing the switches in phase id to happen
+  at those sites. The interfaces and lists of dissolution and growth sites are
+  updated accordingly, too.
 
-@todo Generalize to allow water in nanopores to be chemically reactive
+  @note Water is assumed to be chemically reactive only if it is in capillary
+  porosity (microstructure id ELECTROLYTEID).  If the capillary water is
+  exhausted then some reaction can still happen with water in nanoporosity, but
+  for now we assume that the nanopore water is chemically unreactive and cannot
+  be removed.
 
-@param phasenames is a vector of the microstructure phase names
-@param vol is a vector of the pre-adjusted microstructure volumes
-*/
-void adjustMicrostructureVolumes (vector<string> phasenames,
-                                  vector<double> &vol);
-    
-/**
-@brief Calculate microstructure volume fractions
+  @todo Generalize to allow water in nanopores to be chemically reactive
 
-@param names is a vector of the adjusted microstructure volumes
-@param vol is a vector of the adjusted microstructure volumes
-@param vfrac will hold the microstructure volume fractions
-*/
-void adjustMicrostructureVolFracs (vector<string> &names,
-                                   const vector<double> vol,
-                                   vector<double> &vfrac);
-    
-/**
-@brief Calculate the pore size distribution data
+  @param time is is the simulation time [days]
+  @param simtype is the type of simulation (hydration, leaching, etc)
+  @param isFirst is true if this is the first microstructure update, false
+  otherwise
+  @param capWater is true if there is any capillary pore water in the system.
+  */
+  void changeMicrostructure(double time, const int simtype, bool isFirst,
+                            bool &capWater);
 
-*/
-void calculatePoreSizeDistribution (void);
+  /**
+  @brief Adjust GEMS calculated volumes of microstructure phases
 
-/**
-@brief Write the pore size distribution data to a file
+  The volume fractions passed to this function are those coming directly
+  from the chemical system.  But the chemical system does not account for
+  occluded porosity that may be associated with a solid phase at length
+  scales smaller than the lattice spatial resolution.  This method fixes
+  those volume fractions, paying special attention to the water distribution.
 
-@param curtime is the current time in days
-@param simtype is the sumulation tyupe
-@param root is the root name of the output file to create
-*/
-void writePoreSizeDistribution (double curtime,
-                                const int simtype,
-                                const string &root);
+  @note Water is assumed to be chemically reactive only if it is in capillary
+  porosity (microstructure id ELECTROLYTEID).  If the capillary water is
+  exhausted then some reaction can still happen with water in nanoporosity, but
+  for now we assume that the nanopore water is chemically unreactive and cannot
+  be removed.
 
-/**
-@brief Write the 3D microstructure to a file.
+  @todo Generalize to allow water in nanopores to be chemically reactive
 
-The microstructure output file will indicate the phase id at each site.
+  @param phasenames is a vector of the microstructure phase names
+  @param vol is a vector of the pre-adjusted microstructure volumes
+  */
+  void adjustMicrostructureVolumes(vector<string> phasenames,
+                                   vector<double> &vol);
 
-@param curtime is the current time in days
-@param root is the root name of the output file to create
-*/
-void writeLattice (double curtime,
-                   const int simtype,
-                   const string &root);
-    
-/**
-@brief Write the 3D microstructure to a file.
+  /**
+  @brief Calculate microstructure volume fractions
 
-The damage output file is binary, each site either being damaged or not.
+  @param names is a vector of the adjusted microstructure volumes
+  @param vol is a vector of the adjusted microstructure volumes
+  @param vfrac will hold the microstructure volume fractions
+  */
+  void adjustMicrostructureVolFracs(vector<string> &names,
+                                    const vector<double> vol,
+                                    vector<double> &vfrac);
 
-@param curtime is the current time in days
-@param root is the root name of the output file to create
-*/
-void writeDamageLattice (double curtime, const string &root);
-    
+  /**
+  @brief Calculate the pore size distribution data
 
-/**
-@brief Write the 3D microstructure to a png file that can be immediately rendered.
+  */
+  void calculatePoreSizeDistribution(void);
 
-@param curtime is the current time in days
-@param root is the root name of the png output file to create
-*/
-void writeLatticePNG (double curtime,
-                      const int simtype,
-                      const string &root);
-    
-/**
-@brief Write the 3D microstructure to a png file that can be immediately rendered.
+  /**
+  @brief Write the pore size distribution data to a file
 
-The damage output file is binary, each site either being damaged or not.
+  @param curtime is the current time in days
+  @param simtype is the sumulation tyupe
+  @param root is the root name of the output file to create
+  */
+  void writePoreSizeDistribution(double curtime, const int simtype,
+                                 const string &root);
 
-@param curtime is the current time in days
-@param root is the root name of the png output file to create
-*/
-void writeDamageLatticePNG (double curtime, const string &root);
-    
-/**
-@brief Create files of sequential slices of the microstructure in the x direction.
+  /**
+  @brief Write the 3D microstructure to a file.
 
-The slices are individual PPM files of 2D (y,z) microstructure slices,
-written back to back, in the same file.  Once created, the files are each
-converted to GIFs using a system call to Imagemagick, and then the GIFs are
-converted to an animated GIF file using a system call to gifsicle.
+  The microstructure output file will indicate the phase id at each site.
 
-@note NOT USED.
+  @param curtime is the current time in days
+  @param root is the root name of the output file to create
+  */
+  void writeLattice(double curtime, const int simtype, const string &root);
 
-@warning This method currently depends on system calls
-@warning This method currently depends on having Imagemagick installed
-@warning This method currently depends on having gifsicle installed
+  /**
+  @brief Write the 3D microstructure to a file.
 
-@todo Remove the dependence on system calls, Imagemagick, and gifsicle
+  The damage output file is binary, each site either being damaged or not.
 
-@param root is the root name of the png output file to create
-*/
-void makeMovie (const string &root);
-    
-/**
-@brief Set the expansion strain components of a site specified by its index.
+  @param curtime is the current time in days
+  @param root is the root name of the output file to create
+  */
+  void writeDamageLattice(double curtime, const string &root);
 
-This function changes the strain components of a site already in the
-list of expansion sites.  If the prescribed site is not already in the 
-list of expansion sites, then the site will be added to that list.
+  /**
+  @brief Write the 3D microstructure to a png file that can be immediately
+  rendered.
 
-@param index is the index of the site in the `site_` array
-@param val is the vector of expansion strain components to set
-*/
-void setExpansion (int index,
-                   vector<double> val)
-{
-    map<int,vector<double> >::iterator p = expansion_.find(index);
+  @param curtime is the current time in days
+  @param root is the root name of the png output file to create
+  */
+  void writeLatticePNG(double curtime, const int simtype, const string &root);
+
+  /**
+  @brief Write the 3D microstructure to a png file that can be immediately
+  rendered.
+
+  The damage output file is binary, each site either being damaged or not.
+
+  @param curtime is the current time in days
+  @param root is the root name of the png output file to create
+  */
+  void writeDamageLatticePNG(double curtime, const string &root);
+
+  /**
+  @brief Create files of sequential slices of the microstructure in the x
+  direction.
+
+  The slices are individual PPM files of 2D (y,z) microstructure slices,
+  written back to back, in the same file.  Once created, the files are each
+  converted to GIFs using a system call to Imagemagick, and then the GIFs are
+  converted to an animated GIF file using a system call to gifsicle.
+
+  @note NOT USED.
+
+  @warning This method currently depends on system calls
+  @warning This method currently depends on having Imagemagick installed
+  @warning This method currently depends on having gifsicle installed
+
+  @todo Remove the dependence on system calls, Imagemagick, and gifsicle
+
+  @param root is the root name of the png output file to create
+  */
+  void makeMovie(const string &root);
+
+  /**
+  @brief Set the expansion strain components of a site specified by its index.
+
+  This function changes the strain components of a site already in the
+  list of expansion sites.  If the prescribed site is not already in the
+  list of expansion sites, then the site will be added to that list.
+
+  @param index is the index of the site in the `site_` array
+  @param val is the vector of expansion strain components to set
+  */
+  void setExpansion(int index, vector<double> val) {
+    map<int, vector<double>>::iterator p = expansion_.find(index);
     if (p != expansion_.end()) {
-        p->second = val;
+      p->second = val;
     } else {
-        expansion_.insert(make_pair(index,val));
+      expansion_.insert(make_pair(index, val));
     }
-}
+  }
 
-/**
-@brief Get the expansion strain components of a site specified by its index.
+  /**
+  @brief Get the expansion strain components of a site specified by its index.
 
-@param index is the index of the site in the `site_` array
-@return the vector of expansion strain components to set
-*/
-vector<double> getExpansion (int index)
-{
+  @param index is the index of the site in the `site_` array
+  @return the vector of expansion strain components to set
+  */
+  vector<double> getExpansion(int index) {
     string msg;
-    map<int,vector<double> >::iterator p = expansion_.find(index);
+    map<int, vector<double>>::iterator p = expansion_.find(index);
     if (p != expansion_.end()) {
-        return p->second;
+      return p->second;
     } else {
-        msg = "Could not find expansion_ match to index provided";
-        throw EOBException("Lattice","getExpansion",msg,expansion_.size(),0);
+      msg = "Could not find expansion_ match to index provided";
+      throw EOBException("Lattice", "getExpansion", msg, expansion_.size(), 0);
     }
-}
+  }
 
-/**
-@brief Get the saturation index of a phase.
+  /**
+  @brief Get the saturation index of a phase.
 
-The saturation index is the ratio of the activity product for the assumed
-dissolution reaction in the GEM database to the equilibrium value of that
-activity product (<i>i.e.</i>, the equilibrium constant).
+  The saturation index is the ratio of the activity product for the assumed
+  dissolution reaction in the GEM database to the equilibrium value of that
+  activity product (<i>i.e.</i>, the equilibrium constant).
 
-@note NOT USED.
+  @note NOT USED.
 
-@param idx is the microstructure phase id
-@return the saturation index of that phase
-*/
-double getSI (int idx)
-{
+  @param idx is the microstructure phase id
+  @return the saturation index of that phase
+  */
+  double getSI(int idx) {
     try {
-        return ((double)(SI_.at(idx)));
+      return ((double)(SI_.at(idx)));
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "getSI", "SI_", SI_.size(), idx);
+      ex.printException();
+      exit(1);
     }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","getSI","SI_",
-                        SI_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
+  }
 
-/**
-@brief Set the saturation index of a phase.
+  /**
+  @brief Set the saturation index of a phase.
 
-The saturation index is the ratio of the activity product for the assumed
-dissolution reaction in the GEM database to the equilibrium value of that
-activity product (<i>i.e.</i>, the equilibrium constant).
+  The saturation index is the ratio of the activity product for the assumed
+  dissolution reaction in the GEM database to the equilibrium value of that
+  activity product (<i>i.e.</i>, the equilibrium constant).
 
-@param idx is the microstructure phase id
-@param val is the saturation index.
-*/
-void setSI (const int idx, const double val)
-{
+  @param idx is the microstructure phase id
+  @param val is the saturation index.
+  */
+  void setSI(const int idx, const double val) {
     try {
-        SI_.at(idx) = val;
+      SI_.at(idx) = val;
+    } catch (out_of_range &oor) {
+      EOBException ex("Lattice", "setSI", "SI_", SI_.size(), idx);
+      ex.printException();
+      exit(1);
     }
-    catch (out_of_range &oor) {
-        EOBException ex("Lattice","setSI","SI_",
-                        SI_.size(),idx);
-        ex.printException();
-        exit(1);
-    }
-}
+  }
 
-/**
-@brief Get the expansion strain components for all strained sites in the lattice.
+  /**
+  @brief Get the expansion strain components for all strained sites in the
+  lattice.
 
-@return the map of the strain components, keyed to the site index numbers
-*/
-map<int, vector<double> > getExpansion ()
-{
-    return expansion_;
-}
+  @return the map of the strain components, keyed to the site index numbers
+  */
+  map<int, vector<double>> getExpansion() { return expansion_; }
 
-/**
-@brief Get the coordinates of local region for calculating expansion stress.
+  /**
+  @brief Get the coordinates of local region for calculating expansion stress.
 
-This gets the coordinates of the center site of a box in the lattice within which
-the expansion strain is calculated in the ThermalStrain model due to local
-crystallization pressure.
+  This gets the coordinates of the center site of a box in the lattice within
+  which the expansion strain is calculated in the ThermalStrain model due to
+  local crystallization pressure.
 
-@todo Change the function name to something like getExpansionSiteCoordinates.
+  @todo Change the function name to something like getExpansionSiteCoordinates.
 
-@param index is the index of a site that has crystallization pressure
-@return the (x,y,z) coordinates of the site
-*/
-vector<int> getExpansionCoordin (int index) 
-{
+  @param index is the index of a site that has crystallization pressure
+  @return the (x,y,z) coordinates of the site
+  */
+  vector<int> getExpansionCoordin(int index) {
     string msg;
-    map<int,vector<int> >::iterator p = expansion_coordin_.find(index);
+    map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
     if (p != expansion_coordin_.end()) {
-        return p->second;
+      return p->second;
     } else {
-        msg = "Could not find expansion_coordin_ match to index provided";
-        throw EOBException("Lattice","getExpansionCoordin",msg,expansion_coordin_.size(),0);
+      msg = "Could not find expansion_coordin_ match to index provided";
+      throw EOBException("Lattice", "getExpansionCoordin", msg,
+                         expansion_coordin_.size(), 0);
     }
-}
+  }
 
-/**
-@brief Set the coordinates of local site for calculating expansion stress.
+  /**
+  @brief Set the coordinates of local site for calculating expansion stress.
 
-This gets the coordinates of the center site of a box in the lattice within which
-the expansion strain is calculated in the ThermalStrain model due to local
-crystallization pressure.
+  This gets the coordinates of the center site of a box in the lattice within
+  which the expansion strain is calculated in the ThermalStrain model due to
+  local crystallization pressure.
 
-@note NOT USED (commented in Controller)
+  @note NOT USED (commented in Controller)
 
-@todo Change the function name to something like setExpansionSiteCoordinates
+  @todo Change the function name to something like setExpansionSiteCoordinates
 
-@param index is the index of a site that has crystallization pressure
-@param coordin is the (x,y,z) triple of the site's coordinates
-@return the (x,y,z) coordinates of the site
-*/
-void setExpansionCoordin (int index,
-                          vector<int> coordin)
-{
+  @param index is the index of a site that has crystallization pressure
+  @param coordin is the (x,y,z) triple of the site's coordinates
+  @return the (x,y,z) coordinates of the site
+  */
+  void setExpansionCoordin(int index, vector<int> coordin) {
     string msg;
-    map<int,vector<int> >::iterator p = expansion_coordin_.find(index);
+    map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
     if (p == expansion_coordin_.end()) {
-        expansion_coordin_.insert(make_pair(index,coordin));
+      expansion_coordin_.insert(make_pair(index, coordin));
     }
-}
-    
-/**
-@brief Get the microstructure volume
+  }
 
-@return the microstructure volume (GEMS volume units)
-*/
-double getMicrostructurevolume (void) const
-{
+  /**
+  @brief Get the microstructure volume
+
+  @return the microstructure volume (GEMS volume units)
+  */
+  double getMicrostructurevolume(void) const {
     return (chemSys_->getMicroVolume());
-}
+  }
 
-/**
-@brief Get the initial microstructure volume
+  /**
+  @brief Get the initial microstructure volume
 
-@return the initial microstructure volume (GEMS volume units)
-*/
-double getInitialmicrostructurevolume (void) const
-{
+  @return the initial microstructure volume (GEMS volume units)
+  */
+  double getInitialmicrostructurevolume(void) const {
     return (chemSys_->getInitMicroVolume());
-}
+  }
 
-/**
-@brief Get the total capillary pore volume
+  /**
+  @brief Get the total capillary pore volume
 
-@return the volume of capillary pores (GEMS volume units)
-*/
-double getCapillaryporevolume (void) const
-{
-    return capillaryporevolume_;
-}
+  @return the volume of capillary pores (GEMS volume units)
+  */
+  double getCapillaryporevolume(void) const { return capillaryporevolume_; }
 
-/**
-@brief Set the capillary pore volume
+  /**
+  @brief Set the capillary pore volume
 
-@param capillaryporevolume is the capillary pore volume (GEMS volume units)
-*/
-void setCapillaryporevolume (double capillaryporevolume)
-{
+  @param capillaryporevolume is the capillary pore volume (GEMS volume units)
+  */
+  void setCapillaryporevolume(double capillaryporevolume) {
     capillaryporevolume_ = capillaryporevolume;
-}
+  }
 
-/**
-@brief Get the total capillary pore volume fraction
-This is calculated on a total system volume basis
+  /**
+  @brief Get the total capillary pore volume fraction
+  This is calculated on a total system volume basis
 
-@return the volume fraction of capillary pores (microstructure basis)
-*/
-double getCapillaryporevolumefraction (void) const
-{
+  @return the volume fraction of capillary pores (microstructure basis)
+  */
+  double getCapillaryporevolumefraction(void) const {
     return capillaryporevolumefraction_;
-}
+  }
 
-/**
-@brief Set the capillary pore volume fraction
-This is calculated on a total system volume basis
+  /**
+  @brief Set the capillary pore volume fraction
+  This is calculated on a total system volume basis
 
-@param capillaryporevolumefraction is the capillary pore volume
-fraction (microstructure basis)
-*/
-void setCapillaryporevolumefraction (const double capillaryporevolumefraction)
-{
+  @param capillaryporevolumefraction is the capillary pore volume
+  fraction (microstructure basis)
+  */
+  void
+  setCapillaryporevolumefraction(const double capillaryporevolumefraction) {
     capillaryporevolumefraction_ = capillaryporevolumefraction;
-}
+  }
 
-/**
-@brief Get the total subvoxel pore volume
+  /**
+  @brief Get the total subvoxel pore volume
 
-@return the volume of subvoxel pores (GEMS volume units)
-*/
-double getSubvoxelporevolume (void) const
-{
-    return subvoxelporevolume_;
-}
+  @return the volume of subvoxel pores (GEMS volume units)
+  */
+  double getSubvoxelporevolume(void) const { return subvoxelporevolume_; }
 
-/**
-@brief Set the subvoxel pore volume
+  /**
+  @brief Set the subvoxel pore volume
 
-@param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
-*/
-void setSubvoxelporevolume (const double subvoxelporevolume)
-{
+  @param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
+  */
+  void setSubvoxelporevolume(const double subvoxelporevolume) {
     subvoxelporevolume_ = subvoxelporevolume;
-}
+  }
 
-/**
-@brief Set the subvoxel pore volume
+  /**
+  @brief Set the subvoxel pore volume
 
-@param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
-*/
-void setNonsolidvolume (const double nonsolidvolume)
-{
+  @param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
+  */
+  void setNonsolidvolume(const double nonsolidvolume) {
     nonsolidvolume_ = nonsolidvolume;
-}
+  }
 
-/**
-@brief Get the capillary water volume
+  /**
+  @brief Get the capillary water volume
 
-@param vol is the volume of each microstructure phase
-*/
-void calcCapillarywatervolume (vector<double> &vol);
+  @param vol is the volume of each microstructure phase
+  */
+  void calcCapillarywatervolume(vector<double> &vol);
 
-/**
-@brief Get the capillary water volume
+  /**
+  @brief Get the capillary water volume
 
-@return the capillary water volume
-*/
-double getCapillarywatervolume (void) const
-{
-    return capillarywatervolume_;
-}
+  @return the capillary water volume
+  */
+  double getCapillarywatervolume(void) const { return capillarywatervolume_; }
 
-/**
-@brief Set the capillary water volume
+  /**
+  @brief Set the capillary water volume
 
-@param capillarywatervolume is the capillary water volume (GEMS volume units)
-*/
-void setCapillarywatervolume (const double capillarywatervolume)
-{
+  @param capillarywatervolume is the capillary water volume (GEMS volume units)
+  */
+  void setCapillarywatervolume(const double capillarywatervolume) {
     capillarywatervolume_ = capillarywatervolume;
-}
+  }
 
-/**
-@brief Get the capillary void volume
+  /**
+  @brief Get the capillary void volume
 
-@param vol is the volume of each microstructure phase
-@param calc is true only if calculating instead of just returning
-*/
-void calcCapillaryvoidvolume (vector<double> &vol);
+  @param vol is the volume of each microstructure phase
+  @param calc is true only if calculating instead of just returning
+  */
+  void calcCapillaryvoidvolume(vector<double> &vol);
 
-/**
-@brief Get the capillary void volume
+  /**
+  @brief Get the capillary void volume
 
-@return the capillary void volume
-*/
-double getCapillaryvoidvolume (void) const
-{
-    return capillarywatervolume_;
-}
+  @return the capillary void volume
+  */
+  double getCapillaryvoidvolume(void) const { return capillarywatervolume_; }
 
-/**
-@brief Set the capillary void volume
+  /**
+  @brief Set the capillary void volume
 
-@param capillaryvoidvolume is the capillary void volume (GEMS volume units)
-*/
-void setCapillaryvoidvolume (const double capillaryvoidvolume)
-{
+  @param capillaryvoidvolume is the capillary void volume (GEMS volume units)
+  */
+  void setCapillaryvoidvolume(const double capillaryvoidvolume) {
     capillaryvoidvolume_ = capillaryvoidvolume;
-}
+  }
 
-/**
-@brief Get the total subvoxel pore volume fraction
-This is calculated on a total system volume basis
+  /**
+  @brief Get the total subvoxel pore volume fraction
+  This is calculated on a total system volume basis
 
-@return the volume fraction of subvoxel pores (microstructure basis)
-*/
-double getSubvoxelporevolumefraction (void) const
-{
+  @return the volume fraction of subvoxel pores (microstructure basis)
+  */
+  double getSubvoxelporevolumefraction(void) const {
     return subvoxelporevolumefraction_;
-}
+  }
 
-/**
-@brief Set the subvoxel pore volume fraction
-This is calculated on a total system volume basis
+  /**
+  @brief Set the subvoxel pore volume fraction
+  This is calculated on a total system volume basis
 
-@param subvoxelporevolumefraction is the subvoxel pore volume
-fraction (microstructure basis)
-*/
-void setSubvoxelporevolumefraction (const double subvoxelporevolumefraction)
-{
+  @param subvoxelporevolumefraction is the subvoxel pore volume
+  fraction (microstructure basis)
+  */
+  void setSubvoxelporevolumefraction(const double subvoxelporevolumefraction) {
     subvoxelporevolumefraction_ = subvoxelporevolumefraction;
-}
+  }
 
-/**
-@brief Set the master pore volume distribution
+  /**
+  @brief Set the master pore volume distribution
 
-@param masterporevolume is the pore volume distribution
-*/
-void setMasterporevolume (const vector<struct PoreSizeVolume> masterporevolume)
-{
+  @param masterporevolume is the pore volume distribution
+  */
+  void
+  setMasterporevolume(const vector<struct PoreSizeVolume> masterporevolume) {
     masterporevolume_ = masterporevolume;
     return;
-}
+  }
 
-/**
-@brief Set the master pore volume distribution of a particular size
+  /**
+  @brief Set the master pore volume distribution of a particular size
 
-@param idx is the index to set
-@param diam is the diameter in nm
-@param volume is the volume of pores this size, in nm3 
-@param volfrac is the volume fraction of this size filled with electrolyte
-*/
-void setMasterporevolume (const int idx,
-                          const double diam,
-                          const double volume,
-                          const double volfrac)
-{
+  @param idx is the index to set
+  @param diam is the diameter in nm
+  @param volume is the volume of pores this size, in nm3
+  @param volfrac is the volume fraction of this size filled with electrolyte
+  */
+  void setMasterporevolume(const int idx, const double diam,
+                           const double volume, const double volfrac) {
     try {
-        if (idx >= masterporevolume_.size()) {
-            throw EOBException("Lattice","setMasterporevolume","masterporevolume_",
-                               masterporevolume_.size(),(int)idx);
-        }
-        masterporevolume_[idx].diam = diam;
-        masterporevolume_[idx].volume = volume;
-        masterporevolume_[idx].volfrac = volfrac;
-    }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
+      if (idx >= masterporevolume_.size()) {
+        throw EOBException("Lattice", "setMasterporevolume",
+                           "masterporevolume_", masterporevolume_.size(),
+                           (int)idx);
+      }
+      masterporevolume_[idx].diam = diam;
+      masterporevolume_[idx].volume = volume;
+      masterporevolume_[idx].volfrac = volfrac;
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
     return;
-}
+  }
 
-/**
-@brief Get the master pore volume distribution of a particular size
-@param idx is the index to get
-@return the structure holding the pore size distribution data for that element
-*/
-struct PoreSizeVolume getMasterporevolume(const int idx)
-{
+  /**
+  @brief Get the master pore volume distribution of a particular size
+  @param idx is the index to get
+  @return the structure holding the pore size distribution data for that element
+  */
+  struct PoreSizeVolume getMasterporevolume(const int idx) {
     try {
-        if (idx >= masterporevolume_.size()) {
-            throw EOBException("Lattice","getMasterporevolume","masterporevolume_",
-                               masterporevolume_.size(),(int)idx);
-        }
-    }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
+      if (idx >= masterporevolume_.size()) {
+        throw EOBException("Lattice", "getMasterporevolume",
+                           "masterporevolume_", masterporevolume_.size(),
+                           (int)idx);
+      }
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
     return (masterporevolume_[idx]);
-}
+  }
 
-/**
-@brief Get the diameter of the idx element of the pore volume distribution
-@param idx is the index to get
-@return the diameter of that element in the pore size distribution (nm)
-*/
-double getMasterporevolumeDiam(const int idx)
-{
+  /**
+  @brief Get the diameter of the idx element of the pore volume distribution
+  @param idx is the index to get
+  @return the diameter of that element in the pore size distribution (nm)
+  */
+  double getMasterporevolumeDiam(const int idx) {
     try {
-        if (idx >= masterporevolume_.size()) {
-            throw EOBException("Lattice","getMasterporevolumeDiam","masterporevolume_",
-                               masterporevolume_.size(),(int)idx);
-        }
-    }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
+      if (idx >= masterporevolume_.size()) {
+        throw EOBException("Lattice", "getMasterporevolumeDiam",
+                           "masterporevolume_", masterporevolume_.size(),
+                           (int)idx);
+      }
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
     return (masterporevolume_[idx].diam);
-}
+  }
 
-/**
-@brief Get the total volume of the idx element of the pore volume distribution
-@param idx is the index to get
-@return the volume of that element in the pore size distribution (nm3)
-*/
-double getMasterporevolumeVolume(const int idx)
-{
+  /**
+  @brief Get the total volume of the idx element of the pore volume distribution
+  @param idx is the index to get
+  @return the volume of that element in the pore size distribution (nm3)
+  */
+  double getMasterporevolumeVolume(const int idx) {
     try {
-        if (idx >= masterporevolume_.size()) {
-            throw EOBException("Lattice","getMasterporevolumeVolume","masterporevolume_",
-                               masterporevolume_.size(),(int)idx);
-        }
-    }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
+      if (idx >= masterporevolume_.size()) {
+        throw EOBException("Lattice", "getMasterporevolumeVolume",
+                           "masterporevolume_", masterporevolume_.size(),
+                           (int)idx);
+      }
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
     return (masterporevolume_[idx].volume);
-}
+  }
 
-/**
-@brief Get the volume fraction saturated  of the idx element of the pore volume distribution
-@param idx is the index to get
-@return the volume fraction saturated of that element in the pore size distribution
-*/
-double getMasterporevolumeVolfrac(const int idx)
-{
+  /**
+  @brief Get the volume fraction saturated  of the idx element of the pore
+  volume distribution
+  @param idx is the index to get
+  @return the volume fraction saturated of that element in the pore size
+  distribution
+  */
+  double getMasterporevolumeVolfrac(const int idx) {
     try {
-        if (idx >= masterporevolume_.size()) {
-            throw EOBException("Lattice","getMasterporevolumeVolfrac","masterporevolume_",
-                               masterporevolume_.size(),(int)idx);
-        }
-    }
-    catch (EOBException ex) {
-        ex.printException();
-        exit(1);
+      if (idx >= masterporevolume_.size()) {
+        throw EOBException("Lattice", "getMasterporevolumeVolfrac",
+                           "masterporevolume_", masterporevolume_.size(),
+                           (int)idx);
+      }
+    } catch (EOBException ex) {
+      ex.printException();
+      exit(1);
     }
     return (masterporevolume_[idx].volfrac);
-}
+  }
 
-/**
-@brief Get the largest diameter of pores containing electrolyte
-@return the diameter of the largest pore containing electrolyte
-*/
-double getLargestSaturatedPore(void)
-{
+  /**
+  @brief Get the largest diameter of pores containing electrolyte
+  @return the diameter of the largest pore containing electrolyte
+  */
+  double getLargestSaturatedPore(void) {
     double capsize = 1000.0; // nm of capillary pores
     for (int i = 0; i < masterporevolume_.size(); i++) {
-        if (masterporevolume_[i].volfrac < 1.0) {
-            return (masterporevolume_[i].diam);
-        }
+      if (masterporevolume_[i].volfrac < 1.0) {
+        return (masterporevolume_[i].diam);
+      }
     }
-    return(capsize);
-}
+    return (capsize);
+  }
 
-/**
-@brief Get the number of sites of water that must be added after a time step.
+  /**
+  @brief Get the number of sites of water that must be added after a time step.
 
-@note Currently only used in sulfate attack simulations.
+  @note Currently only used in sulfate attack simulations.
 
-@return the amount of water that must be added [site units]
-*/
-double getWaterchange (void) const
-{
-    return waterchange_;
-}
+  @return the amount of water that must be added [site units]
+  */
+  double getWaterchange(void) const { return waterchange_; }
 
-/**
-@brief Set the number of sites of water that must be added after a time step.
+  /**
+  @brief Set the number of sites of water that must be added after a time step.
 
-@note NOT USED.
+  @note NOT USED.
 
-@param the number of sites of water that must be added [site units]
-*/
-void setWaterchange (double waterchangeval)
-{
-    waterchange_ = waterchangeval;
-}
+  @param the number of sites of water that must be added [site units]
+  */
+  void setWaterchange(double waterchangeval) { waterchange_ = waterchangeval; }
 
-/**
-@brief Increment the number of sites of water that must be added after a time step.
+  /**
+  @brief Increment the number of sites of water that must be added after a time
+  step.
 
-@param the extra number of sites of water that must be added [site units]
-*/
-void dWaterchange (double dwaterchangeval)
-{
-    waterchange_ += dwaterchangeval;
-}
-    
-/**
-@brief Implement conversion of Al-bearing phases to ettringite.
+  @param the extra number of sites of water that must be added [site units]
+  */
+  void dWaterchange(double dwaterchangeval) { waterchange_ += dwaterchangeval; }
 
-This method is intended only for simulating sulfate attack.  The method locates
-all the Al-bearing phases that are driven to transform. It also calculates the volume
-of free space adjacent to this site to determine whether crystallization
-pressure will arise.  If so, the method calculates the crystallization
-pressure and crystallization stress-free strain.  It then applies the expansion strain
-so that the new stress field can be calculated by the ThermalStrain FE model object.
+  /**
+  @brief Implement conversion of Al-bearing phases to ettringite.
 
-@todo Consider breaking this method into smaller pieces for maintenance and
-readability.
+  This method is intended only for simulating sulfate attack.  The method
+  locates all the Al-bearing phases that are driven to transform. It also
+  calculates the volume of free space adjacent to this site to determine whether
+  crystallization pressure will arise.  If so, the method calculates the
+  crystallization pressure and crystallization stress-free strain.  It then
+  applies the expansion strain so that the new stress field can be calculated by
+  the ThermalStrain FE model object.
 
-@todo Generalize this for any phase transformation.
+  @todo Consider breaking this method into smaller pieces for maintenance and
+  readability.
 
-@param alphaseid is the microstructure phase id of the Al-bearing phase to dissolve
-@param netsitesAlphaseid is the number of Al-bearing sites to dissolve
-@param ettrid is the microstructure phase id of ettringite
-@param netsitesEttrid is the number of ettringite sites to grow
-@return vector (na,ne) where na is the number of Al-bearing sites actually changed,
-and ne is the number of ettringite sites actually grown
-*/
-vector<int> transform (int alphaseid,
-                       int netsitesAlphaseid,
-                       int ettrid,
-                       int netsitesEttrid,
-                       double volumeratio);
+  @todo Generalize this for any phase transformation.
 
-/**
-@brief Set a pointer to the AppliedStrain object for the simulation.
+  @param alphaseid is the microstructure phase id of the Al-bearing phase to
+  dissolve
+  @param netsitesAlphaseid is the number of Al-bearing sites to dissolve
+  @param ettrid is the microstructure phase id of ettringite
+  @param netsitesEttrid is the number of ettringite sites to grow
+  @return vector (na,ne) where na is the number of Al-bearing sites actually
+  changed, and ne is the number of ettringite sites actually grown
+  */
+  vector<int> transform(int alphaseid, int netsitesAlphaseid, int ettrid,
+                        int netsitesEttrid, double volumeratio);
 
-@param elas is a pointer to the AppliedStrain object for the simulation
-*/
-void setFEsolver (AppliedStrain *AppliedStrainSolver)
-{
+  /**
+  @brief Set a pointer to the AppliedStrain object for the simulation.
+
+  @param elas is a pointer to the AppliedStrain object for the simulation
+  */
+  void setFEsolver(AppliedStrain *AppliedStrainSolver) {
     FEsolver_ = AppliedStrainSolver;
-}
+  }
 
-/**
-@brief Write a contiguous subvolume of the lattice to a file.
+  /**
+  @brief Write a contiguous subvolume of the lattice to a file.
 
-@param fileName is the file name to which the subvolume will be written
-@param centerste is a pointer to the central site within the subvolume
-@param size is the extent of the subvolume in each direction away from the center site
-@return a list of the site indices belonging to the subvolume that was written
-*/
-vector<unsigned int> writeSubVolume (string fileName,
-                                     Site *centerste,
-                                     int size);
+  @param fileName is the file name to which the subvolume will be written
+  @param centerste is a pointer to the central site within the subvolume
+  @param size is the extent of the subvolume in each direction away from the
+  center site
+  @return a list of the site indices belonging to the subvolume that was written
+  */
+  vector<unsigned int> writeSubVolume(string fileName, Site *centerste,
+                                      int size);
 
-/**
-@brief Assign isotropic expansion strain at a set of prescribed sites.
+  /**
+  @brief Assign isotropic expansion strain at a set of prescribed sites.
 
-This function changes the strain components of a site already in the
-list of expansion sites.  If the prescribed site is not already in the 
-list of expansion sites, then the site will be added to that list.
+  This function changes the strain components of a site already in the
+  list of expansion sites.  If the prescribed site is not already in the
+  list of expansion sites, then the site will be added to that list.
 
-@todo Consider changing the name of this method to applyExpansion
+  @todo Consider changing the name of this method to applyExpansion
 
-@param alnb is the collection of site indices to which strain will be assigned
-@param exp is the isotropic expansion strain to set
-*/
-void applyExp (vector<unsigned int> alnb,
-               double exp);
+  @param alnb is the collection of site indices to which strain will be assigned
+  @param exp is the isotropic expansion strain to set
+  */
+  void applyExp(vector<unsigned int> alnb, double exp);
 
-/**
-@brief Estimate the <i>internal</i> surface area of a phase with the aqueous solution.
+  /**
+  @brief Estimate the <i>internal</i> surface area of a phase with the aqueous
+  solution.
 
-@param phaseid is the id of the microstructure phase
-@return the estimated surface area [site face units]
-*/
-double getSurfaceArea (int phaseid);
+  @param phaseid is the id of the microstructure phase
+  @return the estimated surface area [site face units]
+  */
+  double getSurfaceArea(int phaseid);
 
-/**
-@brief Get the sorted distribution of domain sizes
+  /**
+  @brief Get the sorted distribution of domain sizes
 
-@param phaseid is the id of the phase to query
-@param numsites is the maximum number of sites to store and sort
-@param maxisze is the maxmimum linear size of interest
-@param sortorder is 0 if sorting in descending order, nonzero otherwise
-@return an STL list of the site ids according to the distribution
-*/
-list<Sitesize> findDomainSizeDistribution(int phaseid,
-                                          const int numsites,
-                                          int maxsize,
-                                          int sortorder);
+  @param phaseid is the id of the phase to query
+  @param numsites is the maximum number of sites to store and sort
+  @param maxisze is the maxmimum linear size of interest
+  @param sortorder is 0 if sorting in descending order, nonzero otherwise
+  @return an STL list of the site ids according to the distribution
+  */
+  list<Sitesize> findDomainSizeDistribution(int phaseid, const int numsites,
+                                            int maxsize, int sortorder);
 
-/**
-@brief Estimate the <i>linear size</i> of a domain 
+  /**
+  @brief Estimate the <i>linear size</i> of a domain
 
-@param siteid is the id of the microstructure phase
-@param maxsize is the maxmimum linear size of interest
-@return the edge length of the maximum cube that contains the same phase
-*/
-int findDomainSize(int siteid, int maxsize);
+  @param siteid is the id of the microstructure phase
+  @param maxsize is the maxmimum linear size of interest
+  @return the edge length of the maximum cube that contains the same phase
+  */
+  int findDomainSize(int siteid, int maxsize);
 
-/**
-@brief Set the verbose flag
+  /**
+  @brief Set the verbose flag
 
-@param isverbose is true if verbose output should be produced
-*/
-void setVerbose (const bool isverbose)
-{
+  @param isverbose is true if verbose output should be produced
+  */
+  void setVerbose(const bool isverbose) {
     verbose_ = isverbose;
     return;
-}
+  }
 
-/**
-@brief Get the verbose flag
+  /**
+  @brief Get the verbose flag
 
-@return the verbose flag
-*/
-bool getVerbose () const
-{
-    return verbose_;
-}
+  @return the verbose flag
+  */
+  bool getVerbose() const { return verbose_; }
 
-/**
-@brief Set the warning flag
+  /**
+  @brief Set the warning flag
 
-@param iswarning is true if warning output should be produced
-*/
-void setWarning (const bool iswarning)
-{
+  @param iswarning is true if warning output should be produced
+  */
+  void setWarning(const bool iswarning) {
     warning_ = iswarning;
     return;
-}
+  }
 
-/**
-@brief Get the warning flag
+  /**
+  @brief Get the warning flag
 
-@return the warning flag
-*/
-bool getWarning () const
-{
-    return warning_;
-}
+  @return the warning flag
+  */
+  bool getWarning() const { return warning_; }
 
-};      // End of Lattice class
+}; // End of Lattice class
 #endif
 
 ///
@@ -1724,21 +1577,20 @@ bool getWarning () const
 #define CMPFUNCS
 
 /**
-@brief Compare two sites, returning true is the first site is "less than" the second.
+@brief Compare two sites, returning true is the first site is "less than" the
+second.
 
 The comparison is made on the basis of what THAMES loosely calls the
-<i>weighted mean curvature</i>, (wmc).  A site with high wmc is a site where dissolution of
-a phase is likely to occur, and growth of another phase is unlikely to occur.
-Conversely, a site with a low wmc is a site where growth of a phase is likely to
-occur but dissolution of a phase is unlikely to occur.
+<i>weighted mean curvature</i>, (wmc).  A site with high wmc is a site where
+dissolution of a phase is likely to occur, and growth of another phase is
+unlikely to occur. Conversely, a site with a low wmc is a site where growth of a
+phase is likely to occur but dissolution of a phase is unlikely to occur.
 
 @param s1 is a pointer to the first site in the comparison
 @param s2 is a pointer to the second site in the comparison
 @return true if the first site has lower wmc than the second, false otherwise
 */
-bool cmp (const Site *s1,
-          const Site *s2);
-
+bool cmp(const Site *s1, const Site *s2);
 
 /**
 @brief Sort two sites based on their affinity for a given phase.
@@ -1749,7 +1601,8 @@ is more likely to occur because of an affinity between it and the interface.
 
 @param s1 is the first site in the comparison
 @param s2 is the second site in the comparison
-@return true if the first site has <i>greater</i> affinity than the second, false otherwise
+@return true if the first site has <i>greater</i> affinity than the second,
+false otherwise
 */
 bool affinitySort(const Isite s1, const Isite s2);
 

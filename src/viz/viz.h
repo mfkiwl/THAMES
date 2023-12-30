@@ -2,311 +2,307 @@
 @brief Header file for viz program
 
 */
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
-#include <iostream>
+#include <getopt.h>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <getopt.h>
 
 // Preprocessor defines
 // VCCTL phase codes
-#define POROSITY 		0					/* 0 */
-#define C3S				POROSITY + 1		/* 1 */
-#define C2S				C3S + 1				/* 2 */
-#define C3A				C2S + 1				/* 3 */
-#define C4AF			C3A + 1				/* 4 */
-#define K2SO4           C4AF + 1            /* 5 */
-#define NA2SO4          K2SO4 + 1           /* 6 */
-#define GYPSUM			NA2SO4 + 1			/* 7 */
-#define HEMIHYD			GYPSUM + 1			/* 8 */
-#define ANHYDRITE		HEMIHYD + 1			/* 9 */
-#define SFUME			ANHYDRITE + 1		/* 10 */
-#define INERT			SFUME + 1			/* 11 */
-#define SLAG			INERT + 1			/* 12 */
-#define INERTAGG		SLAG + 1			/* 13 */
-#define ASG				INERTAGG + 1		/* 14 */
-#define CAS2			ASG + 1				/* 15 */
-#define AMSIL			CAS2 + 1			/* 16 */
-#define FAC3A			AMSIL + 1			/* 17 */
+const int POROSITY = 0;            /* 0 */
+const int C3S = POROSITY + 1;      /* 1 */
+const int C2S = C3S + 1;           /* 2 */
+const int C3A = C2S + 1;           /* 3 */
+const int C4AF = C3A + 1;          /* 4 */
+const int K2SO4 = C4AF + 1;        /* 5 */
+const int NA2SO4 = K2SO4 + 1;      /* 6 */
+const int GYPSUM = NA2SO4 + 1;     /* 7 */
+const int HEMIHYD = GYPSUM + 1;    /* 8 */
+const int ANHYDRITE = HEMIHYD + 1; /* 9 */
+const int SFUME = ANHYDRITE + 1;   /* 10 */
+const int INERT = SFUME + 1;       /* 11 */
+const int SLAG = INERT + 1;        /* 12 */
+const int INERTAGG = SLAG + 1;     /* 13 */
+const int ASG = INERTAGG + 1;      /* 14 */
+const int CAS2 = ASG + 1;          /* 15 */
+const int AMSIL = CAS2 + 1;        /* 16 */
+const int FAC3A = AMSIL + 1;       /* 17 */
 
-#define FLYASH			FAC3A + 1			/* 18 */
-#define CH				FLYASH + 1			/* 19 */
-#define CSH				CH + 1				/* 20 */
-#define C3AH6			CSH + 1				/* 21 */
-#define ETTR			C3AH6 + 1			/* 22 */
-#define ETTRC4AF		ETTR + 1 			/* 23 */
+const int FLYASH = FAC3A + 1;  /* 18 */
+const int CH = FLYASH + 1;     /* 19 */
+const int CSH = CH + 1;        /* 20 */
+const int C3AH6 = CSH + 1;     /* 21 */
+const int ETTR = C3AH6 + 1;    /* 22 */
+const int ETTRC4AF = ETTR + 1; /* 23 */
 
-#define AFM				ETTRC4AF + 1		/* 24 */
-#define FH3				AFM + 1				/* 25 */
-#define POZZCSH			FH3 + 1				/* 26 */
-#define SLAGCSH			POZZCSH + 1			/* 27 */
-#define CACL2			SLAGCSH + 1			/* 28 */
+const int AFM = ETTRC4AF + 1;    /* 24 */
+const int FH3 = AFM + 1;         /* 25 */
+const int POZZCSH = FH3 + 1;     /* 26 */
+const int SLAGCSH = POZZCSH + 1; /* 27 */
+const int CACL2 = SLAGCSH + 1;   /* 28 */
 /* Friedel's salt */
-#define FRIEDEL			CACL2 + 1			/* 29 */
+const int FRIEDEL = CACL2 + 1; /* 29 */
 
 /* Stratlingite (C2ASH8) */
-#define STRAT			FRIEDEL + 1			/* 30 */
+const int STRAT = FRIEDEL + 1; /* 30 */
 
 /* Gypsum formed from hemihydrate and anhydrite */
-#define GYPSUMS			STRAT + 1			/* 31 */
-#define ABSGYP			GYPSUMS + 1			/* 32 */
+const int GYPSUMS = STRAT + 1;  /* 31 */
+const int ABSGYP = GYPSUMS + 1; /* 32 */
 
-#define CACO3			ABSGYP + 1			/* 33 */
-#define AFMC			CACO3 + 1			/* 34 */
+const int CACO3 = ABSGYP + 1; /* 33 */
+const int AFMC = CACO3 + 1;   /* 34 */
 
 /***
-*	Phases for chloride ingress model and
-*	sulfate attack model
-***/
-#define BRUCITE			AFMC + 1			/* 35 */
-#define MS				BRUCITE + 1			/* 36 */
+ *	Phases for chloride ingress model and
+ *	sulfate attack model
+ ***/
+const int BRUCITE = AFMC + 1; /* 35 */
+const int MS = BRUCITE + 1;   /* 36 */
 
 /* Free lime */
-#define FREELIME		MS + 1				/* 37 */
+const int FREELIME = MS + 1; /* 37 */
 
 /* Orthorhombic C3A */
-#define OC3A			FREELIME + 1		/* 38 */
-#define NSPHASES		OC3A			/* 38 */
+const int OC3A = FREELIME + 1; /* 38 */
+const int NSPHASES = OC3A;     /* 38 */
 
 /***
-*	Diffusing species
-***/
-#define DIFFCSH		NSPHASES + 1			/* 39 */
-#define DIFFCH		DIFFCSH + 1				/* 40 */
-#define DIFFGYP		DIFFCH + 1				/* 41 */
-#define DIFFC3A		DIFFGYP + 1				/* 42 */
-#define DIFFC4A		DIFFC3A + 1				/* 43 */
-#define DIFFFH3		DIFFC4A + 1				/* 44 */
-#define DIFFETTR	DIFFFH3 + 1				/* 45 */
-#define DIFFCACO3	DIFFETTR + 1			/* 46 */
-#define DIFFAS		DIFFCACO3 + 1			/* 47 */
-#define DIFFANH		DIFFAS + 1				/* 48 */
-#define DIFFHEM		DIFFANH + 1				/* 49 */
-#define DIFFCAS2	DIFFHEM + 1				/* 50 */
-#define DIFFCACL2	DIFFCAS2 + 1			/* 51 */
-#define DIFFSO4     DIFFCACL2 + 1           /* 52 */
+ *	Diffusing species
+ ***/
+const int DIFFCSH = NSPHASES + 1;   /* 39 */
+const int DIFFCH = DIFFCSH + 1;     /* 40 */
+const int DIFFGYP = DIFFCH + 1;     /* 41 */
+const int DIFFC3A = DIFFGYP + 1;    /* 42 */
+const int DIFFC4A = DIFFC3A + 1;    /* 43 */
+const int DIFFFH3 = DIFFC4A + 1;    /* 44 */
+const int DIFFETTR = DIFFFH3 + 1;   /* 45 */
+const int DIFFCACO3 = DIFFETTR + 1; /* 46 */
+const int DIFFAS = DIFFCACO3 + 1;   /* 47 */
+const int DIFFANH = DIFFAS + 1;     /* 48 */
+const int DIFFHEM = DIFFANH + 1;    /* 49 */
+const int DIFFCAS2 = DIFFHEM + 1;   /* 50 */
+const int DIFFCACL2 = DIFFCAS2 + 1; /* 51 */
+const int DIFFSO4 = DIFFCACL2 + 1;  /* 52 */
 
-#define NDIFFPHASES	DIFFSO4 + 1			/* 53 */
-
-/***
-*	Special types of porosity
-***/
-
-#define DRIEDP		NDIFFPHASES				/* 53 */
-#define EMPTYDP		DRIEDP + 1				/* 54 */
+const int NDIFFPHASES = DIFFSO4 + 1; /* 53 */
 
 /***
-*	Empty porosity due to self dessication
-***/
-#define EMPTYP		EMPTYDP + 1				/* 55 */
+ *	Special types of porosity
+ ***/
+
+const int DRIEDP = NDIFFPHASES; /* 53 */
+const int EMPTYDP = DRIEDP + 1; /* 54 */
 
 /***
-*	Crack porosity, defined as the porosity
-*	created when the microstructure is cracked.
-*	Can be saturated or empty, depending on the
-*	application (24 May 2004)
-***/
-#define CRACKP		EMPTYP + 1			/* 56 */
+ *	Empty porosity due to self dessication
+ ***/
+const int EMPTYP = EMPTYDP + 1; /* 55 */
 
 /***
-*	Offset for highlighting potentially
-*	soluble surface pixels in disrealnew
-***/
-
-#define OFFSET		CRACKP + 1				/* 57 */
+ *	Crack porosity, defined as the porosity
+ *	created when the microstructure is cracked.
+ *	Can be saturated or empty, depending on the
+ *	application (24 May 2004)
+ ***/
+const int CRACKP = EMPTYP + 1; /* 56 */
 
 /***
-*	Total number of types of pixels, which
-*	INCLUDES diffusing species
-***/
-#define NDIFFUS		OFFSET
+ *	Offset for highlighting potentially
+ *	soluble surface pixels in disrealnew
+ ***/
 
-#define SANDINCONCRETE  OFFSET + 3     /* 60 */
-#define COARSEAGG01INCONCRETE	SANDINCONCRETE + 1
-#define COARSEAGG02INCONCRETE	COARSEAGG01INCONCRETE + 1
-#define FINEAGG01INCONCRETE	COARSEAGG02INCONCRETE + 1
-#define FINEAGG02INCONCRETE	FINEAGG01INCONCRETE + 1
+const int OFFSET = CRACKP + 1; /* 57 */
 
-#define NPHASES		FINEAGG02INCONCRETE + 1
+/***
+ *	Total number of types of pixels, which
+ *	INCLUDES diffusing species
+ ***/
+const int NDIFFUS = OFFSET;
 
-#define SAT			255
+const int SANDINCONCRETE = OFFSET + 3; /* 60 */
+const int COARSEAGG01INCONCRETE = SANDINCONCRETE + 1;
+const int COARSEAGG02INCONCRETE = COARSEAGG01INCONCRETE + 1;
+const int FINEAGG01INCONCRETE = COARSEAGG02INCONCRETE + 1;
+const int FINEAGG02INCONCRETE = FINEAGG01INCONCRETE + 1;
 
-#define R_BROWN		162
-#define G_BROWN		117
-#define B_BROWN		95
+const int NPHASES = FINEAGG02INCONCRETE + 1;
 
-#define R_BLUE		0
-#define G_BLUE		0
-#define B_BLUE		SAT
+const int SAT = 255;
 
-#define R_CFBLUE	0
-#define G_CFBLUE	128
-#define B_CFBLUE	SAT
+const int R_BROWN = 162;
+const int G_BROWN = 117;
+const int B_BROWN = 95;
 
-#define R_RED		SAT
-#define G_RED		0
-#define B_RED		0
+const int R_BLUE = 0;
+const int G_BLUE = 0;
+const int B_BLUE = SAT;
 
-#define R_GREEN		0
-#define G_GREEN		SAT
-#define B_GREEN		0
+const int R_CFBLUE = 0;
+const int G_CFBLUE = 128;
+const int B_CFBLUE = SAT;
 
-#define R_WHITE		SAT
-#define G_WHITE		SAT
-#define B_WHITE		SAT
+const int R_RED = SAT;
+const int G_RED = 0;
+const int B_RED = 0;
 
-#define R_BLACK		0
-#define G_BLACK		0
-#define B_BLACK		0
+const int R_GREEN = 0;
+const int G_GREEN = SAT;
+const int B_GREEN = 0;
 
-#define R_AQUA		0
-#define G_AQUA		SAT
-#define B_AQUA		SAT
+const int R_WHITE = SAT;
+const int G_WHITE = SAT;
+const int B_WHITE = SAT;
 
-#define R_LTURQUOISE	174
-#define G_LTURQUOISE	237
-#define B_LTURQUOISE	237
+const int R_BLACK = 0;
+const int G_BLACK = 0;
+const int B_BLACK = 0;
 
-#define R_YELLOW	SAT
-#define G_YELLOW	SAT
-#define B_YELLOW	0
+const int R_AQUA = 0;
+const int G_AQUA = SAT;
+const int B_AQUA = SAT;
 
-#define R_LYELLOW	SAT
-#define G_LYELLOW	SAT
-#define B_LYELLOW	SAT/2
+const int R_LTURQUOISE = 174;
+const int G_LTURQUOISE = 237;
+const int B_LTURQUOISE = 237;
 
-#define R_GOLD		SAT
-#define G_GOLD		215
-#define B_GOLD		0
+const int R_YELLOW = SAT;
+const int G_YELLOW = SAT;
+const int B_YELLOW = 0;
 
-#define R_OLIVE		SAT/2
-#define G_OLIVE		SAT/2
-#define B_OLIVE		0
+const int R_LYELLOW = SAT;
+const int G_LYELLOW = SAT;
+const int B_LYELLOW = SAT / 2;
 
-#define R_LOLIVE	150
-#define G_LOLIVE	150
-#define B_LOLIVE	0
+const int R_GOLD = SAT;
+const int G_GOLD = 215;
+const int B_GOLD = 0;
 
-#define R_DOLIVE	SAT/4
-#define G_DOLIVE	SAT/4
-#define B_DOLIVE	0
+const int R_OLIVE = SAT / 2;
+const int G_OLIVE = SAT / 2;
+const int B_OLIVE = 0;
 
-#define R_DBLUE		0
-#define G_DBLUE		0
-#define B_DBLUE		SAT/2
+const int R_LOLIVE = 150;
+const int G_LOLIVE = 150;
+const int B_LOLIVE = 0;
 
-#define R_VIOLET	SAT/2
-#define G_VIOLET	0
-#define B_VIOLET	SAT
+const int R_DOLIVE = SAT / 4;
+const int G_DOLIVE = SAT / 4;
+const int B_DOLIVE = 0;
 
-#define R_LAVENDER	230
-#define G_LAVENDER	230
-#define B_LAVENDER	250
+const int R_DBLUE = 0;
+const int G_DBLUE = 0;
+const int B_DBLUE = SAT / 2;
 
-#define R_PLUM		238
-#define G_PLUM		174
-#define B_PLUM		238
+const int R_VIOLET = SAT / 2;
+const int G_VIOLET = 0;
+const int B_VIOLET = SAT;
 
-#define R_FIREBRICK		178
-#define G_FIREBRICK		34
-#define B_FIREBRICK		34
+const int R_LAVENDER = 230;
+const int G_LAVENDER = 230;
+const int B_LAVENDER = 250;
 
-#define R_MUTEDFIREBRICK		178
-#define G_MUTEDFIREBRICK		128
-#define B_MUTEDFIREBRICK		128
+const int R_PLUM = 238;
+const int G_PLUM = 174;
+const int B_PLUM = 238;
 
-#define R_SEAGREEN	SAT/2
-#define G_SEAGREEN	250
-#define B_SEAGREEN	SAT/2
+const int R_FIREBRICK = 178;
+const int G_FIREBRICK = 34;
+const int B_FIREBRICK = 34;
 
-#define R_MAGENTA	SAT
-#define G_MAGENTA	0
-#define B_MAGENTA	SAT
+const int R_MUTEDFIREBRICK = 178;
+const int G_MUTEDFIREBRICK = 128;
+const int B_MUTEDFIREBRICK = 128;
 
-#define R_ORANGE	SAT
-#define G_ORANGE	165
-#define B_ORANGE	0
+const int R_SEAGREEN = SAT / 2;
+const int G_SEAGREEN = 250;
+const int B_SEAGREEN = SAT / 2;
 
-#define R_PEACH	SAT
-#define G_PEACH	170
-#define B_PEACH	128
+const int R_MAGENTA = SAT;
+const int G_MAGENTA = 0;
+const int B_MAGENTA = SAT;
 
-#define R_WHEAT		245
-#define G_WHEAT		222
-#define B_WHEAT		179
+const int R_ORANGE = SAT;
+const int G_ORANGE = 165;
+const int B_ORANGE = 0;
 
-#define R_TAN		210
-#define G_TAN		180
-#define B_TAN		140
+const int R_PEACH = SAT;
+const int G_PEACH = 170;
+const int B_PEACH = 128;
 
-#define R_DGREEN	0
-#define G_DGREEN	100
-#define B_DGREEN	0
+const int R_WHEAT = 245;
+const int G_WHEAT = 222;
+const int B_WHEAT = 179;
 
-#define R_LGREEN	SAT/2
-#define G_LGREEN	SAT
-#define B_LGREEN	SAT/2
+const int R_TAN = 210;
+const int G_TAN = 180;
+const int B_TAN = 140;
 
-#define R_LIME		51
-#define G_LIME		205
-#define B_LIME		51
+const int R_DGREEN = 0;
+const int G_DGREEN = 100;
+const int B_DGREEN = 0;
 
-#define R_DLIME		26
-#define G_DLIME		103
-#define B_DLIME		26
+const int R_LGREEN = SAT / 2;
+const int G_LGREEN = SAT;
+const int B_LGREEN = SAT / 2;
 
-#define R_LLIME		128
-#define G_LLIME		255
-#define B_LLIME		0
+const int R_LIME = 51;
+const int G_LIME = 205;
+const int B_LIME = 51;
 
-#define R_LYELLOW	SAT
-#define G_LYELLOW	SAT
-#define B_LYELLOW	SAT/2
+const int R_DLIME = 26;
+const int G_DLIME = 103;
+const int B_DLIME = 26;
 
-#define R_GRAY		178
-#define G_GRAY		178
-#define B_GRAY		178
+const int R_LLIME = 128;
+const int G_LLIME = 255;
+const int B_LLIME = 0;
 
-#define R_DGRAY		SAT/4
-#define G_DGRAY		SAT/4
-#define B_DGRAY		SAT/4
+const int R_GRAY = 178;
+const int G_GRAY = 178;
+const int B_GRAY = 178;
 
-#define R_CHARCOAL	50
-#define G_CHARCOAL	50
-#define B_CHARCOAL	50
+const int R_DGRAY = SAT / 4;
+const int G_DGRAY = SAT / 4;
+const int B_DGRAY = SAT / 4;
 
-#define R_LGRAY		3*SAT/4
-#define G_LGRAY		3*SAT/4
-#define B_LGRAY		3*SAT/4
+const int R_CHARCOAL = 50;
+const int G_CHARCOAL = 50;
+const int B_CHARCOAL = 50;
 
-#define R_DAQUA		SAT/4
-#define G_DAQUA		SAT/2
-#define B_DAQUA		SAT/2
+const int R_LGRAY = 3 * SAT / 4;
+const int G_LGRAY = 3 * SAT / 4;
+const int B_LGRAY = 3 * SAT / 4;
 
-#define R_SALMON	SAT
-#define G_SALMON	SAT/2
-#define B_SALMON	SAT/2
+const int R_DAQUA = SAT / 4;
+const int G_DAQUA = SAT / 2;
+const int B_DAQUA = SAT / 2;
 
-#define R_SKYBLUE	SAT/4
-#define G_SKYBLUE	SAT/2
-#define B_SKYBLUE	SAT
+const int R_SALMON = SAT;
+const int G_SALMON = SAT / 2;
+const int B_SALMON = SAT / 2;
 
-#define R_DPINK		SAT
-#define G_DPINK		0
-#define B_DPINK		SAT/2
+const int R_SKYBLUE = SAT / 4;
+const int G_SKYBLUE = SAT / 2;
+const int B_SKYBLUE = SAT;
 
-#define R_PINK		SAT
-#define G_PINK		105
-#define B_PINK		180
+const int R_DPINK = SAT;
+const int G_DPINK = 0;
+const int B_DPINK = SAT / 2;
 
-#define R_ORANGERED		SAT
-#define G_ORANGERED		69
-#define B_ORANGERED		0
+const int R_PINK = SAT;
+const int G_PINK = 105;
+const int B_PINK = 180;
+
+const int R_ORANGERED = SAT;
+const int G_ORANGERED = 69;
+const int B_ORANGERED = 0;
 
 // Global variables
 
@@ -316,7 +312,7 @@ vector<int> Mic;
 string RootName;
 string TypeName;
 string OutName;
-int Xsize,Ysize,Zsize;
+int Xsize, Ysize, Zsize;
 
 // Function declarations
 int checkargs(int argc, char **argv);
@@ -326,6 +322,7 @@ int writeXYZFile(const string &times);
 int countSolid(void);
 bool isSolid(int i, int j, int k);
 int toIndex(int i, int j, int k);
+void getPcolors(vector<float> &red, vector<float> &green, vector<float> &blue);
 void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue);
 void getTcolors(vector<float> &red, vector<float> &green, vector<float> &blue);
 void printHelp(void);
