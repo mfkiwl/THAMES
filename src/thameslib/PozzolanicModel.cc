@@ -121,7 +121,6 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Solution *solut,
   microPhaseId_ = kineticData.microPhaseId;
   DCId_ = kineticData.DCId;
   GEMPhaseId_ = kineticData.GEMPhaseId;
-  ;
   activationEnergy_ = kineticData.activationEnergy;
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
@@ -286,6 +285,9 @@ void PozzolanicModel::calculateKineticStep(
           //
 
           double baserateconst = dissolutionRateConst_ * arrhenius;
+
+          /// @note The following influence alkali and alkali earth cations
+          /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
 
           double ca = chemSys_->getDCConcentration("Ca+2");
           double kca = 4.0e-7; // mol m-2 s-1 ads. rate const for Ca (guess)

@@ -170,215 +170,214 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
       ///
 
       switch (j) {
-
       case 0: // West neighbor
-        xn = (int)site_[ii].getX() - 1;
+        xn = site_[ii].getX() - 1;
         if (xn < 0 && BC != 1)
-          xn += (int)xdim_;
+          xn += xdim_;
         if (xn < 0 && BC == 1)
           xn = 0;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ();
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ();
         break;
       case 1: // East neighbor
-        xn = (int)site_[ii].getX() + 1;
-        if (xn >= (int)xdim_ && BC != 1)
-          xn -= (int)xdim_;
-        if (xn >= (int)xdim_ && BC == 1)
+        xn = site_[ii].getX() + 1;
+        if (xn >= xdim_ && BC != 1)
+          xn -= xdim_;
+        if (xn >= xdim_ && BC == 1)
           xn -= 1;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ();
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ();
         break;
       case 2: // South neighbor
-        yn = (int)site_[ii].getY() - 1;
+        yn = site_[ii].getY() - 1;
         if (yn < 0 && BC != 2)
-          yn += (int)ydim_;
+          yn += ydim_;
         if (yn < 0 && BC == 2)
           yn = 0;
-        xn = (int)site_[ii].getX();
-        zn = (int)site_[ii].getZ();
+        xn = site_[ii].getX();
+        zn = site_[ii].getZ();
         break;
       case 3: // North neighbor
-        yn = (int)site_[ii].getY() + 1;
-        if (yn >= (int)ydim_ && BC != 2)
-          yn -= (int)ydim_;
-        if (yn >= (int)ydim_ && BC == 2)
+        yn = site_[ii].getY() + 1;
+        if (yn >= ydim_ && BC != 2)
+          yn -= ydim_;
+        if (yn >= ydim_ && BC == 2)
           yn -= 1;
-        xn = (int)site_[ii].getX();
-        zn = (int)site_[ii].getZ();
+        xn = site_[ii].getX();
+        zn = site_[ii].getZ();
         break;
       case 4: // Down neighbor
-        zn = (int)site_[ii].getZ() - 1;
+        zn = site_[ii].getZ() - 1;
         if (zn < 0 && BC != 3)
-          zn += (int)zdim_;
+          zn += zdim_;
         if (zn < 0 && BC == 3)
           zn = 0;
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY();
+        xn = site_[ii].getX();
+        yn = site_[ii].getY();
         break;
       case 5: // Up neighbor
-        zn = (int)site_[ii].getZ() + 1;
-        if (zn >= (int)zdim_ && BC != 3)
-          zn -= (int)zdim_;
-        if (zn >= (int)zdim_ && BC == 3)
+        zn = site_[ii].getZ() + 1;
+        if (zn >= zdim_ && BC != 3)
+          zn -= zdim_;
+        if (zn >= zdim_ && BC == 3)
           zn -= 1;
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY();
+        xn = site_[ii].getX();
+        yn = site_[ii].getY();
         break;
       case 6: // Southwest neighbor
-        xn = (int)site_[ii].getX() - 1;
+        xn = site_[ii].getX() - 1;
         if (xn < 0 && BC != 1)
-          xn += (int)xdim_;
+          xn += xdim_;
         if (xn < 0 && BC == 1)
           xn = 0;
-        yn = (int)site_[ii].getY() - 1;
+        yn = site_[ii].getY() - 1;
         if (yn < 0 && BC != 2)
-          yn += (int)ydim_;
+          yn += ydim_;
         if (yn < 0 && BC == 2)
           yn = 0;
-        zn = (int)site_[ii].getZ();
+        zn = site_[ii].getZ();
         break;
       case 7: // Northwest neighbor
-        xn = (int)site_[ii].getX() - 1;
+        xn = site_[ii].getX() - 1;
         if (xn < 0 && BC != 1)
-          xn += (int)xdim_;
+          xn += xdim_;
         if (xn < 0 && BC == 1)
           xn = 0;
-        yn = (int)site_[ii].getY() + 1;
-        if (yn >= (int)ydim_ && BC != 2)
-          yn -= (int)ydim_;
-        if (yn >= (int)ydim_ && BC == 2)
+        yn = site_[ii].getY() + 1;
+        if (yn >= ydim_ && BC != 2)
+          yn -= ydim_;
+        if (yn >= ydim_ && BC == 2)
           yn -= 1;
-        zn = (int)site_[ii].getZ();
+        zn = site_[ii].getZ();
         break;
       case 8: // Northeast neighbor
-        xn = (int)site_[ii].getX() + 1;
-        if (xn >= (int)xdim_ && BC != 1)
-          xn -= (int)xdim_;
-        if (xn >= (int)xdim_ && BC == 1)
+        xn = site_[ii].getX() + 1;
+        if (xn >= xdim_ && BC != 1)
+          xn -= xdim_;
+        if (xn >= xdim_ && BC == 1)
           xn -= 1;
-        yn = (int)site_[ii].getY() + 1;
-        if (yn >= (int)ydim_ && BC != 2)
-          yn -= (int)ydim_;
-        if (yn >= (int)ydim_ && BC == 2)
+        yn = site_[ii].getY() + 1;
+        if (yn >= ydim_ && BC != 2)
+          yn -= ydim_;
+        if (yn >= ydim_ && BC == 2)
           yn -= 1;
-        zn = (int)site_[ii].getZ();
+        zn = site_[ii].getZ();
         break;
       case 9: // Southeast neighbor
-        xn = (int)site_[ii].getX() + 1;
-        if (xn >= (int)xdim_ && BC != 1)
-          xn -= (int)xdim_;
-        if (xn >= (int)xdim_ && BC == 1)
+        xn = site_[ii].getX() + 1;
+        if (xn >= xdim_ && BC != 1)
+          xn -= xdim_;
+        if (xn >= xdim_ && BC == 1)
           xn -= 1;
-        yn = (int)site_[ii].getY() - 1;
+        yn = site_[ii].getY() - 1;
         if (yn < 0 && BC != 2)
-          yn += (int)ydim_;
+          yn += ydim_;
         if (yn < 0 && BC == 2)
           yn = 0;
-        zn = (int)site_[ii].getZ();
+        zn = site_[ii].getZ();
         break;
       case 10: // Downwest neighbor
-        xn = (int)site_[ii].getX() - 1;
+        xn = site_[ii].getX() - 1;
         if (xn < 0 && BC != 1)
-          xn += (int)xdim_;
+          xn += xdim_;
         if (xn < 0 && BC == 1)
           xn = 0;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ() - 1;
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ() - 1;
         if (zn < 0 && BC != 3)
-          zn += (int)zdim_;
+          zn += zdim_;
         if (zn < 0 && BC == 3)
           zn = 0;
         break;
       case 11: // Downnorth neighbor
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY() + 1;
-        if (yn >= (int)ydim_ && BC != 2)
-          yn -= (int)ydim_;
-        if (yn >= (int)ydim_ && BC == 2)
+        xn = site_[ii].getX();
+        yn = site_[ii].getY() + 1;
+        if (yn >= ydim_ && BC != 2)
+          yn -= ydim_;
+        if (yn >= ydim_ && BC == 2)
           yn -= 1;
-        zn = (int)site_[ii].getZ() - 1;
+        zn = site_[ii].getZ() - 1;
         if (zn < 0 && BC != 3)
-          zn += (int)zdim_;
+          zn += zdim_;
         if (zn < 0 && BC == 3)
           zn = 0;
         break;
       case 12: // Downeast neighbor
-        xn = (int)site_[ii].getX() + 1;
-        if (xn >= (int)xdim_ && BC != 1)
-          xn -= (int)xdim_;
-        if (xn >= (int)xdim_ && BC == 1)
+        xn = site_[ii].getX() + 1;
+        if (xn >= xdim_ && BC != 1)
+          xn -= xdim_;
+        if (xn >= xdim_ && BC == 1)
           xn -= 1;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ() - 1;
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ() - 1;
         if (zn < 0 && BC != 3)
-          zn += (int)zdim_;
+          zn += zdim_;
         if (zn < 0 && BC == 3)
           zn = 0;
         break;
       case 13: // Downsouth neighbor
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY() - 1;
+        xn = site_[ii].getX();
+        yn = site_[ii].getY() - 1;
         if (yn < 0 && BC != 2)
-          yn += (int)ydim_;
+          yn += ydim_;
         if (yn < 0 && BC == 2)
           yn = 0;
-        zn = (int)site_[ii].getZ() - 1;
+        zn = site_[ii].getZ() - 1;
         if (zn < 0 && BC != 3)
-          zn += (int)zdim_;
+          zn += zdim_;
         if (zn < 0 && BC == 3)
           zn = 0;
         break;
       case 14: // Upwest neighbor
-        xn = (int)site_[ii].getX() - 1;
+        xn = site_[ii].getX() - 1;
         if (xn < 0 && BC != 1)
-          xn += (int)xdim_;
+          xn += xdim_;
         if (xn < 0 && BC == 1)
           xn = 0;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ() + 1;
-        if (zn >= (int)zdim_ && BC != 3)
-          zn -= (int)zdim_;
-        if (zn >= (int)zdim_ && BC == 3)
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ() + 1;
+        if (zn >= zdim_ && BC != 3)
+          zn -= zdim_;
+        if (zn >= zdim_ && BC == 3)
           zn -= 1;
         break;
       case 15: // Upnorth neighbor
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY() + 1;
-        if (yn >= (int)ydim_ && BC != 2)
-          yn -= (int)ydim_;
-        if (yn >= (int)ydim_ && BC == 2)
+        xn = site_[ii].getX();
+        yn = site_[ii].getY() + 1;
+        if (yn >= ydim_ && BC != 2)
+          yn -= ydim_;
+        if (yn >= ydim_ && BC == 2)
           yn -= 1;
-        zn = (int)site_[ii].getZ() + 1;
-        if (zn >= (int)zdim_ && BC != 3)
-          zn -= (int)zdim_;
-        if (zn >= (int)zdim_ && BC == 3)
+        zn = site_[ii].getZ() + 1;
+        if (zn >= zdim_ && BC != 3)
+          zn -= zdim_;
+        if (zn >= zdim_ && BC == 3)
           zn -= 1;
         break;
       case 16: // Upeast neighbor
-        xn = (int)site_[ii].getX() + 1;
-        if (xn >= (int)xdim_ && BC != 1)
-          xn -= (int)xdim_;
-        if (xn >= (int)xdim_ && BC == 1)
+        xn = site_[ii].getX() + 1;
+        if (xn >= xdim_ && BC != 1)
+          xn -= xdim_;
+        if (xn >= xdim_ && BC == 1)
           xn -= 1;
-        yn = (int)site_[ii].getY();
-        zn = (int)site_[ii].getZ() + 1;
-        if (zn >= (int)zdim_ && BC != 3)
-          zn -= (int)zdim_;
-        if (zn >= (int)zdim_ && BC == 3)
+        yn = site_[ii].getY();
+        zn = site_[ii].getZ() + 1;
+        if (zn >= zdim_ && BC != 3)
+          zn -= zdim_;
+        if (zn >= zdim_ && BC == 3)
           zn -= 1;
         break;
       case 17: // Upsouth neighbor
-        xn = (int)site_[ii].getX();
-        yn = (int)site_[ii].getY() - 1;
+        xn = site_[ii].getX();
+        yn = site_[ii].getY() - 1;
         if (yn < 0 && BC != 2)
-          yn += (int)ydim_;
+          yn += ydim_;
         if (yn < 0 && BC == 2)
           yn = 0;
-        zn = (int)site_[ii].getZ() + 1;
-        if (zn >= (int)zdim_ && BC != 3)
-          zn -= (int)zdim_;
-        if (zn >= (int)zdim_ && BC == 3)
+        zn = site_[ii].getZ() + 1;
+        if (zn >= zdim_ && BC != 3)
+          zn -= zdim_;
+        if (zn >= zdim_ && BC == 3)
           zn -= 1;
         break;
       }
@@ -431,16 +430,26 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
   double solidMass = 0.0;
   int microPhaseId = 0;
   int DCId = 0;
+  string myname;
   try {
+#ifdef DEBUG
+    for (ii = 0; ii < numMicroPhases; ii++) {
+      cout << "Micro phase "
+           << chemSys_->getMicroPhaseName(chemSys_->getMicroPhaseId(ii))
+           << ", count = " << count_[ii] << " of " << site_.size() << endl;
+    }
+    cout.flush();
+#endif
+
     if (site_.size() > 0) {
       for (ii = 0; ii < numMicroPhases; ii++) {
+        myname = chemSys_->getMicroPhaseName(chemSys_->getMicroPhaseId(ii));
         microPhaseId = chemSys_->getMicroPhaseId(ii);
         vfrac = ((double)count_[ii]) / ((double)site_.size());
         setVolumefraction(microPhaseId, vfrac);
         setInitvolumefraction(microPhaseId, vfrac);
 #ifdef DEBUG
-        cout << "Lattice::Lattice ii = " << ii
-             << ", microPhaseId = " << microPhaseId
+        cout << "Lattice::Lattice ii = " << ii << ", microPhase = " << myname
              << ", volume fraction = " << vfrac << endl;
         cout.flush();
 #endif // DEBUG
@@ -457,6 +466,12 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
             density = molarMass / molarVolume / 1.0e6; // g/cm3
           }
           microPhaseMass[microPhaseId] = vfrac * density;
+#ifdef DEBUG
+          cout << "GyeongSeong microPhase " << myname << ":" << endl;
+          cout << "            molarMass = " << molarMass << endl;
+          cout << "            molarVolume = " << molarVolume << endl;
+          cout << "            mass = " << vfrac * density << endl;
+#endif // DEBUG
           if (microPhaseId != ELECTROLYTEID) {
             solidMass += microPhaseMass[microPhaseId];
           }
@@ -889,6 +904,10 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
         pid = ste->getMicroPhaseId();
         removeDissolutionSite(ste, pid);
         setMicroPhaseId(ste, ELECTROLYTEID);
+#ifdef DEBUG
+        cout << "Lattice::dissolvePhase pid(" << i << ") = " << pid << endl;
+        cout.flush();
+#endif // DEBUG
 
         ///
         /// Weighted mean curvature (wmc) is changed by the difference
@@ -899,30 +918,67 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
 
         dwmcval = chemSys_->getMicroPhasePorosity(ELECTROLYTEID) -
                   chemSys_->getMicroPhasePorosity(pid);
+#ifdef DEBUG
+        cout << "  dwmcval = " << dwmcval;
+        cout.flush();
+#endif // DEBUG
         ste->dWmc(dwmcval);
+#ifdef DEBUG
+        cout << "... changed it" << endl;
+        cout.flush();
+#endif // DEBUG
 
         unsigned int j;
         for (j = 0; j < ste->nbSize(1); j++) {
+#ifdef DEBUG
+          cout << "     j = " << j << " of " << ste->nbSize(1) << endl;
+          cout.flush();
+#endif // DEBUG
           stenb = ste->nb(j);
           stenb->dWmc(dwmcval);
           int nbpid = stenb->getMicroPhaseId();
           if ((nbpid != ELECTROLYTEID) && (nbpid != VOIDID)) {
 
-            ///
-            /// Now that the site has been dissolved, it is eligible for growth
-            /// later on, so we add it to the list of growth sites for certain
-            /// phases.
-            ///
+#ifdef DEBUG
+            cout << "     nbpid = " << nbpid << endl;
+            cout.flush();
+#endif // DEBUG
+       ///
+       /// Now that the site has been dissolved, it is eligible for growth
+       /// later on, so we add it to the list of growth sites for certain
+       /// phases.
+       ///
 
             addDissolutionSite(stenb, nbpid);
+#ifdef DEBUG
+            cout << "         Out of addDissolutionSite( " << stenb->getId()
+                 << "," << nbpid << ")" << endl;
+            cout.flush();
+#endif // DEBUG
             addGrowthSite(ste, nbpid);
+#ifdef DEBUG
+            cout << "         Out of addGrowthSite( " << ste->getId() << ","
+                 << nbpid << ")" << endl;
+            cout.flush();
+#endif // DEBUG
 
             vector<int> nbgrowthtemp;
             nbgrowthtemp.clear();
             nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
             for (int ii = 0; ii < nbgrowthtemp.size(); ii++) {
-              if (nbgrowthtemp[ii] != ELECTROLYTEID) {
+              if ((nbgrowthtemp[ii] != ELECTROLYTEID) &&
+                  (nbgrowthtemp[ii] != VOIDID)) {
+#ifdef DEBUG
+                cout << "              nbgrowthtemp[ " << ii
+                     << "] = " << nbgrowthtemp[ii] << endl;
+                cout.flush();
+#endif // DEBUG
                 addGrowthSite(ste, nbgrowthtemp[ii]);
+#ifdef DEBUG
+                cout << "                  Out of addGrowthSite( "
+                     << ste->getId() << ",nbgrowthtemp[" << ii << "])" << endl;
+                cout.flush();
+#endif // DEBUG
               }
             }
           }
@@ -936,12 +992,21 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
         ///
 
         for (j = ste->nbSize(1); j < ste->nbSize(2); j++) {
+#ifdef DEBUG
+          cout << "         Second nearest j = " << j << endl;
+          cout.flush();
+#endif // DEBUG
           stenb = ste->nb(j);
           stenb->dWmc(dwmcval);
         }
 
         numleft--;
         numchange++;
+#ifdef DEBUG
+        cout << "    numleft = " << numleft << ", numchange = " << numchange
+             << endl;
+        cout.flush();
+#endif // DEBUG
       }
     } catch (out_of_range &oor) {
       EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), i);
@@ -1242,9 +1307,9 @@ vector<unsigned int> Lattice::getNeighborhood(const unsigned int sitenum,
       yp = yc + j;
       for (int i = -size; i <= size; i++) {
         xp = xc + i;
-        dist = (double)((xc - xp) * (xc - xp));
-        dist += (double)((yc - yp) * (yc - yp));
-        dist += (double)((zc - zp) * (zc - zp));
+        dist = static_cast<double>(((xc - xp) * (xc - xp)));
+        dist += static_cast<double>(((yc - yp) * (yc - yp)));
+        dist += static_cast<double>(((zc - zp) * (zc - zp)));
         /*
         if ((sqrt(dist) - 0.5) <= (double)size) {
             nh.push_back(getIndex(xp,yp,zp));
@@ -1261,7 +1326,7 @@ vector<unsigned int> Lattice::getNeighborhood(const unsigned int sitenum,
 unsigned int Lattice::getIndex(int ix, int iy, int iz) const {
   if (ix < 0) {
     if (BC != 1) {
-      ix += (int)xdim_;
+      ix += xdim_;
     } else {
       ix = 0;
     }

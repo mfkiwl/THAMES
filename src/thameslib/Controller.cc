@@ -850,12 +850,24 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       double moles = 0.0;
       vector<int> microPhaseMembers;
       for (int i = 0; i < chemSys_->getNumMicroPhases(); ++i) {
+        string pname = chemSys_->getMicroPhaseName(i);
         int newMicroPhaseId =
             chemSys_->getMicroPhaseId(chemSys_->getMicroPhaseName(i));
         aveSI = moles = 0.0;
         microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
+#ifdef DEBUG
+        cout << "Glory micro phase name = " << pname << endl;
+        cout << "Glory micro phase id = " << newMicroPhaseId << endl;
+        cout << "Glory microPhaseMembers size = " << microPhaseMembers.size()
+             << endl;
+#endif // DEBUG
         for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
           int newGEMPhaseId = microPhaseMembers[ii];
+#ifdef DEBUG
+          cout << "    Glory phase member = " << ii << endl;
+          cout << "    Glory GEM phase id = " << newGEMPhaseId << endl;
+          cout.flush();
+#endif // DEBUG
           aveSI += ((solut_->getSI(newGEMPhaseId) *
                      chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
           moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
@@ -863,7 +875,7 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
         if (moles > 0.0) {
           aveSI = aveSI / moles;
         } else {
-          aveSI = aveSI / (double)(microPhaseMembers.size());
+          aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
         }
         lattice_->setSI(newMicroPhaseId, aveSI);
       }

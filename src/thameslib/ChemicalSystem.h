@@ -2461,7 +2461,7 @@ public:
   @return the vector of all GEM CSD phase ids associated with the microstructure
   phase
   */
-  vector<int> getMicroPhaseMembers(const unsigned int idx) {
+  vector<int> getMicroPhaseMembers(const int idx) {
     string msg;
     map<int, vector<int>>::iterator p = microPhaseMembers_.find(idx);
     if (p != microPhaseMembers_.end()) {
@@ -3818,6 +3818,7 @@ public:
   @param val is the mass to assign to that microstructure phase
   */
   void setMicroPhaseMass(const unsigned int idx, const double val);
+
   /**
   @brief Get the masses of all microstructure phases.
 
