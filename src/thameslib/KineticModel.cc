@@ -52,21 +52,10 @@ void KineticModel::setKineticDCMoles() {
     double waterMoles = chemSys_->getDCMoles(waterId);
     double waterMolarMass = chemSys_->getDCMolarMass(waterId);
     double waterMass = waterMoles * waterMolarMass;
-#ifdef DEBUG
-    cout << "KineticModel::setKineticDCmoles        "
-         << chemSys_->getDCName(waterId) << ": Mass = " << waterMass
-         << ", Molar mass = " << waterMolarMass << endl;
-    cout.flush();
-#endif
     if (chemSys_->getDCMolarMass(DCId_) <= 0.0) {
       throw FloatException("KineticModel", "setKineticDCmoles",
                            "Divide by zero error");
     }
-#ifdef DEBUG
-    cout << "KineticModel::setKineticDCmoles        Clinker phase " << name_
-         << ": Mass = " << scaledMass_
-         << ", Molar mass = " << chemSys_->getDCMolarMass(DCId_) << endl;
-#endif
     chemSys_->setDCMoles(DCId_,
                          (scaledMass_ / chemSys_->getDCMolarMass(DCId_)));
   } catch (EOBException eex) {

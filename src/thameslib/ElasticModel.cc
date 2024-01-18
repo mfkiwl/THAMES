@@ -25,11 +25,11 @@ ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, int nphase,
   nz_ = nz;
   ns_ = nx_ * ny_ * nz_;
 
-#ifdef DEBUG
-  cout << "ElasticModel::ElasticModel Constructor nx_ = " << nx_
-       << " ny_ = " << ny_ << " nz_ = " << nz_ << " ns_ = " << ns_ << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "ElasticModel::ElasticModel Constructor nx_ = " << nx_
+         << " ny_ = " << ny_ << " nz_ = " << nz_ << " ns_ = " << ns_ << endl;
+    cout.flush();
+  }
 
   ///
   /// Initialize the prescribed stresses and strains
@@ -193,10 +193,6 @@ ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, int nphase,
 }
 
 void ElasticModel::BuildNeighbor() {
-#ifdef DEBUG
-  cout << "ElasticModel::BuildNeighbor" << endl;
-  cout.flush();
-#endif
 
   ///
   /// First construct the 27 neighbor table in terms of delta i, delta j, and
@@ -281,10 +277,6 @@ void ElasticModel::BuildNeighbor() {
     }
   }
 
-#ifdef DEBUG
-  cout << "ElasticModel::BuildNeighbor Exiting" << endl;
-  cout.flush();
-#endif
   return;
 }
 
@@ -709,10 +701,6 @@ void ElasticModel::getAvgStrainengy() {
 
 void ElasticModel::writeStress(string &root, double time, int index) {
   if (index >= 0 && index < 6) {
-#ifdef DEBUG
-    cout << "ElasticModel::writeStress writing ppm file" << endl;
-    cout.flush();
-#endif
     double min, max;
     min = max = 0.0;
 
@@ -779,13 +767,13 @@ void ElasticModel::writeStress(string &root, double time, int index) {
       }
     }
 
-#ifdef DEBUG
-    cout << "ElasticModel::writeStress minimum stress-" << index
-         << " is: " << min << endl;
-    cout << "ElasticModel::writeStress maximum stress-" << index
-         << " is: " << max << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "ElasticModel::writeStress minimum stress-" << index
+           << " is: " << min << endl;
+      cout << "ElasticModel::writeStress maximum stress-" << index
+           << " is: " << max << endl;
+      cout.flush();
+    }
 
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
@@ -816,11 +804,6 @@ void ElasticModel::writeStress(string &root, double time, int index) {
 
 void ElasticModel::writeStrain(string &root, double time, int index) {
   if (index >= 0 && index < 6) {
-
-#ifdef DEBUG
-    cout << "ElasticModel::writeStrain" << endl;
-    cout.flush();
-#endif
 
     double min, max;
     min = max = 0.0;
@@ -887,14 +870,6 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
           max = elestrain_[m][index];
       }
     }
-#ifdef DEBUG
-    cout << "ElasticModel::writeStrain minimum strain-" << index
-         << " is: " << min << endl;
-    cout << "ElasticModel::writeStrain maximum strain-" << index
-         << " is: " << max << endl;
-    cout.flush();
-#endif
-
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
         int m = nx_ * ny_ * k + nx_ * j + slice;
@@ -1012,12 +987,6 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
         max = strainengy_[m];
     }
   }
-
-#ifdef DEBUG
-  cout << "ElasticModel::writeStrainEngy minimum strainengy is " << min << endl;
-  cout << "ElasticModel::writeStrainEngy maximum strainengy is " << max << endl;
-  cout.flush();
-#endif
 
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < nz_; j++) {

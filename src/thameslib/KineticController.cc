@@ -6,8 +6,10 @@
 #include "KineticController.h"
 
 KineticController::KineticController() {
-  temperature_ = 293.15; // default temperature (K)
-  refT_ = 293.15;        // default temperature (K)
+  temperature_ = 293.15;
+
+  // default temperature (K)
+  refT_ = 293.15;
 
   ///
   /// Clear out the vectors so they can be populated with values from the
@@ -103,9 +105,9 @@ KineticController::KineticController(ChemicalSystem *cs, Solution *solut,
   foundxml = fileName.find(xmlext);
   try {
     if (foundxml != string::npos) {
-#ifdef DEBUG
-      cout << "KineticModel data file is an XML file" << endl;
-#endif
+      if (verbose_) {
+        cout << "KineticModel data file is an XML file" << endl;
+      }
       parseDoc(fileName);
     } else {
       throw FileException("KineticModel", "KineticModel", fileName,
@@ -118,21 +120,21 @@ KineticController::KineticController(ChemicalSystem *cs, Solution *solut,
 
   int microPhaseId;
 
-#ifdef DEBUG
-  cout << "KineticController::KineticController Finished reading chemistry.xml "
-          "file"
-       << endl;
-  for (int i = 0; i < microPhaseId_.size(); ++i) {
-    microPhaseId = microPhaseId_[i];
-    if (isKinetic_[i]) {
-      cout << "KineticController::KineticController kinetic phase "
-           << microPhaseId << endl;
-      cout << "KineticController::KineticController     name = "
-           << chemSys_->getMicroPhaseName(microPhaseId) << endl;
+  if (verbose_) {
+    cout << "KineticController::KineticController Finished reading "
+            "chemistry.xml "
+         << endl;
+    for (int i = 0; i < microPhaseId_.size(); ++i) {
+      microPhaseId = microPhaseId_[i];
+      if (isKinetic_[i]) {
+        cout << "KineticController::KineticController kinetic phase "
+             << microPhaseId << endl;
+        cout << "KineticController::KineticController     name = "
+             << chemSys_->getMicroPhaseName(microPhaseId) << endl;
+      }
     }
+    cout.flush();
   }
-  cout.flush();
-#endif
 
   // Assign the DC index for water
 
@@ -177,10 +179,6 @@ void KineticController::parseDoc(const string &docName) {
 
   try {
     string rxcsd = "chemistry.xsd";
-#ifdef DEBUG
-    cout << "KineticModel::parseDoc Chemistry xsd file is at " << rxcsd << endl;
-    cout.flush();
-#endif
     if (!is_xml_valid(doc, rxcsd.c_str())) {
       throw FileException("KineticModel", "KineticModel", docName,
                           "xml NOT VALID");
@@ -317,10 +315,6 @@ void KineticController::parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
         key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
         string st((char *)key);
         kineticData.type = st;
-#ifdef DEBUG
-        cout << "===> kineticData.type = " << kineticData.type << endl;
-        cout.flush();
-#endif
         if (kineticData.type == ParrotKillohType) {
           typefound = true;
           parseKineticDataForParrotKilloh(doc, cur, kineticData);
@@ -353,25 +347,17 @@ void KineticController::parseKineticDataForParrotKilloh(
   xmlChar *key;
   cur = cur->next;
 
-#ifdef DEBUG
-  cout << "--->Parsing PK data for " << kineticData.name << endl;
-  cout.flush();
-#endif
-  while (cur != NULL) {
-#ifdef DEBUG
-    cout << "Here I am with cur->name =  " << cur->name << endl;
+  if (verbose_) {
+    cout << "--->Parsing PK data for " << kineticData.name << endl;
     cout.flush();
-#endif
+  }
+  while (cur != NULL) {
 
     // Specific surface area (m2/kg)
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.specificSurfaceArea, st);
-#ifdef DEBUG
-      cout << "     specificSurfaceArea = " << kineticData.specificSurfaceArea;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Reference specific surface area (m2/kg)
@@ -379,11 +365,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.refSpecificSurfaceArea, st);
-#ifdef DEBUG
-      cout << "     refSpecificSurfaceArea = "
-           << kineticData.refSpecificSurfaceArea;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh k1 parameter
@@ -391,10 +372,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.k1, st);
-#ifdef DEBUG
-      cout << "     k1 = " << kineticData.k1;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh k2 parameter
@@ -402,10 +379,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.k2, st);
-#ifdef DEBUG
-      cout << "     k2 = " << kineticData.k2;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh k3 parameter
@@ -413,10 +386,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.k3, st);
-#ifdef DEBUG
-      cout << "     k3 = " << kineticData.k3;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh n1 parameter
@@ -424,10 +393,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.n1, st);
-#ifdef DEBUG
-      cout << "     n1 = " << kineticData.n1;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh n3 parameter
@@ -435,10 +400,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.n3, st);
-#ifdef DEBUG
-      cout << "     n3 = " << kineticData.n3;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Parrot-Killoh critical DOH parameter
@@ -446,10 +407,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.critDOH, st);
-#ifdef DEBUG
-      cout << "     critDOH = " << kineticData.critDOH;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Activation energy
@@ -457,10 +414,6 @@ void KineticController::parseKineticDataForParrotKilloh(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.activationEnergy, st);
-#ifdef DEBUG
-      cout << "     Ea = " << kineticData.activationEnergy;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     cur = cur->next;
@@ -474,6 +427,10 @@ void KineticController::parseKineticDataForPozzolanic(
   xmlChar *key;
   cur = cur->next;
 
+  if (verbose_) {
+    cout << "--->Parsing pozzolanic data for " << kineticData.name << endl;
+    cout.flush();
+  }
   while (cur != NULL) {
 
     // Specific surface area (m2/kg)
@@ -481,10 +438,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.specificSurfaceArea, st);
-#ifdef DEBUG
-      cout << "     specificSurfaceArea = " << kineticData.specificSurfaceArea;
-      cout.flush();
-#endif
       xmlFree(key);
     }
 
@@ -493,11 +446,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.refSpecificSurfaceArea, st);
-#ifdef DEBUG
-      cout << "     refSpecificSurfaceArea = "
-           << kineticData.refSpecificSurfaceArea;
-      cout.flush();
-#endif
       xmlFree(key);
     }
 
@@ -506,11 +454,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.dissolutionRateConst, st);
-#ifdef DEBUG
-      cout << "     dissolutionRateConst = "
-           << kineticData.dissolutionRateConst;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Early-age diffusion rate constant (mol/m2/s)
@@ -518,11 +461,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.diffusionRateConstEarly, st);
-#ifdef DEBUG
-      cout << "     diffusionRateConstEarly = "
-           << kineticData.diffusionRateConstEarly;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Later-age diffusion rate constant (mol/m2/s)
@@ -530,11 +468,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.diffusionRateConstLate, st);
-#ifdef DEBUG
-      cout << "     diffusionRateConstLate = "
-           << kineticData.diffusionRateConstLate;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Exponent on  the saturation index in the rate equation
@@ -542,10 +475,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.siexp, st);
-#ifdef DEBUG
-      cout << "     siexp = " << kineticData.siexp;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Exponent on  the driving force term in the rate equation
@@ -553,10 +482,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.dfexp, st);
-#ifdef DEBUG
-      cout << "     dfexp = " << kineticData.dfexp;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Exponent on  the degree of reaction term in the diffusion rate equation
@@ -564,10 +489,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.dorexp, st);
-#ifdef DEBUG
-      cout << "     dorexp = " << kineticData.dorexp;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Exponent on  the hydroxy ion activity in the rate equation
@@ -575,10 +496,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.ohexp, st);
-#ifdef DEBUG
-      cout << "     ohexp = " << kineticData.ohexp;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // SiO2 mass fraction in the material
@@ -586,10 +503,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.sio2, st);
-#ifdef DEBUG
-      cout << "     sio2 = " << kineticData.sio2;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Al2O3 mass fraction in the material
@@ -597,10 +510,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.al2o3, st);
-#ifdef DEBUG
-      cout << "     al2o3 = " << kineticData.al2o3;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // CaO mass fraction in the material
@@ -608,10 +517,6 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.cao, st);
-#ifdef DEBUG
-      cout << "     cao = " << kineticData.cao;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     // Loss on ignition of the material
@@ -619,20 +524,12 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.loi, st);
-#ifdef DEBUG
-      cout << "     loi = " << kineticData.loi;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.activationEnergy, st);
-#ifdef DEBUG
-      cout << "     activationEnergy = " << kineticData.activationEnergy;
-      cout.flush();
-#endif
       xmlFree(key);
     }
     cur = cur->next;
@@ -655,12 +552,13 @@ void KineticController::calcPhaseMasses(void) {
       // Setting the phase mass will also automatically calculate the phase
       // volume
 
-#ifdef DEBUG
-      cout << "KineticController::getPhaseMasses reads solid micphase mass of "
-           << chemSys_->getMicroPhaseName(microPhaseId) << " as "
-           << initScaledMass_[i] << endl;
-      cout.flush();
-#endif
+      if (verbose_) {
+        cout
+            << "KineticController::getPhaseMasses reads solid micphase mass of "
+            << chemSys_->getMicroPhaseName(microPhaseId) << " as "
+            << initScaledMass_[i] << endl;
+        cout.flush();
+      }
     }
   }
 
@@ -744,11 +642,6 @@ void KineticController::setPozzEffectOnPK(void) {
 
   minpozzeffect *= (refloi / maxloi);
 
-#ifdef DEBUG
-  cout << "Pozzeffect = " << minpozzeffect << endl;
-  cout.flush();
-#endif
-
   /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
   for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
     if (phaseKineticModel_[midx]->getType() == ParrotKillohType) {
@@ -784,11 +677,11 @@ void KineticController::calculateKineticStep(const double timestep,
   if (!doTweak)
     hyd_time = hyd_time + timestep;
 
-#ifdef DEBUG
-  cout << "KineticController::calculateKineticStep Hydration Time = "
-       << hyd_time << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "KineticController::calculateKineticStep Hydration Time = "
+         << hyd_time << endl;
+    cout.flush();
+  }
 
   try {
     static int conc_index = 0;
@@ -814,20 +707,7 @@ void KineticController::calculateKineticStep(const double timestep,
     tGEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     string icn;
 
-#ifdef DEBUG
-    cout << "KineticController::calculateKineticStep "
-         << "ICmoles before dissolving:" << endl;
-    cout.flush();
-    for (int i = 0; i < ICNum_; i++) {
-      if (isFirst) {
-        ICMoles[i] = 1.0e-9;
-      } else {
-        ICMoles[i] = chemSys_->getICMoles(i);
-      }
-      cout << "KineticController::calculateKineticStep     " << ICName_[i]
-           << ": " << ICMoles[i] << " mol" << endl;
-    }
-#else
+    // Populate IC moles before kinetic step
     for (int i = 0; i < ICNum_; i++) {
       ICMoles[i] = chemSys_->getICMoles(i);
       if (isFirst) {
@@ -836,11 +716,13 @@ void KineticController::calculateKineticStep(const double timestep,
         ICMoles[i] = chemSys_->getICMoles(i);
       }
     }
-#endif
 
+    // Populate DC moles before kinetic step
     for (int i = 0; i < DCNum_; i++) {
       DCMoles[i] = chemSys_->getDCMoles(i);
     }
+
+    // Populate GEM phase moles before kinetic step
     for (int i = 0; i < GEMPhaseNum_; i++) {
       GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
     }
@@ -859,69 +741,46 @@ void KineticController::calculateKineticStep(const double timestep,
       double waterMass = solidMass * lattice_->getWsratio();
       double waterMolarMass = chemSys_->getDCMolarMass(waterId_);
       double waterMoles = waterMass / waterMolarMass;
-#ifdef DEBUG
-      cout << "KineticController::calculateKineticStep isFirst *** Initial "
-              "solid mass = "
-           << solidMass << endl;
-      cout << "KineticController::calculateKineticStep isFirst *** w/s ratio = "
-           << lattice_->getWsratio() << endl;
-      cout << "KineticController::calculateKineticStep isFirst *** Initial "
-              "water mass = "
-           << waterMass << endl;
-      cout << "KineticController::calculateKineticStep isFirst *** Initial "
-              "water moles = "
-           << waterMoles << endl;
-      cout.flush();
-#endif // DEBUG
-
       microPhaseId = 0;
       double psMass, psVolume;
       double volume = 0.0;
-#ifdef DEBUG
-      for (int i = 0; i < microPhaseId_.size(); ++i) {
-        cout << "KineticController::calculateKineticStep "
-             << "Initial MICROSTRUCTURE phase amount:" << endl;
-        psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
-        psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
-        cout << "KineticController::calculateKineticStep     "
-             << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
-             << microPhaseId_[i] << "): mass = " << psMass
-             << ", vol = " << psVolume << endl;
+      if (verbose_) {
+        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+                "solid mass = "
+             << solidMass << endl;
+        cout << "KineticController::calculateKineticStep isFirst *** w/s ratio "
+                "= "
+             << lattice_->getWsratio() << endl;
+        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+                "water mass = "
+             << waterMass << endl;
+        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+                "water moles = "
+             << waterMoles << endl;
         cout.flush();
+
+        for (int i = 0; i < microPhaseId_.size(); ++i) {
+          cout << "KineticController::calculateKineticStep "
+               << "Initial MICROSTRUCTURE phase amount:" << endl;
+          psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
+          psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
+          cout << "KineticController::calculateKineticStep     "
+               << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
+               << microPhaseId_[i] << "): mass = " << psMass
+               << ", vol = " << psVolume << endl;
+          cout.flush();
+        }
       }
-#endif // DEBUG
 
       for (int i = 0; i < ICNum_; i++) {
         if (ICName_[i] == "H") {
-#ifdef DEBUG
-          cout << "KineticController::calculateKineticStep "
-               << "Previous IC moles for H is: " << ICMoles[i] << endl;
-          cout.flush();
-#endif
           ICMoles[i] = (2.0 * waterMoles);
           solut_->setICMoles(i, ICMoles[i]);
           chemSys_->setDCMoles(waterId_, waterMoles);
-#ifdef DEBUG
-          if (verbose_) {
-            cout << "KineticController::calculateKineticStep "
-                 << "New ICmoles for H is: " << ICMoles[i] << endl;
-            cout.flush();
-          }
-#endif
         }
         if (ICName_[i] == "O") {
-#ifdef DEBUG
-          cout << "KineticController::calculateKineticStep "
-               << "Previous IC moles for O is: " << ICMoles[i] << endl;
-          cout.flush();
-#endif
           ICMoles[i] = waterMoles;
           solut_->setICMoles(i, ICMoles[i]);
-#ifdef DEBUG
-          cout << "KineticController::calculateKineticStep "
-               << "New ICmoles for O is: " << ICMoles[i] << endl;
-          cout.flush();
-#endif
         }
       }
 
@@ -948,12 +807,12 @@ void KineticController::calculateKineticStep(const double timestep,
                << "modifying initial pore solution" << endl;
           cout.flush();
         }
-#ifdef DEBUG
-        cout << "KineticController::calculateKineticStep "
-             << "--->Adding " << p->second << " mol/kgw of "
-             << ICName_[p->first] << " to initial solution." << endl;
-        cout.flush();
-#endif
+        if (verbose_) {
+          cout << "KineticController::calculateKineticStep "
+               << "--->Adding " << p->second << " mol/kgw of "
+               << ICName_[p->first] << " to initial solution." << endl;
+          cout.flush();
+        }
         ICMoles[p->first] += (p->second * kgWaterMass);
         p++;
       }
@@ -986,12 +845,6 @@ void KineticController::calculateKineticStep(const double timestep,
         // First step each iteration is to equilibrate gas phase
         // with the electrolyte, while forbidding anything new
         // from precipitating.
-
-#ifdef DEBUG
-        cout << "KineticController::calculateKineticStep "
-             << "Looping over kinetically controlled phases.  " << endl;
-        cout.flush();
-#endif
 
         vector<double> impurityRelease;
         impurityRelease.clear();
@@ -1041,29 +894,10 @@ void KineticController::calculateKineticStep(const double timestep,
               timestep, temperature, isFirst, rh, dICMoles, dsolutICMoles,
               tDCMoles, tGEMPhaseMoles);
 
-#ifdef DEBUG
-          cout << "Returned from calculateKineticStep for microstructure id "
-               << midx << endl;
-          cout.flush();
-#endif // DEBUG
-
           for (int im = 0; im < ICMoles.size(); ++im) {
-#ifdef DEBUG
-            cout << "Before moles of " << ICName_[im] << " = " << ICMoles[im]
-                 << endl;
-            cout << "Incrementing moles of " << ICName_[im] << " by "
-                 << (dICMoles[im] - minmoles) << endl;
-            cout.flush();
-#endif // DEBUG
 
             ICMoles[im] += (dICMoles[im] - minmoles);
             solutICMoles[im] += (dsolutICMoles[im] - minmoles);
-
-#ifdef DEBUG
-            cout << "After moles of " << ICName_[im] << " = " << ICMoles[im]
-                 << endl;
-            cout.flush();
-#endif // DEBUG
           }
 
           for (int im = 0; im < DCMoles.size(); ++im) {
@@ -1073,11 +907,6 @@ void KineticController::calculateKineticStep(const double timestep,
           for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
             GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
           }
-
-#ifdef DEBUG
-          cout << "Made it through for loop to increment moles " << endl;
-          cout.flush();
-#endif // DEBUG
         }
       } else {
 
@@ -1116,11 +945,6 @@ void KineticController::calculateKineticStep(const double timestep,
 
       for (int ii = 0; ii < ICMoles.size(); ii++) {
         chemSys_->setICMoles(ii, ICMoles[ii]);
-#ifdef DEBUG
-        cout << "KineticController::calculateKineticStep ICmoles of "
-             << ICName_[ii] << " is: " << ICMoles[ii] << endl;
-        cout.flush();
-#endif
       }
 
     } // End of normal hydration block

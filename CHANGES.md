@@ -4,7 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
-| Jan 17 00:58:36 2023 | Debugged behavior for adding growth sites |
+| Jan 18 10:16:14 2024 | Cleaned up some debugging output |
+| Jan 17 00:58:36 2024 | Debugged behavior for adding growth sites |
 | Dec 29 19:21:12 2023 | Formatting uniformity and added viz to build |
 | Dec 23 22:34:19 2023 | Streamlined adjustment
 of microstructure volumes and output chemical shrinkage in Microstructure csv file |

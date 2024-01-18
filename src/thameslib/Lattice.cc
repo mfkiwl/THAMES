@@ -124,13 +124,13 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
   }
 
   rg_->setSeed(-142234);
-#ifdef DEBUG
-  cout << "Lattice::Lattice Checking whether I can get a seed "
-       << rg_->getSeed() << endl;
-  cout << "Lattice::Lattice Checking value of random number "
-       << ", " << rg_->Ran3() << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Lattice::Lattice Checking whether I can get a seed "
+         << rg_->getSeed() << endl;
+    cout << "Lattice::Lattice Checking value of random number "
+         << ", " << rg_->Ran3() << endl;
+    cout.flush();
+  }
 
   count_.clear();
   count_.resize(chemSys_->getNumMicroPhases(), 0);
@@ -422,24 +422,20 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
   initvolumefraction_.clear();
   initvolumefraction_.resize(numMicroPhases, 0.0);
 
-#ifdef DEBUG
-  cout << "Lattice::Lattice Calculating Volume Fractions now..." << endl;
-  cout.flush();
-#endif
   double vfrac, mfrac, capfrac, molarMass, molarVolume, density;
   double solidMass = 0.0;
   int microPhaseId = 0;
   int DCId = 0;
   string myname;
   try {
-#ifdef DEBUG
-    for (ii = 0; ii < numMicroPhases; ii++) {
-      cout << "Micro phase "
-           << chemSys_->getMicroPhaseName(chemSys_->getMicroPhaseId(ii))
-           << ", count = " << count_[ii] << " of " << site_.size() << endl;
+    if (verbose_) {
+      for (ii = 0; ii < numMicroPhases; ii++) {
+        cout << "Micro phase "
+             << chemSys_->getMicroPhaseName(chemSys_->getMicroPhaseId(ii))
+             << ", count = " << count_[ii] << " of " << site_.size() << endl;
+      }
+      cout.flush();
     }
-    cout.flush();
-#endif
 
     if (site_.size() > 0) {
       for (ii = 0; ii < numMicroPhases; ii++) {
@@ -448,11 +444,11 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
         vfrac = ((double)count_[ii]) / ((double)site_.size());
         setVolumefraction(microPhaseId, vfrac);
         setInitvolumefraction(microPhaseId, vfrac);
-#ifdef DEBUG
-        cout << "Lattice::Lattice ii = " << ii << ", microPhase = " << myname
-             << ", volume fraction = " << vfrac << endl;
-        cout.flush();
-#endif // DEBUG
+        if (verbose_) {
+          cout << "Lattice::Lattice ii = " << ii << ", microPhase = " << myname
+               << ", volume fraction = " << vfrac << endl;
+          cout.flush();
+        }
         if (microPhaseId == ELECTROLYTEID) {
           DCId = chemSys_->getDCId("H2O@");
         } else if (microPhaseId != VOIDID) {
@@ -466,12 +462,6 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
             density = molarMass / molarVolume / 1.0e6; // g/cm3
           }
           microPhaseMass[microPhaseId] = vfrac * density;
-#ifdef DEBUG
-          cout << "GyeongSeong microPhase " << myname << ":" << endl;
-          cout << "            molarMass = " << molarMass << endl;
-          cout << "            molarVolume = " << molarVolume << endl;
-          cout << "            mass = " << vfrac * density << endl;
-#endif // DEBUG
           if (microPhaseId != ELECTROLYTEID) {
             solidMass += microPhaseMass[microPhaseId];
           }
@@ -507,11 +497,6 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
       cout.flush();
     }
 
-#ifdef DEBUG
-    cout << "Lattice::Lattice Entering Lattice::normalizePhaseMasses" << endl;
-    cout.flush();
-#endif
-
     // Next we set the initial normalized phase masses, microstructure
     // phase volume, and subvoxel porosity.  This is all triggered when we set
     // the mass.
@@ -528,12 +513,6 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
       }
     }
 
-#ifdef DEBUG
-    cout << "Lattice::Lattice Entering ChemicalSystem::setInitMicroVolume"
-         << endl;
-    cout.flush();
-#endif
-
     chemSys_->setInitMicroVolume(totmicvol);
 
     // Initially assume that all free water and void space
@@ -547,17 +526,9 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
     exit(1);
   }
 
-#ifdef DEBUG
-  cout << "Lattice::Lattice Entering Site::calcWmc for each site" << endl;
-  cout.flush();
-#endif
   for (ii = 0; ii < site_.size(); ii++) {
     site_[ii].calcWmc();
   }
-#ifdef DEBUG
-  cout << "Lattice::Lattice Returned from Site::calcWmc for every site" << endl;
-  cout.flush();
-#endif
 }
 
 Lattice::~Lattice() {
@@ -604,21 +575,13 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       double waterMolarMass = chemSys_->getDCMolarMass(waterId);
       pscaledMass = wsratio_ * 100.0; // Mass of solids scaled to 100 g now
                                       //
-#ifdef DEBUG
-      cout << "Lattice::normalizePhaseMasses Setting DC moles of water to "
-           << (pscaledMass / waterMolarMass) << endl;
-      cout.flush();
-#endif
-
       chemSys_->setDCMoles(waterId, (pscaledMass / waterMolarMass));
-#ifdef DEBUG
       if (verbose_) {
         cout << "Lattice::normalizePhaseMasses Setting initial micphase mass "
                 "and volume of "
              << chemSys_->getMicroPhaseName(ELECTROLYTEID) << endl;
         cout.flush();
       }
-#endif
 
       chemSys_->setMicroPhaseMass(ELECTROLYTEID, pscaledMass);
       chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID, 0.0);
@@ -626,20 +589,20 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
     } else if (microPhaseId != VOIDID) {
 
       pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
-#ifdef DEBUG
-      cout << "Lattice::normalizePhaseMasses Microstructure scaled mass of "
-           << chemSys_->getMicroPhaseName(microPhaseId) << " (" << microPhaseId
-           << ") = " << microPhaseMass[microPhaseId] << " g out of "
-           << solidMass << " g total" << endl;
+      if (verbose_) {
+        cout << "Lattice::normalizePhaseMasses Microstructure scaled mass of "
+             << chemSys_->getMicroPhaseName(microPhaseId) << " ("
+             << microPhaseId << ") = " << microPhaseMass[microPhaseId]
+             << " g out of " << solidMass << " g total" << endl;
 
-      // Setting the phase mass will also automatically calculate the phase
-      // volume
+        // Setting the phase mass will also automatically calculate the phase
+        // volume
 
-      cout << "Lattice::normalizePhaseMasses Setting initial micphase "
-           << "mass and volume of " << chemSys_->getMicroPhaseName(microPhaseId)
-           << endl;
-      cout.flush();
-#endif
+        cout << "Lattice::normalizePhaseMasses Setting initial micphase "
+             << "mass and volume of "
+             << chemSys_->getMicroPhaseName(microPhaseId) << endl;
+        cout.flush();
+      }
 
       chemSys_->setMicroPhaseMass(microPhaseId, pscaledMass);
 
@@ -670,7 +633,7 @@ void Lattice::findInterfaces(void) {
 
   interface_.clear();
   for (i = 0; i < chemSys_->getNumMicroPhases(); i++) {
-    if (i != ELECTROLYTEID && i != VOIDID) {
+    if (i != ELECTROLYTEID && i != VOIDID) { // Solid phase of some kind
       gsite.clear();
       dsite.clear();
       for (k = 0; k < site_.size(); k++) {
@@ -723,18 +686,10 @@ void Lattice::findInterfaces(void) {
         }
       }
 
-#ifdef DEBUG
-      cout << "Lattice::findInterfaces Trying to add a water "
-           << "interface for phase " << i << "... " << endl;
-      cout.flush();
-#endif
       interface_.push_back(Interface(chemSys_, rg_, gsite, dsite, i, verbose_));
-    } else {
-#ifdef DEBUG
-      cout << "Lattice::findInterfaces Trying to add a regular "
-           << "interface for phase " << i << "... " << endl;
-      cout.flush();
-#endif
+
+    } else { // Not a solid phase (either electrolyte or void)
+
       interface_.push_back(Interface(rg_, verbose_));
     }
   }
@@ -770,11 +725,11 @@ int Lattice::growPhase(unsigned int phaseid, int numtoadd) {
   ///
 
   numleft = numtoadd;
-#ifdef DEBUG
-  cout << "Lattice::growPhase -->Phase " << phaseid << " needs to grow at "
-       << numtoadd << " sites" << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Lattice::growPhase -->Phase " << phaseid << " needs to grow at "
+         << numtoadd << " sites" << endl;
+    cout.flush();
+  }
 
   while ((numleft > 0) && (isite.size() >= 1)) {
     for (i = 0; (numleft > 0) && (i < isite.size()); i++) {
@@ -865,11 +820,6 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
 
   unsigned int i;
   vector<Isite> isite = interface_[phaseid].getDissolutionSites();
-#ifdef DEBUG
-  cout << "Lattice::dissolvePhase Size of interface_[" << phaseid << "] is "
-       << isite.size() << endl;
-  cout.flush();
-#endif
 
   try {
     for (i = 0; i < isite.size(); i++) {
@@ -889,10 +839,11 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
     ex.printException();
     exit(1);
   }
-#ifdef DEBUG
-  cout << "Lattice::dissolvePhase -->Phase " << phaseid
-       << " needs to dissolve at " << numtotake << " sites" << endl;
-#endif
+
+  if (verbose_) {
+    cout << "Lattice::dissolvePhase -->Phase " << phaseid
+         << " needs to dissolve at " << numtotake << " sites" << endl;
+  }
 
   int numleft = numtotake;
   int numchange = 0;
@@ -904,10 +855,6 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
         pid = ste->getMicroPhaseId();
         removeDissolutionSite(ste, pid);
         setMicroPhaseId(ste, ELECTROLYTEID);
-#ifdef DEBUG
-        cout << "Lattice::dissolvePhase pid(" << i << ") = " << pid << endl;
-        cout.flush();
-#endif // DEBUG
 
         ///
         /// Weighted mean curvature (wmc) is changed by the difference
@@ -918,49 +865,23 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
 
         dwmcval = chemSys_->getMicroPhasePorosity(ELECTROLYTEID) -
                   chemSys_->getMicroPhasePorosity(pid);
-#ifdef DEBUG
-        cout << "  dwmcval = " << dwmcval;
-        cout.flush();
-#endif // DEBUG
         ste->dWmc(dwmcval);
-#ifdef DEBUG
-        cout << "... changed it" << endl;
-        cout.flush();
-#endif // DEBUG
 
         unsigned int j;
         for (j = 0; j < ste->nbSize(1); j++) {
-#ifdef DEBUG
-          cout << "     j = " << j << " of " << ste->nbSize(1) << endl;
-          cout.flush();
-#endif // DEBUG
           stenb = ste->nb(j);
           stenb->dWmc(dwmcval);
           int nbpid = stenb->getMicroPhaseId();
           if ((nbpid != ELECTROLYTEID) && (nbpid != VOIDID)) {
 
-#ifdef DEBUG
-            cout << "     nbpid = " << nbpid << endl;
-            cout.flush();
-#endif // DEBUG
-       ///
-       /// Now that the site has been dissolved, it is eligible for growth
-       /// later on, so we add it to the list of growth sites for certain
-       /// phases.
-       ///
+            ///
+            /// Now that the site has been dissolved, it is eligible for growth
+            /// later on, so we add it to the list of growth sites for certain
+            /// phases.
+            ///
 
             addDissolutionSite(stenb, nbpid);
-#ifdef DEBUG
-            cout << "         Out of addDissolutionSite( " << stenb->getId()
-                 << "," << nbpid << ")" << endl;
-            cout.flush();
-#endif // DEBUG
             addGrowthSite(ste, nbpid);
-#ifdef DEBUG
-            cout << "         Out of addGrowthSite( " << ste->getId() << ","
-                 << nbpid << ")" << endl;
-            cout.flush();
-#endif // DEBUG
 
             vector<int> nbgrowthtemp;
             nbgrowthtemp.clear();
@@ -968,17 +889,7 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
             for (int ii = 0; ii < nbgrowthtemp.size(); ii++) {
               if ((nbgrowthtemp[ii] != ELECTROLYTEID) &&
                   (nbgrowthtemp[ii] != VOIDID)) {
-#ifdef DEBUG
-                cout << "              nbgrowthtemp[ " << ii
-                     << "] = " << nbgrowthtemp[ii] << endl;
-                cout.flush();
-#endif // DEBUG
                 addGrowthSite(ste, nbgrowthtemp[ii]);
-#ifdef DEBUG
-                cout << "                  Out of addGrowthSite( "
-                     << ste->getId() << ",nbgrowthtemp[" << ii << "])" << endl;
-                cout.flush();
-#endif // DEBUG
               }
             }
           }
@@ -992,21 +903,12 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
         ///
 
         for (j = ste->nbSize(1); j < ste->nbSize(2); j++) {
-#ifdef DEBUG
-          cout << "         Second nearest j = " << j << endl;
-          cout.flush();
-#endif // DEBUG
           stenb = ste->nb(j);
           stenb->dWmc(dwmcval);
         }
 
         numleft--;
         numchange++;
-#ifdef DEBUG
-        cout << "    numleft = " << numleft << ", numchange = " << numchange
-             << endl;
-        cout.flush();
-#endif // DEBUG
       }
     } catch (out_of_range &oor) {
       EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), i);
@@ -1083,11 +985,6 @@ int Lattice::emptyPorosity(int numsites) {
   if (numsites == 0)
     return (0);
   if (numsites < 0) {
-#ifdef DEBUG
-    cout << "Lattice::emptyPorosity Entering Lattice::fillPorosity("
-         << -numsites << ")" << endl;
-    cout.flush();
-#endif
     numemptied = fillPorosity(-numsites);
     return (-numemptied);
   }
@@ -1099,20 +996,15 @@ int Lattice::emptyPorosity(int numsites) {
   /// it.
   ///
 
-#ifdef DEBUG
-  cout << "Lattice::emptyPorosity Finding and sorting all "
-       << "potential void sites";
-  cout.flush();
-#endif
   list<Sitesize> distlist =
       findDomainSizeDistribution(ELECTROLYTEID, numsites, maxsearchsize, 0);
   list<Sitesize>::iterator it;
 
-#ifdef DEBUG
-  cout << "Lattice::emptyPorosity Found " << distlist.size()
-       << " potential void sites." << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Lattice::emptyPorosity Found " << distlist.size()
+         << " potential void sites." << endl;
+    cout.flush();
+  }
 
   ///
   /// We want to empty the sites with the largest pore count
@@ -1152,11 +1044,6 @@ int Lattice::fillPorosity(int numsites) {
   unsigned int cntpore, cntmin;
   bool placed;
 
-#ifdef DEBUG
-  cout << "Lattice::fillPorosity (" << numsites << ")" << endl;
-  cout.flush();
-#endif
-
   if (numsites == 0)
     return (0);
   if (numsites < 0) {
@@ -1171,11 +1058,11 @@ int Lattice::fillPorosity(int numsites) {
   /// it.
   ///
 
-#ifdef DEBUG
-  cout << "Lattice::fillPorosity Finding and sorting all "
-       << "potential water sites ... ";
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Lattice::fillPorosity Finding and sorting all "
+         << "potential water sites ... ";
+    cout.flush();
+  }
 
   list<Sitesize> distlist =
       findDomainSizeDistribution(VOIDID, numsites, maxsearchsize, 1);
@@ -1471,27 +1358,27 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
   vol_next = chemSys_->getMicroPhaseVolume();
   phasenames = chemSys_->getMicroPhaseName();
 
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure Before adjustMicrostructureVolumes:"
-       << endl;
-  for (int iii = 0; iii < vol_next.size(); ++iii) {
-    cout << "Lattice::changeMicrostructure    Volume of " << phasenames[iii]
-         << " = " << vol_next[iii] << " m3" << endl;
+  if (verbose_) {
+    cout << "Lattice::changeMicrostructure Before adjustMicrostructureVolumes:"
+         << endl;
+    for (int iii = 0; iii < vol_next.size(); ++iii) {
+      cout << "Lattice::changeMicrostructure    Volume of " << phasenames[iii]
+           << " = " << vol_next[iii] << " m3" << endl;
+    }
+    cout.flush();
   }
-  cout.flush();
-#endif
 
   try {
     adjustMicrostructureVolumes(phasenames, vol_next);
 
-#ifdef DEBUG
-    cout << "Lattice::changeMicrostructure After adjustMicrostructureVolumes:"
-         << endl;
-    for (int iii = 0; iii < vol_next.size(); ++iii) {
-      cout << "Lattice::changeMicrostructure   Volume of " << phasenames[iii]
-           << " = " << vol_next[iii] << " m3" << endl;
+    if (verbose_) {
+      cout << "Lattice::changeMicrostructure After adjustMicrostructureVolumes:"
+           << endl;
+      for (int iii = 0; iii < vol_next.size(); ++iii) {
+        cout << "Lattice::changeMicrostructure   Volume of " << phasenames[iii]
+             << " = " << vol_next[iii] << " m3" << endl;
+      }
     }
-#endif
 
     adjustMicrostructureVolFracs(phasenames, vol_next, vfrac_next);
   } catch (DataException dex) {
@@ -1508,29 +1395,30 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
   // to hold the volume fraction of capillary space and subvoxel pore space
   // But those two are not needed here anymore
 
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure Calculating volume "
-       << "of each phase to be added..." << endl;
-  try {
-    for (i = 0; i < vfrac_next.size(); i++) {
-      cout << "Lattice::changeMicrostructure ****Volume fraction["
-           << phasenames.at(i)
-           << "] in next state should be = " << vfrac_next.at(i);
-      cout << ", or " << (int)((double)(numsites_ * vfrac_next.at(i)))
-           << " sites" << endl;
+  if (verbose_) {
+    cout << "Lattice::changeMicrostructure Calculating volume "
+         << "of each phase to be added..." << endl;
+    try {
+      for (i = 0; i < vfrac_next.size(); i++) {
+        cout << "Lattice::changeMicrostructure ****Volume fraction["
+             << phasenames.at(i)
+             << "] in next state should be = " << vfrac_next.at(i);
+        cout << ", or " << (int)((double)(numsites_ * vfrac_next.at(i)))
+             << " sites" << endl;
+      }
+      cout << "Lattice::changeMicrostructure ****Volume fraction[capillary "
+           << "pores] in next state"
+           << " should be = " << capillaryporevolumefraction_ << endl;
+      cout << "Lattice::changeMicrostructure ****Volume fraction[subvoxel "
+              "pores] "
+              "in next state"
+           << " should be = " << subvoxelporevolumefraction_ << endl;
+      cout.flush();
+    } catch (out_of_range &oor) {
+      throw EOBException("Lattice", "changeMicrostructure", "phasenames",
+                         phasenames.size(), i);
     }
-    cout << "Lattice::changeMicrostructure ****Volume fraction[capillary "
-         << "pores] in next state"
-         << " should be = " << capillaryporevolumefraction_ << endl;
-    cout << "Lattice::changeMicrostructure ****Volume fraction[subvoxel pores] "
-            "in next state"
-         << " should be = " << subvoxelporevolumefraction_ << endl;
-    cout.flush();
-  } catch (out_of_range &oor) {
-    throw EOBException("Lattice", "changeMicrostructure", "phasenames",
-                       phasenames.size(), i);
   }
-#endif
 
   ///
   /// The next block is executed only if there will eventually be some
@@ -1617,11 +1505,11 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
         ///
 
         if (time_ >= sattack_time_) {
-#ifdef DEBUG
-          cout << "Lattice::changeMicrostructure Crystal-pressure "
-               << "transform at time_ = " << time_ << endl;
-          cout.flush();
-#endif
+          if (verbose_) {
+            cout << "Lattice::changeMicrostructure Crystal-pressure "
+                 << "transform at time_ = " << time_ << endl;
+            cout.flush();
+          }
 
           ///
           /// The relevant stress-free molar volume ratios for sulfate
@@ -1641,13 +1529,13 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
 
               netsites.at(shrinkid) += numchanged[0];
               netsites.at(growid) -= numchanged[1];
-#ifdef DEBUG
-              cout << "Lattice::changeMicrostructure netsites.at(" << shrinkid
-                   << ") is: " << netsites.at(shrinkid) << endl;
-              cout << "Lattice::changeMicrostructure netsites.at(" << growid
-                   << ") is: " << netsites.at(growid) << endl;
-              cout.flush();
-#endif
+              if (verbose_) {
+                cout << "Lattice::changeMicrostructure netsites.at(" << shrinkid
+                     << ") is: " << netsites.at(shrinkid) << endl;
+                cout << "Lattice::changeMicrostructure netsites.at(" << growid
+                     << ") is: " << netsites.at(growid) << endl;
+                cout.flush();
+              }
             }
           }
         }
@@ -1682,15 +1570,13 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
         tnetsites = (newsites - cursites);
         netsites.at(i) = tnetsites;
         pid.at(i) = i;
-        // #ifdef DEBUG
-        if (netsites.at(i) != 0) {
+        if ((verbose_) && (netsites.at(i) != 0)) {
           cout << "Lattice::changeMicrostructure ***netsites["
                << phasenames.at(i) << "] in this state = " << netsites.at(i)
                << "; cursites = " << cursites << " and newsites = " << newsites
                << endl;
           cout.flush();
         }
-        // #endif
       }
     } catch (out_of_range &oor) {
       throw EOBException(
@@ -1699,13 +1585,6 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
           phasenames.size(), i);
     }
   }
-
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostrucdture Sorting non-pore sites... "
-       << "netsites[VOIDID] = netsites[" << VOIDID << "] = " << netsites[VOIDID]
-       << endl;
-  cout.flush();
-#endif
 
   ///
   /// Sort netsites in ascending order, except we will handle
@@ -1733,13 +1612,6 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
   Interface ifc;
   vector<Isite> gs, ds;
 
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure Getting change vectors "
-       << "for non-pore phases... netsites[VOIDID] = " << netsites[VOIDID]
-       << endl;
-  cout.flush();
-#endif
-
   ///
   /// The next loop starts at FIRST_SOLID because we exclude void and water
   /// phases
@@ -1753,35 +1625,25 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
     ds = ifc.getDissolutionSites();
   }
 
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure Switching phase id values..." << endl;
-  cout.flush();
-#endif
   try {
     for (i = FIRST_SOLID; i < netsites.size(); i++) {
       numadded = 0;
       numadded_actual = 0;
 
       if (netsites[i] < 0) {
-#ifdef DEBUG
-        cout << "Lattice::changeMicrostructure Going into "
-             << "dissolve_phase now... pid = " << pid.at(i) << endl;
-        cout.flush();
-#endif
+        if (verbose_) {
+          cout << "Lattice::changeMicrostructure Going into "
+               << "dissolve_phase now... pid = " << pid.at(i) << endl;
+          cout.flush();
+        }
         numadded = dissolvePhase(pid.at(i), -netsites[i]);
         numadded_actual += numadded;
-#ifdef DEBUG
-        cout << "Lattice::changeMicrostructure ...Done with dissolve_phase "
-             << "for phase " << pid.at(i) << "!" << endl;
-        cout.flush();
-#endif
       } else if (netsites[i] > 0) {
-#ifdef DEBUG
-        cout << "Lattice::changeMicrostructure Going into grow_phase "
-             << "now... pid = " << pid.at(i) << endl;
-
-        cout.flush();
-#endif
+        if (verbose_) {
+          cout << "Lattice::changeMicrostructure Going into grow_phase "
+               << "now... pid = " << pid.at(i) << endl;
+          cout.flush();
+        }
 
         numadded = growPhase(pid.at(i), netsites[i]);
 
@@ -1790,119 +1652,58 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
         while (diff > 0) {
           gs = interface_[pid.at(i)].getGrowthSites();
           ds = interface_[pid.at(i)].getDissolutionSites();
-#ifdef DEBUG
-          cout << "Lattice::changeMicrostructure gs.size() = " << gs.size()
-               << endl;
-          cout << "Lattice::changeMicrostructure ds.size() = " << ds.size()
-               << endl;
-          cout.flush();
-#endif
           if (gs.size() == 0) {
-#ifdef DEBUG
-            cout << "Lattice::changeMicrostructure Phase " << pid.at(i)
-                 << " needs to be nucleated. " << endl;
-            cout.flush();
-#endif
 
             int nuclei = diff;
             double thresh =
                 (nuclei / (volumefraction_[ELECTROLYTEID] * site_.size()));
-#ifdef DEBUG
-            cout << "Lattice::changeMicrostructure Thresh = " << thresh << endl;
-            cout.flush();
-#endif
             if (thresh < 1) {
 
               // Compose a shuffled list of all the water sites
 
               vector<int> watersites;
               watersites.clear();
-#ifdef DEBUG
-              cout << "Generating water sites, there are " << site_.size()
-                   << " total sites in the system" << endl;
-              cout << "ELECTROLYTEID =  " << ELECTROLYTEID << endl;
-              cout.flush();
-              vector<int> mmyveccount;
-              mmyveccount.resize(count_.size(), 0);
-              int mypid;
-              for (i = 0; i < site_.size(); i++) {
-                mypid = site_[i].getMicroPhaseId();
-                mmyveccount.at(mypid)++;
-              }
-
-              for (i = 0; i < mmyveccount.size(); i++) {
-                cout << "Number of microstructure id " << i << " = "
-                     << mmyveccount.at(i) << endl;
+              if (verbose_) {
+                cout << "Generating water sites, there are " << site_.size()
+                     << " total sites in the system" << endl;
+                cout << "ELECTROLYTEID =  " << ELECTROLYTEID << endl;
                 cout.flush();
+                vector<int> mmyveccount;
+                mmyveccount.resize(count_.size(), 0);
+                int mypid;
+                for (i = 0; i < site_.size(); i++) {
+                  mypid = site_[i].getMicroPhaseId();
+                  mmyveccount.at(mypid)++;
+                }
+
+                for (i = 0; i < mmyveccount.size(); i++) {
+                  cout << "Number of microstructure id " << i << " = "
+                       << mmyveccount.at(i) << endl;
+                  cout.flush();
+                }
               }
-#endif
 
               int mmycount = 0;
               for (int k = 0; k < site_.size(); ++k) {
-                if (site_[k].getMicroPhaseId() == ELECTROLYTEID) {
+                if (site_[k].getMicroPhaseId() == ELECTROLYTEID)
                   mmycount++;
-#ifdef DEBUG
-                  cout << "  Found " << mmycount << " water sites so far, "
-                       << "this one is site_[" << k
-                       << "] = " << site_[k].getMicroPhaseId() << endl;
-                  cout.flush();
-                  watersites.push_back(k);
-#endif
-                }
               }
-#ifdef DEBUG
-              cout << "Lattice::changeMicrostructure Found "
-                   << watersites.size() << " water sites" << endl;
-              cout.flush();
-#endif
+              if (verbose_) {
+                cout << "Lattice::changeMicrostructure Found "
+                     << watersites.size() << " water sites" << endl;
+                cout.flush();
+              }
               int numshuffles = watersites.size() / 2;
-#ifdef DEBUG
-              cout << "Lattice::changeMicrostructure Preparing to "
-                   << "perform a shuffle" << endl;
-              cout << "Lattice::changeMicrostructure   First ten water "
-                   << "sites prior to shuffle:" << endl;
-              for (int k = 0; k < 10; ++k) {
-                cout << "Lattice::changeMicrostructure       " << k << ": "
-                     << watersites[k] << endl;
-              }
-              cout.flush();
-#endif
 
               rg_->shuffle(watersites, 1);
-
-#ifdef DEBUG
-              cout << "Lattice::changeMicrostructure Done with "
-                   << "shuffle" << endl;
-              cout << "Lattice::changeMicrostructure   First ten "
-                   << "water sites after shuffle:" << endl;
-              for (int k = 0; k < 10; ++k) {
-                cout << "Lattice::changeMicrostructure       " << k << ": "
-                     << watersites[k] << endl;
-              }
-              cout << "Lattice::changeMicrostructure adding growth "
-                   << "sites with " << nuclei << " nuclei" << endl;
-              cout << "Lattice::changeMicrostructure watersites size =  "
-                   << watersites.size();
-              cout.flush();
-#endif
 
               // Now the list is thoroughly shuffled, we just pick
               // the first nuclei elements as new growth sites
 
               for (int k = 0; k < nuclei; ++k) {
-#ifdef DEBUG
-                cout << "    watersites[" << k << "] = " << watersites[k]
-                     << ", while site_ size = " << site_.size() << endl;
-                cout.flush();
-#endif
                 addGrowthSite(&site_[watersites[k]], pid.at(i));
               }
 
-#ifdef DEBUG
-              cout << "Lattice::changeMicrostructure Done with "
-                   << "adding growth sites" << endl;
-              cout.flush();
-#endif
             } else {
               if (verbose_ || warning_) {
                 cout << "Lattice::changeMicrostructure There is no "
@@ -1916,16 +1717,7 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
           numadded = growPhase(pid.at(i), diff);
           numadded_actual += numadded;
           diff = diff - numadded;
-#ifdef DEBUG
-          cout << "Lattice::changeMicrostructure diff = " << diff << endl;
-          cout.flush();
-#endif
         }
-#ifdef DEBUG
-        cout << "Lattice::changeMicrostructure Done with grow_phase "
-             << "for phase " << pid.at(i) << "!" << endl;
-        cout.flush();
-#endif
       }
 
       if (numadded_actual * numadded_actual != netsites[i] * netsites[i]) {
@@ -1945,52 +1737,46 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
                        ii);
   }
 
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure time_ in "
-       << "the Lattice is: " << time_ << endl;
-  cout << "Lattice::changeMicrostructure Now emptying "
-       << "the necessary pore volume:  " << endl;
-  cout.flush();
-#endif
-
   cursites = count_.at(VOIDID);
   newsites = (int)((numsites_ * vfrac_next.at(VOIDID)) + 0.5);
   wcursites = count_.at(ELECTROLYTEID);
   wnewsites = wcursites - (newsites - cursites);
   int numempty = emptyPorosity(newsites - cursites);
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure ***netsites[" << phasenames.at(VOIDID)
-       << "] in this state = " << (newsites - cursites)
-       << "; cursites = " << cursites << " and newsites = " << newsites << endl;
-  cout << "Lattice::changeMicrostructure ***netsites["
-       << phasenames.at(ELECTROLYTEID)
-       << "] in this state = " << (wnewsites - wcursites)
-       << "; cursites = " << wcursites << " and newsites = " << wnewsites
-       << endl
-       << endl;
+  if (verbose_) {
+    cout << "Lattice::changeMicrostructure ***netsites["
+         << phasenames.at(VOIDID)
+         << "] in this state = " << (newsites - cursites)
+         << "; cursites = " << cursites << " and newsites = " << newsites
+         << endl;
+    cout << "Lattice::changeMicrostructure ***netsites["
+         << phasenames.at(ELECTROLYTEID)
+         << "] in this state = " << (wnewsites - wcursites)
+         << "; cursites = " << wcursites << " and newsites = " << wnewsites
+         << endl
+         << endl;
 
-  // When creating void from water, we should
-  // update the target volume fraction of water even though
-  // it is not used in any further calculations at this point
+    // When creating void from water, we should
+    // update the target volume fraction of water even though
+    // it is not used in any further calculations at this point
 
-  cout << "Lattice::changeMicrostructure Target CAPIILARY WATER "
-       << "volume fraction IS " << vfrac_next.at(ELECTROLYTEID) << endl;
+    cout << "Lattice::changeMicrostructure Target CAPIILARY WATER "
+         << "volume fraction IS " << vfrac_next.at(ELECTROLYTEID) << endl;
 
-  // vfrac_next.at(ELECTROLYTEID) -= ((double)(newsites -
-  // cursites)/(double)(numsites_)); cout << "But WILL BE " <<
-  // vfrac_next.at(ELECTROLYTEID) << " after creating void space" << endl;
+    // vfrac_next.at(ELECTROLYTEID) -= ((double)(newsites -
+    // cursites)/(double)(numsites_)); cout << "But WILL BE " <<
+    // vfrac_next.at(ELECTROLYTEID) << " after creating void space" << endl;
 
-  cout << "Lattice::changeMicrostructure Number CAPILLARY VOXELS "
-       << "actually emptied was:  " << numempty << endl;
+    cout << "Lattice::changeMicrostructure Number CAPILLARY VOXELS "
+         << "actually emptied was:  " << numempty << endl;
 
-  ///
-  /// Report on target and actual mass fractions
-  ///
+    ///
+    /// Report on target and actual mass fractions
+    ///
 
-  cout << "Lattice::changeMicrostructure "
-       << "*******************************" << endl;
-  cout.flush();
-#endif
+    cout << "Lattice::changeMicrostructure "
+         << "*******************************" << endl;
+    cout.flush();
+  }
 
   try {
     double totcount = 0.0;
@@ -1998,13 +1784,11 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
       volumefraction_.at(i) =
           ((double)(count_.at(i))) / ((double)(site_.size()));
       totcount += count_.at(i);
-#ifdef DEBUG
       cout << "Lattice::changeMicrostructure Phase " << i
            << " Target volume fraction was " << vfrac_next[i]
            << " and actual is " << volumefraction_.at(i) << ", and " << totcount
            << " of " << site_.size() << " sites claimed so far" << endl;
       cout.flush();
-#endif
     }
   }
 
@@ -2012,12 +1796,6 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
     throw EOBException("Lattice", "changeMicrostructure",
                        "volumefraction_ or count_", volumefraction_.size(), i);
   }
-
-#ifdef DEBUG
-  cout << "Lattice::changeMicrostructure "
-       << "*******************************" << endl;
-  cout.flush();
-#endif
 
   for (i = FIRST_SOLID; i < interface_.size(); i++) {
     interface_[i].sortGrowthSites(site_, i);
@@ -2041,12 +1819,12 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
                                           vector<double> &vol) {
   int i = 0;
 
-  try {
-
 #ifdef DEBUG
-    cout << "Lattice::adjustMicrostructureVolumes" << endl;
-    cout.flush();
+  cout << "Lattice::adjustMicrostructureVolumes" << endl;
+  cout.flush();
 #endif
+
+  try {
 
     // Find the total system volume according to GEMS, in m3
     // units.  The individual microstructure phase volumes
@@ -2078,12 +1856,6 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
     // we add or subtract capillary porosity to keep them equal
 
     microstructurevolume_ = chemSys_->getMicroVolume();
-
-#ifdef DEBUG
-    cout << "Lattice::adjustMicrostructureVolumes Current "
-         << "microstructure volume is " << microstructurevolume_ << endl;
-    cout.flush();
-#endif
 
     // The total amount of non-solid space in the microstructure
     // This is based on forcing the total volume to be constant
@@ -2129,18 +1901,6 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
       voidvolume_ = capillaryvoidvolume_ = 0.0;
       capillarywatervolume_ = watervolume_ - subvoxelporevolume_;
       subvoxelwatervolume_ = subvoxelporevolume_;
-
-#ifdef DEBUG
-      cout << "Lattice::adjustMicrostructureVolumes, System is SATURATED"
-           << endl;
-      cout.flush();
-#endif
-
-    } else {
-#ifdef DEBUG
-      cout << "Lattice::adjustMicrostructureVolumes, System is SEALED" << endl;
-      cout.flush();
-#endif
     }
 
     /// From here to the end of this time cycle, vol.at(ELECTROLYTEID) is the
@@ -2158,24 +1918,24 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
     /// we assign the capillary pore water to ELECTROLYTEID and neglect any
     /// subvoxel electrolyte contribution
 
-#ifdef DEBUG
-    cout << "Lattice::adjustMicrostructureVolumes" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesRESULTS:" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesAll water volume = "
-         << watervolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesAll void volume = "
-         << voidvolume_ << endl;
-    cout << "Lattice::adjustMicrostructureVolumesCapillary water volume = "
-         << capillarywatervolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesCapillary void volume = "
-         << capillaryvoidvolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesSubvoxel water volume = "
-         << subvoxelwatervolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolumesSubvoxel pore volume = "
-         << subvoxelporevolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolumes" << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "Lattice::adjustMicrostructureVolumes" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesRESULTS:" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesAll water volume = "
+           << watervolume_ << " m3" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesAll void volume = "
+           << voidvolume_ << endl;
+      cout << "Lattice::adjustMicrostructureVolumesCapillary water volume = "
+           << capillarywatervolume_ << " m3" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesCapillary void volume = "
+           << capillaryvoidvolume_ << " m3" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesSubvoxel water volume = "
+           << subvoxelwatervolume_ << " m3" << endl;
+      cout << "Lattice::adjustMicrostructureVolumesSubvoxel pore volume = "
+           << subvoxelporevolume_ << " m3" << endl;
+      cout << "Lattice::adjustMicrostructureVolumes" << endl;
+      cout.flush();
+    }
 
     ///
     /// End of manual adjustment
@@ -2201,6 +1961,11 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
   int i = 0;
   double totmicvolume = 0.0;
 
+#ifdef DEBUG
+  cout << "Lattice::adjustMicrostructureVolFracs" << endl;
+  cout.flush();
+#endif
+
   try {
 
     // Remember there are now two extra slots at the end of vfrac, just
@@ -2209,11 +1974,6 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
 
     vfrac.clear();
     vfrac.resize(vol.size(), 0.0);
-
-#ifdef DEBUG
-    cout << "Lattice::adjustMicrostructureVolFracs" << endl;
-    cout.flush();
-#endif
 
     // This model tries to reconcile two different volumes:
     //     (1) The total system volume according to GEMS (solid + liquid).
@@ -2263,14 +2023,14 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
 
     for (i = 0; i < vol.size(); ++i) {
       vfrac.at(i) = vol.at(i) / totmicvolume;
-#ifdef DEBUG
-      cout << "Lattice::adjustMicrostructureVolFracsVolume "
-           << "fraction[" << names.at(i) << "] should be " << vfrac.at(i)
-           << ", (" << vol.at(i) << "/" << totmicvolume
-           << ") and volume fraction NOW is "
-           << (double)(count_.at(i)) / (double)(numsites_) << endl;
-      cout.flush();
-#endif
+      if (verbose_) {
+        cout << "Lattice::adjustMicrostructureVolFracsVolume "
+             << "fraction[" << names.at(i) << "] should be " << vfrac.at(i)
+             << ", (" << vol.at(i) << "/" << totmicvolume
+             << ") and volume fraction NOW is "
+             << (double)(count_.at(i)) / (double)(numsites_) << endl;
+        cout.flush();
+      }
     }
 
     // Calculate volume fraction of subvoxel porosity and
@@ -2279,26 +2039,6 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
     capillaryporevolumefraction_ = capillaryporevolume_ / totmicvolume;
     subvoxelporevolumefraction_ = subvoxelporevolume_ / totmicvolume;
 
-#ifdef DEBUG
-    cout << "Lattice::adjustMicrostructureVolFracs==> "
-         << "capillarySPACEvolumefraction_ = " << capillaryporevolumefraction_
-         << endl;
-    cout << "Lattice::adjustMicrostructureVolFracs==> "
-         << "capillaryWATERvolumefraction_ = " << vfrac.at(ELECTROLYTEID)
-         << endl;
-    cout << "Lattice::adjustMicrostructureVolFracs==> "
-         << "capillaryVOIDvolumefraction_ = " << vfrac.at(VOIDID) << endl;
-    cout << "Lattice::adjustMicrostructureVolFracs==> "
-         << "subvoxelporevolume_ = " << subvoxelporevolume_ << " m3" << endl;
-    cout << "Lattice::adjustMicrostructureVolFracs==> "
-         << "totmicvolume_ = " << totmicvolume << " m3" << endl;
-    double error = capillaryporevolumefraction_ - vfrac.at(ELECTROLYTEID) -
-                   vfrac.at(VOIDID);
-    cout << "Lattice::adjustMicrostructureVolFracs===> "
-         << "error = " << error << endl;
-    cout << "Lattice::adjustMicrostructureVolFracs" << endl;
-    cout.flush();
-#endif
   }
 
   catch (DataException dex) {
@@ -2391,17 +2131,8 @@ void Lattice::calcCapillaryvoidvolume(vector<double> &vol) {
 void Lattice::calculatePoreSizeDistribution(void) {
   // First compose the full pore volume distribution
 
-#ifdef DEBUG
-  cout << "Lattice::calculatePoreSizeDistribution" << endl;
-  cout.flush();
-#endif // DEBUG
   vector<double> subpore_volume;
   subpore_volume.resize(volumefraction_.size(), 0.0);
-#ifdef DEBUG
-  cout << "Lattice::calculatePoreSizeDistribution subpore_volume.size = "
-       << subpore_volume.size() << endl;
-  cout.flush();
-#endif // DEBUG
 
   // Following will hold the subvoxel porosity of a phase
   double phi = 0.0;
@@ -2422,11 +2153,6 @@ void Lattice::calculatePoreSizeDistribution(void) {
 
   vector<vector<struct PoreSizeVolume>> porevolume;
   porevolume = chemSys_->getPoreSizeDistribution();
-#ifdef DEBUG
-  cout << "Lattice::calculatePoreSizeDistribution porevolume.size = "
-       << porevolume.size() << endl;
-  cout.flush();
-#endif // DEBUG
 
   // subpore_volume[i] is the non-normalized pore volume fraction
   // within all of phase i throughout the microstructure.  We
@@ -2455,11 +2181,7 @@ void Lattice::calculatePoreSizeDistribution(void) {
   vector<struct PoreSizeVolume> zpsvec;
   zpsvec.clear();
   binnedporevolume.resize(porevolume.size(), zpsvec);
-#ifdef DEBUG
-  cout << "Lattice::calculatePoreSizeDistribution binnedporevolume.size = "
-       << binnedporevolume.size() << endl;
-  cout.flush();
-#endif // DEBUG
+
   // Done initializing the binned pore volume distribution
 
   double maxsize = 1.0;
@@ -2472,21 +2194,7 @@ void Lattice::calculatePoreSizeDistribution(void) {
     if (i != ELECTROLYTEID && i != VOIDID) {
       maxsize = 1.0;
       int j = 0;
-#ifdef DEBUG
-      cout << "Lattice::calculatePoreSizeDistribution Distribution " << i
-           << " of " << (porevolume.size() - 1) << " now has "
-           << porevolume[i].size() << " elements" << endl;
-      cout.flush();
-#endif
       while (j < porevolume[i].size()) {
-#ifdef DEBUG
-        cout << "    " << j << " of " << (porevolume[i].size() - 1)
-             << " diameter = " << porevolume[i][j].diam
-             << ", maxsize = " << maxsize
-             << ", binnedporevolume size = " << binnedporevolume[i].size()
-             << endl;
-        cout.flush();
-#endif
         while ((porevolume[i][j].diam <= maxsize) &&
                (j < porevolume[i].size())) {
           cumulative_volume += porevolume[i][j].volume;
@@ -2507,36 +2215,36 @@ void Lattice::calculatePoreSizeDistribution(void) {
     }
   }
 
-#ifdef DEBUG
-  cout << "Lattice::calculatePoreSizeDistribution  maxmaxsize = " << maxmaxsize
-       << endl;
-  cout << "Lattice::calculatePoreSizeDistribution  Binned pore distributions"
-       << endl;
-  for (int i = 0; i < porevolume.size(); ++i) {
-    if (i != ELECTROLYTEID && i != VOIDID) {
-      cout << "Lattice::calculatePoreSizeDistribution: Distribution " << i
-           << " of " << (porevolume.size() - 1) << " now has "
-           << porevolume[i].size() << " elements" << endl;
-      cout << "Lattice::calculatePoreSizeDistribution  %%%% "
-           << chemSys_->getMicroPhaseName(i) << endl;
-      for (int j = 0; j < binnedporevolume[i].size(); ++j) {
-        cout << "Lattice::calculatePoreSizeDistribution    "
-             << "binnedporevolume[" << i << "][" << j
-             << "]: diam = " << binnedporevolume[i][j].diam
-             << ", volume = " << binnedporevolume[i][j].volume
-             << ", volfrac = " << binnedporevolume[i][j].volfrac << endl;
-        cout.flush();
-        if (binnedporevolume[i][j].volume > 0.0) {
-          cout << "Lattice::calculatePoreSizeDistribution: Distribution "
-               << "  %%%%%%% diam = " << binnedporevolume[i][j].diam << " nm,"
-               << " volume = " << binnedporevolume[i][j].volume << ","
-               << " volfrac = " << binnedporevolume[i][j].volfrac << endl;
+  if (verbose_) {
+    cout << "Lattice::calculatePoreSizeDistribution  maxmaxsize = "
+         << maxmaxsize << endl;
+    cout << "Lattice::calculatePoreSizeDistribution  Binned pore distributions"
+         << endl;
+    for (int i = 0; i < porevolume.size(); ++i) {
+      if (i != ELECTROLYTEID && i != VOIDID) {
+        cout << "Lattice::calculatePoreSizeDistribution: Distribution " << i
+             << " of " << (porevolume.size() - 1) << " now has "
+             << porevolume[i].size() << " elements" << endl;
+        cout << "Lattice::calculatePoreSizeDistribution  %%%% "
+             << chemSys_->getMicroPhaseName(i) << endl;
+        for (int j = 0; j < binnedporevolume[i].size(); ++j) {
+          cout << "Lattice::calculatePoreSizeDistribution    "
+               << "binnedporevolume[" << i << "][" << j
+               << "]: diam = " << binnedporevolume[i][j].diam
+               << ", volume = " << binnedporevolume[i][j].volume
+               << ", volfrac = " << binnedporevolume[i][j].volfrac << endl;
+          cout.flush();
+          if (binnedporevolume[i][j].volume > 0.0) {
+            cout << "Lattice::calculatePoreSizeDistribution: Distribution "
+                 << "  %%%%%%% diam = " << binnedporevolume[i][j].diam << " nm,"
+                 << " volume = " << binnedporevolume[i][j].volume << ","
+                 << " volfrac = " << binnedporevolume[i][j].volfrac << endl;
+          }
         }
       }
     }
+    cout.flush();
   }
-  cout.flush();
-#endif
 
   // Now all subvoxel pores have been binned in 1-nm bins.
   // Combine them into a single distribution for all phases
