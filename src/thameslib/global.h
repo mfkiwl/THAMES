@@ -63,6 +63,9 @@ const string GenericType("Generic");
 // String indicating the Parrot Killoh Model
 const string ParrotKillohType("ParrotKilloh");
 
+// String indicating the Standard Dissolution Model
+const string StandardType("Standard");
+
 // String indicating the Pozzolanic Reaction Model
 const string PozzolanicType("Pozzolanic");
 

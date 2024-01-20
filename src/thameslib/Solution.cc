@@ -115,32 +115,19 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   ///
 
   numICs_ = (unsigned int)((node_->pCSD())->nIC);
-
-#ifdef DEBUG
-  cout << "Solution::Solution numICs_ is: " << numICs_ << endl;
-  cout.flush();
-#endif
   numDCs_ = (unsigned int)((node_->pCSD())->nDC);
-  if (verbose_) {
-    cout << "numDCs_ is: " << numDCs_ << endl;
-  }
   numGEMPhases_ = (unsigned int)((node_->pCSD())->nPH);
-  if (verbose_) {
-    cout << "numGEMPhases_ is: " << numGEMPhases_ << endl;
-  }
   numSolutionPhases_ = (unsigned int)((node_->pCSD())->nPS);
-  if (verbose_) {
-    cout << "numSolutionPhases_ is: " << numSolutionPhases_ << endl;
-  }
 
-#ifdef DEBUG
-  cout << "Solution::Solution Number of ICs = " << numICs_ << endl;
-  cout << "Solution::Solution Number of DCs = " << numDCs_ << endl;
-  cout << "Solution::Solution Number of GEM phases = " << numGEMPhases_ << endl;
-  cout << "Solution::Solution Number of Solution phases = "
-       << numSolutionPhases_ << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Solution::Solution Number of ICs = " << numICs_ << endl;
+    cout << "Solution::Solution Number of DCs = " << numDCs_ << endl;
+    cout << "Solution::Solution Number of GEM phases = " << numGEMPhases_
+         << endl;
+    cout << "Solution::Solution Number of Solution phases = "
+         << numSolutionPhases_ << endl;
+    cout.flush();
+  }
 
   ///
   /// Attempt to allocate memory for the various arrays
@@ -194,14 +181,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
 
   (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
 
-#ifdef DEBUG
-  cout << "Solution::Solution "
-       << "Entering GEM_run (1) with node status = " << nodeStatus_ << endl;
-  cout << "Solution::Solution NodeStatusCH = "
-       << (node_->pCNode())->NodeStatusCH << endl;
-  cout.flush();
-#endif
-
   ///
   /// Attempt to run GEM
   ///
@@ -224,12 +203,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   ///
 
   nodeStatus_ = node_->GEM_run(false);
-
-#ifdef DEBUG
-  cout << "Solution::Solution "
-       << "Returned from GEM_run with node status = " << nodeStatus_ << endl;
-  cout.flush();
-#endif
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
@@ -288,12 +261,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
     }
   }
 
-#ifdef DEBUG
-  cout << "Solution::Solution "
-       << "Entering GEM_restore_MT (1) ..." << endl;
-  cout.flush();
-#endif
-
   ///
   /// Next call passes (copies) the GEMS3K input data from the DBR structure.
   /// This is useful after the GEM_init and GEM_run() calls to initialize the
@@ -307,14 +274,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   node_->GEM_restore_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_,
                         &ICMoles_[0], &DCUpperLimit_[0], &DCLowerLimit_[0],
                         &surfaceArea_[0]);
-
-#ifdef DEBUG
-  cout << "Solution::Solution Returned from GEM_restore_MT (1)" << endl;
-  cout << "Solution::Solution T_ is: " << T_ << endl;
-  cout << "Solution::Solution "
-       << "Entering GEM_to_MT (1)..." << endl;
-  cout.flush();
-#endif
 
   ///
   /// Next call retrieves the GEMIPM chemical speciation calculation
@@ -333,13 +292,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
                    &pGEMPhaseStoich_[0], &carrier_[0], &surfaceArea_[0],
                    &solidStoich_[0]);
 
-#ifdef DEBUG
-  cout << "Solution::Solution Returned from GEM_to_MT (1)" << endl;
-  cout << "Solution::Solution "
-       << "Entering GEM_read_dbr (1)..." << endl;
-  cout.flush();
-#endif
-
   ///
   /// The next function reads the DBR file with input system compsition,
   /// temperature, pressure, etc.  The DBR file must be compatible with
@@ -356,18 +308,8 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   bool check_dch_compatibility = false;
 
   if (jsonFormat_) {
-#ifdef DEBUG
-    cout << "Solution::Solution JSON GEM DBR file name is " << dbrFileName
-         << endl;
-    cout.flush();
-#endif
     nodeStatus_ = node_->GEM_read_dbr(dbrFileName, check_dch_compatibility);
   } else {
-#ifdef DEBUG
-    cout << "Solution::Solution Key-value GEM DBR file name is " << dbrFileName
-         << endl;
-    cout.flush();
-#endif
     nodeStatus_ = node_->GEM_read_dbr(cdbrName, type_f);
   }
   switch (nodeStatus_) {
@@ -392,11 +334,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   default: // Okay
     break;
   }
-
-#ifdef DEBUG
-  cout << "Solution::Solution" << endl;
-  cout.flush();
-#endif
 
   ///
   /// Transfer phase names from GEM3K to member variables
@@ -526,12 +463,6 @@ void Solution::calculateState(bool isFirst) {
 
   nodeStatus_ = NEED_GEM_AIA;
 
-#ifdef DEBUG
-  cout << "Solution::calculateState    Entering "
-       << "GEM_from_MT (2) ..." << endl;
-  cout.flush();
-#endif
-
   ///
   /// Next function loads the input data for the THAMES node into the
   /// instance of the DBR structure.  This call precedes the GEM_run call
@@ -552,17 +483,17 @@ void Solution::calculateState(bool isFirst) {
                      DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_,
                      DCActivityCoeff_);
 
-#ifdef DEBUG
-  cout << "Solution::calculateState    Entering "
-       << "GEM_run (2) with isFirst = " << isFirst << endl;
-  cout << "Solution::calculateState    But first let's print the IC moles:"
-       << endl;
-  for (int i = 0; i < numICs_; i++) {
-    cout << "Solution::calculateState " << ICName_[i] << ": " << ICMoles_[i]
-         << " mol" << endl;
+  if (verbose_) {
+    cout << "Solution::calculateState    Entering "
+         << "GEM_run (2) with isFirst = " << isFirst << endl;
+    cout << "Solution::calculateState    But first let's print the IC moles:"
+         << endl;
+    for (int i = 0; i < numICs_; i++) {
+      cout << "Solution::calculateState " << ICName_[i] << ": " << ICMoles_[i]
+           << " mol" << endl;
+    }
+    cout.flush();
   }
-  cout.flush();
-#endif
 
   ///
   /// Attempt to run a GEM calculation
@@ -593,12 +524,6 @@ void Solution::calculateState(bool isFirst) {
     (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
   }
   nodeStatus_ = node_->GEM_run(true);
-
-#ifdef DEBUG
-  cout << "Solution::calculateState    Returned from  "
-       << "node::GEM_run, nodestatus = " << nodeStatus_ << endl;
-  cout.flush();
-#endif
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
@@ -665,12 +590,6 @@ void Solution::calculateState(bool isFirst) {
   /// without error.  Check for the errors first.
   ///
 
-#ifdef DEBUG
-  cout << "Solution::calculateState Entering GEM_to_MT "
-       << "(2)...";
-  cout.flush();
-#endif
-
   ///
   /// Next call retrieves the GEMIPM chemical speciation calculation
   /// results from the DBR structure instance into memory provided by
@@ -687,12 +606,6 @@ void Solution::calculateState(bool isFirst) {
                    &GEMPhaseMoles_[0], &GEMPhaseVolume_[0], &GEMPhaseMass_[0],
                    &pGEMPhaseStoich_[0], &carrier_[0], &surfaceArea_[0],
                    &solidStoich_[0]);
-
-#ifdef DEBUG
-  cout << "Soltuion::calculateState Returned from " << endl;
-  cout << "GEM_to_MT...Ms_ = " << Ms_ << endl;
-  cout.flush();
-#endif
 
   ///
   /// The GEM calculation did not precipitate or dissolve solid, so it
@@ -769,11 +682,11 @@ double Solution::calculateCrystalStrain(double SI, double poreVolFrac,
 
     double Rg = 8.314e3; // gas constant; N.mm/mol.K
 
-#ifdef DEBUG
-    cout << "Solution::calculateCrystalStrain SI for this phase is: " << SI
-         << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "Solution::calculateCrystalStrain SI for this phase is: " << SI
+           << endl;
+      cout.flush();
+    }
 
     ///
     /// Calculate the crystal mean curvature in equilibrium with the
@@ -805,11 +718,11 @@ double Solution::calculateCrystalStrain(double SI, double poreVolFrac,
     crystalStrain_ =
         (1.0 / (3.0 * Kp) - 1.0 / (3.0 * Ks)) * (poreVolFrac * pa + pl);
 
-#ifdef DEBUG
-    cout << "Solution::calculateCrystalStrain crystalStrain = "
-         << crystalStrain_ << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "Solution::calculateCrystalStrain crystalStrain = "
+           << crystalStrain_ << endl;
+      cout.flush();
+    }
   }
 
   return crystalStrain_;

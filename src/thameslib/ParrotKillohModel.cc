@@ -198,10 +198,10 @@ void ParrotKillohModel::calculateKineticStep(
     // with the electrolyte, while forbidding anything new
     // from precipitating.
 
-#ifdef DEBUG
-    cout << "ParrotKillohModel::calculateKineticStep for " << name_ << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "ParrotKillohModel::calculateKineticStep for " << name_ << endl;
+      cout.flush();
+    }
 
     vector<double> impurityRelease;
     impurityRelease.clear();
@@ -230,10 +230,10 @@ void ParrotKillohModel::calculateKineticStep(
       DOH = (initScaledMass_ - scaledMass_) / (initScaledMass_);
       DOH = min(DOH, 0.99); // prevents DOH from prematurely
                             // stopping PK calculations
-#ifdef DEBUG
-      cout << "~~~~>DOH for " << name_ << " = " << DOH << endl;
-      cout.flush();
-#endif // DEBUG
+      if (verbose_) {
+        cout << "~~~~>DOH for " << name_ << " = " << DOH << endl;
+        cout.flush();
+      }
     } else {
       throw FloatException("ParrotKillohModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
@@ -323,15 +323,16 @@ void ParrotKillohModel::calculateKineticStep(
       chemSys_->setMicroPhaseMass(microPhaseId_, scaledMass_);
       chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
 
-#ifdef DEBUG
-      cout << "ParrotKillohModel::calculateKineticStep "
-           << "Original scaled mass = " << initScaledMass_
-           << ", dissolved scaled mass = " << massDissolved << endl;
-      cout << "New scaled mass = " << chemSys_->getMicroPhaseMass(microPhaseId_)
-           << " and new volume = "
-           << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-      cout.flush();
-#endif
+      if (verbose_) {
+        cout << "ParrotKillohModel::calculateKineticStep "
+             << "Original scaled mass = " << initScaledMass_
+             << ", dissolved scaled mass = " << massDissolved << endl;
+        cout << "New scaled mass = "
+             << chemSys_->getMicroPhaseMass(microPhaseId_)
+             << " and new volume = "
+             << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+        cout.flush();
+      }
 
       /// @note impurityRelease index values are assumed to
       /// be uniquely associated with particular chemical
@@ -348,13 +349,6 @@ void ParrotKillohModel::calculateKineticStep(
       impurityRelease[2] = (massDissolved * chemSys_->getMgo(microPhaseId_));
       impurityRelease[3] = (massDissolved * chemSys_->getSo3(microPhaseId_));
 
-#ifdef DEBUG
-      cout << "!!!Before dissolving some " << name_ << endl;
-      for (int ii = 0; ii < dICMoles.size(); ii++) {
-        cout << "dIC moles of " << ICName_[ii] << " = " << dICMoles[ii] << endl;
-      }
-      cout.flush();
-#endif
       for (int ii = 0; ii < dICMoles.size(); ii++) {
 
         dICMoles[ii] += ((massDissolved / chemSys_->getDCMolarMass(DCId_)) *
@@ -428,21 +422,6 @@ void ParrotKillohModel::calculateKineticStep(
       throw DataException("ParrotKillohModel", "calculateKineticStep",
                           "DOH >= 1.0");
     }
-
-    //        #ifdef DEBUG
-    //          if (!doTweak) {
-    //              cout << "ParrotKillohModel::calculateKineticStep ICmoles
-    //              after dissolving:" << endl;
-    //          } else {
-    //              cout << "ParrotKillohModel::calculateKineticStep ICmoles
-    //              after tweaking:" << endl;
-    //          }
-    //          for (int i = 0; i < ICNum_; i++) {
-    //            cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol"
-    //            << endl;
-    //          }
-    //          cout.flush();
-    //        #endif
 
   } // End of try block
 

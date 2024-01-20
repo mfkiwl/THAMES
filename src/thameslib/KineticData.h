@@ -36,6 +36,8 @@ growth (flux units)
 diffusion (flux units)
     - `diffusionRateConstLate` is a generic rate constant for later-age
 diffusion (flux units)
+    - `dissolvedUnits` is the number of DC units produced by unit dissolution
+reaction
     - `siexp` is the exponent on the saturation index in the rate equation
     - `dfexp` is the exponent on the driving force term in the rate equation
     - `dorexp` is the exponent on the degree of reaction in the diffusion rate
@@ -73,13 +75,14 @@ struct KineticData {
   double dissolutionRateConst;    /**< Generic rate constant [mol/m2/s] */
   double diffusionRateConstEarly; /**< Generic rate constant [mol/m2/s] */
   double diffusionRateConstLate;  /**< Generic rate constant [mol/m2/s] */
-  double siexp;  /**< Exponent on saturation index [unitless] */
-  double dfexp;  /**< Exponent on driving force [unitless] */
-  double dorexp; /**< Exponent on degree of reaction [unitless] */
-  double ohexp;  /**< Exponent on OH ion activity [unitless] */
-  double loi;    /**< Loss on ignition [unitless] */
-  double sio2;   /**< Mole fraction SiO2 in material */
-  double al2o3;  /**< Mole fraction Al2O3 in material */
-  double cao;    /**< Mole fraction CaO in material */
+  double dissolvedUnits; /**< Number of DC units produced by unit dissolution */
+  double siexp;          /**< Exponent on saturation index [unitless] */
+  double dfexp;          /**< Exponent on driving force [unitless] */
+  double dorexp;         /**< Exponent on degree of reaction [unitless] */
+  double ohexp;          /**< Exponent on OH ion activity [unitless] */
+  double loi;            /**< Loss on ignition [unitless] */
+  double sio2;           /**< Mole fraction SiO2 in material */
+  double al2o3;          /**< Mole fraction Al2O3 in material */
+  double cao;            /**< Mole fraction CaO in material */
 };
 #endif

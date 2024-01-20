@@ -2268,28 +2268,28 @@ void Lattice::calculatePoreSizeDistribution(void) {
     }
   }
 
-// Normalize the pore volume distribution relative to the
-// total subvoxel pore volume, stored already in totsubvoxel_volume
+  // Normalize the pore volume distribution relative to the
+  // total subvoxel pore volume, stored already in totsubvoxel_volume
 
-// for (int i = 0; i < masterporevolume_.size(); ++i) {
-//     masterporevolume_[i].volume = masterporevolume_[i].volume
-//                                    / totsubvoxel_volume;
-// }
+  // for (int i = 0; i < masterporevolume_.size(); ++i) {
+  //     masterporevolume_[i].volume = masterporevolume_[i].volume
+  //                                    / totsubvoxel_volume;
+  // }
 
-// #ifdef DEBUG
-#if 0
-        cout << "Lattice::calculatePoreSizeDistribution  Master pore "
-             << "size volume fractions" << endl;
-        for (int i = 0; i < masterporevolume_.size(); ++i) {
-            if (masterporevolume_[i].volume > 0.0) {
-                cout << "Lattice::calculatePoreSizeDistribution diam = "
-                     << masterporevolume_[i].diam << " nm,"
-                     << " volume = " << masterporevolume_[i].volume << ","
-                     << " volfrac = " << masterporevolume_[i].volfrac << endl << endl;
-            }
-        }
-        cout.flush();
-#endif
+  if (verbose_) {
+    cout << "Lattice::calculatePoreSizeDistribution  Master pore "
+         << "size volume fractions" << endl;
+    for (int i = 0; i < masterporevolume_.size(); ++i) {
+      if (masterporevolume_[i].volume > 0.0) {
+        cout << "Lattice::calculatePoreSizeDistribution diam = "
+             << masterporevolume_[i].diam << " nm,"
+             << " volume = " << masterporevolume_[i].volume << ","
+             << " volfrac = " << masterporevolume_[i].volfrac << endl
+             << endl;
+      }
+    }
+    cout.flush();
+  }
 
   // At this point we have a complete pore volume distribution
   // for the microstructure.  We next need to determine
@@ -2365,34 +2365,33 @@ void Lattice::calculatePoreSizeDistribution(void) {
   double pore_volfrac =
       capillaryporevolumefraction_ + subvoxelporevolumefraction_;
 
-// #ifdef DEBUG
-#if 0
-        cout << "Lattice::calculatePoreSizeDistribution:" << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  "
-             << "==== water_volume = " << water_volume << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  "
-             << "======== microstructurevolume = " << microstructurevolume_ << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  "
-             << "==== initmicrostructurevolume = " << initmicrostructurevolume_ << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  === "
-             << "water_volfrac = " << water_volfrac << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  ==== "
-             << "pore_volfrac = " << pore_volfrac << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  "
-             << "====== (cap = " << capillaryporevolumefraction_
-             << ", subvox = " << subvoxelporevolumefraction_
-             << ")" << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  ====== "
-             << "void fraction = " << volumefraction_.at(VOIDID) << endl;
-        cout << "Lattice::calculatePoreSizeDistribution  ====== "
-             << "is fully saturated? ";
-        if (isfullysaturated) {
-            cout << " YES" << endl;
-        } else {
-            cout << " NO" << endl;
-        }
-        cout.flush();
-#endif
+  //  cout << "Lattice::calculatePoreSizeDistribution:" << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  "
+  //       << "==== water_volume = " << water_volume << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  "
+  //       << "======== microstructurevolume = " << microstructurevolume_ <<
+  //       endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  "
+  //       << "==== initmicrostructurevolume = "
+  //        << initialmicrostructurevolume_ << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  === "
+  //       << "water_volfrac = " << water_volfrac << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  ==== "
+  //       << "pore_volfrac = " << pore_volfrac << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  "
+  //       << "====== (cap = " << capillaryporevolumefraction_
+  //       << ", subvox = " << subvoxelporevolumefraction_
+  //       << ")" << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  ====== "
+  //       << "void fraction = " << volumefraction_.at(VOIDID) << endl;
+  //  cout << "Lattice::calculatePoreSizeDistribution  ====== "
+  //       << "is fully saturated? ";
+  //  if (isfullysaturated) {
+  //      cout << " YES" << endl;
+  //  } else {
+  //      cout << " NO" << endl;
+  //  }
+  //  cout.flush();
 
   // Only worry about unsaturated subvoxel pores if the capillary
   // pores are completely empty of water
@@ -2402,14 +2401,11 @@ void Lattice::calculatePoreSizeDistribution(void) {
     // pores of a given size, on a total microstructure volume basis
     double volfrac_avail = 0.0;
     double volfrac_filled = 0.0;
-// masterporevolume is already a kind of volume fraction
-// because it has been normalized to the total subvoxel pore volume
-// #ifdef DEBUG
-#if 0
-            cout << "Lattice::calculatePoreSizeDistribution  "
-                 << "Master pore size volume filling" << endl;
-            cout.flush();
-#endif
+    // masterporevolume is already a kind of volume fraction
+    // because it has been normalized to the total subvoxel pore volume
+    //    cout << "Lattice::calculatePoreSizeDistribution  "
+    //          << "Master pore size volume filling" << endl;
+    //    cout.flush();
     for (int i = 0; i < masterporevolume_.size(); ++i) {
       volfrac_avail = masterporevolume_[i].volume * subvoxelporevolumefraction_;
       volfrac_filled = water_volfrac / volfrac_avail;
@@ -2421,18 +2417,15 @@ void Lattice::calculatePoreSizeDistribution(void) {
         if (water_volfrac < 0.0)
           water_volfrac = 0.0;
       }
-// #ifdef DEBUG
-#if 0
-            if (masterporevolume_[i].volume > 0.0) {
-                cout << "Lattice::calculatePoreSizeDistribution diam = "
-                     << masterporevolume_[i].diam << " nm,"
-                     << " vfrac avail = " << volfrac_avail << ","
-                     << " volume = " << masterporevolume_[i].volume << ","
-                     << " volfilled = " << masterporevolume_[i].volfrac << ","
-                     << " waterfrac left = " << water_volfrac << endl;
-                cout.flush();
-            }
-#endif
+      //    if (masterporevolume_[i].volume > 0.0) {
+      //      cout << "Lattice::calculatePoreSizeDistribution diam = "
+      //       << masterporevolume_[i].diam << " nm,"
+      //       << " vfrac avail = " << volfrac_avail << ","
+      //       << " volume = " << masterporevolume_[i].volume << ","
+      //       << " volfilled = " << masterporevolume_[i].volfrac << ","
+      //       << " waterfrac left = " << water_volfrac << endl;
+      //    cout.flush();
+      //    }
     }
     cout << endl;
     cout.flush();
@@ -2520,11 +2513,6 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   string tempstr(ostr2.str());
   ofileName =
       ofileName + "_PoreSizeDistribution." + timestr + "." + tempstr + ".csv";
-#ifdef DEBUG
-  cout << "Lattice::writePoreSizeDistribution curtime = " << curtime
-       << ", timestr = " << timestr << endl;
-  cout.flush();
-#endif
 
   ofstream out(ofileName.c_str());
   try {
@@ -2572,13 +2560,6 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   out << "Pore size saturation data:" << endl;
   out << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
   for (int i = 0; i < masterporevolume_.size(); ++i) {
-#ifdef DEBUG
-    cout << "masterporevolume_[" << i << "] of " << masterporevolume_.size()
-         << endl;
-    cout << masterporevolume_[i].diam << "," << masterporevolume_[i].volume
-         << "," << masterporevolume_[i].volfrac << endl;
-    cout.flush();
-#endif
     if (masterporevolume_[i].volume > 0.0) {
       out << masterporevolume_[i].diam << "," << masterporevolume_[i].volume
           << "," << masterporevolume_[i].volfrac << endl;
@@ -3106,12 +3087,6 @@ vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
   vector<Isite> diss;
   diss = interface_[shrinkingid].getDissolutionSites();
 
-#ifdef DEBUG
-  cout << "Lattice::transform The number of sites of phase " << shrinkingid
-       << " to dissolve is: " << diss.size() << endl;
-  cout.flush();
-#endif
-
   Site *ste;
 
   ///
@@ -3133,11 +3108,6 @@ vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
   }
 
   diss = interface_[shrinkingid].getDissolutionSites();
-#ifdef DEBUG
-  cout << "Lattice::transform New size of diss of phase " << shrinkingid
-       << " is: " << diss.size() << endl;
-  cout.flush();
-#endif
 
   double alreadygrown = 0.0;
   int numtransform = 0;
@@ -3163,13 +3133,6 @@ vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
         porousneighbor.push_back(stenb);
       }
     }
-
-#ifdef DEBUG
-    cout << "Lattice::transform Having " << waterneighbor.size()
-         << " water pixels and " << porousneighbor.size()
-         << " porous voxels in the neighborhood." << endl;
-    cout.flush();
-#endif
 
     if ((waterneighbor.size() + 1) <= max) { // count the site itself
 
@@ -3200,10 +3163,6 @@ vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
       ///
 
       double subbulk = FEsolver_->getBulkModulus(fileName);
-#ifdef DEBUG
-      cout << "Lattice::transform subbulk = " << subbulk << " GPa." << endl;
-      cout.flush();
-#endif
 
       subbulk = subbulk * 1.0e3; // convert GPa to MPa
       double subsolidbulk = subbulk;
@@ -3340,23 +3299,11 @@ vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
   netsites.at(growingid) -= (int) alreadygrown;
   */
 
-#ifdef DEBUG
-  cout << "Lattice::transform The number of aluminum phase " << shrinkingid
-       << " transformed into ETTR is: " << numtransform << endl;
-  cout.flush();
-#endif
-
   vector<int> numchanged;
   numchanged.clear();
   numchanged.resize(2, 0);
   numchanged[0] = numtransform;
   numchanged[1] = (int)alreadygrown;
-
-#ifdef DEBUG
-  cout << "Lattice::transform The number of alreadygrown = " << alreadygrown
-       << endl;
-  cout.flush();
-#endif
 
   return numchanged;
 }
@@ -3447,12 +3394,12 @@ double Lattice::getSurfaceArea(int phaseid) {
     }
   }
 
-#ifdef DEBUG
-  cout << "Lattice::getSurfaceArea Surface area of phase " << phaseid
-       << " calculated by method 1 is: " << surface1 << endl;
-  cout << "Lattice::getSurfaceArea Surface area of phase " << phaseid
-       << " calculated by method 2 is: " << surface2 << endl;
-#endif
+  if (verbose_) {
+    cout << "Lattice::getSurfaceArea Surface area of phase " << phaseid
+         << " calculated by method 1 is: " << surface1 << endl;
+    cout << "Lattice::getSurfaceArea Surface area of phase " << phaseid
+         << " calculated by method 2 is: " << surface2 << endl;
+  }
 
   ///
   /// Use Method 2

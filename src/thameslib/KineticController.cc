@@ -318,6 +318,9 @@ void KineticController::parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
         if (kineticData.type == ParrotKillohType) {
           typefound = true;
           parseKineticDataForParrotKilloh(doc, cur, kineticData);
+        } else if (kineticData.type == StandardType) {
+          typefound = true;
+          parseKineticDataForStandard(doc, cur, kineticData);
         } else if (kineticData.type == PozzolanicType) {
           typefound = true;
           parseKineticDataForPozzolanic(doc, cur, kineticData);
@@ -422,6 +425,81 @@ void KineticController::parseKineticDataForParrotKilloh(
   return;
 }
 
+void KineticController::parseKineticDataForStandard(
+    xmlDocPtr doc, xmlNodePtr cur, struct KineticData &kineticData) {
+  xmlChar *key;
+  cur = cur->next;
+
+  if (verbose_) {
+    cout << "--->Parsing standard kinetic data for " << kineticData.name
+         << endl;
+    cout.flush();
+  }
+  while (cur != NULL) {
+
+    // Specific surface area (m2/kg)
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.specificSurfaceArea, st);
+      xmlFree(key);
+    }
+
+    // Reference specific surface area (m2/kg)
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.refSpecificSurfaceArea, st);
+      xmlFree(key);
+    }
+
+    // Dissolution rate constant (mol/m2/s)
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolutionRateConst"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.dissolutionRateConst, st);
+      xmlFree(key);
+    }
+    // Number of DC units produced in dissociation reaction
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolvedUnits"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.dissolvedUnits, st);
+      xmlFree(key);
+    }
+    // Exponent on  the saturation index in the rate equation
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"siexp"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.siexp, st);
+      xmlFree(key);
+    }
+    // Exponent on  the driving force term in the rate equation
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dfexp"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.dfexp, st);
+      xmlFree(key);
+    }
+    // Loss on ignition of the material
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"loi"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.loi, st);
+      xmlFree(key);
+    }
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.activationEnergy, st);
+      xmlFree(key);
+    }
+    cur = cur->next;
+  }
+
+  return;
+}
+
 void KineticController::parseKineticDataForPozzolanic(
     xmlDocPtr doc, xmlNodePtr cur, struct KineticData &kineticData) {
   xmlChar *key;
@@ -461,6 +539,13 @@ void KineticController::parseKineticDataForPozzolanic(
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(kineticData.diffusionRateConstEarly, st);
+      xmlFree(key);
+    }
+    // Number of DC units produced in dissociation reaction
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolvedUnits"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(kineticData.dissolvedUnits, st);
       xmlFree(key);
     }
     // Later-age diffusion rate constant (mol/m2/s)
@@ -587,6 +672,10 @@ void KineticController::makeModel(xmlDocPtr doc, xmlNodePtr cur,
     // Read remaining Parrot and Killoh model parameters
     km = new ParrotKillohModel(chemSys_, solut_, lattice_, kineticData,
                                verbose_, warning_);
+  } else if (kineticData.type == StandardType) {
+    // Read remaining pozzolanic model parameters
+    km = new StandardKineticModel(chemSys_, solut_, lattice_, kineticData,
+                                  verbose_, warning_);
   } else if (kineticData.type == PozzolanicType) {
     // Read remaining pozzolanic model parameters
     km = new PozzolanicModel(chemSys_, solut_, lattice_, kineticData, verbose_,

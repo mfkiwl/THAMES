@@ -1,6 +1,6 @@
 /**
-@file PozzolanicModel.h
-@brief Declaration of the PozzolanicModel class.
+@file StandardKineticModel.h
+@brief Declaration of the StandardKineticModel class.
 
 @section Introduction
 This class implements a dissolution equation like Dove's for
@@ -14,8 +14,8 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 
 */
 
-#ifndef POZZOLANICMODELH
-#define POZZOLANICMODELH
+#ifndef STANDARDKINETICMODELH
+#define STANDARDKINETICMODELH
 
 #include "ChemicalSystem.h"
 #include "KineticController.h"
@@ -34,31 +34,22 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 using namespace std;
 
 /**
-@class PozzolanicModel
+@class StandardKineticModel
 @brief Handles the kinetic model of pozzolanic materials
 
 */
 
-class PozzolanicModel : public KineticModel {
+class StandardKineticModel : public KineticModel {
 
 protected:
-  double dissolutionRateConst_;    /**< Rate constand for dissolution
-                                      (mol/m2/s) */
-  double diffusionRateConstEarly_; /**< Rate constant for early-age diffusion
-                                      (mol/m2/s) */
-  double diffusionRateConstLate_;  /**< Rate constant for later-age diffusion
-                                      (mol/m2/s) */
+  double dissolutionRateConst_; /**< Rate constand for dissolution
+                                   (mol/m2/s) */
   /**
   @brief Number of dissolved DC units per unit dissolution reaction
   */
   double dissolvedUnits_;
-  double siexp_;  /**< Exponent on saturation index (unitless) */
-  double dfexp_;  /**< Exponent on driving force (unitless) */
-  double dorexp_; /**< Exponent on degree of reaction (unitless) */
-  double ohexp_;  /**< Exponent on OH ion activity (unitless) */
-  double sio2_;   /**< Mass fraction of SiO2 (unitless) */
-  double al2o3_;  /**< Mass fraction of Al2O3 (unitless) */
-  double cao_;    /**< Mass fraction of CaO (unitless) */
+  double siexp_; /**< Exponent on saturation index (unitless) */
+  double dfexp_; /**< Exponent on driving force (unitless) */
 
 public:
   /**
@@ -69,7 +60,7 @@ public:
 
   @note NOT USED.
   */
-  PozzolanicModel();
+  StandardKineticModel();
 
   /**
   @brief Overloaded constructor.
@@ -84,16 +75,16 @@ public:
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  PozzolanicModel(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
-                  struct KineticData &kineticData, const bool verbose,
-                  const bool warning);
+  StandardKineticModel(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+                       struct KineticData &kineticData, const bool verbose,
+                       const bool warning);
 
   /**
   @brief Get the type of kinetic model
 
   @return a string indicating the model type
   */
-  string getType() const { return (PozzolanicType); }
+  string getType() const { return (StandardType); }
 
   /**
   @brief Set the dissolution rate constant
@@ -114,66 +105,6 @@ public:
   @return the dissolution rate constant
   */
   double getDissolutionRateConst() const { return dissolutionRateConst_; }
-
-  /**
-  @brief Set the early-age diffusion rate constant
-
-  @note NOT USED.
-
-  @param rc is the early-age diffusion rate constant value to use
-  */
-  void setDiffusionRateConstEarly(const double rc) {
-    diffusionRateConstEarly_ = max(rc, 0.0);
-  }
-
-  /**
-  @brief Get the dissolution rate constant
-
-  @note NOT USED.
-
-  @return the early-age diffusion rate constant
-  */
-  double getDiffusionRateConstEarly() const { return diffusionRateConstEarly_; }
-
-  /**
-  @brief Set the later-age diffusion rate constant
-
-  @note NOT USED.
-
-  @param rc is the later-age diffusion rate constant value to use
-  */
-  void setDiffusionRateConstLate(const double rc) {
-    diffusionRateConstLate_ = max(rc, 0.0);
-  }
-
-  /**
-  @brief Get the later-age diffusion rate constant
-
-  @note NOT USED.
-
-  @return the later-age diffusion rate constant
-  */
-  double getDiffusionRateConstLate() const { return diffusionRateConstLate_; }
-
-  /**
-  @brief Set the exponent on the degree of reaction in the diffusion rate
-  equation
-
-  @note NOT USED.
-
-  @param dorexp is the exponent value to use
-  */
-  void setDorexp(const double dorexp) { dorexp_ = max(dorexp, 0.0); }
-
-  /**
-  @brief Get the exponent on the degree of reaction in the diffusion rate
-  equation
-
-  @note NOT USED.
-
-  @return the exponent on the degree of reaction
-  */
-  double getDorexp() const { return dorexp_; }
 
   /**
   @brief Set the number of dissolved DC units per unit dissolution
@@ -232,90 +163,6 @@ public:
   double getDfexp() const { return dfexp_; }
 
   /**
-  @brief Set the exponent on the hydroxyl ion activity
-
-  @note NOT USED.
-
-  @param ohexp is the exponent value to use
-  */
-  void setOhexp(const double ohexp) { ohexp_ = max(ohexp, 0.0); }
-
-  /**
-  @brief Get the exponent on the hydroxyl ion activity
-
-  @note NOT USED.
-
-  @return the exponent on the hydroxyl ion activity
-  */
-  double getOhexp() const { return ohexp_; }
-
-  /**
-  @brief Set the mass fraction of SiO2
-
-  @note NOT USED.
-
-  @param sio2 is the mass fraction of SiO2
-  */
-  void setSio2(const double sio2) {
-    sio2_ = max(sio2, 0.0);
-    if (sio2_ > 1.0)
-      sio2_ = 1.0;
-  }
-
-  /**
-  @brief Get the SiO2 mass fraction
-
-  @note NOT USED.
-
-  @return the SiO2 mass fraction
-  */
-  double getSio2() const { return sio2_; }
-
-  /**
-  @brief Set the mass fraction of Al2O3
-
-  @note NOT USED.
-
-  @param al2o3 is the mass fraction of Al2O3
-  */
-  void setAl2o3(const double al2o3) {
-    al2o3_ = max(al2o3, 0.0);
-    if (al2o3_ > 1.0)
-      al2o3_ = 1.0;
-  }
-
-  /**
-  @brief Get the Al2O3 mass fraction
-
-  @note NOT USED.
-
-  @return the Al2O3 mass fraction
-  */
-  double getAl2o3() const { return al2o3_; }
-
-  /**
-  @brief Set the mass fraction of CaO
-
-  @note NOT USED.
-
-  @param cao is the mass fraction of CaO
-  */
-  void setCao(const double cao) {
-    cao_ = max(cao, 0.0);
-    if (cao_ > 1.0)
-      cao_ = 1.0;
-  }
-
-  /**
-  @brief Get the CaO mass fraction
-
-  @note NOT USED.
-
-  @return the CaO mass fraction
-  */
-  double getCao() const { return cao_; }
-
-  /**
   @brief Master method for implementing one kinetic time step.
 
   Overloaded from base class to handle pozzolanic materials
@@ -342,6 +189,6 @@ public:
                                     vector<double> &DCMoles,
                                     vector<double> &GEMPhaseMoles);
 
-}; // End of PozzolanicModel class
+}; // End of StandardKineticModel class
 
 #endif

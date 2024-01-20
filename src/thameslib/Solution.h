@@ -302,6 +302,8 @@ public:
 
   /**
   @brief Set the saturation index of each dependent component.
+
+  This method interacts directly with the GEMS3K node object.
   */
   void setSI(void) {
     SI_.clear();
@@ -309,7 +311,9 @@ public:
     Falp = (node_->ppmm())->Falp;
 
     for (int i = 0; i < numGEMPhases_; i++) {
-      double si = pow(10, Falp[i]);
+      // long int xBR = (long int)(getGEMPhaseId(i));
+      // double si = node_->Ph_SatInd(xBR);
+      double si = pow(10.0, Falp[i]);
       SI_.push_back(si);
     }
     return;

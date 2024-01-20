@@ -1621,6 +1621,17 @@ public:
   }
 
   /**
+  @brief Get the integer id of a GEM CSD phase by its THAMES id.
+
+  @param thamesid is the index of the phase in the THAMES array
+  @return the integer id associated with that GEM phase name
+  */
+  unsigned int getGEMPhaseId(const int thamesid) {
+    string gemphasename = getGEMPhaseName(thamesid);
+    return (getGEMPhaseId(gemphasename));
+  }
+
+  /**
   @brief Get the integer id of a GEM phase associated with a microstructure
   phase id.
 

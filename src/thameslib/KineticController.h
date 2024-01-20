@@ -17,6 +17,7 @@ different kinetic models that govern the rate of hydration.
 #include "Lattice.h"
 #include "ParrotKillohModel.h"
 #include "PozzolanicModel.h"
+#include "StandardKineticModel.h"
 #include "global.h"
 #include <ctime>
 #include <fstream>
@@ -121,8 +122,9 @@ public:
     kineticData.dissolutionRateConst = 0.0;
     kineticData.diffusionRateConstEarly = 0.0;
     kineticData.diffusionRateConstLate = 0.0;
-    kineticData.siexp = kineticData.dfexp = kineticData.dorexp =
-        kineticData.ohexp = 0.0;
+    kineticData.siexp = kineticData.dfexp = 0.0;
+    kineticData.dorexp = kineticData.ohexp = 0.0;
+    kineticData.dissolvedUnits = 1.0;
     kineticData.activationEnergy = 0.0;
     kineticData.loi = kineticData.sio2 = kineticData.al2o3 = kineticData.cao =
         0.0;
@@ -176,6 +178,19 @@ public:
   */
   void parseKineticDataForParrotKilloh(xmlDocPtr doc, xmlNodePtr cur,
                                        struct KineticData &kineticData);
+
+  /**
+  @brief Parse the kinetic data for the standard kinetic model.
+
+  This method uses the libxml library, so this must be included.
+
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
+  @param kineticData is a reference to the KineticData structure for temporarily
+  storing the input parameters.
+  */
+  void parseKineticDataForStandard(xmlDocPtr doc, xmlNodePtr cur,
+                                   struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for the pozzolanic kinetic model.

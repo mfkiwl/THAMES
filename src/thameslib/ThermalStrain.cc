@@ -36,11 +36,11 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
   boxnum_ = (int)pow((double)((int)(boxsize_ / 2) * 2 + 1), (double)(3));
   localgtest_ = 1.0e-30 * boxnum_;
 
-#ifdef DEBUG
-  cout << "ThermslStrain::ThermalStrain localgtest_ is: " << localgtest_
-       << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "ThermslStrain::ThermalStrain localgtest_ is: " << localgtest_
+         << endl;
+    cout.flush();
+  }
 
   eigen_.clear();
   eigen_.resize(ns_);
@@ -1696,11 +1696,11 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
           if (j == 1)
             jj = j + mj + 2;
           zcon_[i][mi][j][mj] = pp[ii][jj];
-#ifdef DEBUG
-          cout << "ThermalStrain::constfunc i, mi, j, mj, zcon_[" << i << "]["
-               << mi << "][" << j << "][" << mj << "]" << i << " " << mi << " "
-               << j << " " << mj << " " << zcon_[i][mi][j][mj] << endl;
-#endif
+          if (verbose_) {
+            cout << "ThermalStrain::constfunc i, mi, j, mj, zcon_[" << i << "]["
+                 << mi << "][" << j << "][" << mj << "]" << i << " " << mi
+                 << " " << j << " " << mj << " " << zcon_[i][mi][j][mj] << endl;
+          }
         }
       }
     }
@@ -2192,10 +2192,10 @@ void ThermalStrain::relax(double time, int kmax) {
     }
   }
 
-#ifdef DEBUG
-  cout << "ThermalStrain::relax gg_ = " << gg_ << endl;
-  cout.flush();
-#endif
+  if (verbose_) {
+    cout << "ThermalStrain::relax gg_ = " << gg_ << endl;
+    cout.flush();
+  }
 
   /*
   string outfilename = "displacement.dat";
@@ -2219,18 +2219,8 @@ void ThermalStrain::relax(double time, int kmax) {
     /// Call dembx to implement conjugate gradient routine.
     ///
 
-#ifdef DEBUG
-    cout << "ThermalStrain::relax Entering dembx, call " << kkk << endl;
-    cout.flush();
-#endif
-
     Lstep = dembx(ns_, gg_, ldemb, kkk);
     ltot += Lstep;
-
-#ifdef DEBUG
-    cout << "ThermalStrain::relax Returned from dembx" << endl;
-    cout.flush();
-#endif
 
     ///
     /// Call energy to compute energy after dembx call. If gg_ < gtest_,
@@ -2246,11 +2236,11 @@ void ThermalStrain::relax(double time, int kmax) {
     femat(nx_, ny_, nz_, ns_, nphase_, iskip);
     utot = energy(nx_, ny_, nz_, ns_);
 
-#ifdef DEBUG
-    cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
-         << " ltot = " << ltot << endl;
-    cout.flush();
-#endif
+    if (verbose_) {
+      cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
+           << " ltot = " << ltot << endl;
+      cout.flush();
+    }
 
     ///
     /// If relaxation process is finished, jump out of loop.
@@ -2265,23 +2255,24 @@ void ThermalStrain::relax(double time, int kmax) {
 
       stress(nx_, ny_, nz_, ns_);
 
-#ifdef DEBUG
-      cout << "ThermalStrain::relax stresses: xx, "
-           << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " " << strzz_
-           << " " << strxz_ << " " << stryz_ << " " << strxy_ << endl;
-      cout << "ThermalStrain::relax strains: xx, "
-           << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_ << " "
-           << sxz_ << " " << syz_ << " " << sxy_ << endl;
-      cout << "ThermalStrain::relax macrostrains "
-           << "in same order " << u_[ns_][0] << " " << u_[ns_][1] << " "
-           << u_[ns_][2] << " " << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1]
-           << " " << u_[ns_ + 1][2] << " " << endl;
-      cout << "ThermalStrain::relax avg = "
-           << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
-      cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
-           << " ltot = " << ltot << endl;
-      cout.flush();
-#endif
+      if (verbose_) {
+        cout << "ThermalStrain::relax stresses: xx, "
+             << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " "
+             << strzz_ << " " << strxz_ << " " << stryz_ << " " << strxy_
+             << endl;
+        cout << "ThermalStrain::relax strains: xx, "
+             << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_
+             << " " << sxz_ << " " << syz_ << " " << sxy_ << endl;
+        cout << "ThermalStrain::relax macrostrains "
+             << "in same order " << u_[ns_][0] << " " << u_[ns_][1] << " "
+             << u_[ns_][2] << " " << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1]
+             << " " << u_[ns_ + 1][2] << " " << endl;
+        cout << "ThermalStrain::relax avg = "
+             << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
+        cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
+             << " ltot = " << ltot << endl;
+        cout.flush();
+      }
 
     } else {
       break;
