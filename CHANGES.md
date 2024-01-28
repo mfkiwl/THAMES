@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 28 15:27:45 2024 | Minor changes to visualization programs |
 | Jan 20 15:17:23 2024 | Added StandardKineticModel class for dissolution of salts. Compiles and runs |
 | Jan 18 10:16:14 2024 | Cleaned up some debugging output |
 | Jan 17 00:58:36 2024 | Debugged behavior for adding growth sites |
