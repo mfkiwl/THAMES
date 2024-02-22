@@ -22,6 +22,10 @@ build/*
 doc/html/*
 doc/latex/*
 
+doc/BuildGuide/*.fdb_latexmk
+doc/BuildGuide/*.fls
+doc/BuildGuide/*.synctex.gz
+
 #ignore LaTeX intermediate files
 *.aux
 *.log

@@ -47,50 +47,37 @@ computers.  The build process from scratch is somewhat complicated due to the ne
 to build and install the GEMS3K standalone library and the GEM-Selektor software.
 
 \section{Software Requirements}
-The following software must be installed and running properly on your computer to
-build and install all the components:
+The following software must be installed and running properly on your computer
+to build and install all the components:
 \begin{itemize}
-    \item Git software versioning system.
-    \item Cmake version 3.0 or later.
-    \item A C++11 compiler.  This document will assume the Gnu C/C++ compiler suite with
-        full support for C++11.
-    \item Doxygen version 1.18.13 or later. This is needed only for generating the
-        documentation.
-    \item (Optional) \LaTeX typesetting software.  This is needed only for building the PDF versions
-        of the documentation.  A recent installation of \TeX Live will suffice. 
-    \item (For Linux) The packages build-essentials, libx11-xcb-dev, and libglu1-mesa-dev.
-        These can be installed on Linux using a command like \verb!sudo apt-get install build-essentials!.  On Mac OS, the first two should not need to be installed, but mesa can be
-        installed using Macports or Homebrew, for example \verb!sudo port install mesa! when
-        using Macports.
+  \item Git software
+  versioning system.
+\item Cmake version 3.0 or later.
+\item A C++11 compiler.
+  This document will assume the Gnu C/C++ compiler suite with full support for
+  C++11.
+\item Doxygen version 1.18.13 or later. This is needed only for
+  generating the documentation.
+\item (Optional) \LaTeX typesetting software.
+  This is needed only for building the PDF versions of the documentation.  A
+  recent installation of \TeX Live will suffice.
+\item (For Linux) The packages
+  build-essentials, libx11-xcb-dev, and libglu1-mesa-dev. These can be installed
+  on Linux using a command like \verb!sudo apt-get install build-essentials!.
+  On Mac OS, the first two should not need to be installed, but mesa can be
+installed using Macports or Homebrew, for example \verb!sudo port install mesa!
+when using Macports.
 \end{itemize}
 This document will assume that all of these packages have been installed already.
 
 \section{Downloading the Software}
 Create a working directory somewhere in your home path.  For this document, the working
-directory will be called \verb!$WORKDIR!.  You should substitute to the path to your working
+directory will be called \verb!$WORKDIR!.  You should substitute the path to your working
 directory everywhere you see that.
 
 The remainder of these instructions require that you enter commands on the command line
 (the Terminal app on Mac OS, for example).  These commands will be typeset in monospace
 font to distinguish them from other instructions.
-
-\subsection{GEMS3K Standalone Library}
-\begin{enumerate}
-        \item \verb!cd $WORKDIR!
-        \item \verb!mkdir gitGEMS!
-        \item \verb!cd gitGEMS!
-        \item \verb!mkdir standalone!
-        \item \verb!cd standalone!
-        \item \verb!git clone https://bitbucket.org/gems4/gems3k.git .!
-\end{enumerate}
-
-\subsection{GEM-Selektor}
-\begin{enumerate}
-        \item \verb!cd $WORKDIR/gitGEMS!
-        \item \verb!mkdir GEMS3GUI!
-        \item \verb!cd GEMS3GUI!
-        \item \verb!git clone https://bitbucket.org/gems4/gems3gui.git .!
-\end{enumerate}
 
 \subsection{THAMES 2.5}
 If you already have THAMES installed from github and you want to keep any local changes you
@@ -114,7 +101,15 @@ follow these steps:
         \item \verb!git clone https://github.tamu.edu/jwbullard/THAMES.git .!
 \end{enumerate}
 
-\subsection{Qt}
+\subsection{Qt (Optional)}
+The Qt software suite is needed for either of the following circumstances:
+(a)~you are going to further develop or use the legacy THAMES user interface, or
+(b)~you want to build the newest versions of GEM-Selektor from source code rather
+than using the binary executables that can be downloaded from the PSI website
+for Mac OS or Windows (binaries available at
+\url{https://gems.web.psi.ch/GEMS3/downloads/}).  If you do not need Qt for either
+of those purposes, skip to the next section.
+
 \begin{enumerate}
     \item \verb!cd $WORKDIR!
     \item \verb!mkdir Qt!
@@ -128,28 +123,27 @@ follow these steps:
 \end{center}
 
 \section{Build and Install GEMS3K Standalone Library}
-First, there is one tweak that must be made to the downloaded version of GEMS3K so that
-longer phase nammes can be used (this is needed when working with the cemdata18 database).
-You can apply that tweak with the following command:
-\begin{enumerate}
-    \item \verb!/bin/cp $WORKDIR/THAMES/src/GEMS3K-mods/*.h $WORKDIR/gitGEMS/standalone/GEMS3K/.!
-\end{enumerate}
-
 If you have administrator privileges on your computer (Mac or Linux), then these commands
 will install the library:
 \begin{enumerate}
-        \item \verb!cd $WORKDIR/gitGEMS/standalone!
+        \item \verb!cd $WORKDIR/THAMES/src/GEMS3K-standalone!
         \item \verb!sudo ./install.sh!
 \end{enumerate}
 If you do not have administrator privileges, then you will need to work with your IT
 help desk to get this installed.
 
-\section{Build and Install GEM-Selektor}
+\section{Build and Install GEM-Selektor (Optional)}
+GEM-Selektor is only needed to create basic thermodynamic input files for
+THAMES. It may be better to use one of the binaries at the PSI website
+(\url{https://gems.web.psi.ch/GEMS3/downloads/index.html}) on Windows for this
+purpose so you can avoid the need for Qt. Skip to the next section if you plan
+to use the binaries instead of building from source code.
+
 Start up Qt.  On Linux, the Qt executable is in \verb!$WORKDIR/Qt/Tools/QtCreator/bin/!
 On a Mac, it is easiest to just use the Finder, navigate to \verb!$WORKDIR/Qt!, and then
 double-click on the ``Qt Creator'' app.
 
-From within the QtCreator Software, open the project \verb!$WORKDIR/gitGEMS/GEMS3GUI/gems3gui.pro!.
+From within the QtCreator Software, open the project \verb!$WORKDIR/THAMES/src/GEMS3GUI/gems3gui.pro!.
 This step may take some time to complete.  The progress will be shown in a small window.  Wait
 until it is finished.
 
@@ -168,26 +162,46 @@ Next, click on the Run item in the sidebar to set the Runtime settings as shown 
 Next, build the GEM-Selektor from within Qt by clicking on the Build icon (looks like a hammer).
 This could take a while to build.  When it is finished, check the output log to make sure there
 are no fatal errors.  Multiple warnings are okay, though.  If you configured the build settings
-correctly, this build step will create a new directory, \verb!$WORKDIR/gitGEMS/build-release!
+correctly, this build step will create a new directory, \verb!$WORKDIR/THAMES/src/GEMS3GUI/build-release!
 
 \subsection{One Extra Step for a Mac}
 On a Mac, you now need to go to the command line and run this command:
 \begin{verbatim}
 /bin/cp -R $WORKDIR/gitGEMS/GEMS3GUI/Resources \\
-    $WORKDIR/gitGEMS/build-release/Contents/gems3.app/Contents/.
+    $WORKDIR/THAMES/src/GEMS3GUI/build-release/Contents/gems3.app/Contents/.
 \end{verbatim}
 
 \subsection{Install Third-Party Data Repositories}
-Make sure that GEM-Selektor is not running for this step.
-Any third-party thermodynamic databases, such as Cemdata18 or Mines, should be copied into
-their new location, which is
+You will need to do this step even if you installed the GEM-Selektor binaries.
+Make sure that GEM-Selektor is not running.
+Copy the third-party thermodynamic database, such as Cemdata18 or Mines, into
+the resources directory for GEM-Selektor.  The database files that need to be
+copied are all those in the folder
 \begin{verbatim}
-$WORKDIR/gitGEMS/build-release/gems3.app/Contents/Resources/DB.default
+$WORKDIR/THAMES/src/Cemdata14.01/
 \end{verbatim}
 
-If you have a previous version of GEM-Selektor installed on your computer with
-the third-party libraries already there, you can just copy the contents of your old
-DB.default directory to this new location.
+The location to which you will copy these files depends on your operating
+system.
+\subsubsection{Mac OS}
+If you built GEM-Selektor from source code using Qt, copy the database files
+into the folder 
+\begin{verbatim}
+$WORKDIR/THAMES/src/GEMS3GUI/build-release/Contents/gems3.app/Contents/Resources/DB.default/
+\end{verbatim}
+
+If you used the binary executables downloaded from the PSI website, then the
+database files should be copied into
+\begin{verbatim}
+gems3.app/Contents/Resources/DB.default/
+\end{verbatim}
+
+\subsubsection{Windows}
+On Windows you usually will install GEM-Selektor into \verb!C:\Program Files\GEMS3!.
+Copy the database files into
+\begin{verbatim}
+C:\Program Files\GEMS3\DB.default/Contents/Resources/DB.default/
+\end{verbatim}
 
 \subsection{Test GEM-Selektor}
 You should now be able to run GEM-Selektor from within Qt by clicking on the Run icon (looks
