@@ -136,16 +136,16 @@ const int NPHASES = FINEAGG02INCONCRETE + 1;
 
 const int SAT = 255;
 
-const int R_BROWN = 162;
-const int G_BROWN = 117;
-const int B_BROWN = 95;
+const int R_BROWN = 130;
+const int G_BROWN = 94;
+const int B_BROWN = 76;
 
 const int R_BLUE = 0;
 const int G_BLUE = 0;
 const int B_BLUE = SAT;
 
 const int R_CFBLUE = 0;
-const int G_CFBLUE = 128;
+const int G_CFBLUE = 90;
 const int B_CFBLUE = SAT;
 
 const int R_RED = SAT;
@@ -280,17 +280,17 @@ const int R_LGRAY = 3 * SAT / 4;
 const int G_LGRAY = 3 * SAT / 4;
 const int B_LGRAY = 3 * SAT / 4;
 
-const int R_DAQUA = SAT / 4;
-const int G_DAQUA = SAT / 2;
-const int B_DAQUA = SAT / 2;
+const int R_DAQUA = 36;
+const int G_DAQUA = 157;
+const int B_DAQUA = 159;
 
 const int R_SALMON = SAT;
 const int G_SALMON = SAT / 2;
 const int B_SALMON = SAT / 2;
 
-const int R_SKYBLUE = SAT / 4;
-const int G_SKYBLUE = SAT / 2;
-const int B_SKYBLUE = SAT;
+const int R_SKYBLUE = 51;
+const int G_SKYBLUE = 102;
+const int B_SKYBLUE = 153;
 
 const int R_DPINK = SAT;
 const int G_DPINK = 0;

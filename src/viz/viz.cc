@@ -5,6 +5,9 @@
 
 #include "viz.h"
 
+/* Make Transparency a global variable */
+float transparency;
+
 int main(int argc, char *argv[]) {
 
   vector<string> names;
@@ -24,7 +27,7 @@ int main(int argc, char *argv[]) {
 
 int checkargs(int argc, char **argv) {
   bool wellformed = false;
-  char *iroot, *itype;
+  char *iroot, *itype, *tstring;
 
   if (argc < 3) {
     wellformed = false;
@@ -33,17 +36,19 @@ int checkargs(int argc, char **argv) {
   // Many of the variables here are defined in the getopts.h system header file
   // Can define more options here if we want
 
-  static struct option long_opts[] = {{"input", required_argument, 0, 'i'},
-                                      {"type", required_argument, 0, 't'},
-                                      {"help", no_argument, 0, 'h'},
-                                      {NULL, 0, 0, 0}};
+  static struct option long_opts[] = {
+      {"input", required_argument, 0, 'i'},
+      {"format", required_argument, 0, 'f'},
+      {"transparency", required_argument, 0, 't'},
+      {"help", no_argument, 0, 'h'},
+      {NULL, 0, 0, 0}};
 
   int opt_char;
   int option_index;
 
   TypeName = "vcctl";
 
-  while ((opt_char = getopt_long(argc, argv, "i:t:h", long_opts,
+  while ((opt_char = getopt_long(argc, argv, "i:f:t:h", long_opts,
                                  &option_index)) != -1) {
     switch (opt_char) {
     // -i or --input
@@ -54,14 +59,21 @@ int checkargs(int argc, char **argv) {
       cout << "RootName = " << RootName << endl;
       cout.flush();
       break;
-    // -t or --type
-    case static_cast<int>('t'):
+    // -f or --format
+    case static_cast<int>('f'):
       itype = optarg;
       TypeName = itype;
       for (int j = 0; j < TypeName.size(); ++j) {
         TypeName[j] = tolower(TypeName[j]);
       }
       cout << "TypeName = " << TypeName << endl;
+      cout.flush();
+      break;
+    // -t or --transparency
+    case static_cast<int>('t'):
+      tstring = optarg;
+      transparency = atof(tstring);
+      cout << "Transparency = " << transparency << endl;
       cout.flush();
       break;
     // -h or --help
@@ -180,7 +192,11 @@ int writeXYZFile(const string &times) {
 
   ofstream out(outname.c_str());
 
+  /*
   int numvox = countSolid();
+  */
+
+  int numvox = Xsize * Ysize * Zsize;
 
   // Write the file headers
   out << numvox << endl; // Number of voxels to visualize
@@ -196,11 +212,24 @@ int writeXYZFile(const string &times) {
     for (int j = 0; j < Ysize; ++j) {
       y = (float)j;
       for (int i = 0; i < Xsize; ++i) {
+        x = (float)i;
+        idx = Mic[toIndex(i, j, k)];
         if (isSolid(i, j, k)) {
-          x = (float)i;
-          idx = Mic[toIndex(i, j, k)];
+          /*
+          cout << "Phase " << idx << ", " << red[idx] << "\t" << green[idx]
+               << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
+               << "\t0.0" << endl;
+          */
           out << red[idx] << "\t" << green[idx] << "\t" << blue[idx] << "\t"
-              << x << "\t" << y << "\t" << z << endl;
+              << x << "\t" << y << "\t" << z << "\t0.0" << endl;
+        } else {
+          /*
+          cout << "Phase " << idx << ", " << red[idx] << "\t" << green[idx]
+               << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
+               << "\t" << transparency << endl;
+          */
+          out << red[idx] << "\t" << green[idx] << "\t" << blue[idx] << "\t"
+              << x << "\t" << y << "\t" << z << "\t" << transparency << endl;
         }
       }
     }
@@ -253,24 +282,24 @@ void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
   for (int i = 0; i < NPHASES; ++i) {
     switch (i) {
     case POROSITY:
-      red[i] = (float)(R_BLACK) / (float)(SAT);
-      green[i] = (float)(R_BLACK) / (float)(SAT);
-      blue[i] = (float)(R_BLACK) / (float)(SAT);
+      red[i] = (float)(R_CHARCOAL) / (float)(SAT);
+      green[i] = (float)(G_CHARCOAL) / (float)(SAT);
+      blue[i] = (float)(B_CHARCOAL) / (float)(SAT);
       break;
     case EMPTYP:
-      red[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      green[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      blue[i] = (float)(R_CHARCOAL) / (float)(SAT);
+      red[i] = (float)(R_BLACK) / (float)(SAT);
+      green[i] = (float)(G_BLACK) / (float)(SAT);
+      blue[i] = (float)(B_BLACK) / (float)(SAT);
       break;
     case EMPTYDP:
-      red[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      green[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      blue[i] = (float)(R_CHARCOAL) / (float)(SAT);
+      red[i] = (float)(R_BLACK) / (float)(SAT);
+      green[i] = (float)(G_BLACK) / (float)(SAT);
+      blue[i] = (float)(B_BLACK) / (float)(SAT);
       break;
     case DRIEDP:
-      red[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      green[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      blue[i] = (float)(R_CHARCOAL) / (float)(SAT);
+      red[i] = (float)(R_BLACK) / (float)(SAT);
+      green[i] = (float)(G_BLACK) / (float)(SAT);
+      blue[i] = (float)(B_BLACK) / (float)(SAT);
       break;
     case CH:
       red[i] = (float)(R_BLUE) / (float)(SAT);
@@ -282,12 +311,12 @@ void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
       green[i] = (float)(G_WHEAT) / (float)(SAT);
       blue[i] = (float)(B_WHEAT) / (float)(SAT);
       break;
-    case C3S:
+    case C2S:
       red[i] = (float)(R_BROWN) / (float)(SAT);
       green[i] = (float)(G_BROWN) / (float)(SAT);
       blue[i] = (float)(B_BROWN) / (float)(SAT);
       break;
-    case C2S:
+    case C3S:
       red[i] = (float)(R_CFBLUE) / (float)(SAT);
       green[i] = (float)(G_CFBLUE) / (float)(SAT);
       blue[i] = (float)(B_CFBLUE) / (float)(SAT);
@@ -338,9 +367,9 @@ void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
       blue[i] = (float)(B_GOLD) / (float)(SAT);
       break;
     case SFUME:
-      red[i] = (float)(R_AQUA) / (float)(SAT);
-      green[i] = (float)(G_AQUA) / (float)(SAT);
-      blue[i] = (float)(B_AQUA) / (float)(SAT);
+      red[i] = (float)(R_DAQUA) / (float)(SAT);
+      green[i] = (float)(G_DAQUA) / (float)(SAT);
+      blue[i] = (float)(B_DAQUA) / (float)(SAT);
       break;
     case AMSIL:
       red[i] = (float)(R_AQUA) / (float)(SAT);
