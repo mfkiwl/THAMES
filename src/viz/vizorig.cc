@@ -210,7 +210,7 @@ bool isSolid(int i, int j, int k) {
   int id = Mic[toIndex(i, j, k)];
 
   //  cout << "Mic(" << i << "," << j << "," << k << ") = " << id;
-  if (id != (int)POROSITY && id <= (int)NSPHASES) {
+  if (id != (int)ELECTROLYTE_ID && id <= (int)NSPHASES) {
     result = true;
   }
   //  cout << "; result = " << result << endl;
@@ -226,7 +226,7 @@ int toIndex(int i, int j, int k) {
 void getPcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
   for (int i = 0; i < NPHASES; ++i) {
     switch (i) {
-    case POROSITY:
+    case ELECTROLYTE_ID:
       red[i] = (float)(R_BLACK) / (float)(SAT);
       green[i] = (float)(R_BLACK) / (float)(SAT);
       blue[i] = (float)(R_BLACK) / (float)(SAT);

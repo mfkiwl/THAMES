@@ -635,8 +635,8 @@ public:
   @param cur points to the current location within the XML file
   @param phaseids is a map associating phase names with id numbers
   */
-  void parsePhaseNames(xmlDocPtr doc, xmlNodePtr cur,
-                       map<string, int> &phaseids);
+  void parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
+                            map<string, int> &phaseids);
 
   /**
   @brief Parse input about a microstructure phase from an XML document.
@@ -647,8 +647,8 @@ public:
   @param phaseids is a map associating phase names with id numbers
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parsePhase(xmlDocPtr doc, xmlNodePtr cur, int numEntries,
-                  map<string, int> phaseids, PhaseData &phaseData);
+  void parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur, int numEntries,
+                       map<string, int> phaseids, PhaseData &phaseData);
 
   /**
   @brief Parse input about a GEM CSD phase from an XML document.

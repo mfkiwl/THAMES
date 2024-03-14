@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 14 18:10:02 2024 | Added new createmic program to make THAMES input microstructures directly |
 | Feb 22 09:15:56 2024 | Added Cemdata18 database files from EMPA to the repository; updated build instructions |
 | Jan 28 15:27:45 2024 | Minor changes to visualization programs |
 | Jan 20 15:17:23 2024 | Added StandardKineticModel class for dissolution of salts. Compiles and runs |
@@ -100,4 +101,4 @@ capillary porosity modified to keep it that way; actual volume still tracked |
 | Apr 13 13:12:36 2017 | Update README.md and corrected name spelling |
 | Apr 27 11:22:22 2015 | Initial commit |
 
------------------------------------------------------------------------------
+

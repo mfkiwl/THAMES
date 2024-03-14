@@ -264,7 +264,7 @@ bool isSolid(int i, int j, int k) {
     if (id > 1)
       result = true;
   } else {
-    if (id != (int)POROSITY && id <= (int)NSPHASES) {
+    if (id != (int)ELECTROLYTE_ID && id <= (int)NSPHASES) {
       result = true;
     }
   }
@@ -281,7 +281,7 @@ int toIndex(int i, int j, int k) {
 void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
   for (int i = 0; i < NPHASES; ++i) {
     switch (i) {
-    case POROSITY:
+    case ELECTROLYTE_ID:
       red[i] = (float)(R_CHARCOAL) / (float)(SAT);
       green[i] = (float)(G_CHARCOAL) / (float)(SAT);
       blue[i] = (float)(B_CHARCOAL) / (float)(SAT);

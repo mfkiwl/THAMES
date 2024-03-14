@@ -15,24 +15,24 @@
 
 // Preprocessor defines
 // VCCTL phase codes
-const int POROSITY = 0;            /* 0 */
-const int C3S = POROSITY + 1;      /* 1 */
-const int C2S = C3S + 1;           /* 2 */
-const int C3A = C2S + 1;           /* 3 */
-const int C4AF = C3A + 1;          /* 4 */
-const int K2SO4 = C4AF + 1;        /* 5 */
-const int NA2SO4 = K2SO4 + 1;      /* 6 */
-const int GYPSUM = NA2SO4 + 1;     /* 7 */
-const int HEMIHYD = GYPSUM + 1;    /* 8 */
-const int ANHYDRITE = HEMIHYD + 1; /* 9 */
-const int SFUME = ANHYDRITE + 1;   /* 10 */
-const int INERT = SFUME + 1;       /* 11 */
-const int SLAG = INERT + 1;        /* 12 */
-const int INERTAGG = SLAG + 1;     /* 13 */
-const int ASG = INERTAGG + 1;      /* 14 */
-const int CAS2 = ASG + 1;          /* 15 */
-const int AMSIL = CAS2 + 1;        /* 16 */
-const int FAC3A = AMSIL + 1;       /* 17 */
+const int ELECTROLYTE_ID = 0;       /* 0 */
+const int C3S = ELECTROLYTE_ID + 1; /* 1 */
+const int C2S = C3S + 1;            /* 2 */
+const int C3A = C2S + 1;            /* 3 */
+const int C4AF = C3A + 1;           /* 4 */
+const int K2SO4 = C4AF + 1;         /* 5 */
+const int NA2SO4 = K2SO4 + 1;       /* 6 */
+const int GYPSUM = NA2SO4 + 1;      /* 7 */
+const int HEMIHYD = GYPSUM + 1;     /* 8 */
+const int ANHYDRITE = HEMIHYD + 1;  /* 9 */
+const int SFUME = ANHYDRITE + 1;    /* 10 */
+const int INERT = SFUME + 1;        /* 11 */
+const int SLAG = INERT + 1;         /* 12 */
+const int INERTAGG = SLAG + 1;      /* 13 */
+const int ASG = INERTAGG + 1;       /* 14 */
+const int CAS2 = ASG + 1;           /* 15 */
+const int AMSIL = CAS2 + 1;         /* 16 */
+const int FAC3A = AMSIL + 1;        /* 17 */
 
 const int FLYASH = FAC3A + 1;  /* 18 */
 const int CH = FLYASH + 1;     /* 19 */

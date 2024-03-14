@@ -20,6 +20,9 @@
 \usepackage{booktabs}
 \usepackage[version=4]{mhchem}
 \usepackage{parskip}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+\DefineShortVerb{\!}
 
 \usepackage{datetime2}
 \renewcommand{\DTMdisplaydate}[4]{#1-#2-#3}
@@ -41,12 +44,128 @@
 \tableofcontents
 
 \vspace{0.25truein}
-This document provides guidance on how to build THAMES on an Apple computer running
-Mac OS.  Very similar instructions should apply to Windows and especially to Linux
-computers.  The build process from scratch is somewhat complicated due to the need
+This document provides guidance on how to build THAMES on various operating systems
+The build process from scratch is somewhat complicated due to the need
 to build and install the GEMS3K standalone library and the GEM-Selektor software.
+Separate sections are given for Mac OS, Linux and Windows.
 
-\section{Software Requirements}
+\section{\label{sec:mac}Mac OS}
+\subsection{Software Requirements}
+The following software must be installed and running properly on your computer
+to build and install all the components:
+\begin{itemize}
+  \item Git software versioning system.
+\item Cmake version 3.0 or later.
+\item A C++11 compiler.
+  This document will assume the Gnu C/C++ compiler suite with full support for
+  C++11.
+\item Doxygen version 1.18.13 or later. This is needed only for
+  generating the documentation.
+\item (Optional) \LaTeX typesetting software.
+  This is needed only for building the PDF versions of the documentation.  A
+  recent installation of \TeX Live will suffice.
+\end{itemize}
+This document will assume that all of these packages have been installed already.
+
+\subsection{Downloading the Software}
+Create a working directory somewhere in your home path.  For this document, the working
+directory will be called !$WORKDIR!.  You should substitute the path to your working
+directory everywhere you see that.
+
+The remainder of these instructions require that you enter commands on the command line
+(the Terminal app or iTerm2).  These commands will be typeset in monospace
+font to distinguish them from other instructions.
+
+\subsubsection{THAMES 2.5}
+If you already have THAMES installed from github and you want to keep any local changes you
+have made, then go to the directory where
+you installed it and execute these commands:
+\begin{enumerate}
+    \item !git stash!
+    \item !git pull!
+\end{enumerate}
+The first command stashes away your local changes so they won't be lost.  The second
+command pulls all the updates from the remote repository.  Later, if you want to
+put your local changes back into the updated version, you can run the command
+!git stash pop!
+
+On the other hand, if you have never installed THAMES on your computer, then
+follow these steps:
+\begin{enumerate}
+        \item !cd $WORKDIR!
+        \item !git clone https://github.tamu.edu/jwbullard/THAMES.git!
+\end{enumerate}
+Please contact the developer if you discover that GitHub prevents you
+from cloning the repository. You may need to be added as a collaborator.
+
+\subsubsection{GEM-Selektor}
+GEM-Selektor is only needed to create basic thermodynamic input files for
+THAMES. The downloadable binaries for GEM-Selektor can be found
+at \url{https://gems.web.psi.ch/GEMS3/downloads/index.html}.
+
+The installer is simple to use.  Double-clicking on it will open a window
+from which you can just drag the gems3k application to where
+you want it to reside.  For convenience, it is helpful to put it somewhere
+within your own home folder and to make sure that the folder is also in your `PATH`.
+For these instructions, we will call this folder !PathToGems!.
+You should substitute the actual path to this folder on your computer in these instructions.
+
+\subsubsection{\label{sec:thirdpartymac}Install GEM-Selektor Third-Party Thermodynamic Databases}
+You will need \textit{at a minimum} the Cemdata18 database, which is already a
+part of the THAMES git repository.
+
+Next, ensure that GEM-Selektor is not running. Navigate to the GEM-Selektor DB.default
+folder using either the command line or the Finder:
+
+From the command line:
+
+\begin{Verbatim}[breaklines=true]
+cp $WORKDIR/THAMES/src/Cemdata18.01/* PathToGEMS/gems3.app/Contents/Resources/DB.default/.
+\end{Verbatim}
+
+Using the Finder:
+\begin{enumerate}
+  \item Navigate to the folder !PathToGems!
+  \item Right-click on !gems3! icon, and select ``Show Package
+    Contents''.
+  \item Continue navigating within the package contents to
+    !Contents/Resources/DB.default!
+  \item In a separate Finder window, navigate into to the folder
+    !WORKDIR/THAMES/src/Cemdata18.01/! and drag all the
+    contents of that folder into the !DB.default! folder
+    of the gems3 app from step 3 above.
+\end{enumerate}
+
+\subsection{Build and Install GEMS3K Standalone Library}
+These commands will install the library:
+\begin{enumerate}
+        \item !cd $WORKDIR/THAMES/src/GEMS3K-standalone!
+        \item !./install.sh!
+\end{enumerate}
+
+\subsection{Test GEM-Selektor}
+You should now be able to run GEM-Selektor by double-clicking on the ``GEMSelektor''
+icon wherever you installed it.
+
+\subsection{Build and Install THAMES}
+If all the previous steps have been executed successfully, installing THAMES should be pretty
+straightforward.
+\begin{enumerate}
+    \item !cd $WORKDIR/THAMES/build!
+    \item !cmake ..!
+    \item !make!
+    \item !make install!
+\end{enumerate}
+The last step will put the thames and vcctl2thames executables into the directory
+
+!$WORKDIR/THAMES/bin!
+
+\section{\label{sec:linux}Linux}
+Installation and use of THAMES has not been thoroughly tested on Linux
+computers. Please alert the developer of any changes to the instructions
+that you discovered to enable successful installation.
+
+\subsection{Software Requirements}
 The following software must be installed and running properly on your computer
 to build and install all the components:
 \begin{itemize}
@@ -61,163 +180,177 @@ to build and install all the components:
 \item (Optional) \LaTeX typesetting software.
   This is needed only for building the PDF versions of the documentation.  A
   recent installation of \TeX Live will suffice.
-\item (For Linux) The packages
+\item The packages
   build-essentials, libx11-xcb-dev, and libglu1-mesa-dev. These can be installed
-  on Linux using a command like \verb!sudo apt-get install build-essentials!.
-  On Mac OS, the first two should not need to be installed, but mesa can be
-installed using Macports or Homebrew, for example \verb!sudo port install mesa!
-when using Macports.
+  on Linux using a command like !sudo apt-get install build-essentials!.
 \end{itemize}
 This document will assume that all of these packages have been installed already.
 
-\section{Downloading the Software}
+\subsection{Downloading the Software}
 Create a working directory somewhere in your home path.  For this document, the working
-directory will be called \verb!$WORKDIR!.  You should substitute the path to your working
+directory will be called !$WORKDIR!.  You should substitute the path to your working
 directory everywhere you see that.
 
-The remainder of these instructions require that you enter commands on the command line
-(the Terminal app on Mac OS, for example).  These commands will be typeset in monospace
-font to distinguish them from other instructions.
+The remainder of these instructions require that you enter commands on the command line.
+These commands will be typeset in monospace font to distinguish them from other instructions.
 
-\subsection{THAMES 2.5}
+\subsubsection{THAMES 2.5}
 If you already have THAMES installed from github and you want to keep any local changes you
 have made, then go to the directory where
 you installed it and execute these commands:
 \begin{enumerate}
-    \item git stash
-    \item git pull
+    \item !git stash!
+    \item !git pull!
 \end{enumerate}
 The first command stashes away your local changes so they won't be lost.  The second
 command pulls all the updates from the remote repository.  Later, if you want to
 put your local changes back into the updated version, you can run the command
-\verb!git stash pop!
+!git stash pop!
 
 On the other hand, if you have never installed THAMES on your computer, then
 follow these steps:
 \begin{enumerate}
-        \item \verb!cd $WORKDIR!
-        \item \verb!mkdir THAMES!
-        \item \verb!cd THAMES!
-        \item \verb!git clone https://github.tamu.edu/jwbullard/THAMES.git .!
+        \item !cd $WORKDIR!
+        \item !git clone https://github.tamu.edu/jwbullard/THAMES.git!
 \end{enumerate}
+Please contact the developer if you discover that GitHub prevents you
+from cloning the repository. You may need to be added as a collaborator.
 
-\subsection{Qt (Optional)}
-The Qt software suite is needed for either of the following circumstances:
-(a)~you are going to further develop or use the legacy THAMES user interface, or
-(b)~you want to build the newest versions of GEM-Selektor from source code rather
-than using the binary executables that can be downloaded from the PSI website
-for Mac OS or Windows (binaries available at
-\url{https://gems.web.psi.ch/GEMS3/downloads/}).  If you do not need Qt for either
-of those purposes, skip to the next section.
+\subsubsection{GEM-Selektor}
+GEM-Selektor is only needed to create basic thermodynamic input files for
+THAMES.
+The downloadable binaries for GEM-Selektor can be found
+at \url{https://gems.web.psi.ch/GEMS3/downloads/index.html}. Follow the
+installation instructions.
 
+\subsubsection{\label{sec:thirdpartylinux}Install Third-Party Data Repositories}
+You will need \textit{at a minimum} the Cemdata18 database, which is already a
+part of the THAMES git repository.
+
+Next, ensure that GEM-Selektor is not running. Navigate to the GEM-Selektor DB.default
+folder using the command line:
+
+\begin{Verbatim}[breaklines=true]
+cp $WORKDIR/THAMES/src/Cemdata18.01/* PathToGEMS/gems3.app/Contents/Resources/DB.default/.
+\end{Verbatim}
+
+\subsection{Build and Install GEMS3K Standalone Library}
+These commands will install the library:
 \begin{enumerate}
-    \item \verb!cd $WORKDIR!
-    \item \verb!mkdir Qt!
-    \item Download the Qt software version 5.12.5 (community) for Gnu C++ from 
-        \href{https://qt.io}{https://qt.io} into the Qt directory you just made.
-        Use the settings shown in the figure.
+        \item !cd $WORKDIR/THAMES/src/GEMS3K-standalone!
+        \item !sudo ./install.sh!
 \end{enumerate}
-
-\begin{center}
-    \includegraphics[scale=0.4]{Figures/Qt-screen.png}
-\end{center}
-
-\section{Build and Install GEMS3K Standalone Library}
-If you have administrator privileges on your computer (Mac or Linux), then these commands
-will install the library:
-\begin{enumerate}
-        \item \verb!cd $WORKDIR/THAMES/src/GEMS3K-standalone!
-        \item \verb!sudo ./install.sh!
-\end{enumerate}
-If you do not have administrator privileges, then you will need to work with your IT
+If you do not have administrator privileges, then you may need to work with your IT
 help desk to get this installed.
 
-\section{Build and Install GEM-Selektor (Optional)}
-GEM-Selektor is only needed to create basic thermodynamic input files for
-THAMES. It may be better to use one of the binaries at the PSI website
-(\url{https://gems.web.psi.ch/GEMS3/downloads/index.html}) on Windows for this
-purpose so you can avoid the need for Qt. Skip to the next section if you plan
-to use the binaries instead of building from source code.
-
-Start up Qt.  On Linux, the Qt executable is in \verb!$WORKDIR/Qt/Tools/QtCreator/bin/!
-On a Mac, it is easiest to just use the Finder, navigate to \verb!$WORKDIR/Qt!, and then
-double-click on the ``Qt Creator'' app.
-
-From within the QtCreator Software, open the project \verb!$WORKDIR/THAMES/src/GEMS3GUI/gems3gui.pro!.
-This step may take some time to complete.  The progress will be shown in a small window.  Wait
-until it is finished.
-
-Click on the Build item in the sidebar to set the Build settings as shown in the figure:
-
-\begin{center}
-    \includegraphics[width=0.8\textwidth]{Figures/Qt-build-settings.png}
-\end{center}
-
-Next, click on the Run item in the sidebar to set the Runtime settings as shown in the figure:
-
-\begin{center}
-    \includegraphics[width=0.8\textwidth]{Figures/Qt-run-settings.png}
-\end{center}
-
-Next, build the GEM-Selektor from within Qt by clicking on the Build icon (looks like a hammer).
-This could take a while to build.  When it is finished, check the output log to make sure there
-are no fatal errors.  Multiple warnings are okay, though.  If you configured the build settings
-correctly, this build step will create a new directory, \verb!$WORKDIR/THAMES/src/GEMS3GUI/build-release!
-
-\subsection{One Extra Step for a Mac}
-On a Mac, you now need to go to the command line and run this command:
-\begin{verbatim}
-/bin/cp -R $WORKDIR/gitGEMS/GEMS3GUI/Resources \\
-    $WORKDIR/THAMES/src/GEMS3GUI/build-release/Contents/gems3.app/Contents/.
-\end{verbatim}
-
-\subsection{Install Third-Party Data Repositories}
-You will need to do this step even if you installed the GEM-Selektor binaries.
-Make sure that GEM-Selektor is not running.
-Copy the third-party thermodynamic database, such as Cemdata18 or Mines, into
-the resources directory for GEM-Selektor.  The database files that need to be
-copied are all those in the folder
-\begin{verbatim}
-$WORKDIR/THAMES/src/Cemdata14.01/
-\end{verbatim}
-
-The location to which you will copy these files depends on your operating
-system.
-\subsubsection{Mac OS}
-If you built GEM-Selektor from source code using Qt, copy the database files
-into the folder 
-\begin{verbatim}
-$WORKDIR/THAMES/src/GEMS3GUI/build-release/Contents/gems3.app/Contents/Resources/DB.default/
-\end{verbatim}
-
-If you used the binary executables downloaded from the PSI website, then the
-database files should be copied into
-\begin{verbatim}
-gems3.app/Contents/Resources/DB.default/
-\end{verbatim}
-
-\subsubsection{Windows}
-On Windows you usually will install GEM-Selektor into \verb!C:\Program Files\GEMS3!.
-Copy the database files into
-\begin{verbatim}
-C:\Program Files\GEMS3\DB.default/Contents/Resources/DB.default/
-\end{verbatim}
-
-\subsection{Test GEM-Selektor}
-You should now be able to run GEM-Selektor from within Qt by clicking on the Run icon (looks
-like a green triangle pointing to the right). 
-
-\section{Build and Install THAMES}
+\subsection{Build and Install THAMES}
 If all the previous steps have been executed successfully, installing THAMES should be pretty
 straightforward.
 \begin{enumerate}
-    \item \verb!cd $WORKDIR/THAMES/build!
-    \item \verb!cmake ..!
-    \item \verb!make!
-    \item \verb!make install!
+    \item !cd $WORKDIR/THAMES/build!
+    \item !cmake ..!
+    \item !make!
+    \item !make install!
 \end{enumerate}
 The last step will put the thames and vcctl2thames executables into the directory
-\begin{verbatim}
-$WORKDIR/THAMES/bin
-\end{verbatim}
+!$WORKDIR/THAMES/bin!
+
+\section{\label{sec:windows}Windows}
+\subsection{MSYS installation}
+\begin{enumerate}
+  \item Direct link to the installer is \url{https://github.com/msys2/msys2-installer/releases/download/2022-06-03/msys2-x86_64-20220603.exe}
+  \item Use default installation folder
+  \item Start MSYS2 MinGW x64 from the Start menu, then execute the command
+    !pacman -Syu!
+  \item The MSYS window will close automatically after that command.
+  \item Start MSYS2 MSYS from the Start menu, then execute the following commands:
+  \begin{enumerate}
+    \item !pacman -Syu!
+    \item !pacman -S --needed base-devel mingw-w64-x86_64-toolchain!
+    \item !pacman -S mingw-w64-x86_64-cmake!
+    \item !pacman -S mingw-w64-x86_64-make!
+    \item !pacman -S git!
+  \end{enumerate}
+  \item Close the MSYS window
+\end{enumerate}
+ 
+\subsection{Download THAMES source code}
+Start MSYS2 MinGW x64 from the Start menu and execute the command
+
+!git clone https://github.com/jwbullard/THAMES.git!
+
+You will need a username and password for GitHub.  Contact the developer
+if you are unable to to clone the repository once you have established
+your GitHub credentials.  You may need to be added to the project as a 
+collaborator.
+ 
+\subsection{GEM-Selektor Installation}
+GEM-Selektor is only needed to create basic thermodynamic input files for
+THAMES.
+The downloadable binaries for GEM-Selektor can be found
+at \url{https://gems.web.psi.ch/GEMS3/downloads/index.html}. Follow the
+installation instructions.
+
+\subsubsection{\label{sec:thirdpartywindows}Install Third-Party Data Repositories}
+You will need \textit{at a minimum} the Cemdata18 database, which is already a
+part of the THAMES git repository.
+
+Next, ensure that GEM-Selektor is not running.
+In one Windows File Explorer window, navigate to the GEM-Selektor DB.default
+folder. It should be found at
+
+!C:\Users\"your name"\GEMS39\Gems3-app\Resources\DB.default!
+
+In another Windows File explorer window, navigate to
+
+!WORKDIR/THAMES/src/Cemdata18.01!
+
+Select all the files of this folder and drag them to the DB.default folder
+in the other File Explorer window above.
+
+\subsection{Build GEMS3K-Standalone}
+Start MSYS MinGW x64 from the Start menu if it is not already open. Within the
+MSYS window execute the following commands:
+\begin{enumerate}
+  \item !cd THAMES/src/GEMS3K-Standalone!
+  \item !mkdir build!
+  \item !cd build!
+  \item
+    \begin{Verbatim}[breaklines=true]
+      cmake .. -G "MinGW Makefiles" -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../Resources
+    \end{Verbatim}
+  \item !/mingw64/bin/mingw32-make.exe!
+  \item !/mingw64/bin/mingw32-make.exe install!
+\end{enumerate}
+ 
+\subsection{Build THAMES}
+\begin{enumerate}
+\item !cd ../../../build!
+\item
+  \begin{Verbatim}[breaklines=true]
+    cmake .. -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../bin
+  \end{Verbatim}
+\item !/mingw64/bin/mingw32-make.exe!
+\item !/mingw64/bin/mingw32-make.exe install!
+\end{enumerate}
+ 
+\subsection{Edit Windows Path}
+\begin{enumerate}
+  \item Start Edit the System Variables form the Start menu
+  \item Click ``Environment Variables'' button
+  \item Under ``System Variables'', scroll down until you see Path
+  \item Select that line, and press ``Edit''
+  \item Edit Environment variable window will come up
+  \item Press ``New''
+  \item Add !C:\msys64\mingw64\bin! to the bottom
+  \item OK $\longrightarrow$ OK $\longrightarrow$ OK
+\end{enumerate}
+ 
+At this point, the THAMES executable, !thames.exe!,
+should be under
+
+\begin{Verbatim}
+  C:\msys64\home\<username>\THAMES\bin
+\end{Verbatim}
+ 
 \end{document}

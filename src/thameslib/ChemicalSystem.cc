@@ -723,7 +723,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
   }
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-      parsePhaseNames(doc, cur, phaseids);
+      parseMicroPhaseNames(doc, cur, phaseids);
     }
     cur = cur->next;
   }
@@ -902,8 +902,8 @@ void ChemicalSystem::parseICInGas(xmlDocPtr doc, xmlNodePtr cur) {
   return;
 }
 
-void ChemicalSystem::parsePhaseNames(xmlDocPtr doc, xmlNodePtr cur,
-                                     map<string, int> &phaseids) {
+void ChemicalSystem::parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
+                                          map<string, int> &phaseids) {
 
   xmlChar *key;
   cur = cur->xmlChildrenNode;
@@ -917,7 +917,8 @@ void ChemicalSystem::parsePhaseNames(xmlDocPtr doc, xmlNodePtr cur,
       from_string(pid, st);
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname")) ||
+        (!xmlStrcmp(cur->name, (const xmlChar *)"microphasename"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       pname = st;
@@ -969,7 +970,8 @@ void ChemicalSystem::parsePhase(xmlDocPtr doc, xmlNodePtr cur, int numEntries,
       from_string(phaseData.id, st);
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname")) ||
+        (!xmlStrcmp(cur->name, (const xmlChar *)"microphasename"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       phaseData.thamesName = st;
