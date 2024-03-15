@@ -3,10 +3,6 @@
     xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
   <!--The number of possible phases in the microstructure not counting Void-->
   <numentries>5</numentries>
-  <!--The Blaine fineness of the powder, cm2/kg-->
-  <blaine>403.2</blaine>
-  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
-  <refblaine>385.0</refblaine>
   <!--Temperature in K-->
   <temperature>298.15</temperature>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
@@ -111,7 +107,10 @@
     </impurity_data>
     <kinetic_data>
       <!--Type is whether the phase is controlled by kinetics or thermodynamics-->
-      <type>kinetic</type>
+      <type>ParrotKilloh</type>
+      <specificSurfaceArea>402.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>385.0</refSpecificSurfaceArea>
+
       <!--k1, k2, k3, n1, n3 are Parrott and Killoh parameters. Do not change-->
       <k1>1.5</k1>
       <k2>0.05</k2>
@@ -192,28 +191,25 @@
     </gemphase_data>
     <id>4</id>
     <interface_data>
-      <randomgrowth>0.6</randomgrowth>
+      <randomgrowth>0.995</randomgrowth>
       <affinity>
-        <affinityphaseid>2</affinityphaseid>
-        <affinityvalue>4</affinityvalue>
+        <affinityphase>CSHQ</affinityphaseid>
+        <affinityvalue>1</affinityvalue>
       </affinity>
       <affinity>
-        <affinityphaseid>4</affinityphaseid>
-        <affinityvalue>1</affinityvalue>
+        <affinityphaseid>Alite</affinityphaseid>
+        <affinityvalue>4</affinityvalue>
       </affinity>
     </interface_data>
     <poresizefilename>CSH-PoreSizeDistribution.csv</poresizefilename>
-    <kinetic_data>
-      <type>thermo</type>
-      <Rd>
-        <Rdelement>K</Rdelement>
-        <Rdvalue>0.42</Rdvalue>
-      </Rd>
-      <Rd>
-        <Rdelement>Na</Rdelement>
-        <Rdvalue>0.42</Rdvalue>
-      </Rd>
-    </kinetic_data>
+    <Rd>
+      <Rdelement>K</Rdelement>
+      <Rdvalue>0.42</Rdvalue>
+    </Rd>
+    <Rd>
+      <Rdelement>Na</Rdelement>
+      <Rdvalue>0.42</Rdvalue>
+    </Rd>
     <display_data>
       <red>245.0</red>
       <green>222.0</green>

@@ -26,9 +26,9 @@
 
   <xs:simpleType name="kineticTypetype">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="kinetic"/>
-      <xs:enumeration value="soluble"/>
-      <xs:enumeration value="thermo"/>
+      <xs:enumeration value="Generic"/>
+      <xs:enumeration value="ParrotKilloh"/>
+      <xs:enumeration value="Pozzolanic"/>
     </xs:restriction>
   </xs:simpleType>
 
@@ -75,7 +75,13 @@
     </xs:sequence>
   </xs:complexType>
    
-  <xs:complexType name="solutioncomptype">
+  <xs:complexType name="electrolytecomptype">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="gascomptype">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type = "iccomptype"/>
     </xs:sequence>
@@ -115,14 +121,26 @@
     <xs:sequence>
       <xs:element name="type" type="kineticTypetype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="scaledmass" type="positiveDoubletype"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="specificSurfaceArea" type="positiveDoubletype"/>
+      <xs:element minOccurs="1" maxOccurs="1" name="refSpecificSurfaceArea" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k1" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k2" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="n1" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" maxOccurs="1" name="Ea" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="activationEnergy" type="positiveDoubletype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype"/>
-      <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dissolutionRateConst" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstEarly" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstLate" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="siexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dfexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="dorexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="ohexp" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="sio2" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="al2o3" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="cao" type="positiveDoubletype"/>
+      <xs:element minOccurs="0" maxOccurs="1" name="loi" type="positiveDoubletype"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -160,6 +178,7 @@
       <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="stresscalc" type="integertype"/>
       <xs:element minOccurs="0" maxOccurs="1" name="weak" type="integertype"/>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype"/>
       <xs:element name="display_data" type="display_datatype"/>
     </xs:sequence>
   </xs:complexType>
@@ -170,13 +189,11 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="numentries" type="positiveIntegertype"/>
-        <xs:element name="blaine" type="positiveDoubletype"/>
-        <xs:element name="refblaine" type="positiveDoubletype"/>
-        <xs:element minOccurs="0" maxOccurs="1" name="wcRatio" type="positiveDoubletype"/>
         <xs:element name="temperature" type="positiveDoubletype"/>
         <xs:element name="reftemperature" type="positiveDoubletype"/>
         <xs:element name="saturated" type="integertype"/>
-        <xs:element minOccurs="0" maxOccurs="1" name="solution" type="solutioncomptype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="gas" type="gascomptype"/>
+        <xs:element minOccurs="0" maxOccurs="1" name="electrolyte" type="electrolytecomptype"/>
         <xs:element maxOccurs="unbounded" name="phase" type="phasetype"/>
       </xs:sequence>
     </xs:complexType>
