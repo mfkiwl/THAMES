@@ -150,8 +150,8 @@ public:
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parsePhase(xmlDocPtr doc, xmlNodePtr cur, int &numEntry,
-                  struct KineticData &kineticData);
+  void parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur, int &numEntry,
+                       struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for one phase in the XML input file.

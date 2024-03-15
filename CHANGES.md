@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 15 12:55:17 2024 | Merged some improvements made by Florin Nita |
 | Mar 14 18:10:02 2024 | Added new createmic program to make THAMES input microstructures directly |
 | Feb 22 09:15:56 2024 | Added Cemdata18 database files from EMPA to the repository; updated build instructions |
 | Jan 28 15:27:45 2024 | Minor changes to visualization programs |

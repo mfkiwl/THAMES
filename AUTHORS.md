@@ -5,18 +5,23 @@ Zachry Department of Civil and Environmental Engineering
 Texas A&M University
 College Station, Texas USA
 
+Florin Nita, PhD
+Zachry Department of Civil and Environmental Engineering
+Texas A&M University
+College Station, Texas USA
+
 Pan Feng, PhD
 Jiangsu Key Laboratory of Construction Materials
 School of Material Science and Engineering
 Southeast University
 Nanjing 211189, China
 
+# CONTRIBUTORS
+
 Zachary C. Grasley, PhD
 Zachry Department of Civil Engineering
 Texas A&M University
 College Station, Texas USA
-
-# CONTRIBUTORS
 
 Xiaodan Li, PhD
 Department of Civil and Environmental Engineering

@@ -35,7 +35,7 @@ int breakflocs(FILE *pfile, short int *p, short int *part, short int *in,
   long int m, m1, m2, mm, npartmin, npartmax, taggednpartmax;
   float pres, pver;
   float tiny = 1.0e-4;
-  char buff[MAXSTRING];
+  char buff[MaxString];
 
   /***
    *	Set up neighbor table for 3 x 3 x 3 box of neighbor pixels

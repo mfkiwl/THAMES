@@ -24,7 +24,7 @@
 #include <string.h>
 
 double mediansize(FILE *fpin) {
-  char ch, buff[MAXSTRING], instring[MAXSTRING];
+  char ch, buff[MaxString], instring[MaxString];
   double vollo, diamlo, diamhi, volhi;
   double answer = -1.0;
 

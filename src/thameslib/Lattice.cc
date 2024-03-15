@@ -412,9 +412,7 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
 
   int numMicroPhases = chemSys_->getNumMicroPhases();
 
-  vector<double> microPhaseMass;
-  microPhaseMass.clear();
-  microPhaseMass.resize(numMicroPhases, 0.0);
+  vector<double> microPhaseMass(numMicroPhases, 0.0);
 
   volumefraction_.clear();
   volumefraction_.resize(numMicroPhases, 0.0);
@@ -429,6 +427,7 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
   string myname;
   try {
     if (verbose_) {
+      cout << "Lattice::Lattice Calculating volume fractions now ..." << endl;
       for (ii = 0; ii < numMicroPhases; ii++) {
         cout << "Micro phase "
              << chemSys_->getMicroPhaseName(chemSys_->getMicroPhaseId(ii))
@@ -1656,8 +1655,8 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
 
             int nuclei = diff;
             double thresh =
-                (nuclei / (volumefraction_[ELECTROLYTEID] * site_.size()));
-            if (thresh < 1) {
+                ((double)nuclei) / ((double)count_.at(ELECTROLYTEID));
+            if (thresh < 1.0) {
 
               // Compose a shuffled list of all the water sites
 
@@ -1784,11 +1783,14 @@ void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
       volumefraction_.at(i) =
           ((double)(count_.at(i))) / ((double)(site_.size()));
       totcount += count_.at(i);
-      cout << "Lattice::changeMicrostructure Phase " << i
-           << " Target volume fraction was " << vfrac_next[i]
-           << " and actual is " << volumefraction_.at(i) << ", and " << totcount
-           << " of " << site_.size() << " sites claimed so far" << endl;
-      cout.flush();
+      if (verbose_) {
+        cout << "Lattice::changeMicrostructure Phase " << i
+             << " Target volume fraction was " << vfrac_next[i]
+             << " and actual is " << volumefraction_.at(i) << ", and "
+             << totcount << " of " << site_.size() << " sites claimed so far"
+             << endl;
+        cout.flush();
+      }
     }
   }
 

@@ -180,8 +180,8 @@ struct Surfpix {
 struct pshape {
     int shapetype;            /* SPHERE OR REALSHAPE */
     int ntheta,nphi;        /* Max. number of theta angles sampled */
-    char pathroot[MAXSTRING];      /* Path to shape set directory */
-    char shapeset[MAXSTRING];       /* Directory with shape information */
+    char pathroot[MaxString];      /* Path to shape set directory */
+    char shapeset[MaxString];       /* Directory with shape information */
     float *xg,*wg;
 };
 
@@ -217,15 +217,15 @@ Int3d Cement,Cemreal,Bbox;
 *    System size (pixels per edge), number of
 *    particles, and size of aggregate
 ***/
-long int Syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
-long int Binderpix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
-int Xsyssize = DEFAULTSYSTEMSIZE;
-int Ysyssize = DEFAULTSYSTEMSIZE;
-int Zsyssize = DEFAULTSYSTEMSIZE;
-int BoxXsize = DEFAULTSYSTEMSIZE;
-int BoxYsize = DEFAULTSYSTEMSIZE;
-int BoxZsize = DEFAULTSYSTEMSIZE;
-int Minsyssize = DEFAULTSYSTEMSIZE;
+long int Syspix = DefaultSystemSize * DefaultSystemSize * DefaultSystemSize;
+long int Binderpix = DefaultSystemSize * DefaultSystemSize * DefaultSystemSize;
+int Xsyssize = DefaultSystemSize;
+int Ysyssize = DefaultSystemSize;
+int Zsyssize = DefaultSystemSize;
+int BoxXsize = DefaultSystemSize;
+int BoxYsize = DefaultSystemSize;
+int BoxZsize = DefaultSystemSize;
+int Minsyssize = DefaultSystemSize;
 float Maxadjustxsize = 1.25;
 int Isizemag = 1;
 float Sizemag = 1.0;
@@ -254,7 +254,7 @@ float Volf[NPHASES],Surff[NPHASES];
 /***
 *    System resolution (micrometers per pixel edge)
 ***/
-float Res = DEFAULTRESOLUTION;
+float Res = DefaultResolution;
 
 /* VCCTL software version used to create input file */
 float Version;
@@ -303,11 +303,11 @@ static int Check = 1;
 static int Place = 2;
 
 /* File root for real shape anm files */
-char Pathroot[MAXSTRING],Shapeset[MAXSTRING];
+char Pathroot[MaxString],Shapeset[MaxString];
 char Filesep;
 
 struct lineitem {
-    char name[MAXSTRING];
+    char name[MaxString];
     float xlow;
     float xhi;
     float ylow;
@@ -362,7 +362,7 @@ int Wallpos = 50;
 /***
 *   File pointer for progress file
 ***/
-char Progfilename[MAXSTRING];
+char Progfilename[MaxString];
 FILE *Fprog;
 
 /***
@@ -443,7 +443,7 @@ int procair (long int nsearch);
 int movepix(long int ntomove, int ph1, int ph2);
 void sinter3d(int ph1id, int ph2id, float rhtarget);
 void stat3d(void);
-int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
+int rand3d(int phasein, int phaseout, char filecorr[MaxString], int nskip,
     float xpt, int *r, float ***filter, float *s, float *xr);
 void allmem(void);
 
@@ -454,7 +454,7 @@ int main(int argc, char *argv[])
     int userc;    /* User choice from menu */
     int fadchoice;
     int nseed;
-    char instring[MAXSTRING];
+    char instring[MaxString];
     register int ig,jg,kg;
 
     A = NULL;
@@ -675,7 +675,7 @@ void checkargs(int argc, char *argv[])
 ***/
 int getsystemsize(void)
 {
-    char instring[MAXSTRING];
+    char instring[MaxString];
 
     Xsyssize = Ysyssize = Zsyssize = 0;
     Res = 0.0;
@@ -696,9 +696,9 @@ int getsystemsize(void)
     BoxZsize = (int)(0.75*Zsyssize);
     printf("%d\n",Zsyssize);
 
-    if ((Xsyssize <= 0) || (Xsyssize > MAXSIZE)
-        || (Ysyssize <= 0) || (Ysyssize > MAXSIZE)
-        || (Zsyssize <= 0) || (Zsyssize > MAXSIZE)) {
+    if ((Xsyssize <= 0) || (Xsyssize > MaxSize)
+        || (Ysyssize <= 0) || (Ysyssize > MaxSize)
+        || (Zsyssize <= 0) || (Zsyssize > MaxSize)) {
 
         bailout("createmic","Bad system size specification");
         exit(1);
@@ -708,7 +708,7 @@ int getsystemsize(void)
     read_string(instring,sizeof(instring));
     Res = atof(instring);
     printf("%4.2f\n",Res);
-    if ((Res < HIGHRES - TINY) && (Res > LOWRES + TINY)) {
+    if ((Res < HighRes - TINY) && (Res > LowRes + TINY)) {
         bailout("createmic","Bad value for system resolution");
         exit(1);
     }
@@ -725,7 +725,7 @@ int getsystemsize(void)
 
     Syspix = (long int)(Xsyssize * Ysyssize * Zsyssize);
     Binderpix = Syspix;
-    Sizemag = ((float)Syspix) / (pow(((double)DEFAULTSYSTEMSIZE),3.0));
+    Sizemag = ((float)Syspix) / (pow(((double)DefaultSystemSize),3.0));
     Isizemag = (int)(Sizemag + 0.5);
     if (Isizemag > 1) {
         Npartc = (long)(NPARTC * Isizemag);
@@ -1581,7 +1581,7 @@ int genparticles(int numgen, long int *numeach, float *sizeeach, int *pheach)
     double factor,theta,phi,cosbeta,sinbeta,alpha,gamma,beta,total,abc;
     double realnum;
     fcomplex r1,ddd,icmplx;
-    char buff[MAXSTRING],filename[MAXSTRING],scratchname[MAXSTRING];
+    char buff[MaxString],filename[MaxString],scratchname[MaxString];
     struct lineitem line[MAXLINES];
     FILE *anmfile,*geomfile,*fscratch;
                                        
@@ -2529,8 +2529,8 @@ void create(void)
     float frad[NUMSIZES],tval,val1,val2,binder_vfrac,water_vfrac;
     float diam[NUMSIZES];
     float *xgvec,*wgvec;
-    char buff[MAXSTRING],buff1[MAXSTRING],gaussname[MAXSTRING];
-    char buff2[MAXSTRING],buff3[MAXSTRING],instring[MAXSTRING];
+    char buff[MaxString],buff1[MaxString],gaussname[MaxString];
+    char buff2[MaxString],buff3[MaxString],instring[MaxString];
     FILE *fgauss;
 
     /* initialize local arrays */
@@ -3302,7 +3302,7 @@ void makefloc(void)
     float degfloc;
     int targetnumflocs,numflocs,numdeleted;
     int blocked_by,dx,dy,dz,moveran,flochit;
-    char instring[MAXSTRING];
+    char instring[MaxString];
     struct particle *partpoint, *partkeep, *parttmp;
     int *index;
     
@@ -3690,7 +3690,7 @@ void connect(void)
     int *nmatx,*nmaty,*nmatz,*nnewx,*nnewy,*nnewz;
     int xcn,ycn,zcn,npix,x1,y1,z1,igood;
     int jnew,icur;
-    char instring[MAXSTRING];
+    char instring[MaxString];
 
     nmatx = nmaty = nmatz = NULL;
     nnewx = nnewy = nnewz = NULL;
@@ -3913,7 +3913,7 @@ void outmic(void)
 {
     int ix,iy,iz,valout;
     int totpix,iii,jjj,kkk;
-    char filen[MAXSTRING],filepart[MAXSTRING],filestruct[MAXSTRING],ch;
+    char filen[MaxString],filepart[MaxString],filestruct[MaxString],ch;
     FILE *outfile,*partfile,*infile;
 
     /*** Sanity check on placed pixels ***/
@@ -4393,11 +4393,11 @@ int distrib3d(void)
     int alumdo=1,k2so4do=1;
     float volin,rhtest,eps,corr_res,sumarea,sumvol;
     double rdesire;
-    char filecem[MAXSTRING];
-    char filec3s[MAXSTRING],filesil[MAXSTRING],filealum[MAXSTRING];
-    char filek2so4[MAXSTRING],filec34a[MAXSTRING];
-    char filena2so4[MAXSTRING];
-    char buff[MAXSTRING],instring[MAXSTRING];
+    char filecem[MaxString];
+    char filec3s[MaxString],filesil[MaxString],filealum[MaxString];
+    char filek2so4[MaxString],filec34a[MaxString];
+    char filena2so4[MaxString];
+    char buff[MaxString],instring[MaxString];
     FILE *testfile;
 
     corr_res = 0.0;
@@ -5401,7 +5401,7 @@ int countem(int xp, int yp, int zp, int phin)
 void sysinit(int ph1, int ph2)
 {
     int count,xl,yl,zl;
-    char buff[MAXSTRING];
+    char buff[MaxString];
 
     count = 0;
 
@@ -5496,7 +5496,7 @@ void sysinit(int ph1, int ph2)
 void sysscan(int ph1, int ph2)
 {
     int xd,yd,zd,curvval;
-    char buff[MAXSTRING];
+    char buff[MaxString];
 
     /* Scan all pixels in 3-D system */
 
@@ -6089,7 +6089,7 @@ void stat3d(void)
 *    Called by:    main routine
 *
 ***/
-int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
+int rand3d(int phasein, int phaseout, char filecorr[MaxString], int nskip,
     float xpt, int *r, float ***filter, float *s, float *xr)
 {
     register int i,j,k,ix,iy,iz;
@@ -6100,7 +6100,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
     float val2,t1,t2,x1,x2,u1,xrad,resmax,resmin;
     float filval,radius,sect,sumtot,vcrit;
     long int xtot;
-    char buff[MAXSTRING],instring[MAXSTRING];
+    char buff[MaxString],instring[MaxString];
     FILE *corrfile;
 
     /***
@@ -6209,7 +6209,7 @@ int rand3d(int phasein, int phaseout, char filecorr[MAXSTRING], int nskip,
 
     step = (int)(Corr_res/Res);
     diff = (float)step;
-    if (Res < LOWRES - 0.05 && step > 0) {
+    if (Res < LowRes - 0.05 && step > 0) {
         for (j = 0; j < ido; j++) {
             ilo = step * j;
             ihi = step * (j + 1);
@@ -7091,7 +7091,7 @@ int distfa(int fadchoice)
     float probasg,probcacl2,probsio2;
     float probca2s,probc2as,probk6a2s;
     float probc3a,prph,probcas2,probanh;
-    char instring[MAXSTRING];
+    char instring[MaxString];
 
     totcnt = 0;
     cas2cnt = anhcnt = c3acnt = ascnt = cacl2cnt = quartzcnt = inertcnt = 0;

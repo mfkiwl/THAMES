@@ -42,17 +42,17 @@ int pix2z(long int pid, int xsize, int ysize);
 int calcporedist3d(char *name) {
   register int i1, i2, i3;
   int iout, oiout, status;
-  char instring[MAXSTRING];
-  long int syspix = DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE * DEFAULTSYSTEMSIZE;
-  int xsize = DEFAULTSYSTEMSIZE;
-  int ysize = DEFAULTSYSTEMSIZE;
-  int zsize = DEFAULTSYSTEMSIZE;
+  char instring[MaxString];
+  long int syspix = DefaultSystemSize * DefaultSystemSize * DefaultSystemSize;
+  int xsize = DefaultSystemSize;
+  int ysize = DefaultSystemSize;
+  int zsize = DefaultSystemSize;
   float res = 1.0;
   float sizemag = 1.0;
   int isizemag = 1;
   float resmag = 1.0;
   int iresmag = 1;
-  char filename[MAXSTRING];
+  char filename[MaxString];
   long int i, *pores, *ndiam, porecnt, index, ns, maxsph, nsph;
   int ix, iy, iz, max_allowed_diam, mindim, nd, failed, nrad;
   int xc, yc, zc;
@@ -89,9 +89,9 @@ int calcporedist3d(char *name) {
 
   syspix = (long int)(xsize * ysize * zsize);
   sizemag =
-      pow(((float)syspix) / (pow(((float)DEFAULTSYSTEMSIZE), 3.0)), (1. / 3.));
+      pow(((float)syspix) / (pow(((float)DefaultSystemSize), 3.0)), (1. / 3.));
   isizemag = (int)(sizemag + 0.5);
-  resmag = ((float)DEFAULTRESOLUTION) / res;
+  resmag = ((float)DefaultResolution) / res;
   iresmag = (int)(resmag + 0.5);
 
   /***

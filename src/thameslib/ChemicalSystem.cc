@@ -764,7 +764,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
       parseGasComp(doc, cur);
     } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
       try {
-        parsePhase(doc, cur, testnumEntries, phaseids, phaseData);
+        parseMicroPhase(doc, cur, testnumEntries, phaseids, phaseData);
       } catch (FileException fex) {
         fex.printException();
         cout << endl;
@@ -933,9 +933,9 @@ void ChemicalSystem::parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
   phaseids.insert(make_pair(pname, pid));
 }
 
-void ChemicalSystem::parsePhase(xmlDocPtr doc, xmlNodePtr cur, int numEntries,
-                                map<string, int> phaseids,
-                                PhaseData &phaseData) {
+void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
+                                     int numEntries, map<string, int> phaseids,
+                                     PhaseData &phaseData) {
   xmlChar *key;
 
   string poreSizeFileName;

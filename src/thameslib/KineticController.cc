@@ -214,7 +214,7 @@ void KineticController::parseDoc(const string &docName) {
         /// Each phase is a more complicated grouping of data that
         /// has a separate method for parsing.
 
-        parsePhase(doc, cur, numEntry, kineticData);
+        parseMicroPhase(doc, cur, numEntry, kineticData);
       }
       cur = cur->next;
     }
@@ -238,8 +238,9 @@ void KineticController::parseDoc(const string &docName) {
   return;
 }
 
-void KineticController::parsePhase(xmlDocPtr doc, xmlNodePtr cur, int &numEntry,
-                                   struct KineticData &kineticData) {
+void KineticController::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
+                                        int &numEntry,
+                                        struct KineticData &kineticData) {
   xmlChar *key;
   int proposedgemphaseid, proposedDCid;
   int testgemid, testdcid;

@@ -26,13 +26,14 @@ int main(int argc, char **argv) {
 
   int choice, simtype;
   string buff = "";
-  ChemicalSystem *ChemSys;
-  Solution *Solut;
-  Lattice *Mic;
-  ThermalStrain *ThermalStrainSolver;
-  AppliedStrain *AppliedStrainSolver;
+  ChemicalSystem *ChemSys = NULL;
+  Solution *Solut = NULL;
+  Lattice *Mic = NULL;
+  ThermalStrain *ThermalStrainSolver = NULL;
+  AppliedStrain *AppliedStrainSolver = NULL;
+  Controller *Ctrl = NULL;
 
-  KineticController *KController;
+  KineticController *KController = NULL;
 
   //
   // Main menu where user decides what kind of simulation this will be.
@@ -136,11 +137,15 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
-    delete Solut;
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   } catch (GEMException ex) {
     ex.printException();
-    delete Solut;
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   }
 
@@ -175,8 +180,12 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
          << endl;
-    delete ChemSys;
-    delete Solut;
+    if (ChemSys) {
+      delete ChemSys;
+    }
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   }
 
@@ -210,9 +219,15 @@ int main(int argc, char **argv) {
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in ThermalStrain constructor: "
            << ba.what() << endl;
-      delete Mic;
-      delete ChemSys;
-      delete Solut;
+      if (Mic) {
+        delete Mic;
+      }
+      if (ChemSys) {
+        delete ChemSys;
+      }
+      if (Solut) {
+        delete Solut;
+      }
       exit(1);
     }
 
@@ -232,10 +247,18 @@ int main(int argc, char **argv) {
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in AppliedStrain constructor: "
            << ba.what() << endl;
-      delete ThermalStrainSolver;
-      delete Mic;
-      delete ChemSys;
-      delete Solut;
+      if (ThermalStrainSolver) {
+        delete ThermalStrainSolver;
+      }
+      if (Mic) {
+        delete Mic;
+      }
+      if (ChemSys) {
+        delete ChemSys;
+      }
+      if (Solut) {
+        delete Solut;
+      }
       exit(1);
     }
 
@@ -243,7 +266,6 @@ int main(int argc, char **argv) {
   }
 
   string jobroot, par_filename, statfilename;
-  Controller *Ctrl;
   if (VERBOSE) {
     cout << "About to enter KineticController constructor" << endl;
     cout.flush();
@@ -259,14 +281,21 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
-    if (choice == SULFATE_ATTACK) {
+    if (AppliedStrainSolver) {
       delete AppliedStrainSolver;
+    }
+    if (ThermalStrainSolver) {
       delete ThermalStrainSolver;
     }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
+    if (Mic) {
+      delete Mic;
+    }
+    if (ChemSys) {
+      delete ChemSys;
+    }
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   }
 
@@ -298,27 +327,45 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
+    if (KController) {
+      delete KController;
+    }
+    if (AppliedStrainSolver) {
       delete AppliedStrainSolver;
+    }
+    if (ThermalStrainSolver) {
       delete ThermalStrainSolver;
     }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
+    if (Mic) {
+      delete Mic;
+    }
+    if (ChemSys) {
+      delete ChemSys;
+    }
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   } catch (FileException fex) {
     fex.printException();
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
+    if (KController) {
+      delete KController;
+    }
+    if (AppliedStrainSolver) {
       delete AppliedStrainSolver;
+    }
+    if (ThermalStrainSolver) {
       delete ThermalStrainSolver;
     }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
+    if (Mic) {
+      delete Mic;
+    }
+    if (ChemSys) {
+      delete ChemSys;
+    }
+    if (Solut) {
+      delete Solut;
+    }
     exit(1);
   }
 
@@ -342,56 +389,12 @@ int main(int argc, char **argv) {
     Ctrl->doCycle(statfilename, choice);
   } catch (GEMException gex) {
     gex.printException();
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
-      delete AppliedStrainSolver;
-      delete ThermalStrainSolver;
-    }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
-    delete Ctrl;
-    exit(1);
   } catch (DataException dex) {
     dex.printException();
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
-      delete AppliedStrainSolver;
-      delete ThermalStrainSolver;
-    }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
-    delete Ctrl;
-    exit(1);
   } catch (EOBException ex) {
     ex.printException();
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
-      delete AppliedStrainSolver;
-      delete ThermalStrainSolver;
-    }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
-    delete Ctrl;
-    exit(1);
   } catch (MicrostructureException mex) {
     mex.printException();
-    delete KController;
-    if (choice == SULFATE_ATTACK) {
-      delete AppliedStrainSolver;
-      delete ThermalStrainSolver;
-    }
-    delete Mic;
-    delete ChemSys;
-    delete ThermalStrainSolver;
-    delete AppliedStrainSolver;
-    delete Ctrl;
-    exit(1);
   }
 
   //
@@ -413,33 +416,26 @@ int main(int argc, char **argv) {
   // Delete the dynamically allocated memory
   //
 
-  if (VERBOSE) {
-    cout << "About to delete Ctrl pointer... ";
-    cout.flush();
+  if (Ctrl) {
     delete Ctrl;
-    cout << "Done!" << endl;
-    cout.flush();
-
-    cout << "About to delete KController pointer... ";
-    cout.flush();
+  }
+  if (KController) {
     delete KController;
-    cout << "Done!" << endl;
-
-    cout << "About to delete Mic pointer... ";
-    cout.flush();
+  }
+  if (AppliedStrainSolver) {
+    delete AppliedStrainSolver;
+  }
+  if (ThermalStrainSolver) {
+    delete ThermalStrainSolver;
+  }
+  if (Mic) {
     delete Mic;
-    cout << "Done!" << endl;
-
-    cout << "About to delete ChemSys pointer... ";
-    cout.flush();
+  }
+  if (ChemSys) {
     delete ChemSys;
-    cout << "Done!" << endl;
-    cout.flush();
-  } else {
-    delete Ctrl;
-    delete KController;
-    delete Mic;
-    delete ChemSys;
+  }
+  if (Solut) {
+    delete Solut;
   }
 
   return 0;

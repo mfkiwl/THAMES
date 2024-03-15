@@ -25,10 +25,15 @@
  *	for identifying the version under which a
  *	particular file was created
  ***/
-#define VERSIONSTRING "#THAMES:Version:"
-#define VERSIONNUMBER "2.6"
+const char *VersionString = "#THAMES:Version:";
+const char *VersionNumber = "2.6";
+const char *XSizeString = "#THAMES:X_Size:";
+const char *YSizeString = "#THAMES:Y_Size:";
+const char *ZSizeString = "#THAMES:Z_Size:";
+const char *ImgResString = "#THAMES:Image_Resolution:";
 
-#define MAXSTRING 500 /* maximum length of strings */
+/* maximum length of strings */
+const int MaxString = 500;
 
 /*******************************************************
  * Variables related to system size and
@@ -36,24 +41,19 @@
  *******************************************************/
 
 /* maximum system size in pixels per dimension */
-#define MAXSIZE 400
-#define DEFAULTSYSTEMSIZE 100
+const int MaxSize = 400;
+const int DefaultSystemSize = 100;
 
-#define LOWRES 1.00
-#define MEDLORES 0.75
-#define MEDHIRES 0.50
-#define HIGHRES 0.25
+const float LowRes = 1.00;
+const float HighRes = 0.25;
 
-#define DEFAULTRESOLUTION LOWRES
-
-#define XSIZESTRING "#THAMES:X_Size:"
-#define YSIZESTRING "#THAMES:Y_Size:"
-#define ZSIZESTRING "#THAMES:Z_Size:"
-#define IMGRESSTRING "#THAMES:Image_Resolution:"
+const float DefaultResolution = LowRes;
 
 /***
  *	Pre-defined strings for info files
  ***/
+/*** STOPPED HERE ***/
+
 #define ONEPIXBIASSTRING "One_pixel_bias:"
 #define AGGTHICKSTRING "Aggregate_thickness:"
 #define PFILESTRING "Particle_file:"

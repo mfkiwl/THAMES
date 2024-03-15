@@ -26,5 +26,5 @@
 
 void fread_string(FILE *fpin, char *chstr) {
   fflush(stdout);
-  fgets(chstr, (int)MAXSTRING, fpin);
+  fgets(chstr, (int)MaxString, fpin);
 }
