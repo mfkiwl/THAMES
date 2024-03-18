@@ -644,7 +644,8 @@ void printHelp(void) {
   cout << "If  more that one file matches the supplied root name," << endl;
   cout << "they will all be processed as time frames, producing" << endl;
   cout << "one xyz file for each img file." << endl << endl;
-  cout << "Usage: viz -i,--input rootname" << endl;
+  cout << "Usage: viz -i,--input rootname -f format -t,--transparency value"
+       << endl;
   cout << "       rootname is everything before .img in the file name" << endl
        << endl;
   return;
