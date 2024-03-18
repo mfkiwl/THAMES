@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 17 22:08:20 2024 | Removed createmic from main branch |
 | Mar 15 14:09:23 2024 | Updated test file input |
 | Mar 15 12:55:17 2024 | Merged some improvements made by Florin Nita |
 | Mar 14 18:10:02 2024 | Added new createmic program to make THAMES input microstructures directly |
