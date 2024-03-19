@@ -2557,7 +2557,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
       << capillaryporevolumefraction_ - volumefraction_.at(VOIDID) << endl;
   out << "Nanopore volume fraction (<= 100 nm) = "
       << subvoxelporevolumefraction_ << endl;
-  out << "Total pore volume fraction = " << pore_volfrac << endl << endl;
+  out << "Total pore volume fraction = " << pore_volfrac << endl;
   out << "Total void volume fraction = " << volumefraction_.at(VOIDID) << endl;
   out << "Pore size saturation data:" << endl;
   out << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
@@ -2565,6 +2565,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
     if (masterporevolume_[i].volume > 0.0) {
       out << masterporevolume_[i].diam << "," << masterporevolume_[i].volume
           << "," << masterporevolume_[i].volfrac << endl;
+      out.flush();
     }
   }
 
@@ -2578,6 +2579,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   double capspace_volfrac = capvoid_volfrac + capwater_volfrac;
   out << ">" << masterporevolume_[masterporevolume_.size() - 1].diam << ","
       << capspace_volfrac << "," << (1.0 - volumefraction_.at(VOIDID)) << endl;
+  out.flush();
 
   out.close();
 
