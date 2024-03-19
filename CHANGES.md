@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 19 13:33:18 2024 | viz program now creates one master xyz file with time stamps for Ovito |
 | Mar 17 22:08:20 2024 | Removed createmic from main branch |
 | Mar 15 14:09:23 2024 | Updated test file input |
 | Mar 15 12:55:17 2024 | Merged some improvements made by Florin Nita |

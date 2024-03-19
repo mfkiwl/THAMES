@@ -179,6 +179,8 @@ int writeXYZFile(const string &times) {
   vector<float> blue((int)(NPHASES), 0.0);
   vector<float> green((int)(NPHASES), 0.0);
 
+  ofstream out;
+
   if (TypeName == "thames") {
     getTcolors(red, green, blue);
   } else {
@@ -186,11 +188,10 @@ int writeXYZFile(const string &times) {
   }
 
   string outname = RootName;
-  outname.append("_");
-  outname.append(times);
+  outname.append("_Frames");
   outname.append(".xyz");
 
-  ofstream out(outname.c_str());
+  out.open(outname.c_str(), ios::app);
 
   /*
   int numvox = countSolid();
@@ -200,7 +201,10 @@ int writeXYZFile(const string &times) {
 
   // Write the file headers
   out << numvox << endl; // Number of voxels to visualize
-  out << "Time:\t" << ftime << endl;
+  out << "Lattice=\"" << (float)Xsize << " 0.0 0.0 0.0 " << (float)Ysize
+      << " 0.0 0.0 0.0 " << (float)Zsize << "\" ";
+  out << "Properties=pos:R:3:color:R:3:transparency:R:1 ";
+  out << "Time=" << ftime << endl;
 
   // Loop over all voxels and write out the solid ones
 
@@ -220,16 +224,17 @@ int writeXYZFile(const string &times) {
                << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
                << "\t0.0" << endl;
           */
-          out << red[idx] << "\t" << green[idx] << "\t" << blue[idx] << "\t"
-              << x << "\t" << y << "\t" << z << "\t0.0" << endl;
+          out << x << "\t" << y << "\t" << z << "\t0.0\t" << red[idx] << "\t"
+              << green[idx] << "\t" << blue[idx] << "\t0.0" << endl;
         } else {
           /*
           cout << "Phase " << idx << ", " << red[idx] << "\t" << green[idx]
                << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
                << "\t" << transparency << endl;
           */
-          out << red[idx] << "\t" << green[idx] << "\t" << blue[idx] << "\t"
-              << x << "\t" << y << "\t" << z << "\t" << transparency << endl;
+          out << x << "\t" << y << "\t" << z << "\t0.0\t" << red[idx] << "\t"
+              << green[idx] << "\t" << blue[idx] << "\t" << transparency
+              << endl;
         }
       }
     }
