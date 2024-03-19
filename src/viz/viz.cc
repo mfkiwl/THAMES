@@ -193,10 +193,6 @@ int writeXYZFile(const string &times) {
 
   out.open(outname.c_str(), ios::app);
 
-  /*
-  int numvox = countSolid();
-  */
-
   int numvox = Xsize * Ysize * Zsize;
 
   // Write the file headers
@@ -522,123 +518,32 @@ void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
 }
 
 void getTcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
-  for (int i = 0; i < NPHASES; ++i) {
-    switch (i) {
-    case 0: // THAMES Void
-      red[i] = (float)(R_BLACK) / (float)(SAT);
-      green[i] = (float)(R_BLACK) / (float)(SAT);
-      blue[i] = (float)(R_BLACK) / (float)(SAT);
-      break;
-    case 1: // THAMES saturated porosity
-      red[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      green[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      blue[i] = (float)(R_CHARCOAL) / (float)(SAT);
-      break;
-    case 14: // THAMES portlandite
-      red[i] = (float)(R_BLUE) / (float)(SAT);
-      green[i] = (float)(G_BLUE) / (float)(SAT);
-      blue[i] = (float)(B_BLUE) / (float)(SAT);
-      break;
-    case 11: // THAMES CSH
-      red[i] = (float)(R_WHEAT) / (float)(SAT);
-      green[i] = (float)(G_WHEAT) / (float)(SAT);
-      blue[i] = (float)(B_WHEAT) / (float)(SAT);
-      break;
-    case 2: // THAMES alite
-      red[i] = (float)(R_BROWN) / (float)(SAT);
-      green[i] = (float)(G_BROWN) / (float)(SAT);
-      blue[i] = (float)(B_BROWN) / (float)(SAT);
-      break;
-    case 5: // THAMES belite
-      red[i] = (float)(R_CFBLUE) / (float)(SAT);
-      green[i] = (float)(G_CFBLUE) / (float)(SAT);
-      blue[i] = (float)(B_CFBLUE) / (float)(SAT);
-      break;
-    case 12: // THAMES calcite
-      red[i] = (float)(R_CFBLUE) / (float)(SAT);
-      green[i] = (float)(G_CFBLUE) / (float)(SAT);
-      blue[i] = (float)(B_CFBLUE) / (float)(SAT);
-      break;
-    case 3: // THAMES C3A
-      red[i] = (float)(R_GRAY) / (float)(SAT);
-      green[i] = (float)(G_GRAY) / (float)(SAT);
-      blue[i] = (float)(B_GRAY) / (float)(SAT);
-      break;
-    case 6: // THAMES C4AF
-      red[i] = (float)(R_WHITE) / (float)(SAT);
-      green[i] = (float)(G_WHITE) / (float)(SAT);
-      blue[i] = (float)(B_WHITE) / (float)(SAT);
-      break;
-      //          case 8:  // THAMES arcanite
-      //              red[i] = (float)(R_RED)/(float)(SAT);
-      //              green[i] = (float)(G_RED)/(float)(SAT);
-      //              blue[i] = (float)(B_RED)/(float)(SAT);
-      //              break;
-    case 10: // THAMES thenardite
-      red[i] = (float)(R_SALMON) / (float)(SAT);
-      green[i] = (float)(G_SALMON) / (float)(SAT);
-      blue[i] = (float)(B_SALMON) / (float)(SAT);
-      break;
-    case 7: // THAMES gypsum
-      red[i] = (float)(R_YELLOW) / (float)(SAT);
-      green[i] = (float)(G_YELLOW) / (float)(SAT);
-      blue[i] = (float)(B_YELLOW) / (float)(SAT);
-      break;
-    case 9: // THAMES hemihydrate
-      red[i] = (float)(R_LYELLOW) / (float)(SAT);
-      green[i] = (float)(G_LYELLOW) / (float)(SAT);
-      blue[i] = (float)(B_LYELLOW) / (float)(SAT);
-      break;
-      //          case 14: // THAMES hemianh
-      //              red[i] = (float)(R_LYELLOW)/(float)(SAT);
-      //              green[i] = (float)(G_LYELLOW)/(float)(SAT);
-      //              blue[i] = (float)(B_LYELLOW)/(float)(SAT);
-      //              break;
-    case 4: // THAMES anhydrite.
-      red[i] = (float)(R_GOLD) / (float)(SAT);
-      green[i] = (float)(G_GOLD) / (float)(SAT);
-      blue[i] = (float)(B_GOLD) / (float)(SAT);
-      break;
-    case 8: // THAMES silica fume
-      red[i] = (float)(R_AQUA) / (float)(SAT);
-      green[i] = (float)(G_AQUA) / (float)(SAT);
-      blue[i] = (float)(B_AQUA) / (float)(SAT);
-      break;
-    case 15: // THAMES AFT
-      red[i] = (float)(127.0) / (float)(SAT);
-      green[i] = (float)(0.0) / (float)(SAT);
-      blue[i] = (float)(255.0) / (float)(SAT);
-      break;
-    case 16: // THAMES MONOSULF
-      red[i] = (float)(238.0) / (float)(SAT);
-      green[i] = (float)(174.0) / (float)(SAT);
-      blue[i] = (float)(238.0) / (float)(SAT);
-      break;
-    case 19: // THAMES AFMC
-      red[i] = (float)(R_OLIVE) / (float)(SAT);
-      green[i] = (float)(G_OLIVE) / (float)(SAT);
-      blue[i] = (float)(B_OLIVE) / (float)(SAT);
-      break;
-    case 18: // THAMES AFM
-      red[i] = (float)(R_DOLIVE) / (float)(SAT);
-      green[i] = (float)(G_DOLIVE) / (float)(SAT);
-      blue[i] = (float)(B_DOLIVE) / (float)(SAT);
-      break;
-      //          case 19:
-      //              red[i] = (float)(26.0)/(float)(SAT);
-      //              green[i] = (float)(103.0)/(float)(SAT);
-      //              blue[i] = (float)(26.0)/(float)(SAT);
-      //              break;
-    case 13: // THAMES HYDROTALC
-      red[i] = (float)(200.0) / (float)(SAT);
-      green[i] = (float)(200.0) / (float)(SAT);
-      blue[i] = (float)(208.0) / (float)(SAT);
-      break;
-    default:
-      red[i] = (float)(R_LAVENDER) / (float)(SAT);
-      green[i] = (float)(G_LAVENDER) / (float)(SAT);
-      blue[i] = (float)(B_LAVENDER) / (float)(SAT);
-    }
+
+  string colorscheme = RootName;
+  char comma1, comma2, comma3;
+  colorscheme.append("_Colors.csv");
+  int numMicroPhases;
+  int phaseid;
+  float rval, gval, bval;
+
+  ifstream in;
+  in.open(colorscheme.c_str(), ios::app);
+  if (!in.is_open()) {
+    cout << endl << endl;
+    cout << "ERROR: THAMES color scheme file " << colorscheme
+         << " does not exist" << endl;
+  }
+
+  in >> numMicroPhases;
+  red.resize(numMicroPhases, 0.0);
+  green.resize(numMicroPhases, 0.0);
+  blue.resize(numMicroPhases, 0.0);
+
+  for (int i = 0; i < numMicroPhases; ++i) {
+    in >> phaseid >> comma1 >> rval >> comma2 >> gval >> comma3 >> bval;
+    red[phaseid] = rval;
+    green[phaseid] = gval;
+    blue[phaseid] = bval;
   }
 
   return;

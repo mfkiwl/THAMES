@@ -246,6 +246,14 @@ void Controller::doCycle(const string &statfilename, int choice) {
   bool capwater = true; // True if some capillary water is available
   time_index = 0;
 
+  ///
+  /// Output a file that directly links the microstructure ids to their
+  /// rgb color.  This is only for easier image processing after the simulation
+  /// is finished so we don't have to read the xml file
+  ///
+
+  lattice_->writeMicroColors(jobroot_);
+
   for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
     ///

@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 19 14:49:02 2024 | Better handling of color scheme for visualization of microstructure |
 | Mar 19 13:41:50 2024 | Very minor changes to output of pore size distribution in Lattice.cc |
 | Mar 19 13:33:18 2024 | viz program now creates one master xyz file with time stamps for Ovito |
 | Mar 17 22:08:20 2024 | Removed createmic from main branch |

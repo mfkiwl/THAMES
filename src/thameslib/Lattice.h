@@ -942,11 +942,22 @@ public:
                                  const string &root);
 
   /**
+  @brief Write the microstructure colors to a file
+
+  This is done to save processing the chemistry.xml file just to get the colors
+  and will make post-processing of images easier.
+
+  @param root is the root name of the output file to create
+  */
+  void writeMicroColors(const string &root);
+
+  /**
   @brief Write the 3D microstructure to a file.
 
   The microstructure output file will indicate the phase id at each site.
 
   @param curtime is the current time in days
+  @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
   void writeLattice(double curtime, const int simtype, const string &root);

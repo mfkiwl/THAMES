@@ -2586,6 +2586,39 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   return;
 }
 
+void Lattice::writeMicroColors(const string &root) {
+  unsigned int i, j, k;
+  string ofileName(root);
+  ofileName.append("_Colors.csv");
+
+  ofstream out(ofileName.c_str());
+  try {
+    if (!out.is_open()) {
+      throw FileException("Lattice", "writeLattice", ofileName,
+                          "Could not open");
+    }
+  } catch (FileException fex) {
+    fex.printException();
+    exit(1);
+  }
+
+  int numMicroPhases = chemSys_->getNumMicroPhases();
+  int microPhaseId;
+  double red, green, blue;
+  vector<double> colors;
+  out << numMicroPhases << endl;
+  for (int i = 0; i < numMicroPhases; i++) {
+    microPhaseId = chemSys_->getMicroPhaseId(i);
+    colors = chemSys_->getColor(microPhaseId);
+    out << chemSys_->getMicroPhaseName(microPhaseId) << "," << colors[0] << ","
+        << colors[1] << "," << colors[2] << endl;
+  }
+
+  out.flush();
+  out.close();
+  return;
+}
+
 void Lattice::writeLattice(double curtime, const int simtype,
                            const string &root) {
   unsigned int i, j, k;
