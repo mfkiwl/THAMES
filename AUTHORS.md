@@ -6,7 +6,7 @@ Texas A&M University
 College Station, Texas USA
 
 Florin Nita, PhD
-Zachry Department of Civil and Environmental Engineering
+  Zachry Department of Civil and Environmental Engineering
 Texas A&M University
 College Station, Texas USA
 
