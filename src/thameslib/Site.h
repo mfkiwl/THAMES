@@ -169,6 +169,10 @@ public:
     return;
   }
 
+  vector<Site *> getNb(){
+      return nb_;
+  }
+
   /**
   @brief Get the index number of the site (position in the 1D Lattice vector).
 

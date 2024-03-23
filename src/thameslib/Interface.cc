@@ -212,6 +212,16 @@ bool Interface::addGrowthSite(Site *loc) {
   return answer;
 }
 
+bool Interface::addGrowthSiteMod(int id, int aff) {
+
+    bool answer = false;
+
+    Isite tisite(id, aff);
+    growthSites_.push_back(tisite);
+
+    return answer;
+}
+
 bool Interface::addDissolutionSite(Site *loc) {
   bool answer = false;
   bool found = false;

@@ -26,6 +26,7 @@ private:
   unsigned int id_; /**< The id of the corresponding Site */
   int affinity_;    /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
+  double prob_;
 
 public:
   /**
@@ -83,6 +84,9 @@ public:
   @param num is the growth affinity of the corresponding Site object
   */
   void setAffinity(int num) { affinity_ = num; }
+
+  void setProb(double num) {prob_ = num; };
+  double getProb(void) {return prob_; };
 
   /**
   @brief Set the verbose flag

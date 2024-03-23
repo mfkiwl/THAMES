@@ -520,7 +520,6 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
   try {
     if (foundxml != string::npos) {
       parseDoc(interfaceFileName);
-
       microPhaseVolume_.resize(numMicroPhases_, 0.0);
       microPhaseMass_.resize(numMicroPhases_, 0.0);
       microPhasePorosity_.resize(numMicroPhases_, 0.0);
@@ -766,7 +765,8 @@ void ChemicalSystem::parseDoc(const string &docName) {
       try {
         parseMicroPhase(doc, cur, testnumEntries, phaseids, phaseData);
       } catch (FileException fex) {
-        fex.printException();
+        //fex.printException();
+        throw fex;
         cout << endl;
       } catch (GEMException gex) {
         gex.printException();
@@ -987,7 +987,8 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       try {
         parsePoreSizeDistribution(poreSizeFileName, phaseData);
       } catch (FileException fex) {
-        fex.printException();
+        //fex.printException();
+        throw fex;
         cout << endl;
       }
       xmlFree(key);

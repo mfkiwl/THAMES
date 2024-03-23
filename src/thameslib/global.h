@@ -6,6 +6,12 @@
 #ifndef GLOBALH
 #define GLOBALH
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
+#include "Exceptions.h"
+#include <stdexcept>
 #include <string>
 
 using namespace std;
@@ -161,12 +167,5 @@ const double COLORSATVAL = 255.0;
 // Flags for data formats (NOT USED)
 const int GEMSFORMAT = 0;
 const int EXTERNALFORMAT = 0;
-
-#include "Exceptions.h"
-#include <stdexcept>
-
-#ifndef DEBUG
-#define DEBUG
-#endif
 
 #endif

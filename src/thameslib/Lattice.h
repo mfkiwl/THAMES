@@ -688,6 +688,23 @@ public:
   int growPhase(unsigned int phaseid, int numtoadd);
 
   /**
+  @brief Add a prescribed number of sites of a given phase to the
+  microstructure.
+
+  This method gets a list of all the <i>potential</i> growth sites. A site from
+  this list is selected with a probability computed based on the local
+  configuration: affinities that take into account the nature of the phase occupying
+  this site and phases occupying its nearest and next nearest neighbours.
+  Once switching the phase id of this site, the lists of growth sites and
+  dissolution sites are updated to account for the new local geometry.
+
+  @param phaseid is the id of the microstructure phase to add
+  @param numtoadd is the number of sites to switch to this phase
+  @return the actual number of sites that were changed
+  */
+  int growPhaseMod(unsigned int phaseid, int numtoadd);
+
+  /**
   @brief Remove a prescribed number of sites of a given phase from the
   microstructure.
 
@@ -891,6 +908,8 @@ public:
   void changeMicrostructure(double time, const int simtype, bool isFirst,
                             bool &capWater);
 
+  void changeMicrostructureMod(double time, const int simtype, bool isFirst,
+                            bool &capWater);
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
 

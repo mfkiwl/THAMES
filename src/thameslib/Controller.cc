@@ -324,7 +324,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
     ////
 
     try {
-      lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
+      //lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
+      lattice_->changeMicrostructureMod(time_[i], sim_type_, isFirst, capwater);
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);

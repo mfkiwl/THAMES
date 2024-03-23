@@ -182,6 +182,12 @@ void writeReport(const string &jobroot, struct tm *itime,
                  const string &mfileName, const string &parfilename,
                  const string &csname, ChemicalSystem *csys, Controller *ctr);
 
+/**
+@brief write the timing data
+@param time_ & lt_ are the start time
+*/
+void timeCount(clock_t time_, time_t lt_);
+
 using namespace std;
 
 #endif
