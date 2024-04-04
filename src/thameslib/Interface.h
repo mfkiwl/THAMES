@@ -154,7 +154,7 @@ growthSites_
   */
   bool addGrowthSite(Site *loc);
 
-  bool addGrowthSiteMod(int id, int aff);
+  bool addGrowthSiteMod_newInterface(int id, int aff);
 
   /**
   @brief Add a site to the list of sites where dissolution can occur at the

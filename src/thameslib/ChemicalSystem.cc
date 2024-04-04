@@ -570,6 +570,8 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
     cout << endl;
   }
   vector<double> solutionSI = solut_->getSI();
+  
+  //checkChemSys();
 }
 
 bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
@@ -2273,4 +2275,152 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   }
 
   return timesGEMFailed_;
+}
+
+//*@******************************************
+
+void ChemicalSystem::checkChemSys(void)
+{
+    int i,j,size,size_sec;
+
+    cout << "" <<  endl;
+    cout << "numMicroPhases_ " << numMicroPhases_ << endl;
+    cout << "nnumICs_/numDCs_ " << numICs_ << " / " << numDCs_ << endl;
+    cout << "numGEMPhases_ " << numGEMPhases_ << endl;
+    cout << "numSolutionPhases_ " << numSolutionPhases_ << endl;
+    cout << " " <<  endl;
+    cout << "****************" <<  endl;
+    cout << "vectors" << endl;
+    size = microPhaseName_.size();
+    cout << "microPhaseName_.size " << microPhaseName_.size() << endl;
+    for(i = 0; i < size; i++){
+        cout << "   microPhaseName_[" << i << "] " << microPhaseName_[i] << endl;
+    }
+    cout << " " <<  endl;
+    size = ICName_.size();
+    cout << "ICName_.size " << ICName_.size() << endl;
+    for(i = 0; i < size; i++){
+        cout << "   ICName_[" << i << "] " << ICName_[i] << endl;
+    }
+    size = DCName_.size();
+    cout << "DCName_.size " << DCName_.size() << endl;
+    for(i = 0; i < size; i++){
+        cout << "   DCName_[" << i << "] " << DCName_[i] << endl;
+    }
+    cout << " " <<  endl;
+    size = GEMPhaseName_.size();
+    cout << "GEMPhaseName_.size " << GEMPhaseName_.size() << endl;
+    for(i = 0; i < size; i++){
+        cout << "   GEMPhaseName_[" << i << "] " << GEMPhaseName_[i] << endl;
+    }
+    size = microPhaseId_.size();
+    cout << "microPhaseId_.size " << microPhaseId_.size() << endl;
+    for(i = 0; i < size; i++){
+        cout << "   microPhaseId_[" << i << "] " << microPhaseId_[i] << endl;
+    }
+
+    cout << " " <<  endl;
+    cout << "****************" <<  endl;
+    cout << "maps" << endl;
+    vector<int>second;
+    //map<int,vector<int> > microPhaseMembers_;
+    size = microPhaseMembers_.size();
+    cout << "microPhaseMembers_.size " << size << endl;
+    for(i = 0; i < size; i++){
+        cout << " " <<  endl;
+        second = getMicroPhaseMembers(i);
+        size_sec = second.size();
+        cout << "   i/microPhaseName_/second.size " << i << " " << microPhaseName_[i] << " " << size_sec << endl;
+        for(j = 0; j < size_sec; j++){
+            cout << "      second/microPhaseName_ " << second[j] << " " << microPhaseName_[second[j]] << endl;
+        }
+    }
+    second.clear();
+
+    cout << " " <<  endl;
+    size = microPhaseDCMembers_.size();
+    cout << "microPhaseDCMembers_.size " << size << endl;
+    for(i = 0; i < size; i++){
+        second = getMicroPhaseDCMembers(i);
+        size_sec = second.size();
+        cout << "   second.size " << size_sec << endl;
+        for(j = 0; j < size_sec; j++){
+            cout << "      second " << second[j] << endl;
+        }
+    }
+    second.clear();
+
+    cout << " " <<  endl;
+    size = microPhaseToGEMPhase_.size();
+    cout << "microPhaseToGEMPhase_.size " << size << endl;
+    for(i = 0; i < size; i++){
+        second = getMicroPhaseToGEMPhase(i);
+        size_sec = second.size();
+        cout << "   second.size " << size_sec << endl;
+        for(j = 0; j < size_sec; j++){
+            cout << "      second " << second[j] << endl;
+        }
+    }
+
+    cout << " " <<  endl;
+    cout << "****************" <<  endl;
+    cout << "maps" << endl;
+
+    cout << "numMicroPhases_ " << numMicroPhases_ << endl;
+    size = microPhaseIdLookup_.size();
+    if (size == numMicroPhases_){
+        cout << "microPhaseIdLookup_.size() OK! " << size << endl;
+    }else{
+        cout << "error -> microPhaseIdLookup_.size() /= numMicroPhases_ : " << size << " / " << numMicroPhases_ <<endl;
+        cout << "STOP";
+        exit(1);
+    }
+    for(i = 0; i < size; i++){
+        cout << "   " << microPhaseName_[i] << " " << getMicroPhaseIdLookup(microPhaseName_[i]) << endl;
+    }
+
+    cout << " " <<  endl;
+    cout << "numICs_" << numICs_ << endl;
+    //map<string,int> ICIdLookup_;
+    size = ICIdLookup_.size();
+    if (size == numICs_){
+        cout << "ICIdLookup_.size() OK! " << size << endl;
+    }else{
+        cout << "error -> ICIdLookup_.size() /= numICs_ : " << size << " / " << numICs_ <<endl;
+        cout << "STOP";
+        exit(1);
+    }
+    for(i = 0; i < size; i++){
+        cout << "   " << ICName_[i] << " " << getICIdLookup(ICName_[i]) << endl;
+    }
+
+    cout << " " <<  endl;
+    cout << "numDCs_" << numDCs_ << endl;
+    //map<string,int> DCIdLookup_;
+    size = DCIdLookup_.size();
+    if (size == numDCs_){
+        cout << "DCIdLookup_.size() OK! " << size << endl;
+    }else{
+        cout << "error -> DCIdLookup_.size() /= numDCs_ : " << size << " / " << numDCs_ <<endl;
+        cout << "STOP";
+        exit(1);
+    }
+    for(i = 0; i < size; i++){
+        cout << "   " << DCName_[i] << " " << getDCIdLookup(DCName_[i]) << endl;
+    }
+
+    cout << " " <<  endl;
+    cout << "numGEMPhases_ " << numGEMPhases_ << endl;
+    //map<string,int> GEMPhaseIdLookup_
+        size = GEMPhaseIdLookup_.size();
+    if (size == numGEMPhases_){
+        cout << "GEMPhaseIdLookup_.size() OK! " << size << endl;
+    }else{
+        cout << "error -> GEMPhaseIdLookup_.size() /= numGEMPhases_ : " << size << " / " << numGEMPhases_ <<endl;
+        cout << "STOP";
+        exit(1);
+    }
+    for(i = 0; i < size; i++){
+        cout << "   " << GEMPhaseName_[i] << " " << getGEMPhaseIdLookup(GEMPhaseName_[i]) << endl;
+    }
 }

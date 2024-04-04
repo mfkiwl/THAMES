@@ -720,6 +720,8 @@ public:
   */
   int dissolvePhase(unsigned int phaseid, int numtoadd);
 
+  int dissolvePhaseMod(unsigned int phaseid, int numtoadd);
+
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
 

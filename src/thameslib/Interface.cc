@@ -212,7 +212,7 @@ bool Interface::addGrowthSite(Site *loc) {
   return answer;
 }
 
-bool Interface::addGrowthSiteMod(int id, int aff) {
+bool Interface::addGrowthSiteMod_newInterface(int id, int aff) {
 
     bool answer = false;
 
@@ -394,3 +394,4 @@ bool Interface::removeDissolutionSite(Site *loc) {
   }
   return found;
 }
+

@@ -26,7 +26,8 @@ private:
   unsigned int id_; /**< The id of the corresponding Site */
   int affinity_;    /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
-  double prob_;
+  double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
+  double probIni_;
 
 public:
   /**
@@ -44,7 +45,7 @@ public:
   @param aftyval is the prescribed value of the affinity to set
   @param verbose is the flag for verbose output
   */
-  Isite(unsigned int idval, int aftyval, const bool verbose = false);
+  Isite(unsigned int idval, int aftyval, const bool verbose = false, double prb = 0, double prbIni = 0);
 
   /**
   @brief Copy constructor.
@@ -52,6 +53,8 @@ public:
   @param The Isite object to copy
   */
   Isite(const Isite &obj);
+
+  Isite& operator=(const Isite& obj);    // copy assignment operator
 
   /**
   @brief Get the id number of the corresponding Site object.
@@ -86,7 +89,9 @@ public:
   void setAffinity(int num) { affinity_ = num; }
 
   void setProb(double num) {prob_ = num; };
+  void setProbIni(double num) {probIni_ = num; };
   double getProb(void) {return prob_; };
+  double getProbIni(void) {return probIni_; };
 
   /**
   @brief Set the verbose flag

@@ -5789,6 +5789,104 @@ public:
   @return the warning flag
   */
   bool getWarning(void) const { return warning_; }
+  
+//*@*********************************************
+
+ void checkChemSys(void);
+
+/**
+@brief Get the list of all GEM CSD phases that are associated with a given microstructure phase id number.
+
+@note NOT USED.
+
+@param idx is the microstructure phase in question
+@return the vector of all GEM CSD phase ids associated with the microstructure phase
+*/
+vector<int> getMicroPhaseMembers (const unsigned int idx)
+{
+    string msg;
+    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    if (p != microPhaseMembers_.end()) {
+        return p->second;
+    } else {
+        msg = "Could not find microPhaseMembers_ match to index provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
+                        msg,microPhaseMembers_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+
+/**
+@brief Get the map of of the vector index of the microstructure phases by name.
+
+The integer id of each microstructure phase is keyed to its name in this map,
+so one can "look up" a phase id by the name of that phase.
+
+@note Used only in this class's copy constructor.
+
+@return the microstructure phase lookup map (look up by name)
+*/
+int getMicroPhaseIdLookup (string str)
+{
+    string msg;
+    map<string,int>::iterator p = microPhaseIdLookup_.find(str);
+    if (p != microPhaseIdLookup_.end()){
+        return p->second;
+    }else{
+        msg = "Could not find microPhaseIdLookup_ match to string provided";
+        EOBException ex("ChemicalSystem","getMicroPhaseIdLookup",
+                        msg,microPhaseIdLookup_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+int getICIdLookup (string str)
+{
+    string msg;
+    map<string,int>::iterator p = ICIdLookup_.find(str);
+    if (p != ICIdLookup_.end()){
+        return p->second;
+    }else{
+        msg = "Could not find ICIdLookup_ match to string provided";
+        EOBException ex("ChemicalSystem","getICIdLookup",
+                        msg,ICIdLookup_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+int getDCIdLookup (string str)
+{
+    string msg;
+    map<string,int>::iterator p = DCIdLookup_.find(str);
+    if (p != DCIdLookup_.end()){
+        return p->second;
+    }else{
+        msg = "Could not find DCIdLookup_ match to string provided";
+        EOBException ex("ChemicalSystem","getDCIdLookup",
+                        msg,DCIdLookup_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
+
+int getGEMPhaseIdLookup (string str)
+{
+    string msg;
+    map<string,int>::iterator p = GEMPhaseIdLookup_.find(str);
+    if (p != GEMPhaseIdLookup_.end()){
+        return p->second;
+    }else{
+        msg = "Could not find GEMPhaseIdLookup_ match to string provided";
+        EOBException ex("ChemicalSystem","getGEMPhaseIdLookup",
+                        msg,GEMPhaseIdLookup_.size(),0);
+        ex.printException();
+        exit(1);
+    }
+}
 
 }; // End of ChemicalSystem class
 #endif
