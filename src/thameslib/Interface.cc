@@ -212,14 +212,40 @@ bool Interface::addGrowthSite(Site *loc) {
   return answer;
 }
 
-bool Interface::addGrowthSiteMod_newInterface(int id, int aff) {
-
+bool Interface::addGrowthSiteMod(Site *loc) {
     bool answer = false;
+    bool found = false;
+    unsigned int i;
+
+    /// See if site is already present
+    int size = growthSites_.size();
+    int id = loc->getId();
+    for (i = 0; i < size; i++) {
+        if (id == growthSites_[i].getId()){
+            found = true;
+            break;
+        }
+    }
+
+    /// Add the site only if it was not found already
+    if (!found) {
+        int afty = 0;
+        for (i = 0; i < NN_NNN; i++) {  //NN_NNN = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS
+            afty +=
+                chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
+        }
+        Isite tisite(id, afty);
+        growthSites_.push_back(tisite);
+        answer = true;
+    }
+    return answer;
+}
+
+bool Interface::addGrowthSiteMod_newInterface(int id, int aff) {
 
     Isite tisite(id, aff);
     growthSites_.push_back(tisite);
-
-    return answer;
+    return true;
 }
 
 bool Interface::addDissolutionSite(Site *loc) {
@@ -256,6 +282,29 @@ bool Interface::addDissolutionSite(Site *loc) {
   }
 
   return answer;
+}
+
+bool Interface::addDissolutionSiteMod(Site *loc) {
+    bool answer = false;
+    bool found = false;
+    unsigned int i;
+    unsigned int siteId =loc->getId();
+
+    /// See if site is already present
+    for (i = 0; i < dissolutionSites_.size(); i++) {
+        if (siteId == dissolutionSites_[i].getId()) {
+           found = true;
+           break;
+        }
+    }
+
+    /// Add the site only if it was not found already
+    if (!found) {
+        Isite tisite(siteId,0);
+        dissolutionSites_.push_back(tisite);
+        answer = true;
+    }
+    return answer;
 }
 
 bool Interface::sortGrowthSites(vector<Site> &ste, unsigned int pid) {
@@ -381,6 +430,38 @@ bool Interface::removeGrowthSite(Site *loc) {
   return found;
 }
 
+bool Interface::removeGrowthSiteMod1_grow(Site *loc) {
+    bool found = false;
+    int size = growthSites_.size();
+    int siteId = loc->getId();
+
+    for(int i = 0; i < size; i++){
+        if (growthSites_[i].getId() == siteId) {
+            growthSites_[i] = growthSites_[size - 1];
+            growthSites_.pop_back();
+            found = true;
+            break;
+        }
+    }
+    return found;
+}
+
+bool Interface::removeGrowthSiteMod0_grow(Site *loc, int pos) {
+  bool found = false;
+  //int size = growthSites_.size();
+  if (growthSites_[pos].getId() == loc->getId()) {
+    growthSites_[pos]= growthSites_[growthSites_.size() - 1];
+    growthSites_.pop_back();
+    found = true;
+  }else{
+      cout << endl << "phaseId/siteId/isitePos/growthSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+              loc->getId() << " / " << pos << " / " << growthSites_.size() << endl;
+      cout << "STOP:  Interface::removeGrowthSiteMod0_grow(Site *loc, int pos)" << endl;
+      exit(1);
+  }
+  return found;
+}
+
 bool Interface::removeDissolutionSite(Site *loc) {
   bool found = false;
   vector<Isite>::iterator p;
@@ -395,3 +476,34 @@ bool Interface::removeDissolutionSite(Site *loc) {
   return found;
 }
 
+bool Interface::removeDissolutionSiteMod_diss(Site *loc, int pos) {
+  bool found = false;
+  //int size = dissolutionSites_.size();
+  if (dissolutionSites_[pos].getId() == loc->getId()) {
+      dissolutionSites_[pos]=dissolutionSites_[dissolutionSites_.size() - 1];
+      dissolutionSites_.pop_back();
+      found = true;
+  }else{
+      cout << endl << "phaseId/siteId/isitePos/dissolutionSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+          loc->getId() << " / " << pos << " / " << dissolutionSites_.size() << endl;
+      cout << "STOP:  Interface::removeDissolutionSiteMod_diss(Site *loc, int pos)" << endl;
+      exit(1);
+  }
+  return found;
+}
+
+bool Interface::removeDissolutionSiteMod_grow(Site *loc) {
+    bool found = false;
+    int size_ = dissolutionSites_.size();
+    int id = loc->getId();
+
+    for (int i; i < size_; i++) {
+        if (id == dissolutionSites_[i].getId()) {
+            dissolutionSites_[i] = dissolutionSites_[size_ - 1];
+            dissolutionSites_.pop_back();
+            found = true;
+            break;
+        }
+    }
+    return found;
+}

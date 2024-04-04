@@ -93,6 +93,7 @@ growthSites_
   Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
             vector<Site *> dv, unsigned int pid, const bool verbose);
 
+
   /**
   @brief Destructor for the Interface class.
 
@@ -117,6 +118,14 @@ growthSites_
   @return the vector of Isite objects where growth can occur
   */
   vector<Isite> getGrowthSites(void) { return growthSites_; }
+
+  int getGrowthSitesId (int pos) {
+      return growthSites_[pos].getId();
+  }
+
+  int getDissolutionSitesId (int pos) {
+      return dissolutionSites_[pos].getId();
+  }
 
   /**
   @brief Gets the list of sites where dissolution of this phase can occur at the
@@ -154,6 +163,8 @@ growthSites_
   */
   bool addGrowthSite(Site *loc);
 
+  bool addGrowthSiteMod(Site *loc);
+
   bool addGrowthSiteMod_newInterface(int id, int aff);
 
   /**
@@ -164,6 +175,8 @@ growthSites_
   @return true if the site was added successfully, false otherwise
   */
   bool addDissolutionSite(Site *loc);
+
+  bool addDissolutionSiteMod(Site *loc);
 
   /**
   @brief Sort the list of growth sites in descending order of potential for
@@ -195,6 +208,10 @@ growthSites_
   @return true if the site was removed successfully, false otherwise
   */
   bool removeGrowthSite(Site *loc);
+  
+  bool removeGrowthSiteMod0_grow(Site *loc, int pos);
+
+  bool removeGrowthSiteMod1_grow(Site *loc);
 
   /**
   @brief Remove a site from the list of sites where dissolution can occur
@@ -204,6 +221,10 @@ growthSites_
   @return true if the site was removed successfully, false otherwise
   */
   bool removeDissolutionSite(Site *loc);
+
+  bool removeDissolutionSiteMod_diss(Site *loc, int pos);
+
+  bool removeDissolutionSiteMod_grow(Site *loc);
 
   /**
   @brief Set the verbose flag

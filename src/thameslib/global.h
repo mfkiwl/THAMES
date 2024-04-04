@@ -128,6 +128,8 @@ const unsigned int NUM_NEAREST_NEIGHBORS = 6;
 const unsigned int NUM_SECONDNEAREST_NEIGHBORS = 12;
 const unsigned int NUM_THIRDNEAREST_NEIGHBORS = 8;
 
+const int NN_NNN = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
+
 // Maximum allowed std::string length (NOT USED)
 const int MAXSTRING = 128;
 

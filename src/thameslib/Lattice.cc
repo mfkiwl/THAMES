@@ -164,8 +164,7 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
 
   for (ii = 0; ii < numsites_; ii++) {
 
-    for (j = 0; j < (NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS);
-         j++) {
+    for (j = 0; j < NN_NNN; j++) {
       ///
       /// Store up to 2nd nearest neighbors
       ///
@@ -810,10 +809,10 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
   int dim_isite;
   int numleft,numchange;
   int aff, affMin, affSum;
+  double affSumDbl;
   int valAbs;
   double rng;
   int isitePos;
-  int numNb = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
   
   isite = interface_[phaseid].getGrowthSites();
   dim_isite = isite.size();
@@ -849,7 +848,18 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
     cout.flush();
   }
 
+//  int tr = 0;
+//  cout << endl << "t0 tr - phaseid, dim_isite, numtoadd, numleft : " << tr <<
+//      " , " << phaseid <<
+//      " , " << dim_isite <<
+//      " , " << numtoadd <<
+//      " , " << numleft <<
+//       endl; cout.flush();
+//  cout << "*********************************************************" << endl;
+
   while ((numleft > 0) && (dim_isite >= 1)) {
+      //tr++;
+
     affSum = 0;
     affMin = 1000000;
     for (j = 0; j < dim_isite; ++j) {
@@ -859,14 +869,15 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
     }
 
     //calc probabilities
-    if (affSum != 0) {
+    if (affSum != 0) {  
       if (affMin < 0){
         valAbs = abs(affMin);
         affSum += dim_isite*valAbs;
+        affSumDbl = affSum;
         if (affSum != 0) {
-          isite[0].setProb((isite[0].getAffinity() + valAbs)/(double)affSum);
+          isite[0].setProb((isite[0].getAffinity() + valAbs)/affSumDbl);
           for (j = 1; j < dim_isite; j++) {
-            isite[j].setProb(isite[j-1].getProb() + (isite[j].getAffinity() + valAbs)/(double)affSum);
+            isite[j].setProb(isite[j-1].getProb() + (isite[j].getAffinity() + valAbs)/affSumDbl);
           }
           rng = RanGen::Ran3();
           for (isitePos = 0; isitePos < dim_isite; isitePos++){
@@ -877,9 +888,10 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
           isitePos = (int)(rng * dim_isite);
         }
       }else{
-      	isite[0].setProb(isite[0].getAffinity()/(double)affSum);
+        affSumDbl = affSum;
+        isite[0].setProb(isite[0].getAffinity()/affSumDbl);
       	for (j = 1; j < dim_isite; j++) {
-          isite[j].setProb(isite[j-1].getProb() + isite[j].getAffinity()/(double)affSum);
+          isite[j].setProb(isite[j-1].getProb() + isite[j].getAffinity()/affSumDbl);
         }
         rng = RanGen::Ran3();
         for (isitePos = 0; isitePos < dim_isite; isitePos++){
@@ -894,8 +906,10 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
     ste = &site_[isite[isitePos].getId()];
     pid = ste->getMicroPhaseId(); // always ELECTROLYTEID !!
     if (pid == ELECTROLYTEID) {
-        removeGrowthSite(ste, phaseid);
-        setMicroPhaseId(ste, phaseid);
+        //removeGrowthSite(ste, phaseid);
+        removeGrowthSiteMod_grow(ste, phaseid, isitePos);
+        setMicroPhaseIdMod_grow(ste, phaseid);
+
         /*
         vector<unsigned int> plist = ste->getGrowthPhases();
         for (int ii = 0; ii < plist.size(); ii++) {
@@ -920,7 +934,8 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
         ///
 
         if (ste->getWmc() > 0.0) {
-            addDissolutionSite(ste, phaseid);
+            //addDissolutionSite(ste, phaseid);
+            addDissolutionSiteMod_grow(ste,phaseid);
         }
 
         ///
@@ -929,22 +944,25 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
         /// site, so any time the id of a site within that box changes, it
         /// will change the wmc of the site at the box's center.
         ///
-        ///int numNb = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
+        ///NN_NNN = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
         ///
 
         //for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
-        for (j = 0; j < numNb; j++) {
+        for (j = 0; j < NN_NNN; j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
             if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
-                addGrowthSite(stenb, phaseid);
+                //addGrowthSite(stenb, phaseid);
+                addGrowthSiteMod_grow(stenb, phaseid);
                 if (j < NUM_NEAREST_NEIGHBORS) {
                     for (int jj = 0; jj < nbgrowthtempSize; jj++) {
-                        addGrowthSite(stenb,nbgrowthtemp[jj]);
+                        //addGrowthSite(stenb, nbgrowthtemp[jj]);
+                        addGrowthSiteMod_grow(stenb,nbgrowthtemp[jj]);
                     }
                 }
             } else if (stenb->getWmc() <= 0.0) {
-                removeDissolutionSite(stenb, stenb->getMicroPhaseId());
+                //removeDissolutionSite(stenb, stenb->getMicroPhaseId());
+                removeDissolutionSiteMod_grow(stenb, stenb->getMicroPhaseId());
             }
         }
 //        for (j = NUM_NEAREST_NEIGHBORS; j < NUM_SECONDNEAREST_NEIGHBORS; j++) { // add these sites to the inerface
@@ -955,12 +973,15 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
         numleft--;
         numchange++;
     } else {
+
         cout << "test_removeGrowthSite ste,phaseid: " << ste->getId() << "  " << phaseid <<endl;
         removeGrowthSite(ste, phaseid);
+
     }
 
     isite = interface_[phaseid].getGrowthSites();
     dim_isite = isite.size();
+
   }
 
   return (numchange);
@@ -1087,7 +1108,6 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
   return (numchange);
 }
 
-
 int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
   unsigned int i, j;
   unsigned int pid;
@@ -1160,13 +1180,11 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
   double sumTot;
   int stId;
   Site *nbSite;
-  int sizeNb_;
-  double numNbDefInstab;
+  double NN_NNN_dbl;
   vector<int> nbgrowthtemp;
   int nbGrTmpSize;
   
-  sizeNb_ = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
-  numNbDefInstab = sizeNb_; // NUM_NEAREST_NEIGHBORS;
+  NN_NNN_dbl = NN_NNN; // NUM_NEAREST_NEIGHBORS;
   while ((numleft > 0) && (dim_isite >= 1)) {
     bcl++;
     dissProbVect.clear();
@@ -1175,14 +1193,14 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
       stId=isite[k].getId();
       nbLoc_ = site_[stId].getNb();
       sumEl = 0;
-      for(int i = 0; i<sizeNb_; i++){
+      for(int i = 0; i < NN_NNN; i++){
         if (site_[stId].nb(i)->getMicroPhaseId() == 1){
           sumEl++;
         }
       }
       dissProb_.id = stId;
       dissProb_.nbElectr = sumEl;
-      dissProb_.instab = sumEl/numNbDefInstab;
+      dissProb_.instab = sumEl/NN_NNN_dbl;
       dissProb_.prob = 0.;
       dissProb_.prob_01 = 0.;
       dissProbVect.push_back(dissProb_);
@@ -1208,9 +1226,10 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
 
     try {
         ste = &site_.at(isite[isitePos].getId());
-        pid = ste->getMicroPhaseId();
-        removeDissolutionSite(ste, pid);
-        setMicroPhaseId(ste, ELECTROLYTEID);
+        pid = ste->getMicroPhaseId(); //intrebare pid diff phaseid ???
+        //removeDissolutionSite(ste, pid);
+        removeDissolutionSiteMod_diss(ste, pid, isitePos);
+        setMicroPhaseIdMod_diss(ste, ELECTROLYTEID);
 
         ///
         /// Weighted mean curvature (wmc) is changed by the difference
@@ -1224,8 +1243,7 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
         ste->dWmc(dwmcval);
             
         //for (i = 0; i < NUM_NEAREST_NEIGHBORS; i++) {
-        //sizeNb_ = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
-        for (i = 0; i < sizeNb_; i++) {
+        for (i = 0; i < NN_NNN; i++) {
           stenb = ste->nb(i);
           stenb->dWmc(dwmcval);
           int nbpid = stenb->getMicroPhaseId();
@@ -1237,8 +1255,10 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
             /// phases.
             ///
 
-            addDissolutionSite(stenb, nbpid);
-            addGrowthSite(ste, nbpid);
+            //addDissolutionSite(stenb, nbpid);
+            addDissolutionSiteMod_diss(stenb, nbpid);
+            //addGrowthSite(ste, nbpid);
+            addGrowthSiteMod_diss(ste, nbpid);
             if (i < NUM_NEAREST_NEIGHBORS) {
               nbgrowthtemp.clear();
               nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
@@ -1246,7 +1266,8 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
               for (int ii = 0; ii < nbGrTmpSize; ii++) {
                 if ((nbgrowthtemp[ii] != ELECTROLYTEID) &&
                     (nbgrowthtemp[ii] != VOIDID)) {
-                      addGrowthSite(ste, nbpid);
+                      //addGrowthSite(ste, nbpid);
+                      addGrowthSiteMod_diss(ste, nbgrowthtemp[ii]);
                 }
               }
             }
@@ -1295,6 +1316,42 @@ void Lattice::addDissolutionSite(Site *ste, unsigned int pid) {
   return;
 }
 
+void Lattice::addDissolutionSiteMod_diss(Site *ste, unsigned int pid) {
+    try {
+        interface_.at(pid).addDissolutionSiteMod(ste);
+        vector<unsigned int> plist = ste->getGrowthPhases();
+        for (unsigned int i = 0; i < plist.size(); i++) {
+            interface_.at(plist[i]).removeGrowthSite(ste);
+        }
+        ste->setDissolutionSite(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "addDissolutionSiteMod_diss", "interface_",
+                        interface_.size(), pid);
+        ex.printException();
+        cout << endl << "id pid " << ste->getId() << " " << pid << endl;
+        exit(1);
+    }
+    return;
+}
+
+void Lattice::addDissolutionSiteMod_grow(Site *ste, unsigned int pid) {
+    int pos, newId, size ;
+    try {
+        interface_.at(pid).addDissolutionSiteMod(ste);
+        vector<unsigned int> plist = ste->getGrowthPhases();
+        for (unsigned int i = 0; i < plist.size(); i++) {
+            interface_.at(plist[i]).removeGrowthSiteMod1_grow(ste);
+        }
+        ste->setDissolutionSite(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "addDissolutionSiteMod_grow", "interface_",
+                        interface_.size(), pid);
+        ex.printException();
+        exit(1);
+    }
+    return;
+}
+
 void Lattice::addGrowthSite(Site *ste, unsigned int pid) {
   try {
     interface_.at(pid).addGrowthSite(ste);
@@ -1306,6 +1363,33 @@ void Lattice::addGrowthSite(Site *ste, unsigned int pid) {
     exit(1);
   }
 }
+
+void Lattice::addGrowthSiteMod_diss(Site *ste, unsigned int pid) {
+    try {
+        interface_.at(pid).addGrowthSiteMod(ste);
+        ste->setGrowthSite(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "addGrowthSiteMod_diss", "interface_", interface_.size(),
+                        pid);
+        ex.printException();
+        cout << endl << "id pid " << ste->getId() << " " << pid << endl;
+        exit(1);
+    }
+}
+
+void Lattice::addGrowthSiteMod_grow(Site *ste, unsigned int pid) {
+    try {
+        interface_.at(pid).addGrowthSiteMod(ste);
+        ste->setGrowthSite(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "addGrowthSiteMod_grow", "interface_", interface_.size(),
+                        pid);
+        ex.printException();
+        cout << endl << "id pid " << ste->getId() << " " << pid << endl;
+        exit(1);
+    }
+}
+
 
 void Lattice::removeDissolutionSite(Site *ste, unsigned int pid) {
   try {
@@ -1319,6 +1403,33 @@ void Lattice::removeDissolutionSite(Site *ste, unsigned int pid) {
   }
 }
 
+void Lattice::removeDissolutionSiteMod_diss(Site *ste, unsigned int pid, int interfacePos) {
+    try {
+        interface_.at(pid).removeDissolutionSiteMod_diss(ste, interfacePos);
+        ste->removeDissolutionSiteMod(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "removeDissolutionSiteMod_diss", "interface_",
+                        interface_.size(), pid);
+        ex.printException();
+        cout << endl << "id pid interfacePos " << ste->getId() << " " << pid << " " << interfacePos << endl;
+        exit(1);
+    }
+}
+
+void Lattice::removeDissolutionSiteMod_grow(Site *ste, unsigned int pid) {
+    try {
+        interface_.at(pid).removeDissolutionSiteMod_grow(ste);
+        ste->removeDissolutionSiteMod(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "removeDissolutionSiteMod_grow", "interface_",
+                        interface_.size(), pid);
+        ex.printException();
+        cout << endl << "id pid " << ste->getId() << " " << pid << endl;
+        exit(1);
+    }
+}
+
+
 void Lattice::removeGrowthSite(Site *ste, unsigned int pid) {
   try {
     interface_.at(pid).removeGrowthSite(ste);
@@ -1329,6 +1440,20 @@ void Lattice::removeGrowthSite(Site *ste, unsigned int pid) {
     ex.printException();
     exit(1);
   }
+}
+
+void Lattice::removeGrowthSiteMod_grow(Site *ste, unsigned int pid, int interfacePos) {
+    try {
+        interface_.at(pid).removeGrowthSiteMod0_grow(ste, interfacePos);
+        ste->removeGrowthSiteMod_grow(pid);
+    } catch (out_of_range &oor) {
+        EOBException ex("Lattice", "removeGrowthSiteMod_grow", "interface_",
+                        interface_.size(), pid);
+        ex.printException();
+
+        cout << endl << "id pid interfacePos " << ste->getId() << " " << pid << " " << interfacePos << endl;
+        exit(1);
+    }
 }
 
 int Lattice::emptyPorosity(int numsites) {
@@ -2595,7 +2720,7 @@ void Lattice::changeMicrostructureMod(double time, const int simtype, bool isFir
               int aff, affMin, affSum;
               Site *nbId;
               vector<Site *> localNb_;
-              int sizeNb_, sizeWS_;
+              int sizeWS_;
               int valAbs;
               int dimNewInterface;
               double rng;
@@ -2604,7 +2729,6 @@ void Lattice::changeMicrostructureMod(double time, const int simtype, bool isFir
               
               affSum = 0;
               affMin = 1000000;
-              sizeNb_ = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS; 
               maxFindSameSite = 3;
               watersites.clear();
               for (int k = 0; k < numsites_; ++k) {
@@ -2612,7 +2736,7 @@ void Lattice::changeMicrostructureMod(double time, const int simtype, bool isFir
                       un.id = site_[k].getId();
                       aff = 0;
                       localNb_= site_[k].getNb();
-                      for (int j = 0; j < sizeNb_; j++) {
+                      for (int j = 0; j < NN_NNN; j++) {
                         aff += chemSys_->getAffinity(pid_, localNb_[j]->getMicroPhaseId());
                       }
                       un.aff=aff;

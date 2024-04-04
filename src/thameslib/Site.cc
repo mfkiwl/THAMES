@@ -45,6 +45,11 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
   chemSys_ = csys;
 
   expstrain_ = 0.0;
+
+  inGrowInterface_.clear();
+  inDissInterface_.clear();
+  inGrowInterface_.resize(chemSys_->getNumMicroPhases(),-1);
+  inDissInterface_.resize(chemSys_->getNumMicroPhases(),-1);
 }
 
 void Site::calcWmc(void) {

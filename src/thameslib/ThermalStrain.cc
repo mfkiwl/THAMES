@@ -540,7 +540,7 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
         // x = (nx - 1), z = (nz - 1), edge
         for (int i3 = 0; i3 < 3; i3++) {
           for (int i8 = 0; i8 < 8; i8++) {
-            delta[i3][i8] = 0.0;
+            delta[i8][i3] = 0.0;
             if ((i8 == 1) || (i8 == 2)) {
               delta[i8][0] = exx * (double)nx;
               delta[i8][1] = exy * (double)nx;

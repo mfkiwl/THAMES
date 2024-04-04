@@ -671,6 +671,8 @@ public:
   */
   void findInterfaces(void);
 
+  void findInterfacesMod(void);
+
   /**
   @brief Add a prescribed number of sites of a given phase to the
   microstructure.
@@ -703,6 +705,8 @@ public:
   @return the actual number of sites that were changed
   */
   int growPhaseMod(unsigned int phaseid, int numtoadd);
+
+  int growPhaseMod_WgrowTmplt(unsigned int phaseid, int numtoadd);
 
   /**
   @brief Remove a prescribed number of sites of a given phase from the
@@ -806,6 +810,32 @@ public:
       return;
   }
 
+  void setMicroPhaseIdMod_diss(Site *s, const unsigned int i) {
+    string msg;
+    try {
+      count_.at(s->getMicroPhaseId())--;
+      s->setMicroPhaseId(i);
+      count_.at(i)++;
+    } catch (out_of_range &oor) {
+      msg = "Site does not exist?";
+      throw EOBException("Lattice", "setMicroPhaseIdMod_diss", msg, count_.size(), i);
+    }
+    return;
+  }
+
+  void setMicroPhaseIdMod_grow(Site *s, const unsigned int i) {
+      string msg;
+      try {
+          count_.at(s->getMicroPhaseId())--;
+          s->setMicroPhaseId(i);
+          count_.at(i)++;
+      } catch (out_of_range &oor) {
+          msg = "Site does not exist?";
+          throw EOBException("Lattice", "setMicroPhaseIdMod_grow", msg, count_.size(), i);
+      }
+      return;
+  }
+
   /**
   @brief Set the phase id of a given site, specified by the site's index number.
 
@@ -853,6 +883,10 @@ public:
   */
   void addDissolutionSite(Site *loc, unsigned int pid);
 
+  void addDissolutionSiteMod_diss(Site *loc, unsigned int pid);
+
+  void addDissolutionSiteMod_grow(Site *loc, unsigned int pid);
+
   /**
   @brief Add a site to the list of sites where growth of a given phase can
   occur.
@@ -862,6 +896,10 @@ public:
   @param pid is the microstructure phase id
   */
   void addGrowthSite(Site *loc, unsigned int pid);
+
+  void addGrowthSiteMod_diss(Site *loc, unsigned int pid);
+
+  void addGrowthSiteMod_grow(Site *loc, unsigned int pid);
 
   /**
   @brief Remove a site from the list of sites where dissolution of a given phase
@@ -873,6 +911,10 @@ public:
   */
   void removeDissolutionSite(Site *loc, unsigned int pid);
 
+  void removeDissolutionSiteMod_diss(Site *loc, unsigned int pid, int interfacePos);
+
+  void removeDissolutionSiteMod_grow(Site *loc, unsigned int pid);
+
   /**
   @brief Remove a site from the list of sites where growth of a given phase can
   occur.
@@ -882,6 +924,9 @@ public:
   @param pid is the microstructure phase id
   */
   void removeGrowthSite(Site *loc, unsigned int pid);
+
+  void removeGrowthSiteMod_grow(Site *loc, unsigned int pid, int interfacePos);
+
 
   /**
   @brief Master method to update a microstructure during after a given time

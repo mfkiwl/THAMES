@@ -80,6 +80,9 @@ protected:
 
   bool verbose_; /**< Flag to determine verbose output */
 
+  vector<int>inGrowInterface_;
+  vector<int>inDissInterface_;
+
 public:
   /**
   @brief Default constructor.
@@ -112,6 +115,21 @@ public:
        unsigned int ys, unsigned int zs, unsigned int neigh,
        ChemicalSystem *csys, const bool verbose = false);
 
+
+
+  void setInGrowInterface(int i, int val){
+      inGrowInterface_[i] = val;
+  }
+  void setInDissInterface(int i, int val){
+      inDissInterface_[i] = val;
+  }
+  int getInGrowInterface(int i){
+      return inGrowInterface_[i];
+  }
+  int getInDissInterface(int i){
+      return inDissInterface_[i];
+  }
+
   /**
   @brief Get a pointer to a given site in the site's neighborhood.
 
@@ -143,7 +161,7 @@ public:
       return NUM_NEAREST_NEIGHBORS;
       break;
     case 2:
-      return (NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS);
+      return (NN_NNN);
       break;
     default:
       return nb_.size();
@@ -331,6 +349,8 @@ public:
       dissolution_.clear();
   }
 
+  void removeDissolutionSiteMod(unsigned int pid) { dissolution_.clear(); }
+
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
 
@@ -346,6 +366,27 @@ public:
     vector<unsigned int>::iterator p = find(start, end, pid);
     if (p != growth_.end())
       growth_.erase(p);
+  }
+
+  void removeGrowthSiteMod_grow(unsigned int pid) {
+    bool found = false;
+    int size = growth_.size();
+    int i = -1;
+
+    for (i = 0; i < size; i++) {
+        if (growth_[i] == pid) {
+          growth_[i] = growth_[size - 1];
+          growth_.pop_back();
+          found = true;
+          break;
+        }
+    }
+    if (found == false) {
+          cout <<endl <<" stop - void removeGrowthSiteMod_grow(unsigned int pid) " << endl;
+          cout.flush();
+          cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
+          exit(1);
+    }
   }
 
   /**
