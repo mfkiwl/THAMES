@@ -623,78 +623,78 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
 }
 
 void Lattice::findInterfaces(void) {
-  unsigned int i, kk;
-  unsigned int k;
-  vector<Site *> gsite, dsite;
+    unsigned int i, kk;
+    unsigned int k;
+    vector<Site *> gsite, dsite;
 
-  ///
-  /// An interface must have at least one adjacent site that is water or void
-  ///
+    ///
+    /// An interface must have at least one adjacent site that is water or void
+    ///
 
-  interface_.clear();
-  for (i = 0; i < chemSys_->getNumMicroPhases(); i++) {
-    if (i != ELECTROLYTEID && i != VOIDID) { // Solid phase of some kind
-      gsite.clear();
-      dsite.clear();
-      for (k = 0; k < site_.size(); k++) {
-        if (site_[k].getWmc() > 0) { // Is there some water nearby?
-          if ((site_[k].getMicroPhaseId() == i)) {
-            dsite.push_back(&site_[k]);
-            site_[k].setDissolutionSite(i);
-            for (kk = 0; kk < site_[k].nbSize(2); kk++) {
-              if ((site_[k].nb(kk))->getMicroPhaseId() == ELECTROLYTEID) {
-                gsite.push_back(site_[k].nb(kk));
-                site_[k].nb(kk)->setGrowthSite(i);
-              }
+    interface_.clear();
+    for (i = 0; i < chemSys_->getNumMicroPhases(); i++) {
+        if (i != ELECTROLYTEID && i != VOIDID) { // Solid phase of some kind
+            gsite.clear();
+            dsite.clear();
+            for (k = 0; k < site_.size(); k++) {
+                if (site_[k].getWmc() > 0) { // Is there some water nearby?
+                    if ((site_[k].getMicroPhaseId() == i)) {
+                        dsite.push_back(&site_[k]);
+                        site_[k].setDissolutionSite(i);
+                        for (kk = 0; kk < site_[k].nbSize(2); kk++) {
+                            if ((site_[k].nb(kk))->getMicroPhaseId() == ELECTROLYTEID) {
+                                gsite.push_back(site_[k].nb(kk));
+                                site_[k].nb(kk)->setGrowthSite(i);
+                            }
+                        }
+
+                        /// @note There is no reason to make the phase
+                        /// itself be a template for itself, nor water be
+                        /// a growth template for any phase, because we already
+                        /// tested for those above.
+
+                    } else if (chemSys_->isGrowthTemplate(i,
+                                                          site_[k].getMicroPhaseId())) {
+                        for (kk = 0; kk < site_[k].nbSize(1); kk++) {
+                            if ((site_[k].nb(kk))->getMicroPhaseId() == ELECTROLYTEID) {
+                                gsite.push_back(site_[k].nb(kk));
+                                site_[k].nb(kk)->setGrowthSite(i);
+                            }
+                        }
+                    }
+                }
             }
 
-            /// @note There is no reason to make the phase
-            /// itself be a template for itself, nor water be
-            /// a growth template for any phase, because we already
-            /// tested for those above.
+            if ((gsite.size() == 0) && (dsite.size() == 0)) {
 
-          } else if (chemSys_->isGrowthTemplate(i,
-                                                site_[k].getMicroPhaseId())) {
-            for (kk = 0; kk < site_[k].nbSize(1); kk++) {
-              if ((site_[k].nb(kk))->getMicroPhaseId() == ELECTROLYTEID) {
-                gsite.push_back(site_[k].nb(kk));
-                site_[k].nb(kk)->setGrowthSite(i);
-              }
+                ///
+                /// We are dealing with a phase that may need to
+                /// nucleate.  Identify the eligible nucleation
+                //  sites for that phase
+                ///
+
+                double thresh = (0.5 / pow(resolution_, 3.0));
+                double g = 0.0;
+                for (k = 0; k < site_.size(); k++) {
+                    if ((site_[k].getMicroPhaseId() == ELECTROLYTEID)) {
+                        g = rg_->Ran3();
+                        if (g < thresh) {
+                            gsite.push_back(&site_[k]);
+                            site_[k].setGrowthSite(i);
+                        }
+                    }
+                }
             }
-          }
+
+            interface_.push_back(Interface(chemSys_, rg_, gsite, dsite, i, verbose_));
+
+        } else { // Not a solid phase (either electrolyte or void)
+
+            interface_.push_back(Interface(rg_, verbose_));
         }
-      }
-
-      if ((gsite.size() == 0) && (dsite.size() == 0)) {
-
-        ///
-        /// We are dealing with a phase that may need to
-        /// nucleate.  Identify the eligible nucleation
-        //  sites for that phase
-        ///
-
-        double thresh = (0.5 / pow(resolution_, 3.0));
-        double g = 0.0;
-        for (k = 0; k < site_.size(); k++) {
-          if ((site_[k].getMicroPhaseId() == ELECTROLYTEID)) {
-            g = rg_->Ran3();
-            if (g < thresh) {
-              gsite.push_back(&site_[k]);
-              site_[k].setGrowthSite(i);
-            }
-          }
-        }
-      }
-
-      interface_.push_back(Interface(chemSys_, rg_, gsite, dsite, i, verbose_));
-
-    } else { // Not a solid phase (either electrolyte or void)
-
-      interface_.push_back(Interface(rg_, verbose_));
     }
-  }
 
-  return;
+    return;
 }
 
 int Lattice::growPhase(unsigned int phaseid, int numtoadd) {
@@ -812,7 +812,8 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
   int aff, affMin, affSum;
   int valAbs;
   double rng;
-  int foundSite;
+  int isitePos;
+  int numNb = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
   
   isite = interface_[phaseid].getGrowthSites();
   dim_isite = isite.size();
@@ -820,15 +821,15 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
   numchange = 0;
 
   try {
-    if (numtoadd == 0)
-      return 0;
+      if (numtoadd == 0)
+          return 0;
       if (phaseid >= interface_.size()) {
-        throw EOBException("Lattice", "growPhase", "interface_",
-           interface_.size(), phaseid);
+          throw EOBException("Lattice", "growPhaseMod", "interface_",
+                             interface_.size(), phaseid);
       }
   } catch (EOBException ex) {
-    ex.printException();
-    exit(1);
+      ex.printException();
+      exit(1);
   }
 
   ///
@@ -838,7 +839,7 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
   ///
 
   if (verbose_) {
-    cout << "Lattice::growPhase -->Phase " << phaseid << " needs to grow at "
+    cout << "Lattice::growPhaseMod -->Phase " << phaseid << " needs to grow at "
          << numtoadd << " sites" << endl;
     cout.flush();
   }
@@ -863,12 +864,12 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
             isite[j].setProb(isite[j-1].getProb() + (isite[j].getAffinity() + valAbs)/(double)affSum);
           }
           rng = RanGen::Ran3();
-          for (foundSite = 0; foundSite < dim_isite; foundSite++){
-            if (rng <= isite[foundSite].getProb()) break;
+          for (isitePos = 0; isitePos < dim_isite; isitePos++){
+            if (rng <= isite[isitePos].getProb()) break;
           }
         }else{
           rng = RanGen::Ran3();
-          foundSite = (int)(rng * dim_isite);
+          isitePos = (int)(rng * dim_isite);
         }
       }else{
       	isite[0].setProb(isite[0].getAffinity()/(double)affSum);
@@ -876,19 +877,20 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
           isite[j].setProb(isite[j-1].getProb() + isite[j].getAffinity()/(double)affSum);
         }
         rng = RanGen::Ran3();
-        for (foundSite = 0; foundSite < dim_isite; foundSite++){
-          if (rng <= isite[foundSite].getProb()) break;
+        for (isitePos = 0; isitePos < dim_isite; isitePos++){
+          if (rng <= isite[isitePos].getProb()) break;
         }
       }
     }else{
         rng = RanGen::Ran3();
-        foundSite = (int)(rng * dim_isite);
+        isitePos = (int)(rng * dim_isite);
     }
 
-    ste = &site_[isite[foundSite].getId()];
-    pid = ste->getMicroPhaseId();
+    ste = &site_[isite[isitePos].getId()];
+    pid = ste->getMicroPhaseId(); // always ELECTROLYTEID !!
     if (pid == ELECTROLYTEID) {
         removeGrowthSite(ste, phaseid);
+        setMicroPhaseId(ste, phaseid);
         /*
         vector<unsigned int> plist = ste->getGrowthPhases();
         for (int ii = 0; ii < plist.size(); ii++) {
@@ -905,7 +907,6 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
 
         dwmcval = chemSys_->getMicroPhasePorosity(phaseid) -
                   chemSys_->getMicroPhasePorosity(pid);
-        setMicroPhaseId(ste, phaseid);
         ste->dWmc(dwmcval);
 
         ///
@@ -923,8 +924,11 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
         /// site, so any time the id of a site within that box changes, it
         /// will change the wmc of the site at the box's center.
         ///
+        ///int numNb = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
+        ///
 
-        for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
+        //for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
+        for (j = 0; j < numNb; j++) {
             stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
             if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
@@ -933,14 +937,15 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
                 removeDissolutionSite(stenb, stenb->getMicroPhaseId());
             }
         }
-        for (j = NUM_NEAREST_NEIGHBORS; j < NUM_SECONDNEAREST_NEIGHBORS; j++) {
-            stenb = ste->nb(j);
-            stenb->dWmc(dwmcval);
-        }
+//        for (j = NUM_NEAREST_NEIGHBORS; j < NUM_SECONDNEAREST_NEIGHBORS; j++) { // add these sites to the inerface
+//            stenb = ste->nb(j);
+//            stenb->dWmc(dwmcval);
+//        }
 
         numleft--;
         numchange++;
     } else {
+        cout << "test_removeGrowthSite ste,phaseid: " << ste->getId() << "  " << phaseid <<endl;
         removeGrowthSite(ste, phaseid);
     }
 
@@ -1071,6 +1076,7 @@ int Lattice::dissolvePhase(unsigned int phaseid, int numtotake) {
 
   return (numchange);
 }
+
 
 int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
   unsigned int i, j;
@@ -1207,7 +1213,9 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
                   chemSys_->getMicroPhasePorosity(pid);
         ste->dWmc(dwmcval);
             
-        for (i = 0; i < NUM_NEAREST_NEIGHBORS; i++) {
+        //for (i = 0; i < NUM_NEAREST_NEIGHBORS; i++) {
+        //sizeNb_ = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
+        for (i = 0; i < sizeNb_; i++) {
           stenb = ste->nb(i);
           stenb->dWmc(dwmcval);
           int nbpid = stenb->getMicroPhaseId();
@@ -1221,14 +1229,15 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
 
             addDissolutionSite(stenb, nbpid);
             addGrowthSite(ste, nbpid);
-
-            nbgrowthtemp.clear();
-            nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
-            nbGrTmpSize = nbgrowthtemp.size();
-            for (int ii = 0; ii < nbGrTmpSize; ii++) {
-              if ((nbgrowthtemp[ii] != ELECTROLYTEID) &&
-                  (nbgrowthtemp[ii] != VOIDID)) {
-                addGrowthSite(ste, nbgrowthtemp[ii]);
+            if (i < NUM_NEAREST_NEIGHBORS) {
+              nbgrowthtemp.clear();
+              nbgrowthtemp = chemSys_->getGrowthTemplate(nbpid);
+              nbGrTmpSize = nbgrowthtemp.size();
+              for (int ii = 0; ii < nbGrTmpSize; ii++) {
+                if ((nbgrowthtemp[ii] != ELECTROLYTEID) &&
+                    (nbgrowthtemp[ii] != VOIDID)) {
+                      addGrowthSite(ste, nbpid);
+                }
               }
             }
           }
@@ -1241,10 +1250,10 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
         /// will change the wmc of the site at the box's center.
         ///
 
-        for (i = NUM_NEAREST_NEIGHBORS; i < NUM_SECONDNEAREST_NEIGHBORS; i++) {
-          stenb = ste->nb(i);
-          stenb->dWmc(dwmcval);
-        }
+       // for (i = NUM_NEAREST_NEIGHBORS; i < NUM_SECONDNEAREST_NEIGHBORS; i++) {
+       //   stenb = ste->nb(i);
+       //   stenb->dWmc(dwmcval);
+       // }
 
         numleft--;
         numchange++;

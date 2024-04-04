@@ -794,16 +794,16 @@ public:
   @param i is the phase index to set at that site
   */
   void setMicroPhaseId(Site *s, const unsigned int i) {
-    string msg;
-    try {
-      count_.at(s->getMicroPhaseId())--;
-      s->setMicroPhaseId(i);
-      count_.at(i)++;
-    } catch (out_of_range &oor) {
-      msg = "Site does not exist?";
-      throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
-    }
-    return;
+      string msg;
+      try {
+          count_.at(s->getMicroPhaseId())--;
+          s->setMicroPhaseId(i);
+          count_.at(i)++;
+      } catch (out_of_range &oor) {
+          msg = "Site does not exist?";
+          throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
+      }
+      return;
   }
 
   /**
