@@ -820,6 +820,11 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
   numleft = numtoadd;
   numchange = 0;
 
+  vector<int> nbgrowthtemp;
+  nbgrowthtemp.clear();
+  nbgrowthtemp = chemSys_->getGrowthTemplate(phaseid);
+  int nbgrowthtempSize = nbgrowthtemp.size();
+
   try {
       if (numtoadd == 0)
           return 0;
@@ -933,6 +938,11 @@ int Lattice::growPhaseMod(unsigned int phaseid, int numtoadd) {
             stenb->dWmc(dwmcval);
             if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
                 addGrowthSite(stenb, phaseid);
+                if (j < NUM_NEAREST_NEIGHBORS) {
+                    for (int jj = 0; jj < nbgrowthtempSize; jj++) {
+                        addGrowthSite(stenb,nbgrowthtemp[jj]);
+                    }
+                }
             } else if (stenb->getWmc() <= 0.0) {
                 removeDissolutionSite(stenb, stenb->getMicroPhaseId());
             }
@@ -1198,7 +1208,7 @@ int Lattice::dissolvePhaseMod(unsigned int phaseid, int numtotake) {
 
     try {
         ste = &site_.at(isite[isitePos].getId());
-        pid = ste->getMicroPhaseId(); //intrebare pid diff phaseid ???
+        pid = ste->getMicroPhaseId();
         removeDissolutionSite(ste, pid);
         setMicroPhaseId(ste, ELECTROLYTEID);
 
@@ -2703,7 +2713,10 @@ void Lattice::changeMicrostructureMod(double time, const int simtype, bool isFir
             }
           } //gs.size()==0
           //numadded = growPhase(pid.at(i), diff);
+          cout << "in second growPhaseMod i pid netsites " << i << " " << pid.at(i)<< " " << netsites[i] << endl;
           numadded = growPhaseMod(pid.at(i), nuclei);
+          cout << "   out2 nuclei numadded count_.at(ELECTROLYTEID) gs.size() " <<
+              nuclei << " " << numadded << " " << count_.at(ELECTROLYTEID) << " " << gs.size() << endl;
           numadded_actual += numadded;
           //diff = diff - numadded;
           nuclei = nuclei - numadded;
