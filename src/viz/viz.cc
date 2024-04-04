@@ -103,6 +103,16 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
   int valin, iz, iy, ix;
   string buff, buff1;
 
+  vector<float> red((int)(NPHASES), 0.0);
+  vector<float> blue((int)(NPHASES), 0.0);
+  vector<float> green((int)(NPHASES), 0.0);
+
+  if (TypeName == "thames") {
+    getTcolors(red, green, blue);
+  } else {
+    getVcolors(red, green, blue);
+  }
+
   if (getFileNamesAndTimes(names, times)) {
     return (1);
   }
@@ -117,6 +127,9 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
    *    rather than hardwiring them as preprocessor
    *    defines
    ****/
+
+  string fname = RootName;
+  fname.append("_Frames.xyz");
 
   for (int i = 0; i < names.size(); ++i) {
     ifstream in(names[i].c_str());
@@ -158,7 +171,7 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
 
     cout << "Processing file " << i + 1 << " of " << times.size() << endl;
     cout.flush();
-    if (writeXYZFile(times[i])) {
+    if (writeXYZFile(times[i], fname, red, green, blue)) {
       cout << endl << "ERROR: Problem writing xyz file " << i << endl << endl;
       return (1);
     }
@@ -171,27 +184,18 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
  *  Next function uses the .xyz format description
  *
  ***/
-int writeXYZFile(const string &times) {
+int writeXYZFile(const string &time, const string &xyzname, vector<float> &red,
+                 vector<float> &green, vector<float> &blue) {
 
-  float ftime = stof(times);
+  float ftime = stof(time);
 
-  vector<float> red((int)(NPHASES), 0.0);
-  vector<float> blue((int)(NPHASES), 0.0);
-  vector<float> green((int)(NPHASES), 0.0);
-
-  ofstream out;
-
-  if (TypeName == "thames") {
-    getTcolors(red, green, blue);
-  } else {
-    getVcolors(red, green, blue);
+  // VCCTL files have the time in hours, but THAMES has it in minutes
+  if (TypeName != "vcctl") {
+    ftime *= (1.0 / 60.0);
   }
 
-  string outname = RootName;
-  outname.append("_Frames");
-  outname.append(".xyz");
-
-  out.open(outname.c_str(), ios::app);
+  ofstream out;
+  out.open(xyzname.c_str(), ios::app);
 
   int numvox = Xsize * Ysize * Zsize;
 
@@ -220,7 +224,7 @@ int writeXYZFile(const string &times) {
                << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
                << "\t0.0" << endl;
           */
-          out << x << "\t" << y << "\t" << z << "\t0.0\t" << red[idx] << "\t"
+          out << x << "\t" << y << "\t" << z << "\t" << red[idx] << "\t"
               << green[idx] << "\t" << blue[idx] << "\t0.0" << endl;
         } else {
           /*
@@ -228,7 +232,7 @@ int writeXYZFile(const string &times) {
                << "\t" << blue[idx] << "\t" << x << "\t" << y << "\t" << z
                << "\t" << transparency << endl;
           */
-          out << x << "\t" << y << "\t" << z << "\t0.0\t" << red[idx] << "\t"
+          out << x << "\t" << y << "\t" << z << "\t" << red[idx] << "\t"
               << green[idx] << "\t" << blue[idx] << "\t" << transparency
               << endl;
         }
@@ -520,27 +524,36 @@ void getVcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
 void getTcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
 
   string colorscheme = RootName;
-  char comma1, comma2, comma3;
   colorscheme.append("_Colors.csv");
-  int numMicroPhases;
-  int phaseid;
+  string snumMicroPhases, sphaseid, srval, sgval, sbval;
+  int numMicroPhases, phaseid;
   float rval, gval, bval;
 
   ifstream in;
-  in.open(colorscheme.c_str(), ios::app);
+  in.open(colorscheme.c_str(), ifstream::in);
   if (!in.is_open()) {
     cout << endl << endl;
     cout << "ERROR: THAMES color scheme file " << colorscheme
          << " does not exist" << endl;
   }
 
-  in >> numMicroPhases;
+  in >> snumMicroPhases;
+  cout << endl << snumMicroPhases << " microstructure phases" << endl;
+  numMicroPhases = stoi(snumMicroPhases);
+  cout << endl << numMicroPhases << " microstructure phases" << endl;
+  cout.flush();
   red.resize(numMicroPhases, 0.0);
   green.resize(numMicroPhases, 0.0);
   blue.resize(numMicroPhases, 0.0);
 
   for (int i = 0; i < numMicroPhases; ++i) {
-    in >> phaseid >> comma1 >> rval >> comma2 >> gval >> comma3 >> bval;
+    in >> sphaseid >> srval >> sgval >> sbval;
+    cout << sphaseid << " " << srval << " " << sgval << " " << sbval << endl;
+    phaseid = stoi(sphaseid);
+    rval = (stof(srval)) / 255.0;
+    gval = (stof(sgval)) / 255.0;
+    bval = (stof(sbval)) / 255.0;
+    cout << phaseid << " " << rval << " " << gval << " " << bval << endl;
     red[phaseid] = rval;
     green[phaseid] = gval;
     blue[phaseid] = bval;
@@ -562,20 +575,28 @@ void printHelp(void) {
 }
 
 int getFileNamesAndTimes(vector<string> &names, vector<string> &times) {
+
   string buff, subword;
   string stringtofind = "img";
   int equalOrNot;
 
+  string tstartdelim = ".";
+  string tenddelim;
+
   string cmd = "ls ";
   cmd += RootName;
-  cmd += ".img* > scratchfilelist.txt";
+  if (TypeName == "vcctl") {
+    cmd += ".img* > scratchfilelist.txt";
+    tenddelim = "h";
+  } else {
+    cmd += ".*.img > scratchfilelist.txt";
+    tenddelim = "m";
+  }
 
   cout << "\t" << cmd << endl;
   system(cmd.c_str());
 
   ifstream in("scratchfilelist.txt");
-  string delimdot = ".";
-  string delimh = "h";
 
   names.clear();
   times.clear();
@@ -590,20 +611,39 @@ int getFileNamesAndTimes(vector<string> &names, vector<string> &times) {
       pos = 0;
       names.push_back(buff);
       times.push_back("0.0");
-      done = false;
-      while (((pos = buff.find(delimdot)) != string::npos) && !done) {
-        subword = buff.substr(0, pos);
-        cout << "subword = " << subword << endl;
-        cout << "buff pre-erase = " << buff << endl;
-        buff.erase(0, pos + delimdot.length());
-        cout << "buff post-erase = " << buff << endl;
-        equalOrNot = subword.compare(stringtofind);
-        if (equalOrNot == 0)
+      if (TypeName == "vcctl") {
+        done = false;
+        while (((pos = buff.find(tstartdelim)) != string::npos) && !done) {
+          subword = buff.substr(0, pos);
+          cout << "subword = " << subword << endl;
+          cout << "buff pre-erase = " << buff << endl;
+          buff.erase(0, pos + tstartdelim.length());
+          cout << "buff post-erase = " << buff << endl;
+          equalOrNot = subword.compare(stringtofind);
+          if (equalOrNot == 0)
+            done = true;
+        }
+        if (done) {
           done = true;
-      }
-      if (done) {
-        done = true;
-        pos1 = buff.find(delimh);
+          pos1 = buff.find(tenddelim);
+          if (pos1 != string::npos) {
+            times[times.size() - 1] = buff.substr(0, pos1);
+          }
+          cout << times[times.size() - 1];
+        }
+      } else {
+        // THAMES files are assumed to have root names without a "."
+        pos = buff.find(tstartdelim);
+        if (pos != string::npos) {
+          subword = buff.substr(0, pos);
+          cout << "subword = " << subword << endl;
+          cout << "buff pre-erase = " << buff << endl;
+          buff.erase(0, pos + tstartdelim.length());
+          cout << "buff post-erase = " << buff << endl;
+        } else {
+          cout << "Bad file name?" << endl;
+        }
+        pos1 = buff.find(tenddelim);
         if (pos1 != string::npos) {
           times[times.size() - 1] = buff.substr(0, pos1);
         }

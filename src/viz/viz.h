@@ -318,7 +318,8 @@ int Xsize, Ysize, Zsize;
 int checkargs(int argc, char **argv);
 int processImageFiles(vector<string> &names, vector<string> &times);
 int getFileNamesAndTimes(vector<string> &names, vector<string> &times);
-int writeXYZFile(const string &times);
+int writeXYZFile(const string &time, const string &fname, vector<float> &red,
+                 vector<float> &green, vector<float> &blue);
 int countSolid(void);
 bool isSolid(int i, int j, int k);
 int toIndex(int i, int j, int k);

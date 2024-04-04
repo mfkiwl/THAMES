@@ -2629,7 +2629,7 @@ void Lattice::writeLattice(double curtime, const int simtype,
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
-  ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
+  ofileName = ofileName + "." + timestr + "m." + tempstr + ".img";
   if (verbose_) {
     cout << "    In Lattice::writeLattice, curtime = " << curtime
          << ", timestr = " << timestr << endl;
@@ -2714,11 +2714,12 @@ void Lattice::writeDamageLattice(double curtime, const string &root) {
   unsigned int i, j, k;
   string ofileName(root);
   ostringstream ostr1, ostr2;
-  ostr1 << (int)((curtime * 100.0) + 0.5); // hundredths of a day
+  ostr1 << setfill('0') << setw(6)
+        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
-  ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
+  ofileName = ofileName + "." + timestr + "m." + tempstr + ".img";
 
   ofstream out(ofileName.c_str());
   try {
@@ -2784,8 +2785,8 @@ void Lattice::writeLatticePNG(double curtime, const int simtype,
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
   string buff;
-  ofileName = ofileName + "." + timestr + "." + tempstr + ".ppm";
-  ofpngname = ofpngname + "." + timestr + "." + tempstr + ".png";
+  ofileName = ofileName + "." + timestr + "m." + tempstr + ".ppm";
+  ofpngname = ofpngname + "." + timestr + "m." + tempstr + ".png";
 
   ///
   /// Open the output file
