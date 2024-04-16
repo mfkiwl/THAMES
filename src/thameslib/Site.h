@@ -39,8 +39,8 @@ protected:
   unsigned int microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
-  vector<unsigned int>
-      dissolution_; /**< Vector of phases that can dissolve at this site */
+ unsigned int
+      dissolution_; /**< phase that can dissolve at this site or -1 */
   vector<unsigned int>
       growth_;              /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
@@ -314,10 +314,15 @@ public:
   @param pid is the microstructure phase id of the phase that can dissolve at
   the site
   */
-  void setDissolutionSite(unsigned int pid) {
-    dissolution_.clear();
-    dissolution_.push_back(pid);
-    growth_.clear();
+//  void setDissolutionSite(unsigned int pid) {
+//    dissolution_.clear();
+//    dissolution_.push_back(pid);
+//    growth_.clear();
+//  }
+
+  void setDissolutionSiteMod(unsigned int pid) {
+      dissolution_ = pid;
+      growth_.clear();
   }
 
   /**
@@ -332,7 +337,7 @@ public:
     vector<unsigned int>::iterator p = find(start, end, pid);
     if (p == growth_.end())
       growth_.push_back(pid);
-    dissolution_.clear();
+    dissolution_ = -1;
   }
 
   /**
@@ -344,12 +349,12 @@ public:
 
   @param pid is the id of the microstructure phase to remove
   */
-  void removeDissolutionSite(unsigned int pid) {
-    if (dissolution_.size() > 0 && dissolution_[0] == pid)
-      dissolution_.clear();
-  }
+//  void removeDissolutionSite(unsigned int pid) {
+//    if (dissolution_.size() > 0 && dissolution_[0] == pid)
+//      dissolution_.clear();
+//  }
 
-  void removeDissolutionSiteMod(unsigned int pid) { dissolution_.clear(); }
+  void removeDissolutionSiteMod(void) { dissolution_ = -1;}
 
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
@@ -389,6 +394,7 @@ public:
     }
   }
 
+  void clearGrowthVector(void) {growth_.clear();}
   /**
   @brief Get the entire list of all phases that can grow at the site.
 
@@ -407,7 +413,7 @@ public:
 
   @return the list of ids of all microstructure phases that can grow at the site
   */
-  vector<unsigned int> getDissolutionPhases() const { return dissolution_; }
+  unsigned int getDissolutionPhases() const { return dissolution_; }
 
   /**
   @brief Find out if the site is designated as damaged by some kind of

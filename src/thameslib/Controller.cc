@@ -401,6 +401,11 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
     if (time_[i] >= sattack_time_) {
 
+cout << endl << " Controller::doCycle - for sulfate attack, check conditions for addDissolutionSites & coordination sphere " << endl;
+cout << " program stops " << endl;
+exit(1);
+
+
       if (verbose_) {
         cout << "Controller::doCycle Sulfate attack module" << endl;
         cout.flush();
@@ -589,13 +594,13 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
                 double dwmcval = poreintroduce;
                 lattice_->dWmc(index, dwmcval);
-                for (int j = 0; j < ste->nbSize(1); j++) {
+                for (int j = 0; j < ste->nbSize(1); j++) { //NN_NNN?
                   Site *stenb = ste->nb(j);
                   stenb->dWmc(dwmcval);
                   if ((stenb->getWmc() > 0.0) &&
                       (stenb->getMicroPhaseId() != ELECTROLYTEID) &&
                       (stenb->getMicroPhaseId() != VOIDID)) {
-                    lattice_->addDissolutionSite(stenb,
+                    lattice_->addDissolutionSiteMod(stenb,
                                                  stenb->getMicroPhaseId());
                   }
                 }

@@ -34,7 +34,7 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
   verbose_ = verbose;
 #endif
 
-  dissolution_.clear();
+  dissolution_ = -1;
   growth_.clear();
 
   id_ = (unsigned int)(x_ + (xs * y_) + ((xs * ys) * z_));

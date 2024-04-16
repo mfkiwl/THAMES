@@ -93,7 +93,6 @@ growthSites_
   Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
             vector<Site *> dv, unsigned int pid, const bool verbose);
 
-
   /**
   @brief Destructor for the Interface class.
 
@@ -161,7 +160,6 @@ growthSites_
   @param loc is a pointer to the site to add to the list of growth sites
   @return true if the site was added successfully, false otherwise
   */
-  bool addGrowthSite(Site *loc);
 
   bool addGrowthSiteMod(Site *loc);
 
@@ -174,7 +172,6 @@ growthSites_
   @param loc is a pointer to the site to add to the list of dissolution sites
   @return true if the site was added successfully, false otherwise
   */
-  bool addDissolutionSite(Site *loc);
 
   bool addDissolutionSiteMod(Site *loc);
 
@@ -207,7 +204,7 @@ growthSites_
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-  bool removeGrowthSite(Site *loc);
+  //bool removeGrowthSite(Site *loc);
   
   bool removeGrowthSiteMod0_grow(Site *loc, int pos);
 
@@ -220,7 +217,8 @@ growthSites_
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-  bool removeDissolutionSite(Site *loc);
+
+//  bool removeDissolutionSite(Site *loc);
 
   bool removeDissolutionSiteMod_diss(Site *loc, int pos);
 

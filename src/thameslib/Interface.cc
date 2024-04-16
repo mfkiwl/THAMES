@@ -176,46 +176,20 @@ Interface::~Interface() {
   dissolutionSites_.clear();
 }
 
-bool Interface::addGrowthSite(Site *loc) {
-  bool answer = false;
-  bool found = false;
-  unsigned int i;
-  vector<Isite>::iterator p, q, start, end;
-  start = growthSites_.begin();
-  end = growthSites_.end();
+bool Interface::addGrowthSiteMod_newInterface(int id, int aff) {
 
-  ///
-  /// See if site is already present
-  ///
-
-  for (i = 0; (i < growthSites_.size()) && (!found); i++) {
-    if (loc->getId() == growthSites_[i].getId())
-      found = true;
-  }
-
-  ///
-  /// Add the site only if it was not found already
-  ///
-
-  if (!found) {
-    int afty = 0;
-    for (i = 0; i < loc->nbSize(2); i++) {
-      afty +=
-          chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
-    }
-    Isite tisite(loc->getId(), afty);
-    q = lower_bound(start, end, tisite, affinitySort);
-    growthSites_.insert(q, tisite);
-    answer = true;
-  }
-
-  return answer;
+    Isite tisite(id, aff);
+    growthSites_.push_back(tisite);
+    return true;
 }
 
 bool Interface::addGrowthSiteMod(Site *loc) {
     bool answer = false;
     bool found = false;
     unsigned int i;
+    //vector<Isite>::iterator p, q, start, end;
+    //start = growthSites_.begin();
+    //end = growthSites_.end();
 
     /// See if site is already present
     int size = growthSites_.size();
@@ -235,53 +209,12 @@ bool Interface::addGrowthSiteMod(Site *loc) {
                 chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
         }
         Isite tisite(id, afty);
+        //q = lower_bound(start, end, tisite, affinitySort);
+        //growthSites_.insert(q, tisite);
         growthSites_.push_back(tisite);
         answer = true;
     }
     return answer;
-}
-
-bool Interface::addGrowthSiteMod_newInterface(int id, int aff) {
-
-    Isite tisite(id, aff);
-    growthSites_.push_back(tisite);
-    return true;
-}
-
-bool Interface::addDissolutionSite(Site *loc) {
-  bool answer = false;
-  bool found = false;
-  unsigned int i;
-  vector<Isite>::iterator p, q, start, end;
-  start = dissolutionSites_.begin();
-  end = dissolutionSites_.end();
-
-  ///
-  /// See if site is already present
-  ///
-
-  for (i = 0; (i < dissolutionSites_.size()) && (!found); i++) {
-    if (loc->getId() == dissolutionSites_[i].getId())
-      found = true;
-  }
-
-  ///
-  /// Add the site only if it was not found already
-  ///
-
-  if (!found) {
-    int afty = 0;
-    for (i = 0; i < loc->nbSize(2); i++) {
-      afty +=
-          chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
-    }
-    Isite tisite(loc->getId(), afty);
-    q = lower_bound(start, end, tisite, affinitySort);
-    dissolutionSites_.insert(q, tisite);
-    answer = true;
-  }
-
-  return answer;
 }
 
 bool Interface::addDissolutionSiteMod(Site *loc) {
@@ -300,6 +233,14 @@ bool Interface::addDissolutionSiteMod(Site *loc) {
 
     /// Add the site only if it was not found already
     if (!found) {
+        //int afty = 0;
+        //for (i = 0; i < loc->nbSize(2); i++) {
+        //   afty +=
+        //        chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
+        //}
+        //Isite tisite(siteId,afty);
+        //q = lower_bound(start, end, tisite, affinitySort);
+        //dissolutionSites_.insert(q, tisite);
         Isite tisite(siteId,0);
         dissolutionSites_.push_back(tisite);
         answer = true;
@@ -416,6 +357,7 @@ bool Interface::sortDissolutionSites(vector<Site> &ste, unsigned int pid) {
   return true;
 }
 
+/*
 bool Interface::removeGrowthSite(Site *loc) {
   bool found = false;
   vector<Isite>::iterator p = growthSites_.begin();
@@ -429,6 +371,7 @@ bool Interface::removeGrowthSite(Site *loc) {
 
   return found;
 }
+*/
 
 bool Interface::removeGrowthSiteMod1_grow(Site *loc) {
     bool found = false;
@@ -443,6 +386,13 @@ bool Interface::removeGrowthSiteMod1_grow(Site *loc) {
             break;
         }
     }
+    if(found == false) {
+        cout << endl << "error site doesn't belong to this interface - phaseId/siteId/growthSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+            loc->getId() << " / " << growthSites_.size() << endl;
+        cout << "STOP:  Interface::removeGrowthSiteMod1_grow(Site *loc)" << endl;
+        exit(1);
+    }
+
     return found;
 }
 
@@ -454,7 +404,7 @@ bool Interface::removeGrowthSiteMod0_grow(Site *loc, int pos) {
     growthSites_.pop_back();
     found = true;
   }else{
-      cout << endl << "phaseId/siteId/isitePos/growthSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+      cout << endl << "error site doesn't belong to this interface or wrong site position - phaseId/siteId/isitePos/growthSites_.size(): " << loc->getMicroPhaseId() << " / " <<
               loc->getId() << " / " << pos << " / " << growthSites_.size() << endl;
       cout << "STOP:  Interface::removeGrowthSiteMod0_grow(Site *loc, int pos)" << endl;
       exit(1);
@@ -462,6 +412,7 @@ bool Interface::removeGrowthSiteMod0_grow(Site *loc, int pos) {
   return found;
 }
 
+/*
 bool Interface::removeDissolutionSite(Site *loc) {
   bool found = false;
   vector<Isite>::iterator p;
@@ -475,6 +426,7 @@ bool Interface::removeDissolutionSite(Site *loc) {
   }
   return found;
 }
+*/
 
 bool Interface::removeDissolutionSiteMod_diss(Site *loc, int pos) {
   bool found = false;
@@ -484,7 +436,7 @@ bool Interface::removeDissolutionSiteMod_diss(Site *loc, int pos) {
       dissolutionSites_.pop_back();
       found = true;
   }else{
-      cout << endl << "phaseId/siteId/isitePos/dissolutionSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+      cout << endl << "error site doesn't belong to this interface or wrong site position - phaseId/siteId/isitePos/dissolutionSites_.size(): " << loc->getMicroPhaseId() << " / " <<
           loc->getId() << " / " << pos << " / " << dissolutionSites_.size() << endl;
       cout << "STOP:  Interface::removeDissolutionSiteMod_diss(Site *loc, int pos)" << endl;
       exit(1);
@@ -504,6 +456,12 @@ bool Interface::removeDissolutionSiteMod_grow(Site *loc) {
             found = true;
             break;
         }
+    }
+    if(found == false) {
+        cout << endl << "error site doesn't belong to this interface - phaseId/siteId/growthSites_.size(): " << loc->getMicroPhaseId() << " / " <<
+            loc->getId() << " / " << growthSites_.size() << endl;
+        cout << "STOP:  Interface::removeDissolutionSiteMod_grow(Site *loc)" << endl;
+        exit(1);
     }
     return found;
 }
