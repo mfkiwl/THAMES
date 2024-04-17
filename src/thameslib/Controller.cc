@@ -63,7 +63,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 
   try {
     string outfilename = jobroot_ + "_Solution.csv";
-    ofstream out(outfilename.c_str(), ios::app);
+    ofstream out(outfilename.c_str());
     if (!out) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -80,7 +80,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out.close();
 
     outfilename = jobroot_ + "_DCVolumes.csv";
-    ofstream out1(outfilename.c_str(), ios::app);
+    ofstream out1(outfilename.c_str());
     if (!out1) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -97,7 +97,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out1.close();
 
     outfilename = jobroot_ + "_Microstructure.csv";
-    ofstream out2(outfilename.c_str(), ios::app);
+    ofstream out2(outfilename.c_str());
     if (!out2) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -112,7 +112,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out2.close();
 
     outfilename = jobroot_ + "_pH.csv";
-    ofstream out3(outfilename.c_str(), ios::app);
+    ofstream out3(outfilename.c_str());
     if (!out3) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -121,7 +121,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out3.close();
 
     outfilename = jobroot_ + "_CSH.csv";
-    ofstream out4(outfilename.c_str(), ios::app);
+    ofstream out4(outfilename.c_str());
     if (!out4) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -134,7 +134,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out4.close();
 
     outfilename = jobroot_ + "_CSratio_solid.csv";
-    ofstream out5(outfilename.c_str(), ios::app);
+    ofstream out5(outfilename.c_str());
     if (!out5) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -143,7 +143,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out5.close();
 
     outfilename = jobroot_ + "_icmoles.csv";
-    ofstream out6(outfilename.c_str(), ios::app);
+    ofstream out6(outfilename.c_str());
     if (!out6) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
@@ -156,7 +156,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out6.close();
 
     outfilename = jobroot_ + "_Enthalpy.csv";
-    ofstream out7(outfilename.c_str(), ios::app);
+    ofstream out7(outfilename.c_str());
     if (!out7) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");

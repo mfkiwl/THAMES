@@ -578,7 +578,7 @@ void writeReport(const string &jobroot, struct tm *itime,
                  const string &csname, ChemicalSystem *csys, Controller *ctr) {
   string statname = jobroot + ".stats";
   string jfilename = jobroot + ".report";
-  ofstream out(jfilename.c_str(), ios::app);
+  ofstream out(jfilename.c_str());
   if (!out.is_open()) {
     if (WARNING)
       cout << "WARNING:  Could not open report file" << endl;
