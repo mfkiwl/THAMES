@@ -54,7 +54,9 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
 
 void Site::calcWmc(void) {
   wmc_ = chemSys_->getMicroPhasePorosity(getMicroPhaseId());
-  for (unsigned int i = 0; i < nb_.size(); i++) {
-    wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
+  for (unsigned int i = 0; i < NN_NNN; i++) {
+      wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
+
   }
 }
+

@@ -84,7 +84,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
 
   for (j = 0; j < gv.size(); j++) {
     afty = 0;
-    for (i = 0; i < gv[j]->nbSize(2); i++) {
+    for (i = 0; i < NN_NNN; i++) {
       afty += chemSys_->getAffinity(pid, gv[j]->nb(i)->getMicroPhaseId());
     }
 
@@ -96,6 +96,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     growthSites_.push_back(Isite(gv[j]->getId(), afty));
   }
 
+/*
   if (growthSites_.size() > 0) {
     start = growthSites_.begin();
     end = growthSites_.end();
@@ -126,6 +127,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     site2 = (unsigned int)(rg_->Ran3() * numgsites);
     swap(growthSites_[site1], growthSites_[site2]);
   }
+*/
 
   ///
   /// Now sort the dissolution sites according to the affinity
@@ -134,7 +136,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   try {
     for (j = 0; j < dv.size(); j++) {
       afty = 0;
-      for (i = 0; i < dv[j]->nbSize(2); i++) {
+      for (i = 0; i < NN_NNN; i++) {
         afty += chemSys_->getAffinity(pid, dv[j]->nb(i)->getMicroPhaseId());
       }
       dissolutionSites_.push_back(Isite(dv[j]->getId(), afty));
@@ -144,6 +146,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     exit(0);
   }
 
+/*
   if (dissolutionSites_.size() > 0) {
     start = dissolutionSites_.begin();
     end = dissolutionSites_.end();
@@ -169,6 +172,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     e.printException();
     exit(0);
   }
+*/
 } // End of constructors
 
 Interface::~Interface() {

@@ -73,7 +73,8 @@ protected:
 
   This provides a ranking of dissolution potential only.
   */
-  double wmc_;
+  double wmc_;  //total porosity ("surface curvature") at this site
+  double wmc0_; //this site internal porosity (its own contribution at wmc_ value)
   double expstrain_; /**< Assigned expansion strain by phase
                              constrained transformation or an
                              applied load */
@@ -265,6 +266,7 @@ public:
   @return the relative potential for dissolution at this site
   */
   double getWmc(void) const { return wmc_; }
+  double getWmc0(void) const { return wmc0_; }
 
   /**
   @brief Set the "weighted mean curvature" of the site.
@@ -272,6 +274,7 @@ public:
   @param wmcval is the value of wmc_ to assign to the site
   */
   void setWmc(double wmcval) { wmc_ = wmcval; }
+  void setWmc0(double wmcval) { wmc0_ = wmcval; }
 
   /**
   @brief Increment the "weighted mean curvature" of the site.

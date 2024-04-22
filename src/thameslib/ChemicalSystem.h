@@ -5888,5 +5888,9 @@ int getGEMPhaseIdLookup (string str)
     }
 }
 
+string getMicroPhaseName (int i){
+    return microPhaseName_[i];
+}
+
 }; // End of ChemicalSystem class
 #endif

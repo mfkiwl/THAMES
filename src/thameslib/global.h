@@ -122,6 +122,7 @@ const int VOIDID = 0;
 const int ELECTROLYTEID = 1;
 const int FIRST_SOLID = ELECTROLYTEID + 1;
 const int NUMCLINKERPHASES = 4;
+const double thrPorosityCSH = 0.355255;
 
 // The number of face, edge, and corner neighbors to a cubic lattice site
 const unsigned int NUM_NEAREST_NEIGHBORS = 6;
