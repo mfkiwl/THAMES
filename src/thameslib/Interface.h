@@ -42,7 +42,6 @@ class ChemicalSystem;
 
 /**
 @class Declare the Interface class for handling and sorting interface voxels.
-growthSites_
 The Interface object is a collection of voxels of all the same phase that share
 at least one face with a different type of phase voxel.  We have containers for
 storing the list of voxels and for sorting the list in descending order of
@@ -66,13 +65,13 @@ public:
   /**
   @brief The default constructor, initializing members to empty or zero values.
 
-  @note NOT USED.growthSites_
+  @note NOT USED.
   */
   Interface();
 
   /**
   @brief Overloaded constructor initializing the random number generator.
-growthSites_
+
   @param rg is a pointer to the random number generator object to assign
   @param verbose is true if verbose output should be produced
   */

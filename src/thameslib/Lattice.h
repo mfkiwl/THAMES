@@ -677,22 +677,6 @@ public:
   @brief Add a prescribed number of sites of a given phase to the
   microstructure.
 
-  This method gets a list of all the <i>potential</i> growth sites, which
-  already is sorted in descending order of growth affinity.  The list is
-  then visited one site at a time, switching the id of the phase at the site.
-  Once this is done, the lists of growth sites and dissolution sites are
-  updated to account for the new local geometry.
-
-  @param phaseid is the id of the microstructure phase to add
-  @param numtoadd is the number of sites to switch to this phase
-  @return the actual number of sites that were changed
-  */
-  int growPhase(unsigned int phaseid, int numtoadd);
-
-  /**
-  @brief Add a prescribed number of sites of a given phase to the
-  microstructure.
-
   This method gets a list of all the <i>potential</i> growth sites. A site from
   this list is selected with a probability computed based on the local
   configuration: affinities that take into account the nature of the phase occupying

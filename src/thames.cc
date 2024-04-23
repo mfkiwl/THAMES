@@ -141,6 +141,7 @@ int main(int argc, char **argv) {
        << endl;
   getline(cin, buff);
   const string pi_filename(buff);
+  const string cement_filename(buff);
   cout << pi_filename << endl;
 
   //
@@ -341,8 +342,6 @@ int main(int argc, char **argv) {
   // Create the KineticController object
   //
 
-  const string cement_filename = pi_filename;
-
   try {
     KController = new KineticController(ChemSys, Solut, Mic, cement_filename,
                                         VERBOSE, WARNING);
@@ -521,7 +520,6 @@ void timeCount(clock_t time_, time_t lt_){
     cout << endl
          << "Total time with clock = " << elapsedtime << " seconds" << endl;
 }
-
 
 void printHelp(void) {
   cout << endl;

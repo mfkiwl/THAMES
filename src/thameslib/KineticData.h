@@ -24,6 +24,7 @@ phase
     - `specificSurfaceArea` is the specific surface area in m2 per kg
     - `refSpecificSurfaceArea` is the reference specific surface area in m2 per
 kg
+    - `scaledMass` is the number of grams of the phase per 100 grams of solid
     - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
     - `k2` is the Parrot and Killoh <i>K</i><sub>2</sub> parameter for the phase
     - `k3` is the Parrot and Killoh <i>K</i><sub>3</sub> parameter for the phase

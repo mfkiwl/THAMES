@@ -531,21 +531,21 @@ MicrostructureException() {
         excp_ = excp;
     }
 
-    /**
+  /**
   @brief Get the class name responsible for throwing the exception.
 
   @return the class name
   */
-   string &getClassname() const { return (string &)classname_; }
+  string &getClassname() const { return (string &)classname_; }
 
-    /**
+  /**
   @brief Get the function name responsible for throwing the exception.
 
   @return the function name
   */
-    string &getFunctionname() const { return (string &)functionname_; }
+  string &getFunctionname() const { return (string &)functionname_; }
 
-    /**
+  /**
   @brief Get the description of the exception.
 
   @return the file name
