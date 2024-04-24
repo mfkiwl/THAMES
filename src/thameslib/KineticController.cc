@@ -4,6 +4,7 @@
 
 */
 #include "KineticController.h"
+#include "global.h"
 
 KineticController::KineticController() {
   temperature_ = 293.15;
@@ -229,11 +230,34 @@ void KineticController::parseDoc(const string &docName) {
     exit(1);
   }
 
-  /// All kinetic components have been parsed now.  Next, this block tries
+  /// All kinetic components have been parsed now.
+  /// Count the number of each type of kinetic model;
+
+  int numpk = 0;
+  int numpozz = 0;
+  int numstd = 0;
+
+  for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+    if (phaseKineticModel_[i]->getType() == ParrotKillohType) {
+      numpk++;
+    } else if (phaseKineticModel_[i]->getType() == PozzolanicType) {
+      numpozz++;
+    } else if (phaseKineticModel_[i]->getType() == StandardType) {
+      numstd++;
+    }
+  }
+
+  setNumPK(numpk);
+  setNumPozzolanic(numpozz);
+  setNumStandard(numstd);
+
+  /// Next, this block tries
   /// to handle pozzolanic effects (loi, SiO2 content, etc.) on any other
   /// kinetic phases
 
-  setPozzEffectOnPK();
+  if (getNumPozzolanic() > 0) {
+    setPozzEffectOnPK();
+  }
 
   return;
 }
@@ -701,8 +725,7 @@ void KineticController::setPozzEffectOnPK(void) {
   double refsio2val = 0.94;
   double betval = 29.0;
   double refbetval = 29.0;
-  // double minpozzeffect = 1000.0;
-  double minpozzeffect = 1.0;
+  double minpozzeffect = 1000.0;
   double pozzeffect = 1.0;
 
   for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {

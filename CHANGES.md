@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 24 13:24 2024 | minpozzeffect is set only if at least one kinetically pozzolanic component is detected. |
 | Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix
 later. |
 | Apr 23 15:07 2024 | Copied thameslib source files from florinTH branch. |

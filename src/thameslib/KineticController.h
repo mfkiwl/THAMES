@@ -65,12 +65,15 @@ private:
   vector<double>
       refSpecificSurfaceArea_; /**< List of reference specific surface areas */
   vector<bool> isKinetic_;
-  int waterId_;     /**< DC index for liquid water */
-  int ICNum_;       /**< Number of ICs in chemical system */
-  int DCNum_;       /**< Number of DCs in chemical system */
-  int GEMPhaseNum_; /**< Number of GEM phases in chemical system */
-  bool verbose_;    /**< Flag for verbose output */
-  bool warning_;    /**< Flag for warnining output */
+  int waterId_;       /**< DC index for liquid water */
+  int ICNum_;         /**< Number of ICs in chemical system */
+  int DCNum_;         /**< Number of DCs in chemical system */
+  int numPK_;         /**< Number of kinetically Parrott/Killoh components */
+  int numPozzolanic_; /**< Number of kinetically pozzolanic components */
+  int numStandard_;   /**< Number of kinetically standard components */
+  int GEMPhaseNum_;   /**< Number of GEM phases in chemical system */
+  bool verbose_;      /**< Flag for verbose output */
+  bool warning_;      /**< Flag for warnining output */
 
 public:
   /**
@@ -518,6 +521,70 @@ public:
   @return the warning flag
   */
   bool getWarning() const { return warning_; }
+
+  /**
+  @brief Set the number of kinetically Parrot-Killoh phases
+
+  @param numpk is the number of Parrot-Killot phases
+  */
+  void setNumPK(const int numpk) {
+    if (numpk >= 0) {
+      numPK_ = numpk;
+    } else {
+      numPK_ = 0;
+    }
+    return;
+  }
+
+  /**
+  @brief Get the number of kinetically Parrot-Killoh phases
+
+  @return the number of kinetically Parrot-Killoh phases
+  */
+  int getNumPK() const { return numPK_; }
+  int numpk = 0;
+
+  /**
+  @brief Set the number of kinetically pozzolanic phases
+
+  @param numpk is the number of kinetically pozzolanic phases
+  */
+  void setNumPozzolanic(const int numpozzolanic) {
+    if (numpozzolanic >= 0) {
+      numPozzolanic_ = numpozzolanic;
+    } else {
+      numPozzolanic_ = 0;
+    }
+    return;
+  }
+
+  /**
+  @brief Get the number of kinetically pozzolanic phases
+
+  @return the number of kinetically pozzolanic phases
+  */
+  int getNumPozzolanic() const { return numPozzolanic_; }
+
+  /**
+  @brief Set the number of kinetically standard phases
+
+  @param numpk is the number of kinetically standard phases
+  */
+  void setNumStandard(const int numstandard) {
+    if (numstandard >= 0) {
+      numStandard_ = numstandard;
+    } else {
+      numStandard_ = 0;
+    }
+    return;
+  }
+
+  /**
+  @brief Get the number of kinetically standard phases
+
+  @return the number of kinetically standard phases
+  */
+  int getNumStandard() const { return numStandard_; }
 
 }; // End of KineticController class
 
