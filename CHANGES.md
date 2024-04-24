@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix
+later. |
 | Apr 23 15:07 2024 | Copied thameslib source files from florinTH branch. |
 | Apr 04 12:13 2024 | Changed naming convention of img files, with time string now in minutes. |
 | Mar 19 14:49 2024 | Better handling of color scheme for visualization of microstructure |

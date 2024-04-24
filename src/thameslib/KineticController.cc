@@ -701,7 +701,8 @@ void KineticController::setPozzEffectOnPK(void) {
   double refsio2val = 0.94;
   double betval = 29.0;
   double refbetval = 29.0;
-  double minpozzeffect = 1000.0;
+  // double minpozzeffect = 1000.0;
+  double minpozzeffect = 1.0;
   double pozzeffect = 1.0;
 
   for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
@@ -898,9 +899,9 @@ void KineticController::calculateKineticStep(const double timestep,
           cout.flush();
         }
         if (verbose_) {
-          cout << "KineticController::calculateKineticStep "
-               << "--->Adding " << p->second << " mol/kgw of "
-               << ICName_[p->first] << " to initial solution." << endl;
+          cout << "KineticController::calculateKineticStep " << "--->Adding "
+               << p->second << " mol/kgw of " << ICName_[p->first]
+               << " to initial solution." << endl;
           cout.flush();
         }
         ICMoles[p->first] += (p->second * kgWaterMass);
@@ -1038,7 +1039,7 @@ void KineticController::calculateKineticStep(const double timestep,
       }
 
     } // End of normal hydration block
-  }   // End of try block
+  } // End of try block
 
   catch (EOBException eex) {
     eex.printException();
