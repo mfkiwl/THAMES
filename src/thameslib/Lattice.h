@@ -24,6 +24,7 @@ exists, hydrates, and possibly deteriorates.
 #include <typeinfo>
 #include <vector>
 
+#include "../Resources/include/png.h"
 #include "AppliedStrain.h"
 #include "ChemicalSystem.h"
 #include "Interface.h"
@@ -679,10 +680,10 @@ public:
 
   This method gets a list of all the <i>potential</i> growth sites. A site from
   this list is selected with a probability computed based on the local
-  configuration: affinities that take into account the nature of the phase occupying
-  this site and phases occupying its nearest and next nearest neighbours.
-  Once switching the phase id of this site, the lists of growth sites and
-  dissolution sites are updated to account for the new local geometry.
+  configuration: affinities that take into account the nature of the phase
+  occupying this site and phases occupying its nearest and next nearest
+  neighbours. Once switching the phase id of this site, the lists of growth
+  sites and dissolution sites are updated to account for the new local geometry.
 
   @param phaseid is the id of the microstructure phase to add
   @param numtoadd is the number of sites to switch to this phase
@@ -780,16 +781,16 @@ public:
   @param i is the phase index to set at that site
   */
   void setMicroPhaseId(Site *s, const unsigned int i) {
-      string msg;
-      try {
-          count_.at(s->getMicroPhaseId())--;
-          s->setMicroPhaseId(i);
-          count_.at(i)++;
-      } catch (out_of_range &oor) {
-          msg = "Site does not exist?";
-          throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
-      }
-      return;
+    string msg;
+    try {
+      count_.at(s->getMicroPhaseId())--;
+      s->setMicroPhaseId(i);
+      count_.at(i)++;
+    } catch (out_of_range &oor) {
+      msg = "Site does not exist?";
+      throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
+    }
+    return;
   }
 
   void setMicroPhaseIdMod_diss(Site *s, const unsigned int i) {
@@ -800,22 +801,24 @@ public:
       count_.at(i)++;
     } catch (out_of_range &oor) {
       msg = "Site does not exist?";
-      throw EOBException("Lattice", "setMicroPhaseIdMod_diss", msg, count_.size(), i);
+      throw EOBException("Lattice", "setMicroPhaseIdMod_diss", msg,
+                         count_.size(), i);
     }
     return;
   }
 
   void setMicroPhaseIdMod_grow(Site *s, const unsigned int i) {
-      string msg;
-      try {
-          count_.at(s->getMicroPhaseId())--;
-          s->setMicroPhaseId(i);
-          count_.at(i)++;
-      } catch (out_of_range &oor) {
-          msg = "Site does not exist?";
-          throw EOBException("Lattice", "setMicroPhaseIdMod_grow", msg, count_.size(), i);
-      }
-      return;
+    string msg;
+    try {
+      count_.at(s->getMicroPhaseId())--;
+      s->setMicroPhaseId(i);
+      count_.at(i)++;
+    } catch (out_of_range &oor) {
+      msg = "Site does not exist?";
+      throw EOBException("Lattice", "setMicroPhaseIdMod_grow", msg,
+                         count_.size(), i);
+    }
+    return;
   }
 
   /**
@@ -886,9 +889,10 @@ public:
   @param pid is the microstructure phase id
   */
 
-// void removeDissolutionSite(Site *loc, unsigned int pid);
+  // void removeDissolutionSite(Site *loc, unsigned int pid);
 
-  void removeDissolutionSiteMod_diss(Site *loc, unsigned int pid, int interfacePos);
+  void removeDissolutionSiteMod_diss(Site *loc, unsigned int pid,
+                                     int interfacePos);
 
   void removeDissolutionSiteMod_grow(Site *loc, unsigned int pid);
 
@@ -900,7 +904,7 @@ public:
   potential growth sites
   @param pid is the microstructure phase id
   */
-//  void removeGrowthSite(Site *loc, unsigned int pid);
+  //  void removeGrowthSite(Site *loc, unsigned int pid);
 
   void removeGrowthSiteMod0_grow(Site *loc, unsigned int pid, int interfacePos);
 
@@ -934,7 +938,7 @@ public:
                             bool &capWater);
 
   void changeMicrostructureMod(double time, const int simtype, bool isFirst,
-                            bool &capWater);
+                               bool &capWater);
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
 

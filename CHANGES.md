@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 26 17:43 2024 | Writing PNG files now done directly. |
 | Apr 24 13:24 2024 | minpozzeffect is set only if at least one kinetically pozzolanic component is detected. |
 | Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix
 later. |

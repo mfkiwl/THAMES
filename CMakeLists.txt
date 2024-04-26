@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.7)
 
 project (THAMES)
 
@@ -76,7 +76,7 @@ endif ()
 
 find_library (
     Z_LIB
-    NAMES z libz # what to look for
+    NAMES z.a libz.a # what to look for
     HINTS "${CMAKE_SOURCE_DIR}/src/Resources/lib" # where to look
 )
 
@@ -91,7 +91,7 @@ endif ()
 
 find_library (
     PNG_LIB
-    NAMES png libpng # what to look for
+    NAMES png.a libpng.a # what to look for
     HINTS "${CMAKE_SOURCE_DIR}/src/Resources/lib" # where to look
 )
 
@@ -104,7 +104,7 @@ else ()
   message (FATAL_ERROR "Did not find PNG lib")
 endif ()
 
-set (THAMES_INCLUDE_PATH "-I${CMAKE_SOURCE_DIR}/src -I/usr/local/include")
+set (THAMES_INCLUDE_PATH "-I${CMAKE_SOURCE_DIR}/src/Resources/include -I/usr/local/include")
 
 set (CMAKE_CXX_FLAGS "-O2 -std=c++17 -DIPMGEMPLUGIN ${THAMES_INCLUDE_PATH} ${XML_INCLUDE_PATH}")
 
