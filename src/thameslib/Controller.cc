@@ -254,6 +254,13 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
   lattice_->writeMicroColors(jobroot_);
 
+  ///
+  /// Write the initial microstructure image and its png image
+  ///
+
+  lattice_->writeLattice(0.0, sim_type_, jobroot_);
+  lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
+
   for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
     ///
@@ -324,7 +331,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
     ////
 
     try {
-      //lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
+      // lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
       lattice_->changeMicrostructureMod(time_[i], sim_type_, isFirst, capwater);
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
@@ -401,10 +408,12 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
     if (time_[i] >= sattack_time_) {
 
-cout << endl << " Controller::doCycle - for sulfate attack, check conditions for addDissolutionSites & coordination sphere " << endl;
-cout << " program stops " << endl;
-exit(1);
-
+      cout << endl
+           << " Controller::doCycle - for sulfate attack, check conditions for "
+              "addDissolutionSites & coordination sphere "
+           << endl;
+      cout << " program stops " << endl;
+      exit(1);
 
       if (verbose_) {
         cout << "Controller::doCycle Sulfate attack module" << endl;
@@ -594,14 +603,14 @@ exit(1);
 
                 double dwmcval = poreintroduce;
                 lattice_->dWmc(index, dwmcval);
-                for (int j = 0; j < ste->nbSize(1); j++) { //NN_NNN?
+                for (int j = 0; j < ste->nbSize(1); j++) { // NN_NNN?
                   Site *stenb = ste->nb(j);
                   stenb->dWmc(dwmcval);
                   if ((stenb->getWmc() > 0.0) &&
                       (stenb->getMicroPhaseId() != ELECTROLYTEID) &&
                       (stenb->getMicroPhaseId() != VOIDID)) {
                     lattice_->addDissolutionSiteMod(stenb,
-                                                 stenb->getMicroPhaseId());
+                                                    stenb->getMicroPhaseId());
                   }
                 }
                 for (int j = ste->nbSize(1); j < ste->nbSize(2); j++) {

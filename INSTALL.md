@@ -66,28 +66,66 @@ use Homebrew for package management:
 * `ln -s g++-13 g++`
 * Edit your path to ensure that `/opt/homebrew/bin` comes before `/usr/bin`
 
-Furthermore, to write PNG images of the microstructure, you will need the png++ package;
-
-* `brew install png++`
-
 ### Build GEMS3K library
 
-1. cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
-2. ./install.sh
+* cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
+* Open the file `install.sh` with your favorite text editor.
+* Comment out the line that begins with `cmake ..` by placing a `#` in the first column.
+* Add a line directly below it that reads
+
+```
+cmake .. -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/ope/homebrew/bin/g++ -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_INSTALL_PREFIX=$InstallPrefix 
+```
+* Save the `install.sh` file and close it
+* Run the command `./install.sh`
+
+### Build Z compression library
+You only need to do this if it is not already installed on your system
+
+* cd /PathToTHAMES/THAMES/src/zlib
+* `mkdir build`
+* `cd build`
+* Run the command
+
+```
+cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_INSTALL_PREFIX=../../Resources ..
+```
+
+* `make`
+* `make install`
+
+### Build PNG library
+You only need to do this if it is not already installed on your system
+
+* cd /PathToTHAMES/THAMES/src/libpng
+* `mkdir build; cd build`
+* Run the command
+
+```
+cmake -DCMAKE_INSTALL_PREFIX=../../Resources -DZLIB_ROOT=../../Resources ..
+```
+
+* `make`
+* `make install`
 
 Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
 build, which means that the original files and directories are left untouched.
 Doing this makes the re-compiling and cleaning of the installation files
 much simpler.
 
-1. cd /PathToTHAMES/THAMES/build
-2. `cmake ..`
-3. `make`
-4. `make install`
-5. `make doc`
+* cd /PathToTHAMES/THAMES/build
+* Run the command
+
+```
+cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/g++ ..
+```
+* `make`
+* `make install`
+* `make doc`
 
 This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
 static libraries in the PathToTHAMES/lib directory.
+
 
 ## Building on Unix or Linux
 
@@ -114,10 +152,6 @@ You only need to do this if it is not already installed on your system
 3. `cmake -DCMAKE_INSTALL_PREFIX=../../Resources -DZLIB_ROOT=../../Resources ..`
 4. `make`
 6. `make install`
-
-### Install PNG++
-1. cd /PathToTHAMES/THAMES/src/png++-0.2.9
-* `make install PREFIX=../Resources`
 
 Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
 build, which means that the original files and directories are left untouched.
