@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 27 23:35 2024 | Initial and fixed solution compositions both specified with DCs now |
 | Apr 26 22:49 2024 | Cleaned up install instructions; force initial microstructure output |
 | Apr 26 17:43 2024 | Writing PNG files now done directly. |
 | Apr 24 13:24 2024 | minpozzeffect is set only if at least one kinetically pozzolanic component is detected. |

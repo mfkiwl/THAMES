@@ -252,21 +252,39 @@ class ChemicalSystem {
   @brief Initial solution composition
 
   This is a map of key-value pairs.  The key is the integer value of an
-  independent component (IC), and the value is the concentration of that IC in
+  dependent component (DC), and the value is the concentration of that IC in
   molal units [mol/kgw].
   */
   map<int, double> initialSolutionComposition_;
 
+  /**
+  @brief Fixed solution composition
+
+  This is a map of key-value pairs.  The key is the integer value of an
+  dependent component (DC), and the value is the concentration of that IC in
+  molal units [mol/kgw].
+  */
+  map<int, double> fixedSolutionComposition_;
+
   double gasSolidRatio_; /**< mass ratio of gas to solids */
 
   /**
-  @brief Gas phase composiion
+  @brief Initial gas composition
 
   This is a map of key-value pairs.  The key is the integer value of an
-  independent component (IC), and the value is the concentration of that IC in
+  dependent component (DC), and the value is the concentration of that IC in
   molal units [mol/kgw].
   */
-  map<int, double> gasComposition_;
+  map<int, double> initialGasComposition_;
+
+  /**
+  @brief Fixed gas composition
+
+  This is a map of key-value pairs.  The key is the integer value of an
+  dependent component (DC), and the value is the concentration of that IC in
+  molal units [mol/kgw].
+  */
+  map<int, double> fixedGasComposition_;
 
   /**
   @brief Volume fraction of each GEM CSD phase associated with a THAMES phase.
@@ -596,10 +614,10 @@ public:
   void parseGasComp(xmlDocPtr doc, xmlNodePtr cur);
 
   /**
-  @brief Parse input about an individual IC in the intitial solution
+  @brief Parse input about an individual DC in the intitial solution
 
-  The initial solution composition, if given, is parsed one IC at
-  a time by the parent function parseSolutionComp.  Each IC is
+  The initial solution composition, if given, is parsed one DC at
+  a time by the parent function parseSolutionComp.  Each DC is
   parsed one at a time by this function.  The composition will be
   held in an associative map of key value pairs:
 
@@ -610,12 +628,12 @@ public:
   @param doc points to the XML file
   @param cur points to the current location within the XML file
   */
-  void parseICInSolution(xmlDocPtr doc, xmlNodePtr cur);
+  void parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur);
 
   /**
-  @brief Parse input about an individual IC in the gas
+  @brief Parse input about an individual DC in the gas
 
-  The gas composition, if given, is parsed one IC at
+  The gas composition, if given, is parsed one DC at
   a time by the parent function parseGasComp.  Each IC is
   parsed one at a time by this function.  The composition will be
   held in an associative map of key value pairs:
@@ -626,7 +644,7 @@ public:
   @param doc points to the XML file
   @param cur points to the current location within the XML file
   */
-  void parseICInGas(xmlDocPtr doc, xmlNodePtr cur);
+  void parseDCInGas(xmlDocPtr doc, xmlNodePtr cur);
 
   /**
   @brief Scan an XML document for the phase names.
@@ -5705,7 +5723,7 @@ public:
   /**
   @brief Get the initial solution composition other than water
 
-  This function returns the map of molal concentrations of each IC in
+  This function returns the map of molal concentrations of each DC in
   the initial solution [mol/kgw].
 
   @return the initial solute concentration map
@@ -5715,14 +5733,38 @@ public:
   }
 
   /**
-  @brief Get the gas composition
+  @brief Get the fixed solution composition other than water
 
-  This function returns the map of molal concentrations of each IC in
-  the gas [mol/kg-gas].
+  This function returns the map of molal concentrations of each DC in
+  the fixed solution [mol/kgw].
+
+  @return the fixed solute concentration map
+  */
+  map<int, double> getFixedSolutionComposition(void) {
+    return fixedSolutionComposition_;
+  }
+
+  /**
+  @brief Get the initial gas composition
+
+  This function returns the map of molal concentrations of each DC in
+  the initial solution [mol/kgw].
 
   @return the initial solute concentration map
   */
-  map<int, double> getGasComposition(void) { return gasComposition_; }
+  map<int, double> getInitialGasComposition(void) {
+    return initialGasComposition_;
+  }
+
+  /**
+  @brief Get the fixed gas composition
+
+  This function returns the map of molal concentrations of each DC in
+  the fixed solution [mol/kgw].
+
+  @return the fixed solute concentration map
+  */
+  map<int, double> getFixedGasComposition(void) { return fixedGasComposition_; }
 
   /**
   @brief Set the gas-solid mass ratio
@@ -5789,108 +5831,103 @@ public:
   @return the warning flag
   */
   bool getWarning(void) const { return warning_; }
-  
-//*@*********************************************
 
- void checkChemSys(void);
+  //*@*********************************************
 
-/**
-@brief Get the list of all GEM CSD phases that are associated with a given microstructure phase id number.
+  void checkChemSys(void);
 
-@note NOT USED.
+  /**
+  @brief Get the list of all GEM CSD phases that are associated with a given
+  microstructure phase id number.
 
-@param idx is the microstructure phase in question
-@return the vector of all GEM CSD phase ids associated with the microstructure phase
-*/
-vector<int> getMicroPhaseMembers (const unsigned int idx)
-{
+  @note NOT USED.
+
+  @param idx is the microstructure phase in question
+  @return the vector of all GEM CSD phase ids associated with the microstructure
+  phase
+  */
+  vector<int> getMicroPhaseMembers(const unsigned int idx) {
     string msg;
-    map<int,vector<int> >::iterator p = microPhaseMembers_.find(idx);
+    map<int, vector<int>>::iterator p = microPhaseMembers_.find(idx);
     if (p != microPhaseMembers_.end()) {
-        return p->second;
+      return p->second;
     } else {
-        msg = "Could not find microPhaseMembers_ match to index provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseMembers",
-                        msg,microPhaseMembers_.size(),0);
-        ex.printException();
-        exit(1);
+      msg = "Could not find microPhaseMembers_ match to index provided";
+      EOBException ex("ChemicalSystem", "getMicroPhaseMembers", msg,
+                      microPhaseMembers_.size(), 0);
+      ex.printException();
+      exit(1);
     }
-}
+  }
 
+  /**
+  @brief Get the map of of the vector index of the microstructure phases by
+  name.
 
-/**
-@brief Get the map of of the vector index of the microstructure phases by name.
+  The integer id of each microstructure phase is keyed to its name in this map,
+  so one can "look up" a phase id by the name of that phase.
 
-The integer id of each microstructure phase is keyed to its name in this map,
-so one can "look up" a phase id by the name of that phase.
+  @note Used only in this class's copy constructor.
 
-@note Used only in this class's copy constructor.
-
-@return the microstructure phase lookup map (look up by name)
-*/
-int getMicroPhaseIdLookup (string str)
-{
+  @return the microstructure phase lookup map (look up by name)
+  */
+  int getMicroPhaseIdLookup(string str) {
     string msg;
-    map<string,int>::iterator p = microPhaseIdLookup_.find(str);
-    if (p != microPhaseIdLookup_.end()){
-        return p->second;
-    }else{
-        msg = "Could not find microPhaseIdLookup_ match to string provided";
-        EOBException ex("ChemicalSystem","getMicroPhaseIdLookup",
-                        msg,microPhaseIdLookup_.size(),0);
-        ex.printException();
-        exit(1);
+    map<string, int>::iterator p = microPhaseIdLookup_.find(str);
+    if (p != microPhaseIdLookup_.end()) {
+      return p->second;
+    } else {
+      msg = "Could not find microPhaseIdLookup_ match to string provided";
+      EOBException ex("ChemicalSystem", "getMicroPhaseIdLookup", msg,
+                      microPhaseIdLookup_.size(), 0);
+      ex.printException();
+      exit(1);
     }
-}
+  }
 
-int getICIdLookup (string str)
-{
+  int getICIdLookup(string str) {
     string msg;
-    map<string,int>::iterator p = ICIdLookup_.find(str);
-    if (p != ICIdLookup_.end()){
-        return p->second;
-    }else{
-        msg = "Could not find ICIdLookup_ match to string provided";
-        EOBException ex("ChemicalSystem","getICIdLookup",
-                        msg,ICIdLookup_.size(),0);
-        ex.printException();
-        exit(1);
+    map<string, int>::iterator p = ICIdLookup_.find(str);
+    if (p != ICIdLookup_.end()) {
+      return p->second;
+    } else {
+      msg = "Could not find ICIdLookup_ match to string provided";
+      EOBException ex("ChemicalSystem", "getICIdLookup", msg,
+                      ICIdLookup_.size(), 0);
+      ex.printException();
+      exit(1);
     }
-}
+  }
 
-int getDCIdLookup (string str)
-{
+  int getDCIdLookup(string str) {
     string msg;
-    map<string,int>::iterator p = DCIdLookup_.find(str);
-    if (p != DCIdLookup_.end()){
-        return p->second;
-    }else{
-        msg = "Could not find DCIdLookup_ match to string provided";
-        EOBException ex("ChemicalSystem","getDCIdLookup",
-                        msg,DCIdLookup_.size(),0);
-        ex.printException();
-        exit(1);
+    map<string, int>::iterator p = DCIdLookup_.find(str);
+    if (p != DCIdLookup_.end()) {
+      return p->second;
+    } else {
+      msg = "Could not find DCIdLookup_ match to string provided";
+      EOBException ex("ChemicalSystem", "getDCIdLookup", msg,
+                      DCIdLookup_.size(), 0);
+      ex.printException();
+      exit(1);
     }
-}
+  }
 
-int getGEMPhaseIdLookup (string str)
-{
+  int getGEMPhaseIdLookup(string str) {
     string msg;
-    map<string,int>::iterator p = GEMPhaseIdLookup_.find(str);
-    if (p != GEMPhaseIdLookup_.end()){
-        return p->second;
-    }else{
-        msg = "Could not find GEMPhaseIdLookup_ match to string provided";
-        EOBException ex("ChemicalSystem","getGEMPhaseIdLookup",
-                        msg,GEMPhaseIdLookup_.size(),0);
-        ex.printException();
-        exit(1);
+    map<string, int>::iterator p = GEMPhaseIdLookup_.find(str);
+    if (p != GEMPhaseIdLookup_.end()) {
+      return p->second;
+    } else {
+      msg = "Could not find GEMPhaseIdLookup_ match to string provided";
+      EOBException ex("ChemicalSystem", "getGEMPhaseIdLookup", msg,
+                      GEMPhaseIdLookup_.size(), 0);
+      ex.printException();
+      exit(1);
     }
-}
+  }
 
-string getMicroPhaseName (int i){
-    return microPhaseName_[i];
-}
+  string getMicroPhaseName(int i) { return microPhaseName_[i]; }
 
 }; // End of ChemicalSystem class
 #endif

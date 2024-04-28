@@ -42,6 +42,8 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   char *cdbrName = (char *)dbrFileName.c_str();
   long int gemFlag = 0;
 
+  double *icmolarmass, *dcmolarmass;
+
   if (verbose_) {
     cout << "Solution::Solution" << endl;
     cout << "Solution::Solution Reading Chemical System Definition file "
@@ -105,8 +107,8 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
          << " missing or corrupt." << endl;
     exit(0);
   } else if (gemFlag == -1) {
-    cout << "Bad return from GEM_init: "
-         << "internal memory allocation error." << endl;
+    cout << "Bad return from GEM_init: " << "internal memory allocation error."
+         << endl;
     exit(0);
   }
 
@@ -175,6 +177,28 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
     exit(0);
   }
 
+  /// The results of the thermodynamic calculation are now known, and
+  /// the constructor can cast them into appropriate units and set up
+  /// the data structure to make correspondences between GEM and microstructure
+  ///
+  /// Convert all IC and DC molar masses from kg/mol to g/mol
+  ///
+
+  ICMolarMass_.resize(numICs_, 0.0);
+  icmolarmass = (node_->pCSD())->ICmm;
+  for (int i = 0; i < numICs_; i++) {
+    // Convert to g per mole
+    ICMolarMass_[i] = (1000.0 * (double)(*icmolarmass));
+    icmolarmass++;
+  }
+  DCMolarMass_.resize(numDCs_, 0.0);
+  dcmolarmass = (node_->pCSD())->DCmm;
+  for (int i = 0; i < numDCs_; i++) {
+    // Convert to g per mole
+    DCMolarMass_[i] = (1000.0 * (double)(*dcmolarmass));
+    dcmolarmass++;
+  }
+
   ///
   /// Initialize GEM
   ///
@@ -211,38 +235,38 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
     cout << "Solution::Solution       nodeStatus_ = ";
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
-      cout << " !!!!!Need GEM calc "
-           << "with auto initial approx (AIA)" << endl;
+      cout << " !!!!!Need GEM calc " << "with auto initial approx (AIA)"
+           << endl;
       exmsg = " !!!!!Need GEM calc with auto initial approx (AIA)";
       dothrow = false;
       break;
     case BAD_GEM_AIA:
-      cout << " !!!!!Untrustworthy result "
-           << "with auto initial approx (AIA)" << endl;
+      cout << " !!!!!Untrustworthy result " << "with auto initial approx (AIA)"
+           << endl;
       exmsg = " !!!!!Untrustworthy result with auto initial approx (AIA)",
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      cout << " !!!!!Failed result with "
-           << "auto initial approx (AIA)" << endl;
+      cout << " !!!!!Failed result with " << "auto initial approx (AIA)"
+           << endl;
       exmsg = " !!!!!Failed result with auto initial approx (AIA)";
       dothrow = false;
       break;
     case NEED_GEM_SIA:
-      cout << " !!!!!Need GEM calc with "
-           << "smart initial approx (SIA)" << endl;
+      cout << " !!!!!Need GEM calc with " << "smart initial approx (SIA)"
+           << endl;
       exmsg = " !!!!!Need GEM calc with smart initial approx (SIA)";
       dothrow = false;
       break;
     case BAD_GEM_SIA:
-      cout << " !!!!!Untrustworthy result with "
-           << "smart initial approx (SIA)" << endl;
+      cout << " !!!!!Untrustworthy result with " << "smart initial approx (SIA)"
+           << endl;
       exmsg = " !!!!!Untrustworthy result with smart initial approx (SIA)";
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      cout << " !!!!!Failed result with "
-           << "smart initial approx (SIA)" << endl;
+      cout << " !!!!!Failed result with " << "smart initial approx (SIA)"
+           << endl;
       exmsg = " !!!!!Failed result with smart initial approx (SIA)";
       dothrow = false;
       break;
@@ -339,18 +363,31 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   /// Transfer phase names from GEM3K to member variables
   ///
 
+  int maxICnameLength = node_->getMaxICnameLength();
+  int maxDCnameLength = node_->getMaxDCnameLength();
+
   string string1;
   for (int i = 0; i < numICs_; i++) {
-    string1.assign(node_->xCH_to_IC_name(i));
+    string1 = node_->xCH_to_IC_name(i);
+    if (string1.length() >= maxICnameLength)
+      string1.resize(maxICnameLength);
+    if (verbose_) {
+      cout << "IC number " << i << " is " << string1 << endl;
+    }
     ICName_.push_back(string1);
+    ICIdLookup_.insert(make_pair(string1, i));
   }
 
-  string1.clear(); // This command may be unnecessary
   for (int i = 0; i < numDCs_; i++) {
-    string1.assign(node_->xCH_to_DC_name(i));
+    string1 = node_->xCH_to_DC_name(i);
+    if (string1.length() >= maxDCnameLength)
+      string1.resize(maxDCnameLength);
+    if (verbose_) {
+      cout << "DC number " << i << " is " << string1 << endl;
+    }
     DCName_.push_back(string1);
+    DCIdLookup_.insert(make_pair(string1, i));
   }
-
   string1.clear(); // This command may be unnecessary
   for (int i = 0; i < numGEMPhases_; i++) {
     string1.assign(node_->xCH_to_Ph_name(i));
