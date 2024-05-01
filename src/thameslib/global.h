@@ -171,4 +171,6 @@ const double COLORSATVAL = 255.0;
 const int GEMSFORMAT = 0;
 const int EXTERNALFORMAT = 0;
 
+const double ICTHRESH = 1.0e-9;
+
 #endif

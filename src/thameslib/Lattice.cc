@@ -475,7 +475,8 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
             cout << "Lattice::Lattice     Density = " << density << " g/cm3"
                  << endl;
             cout << "Lattice::Lattice     Volume Fraction = " << vfrac << endl;
-            cout << "Lattice::Lattice     Mass = " << (vfrac * density) << endl;
+            cout << "Lattice::Lattice     Mass density = " << (vfrac * density)
+                 << " g/cm3 of system" << endl;
             cout.flush();
           }
         }

@@ -989,10 +989,6 @@ void KineticController::calculateKineticStep(const double timestep,
 
         for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
 
-          // Changes in solution composition due to fixed boundary
-          // conditions must be set here before going into the
-          // kinetic model
-
           // zero out the temporary chemical compositions before
           // passing them to the kinetic model
 
@@ -1008,61 +1004,22 @@ void KineticController::calculateKineticStep(const double timestep,
           for (int im = 0; im < ICMoles.size(); ++im) {
 
             ICMoles[im] += (dICMoles[im] - minmoles);
-            solutICMoles[im] += (dsolutICMoles[im] - minmoles);
-          }
-
-          for (int im = 0; im < DCMoles.size(); ++im) {
-            DCMoles[im] += (tDCMoles[im] - minmoles);
-          }
-
-          for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
-            GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
-          }
-        }
-
-        // Now correct for fixed solution composition, if any specified
-
-        map<int, double> fsComp = chemSys_->getFixedSolutionComposition();
-        if (fsComp.size() > 0) {
-
-          // Get current mass of liquid water
-          double kgWaterMass = chemSys_->getDCMoles(waterId_) *
-                               chemSys_->getDCMolarMass(waterId_);
-          kgWaterMass *= 0.001; // molar mass is in g/mol
-
-          map<int, double>::iterator p = fsComp.begin();
-          vector<double> ics;
-
-          while (p != fsComp.end()) {
             if (verbose_) {
-              cout << "KineticController::calculateKineticStep "
-                   << "modifying pore solution" << endl;
-              cout << "KineticController::calculateKineticStep "
-                   << "--->Adding " << p->second << " mol/kgw of "
-                   << DCName_[p->first] << " to initial solution." << endl;
-              cout.flush();
+              cout << "Kinetically added " << dICMoles[im] << " moles of IC "
+                   << chemSys_->getICName(im) << " to system" << endl;
+
+              solutICMoles[im] += (dsolutICMoles[im] - minmoles);
             }
 
-            // Get current concentration of this DC
-            double currentDCMoles = chemSys_->getDCMoles(p->first);
-            // Convert it to molal concentration
-            double currentDCConc = currentDCMoles / kgWaterMass;
-
-            // Get difference in concentration from target value
-            double diffConc = p->second - currentDCConc;
-            // Convert the difference to mole difference
-            double diffMoles = diffConc * kgWaterMass;
-
-            // Now we know how many moles of this DC to add to the solution
-            // Get the vector of IC compositions for this DC
-            ics = chemSys_->getDCStoich(p->first);
-            for (int ii = 0; ii < ics.size(); ++ii) {
-              ICMoles[ii] += (diffMoles * ics[ii]);
+            for (int im = 0; im < DCMoles.size(); ++im) {
+              DCMoles[im] += (tDCMoles[im] - minmoles);
             }
-            p++;
+
+            for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
+              GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
+            }
           }
         }
-
       } else {
 
         ///
@@ -1082,9 +1039,9 @@ void KineticController::calculateKineticStep(const double timestep,
                 "dissolving:"
              << endl;
       } else {
-        cout
-            << "KineticController::calculateKineticStep ICmoles after tweaking:"
-            << endl;
+        cout << "KineticController::calculateKineticStep ICmoles after "
+                "tweaking:"
+             << endl;
       }
       for (int i = 0; i < ICNum_; i++) {
         cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
@@ -1098,6 +1055,57 @@ void KineticController::calculateKineticStep(const double timestep,
         return;
       }
 
+      // Now correct for fixed solution composition, if any specified
+
+      map<int, double> fsComp = chemSys_->getFixedSolutionComposition();
+      if (fsComp.size() > 0) {
+
+        // Get current mass of liquid water
+        double kgWaterMass =
+            chemSys_->getDCMoles(waterId_) * chemSys_->getDCMolarMass(waterId_);
+        kgWaterMass *= 0.001; // molar mass is in g/mol
+
+        map<int, double>::iterator p = fsComp.begin();
+        vector<double> ics;
+
+        while (p != fsComp.end()) {
+          if (verbose_) {
+            cout << "KineticController::calculateKineticStep "
+                 << "modifying pore solution" << endl;
+            cout << "KineticController::calculateKineticStep " << "--->Adding "
+                 << p->second << " mol/kgw of " << DCName_[p->first]
+                 << " to initial solution." << endl;
+            cout.flush();
+          }
+
+          // Get current concentration of this DC
+          double currentDCMoles = chemSys_->getDCMoles(p->first);
+          // Convert it to molal concentration
+          double currentDCConc = currentDCMoles / kgWaterMass;
+
+          // Get difference in concentration from target value
+          double diffConc = p->second - currentDCConc;
+          // Convert the difference to mole difference
+          double diffMoles = diffConc * kgWaterMass;
+
+          // Now we know how many moles of this DC to add to the solution
+          // Get the vector of IC compositions for this DC
+          ics = chemSys_->getDCStoich(p->first);
+          if (verbose_)
+            cout << "Fixed BC effect:" << endl;
+          for (int ii = 0; ii < ics.size(); ++ii) {
+            ICMoles[ii] += (diffMoles * ics[ii]);
+            if (verbose_) {
+              cout << "    Add " << diffMoles * ics[ii] << " moles of IC "
+                   << chemSys_->getICName(ii) << " due to BCs" << endl;
+              cout << "    New IC concentration = " << ICMoles[ii] / kgWaterMass
+                   << endl;
+              cout.flush();
+            }
+          }
+          p++;
+        }
+      }
       for (int ii = 0; ii < ICMoles.size(); ii++) {
         chemSys_->setICMoles(ii, ICMoles[ii]);
       }

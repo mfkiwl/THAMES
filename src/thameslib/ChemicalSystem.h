@@ -3014,9 +3014,9 @@ public:
   */
   void checkICMoles(void) {
     for (unsigned int i = 0; i < numICs_; i++) {
-      if (ICMoles_[i] < 1.0e-9)
-        ICMoles_[i] = 1.0e-9;
-      if (i == numICs_ - 1)
+      if (ICMoles_[i] < ICTHRESH)
+        ICMoles_[i] = ICTHRESH;
+      if (i == numICs_ - 1) // This IC is always charge
         ICMoles_[i] = 0.0;
     }
     return;

@@ -67,11 +67,18 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="bctype">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="fixed" />
+      <xs:enumeration value="initial" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <!-- definition of complex types -->
   <xs:complexType name="dccomptype">
     <xs:sequence>
       <xs:element name="name" type="stringtype" />
-      <xs:element name="condition" type="stringtype" />
+      <xs:element name="condition" type="bctype" />
       <xs:element name="conc" type="doubletype" />
     </xs:sequence>
   </xs:complexType>
