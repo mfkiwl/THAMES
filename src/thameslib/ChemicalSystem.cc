@@ -2100,14 +2100,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   setGEMPhaseMolarMass();
 
   if (verbose_) {
-    cout << "    ~~~~>After calculateState, " << "printing microPhaseVolumes"
-         << endl;
-    for (int i = 0; i < microPhaseVolumes.size(); ++i) {
-      cout << "    Phase name " << microPhaseNames[i]
-           << ": volume = " << microPhaseVolumes[i] << endl;
-      cout.flush();
-    }
-
+    cout << "    ~~~~>After calculateState:" << endl;
     cout << "%%%%%%%%%% Printing GEM Masses and "
          << "Volumes in this Step %%%%%%%" << endl;
 

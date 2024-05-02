@@ -335,12 +335,12 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles);
+  virtual void calculateDissolutionEvent(const double timestep,
+                                         const double temperature, bool isFirst,
+                                         double rh, vector<double> &dICMoles,
+                                         vector<double> &dsolutICMoles,
+                                         vector<double> &DCMoles,
+                                         vector<double> &GEMPhaseMoles);
 
 }; // End of PozzolanicModel class
 

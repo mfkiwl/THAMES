@@ -48,7 +48,7 @@ equations
 component
     - `cao' is the mole fraction of CaO in the component
     - `activationEnergy` is the activation energy [J/mol/K]
-    - `critDOH` is the critical degree of hydration used in the equation for
+    - `critDOR` is the critical degree of reaction used in the equation for
         calculating the influence of w/c ratio.
 */
 
@@ -71,7 +71,7 @@ struct KineticData {
   double k3;      /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
   double n1;      /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
   double n3;      /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
-  double critDOH; /**< Critical degree of hydration for w/c effect */
+  double critDOR; /**< Critical degree of reaction (hydration) for w/c effect */
   double dissolutionRateConst;    /**< Generic rate constant [mol/m2/s] */
   double diffusionRateConstEarly; /**< Generic rate constant [mol/m2/s] */
   double diffusionRateConstLate;  /**< Generic rate constant [mol/m2/s] */

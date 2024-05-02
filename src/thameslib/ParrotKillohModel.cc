@@ -45,7 +45,7 @@ ParrotKillohModel::ParrotKillohModel() {
   activationEnergy_ = 0.0;
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
-  critDOH_ = 100.0;
+  critDOR_ = 100.0;
   degreeOfReaction_ = 0.0;
   ICNum_ = 0;
   ICName_.clear();
@@ -134,7 +134,7 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Solution *solut,
   activationEnergy_ = kineticData.activationEnergy;
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
-  critDOH_ = kineticData.critDOH;
+  critDOR_ = kineticData.critDOR;
   degreeOfReaction_ = 0.0;
 
   waterId_ = chemSys_->getDCId("H2O@");
@@ -155,7 +155,7 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Solution *solut,
   return;
 }
 
-void ParrotKillohModel::calculateKineticStep(
+void ParrotKillohModel::calculateDissolutionEvent(
     const double timestep, const double temperature, bool isFirst, double rh,
     vector<double> &dICMoles, vector<double> &dsolutICMoles,
     vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
@@ -166,8 +166,8 @@ void ParrotKillohModel::calculateKineticStep(
   double T = temperature;
   double wsFactor = 1.0;
   double rhFactor = 1.0;
-  double DOH = getDegreeOfReaction();
-  double cDOH = 0.0;
+  double DOR = getDegreeOfReaction();
+  double cDOR = 0.0;
   double arrhenius = 1.0;
 
   double ngrate = 1.0e-10;   // Nucleation and growth rate
@@ -175,7 +175,7 @@ void ParrotKillohModel::calculateKineticStep(
   double diffrate = 1.0e-10; // Diffusion rate
   double rate = 1.0e-10;     // Selected rate
 
-  double newDOH = DOH; // Updated value of doh
+  double newDOR = DOR; // Updated value of doh
   double massDissolved = 0.0;
 
   ///
@@ -199,7 +199,8 @@ void ParrotKillohModel::calculateKineticStep(
     // from precipitating.
 
     if (verbose_) {
-      cout << "ParrotKillohModel::calculateKineticStep for " << name_ << endl;
+      cout << "ParrotKillohModel::calculateDissolutionEvent for " << name_
+           << endl;
       cout.flush();
     }
 
@@ -208,85 +209,75 @@ void ParrotKillohModel::calculateKineticStep(
     impurityRelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
 
     // RH factor is the same for all clinker phases
-
-    /// This is a big kluge for internal relative humidity
-    /// @note Using new gel and interhydrate pore size distribution model
-    ///       which is currently contained in the Lattice object.
-    ///
-    /// Surface tension of water is gamma = 0.072 J/m2
-    /// Molar volume of water is Vm = 1.8e-5 m3/mole
-    /// The Kelvin equation is
-    ///    p/p0 = exp (-4 gamma Vm / d R T) = exp (-6.23527e-7 / (d T))
-    ///
-    ///    where d is the pore diameter in meters and T is absolute temperature
-
-    /// Assume a zero contact angle for now.
-    /// @todo revisit the contact angle issue
+    // rh variable passed to this function pre-calculated by KineticController
+    // class
 
     rh = rh > 0.55 ? rh : 0.551;
     rhFactor = pow(((rh - 0.55) / 0.45), 4.0);
 
     if (initScaledMass_ > 0.0) {
-      DOH = (initScaledMass_ - scaledMass_) / (initScaledMass_);
-      DOH = min(DOH, 0.99); // prevents DOH from prematurely
+      DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
+      DOR = min(DOR, 0.99); // prevents DOR from prematurely
                             // stopping PK calculations
       if (verbose_) {
-        cout << "~~~~>DOH for " << name_ << " = " << DOH << endl;
+        cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
         cout.flush();
       }
     } else {
-      throw FloatException("ParrotKillohModel", "calculateKineticStep",
+      throw FloatException("ParrotKillohModel", "calculateDissolutionEvent",
                            "initScaledMass_ = 0.0");
     }
 
-    cDOH = 1.333 * wsRatio_;
+    cDOR = 1.333 * wsRatio_;
     wsFactor = 1.0;
-    if (DOH > cDOH) {
-      wsFactor += ((4.444 * wsRatio_) - (3.333 * DOH));
+    if (DOR > cDOR) {
+      wsFactor += ((4.444 * wsRatio_) - (3.333 * DOR));
       wsFactor = pow(wsFactor, 4.0);
     }
 
     /*
     wsFactor = 1.0 + (3.333 *
-           (pow(((critDOH_[i] * wsRatio_) - DOH),4.0)));
+           (pow(((critDOR_[i] * wsRatio_) - DOR),4.0)));
     */
 
     arrhenius =
         exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
 
-    cout << "PK model for " << name_ << endl;
-    cout << "    k1 = " << k1_ << endl;
-    cout << "    k2 = " << k2_ << endl;
-    cout << "    k3 = " << k3_ << endl;
-    cout << "    pfk = " << pfk_ << endl;
-    cout << "    n1 = " << n1_ << endl;
-    cout << "    n3 = " << n3_ << endl;
-    cout << "    Ea = " << activationEnergy_ << endl;
-    cout.flush();
+    if (verbose_) {
+      cout << "PK model for " << name_ << endl;
+      cout << "    k1 = " << k1_ << endl;
+      cout << "    k2 = " << k2_ << endl;
+      cout << "    k3 = " << k3_ << endl;
+      cout << "    pfk = " << pfk_ << endl;
+      cout << "    n1 = " << n1_ << endl;
+      cout << "    n3 = " << n3_ << endl;
+      cout << "    Ea = " << activationEnergy_ << endl;
+      cout.flush();
+    }
 
-    if (DOH < 1.0) {
+    if (DOR < 1.0) {
 
       // Normal Parrott and Killoh implementation here
 
       if (fabs(n1_) > 0.0) {
         ngrate =
-            (k1_ / n1_) * (1.0 - DOH) * pow((-log(1.0 - DOH)), (1.0 - n1_));
+            (k1_ / n1_) * (1.0 - DOR) * pow((-log(1.0 - DOR)), (1.0 - n1_));
         ngrate *= (ssaFactor_); // only used for the N+G rate
 
         if (ngrate < 1.0e-10)
           ngrate = 1.0e-10;
       } else {
-        throw FloatException("ParrotKillohModel", "calculateKineticStep",
+        throw FloatException("ParrotKillohModel", "calculateDissolutionEvent",
                              "n1_ = 0.0");
       }
 
-      hsrate = k3_ * pow((1.0 - DOH), n3_);
+      hsrate = k3_ * pow((1.0 - DOR), n3_);
       if (hsrate < 1.0e-10)
         hsrate = 1.0e-10;
 
-      if (DOH > 0.0) {
-        diffrate = (k2_ * pow((1.0 - DOH), (2.0 / 3.0))) /
-                   (1.0 - pow((1.0 - DOH), (1.0 / 3.0)));
+      if (DOR > 0.0) {
+        diffrate = (k2_ * pow((1.0 - DOR), (2.0 / 3.0))) /
+                   (1.0 - pow((1.0 - DOR), (1.0 / 3.0)));
         if (diffrate < 1.0e-10)
           diffrate = 1.0e-10;
       } else {
@@ -297,15 +288,18 @@ void ParrotKillohModel::calculateKineticStep(
       if (diffrate < rate)
         rate = diffrate;
       rate *= (pfk_ * wsFactor * rhFactor * arrhenius);
-      newDOH = DOH + (rate * timestep);
-      setDegreeOfReaction(newDOH);
+      newDOR = DOR + (rate * timestep);
 
-      cout << "PK model for " << name_ << ", ngrate = " << ngrate
-           << ", hsrate = " << hsrate << ", diffrate = " << diffrate
-           << ", rhFactor = " << rhFactor << ", wsFactor = " << wsFactor
-           << ", RATE = " << rate << ", timestep " << timestep
-           << ", oldDOH = " << DOH << ", new DOH = " << newDOH << endl;
-      cout.flush();
+      setDegreeOfReaction(newDOR);
+
+      if (verbose_) {
+        cout << "PK model for " << name_ << ", ngrate = " << ngrate
+             << ", hsrate = " << hsrate << ", diffrate = " << diffrate
+             << ", rhFactor = " << rhFactor << ", wsFactor = " << wsFactor
+             << ", RATE = " << rate << ", timestep " << timestep
+             << ", oldDOR = " << DOR << ", new DOR = " << newDOR << endl;
+        cout.flush();
+      }
 
       /// @note This where we can figure out the volume dissolved
       /// and link it back to the current volume to see how many
@@ -317,14 +311,14 @@ void ParrotKillohModel::calculateKineticStep(
 
       /// @todo Make this independent of PK model
 
-      scaledMass_ = initScaledMass_ * (1.0 - newDOH);
-      massDissolved = (newDOH - DOH) * initScaledMass_;
+      scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+      massDissolved = (newDOR - DOR) * initScaledMass_;
 
       chemSys_->setMicroPhaseMass(microPhaseId_, scaledMass_);
       chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
 
       if (verbose_) {
-        cout << "ParrotKillohModel::calculateKineticStep "
+        cout << "ParrotKillohModel::calculateDissolutionEvent "
              << "Original scaled mass = " << initScaledMass_
              << ", dissolved scaled mass = " << massDissolved << endl;
         cout << "New scaled mass = "
@@ -419,8 +413,8 @@ void ParrotKillohModel::calculateKineticStep(
       }
 
     } else {
-      throw DataException("ParrotKillohModel", "calculateKineticStep",
-                          "DOH >= 1.0");
+      throw DataException("ParrotKillohModel", "calculateDissolutionEvent",
+                          "DOR >= 1.0");
     }
 
   } // End of try block
@@ -435,8 +429,8 @@ void ParrotKillohModel::calculateKineticStep(
     fex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("ParrotKillohModel", "calculateKineticStep", oor.what(), 0,
-                    0);
+    EOBException ex("ParrotKillohModel", "calculateDissolutionEvent",
+                    oor.what(), 0, 0);
     ex.printException();
     exit(1);
   }

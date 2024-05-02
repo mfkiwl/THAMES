@@ -121,7 +121,7 @@ public:
     kineticData.temperature = kineticData.reftemperature = 293.15;
     kineticData.k1 = kineticData.k2 = kineticData.k3 = 1.0;
     kineticData.n1 = kineticData.n3 = 1.0;
-    kineticData.critDOH = 0.0;
+    kineticData.critDOR = 0.0;
     kineticData.dissolutionRateConst = 0.0;
     kineticData.diffusionRateConstEarly = 0.0;
     kineticData.diffusionRateConstLate = 0.0;
@@ -485,8 +485,8 @@ public:
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
   */
-  void calculateKineticStep(const double timestep, const double temperature,
-                            bool isFirst);
+  void calculateDissolutionEvents(const double timestep,
+                                  const double temperature, bool isFirst);
 
   /**
   @brief Set the verbose flag

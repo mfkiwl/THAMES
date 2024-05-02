@@ -430,11 +430,11 @@ void KineticController::parseKineticDataForParrotKilloh(
       from_string(kineticData.n3, st);
       xmlFree(key);
     }
-    // Parrot-Killoh critical DOH parameter
+    // Parrot-Killoh critical DOR parameter
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(kineticData.critDOH, st);
+      from_string(kineticData.critDOR, st);
       xmlFree(key);
     }
     // Activation energy
@@ -766,9 +766,9 @@ void KineticController::setPozzEffectOnPK(void) {
   return;
 }
 
-void KineticController::calculateKineticStep(const double timestep,
-                                             const double temperature,
-                                             bool isFirst) {
+void KineticController::calculateDissolutionEvents(const double timestep,
+                                                   const double temperature,
+                                                   bool isFirst) {
   ///
   /// Initialize local variables
   ///
@@ -792,7 +792,7 @@ void KineticController::calculateKineticStep(const double timestep,
     hyd_time = hyd_time + timestep;
 
   if (verbose_) {
-    cout << "KineticController::calculateKineticStep Hydration Time = "
+    cout << "KineticController::calculateDissolutionEvents Hydration Time = "
          << hyd_time << endl;
     cout.flush();
   }
@@ -859,26 +859,30 @@ void KineticController::calculateKineticStep(const double timestep,
       double psMass, psVolume;
       double volume = 0.0;
       if (verbose_) {
-        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+        cout << "KineticController::calculateDissolutionEvents isFirst *** "
+                "Initial "
                 "solid mass = "
              << solidMass << endl;
-        cout << "KineticController::calculateKineticStep isFirst *** w/s ratio "
+        cout << "KineticController::calculateDissolutionEvents isFirst *** w/s "
+                "ratio "
                 "= "
              << lattice_->getWsratio() << endl;
-        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+        cout << "KineticController::calculateDissolutionEvents isFirst *** "
+                "Initial "
                 "water mass = "
              << waterMass << endl;
-        cout << "KineticController::calculateKineticStep isFirst *** Initial "
+        cout << "KineticController::calculateDissolutionEvents isFirst *** "
+                "Initial "
                 "water moles = "
              << waterMoles << endl;
         cout.flush();
 
         for (int i = 0; i < microPhaseId_.size(); ++i) {
-          cout << "KineticController::calculateKineticStep "
+          cout << "KineticController::calculateDissolutionEvents "
                << "Initial MICROSTRUCTURE phase amount:" << endl;
           psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
           psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
-          cout << "KineticController::calculateKineticStep     "
+          cout << "KineticController::calculateDissolutionEvents     "
                << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
                << microPhaseId_[i] << "): mass = " << psMass
                << ", vol = " << psVolume << endl;
@@ -918,14 +922,14 @@ void KineticController::calculateKineticStep(const double timestep,
 
       while (p != isComp.end()) {
         if (verbose_) {
-          cout << "KineticController::calculateKineticStep "
+          cout << "KineticController::calculateDissolutionEvents "
                << "modifying initial pore solution" << endl;
           cout.flush();
         }
         if (verbose_) {
-          cout << "KineticController::calculateKineticStep " << "--->Adding "
-               << p->second << " mol/kgw of " << DCName_[p->first]
-               << " to initial solution." << endl;
+          cout << "KineticController::calculateDissolutionEvents "
+               << "--->Adding " << p->second << " mol/kgw of "
+               << DCName_[p->first] << " to initial solution." << endl;
           cout.flush();
         }
         // Get the vector of IC compositions for this DC
@@ -953,11 +957,6 @@ void KineticController::calculateKineticStep(const double timestep,
         // with the electrolyte, while forbidding anything new
         // from precipitating.
 
-        vector<double> impurityRelease;
-        impurityRelease.clear();
-        impurityRelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
-
-        // RH factor is the same for all clinker phases
         double vfvoid = lattice_->getVolumefraction(VOIDID);
         double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
 
@@ -997,7 +996,7 @@ void KineticController::calculateKineticStep(const double timestep,
           fill(tDCMoles.begin(), tDCMoles.end(), minmoles);
           fill(tGEMPhaseMoles.begin(), tGEMPhaseMoles.end(), minmoles);
 
-          phaseKineticModel_[midx]->calculateKineticStep(
+          phaseKineticModel_[midx]->calculateDissolutionEvent(
               timestep, temperature, isFirst, rh, dICMoles, dsolutICMoles,
               tDCMoles, tGEMPhaseMoles);
 
@@ -1034,19 +1033,19 @@ void KineticController::calculateKineticStep(const double timestep,
         }
       }
 
-      if (!doTweak) {
-        cout << "KineticController::calculateKineticStep ICmoles after "
-                "dissolving:"
-             << endl;
-      } else {
-        cout << "KineticController::calculateKineticStep ICmoles after "
-                "tweaking:"
-             << endl;
+      if (verbose_) {
+        cout << "KineticController::calculateDissolutionEvents ICmoles after ";
+        if (!doTweak) {
+          cout << "dissolving:";
+        } else {
+          cout << "tweaking:";
+        }
+        cout << endl;
+        for (int i = 0; i < ICNum_; i++) {
+          cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
+        }
+        cout.flush();
       }
-      for (int i = 0; i < ICNum_; i++) {
-        cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
-      }
-      cout.flush();
 
       if (doTweak) {
         for (int ii = 0; ii < ICMoles.size(); ii++) {
@@ -1070,11 +1069,11 @@ void KineticController::calculateKineticStep(const double timestep,
 
         while (p != fsComp.end()) {
           if (verbose_) {
-            cout << "KineticController::calculateKineticStep "
+            cout << "KineticController::calculateDissolutionEvents "
                  << "modifying pore solution" << endl;
-            cout << "KineticController::calculateKineticStep " << "--->Adding "
-                 << p->second << " mol/kgw of " << DCName_[p->first]
-                 << " to initial solution." << endl;
+            cout << "KineticController::calculateDissolutionEvents "
+                 << "--->Adding " << p->second << " mol/kgw of "
+                 << DCName_[p->first] << " to initial solution." << endl;
             cout.flush();
           }
 
@@ -1106,6 +1105,8 @@ void KineticController::calculateKineticStep(const double timestep,
           p++;
         }
       }
+
+      // Finally, set the new IC moles in the thermodynamic system
       for (int ii = 0; ii < ICMoles.size(); ii++) {
         chemSys_->setICMoles(ii, ICMoles[ii]);
       }
@@ -1123,8 +1124,8 @@ void KineticController::calculateKineticStep(const double timestep,
     fex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("KineticController", "calculateKineticStep", oor.what(), 0,
-                    0);
+    EOBException ex("KineticController", "calculateDissolutionEvents",
+                    oor.what(), 0, 0);
     ex.printException();
     exit(1);
   }

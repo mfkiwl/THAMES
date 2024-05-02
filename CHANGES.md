@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 02 17:47 2024 | Changed DOH to DOR while planning for new changes to kinetics branch |
 | May 01 13:45 2024 | Small changes KineticController |
 | Apr 27 23:35 2024 | Initial and fixed solution compositions both specified with DCs now |
 | Apr 26 22:49 2024 | Cleaned up install instructions; force initial microstructure output |

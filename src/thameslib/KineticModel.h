@@ -194,7 +194,7 @@ public:
   @param dor is the degree of reaction to set
   */
   virtual void setDegreeOfReaction(const double dor) {
-    degreeOfReaction_ = dor;
+    degreeOfReaction_ = dor >= 0.0 ? dor : 0.0;
   }
 
   /**
@@ -515,12 +515,12 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles) = 0;
+  virtual void calculateDissolutionEvent(const double timestep,
+                                         const double temperature, bool isFirst,
+                                         double rh, vector<double> &dICMoles,
+                                         vector<double> &dsolutICMoles,
+                                         vector<double> &DCMoles,
+                                         vector<double> &GEMPhaseMoles) = 0;
 
   /**
   @brief Set up the number of moles of dependent components in the kinetic
