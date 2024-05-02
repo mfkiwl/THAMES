@@ -134,7 +134,7 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Solution *solut,
   return;
 }
 
-void PozzolanicModel::calculateKineticStep(
+void PozzolanicModel::calculateDissolutionEvent(
     const double timestep, const double temperature, bool isFirst, double rh,
     vector<double> &dICMoles, vector<double> &dsolutICMoles,
     vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
@@ -247,7 +247,7 @@ void PozzolanicModel::calculateKineticStep(
         // prevent DOR from prematurely stopping PK calculations
         DOR = min(DOR, 0.99);
       } else {
-        throw FloatException("PozzolanicModel", "calculateKineticStep",
+        throw FloatException("PozzolanicModel", "calculateDissolutionEvent",
                              "initScaledMass_ = 0.0");
       }
 
@@ -357,7 +357,8 @@ void PozzolanicModel::calculateKineticStep(
           diffrate = -1.0e9;
         }
 
-        cout << "PozzolanicModel::calculateKineticStep for " << name_ << endl;
+        cout << "PozzolanicModel::calculateDissolutionEvent for " << name_
+             << endl;
         cout << "  dissrate = " << dissrate << endl;
         cout << "    (baserateconst = " << baserateconst << ")" << endl;
         cout << "    (ssaFactor = " << ssaFactor_ << ")" << endl;
@@ -393,12 +394,12 @@ void PozzolanicModel::calculateKineticStep(
         chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
 
         if (verbose_) {
-          cout
-              << "PozzolanicModel::calculateKineticStep Original scaled mass = "
-              << initScaledMass_ << " and new scaled mass = "
-              << chemSys_->getMicroPhaseMass(microPhaseId_)
-              << " and new volume = "
-              << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+          cout << "PozzolanicModel::calculateDissolutionEvent Original scaled "
+                  "mass = "
+               << initScaledMass_ << " and new scaled mass = "
+               << chemSys_->getMicroPhaseMass(microPhaseId_)
+               << " and new volume = "
+               << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
           cout.flush();
         }
 
@@ -487,12 +488,12 @@ void PozzolanicModel::calculateKineticStep(
         }
 
       } else {
-        throw DataException("PozzolanicModel", "calculateKineticStep",
+        throw DataException("PozzolanicModel", "calculateDissolutionEvent",
                             "DOR >= 1.0");
       }
 
     } // End of normal hydration block
-  }   // End of try block
+  } // End of try block
 
   catch (EOBException eex) {
     eex.printException();
@@ -504,8 +505,8 @@ void PozzolanicModel::calculateKineticStep(
     fex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("PozzolanicModel", "calculateKineticStep", oor.what(), 0,
-                    0);
+    EOBException ex("PozzolanicModel", "calculateDissolutionEvent", oor.what(),
+                    0, 0);
     ex.printException();
     exit(1);
   }

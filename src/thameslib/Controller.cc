@@ -678,24 +678,13 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     }
 
     ///
-    /// We must pass some vectors to the `calculateKineticStep` method that
-    /// will hold the amounts of impurity elements released from the clinker
-    /// phases.  These values do not go in the `ChemicalSystem` object, but will
-    /// still need to be processed afterward.
-    ///
-
-    vector<double> impurityrelease;
-    impurityrelease.clear();
-    impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
-
-    ///
     /// Get the number of moles of each IC dissolved from kinetically controlled
     /// phases
     ///
 
     double T = lattice_->getTemperature();
 
-    kineticController_->calculateKineticStep(dt, T, isFirst);
+    kineticController_->calculateDissolutionEvents(dt, T, isFirst);
 
     ///
     /// The next block only operates for sulfate attack iterations

@@ -121,7 +121,7 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
   return;
 }
 
-void StandardKineticModel::calculateKineticStep(
+void StandardKineticModel::calculateDissolutionEvent(
     const double timestep, const double temperature, bool isFirst, double rh,
     vector<double> &dICMoles, vector<double> &dsolutICMoles,
     vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
@@ -387,7 +387,7 @@ void StandardKineticModel::calculateKineticStep(
       }
 
     } // End of normal hydration block
-  }   // End of try block
+  } // End of try block
 
   catch (EOBException eex) {
     eex.printException();

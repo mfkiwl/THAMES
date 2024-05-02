@@ -116,7 +116,7 @@ protected:
   double k3_;      /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
   double n1_;      /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
   double n3_;      /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
-  double critDOH_; /**< List of critical degrees of hydration for w/c
+  double critDOR_; /**< List of critical degrees of hydration for w/c
                                    effect in the Parrot and Killoh model */
   double pfk_;     /**< Multiplicative factor for k's to account for
     
@@ -244,14 +244,14 @@ public:
   double getN3() const { return n3_; }
 
   /**
-  @brief Get the critical degrees of hydration for w/c effects in the kinetic
+  @brief Get the critical degrees of reaction for w/c effects in the kinetic
   model.
 
   @note NOT USED.
 
-  @return the critical degree of hydration for this phase
+  @return the critical degree of reaction for this phase
   */
-  double getCritDOH() const { return critDOH_; }
+  double getCritDOR() const { return critDOR_; }
 
   /**
   @brief Master method for implementing one kinetic time step.
@@ -273,12 +273,12 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles);
+  virtual void calculateDissolutionEvent(const double timestep,
+                                         const double temperature, bool isFirst,
+                                         double rh, vector<double> &dICMoles,
+                                         vector<double> &dsolutICMoles,
+                                         vector<double> &DCMoles,
+                                         vector<double> &GEMPhaseMoles);
 
 }; // End of ParrotKillohModel class
 
