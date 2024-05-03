@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 03 12:00 2024 | Preliminary planning of code restructuring for precipitation kinetics |
 | May 02 17:47 2024 | Changed DOH to DOR while planning for new changes to kinetics branch |
 | May 01 13:45 2024 | Small changes KineticController |
 | May 01 15:37 2024 | Created kineticPrecip branch off of main |

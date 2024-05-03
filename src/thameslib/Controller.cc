@@ -795,11 +795,19 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       chemSys_->writeChemSys();
     }
 
+    // BULLARD: These are the kinds of changes that need to be made
+    //
+    // kineticController_->calculatePrecipitationEvents(dt, T, isFirst);
+    // Then we need to rerun the SI calculations above.
+    //
+    // Another possibility is to use the dul and dll vectors for GEM_from_MT and
+    // maybe then we could do the entire dissolution and precipitation in one
+    // GEM_run calculation.
+    //
+    //
     ///
     /// Set the kinetic DC moles.  This adds the clinker components to the DC
     /// moles.
-    ///
-    /// @todo Find out what this is and why it needs to be done
     ///
 
     kineticController_->setKineticDCMoles();
