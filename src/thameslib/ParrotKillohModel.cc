@@ -45,6 +45,7 @@ ParrotKillohModel::ParrotKillohModel() {
   activationEnergy_ = 0.0;
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
+  initScaledMoles_ = 0.0;
   critDOR_ = 100.0;
   degreeOfReaction_ = 0.0;
   ICNum_ = 0;
@@ -134,6 +135,7 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Solution *solut,
   activationEnergy_ = kineticData.activationEnergy;
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
+  initScaledMoles_ = initScaledMass_ / (chemSys_->getDCMolarMass(DCId_));
   critDOR_ = kineticData.critDOR;
   degreeOfReaction_ = 0.0;
 
@@ -177,6 +179,26 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
   double newDOR = DOR; // Updated value of doh
   double massDissolved = 0.0;
+  double DCMolarMass = chemSys_->getDCMolarMass(DCId_);
+  double scaledMoles, scaledMolesDissolved;
+
+  // Is this the first time? If so, then for the ParrotKilloh model
+  // we will add all the IC moles for this phase at the beginning
+
+  if (isFirst) {
+    chemSys_->setMicroPhaseMass(microPhaseId_, initScaledMass_);
+    chemSys_->setMicroPhaseMassDissolved(microPhaseId_, 0.0);
+
+    /// Convert mass and mass dissolved to moles and moles dissolved
+
+    scaledMoles = initScaledMass_ / DCMolarMass;
+    scaledMolesDissolved = massDissolved / DCMolarMass;
+
+    for (int ii = 0; ii < dICMoles.size(); ++ii) {
+      dICMoles[ii] +=
+          ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_, ii));
+    }
+  }
 
   ///
   /// Determine if this is a normal step or a necessary
@@ -306,16 +328,18 @@ void ParrotKillohModel::calculateDissolutionEvent(
       /// voxels need to dissolve
       ///
 
-      /// @note This all depends on concept of degree of
-      /// hydration as defined by the PK model
-
-      /// @todo Make this independent of PK model
-
       scaledMass_ = initScaledMass_ * (1.0 - newDOR);
       massDissolved = (newDOR - DOR) * initScaledMass_;
 
       chemSys_->setMicroPhaseMass(microPhaseId_, scaledMass_);
       chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
+
+      /// Convert mass and mass dissolved to moles and moles dissolved
+
+      scaledMoles = scaledMass_ / DCMolarMass;
+      scaledMolesDissolved = massDissolved / DCMolarMass;
+
+      chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
       if (verbose_) {
         cout << "ParrotKillohModel::calculateDissolutionEvent "
@@ -345,8 +369,12 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
       for (int ii = 0; ii < dICMoles.size(); ii++) {
 
-        dICMoles[ii] += ((massDissolved / chemSys_->getDCMolarMass(DCId_)) *
-                         chemSys_->getDCStoich(DCId_, ii));
+        // Handling the actual clinker phase as a DC lower limits now,
+        // because we set the IC moles of the phase at the very beginning
+        // all at once.
+
+        // Therefore, only need to do IC moles for impurities dissolved within
+        // the clinker phase
 
         if (ICName_[ii] == "O") {
           // Dissolved K2O in this phase

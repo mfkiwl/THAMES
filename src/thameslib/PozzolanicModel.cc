@@ -151,6 +151,26 @@ void PozzolanicModel::calculateDissolutionEvent(
   double rate = 1.0e-10; // Selected rate
 
   double massDissolved = 0.0;
+  double DCMolarMass = chemSys_->getDCMolarMass(DCId_);
+  double scaledMoles, scaledMolesDissolved;
+
+  // Is this the first time? If so, then for the ParrotKilloh model
+  // we will add all the IC moles for this phase at the beginning
+
+  if (isFirst) {
+    chemSys_->setMicroPhaseMass(microPhaseId_, initScaledMass_);
+    chemSys_->setMicroPhaseMassDissolved(microPhaseId_, 0.0);
+
+    /// Convert mass and mass dissolved to moles and moles dissolved
+
+    scaledMoles = initScaledMass_ / DCMolarMass;
+    scaledMolesDissolved = massDissolved / DCMolarMass;
+
+    for (int ii = 0; ii < dICMoles.size(); ++ii) {
+      dICMoles[ii] +=
+          ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_, ii));
+    }
+  }
 
   ///
   /// Determine if this is a normal step or a necessary
@@ -291,7 +311,6 @@ void PozzolanicModel::calculateDissolutionEvent(
 
         double ohActivity = chemSys_->getDCActivity("OH-");
         double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
-        double molarmass = chemSys_->getDCMolarMass("Amor-Sl");      // g mol-1
         int GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
 
         // Saturation index , but be sure that there is only one GEM Phase
@@ -393,6 +412,13 @@ void PozzolanicModel::calculateDissolutionEvent(
         chemSys_->setMicroPhaseMass(microPhaseId_, scaledMass_);
         chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
 
+        /// Convert mass and mass dissolved to moles and moles dissolved
+
+        scaledMoles = scaledMass_ / DCMolarMass;
+        scaledMolesDissolved = massDissolved / DCMolarMass;
+
+        chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
+
         if (verbose_) {
           cout << "PozzolanicModel::calculateDissolutionEvent Original scaled "
                   "mass = "
@@ -420,8 +446,12 @@ void PozzolanicModel::calculateDissolutionEvent(
 
         for (int ii = 0; ii < dICMoles.size(); ii++) {
 
-          dICMoles[ii] += ((massDissolved / chemSys_->getDCMolarMass(DCId_)) *
-                           chemSys_->getDCStoich(DCId_, ii));
+          // Handling the actual clinker phase as a DC lower limits now,
+          // because we set the IC moles of the phase at the very beginning
+          // all at once.
+
+          // Therefore, only need to do IC moles for impurities dissolved within
+          // the clinker phase
 
           if (ICName[ii] == "O") {
             // Dissolved K2O in this phase

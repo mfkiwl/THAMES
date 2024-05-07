@@ -1034,7 +1034,23 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       }
 
       if (verbose_) {
-        cout << "KineticController::calculateDissolutionEvents ICmoles after ";
+        double *DCUpperLimit = chemSys_->getDCUpperLimit();
+        double *DCLowerLimit = chemSys_->getDCLowerLimit();
+        cout << "KineticController::calculateDissolutionEvents lower and upper "
+                "moles after ";
+        if (!doTweak) {
+          cout << "dissolving:";
+        } else {
+          cout << "tweaking:";
+        }
+        for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+          cout << "    " << DCName_[i] << ": " << DCLowerLimit[i] << ", "
+               << DCUpperLimit[i] << endl;
+          cout.flush();
+        }
+
+        cout << endl
+             << "KineticController::calculateDissolutionEvents ICmoles after ";
         if (!doTweak) {
           cout << "dissolving:";
         } else {

@@ -280,6 +280,7 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
          << nodeStatus_ << endl;
     cout.flush();
   }
+
   nodeStatus_ = node_->GEM_run(true);
   if (verbose_) {
     cout << "Done! nodeStatus is " << nodeStatus_ << endl;
@@ -1923,9 +1924,38 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   /// in this case.
   ///
 
+  if (verbose_) {
+    cout << "ChemicalSystem::calculateState Entering GEM_from_MT" << endl;
+    cout << "DCMoles:" << endl;
+    for (int i = 0; i < numDCs_; ++i) {
+      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
+    }
+    cout.flush();
+    cout << "ICMoles:" << endl;
+    for (int i = 0; i < numICs_; ++i) {
+      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    }
+    cout.flush();
+  }
+
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
                      DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_,
                      DCActivityCoeff_);
+
+  if (verbose_) {
+    cout << "ChemicalSystem::calculateState Exiting GEM_from_MT" << endl;
+    cout << "DCMoles:" << endl;
+    for (int i = 0; i < numDCs_; ++i) {
+      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
+    }
+    cout << "ICMoles:" << endl;
+    for (int i = 0; i < numICs_; ++i) {
+      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    }
+    cout.flush();
+  }
 
   /// For passing the current THAMES time and time step into the working
   /// instance of the DBR structure.
@@ -1962,7 +1992,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   /// parameters are loaded into the THAMES vectors that keep track of these
   /// things, since, they were passed to the GEM calculation by reference.
   ///
-  /// The argument is false if we wamt to use activity coefficients and
+  /// The argument is false if we want to use activity coefficients and
   /// speciation from a previous GEM_run, but is true if we want to use the
   /// activity coefficients and speciation stored in a DBR memory structure read
   /// from a DBR file
@@ -1974,7 +2004,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
   ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
-  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    SIA)
+  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
   ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
   ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
   ///    error (e.g., memory corruption).  Need restart
@@ -2054,7 +2085,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
 
   if (timesGEMFailed_ > 0) {
     cout << "Call to GEM_run has failed " << timesGEMFailed_
-         << " consecutive times.  " << "Attempt this step again" << endl;
+         << " consecutive times.  "
+         << "Attempt this step again" << endl;
     return timesGEMFailed_;
   }
 

@@ -66,7 +66,8 @@ protected:
   vector<string> ICName_;      /**< Names of ICs */
   vector<string> DCName_;      /**< Names of DCs */
   double scaledMass_;          /**< Phase mass percent, total solids basis */
-  double initScaledMass_;      /**< Initial phase mass percents */
+  double initScaledMass_;      /**< Initial phase scaled mass */
+  double initScaledMoles_;     /**< Initial phase scaled moles */
   double activationEnergy_;    /**< Apparent activation energy for the reaction
                                   [J/mol/K] */
   double specificSurfaceArea_; /**< Specific surface area (m2/kg) */
@@ -474,13 +475,54 @@ public:
   double getScaledMass() const { return scaledMass_; }
 
   /**
+  @brief Set the <i>initial</i> mass of the phase in the kinetic model.
+
+  The scaled mass of a phase is its mass in grams per unit system volume
+
+  @param initscaledmass is the value to set
+  */
+  void setInitScaledMass(const double initscaledmass) {
+    if (initscaledmass < 0.0) {
+      initScaledMass_ = 0.0;
+    } else {
+      initScaledMass_ = initscaledmass;
+    }
+    return;
+  }
+
+  /**
   @brief Get the <i>initial</i> mass of the phase in the kinetic model.
 
-  The scaled mass of a phase is its mass percent on a total solids basis.
+  The scaled mass of a phase is its mass in grams per unit system volume
 
-  @return the vector of initial scaled masses [percent solids]
+  @return the initial scaled mass
   */
   double getInitScaledMass() const { return initScaledMass_; }
+
+  /**
+  @brief Set the <i>initial</i> scaled moles of the phase in the kinetic model.
+
+  The scaled moles of a phase is its moles per unit system volume
+
+  @param initscaledmoles is the value to set
+  */
+  void setInitScaledMoles(const double initscaledmoles) {
+    if (initscaledmoles < 0.0) {
+      initScaledMoles_ = 0.0;
+    } else {
+      initScaledMoles_ = initscaledmoles;
+    }
+    return;
+  }
+
+  /**
+  @brief Get the <i>initial</i> scaled moles of the phase in the kinetic model.
+
+  The scaled moles of a phase is its moles per unit system volume
+
+  @return the initial scaled moles
+  */
+  double getInitScaledMoles() const { return initScaledMoles_; }
 
   /**
   @brief Master method for implementing one kinetic time step.

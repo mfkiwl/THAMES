@@ -3996,7 +3996,7 @@ public:
   @brief Set the upper bound on the moles of a dependent component.
 
   @param idx is the id of the DC component
-  @param val is the upper bound to set
+  @param val is the upper bound to set (in scaled moles)
   */
   void setDCUpperLimit(const unsigned int idx, const double val) {
     if (idx < numDCs_) {
@@ -4042,7 +4042,7 @@ public:
   @brief Get the lower bound on the moles of a dependent component (DC).
 
   @param idx is the id of the DC component
-  @param val is the lower bound to set for this DC
+  @param val is the lower bound to set for this DC (in scaled moles)
   */
   void setDCLowerLimit(const unsigned int idx, const double val) {
     if (idx < numDCs_) {

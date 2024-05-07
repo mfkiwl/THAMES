@@ -736,6 +736,7 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
 
     try {
       timesGEMFailed = chemSys_->calculateState(time, isFirst);
+
       if (verbose_) {
         cout << "*Returned from ChemicalSystem::calculateState" << endl;
         cout << "*called by function Controller::calculateState" << endl;

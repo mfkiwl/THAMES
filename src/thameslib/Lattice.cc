@@ -129,8 +129,8 @@ Lattice::Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
   if (verbose_) {
     cout << "Lattice::Lattice Checking whether I can get a seed "
          << rg_->getSeed() << endl;
-    cout << "Lattice::Lattice Checking value of random number " << ", "
-         << rg_->Ran3() << endl;
+    cout << "Lattice::Lattice Checking value of random number "
+         << ", " << rg_->Ran3() << endl;
     cout.flush();
   }
 
@@ -632,7 +632,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
         // volume
 
         cout << "Lattice::normalizePhaseMasses Setting initial micphase "
-             << "mass and volume of "
+             << "mass, volume, and DC moles of "
              << chemSys_->getMicroPhaseName(microPhaseId) << endl;
         cout.flush();
       }
@@ -2814,9 +2814,9 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
     for (i = 0; i < vol.size(); ++i) {
       vfrac.at(i) = vol.at(i) / totmicvolume;
       if (verbose_) {
-        cout << "Lattice::adjustMicrostructureVolFracsVolume " << "fraction["
-             << names.at(i) << "] should be " << vfrac.at(i) << ", ("
-             << vol.at(i) << "/" << totmicvolume
+        cout << "Lattice::adjustMicrostructureVolFracsVolume "
+             << "fraction[" << names.at(i) << "] should be " << vfrac.at(i)
+             << ", (" << vol.at(i) << "/" << totmicvolume
              << ") and volume fraction NOW is "
              << (double)(count_.at(i)) / (double)(numsites_) << endl;
         cout.flush();
