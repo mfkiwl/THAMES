@@ -220,11 +220,11 @@ void ParrotKillohModel::calculateDissolutionEvent(
     // with the electrolyte, while forbidding anything new
     // from precipitating.
 
-    if (verbose_) {
-      cout << "ParrotKillohModel::calculateDissolutionEvent for " << name_
-           << endl;
-      cout.flush();
-    }
+    // if (verbose_) {
+    // cout << "ParrotKillohModel::calculateDissolutionEvent for " << name_
+    // << endl;
+    // cout.flush();
+    // }
 
     vector<double> impurityRelease;
     impurityRelease.clear();
@@ -241,10 +241,10 @@ void ParrotKillohModel::calculateDissolutionEvent(
       DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
       DOR = min(DOR, 0.99); // prevents DOR from prematurely
                             // stopping PK calculations
-      if (verbose_) {
-        cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
-        cout.flush();
-      }
+      // if (verbose_) {
+      // cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
+      // cout.flush();
+      // }
     } else {
       throw FloatException("ParrotKillohModel", "calculateDissolutionEvent",
                            "initScaledMass_ = 0.0");
@@ -265,17 +265,17 @@ void ParrotKillohModel::calculateDissolutionEvent(
     arrhenius =
         exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
 
-    if (verbose_) {
-      cout << "PK model for " << name_ << endl;
-      cout << "    k1 = " << k1_ << endl;
-      cout << "    k2 = " << k2_ << endl;
-      cout << "    k3 = " << k3_ << endl;
-      cout << "    pfk = " << pfk_ << endl;
-      cout << "    n1 = " << n1_ << endl;
-      cout << "    n3 = " << n3_ << endl;
-      cout << "    Ea = " << activationEnergy_ << endl;
-      cout.flush();
-    }
+    // if (verbose_) {
+    // cout << "PK model for " << name_ << endl;
+    // cout << "    k1 = " << k1_ << endl;
+    // cout << "    k2 = " << k2_ << endl;
+    // cout << "    k3 = " << k3_ << endl;
+    // cout << "    pfk = " << pfk_ << endl;
+    // cout << "    n1 = " << n1_ << endl;
+    // cout << "    n3 = " << n3_ << endl;
+    // cout << "    Ea = " << activationEnergy_ << endl;
+    // cout.flush();
+    // }
 
     if (DOR < 1.0) {
 
@@ -314,14 +314,14 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
       setDegreeOfReaction(newDOR);
 
-      if (verbose_) {
-        cout << "PK model for " << name_ << ", ngrate = " << ngrate
-             << ", hsrate = " << hsrate << ", diffrate = " << diffrate
-             << ", rhFactor = " << rhFactor << ", wsFactor = " << wsFactor
-             << ", RATE = " << rate << ", timestep " << timestep
-             << ", oldDOR = " << DOR << ", new DOR = " << newDOR << endl;
-        cout.flush();
-      }
+      // if (verbose_) {
+      // cout << "PK model for " << name_ << ", ngrate = " << ngrate
+      // << ", hsrate = " << hsrate << ", diffrate = " << diffrate
+      // << ", rhFactor = " << rhFactor << ", wsFactor = " << wsFactor
+      // << ", RATE = " << rate << ", timestep " << timestep
+      // << ", oldDOR = " << DOR << ", new DOR = " << newDOR << endl;
+      // cout.flush();
+      // }
 
       /// @note This where we can figure out the volume dissolved
       /// and link it back to the current volume to see how many
@@ -341,16 +341,18 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
       chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-      if (verbose_) {
-        cout << "ParrotKillohModel::calculateDissolutionEvent "
-             << "Original scaled mass = " << initScaledMass_
-             << ", dissolved scaled mass = " << massDissolved << endl;
-        cout << "New scaled mass = "
-             << chemSys_->getMicroPhaseMass(microPhaseId_)
-             << " and new volume = "
-             << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-        cout.flush();
-      }
+      // if (verbose_) {
+      // cout << "ParrotKillohModel::calculateDissolutionEvent "
+      // << "Original scaled mass = " << initScaledMass_
+      // << ", dissolved scaled mass = " << massDissolved << endl;
+      // cout << "New scaled mass = "
+      // << chemSys_->getMicroPhaseMass(microPhaseId_)
+      // << " and new volume = "
+      // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+      // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+      // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+      // cout.flush();
+      // }
 
       /// @note impurityRelease index values are assumed to
       /// be uniquely associated with particular chemical

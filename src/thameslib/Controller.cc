@@ -684,7 +684,61 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
 
     double T = lattice_->getTemperature();
 
+    if (verbose_) {
+      cout << "Controller::calculateState at time " << time << endl;
+      cout << "    Number of ICs = " << chemSys_->getNumICs() << endl;
+      for (int i = 0; i < chemSys_->getNumICs(); ++i) {
+        cout << "        " << chemSys_->getICName(i) << ": "
+             << chemSys_->getICMoles(i) << " moles" << endl;
+      }
+      // cout << endl;
+      // cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
+      // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+      // cout << "        " << chemSys_->getDCName(i) << ": "
+      // << chemSys_->getDCMoles(i) << " moles" << endl;
+      // }
+      cout << endl;
+      cout << "Getting Solution stuff -01" << endl;
+      vector<double> soluteICMoles = chemSys_->getSolution();
+      cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
+      for (int i = 0; i < soluteICMoles.size(); ++i) {
+        cout << "        " << soluteICMoles[i] << " moles" << endl;
+      }
+      cout << endl;
+      cout.flush();
+    }
+
     kineticController_->calculateDissolutionEvents(dt, T, isFirst);
+
+    if (verbose_) {
+      cout << "Controller::calculateState after KineticController " << time
+           << endl;
+      cout << "    Number of ICs = " << chemSys_->getNumICs() << endl;
+      for (int i = 0; i < chemSys_->getNumICs(); ++i) {
+        cout << "        " << chemSys_->getICName(i) << ": "
+             << chemSys_->getICMoles(i) << " moles" << endl;
+      }
+      // cout << endl;
+      cout << endl;
+
+      cout << "Controller::calculateState post KineticController DC limits:"
+           << endl;
+      cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
+      for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+        cout << "        " << chemSys_->getDCName(i) << ": ["
+             << chemSys_->getDCLowerLimit(i) << ", "
+             << chemSys_->getDCUpperLimit(i) << "] moles" << endl;
+      }
+      cout << endl;
+      cout.flush();
+      vector<double> soluteICMoles = chemSys_->getSolution();
+      cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
+      for (int i = 0; i < soluteICMoles.size(); ++i) {
+        cout << "        " << soluteICMoles[i] << " moles" << endl;
+      }
+      cout << endl;
+      cout.flush();
+    }
 
     ///
     /// The next block only operates for sulfate attack iterations

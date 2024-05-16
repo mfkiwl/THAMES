@@ -281,11 +281,14 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
     cout.flush();
   }
 
+  /// All ICs and DCs, etc. are zeroed out right now
+
   nodeStatus_ = node_->GEM_run(true);
   if (verbose_) {
     cout << "Done! nodeStatus is " << nodeStatus_ << endl;
     cout.flush();
   }
+
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
     cerr << "ERROR: Call to GEM_run in ChemicalSystem constructor had an "
@@ -380,6 +383,9 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
                    &GEMPhaseMoles_[0], &GEMPhaseVolume_[0], &GEMPhaseMass_[0],
                    &pGEMPhaseStoich_[0], &carrier_[0], &surfaceArea_[0],
                    &pSolidStoich_[0]);
+
+  /// At this point all the IC moles and DC moles have the values that
+  /// are loaded in the <bIC> vector of the DBR file.
 
   /// The results of the thermodynamic calculation are now known, and
   /// the constructor can cast them into appropriate units and set up
@@ -513,6 +519,30 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
     cc++;
   }
 
+  if (verbose_) {
+    cout << "ChemicalSystem::Constructor after GEM_run" << endl;
+    cout << "    Number of ICs = " << getNumICs() << endl;
+    for (int i = 0; i < getNumICs(); ++i) {
+      cout << "        " << getICName(i) << ": " << getICMoles(i) << " moles"
+           << endl;
+    }
+    // cout << endl;
+    // cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
+    // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+    // cout << "        " << chemSys_->getDCName(i) << ": "
+    // << chemSys_->getDCMoles(i) << " moles" << endl;
+    // }
+    cout << endl;
+    cout << "Getting Solution stuff 03" << endl;
+    vector<double> soluteICMoles = getSolution();
+    cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
+    for (int i = 0; i < soluteICMoles.size(); ++i) {
+      cout << "        " << soluteICMoles[i] << " moles" << endl;
+    }
+    cout << endl;
+    cout.flush();
+  }
+
   ///
   /// Begin parsing the chemistry input XML file
   ///
@@ -563,6 +593,7 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
   /// Set up all the information for the composition of the aqueous solution
   ///
 
+  cout << "Getting Solution stuff 04" << endl;
   vector<double> solutionICMoles = getSolution();
 
   solut_->setICMoles(solutionICMoles);
@@ -575,6 +606,28 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
   vector<double> solutionSI = solut_->getSI();
 
   // checkChemSys();
+  //
+  if (verbose_) {
+    cout << "ChemicalSystem::Constructor after calculating solution" << endl;
+    cout << "    Number of ICs = " << getNumICs() << endl;
+    for (int i = 0; i < getNumICs(); ++i) {
+      cout << "        " << getICName(i) << ": " << getICMoles(i) << " moles"
+           << endl;
+    }
+    // cout << endl;
+    // cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
+    // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+    // cout << "        " << chemSys_->getDCName(i) << ": "
+    // << chemSys_->getDCMoles(i) << " moles" << endl;
+    // }
+    cout << endl;
+    cout << "    Number of Solution ICs = " << solutionICMoles.size() << endl;
+    for (int i = 0; i < solutionICMoles.size(); ++i) {
+      cout << "        " << solutionICMoles[i] << " moles" << endl;
+    }
+    cout << endl;
+    cout.flush();
+  }
 }
 
 bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
@@ -2288,6 +2341,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   /// Update solution
   ///
 
+  cout << "Getting Solution stuff 02" << endl;
   vector<double> solutICMoles = getSolution();
   if (verbose_)
     cout << "Now update solution IC moles...";

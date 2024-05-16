@@ -791,11 +791,11 @@ void KineticController::calculateDissolutionEvents(const double timestep,
   if (!doTweak)
     hyd_time = hyd_time + timestep;
 
-  if (verbose_) {
-    cout << "KineticController::calculateDissolutionEvents Hydration Time = "
-         << hyd_time << endl;
-    cout.flush();
-  }
+  // if (verbose_) {
+  // cout << "KineticController::calculateDissolutionEvents Hydration Time = "
+  // << hyd_time << endl;
+  // cout.flush();
+  // }
 
   try {
     static int conc_index = 0;
@@ -841,6 +841,7 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
     }
 
+    cout << "Getting Solution stuff 01" << endl;
     solutICMoles = chemSys_->getSolution();
 
     if (isFirst) { // Beginning of special first-time setup tasks
@@ -858,38 +859,45 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       microPhaseId = 0;
       double psMass, psVolume;
       double volume = 0.0;
-      if (verbose_) {
-        cout << "KineticController::calculateDissolutionEvents isFirst *** "
-                "Initial "
-                "solid mass = "
-             << solidMass << endl;
-        cout << "KineticController::calculateDissolutionEvents isFirst *** w/s "
-                "ratio "
-                "= "
-             << lattice_->getWsratio() << endl;
-        cout << "KineticController::calculateDissolutionEvents isFirst *** "
-                "Initial "
-                "water mass = "
-             << waterMass << endl;
-        cout << "KineticController::calculateDissolutionEvents isFirst *** "
-                "Initial "
-                "water moles = "
-             << waterMoles << endl;
-        cout.flush();
+      // if (verbose_) {
+      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
+      // << endl;
+      // for (int i = 0; i < DCNum_; ++i) {
+      // cout << "  DC " << chemSys_->getDCName(i)
+      // << " initial moles = " << DCMoles[i] << endl;
+      // }
+      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
+      // "Initial "
+      // "solid mass = "
+      // << solidMass << endl;
+      // cout << "KineticController::calculateDissolutionEvents isFirst *** w/s
+      // " "ratio "
+      // "= "
+      // << lattice_->getWsratio() << endl;
+      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
+      // "Initial "
+      // "water mass = "
+      // << waterMass << endl;
+      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
+      // "Initial "
+      // "water moles = "
+      // << waterMoles << endl;
+      // cout.flush();
 
-        for (int i = 0; i < microPhaseId_.size(); ++i) {
-          cout << "KineticController::calculateDissolutionEvents "
-               << "Initial MICROSTRUCTURE phase amount:" << endl;
-          psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
-          psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
-          cout << "KineticController::calculateDissolutionEvents     "
-               << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
-               << microPhaseId_[i] << "): mass = " << psMass
-               << ", vol = " << psVolume << endl;
-          cout.flush();
-        }
-      }
+      // for (int i = 0; i < microPhaseId_.size(); ++i) {
+      // cout << "KineticController::calculateDissolutionEvents "
+      // << "Initial MICROSTRUCTURE phase amount:" << endl;
+      // psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
+      // psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
+      // cout << "KineticController::calculateDissolutionEvents     "
+      // << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
+      // << microPhaseId_[i] << "): mass = " << psMass
+      // << ", vol = " << psVolume << endl;
+      // cout.flush();
+      // }
+      // }
 
+      // This sets the IC Moles associated with water
       for (int i = 0; i < ICNum_; i++) {
         if (ICName_[i] == "H") {
           ICMoles[i] = (2.0 * waterMoles);
@@ -921,17 +929,17 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       vector<double> ics;
 
       while (p != isComp.end()) {
-        if (verbose_) {
-          cout << "KineticController::calculateDissolutionEvents "
-               << "modifying initial pore solution" << endl;
-          cout.flush();
-        }
-        if (verbose_) {
-          cout << "KineticController::calculateDissolutionEvents "
-               << "--->Adding " << p->second << " mol/kgw of "
-               << DCName_[p->first] << " to initial solution." << endl;
-          cout.flush();
-        }
+        // if (verbose_) {
+        // cout << "KineticController::calculateDissolutionEvents "
+        // << "modifying initial pore solution" << endl;
+        // cout.flush();
+        // }
+        // if (verbose_) {
+        // cout << "KineticController::calculateDissolutionEvents "
+        // << "--->Adding " << p->second << " mol/kgw of "
+        // << DCName_[p->first] << " to initial solution." << endl;
+        // cout.flush();
+        // }
         // Get the vector of IC compositions for this DC
         ics = chemSys_->getDCStoich(p->first);
         for (int ii = 0; ii < ics.size(); ++ii) {
@@ -1003,22 +1011,32 @@ void KineticController::calculateDissolutionEvents(const double timestep,
           for (int im = 0; im < ICMoles.size(); ++im) {
 
             ICMoles[im] += (dICMoles[im] - minmoles);
-            if (verbose_) {
-              cout << "Kinetically added " << dICMoles[im] << " moles of IC "
-                   << chemSys_->getICName(im) << " to system" << endl;
+            // if (verbose_) {
+            // cout << "Kinetically added " << dICMoles[im] << " moles of IC "
+            // << chemSys_->getICName(im) << " to system" << endl;
 
-              solutICMoles[im] += (dsolutICMoles[im] - minmoles);
-            }
+            //}
+            solutICMoles[im] += (dsolutICMoles[im] - minmoles);
+          }
 
-            for (int im = 0; im < DCMoles.size(); ++im) {
-              DCMoles[im] += (tDCMoles[im] - minmoles);
-            }
+          // if (verbose_) {
+          // cout << "KineticController Authoritative DC limits:" << endl;
+          // }
+          for (int im = 0; im < DCMoles.size(); ++im) {
+            DCMoles[im] += (tDCMoles[im] - minmoles);
+            // if (verbose_) {
+            // cout << "  " << DCName_[im] << ": ["
+            // << chemSys_->getDCLowerLimit(im) << ","
+            // << chemSys_->getDCUpperLimit(im) << "]" << endl;
+            // cout.flush();
+            // }
+          }
 
-            for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
-              GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
-            }
+          for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
+            GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
           }
         }
+
       } else {
 
         ///
@@ -1033,35 +1051,35 @@ void KineticController::calculateDissolutionEvents(const double timestep,
         }
       }
 
-      if (verbose_) {
-        double *DCUpperLimit = chemSys_->getDCUpperLimit();
-        double *DCLowerLimit = chemSys_->getDCLowerLimit();
-        cout << "KineticController::calculateDissolutionEvents lower and upper "
-                "moles after ";
-        if (!doTweak) {
-          cout << "dissolving:";
-        } else {
-          cout << "tweaking:";
-        }
-        for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
-          cout << "    " << DCName_[i] << ": " << DCLowerLimit[i] << ", "
-               << DCUpperLimit[i] << endl;
-          cout.flush();
-        }
+      // if (verbose_) {
+      // double *DCUpperLimit = chemSys_->getDCUpperLimit();
+      // double *DCLowerLimit = chemSys_->getDCLowerLimit();
+      // cout << "KineticController::calculateDissolutionEvents lower and upper
+      // " "moles after ";
+      // if (!doTweak) {
+      // cout << "dissolving:";
+      // } else {
+      // cout << "tweaking:";
+      // }
+      // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
+      // cout << "    " << DCName_[i] << ": " << DCLowerLimit[i] << ", "
+      // << DCUpperLimit[i] << endl;
+      // cout.flush();
+      // }
 
-        cout << endl
-             << "KineticController::calculateDissolutionEvents ICmoles after ";
-        if (!doTweak) {
-          cout << "dissolving:";
-        } else {
-          cout << "tweaking:";
-        }
-        cout << endl;
-        for (int i = 0; i < ICNum_; i++) {
-          cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
-        }
-        cout.flush();
-      }
+      // cout << endl
+      // << "KineticController::calculateDissolutionEvents ICmoles after ";
+      // if (!doTweak) {
+      // cout << "dissolving:";
+      // } else {
+      // cout << "tweaking:";
+      // }
+      // cout << endl;
+      // for (int i = 0; i < ICNum_; i++) {
+      // cout << "    " << ICName_[i] << ": " << ICMoles[i] << " mol" << endl;
+      // }
+      // cout.flush();
+      // }
 
       if (doTweak) {
         for (int ii = 0; ii < ICMoles.size(); ii++) {
@@ -1084,14 +1102,14 @@ void KineticController::calculateDissolutionEvents(const double timestep,
         vector<double> ics;
 
         while (p != fsComp.end()) {
-          if (verbose_) {
-            cout << "KineticController::calculateDissolutionEvents "
-                 << "modifying pore solution" << endl;
-            cout << "KineticController::calculateDissolutionEvents "
-                 << "--->Adding " << p->second << " mol/kgw of "
-                 << DCName_[p->first] << " to initial solution." << endl;
-            cout.flush();
-          }
+          // if (verbose_) {
+          // cout << "KineticController::calculateDissolutionEvents "
+          // << "modifying pore solution" << endl;
+          // cout << "KineticController::calculateDissolutionEvents "
+          // << "--->Adding " << p->second << " mol/kgw of "
+          // << DCName_[p->first] << " to initial solution." << endl;
+          // cout.flush();
+          // }
 
           // Get current concentration of this DC
           double currentDCMoles = chemSys_->getDCMoles(p->first);
@@ -1106,23 +1124,25 @@ void KineticController::calculateDissolutionEvents(const double timestep,
           // Now we know how many moles of this DC to add to the solution
           // Get the vector of IC compositions for this DC
           ics = chemSys_->getDCStoich(p->first);
-          if (verbose_)
-            cout << "Fixed BC effect:" << endl;
+          // if (verbose_)
+          // cout << "Fixed BC effect:" << endl;
           for (int ii = 0; ii < ics.size(); ++ii) {
             ICMoles[ii] += (diffMoles * ics[ii]);
-            if (verbose_) {
-              cout << "    Add " << diffMoles * ics[ii] << " moles of IC "
-                   << chemSys_->getICName(ii) << " due to BCs" << endl;
-              cout << "    New IC concentration = " << ICMoles[ii] / kgWaterMass
-                   << endl;
-              cout.flush();
-            }
+            // if (verbose_) {
+            // cout << "    Add " << diffMoles * ics[ii] << " moles of IC "
+            // << chemSys_->getICName(ii) << " due to BCs" << endl;
+            // cout << "    New IC concentration = " << ICMoles[ii] /
+            // kgWaterMass
+            // << endl;
+            // cout.flush();
+            // }
           }
           p++;
         }
       }
 
       // Finally, set the new IC moles in the thermodynamic system
+      // This happens whether tweaking or not.
       for (int ii = 0; ii < ICMoles.size(); ii++) {
         chemSys_->setICMoles(ii, ICMoles[ii]);
       }

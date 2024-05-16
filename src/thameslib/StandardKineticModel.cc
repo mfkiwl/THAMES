@@ -282,24 +282,26 @@ void StandardKineticModel::calculateDissolutionEvent(
                      pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
         }
 
-        cout << "StandardKineticModel::calculateKineticStep for " << name_
-             << endl;
-        cout << "  dissrate = " << dissrate << endl;
-        cout << "    (DOR = " << DOR << ")" << endl;
-        cout << "    (rhFactor = " << rhFactor << ")" << endl;
-        cout << "    (arrhenius = " << arrhenius << ")" << endl;
-        cout << "    (area = " << area << ")" << endl;
-        cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
-        cout << "    (siexp = " << siexp_ << ")" << endl;
-        cout << "    (dfexp = " << dfexp_ << ")" << endl;
-        cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
-        cout.flush();
+        // if (verbose_) {
+        // cout << "StandardKineticModel::calculateKineticStep for " << name_
+        // << endl;
+        // cout << "  dissrate = " << dissrate << endl;
+        // cout << "    (DOR = " << DOR << ")" << endl;
+        // cout << "    (rhFactor = " << rhFactor << ")" << endl;
+        // cout << "    (arrhenius = " << arrhenius << ")" << endl;
+        // cout << "    (area = " << area << ")" << endl;
+        // cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
+        // cout << "    (siexp = " << siexp_ << ")" << endl;
+        // cout << "    (dfexp = " << dfexp_ << ")" << endl;
+        // cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
+        // cout.flush();
+        // }
 
         dissrate *= (rhFactor * arrhenius);
         newDOR = DOR + (dissrate * timestep);
 
-        cout << "  Final rate = " << dissrate << endl;
-        cout.flush();
+        // cout << "  Final rate = " << dissrate << endl;
+        // cout.flush();
 
         scaledMass_ = max(initScaledMass_ * (1.0 - newDOR), 0.0);
         massDissolved = max((newDOR - DOR) * initScaledMass_, 0.0);
@@ -312,17 +314,22 @@ void StandardKineticModel::calculateDissolutionEvent(
         scaledMoles = scaledMass_ / DCMolarMass;
         scaledMolesDissolved = massDissolved / DCMolarMass;
 
+        // BULLARD test
+        // chemSys_->setDCLowerLimit(DCId_, scaledMoles);
+        // End BULLARD test
         chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-        if (verbose_) {
-          cout << "StandardKineticModel::calculateKineticStep Original scaled "
-                  "mass = "
-               << initScaledMass_ << " and new scaled mass = "
-               << chemSys_->getMicroPhaseMass(microPhaseId_)
-               << " and new volume = "
-               << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-          cout.flush();
-        }
+        // if (verbose_) {
+        // cout << "StandardKineticModel::calculateKineticStep Original scaled "
+        // "mass = "
+        // << initScaledMass_ << " and new scaled mass = "
+        // << chemSys_->getMicroPhaseMass(microPhaseId_)
+        // << " and new volume = "
+        // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+        // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+        // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+        // cout.flush();
+        // }
 
         /// @note impurityRelease index values are assumed to
         /// be uniquely associated with particular chemical
