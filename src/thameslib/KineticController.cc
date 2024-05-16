@@ -18,7 +18,6 @@ KineticController::KineticController() {
 
   numPhases_ = 0;
   chemSys_ = NULL;
-  solut_ = NULL;
   lattice_ = NULL;
   phaseKineticModel_.clear();
   name_.clear();
@@ -48,10 +47,10 @@ KineticController::KineticController() {
   return;
 }
 
-KineticController::KineticController(ChemicalSystem *cs, Solution *solut,
-                                     Lattice *lattice, const string &fileName,
-                                     const bool verbose, const bool warning)
-    : chemSys_(cs), solut_(solut), lattice_(lattice) {
+KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
+                                     const string &fileName, const bool verbose,
+                                     const bool warning)
+    : chemSys_(cs), lattice_(lattice) {
   ///
   /// Clear out the vectors so they can be populated with values from the
   ///
@@ -695,15 +694,15 @@ void KineticController::makeModel(xmlDocPtr doc, xmlNodePtr cur,
 
   if (kineticData.type == ParrotKillohType) {
     // Read remaining Parrot and Killoh model parameters
-    km = new ParrotKillohModel(chemSys_, solut_, lattice_, kineticData,
-                               verbose_, warning_);
+    km = new ParrotKillohModel(chemSys_, lattice_, kineticData, verbose_,
+                               warning_);
   } else if (kineticData.type == StandardType) {
     // Read remaining pozzolanic model parameters
-    km = new StandardKineticModel(chemSys_, solut_, lattice_, kineticData,
-                                  verbose_, warning_);
+    km = new StandardKineticModel(chemSys_, lattice_, kineticData, verbose_,
+                                  warning_);
   } else if (kineticData.type == PozzolanicType) {
     // Read remaining pozzolanic model parameters
-    km = new PozzolanicModel(chemSys_, solut_, lattice_, kineticData, verbose_,
+    km = new PozzolanicModel(chemSys_, lattice_, kineticData, verbose_,
                              warning_);
   }
 
@@ -859,54 +858,15 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       microPhaseId = 0;
       double psMass, psVolume;
       double volume = 0.0;
-      // if (verbose_) {
-      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
-      // << endl;
-      // for (int i = 0; i < DCNum_; ++i) {
-      // cout << "  DC " << chemSys_->getDCName(i)
-      // << " initial moles = " << DCMoles[i] << endl;
-      // }
-      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
-      // "Initial "
-      // "solid mass = "
-      // << solidMass << endl;
-      // cout << "KineticController::calculateDissolutionEvents isFirst *** w/s
-      // " "ratio "
-      // "= "
-      // << lattice_->getWsratio() << endl;
-      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
-      // "Initial "
-      // "water mass = "
-      // << waterMass << endl;
-      // cout << "KineticController::calculateDissolutionEvents isFirst *** "
-      // "Initial "
-      // "water moles = "
-      // << waterMoles << endl;
-      // cout.flush();
-
-      // for (int i = 0; i < microPhaseId_.size(); ++i) {
-      // cout << "KineticController::calculateDissolutionEvents "
-      // << "Initial MICROSTRUCTURE phase amount:" << endl;
-      // psMass = chemSys_->getMicroPhaseMass(microPhaseId_[i]);
-      // psVolume = chemSys_->getMicroPhaseVolume(microPhaseId_[i]);
-      // cout << "KineticController::calculateDissolutionEvents     "
-      // << chemSys_->getMicroPhaseName(microPhaseId_[i]) << " ("
-      // << microPhaseId_[i] << "): mass = " << psMass
-      // << ", vol = " << psVolume << endl;
-      // cout.flush();
-      // }
-      // }
 
       // This sets the IC Moles associated with water
       for (int i = 0; i < ICNum_; i++) {
         if (ICName_[i] == "H") {
           ICMoles[i] = (2.0 * waterMoles);
-          solut_->setICMoles(i, ICMoles[i]);
           chemSys_->setDCMoles(waterId_, waterMoles);
         }
         if (ICName_[i] == "O") {
           ICMoles[i] = waterMoles;
-          solut_->setICMoles(i, ICMoles[i]);
         }
       }
 

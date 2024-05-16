@@ -48,15 +48,13 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
 
   inGrowInterface_.clear();
   inDissInterface_.clear();
-  inGrowInterface_.resize(chemSys_->getNumMicroPhases(),-1);
-  inDissInterface_.resize(chemSys_->getNumMicroPhases(),-1);
+  inGrowInterface_.resize(chemSys_->getNumMicroPhases(), -1);
+  inDissInterface_.resize(chemSys_->getNumMicroPhases(), -1);
 }
 
 void Site::calcWmc(void) {
   wmc_ = chemSys_->getMicroPhasePorosity(getMicroPhaseId());
   for (unsigned int i = 0; i < NN_NNN; i++) {
-      wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
-
+    wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
   }
 }
-

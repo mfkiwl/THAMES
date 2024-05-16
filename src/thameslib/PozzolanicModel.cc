@@ -61,8 +61,7 @@ PozzolanicModel::PozzolanicModel() {
   return;
 }
 
-PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Solution *solut,
-                                 Lattice *lattice,
+PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
                                  struct KineticData &kineticData,
                                  const bool verbose, const bool warning) {
 
@@ -82,7 +81,6 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Solution *solut,
 #endif
 
   chemSys_ = cs;
-  solut_ = solut;
   lattice_ = lattice;
 
   ///
@@ -258,7 +256,7 @@ void PozzolanicModel::calculateDissolutionEvent(
       // rhFactor = pow(((rh - 0.55)/0.45),4.0);
 
       int thisGEMPhase = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
-      double saturationIndex = solut_->getSI(thisGEMPhase);
+      double saturationIndex = chemSys_->getSI(thisGEMPhase);
       double DOR = 0.0;
       double newDOR = 0.0;
 
@@ -318,7 +316,7 @@ void PozzolanicModel::calculateDissolutionEvent(
         /// component
         /// @todo Generalize to multiple phases in a component (how?)
 
-        double saturationIndex = solut_->getSI(GEMPhaseIndex);
+        double saturationIndex = chemSys_->getSI(GEMPhaseIndex);
 
         // activity of water
         double waterActivity =

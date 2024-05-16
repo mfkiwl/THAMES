@@ -65,7 +65,6 @@ private:
   const unsigned int
       siteneighbors_;       /**< Number of neighbor sites to a given site */
   ChemicalSystem *chemSys_; /**< Pointer to simulation's ChemicalSystem */
-  Solution *solut_;         /**< Pointer to the simulation's Solution */
   AppliedStrain *FEsolver_; /**< Pointer to simulation's FE elastic solver */
   vector<Interface> interface_;   /**< List of the different interface objects
                                           in the microstructure */
@@ -138,9 +137,8 @@ public:
   @note Not currently used in THAMES
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the Solution object for the simulation
   */
-  Lattice(ChemicalSystem *cs, Solution *solut);
+  Lattice(ChemicalSystem *cs);
 
   /**
   @brief Overloaded constructor with input microstructure file name.
@@ -152,13 +150,12 @@ public:
   the voxel phase assignments can be made at each site.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the Solution object for the simulation
   @param fileName is the name of the file containing the microstructure data
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
   */
-  Lattice(ChemicalSystem *cs, Solution *solut, const string &fileName,
-          const bool verbose, const bool warning);
+  Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
+          const bool warning);
 
   /**
   @brief Destructor.

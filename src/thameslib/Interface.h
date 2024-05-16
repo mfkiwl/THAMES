@@ -117,13 +117,9 @@ public:
   */
   vector<Isite> getGrowthSites(void) { return growthSites_; }
 
-  int getGrowthSitesId (int pos) {
-      return growthSites_[pos].getId();
-  }
+  int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
 
-  int getDissolutionSitesId (int pos) {
-      return dissolutionSites_[pos].getId();
-  }
+  int getDissolutionSitesId(int pos) { return dissolutionSites_[pos].getId(); }
 
   /**
   @brief Gets the list of sites where dissolution of this phase can occur at the
@@ -203,8 +199,8 @@ public:
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-  //bool removeGrowthSite(Site *loc);
-  
+  // bool removeGrowthSite(Site *loc);
+
   bool removeGrowthSiteMod0_grow(Site *loc, int pos);
 
   bool removeGrowthSiteMod1_grow(Site *loc);
@@ -217,7 +213,7 @@ public:
   @return true if the site was removed successfully, false otherwise
   */
 
-//  bool removeDissolutionSite(Site *loc);
+  //  bool removeDissolutionSite(Site *loc);
 
   bool removeDissolutionSiteMod_diss(Site *loc, int pos);
 

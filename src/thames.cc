@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
   int choice, simtype;
   string buff = "";
   ChemicalSystem *ChemSys = NULL;
-  Solution *Solut = NULL;
   Lattice *Mic = NULL;
   ThermalStrain *ThermalStrainSolver = NULL;
   AppliedStrain *AppliedStrainSolver = NULL;
@@ -69,49 +68,6 @@ int main(int argc, char **argv) {
 
   // Read the newline character.  Wish there was a better way!
   getline(cin, buff);
-  cout << "What is the name of the GEM input file for solution? " << endl;
-  // cin >> buff;  // C++ >> operator does not allow spaces
-  getline(cin, buff);
-  const string geminput_filename_solution(buff);
-  cout << "geminput assignment is " << geminput_filename_solution << endl;
-  cout.flush();
-
-  //
-  // User must provide the name of the GEM data bridge (DBR) file
-  // for the aqueous solution
-  //
-
-  cout << "What is the name of the GEM DBR file for solution? " << endl;
-  getline(cin, buff);
-  const string geminput_dbrname_solution(buff);
-  cout << geminput_dbrname_solution << endl;
-
-  //
-  // Create the aqueous solution object
-  //
-
-  try {
-    Solut = new Solution(geminput_filename_solution, geminput_dbrname_solution,
-                         VERBOSE);
-  } catch (bad_alloc &ba) {
-    cout << "Bad memory allocation in Solution constructor: " << ba.what()
-         << endl;
-    stopProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
-    stopProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
-    stopProgram = true;
-  }
-  if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
-    timeCount(starttime,lt);
-    cout << "STOP Program";
-    exit(1);
-  }
 
   //
   // User must provide the name of the GEM CSD for the whole system
@@ -149,7 +105,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    ChemSys = new ChemicalSystem(Solut, geminput_filename, geminput_dbrname,
+    ChemSys = new ChemicalSystem(geminput_filename, geminput_dbrname,
                                  pi_filename, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
@@ -163,13 +119,10 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     cout << "STOP Program";
     exit(1);
   }
@@ -195,7 +148,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Mic = new Lattice(ChemSys, Solut, mic_filename, VERBOSE, WARNING);
+    Mic = new Lattice(ChemSys, mic_filename, VERBOSE, WARNING);
     cout << "Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
@@ -206,24 +159,21 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
          << endl;
     stopProgram = true;
-  }catch (FileException ex) {
-      ex.printException();
-      stopProgram = true;
+  } catch (FileException ex) {
+    ex.printException();
+    stopProgram = true;
   } catch (GEMException ex) {
-      ex.printException();
-      stopProgram = true;
+    ex.printException();
+    stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
     if (Mic) {
       delete Mic;
     }
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     cout << "STOP Program";
     exit(1);
   }
@@ -267,10 +217,7 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (Solut) {
-        delete Solut;
-      }
-        if (ChemSys) {
+      if (ChemSys) {
         delete ChemSys;
       }
       if (Mic) {
@@ -279,7 +226,7 @@ int main(int argc, char **argv) {
       if (ThermalStrainSolver) {
         delete ThermalStrainSolver;
       }
-      timeCount(starttime,lt);
+      timeCount(starttime, lt);
       cout << "STOP Program";
       exit(1);
     }
@@ -309,9 +256,6 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (Solut) {
-        delete Solut;
-      }
       if (ChemSys) {
         delete ChemSys;
       }
@@ -324,7 +268,7 @@ int main(int argc, char **argv) {
       if (AppliedStrainSolver) {
         delete AppliedStrainSolver;
       }
-      timeCount(starttime,lt);
+      timeCount(starttime, lt);
       cout << "STOP Program";
       exit(1);
     }
@@ -343,8 +287,8 @@ int main(int argc, char **argv) {
   //
 
   try {
-    KController = new KineticController(ChemSys, Solut, Mic, cement_filename,
-                                        VERBOSE, WARNING);
+    KController =
+        new KineticController(ChemSys, Mic, cement_filename, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
@@ -357,9 +301,6 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -376,7 +317,7 @@ int main(int argc, char **argv) {
       delete KController;
     }
     cout << "STOP Program";
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     exit(1);
   }
 
@@ -403,7 +344,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Ctrl = new Controller(Mic, KController, ChemSys, Solut, ThermalStrainSolver,
+    Ctrl = new Controller(Mic, KController, ChemSys, ThermalStrainSolver,
                           simtype, par_filename, jobroot, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
@@ -417,9 +358,6 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -439,7 +377,7 @@ int main(int argc, char **argv) {
       delete Ctrl;
     }
     cout << "STOP Program";
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     exit(1);
   }
 
@@ -475,7 +413,7 @@ int main(int argc, char **argv) {
   // Simulation is finished.  Record and output the timing data.
   //
 
-  timeCount(starttime,lt);
+  timeCount(starttime, lt);
 
   //
   // Delete the dynamically allocated memory
@@ -499,26 +437,23 @@ int main(int argc, char **argv) {
   if (ChemSys) {
     delete ChemSys;
   }
-  if (Solut) {
-    delete Solut;
-  }
 
   return 0;
 }
 
-void timeCount(clock_t time_, time_t lt_){
+void timeCount(clock_t time_, time_t lt_) {
 
-    time_t lt1 = time(NULL);
-    struct tm *inittime1;
-    inittime1 = localtime(&lt1);
-    cout << endl << asctime(inittime1);
-    clock_t endtime = clock();
+  time_t lt1 = time(NULL);
+  struct tm *inittime1;
+  inittime1 = localtime(&lt1);
+  cout << endl << asctime(inittime1);
+  clock_t endtime = clock();
 
-    double elapsedtime = (double)(endtime - time_) / CLOCKS_PER_SEC;
-    double ltD = difftime(lt1, lt_);
-    cout << endl << "Total time = " << ltD << " seconds" << endl;
-    cout << endl
-         << "Total time with clock = " << elapsedtime << " seconds" << endl;
+  double elapsedtime = (double)(endtime - time_) / CLOCKS_PER_SEC;
+  double ltD = difftime(lt1, lt_);
+  cout << endl << "Total time = " << ltD << " seconds" << endl;
+  cout << endl
+       << "Total time with clock = " << elapsedtime << " seconds" << endl;
 }
 
 void printHelp(void) {

@@ -11,11 +11,10 @@ string HydrotalcMicroName("");
 string AFTMicroName("");
 string MonosulfMicroName("");
 
-ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
+ChemicalSystem::ChemicalSystem(const string &GEMfilename,
                                const string &GEMdbrname,
                                const string &interfaceFileName,
-                               const bool verbose, const bool warning)
-    : solut_(Solut) {
+                               const bool verbose, const bool warning) {
   unsigned int i, j;
   double *amat;
   string exmsg;
@@ -533,13 +532,6 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
     // << chemSys_->getDCMoles(i) << " moles" << endl;
     // }
     cout << endl;
-    cout << "Getting Solution stuff 03" << endl;
-    vector<double> soluteICMoles = getSolution();
-    cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
-    for (int i = 0; i < soluteICMoles.size(); ++i) {
-      cout << "        " << soluteICMoles[i] << " moles" << endl;
-    }
-    cout << endl;
     cout.flush();
   }
 
@@ -589,45 +581,7 @@ ChemicalSystem::ChemicalSystem(Solution *Solut, const string &GEMfilename,
   setSI();
   vector<double> SIforsystem = getSI();
 
-  ///
-  /// Set up all the information for the composition of the aqueous solution
-  ///
-
-  cout << "Getting Solution stuff 04" << endl;
-  vector<double> solutionICMoles = getSolution();
-
-  solut_->setICMoles(solutionICMoles);
-  try {
-    solut_->calculateState(true);
-  } catch (GEMException gex) {
-    gex.printException();
-    cout << endl;
-  }
-  vector<double> solutionSI = solut_->getSI();
-
   // checkChemSys();
-  //
-  if (verbose_) {
-    cout << "ChemicalSystem::Constructor after calculating solution" << endl;
-    cout << "    Number of ICs = " << getNumICs() << endl;
-    for (int i = 0; i < getNumICs(); ++i) {
-      cout << "        " << getICName(i) << ": " << getICMoles(i) << " moles"
-           << endl;
-    }
-    // cout << endl;
-    // cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
-    // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
-    // cout << "        " << chemSys_->getDCName(i) << ": "
-    // << chemSys_->getDCMoles(i) << " moles" << endl;
-    // }
-    cout << endl;
-    cout << "    Number of Solution ICs = " << solutionICMoles.size() << endl;
-    for (int i = 0; i < solutionICMoles.size(); ++i) {
-      cout << "        " << solutionICMoles[i] << " moles" << endl;
-    }
-    cout << endl;
-    cout.flush();
-  }
 }
 
 bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
@@ -2307,57 +2261,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   }
 
   setGEMPhaseStoich();
-
-  ///
-  /// Calculate driving force for growth or dissolution
-  ///
-
-  // double *soluticmoles;
-  // soluticmoles = solut_->getICmoles();
-  // for (int i = 0; i < numDCs_; i++) {
-  //     char cc;
-  //     cc = getDCClassCode(i);
-  //     if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
-  //         double dissolveDCMoles = oDCMoles[i] - DCMoles_[i];
-  //         if (dissolveDCMoles > 0.0) {
-  //             for (int j = 0; j < (numICs_ - 1); j++) {
-  //                 soluticmoles[j] += dissolveDCMoles * DCStoich_[i][j];
-  //             }
-  //         }
-  //     }
-  // }
-  // for (int i = 0; i < numICs_; i++) {
-  //     solut_->setICMoles(i, soluticmoles[i]);
-  // }
-  // try {
-  //     solut_->calculateState(true);
-  // }
-  // catch (GEMException gex) {
-  //     gex.printException();
-  //     cout << endl;
-  // }
-
-  ///
-  /// Update solution
-  ///
-
-  cout << "Getting Solution stuff 02" << endl;
-  vector<double> solutICMoles = getSolution();
-  if (verbose_)
-    cout << "Now update solution IC moles...";
-  for (int i = 0; i < numICs_; i++) {
-    solut_->setICMoles(i, solutICMoles[i]);
-  }
-  if (verbose_)
-    cout << "Done." << endl;
-
-  try {
-    // Solution state was calculated for the first
-    // time in the constructor.
-    solut_->calculateState(false);
-  } catch (GEMException gex) {
-    throw gex;
-  }
 
   if (verbose_) {
     cout << "Leaving ChemicalSystem::calculateState now" << endl;

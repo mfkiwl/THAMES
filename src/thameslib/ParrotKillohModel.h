@@ -139,13 +139,12 @@ public:
   various other objects for the simulation are allocated and constructed.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the aqeuous solution object for the simulation
   @param lattice is a pointer to the Lattice object holding the microstructure
   @param kineticData is the collection of kinetic parameters already stored
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  ParrotKillohModel(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+  ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
                     struct KineticData &kineticData, const bool verbose,
                     const bool warning);
 

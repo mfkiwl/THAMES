@@ -24,7 +24,6 @@ as possible.
 #define CHEMSYSH
 
 #include "../Resources/include/GEMS3K/node.h"
-#include "Solution.h"
 #include "global.h"
 #include "utils.h"
 #include "valid.h"
@@ -175,7 +174,6 @@ class ChemicalSystem {
 
   bool jsonFormat_; /**< True if input GEM data files are JSON format */
 
-  Solution *solut_; /**< Pointer to a Solution object for the system */
   unsigned int numMicroPhases_; /**< Total number of material components that
                                    the microstructure can contain.  The GEM
                                      chemical system definition (CSD) will
@@ -532,7 +530,6 @@ public:
   Only one constructor is provided, which initializes the ChemicalSystem with
   all the information read from the GEM input files.
 
-  @param Solut points to the Solution object for this system
   @param GEMfilename is the name of the file holding GEM input data
   @param GEMdbrname is the name of the GEM data bridge file
   @param Interfacefilename is the name of the file containing information about
@@ -540,9 +537,9 @@ public:
   @param verbose is true if producing verbose output
   @param warning is true if producing verbose output
   */
-  ChemicalSystem(Solution *Solut, const string &GEMfilename,
-                 const string &GEMdbrname, const string &Interfacefilename,
-                 const bool verbose, const bool warning = false);
+  ChemicalSystem(const string &GEMfilename, const string &GEMdbrname,
+                 const string &Interfacefilename, const bool verbose,
+                 const bool warning = false);
 
   /**
   @brief Copy constructor.
@@ -5680,6 +5677,8 @@ public:
   */
   double getSI(int phaseid) {
     try {
+      cout << "Trying to find GEM phase id " << phaseid << endl;
+      cout.flush();
       return SI_.at(phaseid);
     } catch (out_of_range &oor) {
       EOBException ex("ChemicalSystem", "getSI", "SI_", SI_.size(), phaseid);

@@ -42,8 +42,6 @@ private:
   int numPhases_; /**< Total number of phases in the kinetic model */
   ChemicalSystem *
       chemSys_; /**< Pointer to the ChemicalSystem object for this simulation */
-  Solution
-      *solut_; /**< Pointer to the aqueous phase object for this simulation */
   Lattice *
       lattice_; /**< Pointer to the lattice object holding the microstructure */
   vector<KineticModel *>
@@ -92,14 +90,13 @@ public:
   This constructor is used in THAMES.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the aqeuous solution object for the simulation
   @param lattic is a pointer to the Lattice object holding the microstructure
   @param fileName is the name of the XML file with the input for the kinetic
   model
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  KineticController(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+  KineticController(ChemicalSystem *cs, Lattice *lattice,
                     const string &fileName, const bool verbose,
                     const bool warning);
 

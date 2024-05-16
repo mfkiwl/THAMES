@@ -6,12 +6,11 @@
 #include "Controller.h"
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
-                       Solution *solut, ThermalStrain *thmstr,
-                       const int simtype, const string &parfilename,
-                       const string &jobname, const bool verbose,
-                       const bool warning)
-    : lattice_(msh), kineticController_(kc), chemSys_(cs), solut_(solut),
-      sim_type_(simtype), thermalstr_(thmstr), jobroot_(jobname) {
+                       ThermalStrain *thmstr, const int simtype,
+                       const string &parfilename, const string &jobname,
+                       const bool verbose, const bool warning)
+    : lattice_(msh), kineticController_(kc), chemSys_(cs), sim_type_(simtype),
+      thermalstr_(thmstr), jobroot_(jobname) {
   unsigned int i;
   double tvalue, pvalue;
   string buff;
@@ -698,13 +697,6 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       // << chemSys_->getDCMoles(i) << " moles" << endl;
       // }
       cout << endl;
-      cout << "Getting Solution stuff -01" << endl;
-      vector<double> soluteICMoles = chemSys_->getSolution();
-      cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
-      for (int i = 0; i < soluteICMoles.size(); ++i) {
-        cout << "        " << soluteICMoles[i] << " moles" << endl;
-      }
-      cout << endl;
       cout.flush();
     }
 
@@ -728,13 +720,6 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
         cout << "        " << chemSys_->getDCName(i) << ": ["
              << chemSys_->getDCLowerLimit(i) << ", "
              << chemSys_->getDCUpperLimit(i) << "] moles" << endl;
-      }
-      cout << endl;
-      cout.flush();
-      vector<double> soluteICMoles = chemSys_->getSolution();
-      cout << "    Number of Solute ICs = " << soluteICMoles.size() << endl;
-      for (int i = 0; i < soluteICMoles.size(); ++i) {
-        cout << "        " << soluteICMoles[i] << " moles" << endl;
       }
       cout << endl;
       cout.flush();
@@ -830,7 +815,10 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
         microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
         for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
           int newGEMPhaseId = microPhaseMembers[ii];
-          aveSI += ((solut_->getSI(newGEMPhaseId) *
+          cout << "Getting SI for GEM phase "
+               << chemSys_->getGEMPhaseName(newGEMPhaseId) << endl;
+          cout.flush();
+          aveSI += ((chemSys_->getSI(newGEMPhaseId) *
                      chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
           moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
         }

@@ -72,7 +72,6 @@ protected:
 
   double imgfreq_;          /**< Frequency to output microstructure image */
   ChemicalSystem *chemSys_; /**< Pointer to `ChemicalSystem` object */
-  Solution *solut_;         /**< Pointer to the `Solution` object */
   vector<double> time_;     /**< List of simulation times for each iteration */
   vector<double> output_time_; /**< List of times to output image */
   double statfreq_;            /**< Frequency to output statistics */
@@ -99,13 +98,11 @@ public:
       - The lattice object
       - The kinetic model object
       - The chemical system object (interface between GEM and THAMES
-      - The solution object
       - The finite element model for tracking strain and stress
 
   @param msh is a pointer to the already-instantiated `Lattice` object
   @param kc is a pointer to the already-instantiated `KineticController`
   @param cs is a pointer to the already-instantiated `ChemicalSystem` object
-  @param solut is a pointer to the already-instantiated `Solution` object
   @param thmstr is a pointer to the already-instantiated `ThermalStrain` object
   @param simtype is the type of simulation to run
   @param parfilename is the name of the input parameter file
@@ -114,7 +111,7 @@ public:
   @param warning is true if warning output should be produced
   */
   Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
-             Solution *solut, ThermalStrain *thmstr, const int simtype,
+             ThermalStrain *thmstr, const int simtype,
              const string &parfilename, const string &jobname,
              const bool verbose, const bool warning);
 

@@ -66,8 +66,7 @@ ParrotKillohModel::ParrotKillohModel() {
   return;
 }
 
-ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Solution *solut,
-                                     Lattice *lattice,
+ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
                                      struct KineticData &kineticData,
                                      const bool verbose, const bool warning) {
   // Set the verbose and warning flags
@@ -85,7 +84,6 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Solution *solut,
 #endif
 
   chemSys_ = cs;
-  solut_ = solut;
   lattice_ = lattice;
 
   ///
@@ -341,18 +339,18 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
       chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-      // if (verbose_) {
-      // cout << "ParrotKillohModel::calculateDissolutionEvent "
-      // << "Original scaled mass = " << initScaledMass_
-      // << ", dissolved scaled mass = " << massDissolved << endl;
-      // cout << "New scaled mass = "
-      // << chemSys_->getMicroPhaseMass(microPhaseId_)
-      // << " and new volume = "
-      // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-      // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
-      // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
-      // cout.flush();
-      // }
+      if (verbose_) {
+        cout << "ParrotKillohModel::calculateDissolutionEvent "
+             << "Original scaled mass = " << initScaledMass_
+             << ", dissolved scaled mass = " << massDissolved << endl;
+        cout << "New scaled mass = "
+             << chemSys_->getMicroPhaseMass(microPhaseId_)
+             << " and new volume = "
+             << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+        cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+             << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+        cout.flush();
+      }
 
       /// @note impurityRelease index values are assumed to
       /// be uniquely associated with particular chemical

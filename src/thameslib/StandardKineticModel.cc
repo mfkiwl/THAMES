@@ -56,8 +56,7 @@ StandardKineticModel::StandardKineticModel() {
   return;
 }
 
-StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
-                                           Lattice *lattice,
+StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
                                            struct KineticData &kineticData,
                                            const bool verbose,
                                            const bool warning) {
@@ -75,7 +74,6 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
 #endif
 
   chemSys_ = cs;
-  solut_ = solut;
   lattice_ = lattice;
 
   ///
@@ -242,7 +240,7 @@ void StandardKineticModel::calculateDissolutionEvent(
       // rhFactor = pow(((rh - 0.55)/0.45),4.0);
 
       int thisGEMPhase = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
-      double saturationIndex = solut_->getSI(thisGEMPhase);
+      double saturationIndex = chemSys_->getSI(thisGEMPhase);
       double DOR = 0.0;
       double newDOR = 0.0;
 
@@ -268,7 +266,7 @@ void StandardKineticModel::calculateDissolutionEvent(
         /// component
         /// @todo Generalize to multiple phases in a component (how?)
 
-        double saturationIndex = solut_->getSI(GEMPhaseIndex);
+        double saturationIndex = chemSys_->getSI(GEMPhaseIndex);
 
         // This equation basically implements the Dove and Crerar rate
         // equation for quartz.  Needs to be calibrated for silica fume, but
@@ -319,17 +317,18 @@ void StandardKineticModel::calculateDissolutionEvent(
         // End BULLARD test
         chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-        // if (verbose_) {
-        // cout << "StandardKineticModel::calculateKineticStep Original scaled "
-        // "mass = "
-        // << initScaledMass_ << " and new scaled mass = "
-        // << chemSys_->getMicroPhaseMass(microPhaseId_)
-        // << " and new volume = "
-        // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-        // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
-        // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
-        // cout.flush();
-        // }
+        if (verbose_) {
+          cout << "StandardKineticModel::calculateDissolutionEvent "
+               << "Original scaled mass = " << initScaledMass_
+               << ", dissolved scaled mass = " << massDissolved << endl;
+          cout << "New scaled mass = "
+               << chemSys_->getMicroPhaseMass(microPhaseId_)
+               << " and new volume = "
+               << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+          cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+               << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+          cout.flush();
+        }
 
         /// @note impurityRelease index values are assumed to
         /// be uniquely associated with particular chemical
