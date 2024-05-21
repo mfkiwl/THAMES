@@ -192,6 +192,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
     scaledMoles = initScaledMass_ / DCMolarMass;
     scaledMolesDissolved = massDissolved / DCMolarMass;
 
+    cout << "dICMoles in ParrotKilloh Model:" << endl;
     for (int ii = 0; ii < dICMoles.size(); ++ii) {
       dICMoles[ii] +=
           ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_, ii));
@@ -263,18 +264,6 @@ void ParrotKillohModel::calculateDissolutionEvent(
     arrhenius =
         exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
 
-    // if (verbose_) {
-    // cout << "PK model for " << name_ << endl;
-    // cout << "    k1 = " << k1_ << endl;
-    // cout << "    k2 = " << k2_ << endl;
-    // cout << "    k3 = " << k3_ << endl;
-    // cout << "    pfk = " << pfk_ << endl;
-    // cout << "    n1 = " << n1_ << endl;
-    // cout << "    n3 = " << n3_ << endl;
-    // cout << "    Ea = " << activationEnergy_ << endl;
-    // cout.flush();
-    // }
-
     if (DOR < 1.0) {
 
       // Normal Parrott and Killoh implementation here
@@ -339,18 +328,25 @@ void ParrotKillohModel::calculateDissolutionEvent(
 
       chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-      if (verbose_) {
-        cout << "ParrotKillohModel::calculateDissolutionEvent "
-             << "Original scaled mass = " << initScaledMass_
-             << ", dissolved scaled mass = " << massDissolved << endl;
-        cout << "New scaled mass = "
-             << chemSys_->getMicroPhaseMass(microPhaseId_)
-             << " and new volume = "
-             << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-        cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
-             << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
-        cout.flush();
-      }
+      // if (verbose_) {
+      // cout << "ParrotKillohModel::calculateDissolutionEvent "
+      // << "Original scaled mass = " << initScaledMass_
+      // << ", dissolved scaled mass = " << massDissolved << endl;
+      // cout << "New scaled mass = "
+      // << chemSys_->getMicroPhaseMass(microPhaseId_)
+      // << " and new volume = "
+      // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+      // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+      // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+      // cout.flush();
+      // cout << endl;
+      // cout << "IC composition:" << endl;
+      // for (int i = 0; i < chemSys_->getNumICs(); ++i) {
+      // cout << chemSys_->getICName(i) << ": " << chemSys_->getICMoles(i)
+      // << endl;
+      // }
+      // cout.flush();
+      // }
 
       /// @note impurityRelease index values are assumed to
       /// be uniquely associated with particular chemical

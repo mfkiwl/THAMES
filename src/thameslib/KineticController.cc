@@ -970,33 +970,41 @@ void KineticController::calculateDissolutionEvents(const double timestep,
 
           for (int im = 0; im < ICMoles.size(); ++im) {
 
+            if (verbose_) {
+              cout << "Kinetically added " << dICMoles[im] << " moles of IC "
+                   << chemSys_->getICName(im) << " to " << ICMoles[im]
+                   << " existing moles" << endl;
+              cout.flush();
+            }
+
             ICMoles[im] += (dICMoles[im] - minmoles);
-            // if (verbose_) {
-            // cout << "Kinetically added " << dICMoles[im] << " moles of IC "
-            // << chemSys_->getICName(im) << " to system" << endl;
 
-            //}
+            if (verbose_) {
+              cout << "Kinetically added " << dsolutICMoles[im]
+                   << " moles of solute IC " << chemSys_->getICName(im)
+                   << " to " << solutICMoles[im] << " existing moles" << endl;
+              cout.flush();
+            }
             solutICMoles[im] += (dsolutICMoles[im] - minmoles);
-          }
 
-          // if (verbose_) {
-          // cout << "KineticController Authoritative DC limits:" << endl;
-          // }
-          for (int im = 0; im < DCMoles.size(); ++im) {
-            DCMoles[im] += (tDCMoles[im] - minmoles);
-            // if (verbose_) {
-            // cout << "  " << DCName_[im] << ": ["
-            // << chemSys_->getDCLowerLimit(im) << ","
-            // << chemSys_->getDCUpperLimit(im) << "]" << endl;
-            // cout.flush();
-            // }
-          }
+            if (verbose_) {
+              cout << "KineticController Authoritative DC limits:" << endl;
+            }
+            for (int im = 0; im < DCMoles.size(); ++im) {
+              DCMoles[im] += (tDCMoles[im] - minmoles);
+              if (verbose_) {
+                cout << "  " << DCName_[im] << ": ["
+                     << chemSys_->getDCLowerLimit(im) << ","
+                     << chemSys_->getDCUpperLimit(im) << "]" << endl;
+                cout.flush();
+              }
+            }
 
-          for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
-            GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
+            for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
+              GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
+            }
           }
         }
-
       } else {
 
         ///
@@ -1014,12 +1022,9 @@ void KineticController::calculateDissolutionEvents(const double timestep,
       // if (verbose_) {
       // double *DCUpperLimit = chemSys_->getDCUpperLimit();
       // double *DCLowerLimit = chemSys_->getDCLowerLimit();
-      // cout << "KineticController::calculateDissolutionEvents lower and upper
-      // " "moles after ";
-      // if (!doTweak) {
-      // cout << "dissolving:";
-      // } else {
-      // cout << "tweaking:";
+      // cout << "KineticController::calculateDissolutionEvents lower and
+      // upper " "moles after "; if (!doTweak) { cout << "dissolving:"; } else
+      // { cout << "tweaking:";
       // }
       // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
       // cout << "    " << DCName_[i] << ": " << DCLowerLimit[i] << ", "

@@ -148,6 +148,7 @@ void StandardKineticModel::calculateDissolutionEvent(
     scaledMoles = initScaledMass_ / DCMolarMass;
     scaledMolesDissolved = massDissolved / DCMolarMass;
 
+    cout << "dICMoles in Standard Model:" << endl;
     for (int ii = 0; ii < dICMoles.size(); ++ii) {
       dICMoles[ii] +=
           ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_, ii));
@@ -169,10 +170,6 @@ void StandardKineticModel::calculateDissolutionEvent(
     int numGEMPhases = chemSys_->getNumGEMPhases();
     int DCId, ICId;
     double molarMass;
-    dICMoles.clear();
-    dICMoles.resize(ICNum, 0.0);
-    dsolutICMoles.clear();
-    dsolutICMoles.resize(ICNum, 0.0);
     GEMPhaseMoles.clear();
     GEMPhaseMoles.resize(numGEMPhases, 0.0);
     string icn;
@@ -317,18 +314,25 @@ void StandardKineticModel::calculateDissolutionEvent(
         // End BULLARD test
         chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
-        if (verbose_) {
-          cout << "StandardKineticModel::calculateDissolutionEvent "
-               << "Original scaled mass = " << initScaledMass_
-               << ", dissolved scaled mass = " << massDissolved << endl;
-          cout << "New scaled mass = "
-               << chemSys_->getMicroPhaseMass(microPhaseId_)
-               << " and new volume = "
-               << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-          cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
-               << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
-          cout.flush();
-        }
+        // if (verbose_) {
+        // cout << "StandardKineticModel::calculateDissolutionEvent "
+        // << "Original scaled mass = " << initScaledMass_
+        // << ", dissolved scaled mass = " << massDissolved << endl;
+        // cout << "New scaled mass = "
+        // << chemSys_->getMicroPhaseMass(microPhaseId_)
+        // << " and new volume = "
+        // << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
+        // cout << "DC limits: [" << chemSys_->getDCLowerLimit(DCId_) << ","
+        // << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+        // cout.flush();
+        // cout << endl;
+        // cout << "IC composition:" << endl;
+        // for (int i = 0; i < chemSys_->getNumICs(); ++i) {
+        // cout << chemSys_->getICName(i) << ": " << chemSys_->getICMoles(i)
+        // << endl;
+        // }
+        // cout.flush();
+        // }
 
         /// @note impurityRelease index values are assumed to
         /// be uniquely associated with particular chemical

@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 21 13:46 2024 | Fixed accidental resetting of ICmoles assignment in StandardKineticModel |
 | May 16 16:53 2024 | Removed Solution class and all dependencies on it |
 | May 16 11:19 2024 | Committing because I'm about to try radical surgery on structure |
 | May 06 22:14 2024 | Now using DCLowerLimit for kinetics |
