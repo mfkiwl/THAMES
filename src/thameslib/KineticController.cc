@@ -952,6 +952,14 @@ void KineticController::calculateDissolutionEvents(const double timestep,
 
         /// Loop over all kinetic models
 
+        /// @todo Calculate all phase stability indices first. Visit all kinetic
+        /// models and do the isFirst loop, which will push all the IC
+        /// moles to the system.  Then set all DC lower limits to 1e-9 and
+        /// do a GEM_run.  This will calculate all the stability indices. At
+        /// that point, we can run all the phase kinetic models *including*
+        /// precipitations.
+        ///
+
         double minmoles = 0.0;
 
         for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {

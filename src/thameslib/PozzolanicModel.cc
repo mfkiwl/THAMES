@@ -185,10 +185,6 @@ void PozzolanicModel::calculateDissolutionEvent(
     int numGEMPhases = chemSys_->getNumGEMPhases();
     int DCId, ICId;
     double molarMass;
-    dICMoles.clear();
-    dICMoles.resize(ICNum, 0.0);
-    dsolutICMoles.clear();
-    dsolutICMoles.resize(ICNum, 0.0);
     GEMPhaseMoles.clear();
     GEMPhaseMoles.resize(numGEMPhases, 0.0);
     string icn;
