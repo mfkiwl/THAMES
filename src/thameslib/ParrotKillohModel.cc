@@ -155,10 +155,12 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   return;
 }
 
-void ParrotKillohModel::calculateDissolutionEvent(
-    const double timestep, const double temperature, bool isFirst, double rh,
-    vector<double> &dICMoles, vector<double> &dsolutICMoles,
-    vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
+void ParrotKillohModel::calculateKineticEvent(const double timestep,
+                                              const double temperature,
+                                              bool isFirst, double rh,
+                                              vector<double> &dICMoles,
+                                              vector<double> &DCMoles,
+                                              vector<double> &GEMPhaseMoles) {
   ///
   /// Initialize local variables
   ///
@@ -220,7 +222,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
     // from precipitating.
 
     // if (verbose_) {
-    // cout << "ParrotKillohModel::calculateDissolutionEvent for " << name_
+    // cout << "ParrotKillohModel::calculateKineticEvent for " << name_
     // << endl;
     // cout.flush();
     // }
@@ -245,7 +247,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
       // cout.flush();
       // }
     } else {
-      throw FloatException("ParrotKillohModel", "calculateDissolutionEvent",
+      throw FloatException("ParrotKillohModel", "calculateKineticEvent",
                            "initScaledMass_ = 0.0");
     }
 
@@ -276,7 +278,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
         if (ngrate < 1.0e-10)
           ngrate = 1.0e-10;
       } else {
-        throw FloatException("ParrotKillohModel", "calculateDissolutionEvent",
+        throw FloatException("ParrotKillohModel", "calculateKineticEvent",
                              "n1_ = 0.0");
       }
 
@@ -329,7 +331,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
       chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
       // if (verbose_) {
-      // cout << "ParrotKillohModel::calculateDissolutionEvent "
+      // cout << "ParrotKillohModel::calculateKineticEvent "
       // << "Original scaled mass = " << initScaledMass_
       // << ", dissolved scaled mass = " << massDissolved << endl;
       // cout << "New scaled mass = "
@@ -437,7 +439,7 @@ void ParrotKillohModel::calculateDissolutionEvent(
       }
 
     } else {
-      throw DataException("ParrotKillohModel", "calculateDissolutionEvent",
+      throw DataException("ParrotKillohModel", "calculateKineticEvent",
                           "DOR >= 1.0");
     }
 
@@ -453,8 +455,8 @@ void ParrotKillohModel::calculateDissolutionEvent(
     fex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("ParrotKillohModel", "calculateDissolutionEvent",
-                    oor.what(), 0, 0);
+    EOBException ex("ParrotKillohModel", "calculateKineticEvent", oor.what(), 0,
+                    0);
     ex.printException();
     exit(1);
   }

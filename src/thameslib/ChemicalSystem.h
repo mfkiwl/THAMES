@@ -519,6 +519,7 @@ class ChemicalSystem {
   solid phase in the GEM CSD.
   */
   vector<double> SI_;
+  vector<double> microPhaseSI_;
 
   bool verbose_; /**< Whether to produce verbose output */
   bool warning_; /**< Whether to produce warning output */
@@ -5694,6 +5695,48 @@ public:
   @return the saturation index of the GEM phase
   */
   double getSI(const string &str) { return SI_[getGEMPhaseId(str)]; }
+
+  /**
+  @brief Set the vector of saturation indices of all microstructure phases.
+
+  */
+  void setMicroPhaseSI(void);
+
+  /**
+  @brief Get the vector of saturation indices of all microstructure phases.
+
+  @return the vector of saturation indices of all microstructure phases
+  */
+  vector<double> getMicroPhaseSI(void) { return microPhaseSI_; }
+
+  /**
+  @brief Get the saturation index of a microstructure phase, by its id.
+
+  @param microphaseid is the index of the microstructure phase to query
+  @return the saturation index of the microstructure phase
+  */
+  double getMicroPhaseSI(int microphaseid) {
+    try {
+      cout << "Trying to find microstructure phase id " << microphaseid << endl;
+      cout.flush();
+      return microPhaseSI_.at(microphaseid);
+    } catch (out_of_range &oor) {
+      EOBException ex("ChemicalSystem", "getMicroPhaseSI", "microPhaseSI_",
+                      microPhaseSI_.size(), microphaseid);
+      ex.printException();
+      exit(1);
+    }
+  }
+
+  /**
+  @brief Get the saturation index of a microstructure phase, by its name.
+
+  @param str is the name of the microstructure phase to query
+  @return the saturation index of the microstructure phase
+  */
+  double getMicroPhaseSI(const string &str) {
+    return microPhaseSI_[getMicroPhaseId(str)];
+  }
 
   /**
   @brief Get the activity of a GEM DC by its id.

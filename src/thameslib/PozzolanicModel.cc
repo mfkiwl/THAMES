@@ -132,10 +132,12 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   return;
 }
 
-void PozzolanicModel::calculateDissolutionEvent(
-    const double timestep, const double temperature, bool isFirst, double rh,
-    vector<double> &dICMoles, vector<double> &dsolutICMoles,
-    vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
+void PozzolanicModel::calculateKineticEvent(const double timestep,
+                                            const double temperature,
+                                            bool isFirst, double rh,
+                                            vector<double> &dICMoles,
+                                            vector<double> &DCMoles,
+                                            vector<double> &GEMPhaseMoles) {
   ///
   /// Initialize local variables
   ///
@@ -251,8 +253,6 @@ void PozzolanicModel::calculateDissolutionEvent(
       double rhFactor = rh;
       // rhFactor = pow(((rh - 0.55)/0.45),4.0);
 
-      int thisGEMPhase = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
-      double saturationIndex = chemSys_->getSI(thisGEMPhase);
       double DOR = 0.0;
       double newDOR = 0.0;
 
@@ -261,7 +261,7 @@ void PozzolanicModel::calculateDissolutionEvent(
         // prevent DOR from prematurely stopping PK calculations
         DOR = min(DOR, 0.99);
       } else {
-        throw FloatException("PozzolanicModel", "calculateDissolutionEvent",
+        throw FloatException("PozzolanicModel", "calculateKineticEvent",
                              "initScaledMass_ = 0.0");
       }
 
@@ -305,14 +305,10 @@ void PozzolanicModel::calculateDissolutionEvent(
 
         double ohActivity = chemSys_->getDCActivity("OH-");
         double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
-        int GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
 
-        // Saturation index , but be sure that there is only one GEM Phase
-        /// @note Assumes there is only one phase in this microstructure
-        /// component
-        /// @todo Generalize to multiple phases in a component (how?)
+        // Saturation index
 
-        double saturationIndex = chemSys_->getSI(GEMPhaseIndex);
+        double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
 
         // activity of water
         double waterActivity =
@@ -370,8 +366,7 @@ void PozzolanicModel::calculateDissolutionEvent(
           diffrate = -1.0e9;
         }
 
-        cout << "PozzolanicModel::calculateDissolutionEvent for " << name_
-             << endl;
+        cout << "PozzolanicModel::calculateKineticEvent for " << name_ << endl;
         cout << "  dissrate = " << dissrate << endl;
         cout << "    (baserateconst = " << baserateconst << ")" << endl;
         cout << "    (ssaFactor = " << ssaFactor_ << ")" << endl;
@@ -414,7 +409,7 @@ void PozzolanicModel::calculateDissolutionEvent(
         chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
 
         if (verbose_) {
-          cout << "PozzolanicModel::calculateDissolutionEvent Original scaled "
+          cout << "PozzolanicModel::calculateKineticEvent Original scaled "
                   "mass = "
                << initScaledMass_ << " and new scaled mass = "
                << chemSys_->getMicroPhaseMass(microPhaseId_)
@@ -512,7 +507,7 @@ void PozzolanicModel::calculateDissolutionEvent(
         }
 
       } else {
-        throw DataException("PozzolanicModel", "calculateDissolutionEvent",
+        throw DataException("PozzolanicModel", "calculateKineticEvent",
                             "DOR >= 1.0");
       }
 
@@ -529,8 +524,8 @@ void PozzolanicModel::calculateDissolutionEvent(
     fex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("PozzolanicModel", "calculateDissolutionEvent", oor.what(),
-                    0, 0);
+    EOBException ex("PozzolanicModel", "calculateKineticEvent", oor.what(), 0,
+                    0);
     ex.printException();
     exit(1);
   }

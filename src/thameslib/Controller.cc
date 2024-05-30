@@ -700,7 +700,21 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       cout.flush();
     }
 
-    kineticController_->calculateDissolutionEvents(dt, T, isFirst);
+    /// The thermodynamic calculation returns the saturation index of phases,
+    /// which is needed for calculations of driving force for dissolution
+    /// or growth.  Assign this to the lattice in case crystallization pressures
+    /// should be calculated.
+    ///
+    /// 2024-05-29:  At the moment, if a microstructure phase is defined
+    /// to be one or more GEM phases, the SI of the microstructure phase
+    /// is calculated as the mole-weighted average of the SIs of the
+    /// constituent GEM CSD phases.  Can't think of a better way to do this
+    /// except to prohibit users from defining mixtures of CSD phases
+    /// as microstructure phases.
+
+    chemSys_->setMicroPhaseSI();
+
+    kineticController_->calculateKineticEvents(dt, T, isFirst);
 
     if (verbose_) {
       cout << "Controller::calculateState after KineticController " << time
@@ -792,46 +806,8 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       cout.flush();
     }
 
-    ///
-    /// The thermodynamic calculation returns the saturation index of phases,
-    /// which is needed for calculations of driving force for dissolution
-    /// or growth.  Assign this to the lattice in case crystallization pressures
-    /// should be calculated.
-    ///
-
     if (chemSys_->getTimesGEMFailed() > 0) {
       return;
-    }
-
-    try {
-      double aveSI = 0.0;
-      double moles = 0.0;
-      vector<int> microPhaseMembers;
-      for (int i = 0; i < chemSys_->getNumMicroPhases(); ++i) {
-        string pname = chemSys_->getMicroPhaseName(i);
-        int newMicroPhaseId =
-            chemSys_->getMicroPhaseId(chemSys_->getMicroPhaseName(i));
-        aveSI = moles = 0.0;
-        microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
-        for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
-          int newGEMPhaseId = microPhaseMembers[ii];
-          cout << "Getting SI for GEM phase "
-               << chemSys_->getGEMPhaseName(newGEMPhaseId) << endl;
-          cout.flush();
-          aveSI += ((chemSys_->getSI(newGEMPhaseId) *
-                     chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
-          moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
-        }
-        if (moles > 0.0) {
-          aveSI = aveSI / moles;
-        } else {
-          aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
-        }
-        lattice_->setSI(newMicroPhaseId, aveSI);
-      }
-    } catch (EOBException eex) {
-      eex.printException();
-      exit(1);
     }
 
     if (isFirst) {
@@ -846,11 +822,11 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     // Another possibility is to use the dul and dll vectors for GEM_from_MT and
     // maybe then we could do the entire dissolution and precipitation in one
     // GEM_run calculation.
-    //
-    //
+
     ///
     /// Set the kinetic DC moles.  This adds the clinker components to the DC
-    /// moles.
+    /// moles of the GEM CSD. Not sure if this is helpful or maybe even an
+    /// error.
     ///
 
     kineticController_->setKineticDCMoles();

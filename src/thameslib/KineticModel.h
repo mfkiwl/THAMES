@@ -525,15 +525,10 @@ public:
   /**
   @brief Master method for implementing one kinetic time step.
 
-  In a given time step, a certain number of moles of each clinker phase will
-  dissolve, and the instantly soluble phases will dissolve in the first time
-  step.  This function determines the number of moles of each phase to dissolve,
-  based on the time interval being simulated.  It then calculates the number of
-  IC moles to promote to the thermodynamic system from those phases (which are
-  outside the thermodynamic system because they are kinetically controlled),
-  based on the stoichiometry.  Those IC moles are then added to the
-  thermodynamic system, and the moles and mass of each kinetically controlled
-  phase are changed accordingly.
+  In a given time step, a certain number of moles of kinetically controlled
+  phases may dissolve or precipitate.
+  This function determines the number of moles of each phase to change,
+  based on the time interval being simulated.
 
   This is now a pure virtual function.
 
@@ -550,17 +545,14 @@ public:
   otherwise
   @param rh is the internal relative humidity
   @param dICMoles is the vector of moles of each IC change due to kinetics
-  @param dsolutICMoles is the vector of moles of each IC change in solution due
-  to kinetics
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateDissolutionEvent(const double timestep,
-                                         const double temperature, bool isFirst,
-                                         double rh, vector<double> &dICMoles,
-                                         vector<double> &dsolutICMoles,
-                                         vector<double> &DCMoles,
-                                         vector<double> &GEMPhaseMoles) = 0;
+  virtual void calculateKineticEvent(const double timestep,
+                                     const double temperature, bool isFirst,
+                                     double rh, vector<double> &dICMoles,
+                                     vector<double> &DCMoles,
+                                     vector<double> &GEMPhaseMoles) = 0;
 
   /**
   @brief Set up the number of moles of dependent components in the kinetic

@@ -267,17 +267,14 @@ public:
   otherwise
   @param rh is the internal relative humidity
   @param dICMoles is the vector of moles of each IC changed by kinetics
-  @param dsolutICMoles is the vector of moles of each IC in solution changed by
-  kinetics
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateDissolutionEvent(const double timestep,
-                                         const double temperature, bool isFirst,
-                                         double rh, vector<double> &dICMoles,
-                                         vector<double> &dsolutICMoles,
-                                         vector<double> &DCMoles,
-                                         vector<double> &GEMPhaseMoles);
+  virtual void calculateKineticEvent(const double timestep,
+                                     const double temperature, bool isFirst,
+                                     double rh, vector<double> &dICMoles,
+                                     vector<double> &DCMoles,
+                                     vector<double> &GEMPhaseMoles);
 
 }; // End of ParrotKillohModel class
 

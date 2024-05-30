@@ -765,9 +765,9 @@ void KineticController::setPozzEffectOnPK(void) {
   return;
 }
 
-void KineticController::calculateDissolutionEvents(const double timestep,
-                                                   const double temperature,
-                                                   bool isFirst) {
+void KineticController::calculateKineticEvents(const double timestep,
+                                               const double temperature,
+                                               bool isFirst) {
   ///
   /// Initialize local variables
   ///
@@ -791,7 +791,7 @@ void KineticController::calculateDissolutionEvents(const double timestep,
     hyd_time = hyd_time + timestep;
 
   // if (verbose_) {
-  // cout << "KineticController::calculateDissolutionEvents Hydration Time = "
+  // cout << "KineticController::calculateKineticEvents Hydration Time = "
   // << hyd_time << endl;
   // cout.flush();
   // }
@@ -800,48 +800,21 @@ void KineticController::calculateDissolutionEvents(const double timestep,
     static int conc_index = 0;
     int microPhaseId, DCId, ICId;
     double molarMass;
-    vector<double> ICMoles, solutICMoles, DCMoles, GEMPhaseMoles;
-    vector<double> dICMoles, dsolutICMoles, tDCMoles, tGEMPhaseMoles;
+    vector<double> ICMoles, DCMoles, GEMPhaseMoles;
+    vector<double> dICMoles, tDCMoles, tGEMPhaseMoles;
     ICMoles.clear();
-    ICMoles.resize(ICNum_, 0.0);
-    solutICMoles.clear();
-    solutICMoles.resize(ICNum_, 0.0);
+    ICMoles.resize(ICNum_, 1.0e-9);
     DCMoles.clear();
-    DCMoles.resize(DCNum_, 0.0);
+    DCMoles.resize(DCNum_, 1.0e-9);
     GEMPhaseMoles.clear();
     GEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     dICMoles.clear();
     dICMoles.resize(ICNum_, 0.0);
-    dsolutICMoles.clear();
-    dsolutICMoles.resize(ICNum_, 0.0);
     tDCMoles.clear();
     tDCMoles.resize(DCNum_, 0.0);
     tGEMPhaseMoles.clear();
     tGEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     string icn;
-
-    // Populate IC moles before kinetic step
-    for (int i = 0; i < ICNum_; i++) {
-      ICMoles[i] = chemSys_->getICMoles(i);
-      if (isFirst) {
-        ICMoles[i] = 1.0e-9;
-      } else {
-        ICMoles[i] = chemSys_->getICMoles(i);
-      }
-    }
-
-    // Populate DC moles before kinetic step
-    for (int i = 0; i < DCNum_; i++) {
-      DCMoles[i] = chemSys_->getDCMoles(i);
-    }
-
-    // Populate GEM phase moles before kinetic step
-    for (int i = 0; i < GEMPhaseNum_; i++) {
-      GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
-    }
-
-    cout << "Getting Solution stuff 01" << endl;
-    solutICMoles = chemSys_->getSolution();
 
     if (isFirst) { // Beginning of special first-time setup tasks
 
@@ -908,10 +881,24 @@ void KineticController::calculateDissolutionEvents(const double timestep,
         p++;
       }
 
-      // @todo BULLARD PLACEHOLDER
-      // Still need to implement constant gas phase composition
+      // End of special first-time tasks
 
-    } // End of special first-time tasks
+    } else { // Get IC moles from chemical system if this is not first time step
+
+      for (int i = 0; i < ICNum_; i++) {
+        ICMoles[i] = chemSys_->getICMoles(i);
+      }
+    }
+
+    // Populate DC moles
+    for (int i = 0; i < DCNum_; i++) {
+      DCMoles[i] = chemSys_->getDCMoles(i);
+    }
+
+    // Populate GEM phase moles
+    for (int i = 0; i < GEMPhaseNum_; i++) {
+      GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
+    }
 
     if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) {
 
@@ -968,13 +955,12 @@ void KineticController::calculateDissolutionEvents(const double timestep,
           // passing them to the kinetic model
 
           fill(dICMoles.begin(), dICMoles.end(), minmoles);
-          fill(dsolutICMoles.begin(), dsolutICMoles.end(), minmoles);
           fill(tDCMoles.begin(), tDCMoles.end(), minmoles);
           fill(tGEMPhaseMoles.begin(), tGEMPhaseMoles.end(), minmoles);
 
-          phaseKineticModel_[midx]->calculateDissolutionEvent(
-              timestep, temperature, isFirst, rh, dICMoles, dsolutICMoles,
-              tDCMoles, tGEMPhaseMoles);
+          phaseKineticModel_[midx]->calculateKineticEvent(
+              timestep, temperature, isFirst, rh, dICMoles, tDCMoles,
+              tGEMPhaseMoles);
 
           for (int im = 0; im < ICMoles.size(); ++im) {
 
@@ -986,14 +972,6 @@ void KineticController::calculateDissolutionEvents(const double timestep,
             }
 
             ICMoles[im] += (dICMoles[im] - minmoles);
-
-            if (verbose_) {
-              cout << "Kinetically added " << dsolutICMoles[im]
-                   << " moles of solute IC " << chemSys_->getICName(im)
-                   << " to " << solutICMoles[im] << " existing moles" << endl;
-              cout.flush();
-            }
-            solutICMoles[im] += (dsolutICMoles[im] - minmoles);
 
             if (verbose_) {
               cout << "KineticController Authoritative DC limits:" << endl;

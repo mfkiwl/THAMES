@@ -579,7 +579,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// attack
 
   setSI();
-  vector<double> SIforsystem = getSI();
 
   // checkChemSys();
 }
@@ -2412,7 +2411,6 @@ void ChemicalSystem::checkChemSys(void) {
   // map<string,int> GEMPhaseIdLookup_
   size = GEMPhaseIdLookup_.size();
   if (size == numGEMPhases_) {
-    cout << "GEMPhaseIdLookup_.size() OK! " << size << endl;
   } else {
     cout << "error -> GEMPhaseIdLookup_.size() /= numGEMPhases_ : " << size
          << " / " << numGEMPhases_ << endl;
@@ -2423,4 +2421,47 @@ void ChemicalSystem::checkChemSys(void) {
     cout << "   " << GEMPhaseName_[i] << " "
          << getGEMPhaseIdLookup(GEMPhaseName_[i]) << endl;
   }
+}
+
+void ChemicalSystem::setMicroPhaseSI(void) {
+
+  microPhaseSI_.clear();
+  microPhaseSI_.resize(getNumMicroPhases(), 0.0);
+
+  try {
+    double aveSI = 0.0;
+    double moles = 0.0;
+    double tmoles = 0.0;
+    vector<int> microPhaseMembers;
+    setSI();
+    for (int i = 0; i < getNumMicroPhases(); ++i) {
+      string pname = getMicroPhaseName(i);
+      int newMicroPhaseId = getMicroPhaseId(pname);
+      aveSI = moles = 0.0;
+      microPhaseMembers = getMicroPhaseMembers(newMicroPhaseId);
+      for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
+        int newGEMPhaseId = microPhaseMembers.at(ii);
+        if (verbose_) {
+          cout
+              << "ChemicalSystem::setMicroPhaseSI Getting SI for GEM CSD phase "
+              << getGEMPhaseName(newGEMPhaseId) << endl;
+          cout.flush();
+        }
+        tmoles = getGEMPhaseMoles(newGEMPhaseId);
+        aveSI += (getSI(newGEMPhaseId) * tmoles);
+        moles += tmoles;
+      }
+      if (moles > 0.0) {
+        aveSI = aveSI / moles;
+      } else {
+        aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
+      }
+      microPhaseSI_.at(i) = aveSI;
+    }
+  } catch (EOBException eex) {
+    eex.printException();
+    exit(1);
+  }
+
+  return;
 }

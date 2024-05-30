@@ -77,8 +77,7 @@ private:
   @note Changed count_ from type double to type int
   */
   vector<int> count_; /**< Number of sites of each different type */
-  vector<double> SI_; /**< Current saturation index of AFt phase,
-                              used only for sulfate attack simulation */
+
   map<int, vector<double>>
       expansion_; /**< Map of expansion strain of each voxel */
   map<int, vector<int>> expansion_coordin_; /**< Map of coordinates of sites
@@ -1091,48 +1090,6 @@ public:
     } else {
       msg = "Could not find expansion_ match to index provided";
       throw EOBException("Lattice", "getExpansion", msg, expansion_.size(), 0);
-    }
-  }
-
-  /**
-  @brief Get the saturation index of a phase.
-
-  The saturation index is the ratio of the activity product for the assumed
-  dissolution reaction in the GEM database to the equilibrium value of that
-  activity product (<i>i.e.</i>, the equilibrium constant).
-
-  @note NOT USED.
-
-  @param idx is the microstructure phase id
-  @return the saturation index of that phase
-  */
-  double getSI(int idx) {
-    try {
-      return ((double)(SI_.at(idx)));
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "getSI", "SI_", SI_.size(), idx);
-      ex.printException();
-      exit(1);
-    }
-  }
-
-  /**
-  @brief Set the saturation index of a phase.
-
-  The saturation index is the ratio of the activity product for the assumed
-  dissolution reaction in the GEM database to the equilibrium value of that
-  activity product (<i>i.e.</i>, the equilibrium constant).
-
-  @param idx is the microstructure phase id
-  @param val is the saturation index.
-  */
-  void setSI(const int idx, const double val) {
-    try {
-      SI_.at(idx) = val;
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "setSI", "SI_", SI_.size(), idx);
-      ex.printException();
-      exit(1);
     }
   }
 

@@ -456,19 +456,11 @@ public:
   void setPozzEffectOnPK(void);
 
   /**
-  @brief Master method for implementing one kinetic time step.
+  @brief Master method for implementing phase kinetics
 
-  In a given time step, a certain number of moles of each clinker phase will
-  dissolve, and the instantly soluble phases will dissolve in the first time
-  step.  This function determines the number of moles of each phase to dissolve,
-  based on the time interval being simulated.  It then calculates the number of
-  IC moles to promote to the thermodynamic system from those phases (which are
-  outside the thermodynamic system because they are kinetically controlled),
-  based on the stoichiometry.  Those IC moles are then added to the
-  thermodynamic system, and the moles and mass of each kinetically controlled
-  phase are changed accordingly.
-
-  This is now a pure virtual function.
+  In a given time step, a certain number of moles of each phase may
+  dissolve or precipitate.  This function determines the number of moles of each
+  phase to change, based on the time interval being simulated.
 
   @remark This method is very long and several parts are hard-coded when they
   should be made more general.
@@ -482,8 +474,8 @@ public:
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
   */
-  void calculateDissolutionEvents(const double timestep,
-                                  const double temperature, bool isFirst);
+  void calculateKineticEvents(const double timestep, const double temperature,
+                              bool isFirst);
 
   /**
   @brief Set the verbose flag

@@ -136,9 +136,6 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
   count_.clear();
   count_.resize(chemSys_->getNumMicroPhases(), 0);
 
-  SI_.clear();
-  SI_.resize(chemSys_->getNumMicroPhases(), 1.0);
-
   expansion_.clear();
   expansion_coordin_.clear();
 
