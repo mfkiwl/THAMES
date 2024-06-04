@@ -702,8 +702,7 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
 
     /// The thermodynamic calculation returns the saturation index of phases,
     /// which is needed for calculations of driving force for dissolution
-    /// or growth.  Assign this to the lattice in case crystallization pressures
-    /// should be calculated.
+    /// or growth.
     ///
     /// 2024-05-29:  At the moment, if a microstructure phase is defined
     /// to be one or more GEM phases, the SI of the microstructure phase

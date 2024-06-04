@@ -1577,6 +1577,23 @@ public:
   }
 
   /**
+  @brief Find out if named DC is solid
+
+  @param dcname is the name of the DC
+  @return true if the DC is solid
+  */
+  bool isDCSolid(const string &dcname) {
+    if (isDC(dcname)) {
+      char classcode = getDCClassCode(getDCId(dcname));
+      if (classcode == 'I' || classcode == 'J' || classcode == 'M' ||
+          classcode == 'O') {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
   @brief Get the integer id of a dependent component (DC) by its name.
 
   @param dcname is the name of the DC
@@ -4771,8 +4788,6 @@ public:
       - Surface complexes [mol/m<sup>2</sup>]
       - Species in other phases [mole fraction]
 
-  @note NOT USED.
-
   @param dcidx is the index of the DC being queried
   @return the concentration of the DC in appropriate units
   */
@@ -5653,10 +5668,9 @@ public:
     Falp = (node_->ppmm())->Falp;
 
     for (int i = 0; i < numGEMPhases_; i++) {
-      // if (verbose_) {
-      //     cout << "logSI for " << GEMPhaseName_[i] << " is: "
-      //          << Falp[i] << endl;
-      // }
+      if (verbose_) {
+        cout << "logSI for " << GEMPhaseName_[i] << " is: " << Falp[i] << endl;
+      }
       double si = pow(10, Falp[i]);
       SI_.push_back(si);
     }

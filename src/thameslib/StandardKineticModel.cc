@@ -107,6 +107,10 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
+  ICNum_ = chemSys_->getNumICs();
+  DCNum_ = chemSys_->getNumDCs();
+  GEMPhaseNum_ = chemSys_->getNumGEMPhases();
+
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -165,18 +169,15 @@ void StandardKineticModel::calculateKineticEvent(
 
   try {
     static int conc_index = 0;
-    int ICNum = chemSys_->getNumICs();
-    int DCNum = chemSys_->getNumDCs();
-    int numGEMPhases = chemSys_->getNumGEMPhases();
     int DCId, ICId;
     double molarMass;
     GEMPhaseMoles.clear();
-    GEMPhaseMoles.resize(numGEMPhases, 0.0);
+    GEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     string icn;
 
     vector<string> ICName;
     ICName.clear();
-    ICName.resize(ICNum, " ");
+    ICName.resize(ICNum_, " ");
 
     int waterId = chemSys_->getDCId("H2O@");
 
@@ -184,11 +185,11 @@ void StandardKineticModel::calculateKineticEvent(
     // just want to know the *change* in IC moles caused by
     // this component's dissolution or growth.
 
-    for (int i = 0; i < ICNum; i++) {
+    for (int i = 0; i < ICNum_; i++) {
       ICName[i] = chemSys_->getICName(i);
     }
 
-    for (int i = 0; i < numGEMPhases; i++) {
+    for (int i = 0; i < GEMPhaseNum_; i++) {
       GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
     }
 
@@ -271,20 +272,17 @@ void StandardKineticModel::calculateKineticEvent(
                      pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
         }
 
-        // if (verbose_) {
-        // cout << "StandardKineticModel::calculateKineticStep for " << name_
-        // << endl;
-        // cout << "  dissrate = " << dissrate << endl;
-        // cout << "    (DOR = " << DOR << ")" << endl;
-        // cout << "    (rhFactor = " << rhFactor << ")" << endl;
-        // cout << "    (arrhenius = " << arrhenius << ")" << endl;
-        // cout << "    (area = " << area << ")" << endl;
-        // cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
-        // cout << "    (siexp = " << siexp_ << ")" << endl;
-        // cout << "    (dfexp = " << dfexp_ << ")" << endl;
-        // cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
-        // cout.flush();
-        // }
+        if (verbose_) {
+          cout << "StandardKineticModel::calculateKineticStep for " << name_
+               << endl;
+          cout << "  dissrate = " << dissrate << endl;
+          cout << "    (DOR = " << DOR << ")" << endl;
+          cout << "    (rhFactor = " << rhFactor << ")" << endl;
+          cout << "    (arrhenius = " << arrhenius << ")" << endl;
+          cout << "    (area = " << area << ")" << endl;
+          cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
+          cout.flush();
+        }
 
         dissrate *= (rhFactor * arrhenius);
         newDOR = DOR + (dissrate * timestep);

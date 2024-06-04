@@ -112,6 +112,10 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
+  ICNum_ = chemSys_->getNumICs();
+  DCNum_ = chemSys_->getNumDCs();
+  GEMPhaseNum_ = chemSys_->getNumGEMPhases();
+
   name_ = kineticData.name;
   microPhaseId_ = kineticData.microPhaseId;
   DCId_ = kineticData.DCId;
@@ -182,18 +186,15 @@ void PozzolanicModel::calculateKineticEvent(const double timestep,
 
   try {
     static int conc_index = 0;
-    int ICNum = chemSys_->getNumICs();
-    int DCNum = chemSys_->getNumDCs();
-    int numGEMPhases = chemSys_->getNumGEMPhases();
     int DCId, ICId;
     double molarMass;
     GEMPhaseMoles.clear();
-    GEMPhaseMoles.resize(numGEMPhases, 0.0);
+    GEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     string icn;
 
     vector<string> ICName;
     ICName.clear();
-    ICName.resize(ICNum, " ");
+    ICName.resize(ICNum_, " ");
 
     int waterId = chemSys_->getDCId("H2O@");
 
@@ -201,11 +202,11 @@ void PozzolanicModel::calculateKineticEvent(const double timestep,
     // just want to know the *change* in IC moles caused by
     // this component's dissolution or growth.
 
-    for (int i = 0; i < ICNum; i++) {
+    for (int i = 0; i < ICNum_; i++) {
       ICName[i] = chemSys_->getICName(i);
     }
 
-    for (int i = 0; i < numGEMPhases; i++) {
+    for (int i = 0; i < GEMPhaseNum_; i++) {
       GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
     }
 

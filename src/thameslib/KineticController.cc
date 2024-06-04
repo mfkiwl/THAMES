@@ -140,6 +140,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
 
   waterId_ = chemSys_->getDCId(WaterDCName);
   ICNum_ = chemSys_->getNumICs();
+  DCNum_ = chemSys_->getNumDCs();
   ICName_ = chemSys_->getICName();
   DCName_ = chemSys_->getDCName();
   GEMPhaseNum_ = chemSys_->getNumGEMPhases();
@@ -941,11 +942,10 @@ void KineticController::calculateKineticEvents(const double timestep,
 
         /// @todo Calculate all phase stability indices first. Visit all kinetic
         /// models and do the isFirst loop, which will push all the IC
-        /// moles to the system.  Then set all DC lower limits to 1e-9 and
+        /// moles to the system.  Then set all DC upper limits to 1e-9 and
         /// do a GEM_run.  This will calculate all the stability indices. At
         /// that point, we can run all the phase kinetic models *including*
         /// precipitations.
-        ///
 
         double minmoles = 0.0;
 
@@ -972,23 +972,24 @@ void KineticController::calculateKineticEvents(const double timestep,
             }
 
             ICMoles[im] += (dICMoles[im] - minmoles);
+          }
 
-            if (verbose_) {
-              cout << "KineticController Authoritative DC limits:" << endl;
-            }
-            for (int im = 0; im < DCMoles.size(); ++im) {
-              DCMoles[im] += (tDCMoles[im] - minmoles);
-              if (verbose_) {
-                cout << "  " << DCName_[im] << ": ["
-                     << chemSys_->getDCLowerLimit(im) << ","
-                     << chemSys_->getDCUpperLimit(im) << "]" << endl;
-                cout.flush();
-              }
-            }
+          if (verbose_) {
+            cout << "KineticController Authoritative DC limits:" << endl;
+          }
 
-            for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
-              GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
+          for (int im = 0; im < DCNum_; ++im) {
+            DCMoles[im] += (tDCMoles[im] - minmoles);
+            if (verbose_ && chemSys_->isDCSolid(DCName_[im])) {
+              cout << "  " << DCName_[im] << ": ["
+                   << chemSys_->getDCLowerLimit(im) << ","
+                   << chemSys_->getDCUpperLimit(im) << "]" << endl;
+              cout.flush();
             }
+          }
+
+          for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
+            GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
           }
         }
       } else {

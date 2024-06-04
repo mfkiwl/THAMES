@@ -492,10 +492,26 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   ///
   /// Set up the class codes for ICs, DCs, and phases, based on the type of
-  /// component they are.  Refer to the documentation for these individual
-  /// members for more detailed information about allowable values of the class
-  /// codes
+  /// component they are.
   ///
+  ///   IC class codes:
+  ///       e = element
+  ///       h = hydrogen
+  ///       o = oxygen
+  ///       a = Nit
+  ///       z = Zz (charge)
+  ///
+  ///   DC class codes:
+  ///       G = gas
+  ///       I,M,J,O = solid components
+  ///       W = water (solvent)
+  ///       T = H^+
+  ///       S = solute in electrolyte
+  ///
+  ///   Phase class codes:
+  ///       a = aqueous solution
+  ///       g = gas mixture
+  ///       s = solid
 
   ICClassCode_.resize(numICs_, ' ');
   cc = (node_->pCSD())->ccIC;
@@ -2433,20 +2449,26 @@ void ChemicalSystem::setMicroPhaseSI(void) {
     double moles = 0.0;
     double tmoles = 0.0;
     vector<int> microPhaseMembers;
+
+    // Query CSD node to set the SI of every phase
     setSI();
+
     for (int i = 0; i < getNumMicroPhases(); ++i) {
       string pname = getMicroPhaseName(i);
+      if (verbose_ && (pname == "Alite")) {
+        double totsil = getDCConcentration("HSiO3-");
+        totsil += getDCConcentration("SiO2@");
+        totsil += getDCConcentration("SiO3-2");
+        cout << "SI(Alite) Calculation:" << endl;
+        cout << "    [Ca2+] = " << getDCConcentration("Ca+2") << endl;
+        cout << "    [Silica] = " << totsil << endl;
+        cout << "    [OH-] = " << getDCConcentration("OH-") << endl;
+      }
       int newMicroPhaseId = getMicroPhaseId(pname);
       aveSI = moles = 0.0;
       microPhaseMembers = getMicroPhaseMembers(newMicroPhaseId);
       for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
         int newGEMPhaseId = microPhaseMembers.at(ii);
-        if (verbose_) {
-          cout
-              << "ChemicalSystem::setMicroPhaseSI Getting SI for GEM CSD phase "
-              << getGEMPhaseName(newGEMPhaseId) << endl;
-          cout.flush();
-        }
         tmoles = getGEMPhaseMoles(newGEMPhaseId);
         aveSI += (getSI(newGEMPhaseId) * tmoles);
         moles += tmoles;
@@ -2457,6 +2479,10 @@ void ChemicalSystem::setMicroPhaseSI(void) {
         aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
       }
       microPhaseSI_.at(i) = aveSI;
+      if (verbose_ && (pname == "Alite")) {
+        cout << "    SI(" << pname << ") = " << aveSI << endl;
+        cout.flush();
+      }
     }
   } catch (EOBException eex) {
     eex.printException();

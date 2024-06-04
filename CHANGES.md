@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| June 04 09:00 2024 | Saturation indices all
+reading zero no matter what. Debugging. |
 | May 22 10:51 2024 | Beginning to generalize dissolution and precipitation kinetics |
 | May 22 10:51 2024 | Propagated fix for StandardKineticModel to PozzolanicModel |
 | May 21 13:46 2024 | Fixed accidental resetting of ICmoles assignment in StandardKineticModel |
