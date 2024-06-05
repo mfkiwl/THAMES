@@ -933,8 +933,6 @@ public:
   void changeMicrostructure(double time, const int simtype, bool isFirst,
                             bool &capWater);
 
-  void changeMicrostructureMod(double time, const int simtype, bool isFirst,
-                               bool &capWater);
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
 

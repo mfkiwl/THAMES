@@ -511,6 +511,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
     }
 
     chemSys_->setInitMicroVolume(totmicvol);
+    initialmicrostructurevolume_ = totmicvol;
 
     // Initially assume that all free water and void space
     // is capillary volume
@@ -1944,8 +1945,8 @@ unsigned int Lattice::getIndex(int ix, int iy, int iz) const {
   return (unsigned int)(ix + (xdim_ * iy) + ((xdim_ * ydim_) * iz));
 }
 
-void Lattice::changeMicrostructureMod(double time, const int simtype,
-                                      bool isFirst, bool &capWater) {
+void Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
+                                   bool &capWater) {
   unsigned int i, ii;
   int numadded, numadded_actual;
   unsigned int tpid;
@@ -1981,53 +1982,7 @@ void Lattice::changeMicrostructureMod(double time, const int simtype,
   /// strain data from a file and loads it into the appropriate
   /// class members.
   ///
-
-  /*
-expansion_.clear();
-expansion_coordin_.clear();
-string fexpansion = jobroot_ + "_exp.dat";
-string fexpansioncoor = jobroot_ + "_exp_coor.dat";
-ifstream in(fexpansion.c_str());
-if (!in) {
-  cout << "can't open file " << fexpansion << ", so exit program." << endl;
-  exit(1);
-} else {
-  while (!in.eof()) {
-    int index;
-    vector<double> expval;
-    expval.clear();
-    expval.resize(3,0.0);
-    in >> index;
-    //cout << "index = " << index << endl;
-    in >> expval[0];
-    in >> expval[1];
-    in >> expval[2];
-    //cout << "expval[0]: " << expval[0] << " expval[1]: " << expval[1]
-         //<< " expval[2]: " << expval[2] << endl;
-    expansion_.insert(make_pair(index,expval));
-    site_[index].setExpansionStrain(expval[0]);
-  }
-  in.close();
-}
-cout << "open fexpansioncoor file" << endl;
-ifstream in1(fexpansioncoor.c_str());
-if (!in1) {
-  cout << "can't open file " << fexpansioncoor << ", so exit program." <<
-endl; exit(1); } else { while (!in1.eof()) { int index; vector<int> coordin;
-    coordin.clear();
-    coordin.resize(3,0);
-    in1 >> index;
-    in1 >> coordin[0];
-    in1 >> coordin[1];
-    in1 >> coordin[2];
-    expansion_coordin_.insert(make_pair(index,coordin));
-  }
-  in1.close();
-}
-
-cout << "expansion_.size() = " << expansion_.size() << " at the beginning of "
-     << time << endl;
-*/
+  /// Used to be sulfate attack stuff here
 
   ///
   /// Zero out the amount of water to add to the microstructure.
@@ -2115,127 +2070,24 @@ cout << "expansion_.size() = " << expansion_.size() << " at the beginning of "
 
   if (simtype == SULFATE_ATTACK) {
     /*
-///
-///  Normalize to get volume fractions and compute number
-///  of sites of each phase needed
-///
-///  @todo Find out why we need to do all of this just because
-///  there will eventually be sulfate attack.  Why not wait until
-///  sulfate attack simulation actually starts?
-///
-
-int numMicroPhases = chemSys_->getNumMicroPhases();
-
-netsites.clear();
-netsites.resize(numMicroPhases, 0);
-pid.clear();
-pid.resize(numMicroPhases, 0);
-
-vector<int> growing;
-vector<vector<int>> shrinking;
-vector<vector<double>> volratios;
-growing.clear();
-shrinking.clear();
-volratios.clear();
-vector<int> idummy;
-idummy.clear();
-vector<double> ddummy;
-ddummy.clear();
-
-try {
-  // Hard wiring for sulfate attack here
-  // @todo Generalize to other phases
-
-  growing.push_back(chemSys_->getMicroPhaseId(AFTMicroName));
-  shrinking.resize(growing.size(), idummy);
-  volratios.resize(growing.size(), ddummy);
-  for (i = 0; i < growing.size(); ++i) {
-    if (MonosulfMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(MonosulfMicroName));
-      volratios[i].push_back(2.288);
-    }
-    if (MonocarbMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(MonocarbMicroName));
-      volratios[i].push_back(2.699);
-    }
-    if (HydrotalcMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(HydrotalcMicroName));
-      volratios[i].push_back(3.211);
-    }
-  }
-
-  for (int ii = 0; ii < growing.size(); ++ii) {
-    for (i = 0; i < vfrac_next.size(); i++) {
-      cursites = (int)(count_.at(i) + 0.5);
-      newsites = (int)((numsites_ * vfrac_next.at(i)) + 0.5);
-      tnetsites = 0;
-      if (i != ELECTROLYTEID && i != VOIDID)
-        tnetsites = (newsites - cursites);
-      netsites.at(i) = tnetsites;
-      pid.at(i) = i;
-      if (i == growing[ii] && isFirst) {
-        netsites.at(i) = 0;
-        count_.at(i) = newsites;
-      }
-      if (verbose_) {
-        if (netsites.at(i) != 0) {
-          cout << "Lattice::changeMicrostructure ****netsites["
-               << phasenames.at(i) << "] in this state = " << netsites.at(i)
-               << endl;
-          cout.flush();
-        }
-      }
-    }
+    ///
+    ///  Normalize to get volume fractions and compute number
+    ///  of sites of each phase needed
+    ///
+    ///  @todo Find out why we need to do all of this just because
+    ///  there will eventually be sulfate attack.  Why not wait until
+    ///  sulfate attack simulation actually starts?
+    ///
 
     ///
     /// Next block gets executed only if we are now simulating
     /// sulfate attack.
     ///
 
-    if (time_ >= sattack_time_) {
-      if (verbose_) {
-        cout << "Lattice::changeMicrostructure Crystal-pressure "
-             << "transform at time_ = " << time_ << endl;
-        cout.flush();
-      }
-
-      ///
-      /// The relevant stress-free molar volume ratios for sulfate
-      /// attack phase transformations.
-      ///
-
-      vector<int> numchanged;
-      numchanged.clear();
-      int growid = growing[ii];
-      for (int iii = 0; iii < shrinking[ii].size(); ++iii) {
-        numchanged.resize(2, 0);
-        int shrinkid = shrinking[ii][iii];
-        double volrat = volratios[ii][iii];
-        if ((netsites.at(shrinkid) < 0) && (netsites.at(growid) > 0)) {
-          numchanged = transform(shrinkid, netsites.at(shrinkid), growid,
-                                 netsites.at(growid), volrat);
-
-          netsites.at(shrinkid) += numchanged[0];
-          netsites.at(growid) -= numchanged[1];
-          if (verbose_) {
-            cout << "Lattice::changeMicrostructure netsites.at(" << shrinkid
-                 << ") is: " << netsites.at(shrinkid) << endl;
-            cout << "Lattice::changeMicrostructure netsites.at(" << growid
-                 << ") is: " << netsites.at(growid) << endl;
-            cout.flush();
-          }
-        }
-      }
-    }
-  }
-}
-
-catch (out_of_range &oor) {
-  throw EOBException(
-      "Lattice", "changeMicrostructure",
-      "phasenames or count_ or pid or netsites or vfrac_next",
-      phasenames.size(), i);
-}
+    ///
+    /// The relevant stress-free molar volume ratios for sulfate
+    /// attack phase transformations.
+    ///
 */
 
   } else {
@@ -2339,7 +2191,6 @@ catch (out_of_range &oor) {
         // int diff = netsites[i] - numadded;
         nuclei = netsites[i] - numadded;
 
-        // while (diff > 0) {
         while (nuclei > 0) {
           gs = interface_[pid.at(i)].getGrowthSites();
           ds = interface_[pid.at(i)].getDissolutionSites();
@@ -2485,8 +2336,7 @@ catch (out_of_range &oor) {
                 cout.flush();
               }
               bool is_Error = false;
-              throw MicrostructureException("Lattice",
-                                            "changeMicrostructureMod",
+              throw MicrostructureException("Lattice", "changeMicrostructure",
                                             "no room to grow phase", is_Error);
             }
           } // gs.size()==0
@@ -2516,8 +2366,7 @@ catch (out_of_range &oor) {
   }
 
   catch (out_of_range &oor) {
-    throw EOBException("Lattice", "changeMicrostructureMod", "pid", pid.size(),
-                       i);
+    throw EOBException("Lattice", "changeMicrostructure", "pid", pid.size(), i);
   }
 
   cursites = count_.at(VOIDID);
@@ -2583,20 +2432,9 @@ catch (out_of_range &oor) {
                        "volumefraction_ or count_", volumefraction_.size(), i);
   }
 
-  //    for (i = FIRST_SOLID; i < interface_.size(); i++) {
-  //        interface_[i].sortGrowthSites(site_, i);
-  //        interface_[i].sortDissolutionSites(site_, i);
-  //    }
-
-  ///  This is a local variable and the value is never used.
-  ///
-  ///  @todo Why not eliminate this line completely?
-  ///
-
-  double surfa = getSurfaceArea(chemSys_->getMicroPhaseId(CSHMicroName));
-
-  if (volumefraction_[ELECTROLYTEID] <= 0.0)
+  if (volumefraction_[ELECTROLYTEID] <= 0.0) {
     capWater = false;
+  }
 
   return;
 }
@@ -2626,6 +2464,7 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
     calcCapillarywatervolume(vol);
     calcCapillaryvoidvolume(vol);
     watervolume_ = vol.at(ELECTROLYTEID);
+    cout << ")))) Water volume 01 = " << watervolume_ << endl;
 
     calcSolidvolumewithpores(vol);
 
@@ -2650,10 +2489,21 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
     nonsolidvolume_ =
         microstructurevolume_ - (solidvolumewithpores_ - subvoxelporevolume_);
 
+    cout << "Microstructure volume = " << microstructurevolume_ << endl;
+    cout << "Solid volume with pores = " << solidvolumewithpores_ << endl;
+    cout << "Subvoxel pore volume = " << subvoxelporevolume_ << endl;
+    cout << "Nonsolid volume = " << nonsolidvolume_ << endl;
+
     /// @note BULLARD trying to assign any change in total microstructure
     /// volume to capillary porosity.  Try to do this with one line here
 
     nonsolidvolume_ += (initialmicrostructurevolume_ - microstructurevolume_);
+
+    cout << "Initial microstructure volume = " << initialmicrostructurevolume_
+         << endl;
+    cout << "Solid volume with pores = " << solidvolumewithpores_ << endl;
+    cout << "Subvoxel pore volume = " << subvoxelporevolume_ << endl;
+    cout << "Nonsolid volume = " << nonsolidvolume_ << endl;
 
     calcCapillaryvoidvolume(vol);
 
@@ -2666,8 +2516,10 @@ void Lattice::adjustMicrostructureVolumes(vector<string> names,
     // First need to trim off any extra water that lies outside the system
 
     voidvolume_ = nonsolidvolume_ - watervolume_;
+
     if (voidvolume_ < 0.0)
       watervolume_ = nonsolidvolume_;
+    cout << ")))) Water volume 02 = " << watervolume_ << endl;
 
     capillarywatervolume_ = watervolume_ - subvoxelporevolume_;
     capillaryvoidvolume_ = capillaryporevolume_ - capillarywatervolume_;

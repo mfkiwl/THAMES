@@ -125,7 +125,7 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
 
 void StandardKineticModel::calculateKineticEvent(
     const double timestep, const double temperature, bool isFirst, double rh,
-    vector<double> &dICMoles, vector<double> &DCMoles,
+    vector<double> &dICMoles, vector<double> &dDCMoles,
     vector<double> &GEMPhaseMoles) {
   ///
   /// Initialize local variables
@@ -152,11 +152,14 @@ void StandardKineticModel::calculateKineticEvent(
     scaledMoles = initScaledMass_ / DCMolarMass;
     scaledMolesDissolved = massDissolved / DCMolarMass;
 
-    cout << "dICMoles in Standard Model:" << endl;
-    for (int ii = 0; ii < dICMoles.size(); ++ii) {
-      dICMoles[ii] +=
-          ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_, ii));
-    }
+    // cout << "dICMoles in Standard Model:" << endl;
+    // for (int ii = 0; ii < dICMoles.size(); ++ii) {
+    //   dICMoles[ii] +=
+    //       ((initScaledMass_ / DCMolarMass) * chemSys_->getDCStoich(DCId_,
+    //       ii));
+    // }
+
+    dDCMoles[DCId_] = scaledMoles;
   }
 
   ///
@@ -272,19 +275,8 @@ void StandardKineticModel::calculateKineticEvent(
                      pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
         }
 
-        if (verbose_) {
-          cout << "StandardKineticModel::calculateKineticStep for " << name_
-               << endl;
-          cout << "  dissrate = " << dissrate << endl;
-          cout << "    (DOR = " << DOR << ")" << endl;
-          cout << "    (rhFactor = " << rhFactor << ")" << endl;
-          cout << "    (arrhenius = " << arrhenius << ")" << endl;
-          cout << "    (area = " << area << ")" << endl;
-          cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
-          cout.flush();
-        }
-
         dissrate *= (rhFactor * arrhenius);
+        dissrate = 0.0;
         newDOR = DOR + (dissrate * timestep);
 
         // cout << "  Final rate = " << dissrate << endl;
@@ -302,6 +294,23 @@ void StandardKineticModel::calculateKineticEvent(
         scaledMolesDissolved = massDissolved / DCMolarMass;
 
         chemSys_->setDCLowerLimit(DCId_, (scaledMoles - scaledMolesDissolved));
+
+        if (verbose_) {
+          cout << "StandardKineticModel::calculateKineticStep for " << name_
+               << endl;
+          cout << "  dissrate = " << dissrate << endl;
+          cout << "    (DOR = " << DOR << ")" << endl;
+          cout << "    (rhFactor = " << rhFactor << ")" << endl;
+          cout << "    (arrhenius = " << arrhenius << ")" << endl;
+          cout << "    (area = " << area << ")" << endl;
+          cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
+          cout << "  scaledMoles = " << scaledMoles << ")" << endl;
+          cout << "  scaledMolesDissolved = " << scaledMolesDissolved << ")"
+               << endl;
+          cout << "  DCLimits = [" << chemSys_->getDCLowerLimit(DCId_) << ","
+               << chemSys_->getDCUpperLimit(DCId_) << "]" << endl;
+          cout.flush();
+        }
 
         /// @note impurityRelease index values are assumed to
         /// be uniquely associated with particular chemical

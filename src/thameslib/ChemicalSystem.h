@@ -1334,6 +1334,7 @@ public:
     try {
       return microPhaseId_.at(idx);
     } catch (out_of_range &oor) {
+      cout << "IDX = " << idx << endl;
       EOBException ex("ChemicalSystem", "getMicroPhaseId", "microPhaseId_",
                       microPhaseId_.size(), idx);
       ex.printException();

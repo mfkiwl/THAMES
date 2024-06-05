@@ -802,7 +802,7 @@ void KineticController::calculateKineticEvents(const double timestep,
     int microPhaseId, DCId, ICId;
     double molarMass;
     vector<double> ICMoles, DCMoles, GEMPhaseMoles;
-    vector<double> dICMoles, tDCMoles, tGEMPhaseMoles;
+    vector<double> dICMoles, dDCMoles, dGEMPhaseMoles;
     ICMoles.clear();
     ICMoles.resize(ICNum_, 1.0e-9);
     DCMoles.clear();
@@ -811,10 +811,10 @@ void KineticController::calculateKineticEvents(const double timestep,
     GEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     dICMoles.clear();
     dICMoles.resize(ICNum_, 0.0);
-    tDCMoles.clear();
-    tDCMoles.resize(DCNum_, 0.0);
-    tGEMPhaseMoles.clear();
-    tGEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
+    dDCMoles.clear();
+    dDCMoles.resize(DCNum_, 0.0);
+    dGEMPhaseMoles.clear();
+    dGEMPhaseMoles.resize(GEMPhaseNum_, 0.0);
     string icn;
 
     if (isFirst) { // Beginning of special first-time setup tasks
@@ -833,16 +833,18 @@ void KineticController::calculateKineticEvents(const double timestep,
       double psMass, psVolume;
       double volume = 0.0;
 
+      // This sets the DC Moles associated with water
+      chemSys_->setDCMoles(waterId_, waterMoles);
+
       // This sets the IC Moles associated with water
-      for (int i = 0; i < ICNum_; i++) {
-        if (ICName_[i] == "H") {
-          ICMoles[i] = (2.0 * waterMoles);
-          chemSys_->setDCMoles(waterId_, waterMoles);
-        }
-        if (ICName_[i] == "O") {
-          ICMoles[i] = waterMoles;
-        }
-      }
+      // for (int i = 0; i < ICNum_; i++) {
+      //   if (ICName_[i] == "H") {
+      //     ICMoles[i] = (2.0 * waterMoles);
+      //   }
+      //   if (ICName_[i] == "O") {
+      //     ICMoles[i] = waterMoles;
+      //   }
+      // }
 
       double wmv = chemSys_->getNode()->DC_V0(chemSys_->getDCId(WaterDCName),
                                               chemSys_->getP(),
@@ -955,12 +957,12 @@ void KineticController::calculateKineticEvents(const double timestep,
           // passing them to the kinetic model
 
           fill(dICMoles.begin(), dICMoles.end(), minmoles);
-          fill(tDCMoles.begin(), tDCMoles.end(), minmoles);
-          fill(tGEMPhaseMoles.begin(), tGEMPhaseMoles.end(), minmoles);
+          fill(dDCMoles.begin(), dDCMoles.end(), minmoles);
+          fill(dGEMPhaseMoles.begin(), dGEMPhaseMoles.end(), minmoles);
 
           phaseKineticModel_[midx]->calculateKineticEvent(
-              timestep, temperature, isFirst, rh, dICMoles, tDCMoles,
-              tGEMPhaseMoles);
+              timestep, temperature, isFirst, rh, dICMoles, dDCMoles,
+              dGEMPhaseMoles);
 
           for (int im = 0; im < ICMoles.size(); ++im) {
 
@@ -979,7 +981,7 @@ void KineticController::calculateKineticEvents(const double timestep,
           }
 
           for (int im = 0; im < DCNum_; ++im) {
-            DCMoles[im] += (tDCMoles[im] - minmoles);
+            DCMoles[im] += (dDCMoles[im] - minmoles);
             if (verbose_ && chemSys_->isDCSolid(DCName_[im])) {
               cout << "  " << DCName_[im] << ": ["
                    << chemSys_->getDCLowerLimit(im) << ","
@@ -989,7 +991,7 @@ void KineticController::calculateKineticEvents(const double timestep,
           }
 
           for (int im = 0; im < GEMPhaseMoles.size(); ++im) {
-            GEMPhaseMoles[im] += (tGEMPhaseMoles[im] - minmoles);
+            GEMPhaseMoles[im] += (dGEMPhaseMoles[im] - minmoles);
           }
         }
       } else {

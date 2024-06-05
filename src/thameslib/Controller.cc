@@ -78,7 +78,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out << endl;
     out.close();
 
-    outfilename = jobroot_ + "_DCVolumes.csv";
+    outfilename = jobroot_ + "_DCMoles.csv";
     ofstream out1(outfilename.c_str());
     if (!out1) {
       throw FileException("Controller", "Controller", outfilename,
@@ -260,6 +260,11 @@ void Controller::doCycle(const string &statfilename, int choice) {
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
 
+  cout << "Before doCycle:" << endl;
+  cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
+  cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
+  cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
+
   for (i = 0; (i < time_.size()) && (capwater); ++i) {
 
     ///
@@ -297,6 +302,11 @@ void Controller::doCycle(const string &statfilename, int choice) {
       throw gex;
     }
 
+    cout << "After calculateState:" << endl;
+    cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
+    cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
+    cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
+
     ///
     /// Once the change in state is determined, propagate the consequences
     /// to the 3D microstructure only if the GEM_run calculation succeeded.
@@ -331,7 +341,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
     try {
       // lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
-      lattice_->changeMicrostructureMod(time_[i], sim_type_, isFirst, capwater);
+      lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
@@ -800,6 +810,11 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       exit(1);
     }
 
+    cout << "After ChemicalSystem::calculateState" << endl;
+    cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
+    cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
+    cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
+
     if (verbose_) {
       cout << "Done!" << endl;
       cout.flush();
@@ -851,7 +866,7 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     out3 << endl;
     out3.close();
 
-    outfilename = jobroot_ + "_DCVolumes.csv";
+    outfilename = jobroot_ + "_DCMoles.csv";
     ofstream out4(outfilename.c_str(), ios::app);
     if (!out4) {
       throw FileException("Controller", "calculateState", outfilename,
@@ -864,9 +879,11 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
         cc = chemSys_->getDCClassCode(i);
         if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
           string dcname = chemSys_->getDCName(i);
-          double V0 =
-              chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
-          out4 << "," << V0;
+          out4 << "," << chemSys_->getDCMoles(dcname);
+          // double V0 =
+          //     chemSys_->getDCMoles(dcname) *
+          //     chemSys_->getDCMolarVolume(dcname);
+          // out4 << "," << V0;
           if (verbose_) {
             cout << "Controller::calculateState    DC = "
                  << chemSys_->getDCName(i)

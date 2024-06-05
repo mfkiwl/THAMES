@@ -372,9 +372,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// the THAMES code.  The dimensions and ordering of the arrays must
   /// correspond to those in currently existing DCH memory structure
   ///
-  /// This function returns nothing and appears unable of throwing exceptions
-  /// @todo Check carefully whether this function can throw an exception
-  ///
 
   node_->GEM_to_MT(nodeHandle_, nodeStatus_, iterDone_, Vs_, Ms_, Gs_, Hs_,
                    ionicStrength_, pH_, pe_, Eh_, &ICResiduals_[0],
@@ -583,7 +580,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// phases
   ///
 
-  initMicroVolume_ = 0.0;
   for (unsigned int i = 0; i < numMicroPhases_; i++) {
     microPhaseToGEMPhase_.insert(make_pair((int)i, microPhaseMembers_[i]));
   }
@@ -1962,8 +1958,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
   }
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
-                     DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_,
-                     DCActivityCoeff_);
+                     DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_);
 
   if (verbose_) {
     cout << "ChemicalSystem::calculateState Exiting GEM_from_MT" << endl;
@@ -2138,6 +2133,16 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false) {
 
   if (verbose_) {
     cout << "Done!" << endl;
+    cout << "ChemicalSystem::calculateState Exiting GEM_from_MT" << endl;
+    cout << "DCMoles:" << endl;
+    for (int i = 0; i < numDCs_; ++i) {
+      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
+    }
+    cout << "ICMoles:" << endl;
+    for (int i = 0; i < numICs_; ++i) {
+      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    }
     cout << "after GEM_to_MT...Ms_ = " << Ms_ << ", Hs_ = " << Hs_ << endl;
     cout.flush();
   }
@@ -2455,13 +2460,10 @@ void ChemicalSystem::setMicroPhaseSI(void) {
 
     for (int i = 0; i < getNumMicroPhases(); ++i) {
       string pname = getMicroPhaseName(i);
-      if (verbose_ && (pname == "Alite")) {
-        double totsil = getDCConcentration("HSiO3-");
-        totsil += getDCConcentration("SiO2@");
-        totsil += getDCConcentration("SiO3-2");
+      if (verbose_ && (pname == "Portlandite")) {
         cout << "SI(Alite) Calculation:" << endl;
         cout << "    [Ca2+] = " << getDCConcentration("Ca+2") << endl;
-        cout << "    [Silica] = " << totsil << endl;
+        cout << "    [CaOH+] = " << getDCConcentration("CaOH+") << endl;
         cout << "    [OH-] = " << getDCConcentration("OH-") << endl;
       }
       int newMicroPhaseId = getMicroPhaseId(pname);
@@ -2479,7 +2481,7 @@ void ChemicalSystem::setMicroPhaseSI(void) {
         aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
       }
       microPhaseSI_.at(i) = aveSI;
-      if (verbose_ && (pname == "Alite")) {
+      if (verbose_ && (pname == "Portlandite")) {
         cout << "    SI(" << pname << ") = " << aveSI << endl;
         cout.flush();
       }
