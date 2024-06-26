@@ -4,6 +4,22 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| June 04 09:00 2024 | Saturation indices all
+reading zero no matter what. Debugging. |
+| May 22 10:51 2024 | Beginning to generalize dissolution and precipitation kinetics |
+| May 22 10:51 2024 | Propagated fix for StandardKineticModel to PozzolanicModel |
+| May 21 13:46 2024 | Fixed accidental resetting of ICmoles assignment in StandardKineticModel |
+| May 16 16:53 2024 | Removed Solution class and all dependencies on it |
+| May 16 11:19 2024 | Committing because I'm about to try radical surgery on structure |
+| May 06 22:14 2024 | Now using DCLowerLimit for kinetics |
+| May 03 12:00 2024 | Preliminary planning of code restructuring for precipitation kinetics |
+| May 02 17:47 2024 | Changed DOH to DOR while planning for new changes to kinetics branch |
+| May 01 13:45 2024 | Small changes KineticController |
+| May 01 15:37 2024 | Created kineticPrecip branch off of main |
+| Apr 27 23:35 2024 | Initial and fixed solution compositions both specified with DCs now |
+| Apr 26 22:49 2024 | Cleaned up install instructions; force initial microstructure output |
+| Apr 26 17:43 2024 | Writing PNG files now done directly. |
+| Apr 24 13:24 2024 | minpozzeffect is set only if at least one kinetically pozzolanic component is detected. |
 | Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix
 later. |
 | Apr 23 15:07 2024 | Copied thameslib source files from florinTH branch. |
