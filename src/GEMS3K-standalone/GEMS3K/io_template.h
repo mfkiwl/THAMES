@@ -27,6 +27,7 @@
 
 #include <vector>
 #include "verror.h"
+#include <iostream>
 
 namespace  io_formats {
 

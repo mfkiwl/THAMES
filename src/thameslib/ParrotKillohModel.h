@@ -88,7 +88,7 @@ of portland cement, Cement and Concrete Research 36 (2006) 209--226.
 #include <map>
 #include <string>
 #include <vector>
-// #include "KineticController.h"
+#include "KineticController.h"
 #include "ChemicalSystem.h"
 #include "KineticData.h"
 #include "Lattice.h"
@@ -110,18 +110,20 @@ class ParrotKillohModel : public KineticModel {
 
 protected:
   double wsRatio_; /**< water-solid mass ratio */
+  double wcRatio_;
 
   double k1_;      /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
   double k2_;      /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
   double k3_;      /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
   double n1_;      /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
   double n3_;      /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
+  double HLK_;
   double critDOH_; /**< List of critical degrees of hydration for w/c
                                    effect in the Parrot and Killoh model */
   double pfk_;     /**< Multiplicative factor for k's to account for
-    
-effects of pozzolanic additions */
-public:
+                        effects of pozzolanic additions */
+
+  public:
   /**
   @brief Default constructor.
 
@@ -139,13 +141,12 @@ public:
   various other objects for the simulation are allocated and constructed.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the aqeuous solution object for the simulation
   @param lattice is a pointer to the Lattice object holding the microstructure
   @param kineticData is the collection of kinetic parameters already stored
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  ParrotKillohModel(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+  ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
                     struct KineticData &kineticData, const bool verbose,
                     const bool warning);
 
@@ -273,12 +274,16 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles);
+  //virtual void calculateKineticStep (const double timestep,
+  //                                  const double temperature, bool isFirst,
+  //                                  double rh, vector<double> &dICMoles,
+  //                                  vector<double> &dsolutICMoles,
+  //                                  vector<double> &DCMoles,
+  //                                  vector<double> &GEMPhaseMoles, int cyc);
+
+  virtual void calculateKineticStep (const double timestep, const double temperature,
+                                    double rh, double &scaledMass,
+                                    double &massDissolved, int cyc, double totalDOR);
 
 }; // End of ParrotKillohModel class
 

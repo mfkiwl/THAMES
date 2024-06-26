@@ -43,8 +43,6 @@ protected:
   int numPhases_; /**< Total number of phases in the kinetic model */
   ChemicalSystem *
       chemSys_; /**< Pointer to the ChemicalSystem object for this simulation */
-  Solution
-      *solut_; /**< Pointer to the aqueous phase object for this simulation */
   Lattice *
       lattice_; /**< Pointer to the lattice object holding the microstructure */
   double initSolidMass_; /**< initial total mass of solids controlled by this
@@ -307,6 +305,8 @@ public:
   */
   int getDCNum() const { return DCNum_; }
 
+  int getDCId() const { return DCId_; }
+
   /**
   @brief Set the number of GEM phases
 
@@ -515,12 +515,16 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles) = 0;
+  //virtual void calculateKineticStep(const double timestep,
+  //                                  const double temperature, bool isFirst,
+  //                                  double rh, vector<double> &dICMoles,
+  //                                  vector<double> &dsolutICMoles,
+  //                                  vector<double> &DCMoles,
+  //                                  vector<double> &GEMPhaseMoles, int cyc) = 0;
+
+  virtual void calculateKineticStep (const double timestep, const double temperature,
+                                    double rh, double &scaledMass,
+                                    double &massDissolved, int cyc, double totalDOR) = 0;
 
   /**
   @brief Set up the number of moles of dependent components in the kinetic

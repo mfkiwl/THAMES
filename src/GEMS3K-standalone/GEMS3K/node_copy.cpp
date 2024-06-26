@@ -239,24 +239,21 @@ long int  TNode::GEM_init( const char* ipmfiles_lst_name )
         //  Syntax: -t/-b  "<DCH_DAT file name>"  "<IPM_DAT file name>"
         //       "<DBR_DAT file1 name>" [ ...  "<DBR_DAT fileN name>"]
 
-
         GEMS3KGenerator generator( ipmfiles_lst_name );
-        
         current_output_set_name = current_input_set_name = generator.set_name();
-
         switch( generator.files_mode() )
         {
-        case GEMS3KGenerator::f_binary:
-        {
+          case GEMS3KGenerator::f_binary:
+          {
             GemDataStream f_ch( generator.get_dch_path(), std::ios::in|std::ios::binary );
             datach_from_file(f_ch);
 
             GemDataStream f_m( generator.get_ipm_path(), std::ios::in|std::ios::binary );
              multi_ptr()->read_multi(f_m, CSD);
-        }
-            break;
-        default:
-        {
+          }
+          break;
+          default:
+          {
             std::fstream f_ch( generator.get_dch_path(), std::ios::in );
             ErrorIf( !f_ch.good() , generator.get_dch_path(), "DCH_DAT fileopen error");
             read_dch_format_stream( f_ch, generator.files_mode() );
@@ -264,10 +261,9 @@ long int  TNode::GEM_init( const char* ipmfiles_lst_name )
             std::fstream ff( generator.get_ipm_path(), std::ios::in );
             ErrorIf( !ff.good() , generator.get_ipm_path(), "Fileopen error");
             multi_ptr()->read_ipm_format_stream( ff,generator.files_mode(), CSD, current_input_set_name);
-        }
+          }
             break;
         }
-
         // copy intervals for minimization
         pmm->Pai[0] = CSD->Pval[0]/bar_to_Pa;
         pmm->Pai[1] = CSD->Pval[CSD->nPp-1]/bar_to_Pa;
@@ -283,7 +279,6 @@ long int  TNode::GEM_init( const char* ipmfiles_lst_name )
         pmm->Fdev1[1] = 1e-6;   // 24/05/2010 must be copied from GEMS3 structure
         pmm->Fdev2[0] = 0.;
         pmm->Fdev2[1] = 1e-6;
-
         // Reading DBR_DAT file into work DATABR structure from ipmfiles_lst_name
         std::string dbr_file = generator.get_dbr_path( 0 );
         ErrorIf( dbr_file.empty() , ipmfiles_lst_name, " Undefined DBR_DAT file name");

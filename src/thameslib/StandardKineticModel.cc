@@ -56,8 +56,7 @@ StandardKineticModel::StandardKineticModel() {
   return;
 }
 
-StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
-                                           Lattice *lattice,
+StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
                                            struct KineticData &kineticData,
                                            const bool verbose,
                                            const bool warning) {
@@ -75,7 +74,6 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
 #endif
 
   chemSys_ = cs;
-  solut_ = solut;
   lattice_ = lattice;
 
   ///
@@ -121,289 +119,173 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Solution *solut,
   return;
 }
 
-void StandardKineticModel::calculateKineticStep(
-    const double timestep, const double temperature, bool isFirst, double rh,
-    vector<double> &dICMoles, vector<double> &dsolutICMoles,
-    vector<double> &DCMoles, vector<double> &GEMPhaseMoles) {
-  ///
-  /// Initialize local variables
-  ///
+void StandardKineticModel::calculateKineticStep (const double timestep, const double temperature,
+                                                double rh, double &scaledMass,
+                                                double &massDissolved, int cyc, double totalDOR) {
+    ///
+    /// Initialize local variables
+    ///
 
-  double T = temperature;
-  double arrhenius = 1.0;
+    double T = temperature;
+    double arrhenius = 1.0;
 
-  double dissrate = 1.0e9; // Nucleation and growth rate
+    double dissrate = 1.0e9; // Nucleation and growth rate
 
-  double massDissolved = 0.0;
+    double DOR, newDOR;
+    //double massDissolved = 0.0;
 
-  ///
-  /// Determine if this is a normal step or a necessary
-  /// tweak from a failed GEM_run call
-  ///
+    ///
+    /// Determine if this is a normal step or a necessary
+    /// tweak from a failed GEM_run call
+    ///
 
-  static double hyd_time = 0.0;
-  hyd_time = hyd_time + timestep;
+    try {
 
-  try {
-    static int conc_index = 0;
-    int ICNum = chemSys_->getNumICs();
-    int DCNum = chemSys_->getNumDCs();
-    int numGEMPhases = chemSys_->getNumGEMPhases();
-    int DCId, ICId;
-    double molarMass;
-    dICMoles.clear();
-    dICMoles.resize(ICNum, 0.0);
-    dsolutICMoles.clear();
-    dsolutICMoles.resize(ICNum, 0.0);
-    GEMPhaseMoles.clear();
-    GEMPhaseMoles.resize(numGEMPhases, 0.0);
-    string icn;
+        //if (timestep < leachTime_ && timestep < sulfateAttackTime_) {
 
-    vector<string> ICName;
-    ICName.clear();
-    ICName.resize(ICNum, " ");
+        // @todo BULLARD PLACEHOLDER
+        // Still need to implement constant gas phase composition
+        // Will involve equilibrating gas with aqueous solution
+        //
+        // First step each iteration is to equilibrate gas phase
+        // with the electrolyte, while forbidding anything new
+        // from precipitating.
 
-    int waterId = chemSys_->getDCId("H2O@");
+        // RH factor is the same for all clinker phases
+        //double vfvoid = lattice_->getVolumefraction(VOIDID);
+        //double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
 
-    // Each component now has its own kinetic model and we
-    // just want to know the *change* in IC moles caused by
-    // this component's dissolution or growth.
+        /// This is a big kluge for internal relative humidity
+        /// @note Using new gel and interhydrate pore size distribution model
+        ///       which is currently contained in the Lattice object.
+        ///
+        /// Surface tension of water is gamma = 0.072 J/m2
+        /// Molar volume of water is Vm = 1.8e-5 m3/mole
+        /// The Kelvin equation is
+        ///    p/p0 = exp (-4 gamma Vm / d R T) = exp (-6.23527e-7 / (d T))
+        ///
+        ///    where d is the pore diameter in meters and T is absolute
+        ///    temperature
 
-    for (int i = 0; i < ICNum; i++) {
-      ICName[i] = chemSys_->getICName(i);
-    }
+        /// Assume a zero contact angle for now.
+        /// @todo revisit the contact angle issue
 
-    for (int i = 0; i < numGEMPhases; i++) {
-      GEMPhaseMoles[i] = chemSys_->getGEMPhaseMoles(i);
-    }
+        //double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+        //critporediam *= 1.0e-9;                                    // in m
+        //double rh = exp(-6.23527e-7 / critporediam / T);
 
-    if (hyd_time < leachTime_ && hyd_time < sulfateAttackTime_) {
+        //rh = rh > 0.55 ? rh : 0.551;
+        double rhFactor = rh;
+        // rhFactor = pow(((rh - 0.55)/0.45),4.0);
 
-      // @todo BULLARD PLACEHOLDER
-      // Still need to implement constant gas phase composition
-      // Will involve equilibrating gas with aqueous solution
-      //
-      // First step each iteration is to equilibrate gas phase
-      // with the electrolyte, while forbidding anything new
-      // from precipitating.
-
-      vector<double> impurityRelease;
-      impurityRelease.clear();
-      impurityRelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
-
-      // RH factor is the same for all clinker phases
-      double vfvoid = lattice_->getVolumefraction(VOIDID);
-      double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
-
-      /// This is a big kluge for internal relative humidity
-      /// @note Using new gel and interhydrate pore size distribution model
-      ///       which is currently contained in the Lattice object.
-      ///
-      /// Surface tension of water is gamma = 0.072 J/m2
-      /// Molar volume of water is Vm = 1.8e-5 m3/mole
-      /// The Kelvin equation is
-      ///    p/p0 = exp (-4 gamma Vm / d R T) = exp (-6.23527e-7 / (d T))
-      ///
-      ///    where d is the pore diameter in meters and T is absolute
-      ///    temperature
-
-      /// Assume a zero contact angle for now.
-      /// @todo revisit the contact angle issue
-
-      double critporediam = lattice_->getLargestSaturatedPore(); // in nm
-      critporediam *= 1.0e-9;                                    // in m
-      double rh = exp(-6.23527e-7 / critporediam / T);
-
-      /// Assume a zero contact angle for now.
-      /// @todo revisit the contact angle issue
-
-      rh = rh > 0.55 ? rh : 0.551;
-      double rhFactor = rh;
-      // rhFactor = pow(((rh - 0.55)/0.45),4.0);
-
-      int thisGEMPhase = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
-      double saturationIndex = solut_->getSI(thisGEMPhase);
-      double DOR = 0.0;
-      double newDOR = 0.0;
-
-      if (initScaledMass_ > 0.0) {
-        DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
-        // prevent DOR from prematurely stopping PK calculations
-        DOR = min(DOR, 0.99);
-      } else {
-        throw FloatException("StandardKineticModel", "calculateKineticStep",
-                             "initScaledMass_ = 0.0");
-      }
-
-      arrhenius =
-          exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
-
-      if (DOR < 1.0) {
-
-        double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
-        int GEMPhaseIndex = chemSys_->getMicroPhaseToGEMPhase(microPhaseId_, 0);
-
-        // Saturation index , but be sure that there is only one GEM Phase
-        /// @note Assumes there is only one phase in this microstructure
-        /// component
-        /// @todo Generalize to multiple phases in a component (how?)
-
-        double saturationIndex = solut_->getSI(GEMPhaseIndex);
-
-        // This equation basically implements the Dove and Crerar rate
-        // equation for quartz.  Needs to be calibrated for silica fume, but
-        // hopefully the BET area and LOI will help do that.
-
-        if (saturationIndex < 1.0) {
-          dissrate = dissolutionRateConst_ * area *
-                     pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
+        if (initScaledMass_ > 0.0) {
+            DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+            // prevent DOR from prematurely stopping PK calculations
+            DOR = min(DOR, 0.99);
         } else {
-          dissrate = -dissolutionRateConst_ * area *
-                     pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
+            throw FloatException("StandardKineticModel", "calculateKineticStep",
+                                 "initScaledMass_ = 0.0");
         }
 
-        cout << "StandardKineticModel::calculateKineticStep for " << name_
-             << endl;
-        cout << "  dissrate = " << dissrate << endl;
-        cout << "    (DOR = " << DOR << ")" << endl;
-        cout << "    (rhFactor = " << rhFactor << ")" << endl;
-        cout << "    (arrhenius = " << arrhenius << ")" << endl;
-        cout << "    (area = " << area << ")" << endl;
-        cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
-        cout << "    (siexp = " << siexp_ << ")" << endl;
-        cout << "    (dfexp = " << dfexp_ << ")" << endl;
-        cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
-        cout.flush();
+        arrhenius =
+            exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
 
-        dissrate *= (rhFactor * arrhenius);
-        newDOR = DOR + (dissrate * timestep);
+        if (DOR < 1.0) {
 
-        cout << "  Final rate = " << dissrate << endl;
-        cout.flush();
+            double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
-        scaledMass_ = max(initScaledMass_ * (1.0 - newDOR), 0.0);
-        massDissolved = max((newDOR - DOR) * initScaledMass_, 0.0);
+            // Saturation index , but be sure that there is only one GEM Phase
+            /// @note Assumes there is only one phase in this microstructure
+            /// component
+            /// @todo Generalize to multiple phases in a component (how?)
 
-        chemSys_->setMicroPhaseMass(microPhaseId_, scaledMass_);
-        chemSys_->setMicroPhaseMassDissolved(microPhaseId_, massDissolved);
+            //double saturationIndex = chemSys_->getSI(GEMPhaseId_);
+            double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
 
-        if (verbose_) {
-          cout << "StandardKineticModel::calculateKineticStep Original scaled "
-                  "mass = "
-               << initScaledMass_ << " and new scaled mass = "
-               << chemSys_->getMicroPhaseMass(microPhaseId_)
-               << " and new volume = "
-               << chemSys_->getMicroPhaseVolume(microPhaseId_) << endl;
-          cout.flush();
+            // This equation basically implements the Dove and Crerar rate
+            // equation for quartz.  Needs to be calibrated for silica fume, but
+            // hopefully the BET area and LOI will help do that.
+
+            if (saturationIndex < 1.0) {
+                dissrate = dissolutionRateConst_ * area *
+                           pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
+            } else {
+                dissrate = -dissolutionRateConst_ * area *
+                           pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
+            }
+
+            //cout << endl << "StandardKineticModel::calculateKineticStep for " << name_ << "\tDCId_: " << DCId_ << "\tmicroPhaseId_: " << microPhaseId_
+            //     << endl;
+            //cout << "  dissrate = " << dissrate << endl;
+            //cout << "    (DOR = " << DOR << ")" << endl;
+            //cout << "    (rhFactor = " << rhFactor << ")" << endl;
+            //cout << "    (arrhenius = " << arrhenius << ")" << endl;
+            //cout << "    (area = " << area << ")" << endl;
+            //cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
+            //cout << "    (siexp = " << siexp_ << ")" << endl;
+            //cout << "    (dfexp = " << dfexp_ << ")" << endl;
+            //cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
+            //cout.flush();
+
+            double dissrate_ini = dissrate;
+
+            dissrate *= (rhFactor * arrhenius);
+
+            massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);//
+
+            scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+
+            newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+
+            scaledMass = scaledMass_;
+
+
+
+            cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
+                 << "    microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+                 << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************" << endl;
+            cout << "SKM_hT   " << "rhFactor: " << rhFactor << "\tarrhenius: " << arrhenius
+                 << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area << endl;
+            cout << "SKM_hT   " << "dissrate_ini: " << dissrate_ini << "\tdissrate: " << dissrate << endl;
+            cout << "SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+                 << "\tinitScaledMass_: " << initScaledMass_ <<  "\tscaledMass_: " << scaledMass_
+                 << "\tmassDissolved: " << massDissolved << endl;
+            cout << "cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+                 << "    microPhaseName = " << name_
+                 << "    saturationIndex = " << saturationIndex
+                 << "   Dc_a = " << chemSys_->getNode()->DC_a(DCId_)
+                // << "   SI_["
+                 << endl;
+            //exit(0);
+            cout.flush();
+
+            if (verbose_) {
+                cout << "StandardKineticModel::calculateKineticStep "
+                     << "Original scaled mass = " << initScaledMass_
+                     << ", dissolved scaled mass = " << massDissolved << endl;
+            }
+        } else {
+            throw DataException("StandardKineticModel", "calculateKineticStep",
+                                "DOR >= 1.0");
         }
 
-        /// @note impurityRelease index values are assumed to
-        /// be uniquely associated with particular chemical
-        /// elements
+        //} // End of normal hydration block
+    }   // End of try block
 
-        /// @todo Make this more general so that any indexing
-        /// can be used
+    catch (EOBException eex) {
+        eex.printException();
+        exit(1);
+    } catch (DataException dex) {
+        dex.printException();
+        exit(1);
+    } catch (FloatException fex) {
+        fex.printException();
+        exit(1);
+    } catch (out_of_range &oor) {
+        EOBException ex("StandardKineticModel", "calculateKineticStep", oor.what(), 0, 0);
+        ex.printException();
+        exit(1);
+    }
 
-        /// @todo Allow any IC element to be an impurity, not
-        /// necessarily just the ones hard-coded here
-
-        impurityRelease[0] = (massDissolved * chemSys_->getK2o(microPhaseId_));
-        impurityRelease[1] = (massDissolved * chemSys_->getNa2o(microPhaseId_));
-        impurityRelease[2] = (massDissolved * chemSys_->getMgo(microPhaseId_));
-        impurityRelease[3] = (massDissolved * chemSys_->getSo3(microPhaseId_));
-
-        for (int ii = 0; ii < dICMoles.size(); ii++) {
-
-          dICMoles[ii] += ((massDissolved / chemSys_->getDCMolarMass(DCId_)) *
-                           chemSys_->getDCStoich(DCId_, ii));
-
-          if (ICName[ii] == "O") {
-            // Dissolved K2O in this phase
-            if (chemSys_->isIC("K")) {
-              icn = "K";
-              molarMass = 2.0 * chemSys_->getICMolarMass(icn);
-              icn = "O";
-              molarMass += chemSys_->getICMolarMass(icn);
-              dICMoles[ii] += (impurityRelease[0] / molarMass);
-            }
-            // Dissolved Na2O in this phase
-            if (chemSys_->isIC("Na")) {
-              icn = "Na";
-              molarMass = 2.0 * chemSys_->getICMolarMass(icn);
-              icn = "O";
-              molarMass += chemSys_->getICMolarMass(icn);
-              dICMoles[ii] += (impurityRelease[1] / molarMass);
-            }
-            // Dissolved MgO in this phase
-            if (chemSys_->isIC("Mg")) {
-              icn = "Mg";
-              molarMass = chemSys_->getICMolarMass(icn);
-              icn = "O";
-              molarMass += chemSys_->getICMolarMass(icn);
-              dICMoles[ii] += (impurityRelease[2] / molarMass);
-            }
-            // Dissolved SO3 in this phase
-            if (chemSys_->isIC("S")) {
-              icn = "S";
-              molarMass = chemSys_->getICMolarMass(icn);
-              icn = "O";
-              molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-              dICMoles[ii] += (3.0 * (impurityRelease[3] / molarMass));
-            }
-          } else if (ICName[ii] == "S") {
-            // Dissolved SO3  in this phase
-            icn = "S";
-            molarMass = chemSys_->getICMolarMass(icn);
-            icn = "O";
-            molarMass += (3.0 * chemSys_->getICMolarMass(icn));
-            dICMoles[ii] += (impurityRelease[3] / molarMass);
-          } else if (ICName[ii] == "K") {
-            // Dissolved K2O in this phase
-            icn = "K";
-            molarMass = 2.0 * chemSys_->getICMolarMass(icn);
-            icn = "O";
-            molarMass += chemSys_->getICMolarMass(icn);
-            dICMoles[ii] += (2.0 * (impurityRelease[0] / molarMass));
-          } else if (ICName[ii] == "Na") {
-            // Dissolved Na2O in this phase
-            icn = "Na";
-            molarMass = 2.0 * chemSys_->getICMolarMass(icn);
-            icn = "O";
-            molarMass += chemSys_->getICMolarMass(icn);
-            dICMoles[ii] += (2.0 * (impurityRelease[1] / molarMass));
-          } else if (ICName[ii] == "Mg") {
-            // Dissolved MgO in this phase
-            icn = "Mg";
-            molarMass = chemSys_->getICMolarMass(icn);
-            icn = "O";
-            molarMass += chemSys_->getICMolarMass(icn);
-            dICMoles[ii] += (impurityRelease[2] / molarMass);
-          }
-        }
-
-      } else {
-        throw DataException("StandardKineticModel", "calculateKineticStep",
-                            "DOR >= 1.0");
-      }
-
-    } // End of normal hydration block
-  }   // End of try block
-
-  catch (EOBException eex) {
-    eex.printException();
-    exit(1);
-  } catch (DataException dex) {
-    dex.printException();
-    exit(1);
-  } catch (FloatException fex) {
-    fex.printException();
-    exit(1);
-  } catch (out_of_range &oor) {
-    EOBException ex("StandardKineticModel", "calculateKineticStep", oor.what(),
-                    0, 0);
-    ex.printException();
-    exit(1);
-  }
-
-  return;
+    return;
 }

@@ -78,18 +78,12 @@ private:
       numSolutionPhases_; /**< Number of GEM solution phases in the CSD;
                                    solution phases are non-stoichiometric */
 
-  double *ICMoles_; /**< List of number of moles of each IC in system */
-  vector<double> ICMolarMass_; /**< List of molar mass of each IC in system */
+  double *ICMoles_;     /**< List of number of moles of each IC in system */
   double *ICResiduals_; /**< List of errors in IC moles for mass balance */
   double *ICChemicalPotential_; /**< List of chemical potentials of each IC, in
                               the GEM dual solution */
-  map<string, int> ICIdLookup_; /**< Map that returns the vector index of the
-                                        IC name */
-  vector<double> DCMolarMass_;  /**< List of molar mass of each DC in system */
-  double *DCActivityCoeff_; /**< List of activity coefficients for each DC */
-  map<string, int> DCIdLookup_; /**< Map that returns the vector index of the
-                                        DC name */
   double *DCMoles_;             /**< List of moles of each DC */
+  double *DCActivityCoeff_; /**< List of activity coefficients for each DC */
 
   double *GEMPhaseMoles_;  /**< List of moles of each phase in the system */
   double *GEMPhaseMass_;   /**< List of mass of each phase in the system [kg] */
@@ -187,7 +181,7 @@ public:
   @param isFirst is true if this is the first equilibrium calculation, false
   otherwise
   */
-  void calculateState(bool isFirst);
+  void calculateState(bool isFirst, int cyc);
 
   /**
   @brief Get the list of multicomponent phase volumes.
@@ -263,10 +257,10 @@ public:
   */
   void setICMoles(const unsigned int idx, const double val) {
     if (idx >= numICs_) {
-      cout << "index beyond the range of ICnum, " << "so exit the program."
-           << endl;
-      cerr << "index beyond the range of ICnum, " << "so exit the program."
-           << endl;
+      cout << "index beyond the range of ICnum, "
+           << "so exit the program." << endl;
+      cerr << "index beyond the range of ICnum, "
+           << "so exit the program." << endl;
       exit(1);
     } else {
       ICMoles_[idx] = val;
@@ -307,70 +301,29 @@ public:
   double getICMoles(const unsigned int idx) { return ICMoles_[idx]; }
 
   /**
-  @brief Get the integer id of a dependent component (DC) by its name.
-
-  @param dcname is the name of the DC
-  @return the integer id associated with that DC name
-  */
-  unsigned int getDCId(const string &dcname) {
-    map<string, int>::iterator p = DCIdLookup_.find(dcname);
-    if (p != DCIdLookup_.end()) {
-      return p->second;
-    } else {
-      // cout << "WARNING: Could not find DCIdLookup_ match to " << dcname <<
-      // endl; cout << "WARNING: Here are the ones I know about:" << endl;
-      // cout.flush();
-      // p = DCIdLookup_.begin();
-      // while (p != DCIdLookup_.end()) {
-      //     cout << "WARNING:     " << p->first << " ("
-      //          << p->second << ")" << endl;
-      //     cout.flush();
-      //     p++;
-      // }
-      // cout << "WARNING:" << endl;
-      // cout.flush();
-      return (numDCs_ + 9999);
-    }
-  }
-
-  /**
-  @brief Get the number of moles of a dependent component (DC) specified by
-  its index.
-
-  @todo Perform bounds checking and throw an error if out of bounds.
-
-  @param idx is the index of the DC to query
-  @return the number of moles of that DC in the system
-  */
-  double getDCMoles(const unsigned int idx) { return DCMoles_[idx]; }
-
-  /**
-  @brief Get the molal concentration of a dependent component (DC) specified by
-  its index.
-
-  @todo Perform bounds checking and throw an error if out of bounds.
-
-  @param idx is the index of the DC to query
-  @return the number of moles of that DC in the system
-  */
-  double getDCConcentration(const unsigned int idx) { return DCMoles_[idx]; }
-
-  /**
   @brief Set the saturation index of each dependent component.
 
   This method interacts directly with the GEMS3K node object.
   */
-  void setSI(void) {
+  void setSI(int cyc) {
     SI_.clear();
+    double si;
     double *Falp;
     Falp = (node_->ppmm())->Falp;
 
     for (int i = 0; i < numGEMPhases_; i++) {
       // long int xBR = (long int)(getGEMPhaseId(i));
       // double si = node_->Ph_SatInd(xBR);
-      double si = pow(10.0, Falp[i]);
+      si = pow(10.0, Falp[i]);
       SI_.push_back(si);
     }
+
+//    cout << endl << "Solution::setSI for cyc = " << cyc << endl;
+//    for (int i = 0; i < numGEMPhases_; i++) {
+//        cout << "\tsetSI : " << i << "\t" << SI_[i] << endl;
+//    }
+//    cout << endl << "Solution::setSI : end" << endl;
+
     return;
   }
 
@@ -551,6 +504,19 @@ public:
   @return the verbose flag
   */
   bool getVerbose(void) const { return verbose_; }
+
+  double getDCMoles(const unsigned int idx) {return DCMoles_[idx];}
+
+  void initSI(int phaseid, double val){
+      if(SI_.size() == 0) SI_.resize(numGEMPhases_, 0.0);
+      SI_[phaseid] = val;
+  }
+
+  void setDCActivityCoeff(int dcidx, double val) {
+    DCActivityCoeff_[dcidx] = val;
+  }
+
+  void setDCMoles(int idx, double val) { DCMoles_[idx] = val;}
 
 }; // End of the Solution class
 

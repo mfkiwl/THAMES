@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
-    xs:noNamespaceSchemaLocation="/Users/bullard/Software/MyProjects/THAMES/src/xsdfiles/chemistry.xsd">
+    xs:noNamespaceSchemaLocation="chemistry.xsd">
 <!--The number of possible phases in the microstructure not counting Void-->
  <numentries>18</numentries>
 <!--Temperature in K-->

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <simulation_parameters xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:noNamespaceSchemaLocation="/Users/bullard/thames_wd/parameters.xsd">
+xsi:noNamespaceSchemaLocation="parameters.xsd">
   <calctime>0.001</calctime>
   <calctime>0.0011</calctime>
   <calctime>0.00121</calctime>

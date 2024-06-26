@@ -84,6 +84,8 @@ protected:
   vector<int>inGrowInterface_;
   vector<int>inDissInterface_;
 
+  int visit_;
+
 public:
   /**
   @brief Default constructor.
@@ -116,7 +118,8 @@ public:
        unsigned int ys, unsigned int zs, unsigned int neigh,
        ChemicalSystem *csys, const bool verbose = false);
 
-
+  void setVisit(int sv){visit_ = sv;}
+  int getVisit (void){return visit_;}
 
   void setInGrowInterface(int i, int val){
       inGrowInterface_[i] = val;
@@ -317,13 +320,7 @@ public:
   @param pid is the microstructure phase id of the phase that can dissolve at
   the site
   */
-//  void setDissolutionSite(unsigned int pid) {
-//    dissolution_.clear();
-//    dissolution_.push_back(pid);
-//    growth_.clear();
-//  }
-
-  void setDissolutionSiteMod(unsigned int pid) {
+  void setDissolutionSite(unsigned int pid) {
       dissolution_ = pid;
       growth_.clear();
   }
@@ -352,12 +349,7 @@ public:
 
   @param pid is the id of the microstructure phase to remove
   */
-//  void removeDissolutionSite(unsigned int pid) {
-//    if (dissolution_.size() > 0 && dissolution_[0] == pid)
-//      dissolution_.clear();
-//  }
-
-  void removeDissolutionSiteMod(void) { dissolution_ = -1;}
+  void removeDissolutionSite(void) { dissolution_ = -1;}
 
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
@@ -369,14 +361,6 @@ public:
   @param pid is the id of the microstructure phase to remove
   */
   void removeGrowthSite(unsigned int pid) {
-    vector<unsigned int>::iterator start = growth_.begin();
-    vector<unsigned int>::iterator end = growth_.end();
-    vector<unsigned int>::iterator p = find(start, end, pid);
-    if (p != growth_.end())
-      growth_.erase(p);
-  }
-
-  void removeGrowthSiteMod_grow(unsigned int pid) {
     bool found = false;
     int size = growth_.size();
     int i = -1;
@@ -390,20 +374,27 @@ public:
         }
     }
     if (found == false) {
-          cout <<endl <<" stop - void removeGrowthSiteMod_grow(unsigned int pid) " << endl;
+          cout <<endl <<" stop - void removeGrowthSite(unsigned int pid) " << endl;
           cout.flush();
           cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
           exit(1);
     }
   }
 
-  void clearGrowthVector(void) {growth_.clear();}
   /**
   @brief Get the entire list of all phases that can grow at the site.
 
   @return the list of ids of all microstructure phases that can grow at the site
   */
   vector<unsigned int> getGrowthPhases() const { return growth_; }
+
+  void setGrowthPhases(vector<unsigned int> vect) {
+    int dim = vect.size();
+    growth_.resize(dim,0);
+    for(int i = 0; i < dim; i++){
+        growth_[i] = vect[i];
+    }
+  }
 
   /**
   @brief Get the entire list of all phases that can grow at the site.

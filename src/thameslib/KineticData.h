@@ -20,7 +20,6 @@ System Definition (CSD)
 phase
     - `type` is a string specifying whether the phase is under kinetic control
         or thermodynamic control
-    - `scaledMass` is the number of grams of the phase per 100 grams of solid
     - `specificSurfaceArea` is the specific surface area in m2 per kg
     - `refSpecificSurfaceArea` is the reference specific surface area in m2 per
 kg
@@ -51,6 +50,7 @@ component
     - `critDOH` is the critical degree of hydration used in the equation for
         calculating the influence of w/c ratio.
 */
+#include <string>
 
 #ifndef KINETICDATASTRUCT
 #define KINETICDATASTRUCT
@@ -84,5 +84,6 @@ struct KineticData {
   double sio2;           /**< Mole fraction SiO2 in material */
   double al2o3;          /**< Mole fraction Al2O3 in material */
   double cao;            /**< Mole fraction CaO in material */
+  double HLK; //H_Lothenbach-Kulik
 };
 #endif

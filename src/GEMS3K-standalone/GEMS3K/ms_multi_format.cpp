@@ -612,6 +612,7 @@ void TMulti::from_text_file_gemipm( TIO& in_format,  DATACH  *dCH )
 #ifdef IPMGEMPLUGIN
     set_def();
 #endif
+
     //mem_set( &pm.N, 0, 39*sizeof(long int));
     //mem_set( &pm.TC, 0, 55*sizeof(double));
     // get sizes from DATACH
@@ -760,10 +761,8 @@ void TMulti::from_text_file_gemipm( TIO& in_format,  DATACH  *dCH )
     // !!!!  copyValues( pm.DCCW, dCH->ccDCW, dCH->nDC);
     // set up DCCW
     ConvertDCC();
-
     //dynamic data
     io_formats::TReadArrays<TIO>   rddar( 80, MULTI_dynamic_fields, in_format);
-
     // set up array flags for permanent fields
 
     if( !( pm.FIs > 0 && pm.Ls > 0 ) )
@@ -777,6 +776,7 @@ void TMulti::from_text_file_gemipm( TIO& in_format,  DATACH  *dCH )
         rddar.setNoAlws( f_Sigw );
         rddar.setNoAlws( f_Sigg );
     }
+
     if( !( pm.FIat > 0 &&  pm.FIs > 0 ) )
     { /* ADSORPTION AND ION EXCHANGE */
         rddar.setNoAlws( f_Nfsp );

@@ -29,14 +29,10 @@ its applications can also be found in the following references:
 
 ## PREREQUISITES
 
-* GNU Compiler Collection (gcc/g++ >= 11, REQUIRED)
- * Mac OS no longer uses true gcc/g++, despite the fact that
- Apple provides shortcuts called gcc and g++ to its own Apple Clang
- compiler.  So on a Mac you _must_ install the actual gcc/g++ and
- make it the default compiler, at least long enough to build THAMES.
- Instructions are provided in the section below for building on Mac OS.
+To install THAMES, you need 'cmake'.  Creation of the API documentation also
+requires 'doxygen'.
 
-* CMake (>= 3.5), the build system used by THAMES
+* CMake (>= 3.0), the build system used by THAMES
  * Required for building THAMES
 
 * Doxygen (>= 1.8.13), the API documentation software
@@ -45,124 +41,36 @@ its applications can also be found in the following references:
 * LaTeX 2e, the document preparation system
  * Required only for creating the PDF version of the API documentation
 
-* GEM-Selektor (optional)
+* GEM-Selektor
  * Needed for producing input data files for thermodynamic calculations.
  * Source code available at https://bitbucket.org/gems4/gems3gui.git
  * Binaries available at https://gems.web.psi.ch
 
 * libxml2
 
-## Building on Mac OS
+* Imagemagick (optional, for creating PNG image files for the microstructures)
 
-As already stated, modern Mac OS uses the Apple Clang compiler by default,
-but THAMES requires the GNU Compiler Collection (gcc).
-Therefore you must install the Gnu compiler suite and then
-make it the default C/C++ compiler on your computer. Assuming you
-use Homebrew for package management:
+## BUILDING
 
-* `brew install gcc`
-* `cd /opt/homebrew/bin`
-* `ln -s gcc-13 gcc`
-* `ln -s g++-13 g++`
-* Edit your path to ensure that `/opt/homebrew/bin` comes before `/usr/bin`
+This section assumes that all the prerequisites are already installed on
+your system.  We also assume that your THAMES distribution is installed at /PathToTHAMES/THAMES.
 
-### Build GEMS3K library
+### Mac OS and Unix
 
-* cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
-* Open the file `install.sh` with your favorite text editor.
-* Comment out the line that begins with `cmake ..` by placing a `#` in the first column.
-* Add a line directly below it that reads
-
-```
-cmake .. -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/ope/homebrew/bin/g++ -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=$BuildType -DCMAKE_INSTALL_PREFIX=$InstallPrefix 
-```
-* Save the `install.sh` file and close it
-* Run the command `./install.sh`
-
-### Build Z compression library
-You only need to do this if it is not already installed on your system
-
-* cd /PathToTHAMES/THAMES/src/zlib
-* `mkdir build`
-* `cd build`
-* Run the command
-
-```
-cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_INSTALL_PREFIX=../../Resources ..
-```
-
-* `make`
-* `make install`
-
-### Build PNG library
-You only need to do this if it is not already installed on your system
-
-* cd /PathToTHAMES/THAMES/src/libpng
-* `mkdir build; cd build`
-* Run the command
-
-```
-cmake -DCMAKE_INSTALL_PREFIX=../../Resources -DZLIB_ROOT=../../Resources ..
-```
-
-* `make`
-* `make install`
-
-Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
-build, which means that the original files and directories are left untouched.
-Doing this makes the re-compiling and cleaning of the installation files
-much simpler.
-
-* cd /PathToTHAMES/THAMES/build
-* Run the command
-
-```
-cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/opt/homebrew/bin/g++ ..
-```
-* `make`
-* `make install`
-* `make doc`
-
-This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
-static libraries in the PathToTHAMES/lib directory.
-
-
-## Building on Unix or Linux
-
-### Build GEMS3K library
+First build and install the GEMS3K library:
 
 1. cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
 2. ./install.sh
 
-### Build Z compression library
-You only need to do this if it is not already installed on your system
-
-1. cd /PathToTHAMES/THAMES/src/zlib
-2. `mkdir build`
-3. `cd build`
-4. `cmake -DCMAKE_INSTALL_PREFIX=../../Resources ..`
-5. `make`
-6. `make install`
-
-### Build PNG library
-You only need to do this if it is not already installed on your system
-
-1. cd /PathToTHAMES/THAMES/src/libpng
-2. `mkdir build; cd build`
-3. `cmake -DCMAKE_INSTALL_PREFIX=../../Resources -DZLIB_ROOT=../../Resources ..`
-4. `make`
-6. `make install`
-
-Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
-build, which means that the original files and directories are left untouched.
-Doing this makes the re-compiling and cleaning of the installation files
+Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source build,
+which means that the original files and directories are left untouched. Doing this makes the re-compiling and cleaning of the installation files
 much simpler.
 
 1. cd /PathToTHAMES/THAMES/build
-2. `cmake ..`
-3. `make`
-4. `make install`
-5. `make doc`
+2. cmake ..
+3. make
+4. make install
+5. make doc
 
 This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
 static libraries in the PathToTHAMES/lib directory.
@@ -181,24 +89,7 @@ you must first install **MinGW** and **MSYS**. Assuming these are installed, exe
 	* cmake .. -G "MinGW Makefile" -DCMAKE\_CSS\_FLAGS=-fPIC -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../Resources
 	* mingw32-make.exe
 	* mingw32-make.exe install
-3. Build and install the z compression library:
-    * cd /PathToTHAMES/THAMES/src/zlib
-    * `mkdir build`
-    * `cd build`
-    * `cmake .. -G "MinGW Makefile"`
-    * `mingw32-make.exe`
-    * `cp zconf.h ../../Resources/include/.`
-    * `cp libz.a ../../Resources/lib/.`
-    * `cp libz.dylib ../../Resources/lib/.`
-4. Build and install the png library:
-    * cd /PathToTHAMES/THAMES/src/libpng
-    * `mkdir build`
-    * `cmake .. -G "MinGW Makefile" -DZLIB_ROOT=../../Resources`
-    * `mingw32-make.exe`
-    * `cp *.dylib ../../Resources/lib/.`
-    * `cp *.a ../../Resources/lib/.`
-    * `cp *.h ../../Resources/include/.`
-5. Build THAMES
+3. Build THAMES
 	* cd /PathToTHAMES/THAMES/build
 	* cmake .. -G "MinGW Makefile" -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../bin
 	* mingw32-make.exe

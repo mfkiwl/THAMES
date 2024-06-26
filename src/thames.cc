@@ -5,6 +5,7 @@
 
 #include "thames.h"
 #include "version.h"
+#include <limits>
 
 int *RanGen::seed_;
 
@@ -18,7 +19,7 @@ int main(int argc, char **argv) {
   // Set up the strainenergy vector.  We allow no more than 156 phases,
   // but this can be changed below.
   //
-
+  cout << scientific << setprecision(15);
   checkargs(argc, argv);
 
   strainenergy.clear();
@@ -27,7 +28,6 @@ int main(int argc, char **argv) {
   int choice, simtype;
   string buff = "";
   ChemicalSystem *ChemSys = NULL;
-  Solution *Solut = NULL;
   Lattice *Mic = NULL;
   ThermalStrain *ThermalStrainSolver = NULL;
   AppliedStrain *AppliedStrainSolver = NULL;
@@ -49,6 +49,10 @@ int main(int argc, char **argv) {
   cin >> choice;
   cout << choice << endl;
 
+  //cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() << endl;
+  //cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() << endl;
+  //cout << "epsilon for float : \t" << numeric_limits<float>::epsilon() << endl;
+
   if (choice <= QUIT_PROGRAM || choice > SULFATE_ATTACK) {
 
     cout << "Exiting program now." << endl << endl;
@@ -69,87 +73,45 @@ int main(int argc, char **argv) {
 
   // Read the newline character.  Wish there was a better way!
   getline(cin, buff);
-  cout << "What is the name of the GEM input file for solution? " << endl;
-  // cin >> buff;  // C++ >> operator does not allow spaces
-  getline(cin, buff);
-  const string geminput_filename_solution(buff);
-  cout << "geminput assignment is " << geminput_filename_solution << endl;
-  cout.flush();
-
-  //
-  // User must provide the name of the GEM data bridge (DBR) file
-  // for the aqueous solution
-  //
-
-  cout << "What is the name of the GEM DBR file for solution? " << endl;
-  getline(cin, buff);
-  const string geminput_dbrname_solution(buff);
-  cout << geminput_dbrname_solution << endl;
-
-  //
-  // Create the aqueous solution object
-  //
-
-  try {
-    Solut = new Solution(geminput_filename_solution, geminput_dbrname_solution,
-                         VERBOSE);
-  } catch (bad_alloc &ba) {
-    cout << "Bad memory allocation in Solution constructor: " << ba.what()
-         << endl;
-    stopProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
-    stopProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
-    stopProgram = true;
-  }
-  if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
-    timeCount(starttime,lt);
-    cout << "STOP Program";
-    exit(1);
-  }
 
   //
   // User must provide the name of the GEM CSD for the whole system
   //
 
-  cout << "What is the name of the GEM input file? " << endl;
+  cout << endl << "What is the name of the GEM input file? " << endl;
   getline(cin, buff);
   const string geminput_filename(buff);
-  cout << geminput_filename << endl;
-
+  cout << "geminput_filename : " << geminput_filename << endl;
+  cout.flush();
   //
   // User must provide the name of the GEM data bridge (DBR) file
   // for the whole system
   //
 
-  cout << "What is the name of the GEM DBR file? " << endl;
+  cout << endl << "What is the name of the GEM DBR file? " << endl;
   getline(cin, buff);
   const string geminput_dbrname(buff);
-  cout << geminput_dbrname << endl;
+  cout << "geminput_dbrname  : " << geminput_dbrname << endl;
 
   //
   // User must provide the name of the file specifying the microstructre
   // phase data
   //
 
-  cout << "What is the name of the microstructure phase definition file? "
+  cout << endl << "What is the name of the microstructure phase definition file? "
        << endl;
   getline(cin, buff);
   const string pi_filename(buff);
   const string cement_filename(buff);
-  cout << pi_filename << endl;
+  cout << "pi_filename       : " << pi_filename << endl;
+  cout << "cement_filename   : " << cement_filename << endl;
 
   //
   // Create the ChemicalSystem object
   //
 
   try {
-    ChemSys = new ChemicalSystem(Solut, geminput_filename, geminput_dbrname,
+    ChemSys = new ChemicalSystem(geminput_filename, geminput_dbrname,
                                  pi_filename, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
@@ -163,9 +125,6 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -185,22 +144,21 @@ int main(int argc, char **argv) {
   // User must specifiy the file containing the 3D microstructure itself
   //
 
-  cout << "What is the name of the MICROSTRUCTURE file? " << endl;
+  cout << endl << "What is the name of the MICROSTRUCTURE file? " << endl;
   getline(cin, buff);
   const string mic_filename(buff);
-  cout << mic_filename << endl;
+  cout << "mic_filename      : " << mic_filename << endl;
 
   //
   // Create the Lattice object to hold the microstructure
   //
 
   try {
-    Mic = new Lattice(ChemSys, Solut, mic_filename, VERBOSE, WARNING);
+    Mic = new Lattice(ChemSys, mic_filename, VERBOSE, WARNING);
     cout << "Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
     cout << "Z size of lattice is " << Mic->getZDim() << endl;
-    cout << " " << endl;
     cout << "Total number of sites is " << Mic->getNumsites() << endl;
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
@@ -214,9 +172,6 @@ int main(int argc, char **argv) {
       stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -236,7 +191,7 @@ int main(int argc, char **argv) {
     // constituent phases, and will need to include a finite element solver
     //
 
-    cout << "What is the name of the elastic modulus file?" << endl;
+    cout << endl << "What is the name of the elastic modulus file?" << endl;
     buff = "";
     // cin >> buff;  // C++ >> operator does not allow spaces
     getline(cin, buff);
@@ -267,9 +222,6 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (Solut) {
-        delete Solut;
-      }
         if (ChemSys) {
         delete ChemSys;
       }
@@ -309,9 +261,6 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (Solut) {
-        delete Solut;
-      }
       if (ChemSys) {
         delete ChemSys;
       }
@@ -343,7 +292,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    KController = new KineticController(ChemSys, Solut, Mic, cement_filename,
+    KController = new KineticController(ChemSys, Mic, cement_filename,
                                         VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
@@ -357,9 +306,6 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -384,18 +330,18 @@ int main(int argc, char **argv) {
     cout << "Finished constructing KineticController KController" << endl;
     cout.flush();
   }
-  cout << "What is the name of the simulation parameter file? " << endl;
+  cout << endl << "What is the name of the simulation parameter file? " << endl;
   getline(cin, buff);
   par_filename.assign(buff);
-  cout << par_filename << endl;
+  cout << "par_filename      : " << par_filename << endl;
 
-  cout << "What is the root name of this job? " << endl;
+  cout << endl << "What is the root name of this job? " << endl;
   getline(cin, buff);
   jobroot.assign(buff);
-  cout << jobroot << endl;
+  cout << "jobroot           : " << jobroot << endl;
 
   statfilename = jobroot + ".stats";
-  cout << "About to go into Controller constructor" << endl;
+  cout << endl << "About to go into Controller constructor" << endl;
   cout.flush();
 
   //
@@ -403,7 +349,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Ctrl = new Controller(Mic, KController, ChemSys, Solut, ThermalStrainSolver,
+    Ctrl = new Controller(Mic, KController, ChemSys, ThermalStrainSolver,
                           simtype, par_filename, jobroot, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
@@ -417,9 +363,6 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (Solut) {
-      delete Solut;
-    }
     if (ChemSys) {
       delete ChemSys;
     }
@@ -454,13 +397,15 @@ int main(int argc, char **argv) {
   // Launch the main controller to run the simulation
   //
 
-  if (VERBOSE) {
+  //if (VERBOSE) {
     cout << "Going into Controller::doCycle now" << endl;
     cout.flush();
-  }
+  //}
 
   try {
+
     Ctrl->doCycle(statfilename, choice);
+
   } catch (GEMException gex) {
     gex.printException();
   } catch (DataException dex) {
@@ -498,9 +443,6 @@ int main(int argc, char **argv) {
   }
   if (ChemSys) {
     delete ChemSys;
-  }
-  if (Solut) {
-    delete Solut;
   }
 
   return 0;

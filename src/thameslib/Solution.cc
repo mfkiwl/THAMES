@@ -42,8 +42,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   char *cdbrName = (char *)dbrFileName.c_str();
   long int gemFlag = 0;
 
-  double *icmolarmass, *dcmolarmass;
-
   if (verbose_) {
     cout << "Solution::Solution" << endl;
     cout << "Solution::Solution Reading Chemical System Definition file "
@@ -107,8 +105,8 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
          << " missing or corrupt." << endl;
     exit(0);
   } else if (gemFlag == -1) {
-    cout << "Bad return from GEM_init: " << "internal memory allocation error."
-         << endl;
+    cout << "Bad return from GEM_init: "
+         << "internal memory allocation error." << endl;
     exit(0);
   }
 
@@ -177,28 +175,6 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
     exit(0);
   }
 
-  /// The results of the thermodynamic calculation are now known, and
-  /// the constructor can cast them into appropriate units and set up
-  /// the data structure to make correspondences between GEM and microstructure
-  ///
-  /// Convert all IC and DC molar masses from kg/mol to g/mol
-  ///
-
-  ICMolarMass_.resize(numICs_, 0.0);
-  icmolarmass = (node_->pCSD())->ICmm;
-  for (int i = 0; i < numICs_; i++) {
-    // Convert to g per mole
-    ICMolarMass_[i] = (1000.0 * (double)(*icmolarmass));
-    icmolarmass++;
-  }
-  DCMolarMass_.resize(numDCs_, 0.0);
-  dcmolarmass = (node_->pCSD())->DCmm;
-  for (int i = 0; i < numDCs_; i++) {
-    // Convert to g per mole
-    DCMolarMass_[i] = (1000.0 * (double)(*dcmolarmass));
-    dcmolarmass++;
-  }
-
   ///
   /// Initialize GEM
   ///
@@ -235,38 +211,38 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
     cout << "Solution::Solution       nodeStatus_ = ";
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
-      cout << " !!!!!Need GEM calc " << "with auto initial approx (AIA)"
-           << endl;
+      cout << " !!!!!Need GEM calc "
+           << "with auto initial approx (AIA)" << endl;
       exmsg = " !!!!!Need GEM calc with auto initial approx (AIA)";
       dothrow = false;
       break;
     case BAD_GEM_AIA:
-      cout << " !!!!!Untrustworthy result " << "with auto initial approx (AIA)"
-           << endl;
+      cout << " !!!!!Untrustworthy result "
+           << "with auto initial approx (AIA)" << endl;
       exmsg = " !!!!!Untrustworthy result with auto initial approx (AIA)",
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      cout << " !!!!!Failed result with " << "auto initial approx (AIA)"
-           << endl;
+      cout << " !!!!!Failed result with "
+           << "auto initial approx (AIA)" << endl;
       exmsg = " !!!!!Failed result with auto initial approx (AIA)";
       dothrow = false;
       break;
     case NEED_GEM_SIA:
-      cout << " !!!!!Need GEM calc with " << "smart initial approx (SIA)"
-           << endl;
+      cout << " !!!!!Need GEM calc with "
+           << "smart initial approx (SIA)" << endl;
       exmsg = " !!!!!Need GEM calc with smart initial approx (SIA)";
       dothrow = false;
       break;
     case BAD_GEM_SIA:
-      cout << " !!!!!Untrustworthy result with " << "smart initial approx (SIA)"
-           << endl;
+      cout << " !!!!!Untrustworthy result with "
+           << "smart initial approx (SIA)" << endl;
       exmsg = " !!!!!Untrustworthy result with smart initial approx (SIA)";
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      cout << " !!!!!Failed result with " << "smart initial approx (SIA)"
-           << endl;
+      cout << " !!!!!Failed result with "
+           << "smart initial approx (SIA)" << endl;
       exmsg = " !!!!!Failed result with smart initial approx (SIA)";
       dothrow = false;
       break;
@@ -317,7 +293,7 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
                    &solidStoich_[0]);
 
   ///
-  /// The next function reads the DBR file with input system compsition,
+  /// The next function reads the DBR file with input system composition,
   /// temperature, pressure, etc.  The DBR file must be compatible with
   /// the currently loaded IPM and DCH files.  It will return one of nine
   /// codes (see above for the GEM_init function comment for their meaning).
@@ -363,36 +339,28 @@ Solution::Solution(const string &dchFileName, const string &dbrFileName,
   /// Transfer phase names from GEM3K to member variables
   ///
 
-  int maxICnameLength = node_->getMaxICnameLength();
-  int maxDCnameLength = node_->getMaxDCnameLength();
-
+  //cout << endl << "***   numICs_ = " <<  numICs_ << "   ***" << endl;
   string string1;
   for (int i = 0; i < numICs_; i++) {
-    string1 = node_->xCH_to_IC_name(i);
-    if (string1.length() >= maxICnameLength)
-      string1.resize(maxICnameLength);
-    if (verbose_) {
-      cout << "IC number " << i << " is " << string1 << endl;
-    }
+    string1.assign(node_->xCH_to_IC_name(i));
     ICName_.push_back(string1);
-    ICIdLookup_.insert(make_pair(string1, i));
+    //cout << "   " << i << "\t" << string1 << "\t" << ICMoles_[i] << endl;
   }
 
+  //cout << endl << "***   numDCs_ = " <<  numDCs_ << "   ***" << endl;
   for (int i = 0; i < numDCs_; i++) {
-    string1 = node_->xCH_to_DC_name(i);
-    if (string1.length() >= maxDCnameLength)
-      string1.resize(maxDCnameLength);
-    if (verbose_) {
-      cout << "DC number " << i << " is " << string1 << endl;
-    }
+    string1.assign(node_->xCH_to_DC_name(i));
     DCName_.push_back(string1);
-    DCIdLookup_.insert(make_pair(string1, i));
+    //cout << "   " << i << "\t" << string1 << "\t" << DCMoles_[i] << endl;
   }
-  string1.clear(); // This command may be unnecessary
+
+  //cout << endl << "***   numGEMPhases_ = " <<  numGEMPhases_ << "   GEMPhaseMoles_/GEMPhaseName_   ***" << endl;
   for (int i = 0; i < numGEMPhases_; i++) {
     string1.assign(node_->xCH_to_Ph_name(i));
     GEMPhaseName_.push_back(string1);
+    //cout << "   " << i << "\t" << GEMPhaseMoles_[i] << "\t" << "\t" <<string1 << endl;
   }
+
 }
 
 Solution::~Solution() {
@@ -490,7 +458,7 @@ void Solution::getJSONFiles(const char *masterFileName, string &dchName,
   dbrName.erase(remove(dbrName.begin(), dbrName.end(), '"'), dbrName.end());
 }
 
-void Solution::calculateState(bool isFirst) {
+void Solution::calculateState(bool isFirst, int cyc) {
   int status = 0;
   string msg;
 
@@ -514,7 +482,25 @@ void Solution::calculateState(bool isFirst) {
   /// in this case.
   ///
 
+//  cout << endl << "solution before GEM_from_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_" << endl;
+  for(int i = 0; i < numDCs_; i++){
+      if(i > 68)DCUpperLimit_[i] = 0;
+//      cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] << "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
+  }
+
+//  cout << endl << "solution before checkICMoles : ICMoles_/ICName_" << endl;
+//  for(int i = 0; i < numICs_; i++){
+//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
+//  }
+
   checkICMoles();
+
+//  cout << endl << "solution after checkICMoles : ICMoles_/ICName_" << endl;
+//  for(int i = 0; i < numICs_; i++){
+//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
+//  }
+//  //if (cyc == 0)exit(0);
+
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
                      DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_,
@@ -553,13 +539,12 @@ void Solution::calculateState(bool isFirst) {
   ///    error (e.g., memory corruption).  Need restart
   ///
 
-  checkICMoles();
+  //if (isFirst) {
+  //  (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
+  //} else {
+  //  (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
+  //}
 
-  if (isFirst) {
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
-  } else {
-    (node_->pCNode())->NodeStatusCH = NEED_GEM_SIA;
-  }
   nodeStatus_ = node_->GEM_run(true);
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
@@ -650,8 +635,14 @@ void Solution::calculateState(bool isFirst) {
   /// be assigned to the corresponding array in the Solution object.
   ///
 
-  setSI();
+//  cout << endl << "solution after GEM_to_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_" << endl;
+//  for(int i = 0; i < numDCs_; i++){
+//      //if(i > 68)DCUpperLimit_[i] = 0;
+//      cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] << "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
+//  }
 
+  setSI(cyc);
+//if (cyc == 0)exit(0);
   return;
 }
 

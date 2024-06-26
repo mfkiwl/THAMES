@@ -42,8 +42,6 @@ private:
   int numPhases_; /**< Total number of phases in the kinetic model */
   ChemicalSystem *
       chemSys_; /**< Pointer to the ChemicalSystem object for this simulation */
-  Solution
-      *solut_; /**< Pointer to the aqueous phase object for this simulation */
   Lattice *
       lattice_; /**< Pointer to the lattice object holding the microstructure */
   vector<KineticModel *>
@@ -65,15 +63,18 @@ private:
   vector<double>
       refSpecificSurfaceArea_; /**< List of reference specific surface areas */
   vector<bool> isKinetic_;
-  int waterId_;       /**< DC index for liquid water */
-  int ICNum_;         /**< Number of ICs in chemical system */
-  int DCNum_;         /**< Number of DCs in chemical system */
-  int numPK_;         /**< Number of kinetically Parrott/Killoh components */
-  int numPozzolanic_; /**< Number of kinetically pozzolanic components */
-  int numStandard_;   /**< Number of kinetically standard components */
-  int GEMPhaseNum_;   /**< Number of GEM phases in chemical system */
-  bool verbose_;      /**< Flag for verbose output */
-  bool warning_;      /**< Flag for warnining output */
+  int waterId_;     /**< DC index for liquid water */
+  int ICNum_;       /**< Number of ICs in chemical system */
+  int DCNum_;       /**< Number of DCs in chemical system */
+  int GEMPhaseNum_; /**< Number of GEM phases in chemical system */
+  bool verbose_;    /**< Flag for verbose output */
+  bool warning_;    /**< Flag for warnining output */
+
+  vector<double> ICMoles_;
+  vector<double> DCMoles_;
+  vector<double> ICMolesTot_;
+
+  double initScaledCementMass_;
 
 public:
   /**
@@ -92,14 +93,13 @@ public:
   This constructor is used in THAMES.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the aqeuous solution object for the simulation
-  @param lattic is a pointer to the Lattice object holding the microstructure
+  @param lattice is a pointer to the Lattice object holding the microstructure
   @param fileName is the name of the XML file with the input for the kinetic
   model
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  KineticController(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+  KineticController(ChemicalSystem *cs, Lattice *lattice,
                     const string &fileName, const bool verbose,
                     const bool warning);
 
@@ -485,8 +485,11 @@ public:
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
   */
-  void calculateKineticStep(const double timestep, const double temperature,
-                            bool isFirst);
+  //void calculateKineticStep(const double timestep, const double temperature,
+  //                          bool isFirst, int cyc);
+
+  void calculateKineticStep (const double timestep, const double temperature,
+                            int cyc);
 
   /**
   @brief Set the verbose flag
@@ -522,69 +525,9 @@ public:
   */
   bool getWarning() const { return warning_; }
 
-  /**
-  @brief Set the number of kinetically Parrot-Killoh phases
+  vector<double> getICMoles (void) {return ICMoles_;}
+  vector<double> getDCMoles (void) {return DCMoles_;}
 
-  @param numpk is the number of Parrot-Killot phases
-  */
-  void setNumPK(const int numpk) {
-    if (numpk >= 0) {
-      numPK_ = numpk;
-    } else {
-      numPK_ = 0;
-    }
-    return;
-  }
-
-  /**
-  @brief Get the number of kinetically Parrot-Killoh phases
-
-  @return the number of kinetically Parrot-Killoh phases
-  */
-  int getNumPK() const { return numPK_; }
-  int numpk = 0;
-
-  /**
-  @brief Set the number of kinetically pozzolanic phases
-
-  @param numpk is the number of kinetically pozzolanic phases
-  */
-  void setNumPozzolanic(const int numpozzolanic) {
-    if (numpozzolanic >= 0) {
-      numPozzolanic_ = numpozzolanic;
-    } else {
-      numPozzolanic_ = 0;
-    }
-    return;
-  }
-
-  /**
-  @brief Get the number of kinetically pozzolanic phases
-
-  @return the number of kinetically pozzolanic phases
-  */
-  int getNumPozzolanic() const { return numPozzolanic_; }
-
-  /**
-  @brief Set the number of kinetically standard phases
-
-  @param numpk is the number of kinetically standard phases
-  */
-  void setNumStandard(const int numstandard) {
-    if (numstandard >= 0) {
-      numStandard_ = numstandard;
-    } else {
-      numStandard_ = 0;
-    }
-    return;
-  }
-
-  /**
-  @brief Get the number of kinetically standard phases
-
-  @return the number of kinetically standard phases
-  */
-  int getNumStandard() const { return numStandard_; }
 
 }; // End of KineticController class
 

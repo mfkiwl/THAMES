@@ -78,13 +78,12 @@ public:
   various other objects for the simulation are allocated and constructed.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param solut is a pointer to the aqeuous solution object for the simulation
   @param lattice is a pointer to the Lattice object holding the microstructure
   @param kineticData is the collection of kinetic parameters already stored
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
-  PozzolanicModel(ChemicalSystem *cs, Solution *solut, Lattice *lattice,
+  PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
                   struct KineticData &kineticData, const bool verbose,
                   const bool warning);
 
@@ -335,12 +334,16 @@ public:
   @param DCMoles is the vector of moles of each DC
   @param GEMPhaseMoles is the vector of moles of each phase in GEMS
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, bool isFirst,
-                                    double rh, vector<double> &dICMoles,
-                                    vector<double> &dsolutICMoles,
-                                    vector<double> &DCMoles,
-                                    vector<double> &GEMPhaseMoles);
+  //virtual void calculateKineticStep (const double timestep,
+  //                                  const double temperature, bool isFirst,
+  //                                  double rh, vector<double> &dICMoles,
+  //                                  vector<double> &dsolutICMoles,
+  //                                  vector<double> &DCMoles,
+  //                                  vector<double> &GEMPhaseMoles, int cyc);
+
+  virtual void calculateKineticStep (const double timestep, const double temperature,
+                                    double rh, double &scaledMass,
+                                    double &massDissolved, int cyc, double totalDOR);
 
 }; // End of PozzolanicModel class
 

@@ -116,9 +116,9 @@ Department of Commerce, April, 2000.
 #include "thameslib/KineticController.h"
 #include "thameslib/Lattice.h"
 #include "thameslib/Site.h"
-#include "thameslib/Solution.h"
 #include "thameslib/StrainEnergy.h"
 #include "thameslib/ThermalStrain.h"
+#include "thameslib/global.h"
 #include <ctime>
 #include <fstream>
 #include <getopt.h>
