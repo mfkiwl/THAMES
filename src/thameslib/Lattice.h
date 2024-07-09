@@ -733,10 +733,10 @@ public:
   The list is then sorted essentially by the effective pore size.  Only then
   is the list visited and the prescribed number of sites switched to void.
 
-  @param numsites is the number of sites to switch to void
+  @param numsites is the number of sites to switch from water to void
   @return the actual number of sites that were changed
   */
-  int emptyPorosity(int numsites);
+  int emptyPorosity(int numsites, int cyc);
 
   /**
   @brief Add water to a prescribed number of empty pore sites.
@@ -749,7 +749,7 @@ public:
   @param numsites is the number of sites to switch from void to water
   @return the actual number of sites that were changed
   */
-  int fillPorosity(int numsites);
+  int fillPorosity(int numsites, int cyc);
 
   /**
   @brief Count the number of solution sites within a box centered on a given
@@ -923,7 +923,7 @@ public:
 
   int changeMicrostructure (double time, const int simtype, bool isFirst,
                                 bool &capWater, int &numDiff ,int &phDiff,
-                                string &nameDiff, int whileCount);
+                                string &nameDiff, int whileCount, int cyc);
 
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
@@ -945,8 +945,7 @@ public:
   @param phasenames is a vector of the microstructure phase names
   @param vol is a vector of the pre-adjusted microstructure volumes
   */
-  void adjustMicrostructureVolumes(vector<string> phasenames,
-                                   vector<double> &vol);
+  void adjustMicrostructureVolumes(vector<double> &vol, int volSize, int cyc);
 
   /**
   @brief Calculate microstructure volume fractions
@@ -957,7 +956,7 @@ public:
   */
   void adjustMicrostructureVolFracs(vector<string> &names,
                                     const vector<double> vol,
-                                    vector<double> &vfrac);
+                                    vector<double> &vfrac, int volSize);
 
   /**
   @brief Calculate the pore size distribution data
