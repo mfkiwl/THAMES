@@ -133,8 +133,8 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
 }
 
 void PozzolanicModel::calculateKineticStep (const double timestep, const double temperature,
-                                            double rh, double &scaledMass,
-                                            double &massDissolved, int cyc, double totalDOR) {
+                                            double rh, double &scaledMass, double &massDissolved, int cyc,
+                                            double totalDOR) {
 
 
     ///

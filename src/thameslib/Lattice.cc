@@ -2556,9 +2556,11 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool isFirst,
                     numDiff = count_[pid_]; //count_[pid_] - numadded; //-(numadded + netsites[i]);
                     phDiff = pid_;
                     nameDiff = phName[i];
-                    cout << "pid_,nameDiff,numDiff,count_[pid_],numadded : " << pid_
+                    cout << endl <<"pid_,nameDiff,numDiff,count_[pid_],numadded : " << pid_
                          << " , " << nameDiff << " , " << numDiff << " , "
                          << count_[pid_] << " , " << numadded << endl;
+                    cout << "=> recall GEM after (re)setDCLowerLimit according to the system configuration (lattice)"
+                         << endl << endl;
                     return 0;
                 }
                 numadded_actual += numadded;

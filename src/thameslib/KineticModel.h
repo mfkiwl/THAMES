@@ -523,8 +523,8 @@ public:
   //                                  vector<double> &GEMPhaseMoles, int cyc) = 0;
 
   virtual void calculateKineticStep (const double timestep, const double temperature,
-                                    double rh, double &scaledMass,
-                                    double &massDissolved, int cyc, double totalDOR) = 0;
+                                    double rh, double &scaledMass, double &massDissolved, int cyc,
+                                    double totalDOR) = 0;
 
   /**
   @brief Set up the number of moles of dependent components in the kinetic

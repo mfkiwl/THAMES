@@ -72,6 +72,7 @@ private:
 
   vector<double> ICMoles_;
   vector<double> DCMoles_;
+  vector<double> DCMolesIni_;
   vector<double> ICMolesTot_;
 
   double initScaledCementMass_;

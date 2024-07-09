@@ -221,7 +221,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
         cout << "Controller::Entering Main time loop" << endl;
     }
 
-    double timestep = 0.0;
+    static double timestep = 0.0;
     bool capwater = true; // True if some capillary water is available
     time_index = 0;
 
@@ -280,20 +280,38 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
         bool isFirst = (i == 0) ? true : false;
 
-        if (chemSys_->getTimesGEMFailed() > 0)
-            i -= 1;//if(i > 69)DCUpperLimit_[i] = 0;
 
-        //cout << "Time = " << time_[i] << endl;
+        //if (chemSys_->getTimesGEMFailed() > 0)
+        //    i -= 1;//if(i > 69)DCUpperLimit_[i] = 0;
+
+        //cout << "i/Time0 = " << i << "   " << time_[i] << endl;cout.flush();
         cyc = i + 1;
-        cout << endl << "Controller::doCycle     i/cyc/Time(i.e. time_[i]) : "
-             << i << " / " << cyc << " / " << time_[i] << endl;
 
         //time_t lt10 = time(NULL);
         //struct tm *time10;
         //time10 = localtime(&lt10);
         //cout << asctime(time10);
 
-        timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
+        //timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
+        if (chemSys_->getTimesGEMFailed() > 0) {
+          timestep += (time_[i] - time_[i - 1]);
+            if (i == 0) {
+              cout << endl << "Controller::doCycle  GEMFailed   i/cyc/time_[i]/timestep) : "
+                   << i << " / " << cyc << " / " << time_[i] << " / " << timestep << endl;
+            } else {
+              cout << endl << "Controller::doCycle  normal   i/cyc/time_[i]/time_[i - 1]/timestep) : "
+                   << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << endl;
+            }
+        } else {
+          timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
+            if (i == 0) {
+              cout << endl << "Controller::doCycle  GEMFailed   i/cyc/time_[i]/timestep) : "
+               << i << " / " << cyc << " / " << time_[i] << " / " << timestep << endl;
+            } else {
+              cout << endl << "Controller::doCycle  normal   i/cyc/time_[i]/time_[i - 1]/timestep) : "
+                   << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << endl;
+            }
+        }
 
         ///
         /// Assume that only capillary pore water is chemically reactive,
@@ -417,7 +435,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
             int changeLattice;
             int whileCount = 0;
             changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater, numDiff,
-                                                           phDiff, nameDiff, whileCount);
+                                                           phDiff, nameDiff, whileCount, cyc);
 
             //if error from changeMicrostructure (not all the voxels given by GEM can
             //be switched to a new DCId):
@@ -497,7 +515,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
                 nameDiff = "testDiff_recall";
 
                 whileCount++;
-                changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater, numDiff, phDiff, nameDiff, whileCount);
+                changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater, numDiff, phDiff, nameDiff, whileCount, cyc);
                 //if(changeLattice != 1 ) {cout << endl << " end changeLattice recall changeLattice = " << changeLattice << endl; exit(0);}
             }
 

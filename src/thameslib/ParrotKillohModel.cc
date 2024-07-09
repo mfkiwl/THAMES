@@ -357,8 +357,8 @@ void ParrotKillohModel::calculateKineticStep (const double timestep, const doubl
 */
 
 void ParrotKillohModel::calculateKineticStep (const double timestep, const double temperature,
-                                             double rh, double &scaledMass,
-                                             double &massDissolved, int cyc, double totalDOR) {
+                                             double rh, double &scaledMass, double &massDissolved, int cyc,
+                                             double totalDOR) {
 
     ///
     /// Initialize local variables
@@ -481,8 +481,11 @@ void ParrotKillohModel::calculateKineticStep (const double timestep, const doubl
             }
 
             scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+
             //massDissolved = (newDOR - DOR) * initScaledMass_;
+
             massDissolved = initScaledMass_ * prod;
+
             scaledMass = scaledMass_;
 
             cout << "****************** PKM_hT = " << timestep << "    cyc = " << cyc

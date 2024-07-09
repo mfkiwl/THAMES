@@ -189,8 +189,8 @@ public:
   //                                  vector<double> &GEMPhaseMoles, int cyc);
 
   virtual void calculateKineticStep (const double timestep, const double temperature,
-                                    double rh, double &scaledMass,
-                                    double &massDissolved, int cyc, double totalDOR);
+                                    double rh, double &scaledMass, double &massDissolved, int cyc,
+                                    double totalDOR);
 
 }; // End of StandardKineticModel class
 

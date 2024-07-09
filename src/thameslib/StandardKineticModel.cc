@@ -120,8 +120,8 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
 }
 
 void StandardKineticModel::calculateKineticStep (const double timestep, const double temperature,
-                                                double rh, double &scaledMass,
-                                                double &massDissolved, int cyc, double totalDOR) {
+                                                double rh, double &scaledMass, double &massDissolved,
+                                                int cyc,double totalDOR) {
     ///
     /// Initialize local variables
     ///
@@ -238,8 +238,6 @@ void StandardKineticModel::calculateKineticStep (const double timestep, const do
             newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
 
             scaledMass = scaledMass_;
-
-
 
             cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
                  << "    microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
