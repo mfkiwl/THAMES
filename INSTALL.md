@@ -108,6 +108,7 @@ cmake -DCMAKE_INSTALL_PREFIX=../../Resources -DZLIB_ROOT=../../Resources ..
 * `make`
 * `make install`
 
+### Build THAMES
 Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
 build, which means that the original files and directories are left untouched.
 Doing this makes the re-compiling and cleaning of the installation files
@@ -121,7 +122,6 @@ cmake -DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc -DCMAKE_CXX_COMPILER=/opt/homebre
 ```
 * `make`
 * `make install`
-* `make doc`
 
 This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
 static libraries in the PathToTHAMES/lib directory.

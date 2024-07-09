@@ -325,18 +325,25 @@ public:
 
   @param timestep is the time interval to simulate [days]
   @param temperature is the absolute temperature during this step [K]
-  @param isFirst is true if this is the first time step of the simulation, false
-  otherwise
   @param rh is the internal relative humidity
-  @param dICMoles is the vector of moles of each IC changed by kinetics
-  @param DCMoles is the vector of moles of each DC
-  @param GEMPhaseMoles is the vector of moles of each phase in GEMS
+  @param scaledMass is C-style array of the normalized mass of each
+  microstructure phase [g/100 g]
+  @param massDissolved is the C-style array of dissolved mass of each
+  microstructure phase [g/100g]
+  @param cyc is the cycle number (iteration of main loop)
+  @param totalDOR is the total degree of reaction [dimensionless]
   */
-  virtual void calculateKineticEvent(const double timestep,
-                                     const double temperature, bool isFirst,
-                                     double rh, vector<double> &dICMoles,
-                                     vector<double> &DCMoles,
-                                     vector<double> &GEMPhaseMoles);
+  // virtual void calculateKineticStep (const double timestep,
+  //                                   const double temperature, bool isFirst,
+  //                                   double rh, vector<double> &dICMoles,
+  //                                   vector<double> &dsolutICMoles,
+  //                                   vector<double> &DCMoles,
+  //                                   vector<double> &GEMPhaseMoles, int cyc);
+
+  virtual void calculateKineticStep(const double timestep,
+                                    const double temperature, double rh,
+                                    double &scaledMass, double &massDissolved,
+                                    int cyc, double totalDOR);
 
 }; // End of PozzolanicModel class
 

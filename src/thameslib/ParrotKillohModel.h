@@ -80,7 +80,12 @@ of portland cement, Cement and Concrete Research 36 (2006) 209--226.
 #ifndef PARROTKILLOHMODELH
 #define PARROTKILLOHMODELH
 
+#include "ChemicalSystem.h"
+#include "KineticController.h"
+#include "KineticData.h"
 #include "KineticModel.h"
+#include "Lattice.h"
+#include "global.h"
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -88,11 +93,6 @@ of portland cement, Cement and Concrete Research 36 (2006) 209--226.
 #include <map>
 #include <string>
 #include <vector>
-// #include "KineticController.h"
-#include "ChemicalSystem.h"
-#include "KineticData.h"
-#include "Lattice.h"
-#include "global.h"
 
 using namespace std;
 
@@ -110,17 +110,19 @@ class ParrotKillohModel : public KineticModel {
 
 protected:
   double wsRatio_; /**< water-solid mass ratio */
+  double wcRatio_;
 
-  double k1_;      /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
-  double k2_;      /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
-  double k3_;      /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
-  double n1_;      /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
-  double n3_;      /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
+  double k1_; /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
+  double k2_; /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
+  double k3_; /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
+  double n1_; /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
+  double n3_; /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
+  double HLK_;
   double critDOR_; /**< List of critical degrees of hydration for w/c
                                    effect in the Parrot and Killoh model */
   double pfk_;     /**< Multiplicative factor for k's to account for
-    
-effects of pozzolanic additions */
+                        effects of pozzolanic additions */
+
 public:
   /**
   @brief Default constructor.
@@ -263,18 +265,25 @@ public:
 
   @param timestep is the time interval to simulate [days]
   @param temperature is the absolute temperature during this step [K]
-  @param isFirst is true if this is the first time step of the simulation, false
-  otherwise
   @param rh is the internal relative humidity
-  @param dICMoles is the vector of moles of each IC changed by kinetics
-  @param DCMoles is the vector of moles of each DC
-  @param GEMPhaseMoles is the vector of moles of each phase in GEMS
+  @param scaledMass is C-style array of the normalized mass of each
+  microstructure phase [g/100 g]
+  @param massDissolved is the C-style array of dissolved mass of each
+  microstructure phase [g/100g]
+  @param cyc is the cycle number (iteration of main loop)
+  @param totalDOR is the total degree of reaction [dimensionless]
   */
-  virtual void calculateKineticEvent(const double timestep,
-                                     const double temperature, bool isFirst,
-                                     double rh, vector<double> &dICMoles,
-                                     vector<double> &DCMoles,
-                                     vector<double> &GEMPhaseMoles);
+  // virtual void calculateKineticStep (const double timestep,
+  //                                   const double temperature, bool isFirst,
+  //                                   double rh, vector<double> &dICMoles,
+  //                                   vector<double> &dsolutICMoles,
+  //                                   vector<double> &DCMoles,
+  //                                   vector<double> &GEMPhaseMoles, int cyc);
+
+  virtual void calculateKineticStep(const double timestep,
+                                    const double temperature, double rh,
+                                    double &scaledMass, double &massDissolved,
+                                    int cyc, double totalDOR);
 
 }; // End of ParrotKillohModel class
 

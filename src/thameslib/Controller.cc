@@ -141,27 +141,14 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out5 << "Time(d),C/S in solid" << endl;
     out5.close();
 
-    outfilename = jobroot_ + "_icmoles.csv";
+    outfilename = jobroot_ + "_Enthalpy.csv";
     ofstream out6(outfilename.c_str());
     if (!out6) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out6 << "Time(d)";
-    for (int i = 0; i < chemSys_->getNumICs(); i++) {
-      out6 << "," << chemSys_->getICName(i);
-    }
-    out6 << endl;
+    out6 << "Time(d),Enthalpy(J)" << endl;
     out6.close();
-
-    outfilename = jobroot_ + "_Enthalpy.csv";
-    ofstream out7(outfilename.c_str());
-    if (!out7) {
-      throw FileException("Controller", "Controller", outfilename,
-                          "Could not append");
-    }
-    out7 << "Time(d),Enthalpy(J)" << endl;
-    out7.close();
 
   } catch (FileException fex) {
     throw fex;
@@ -193,7 +180,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 void Controller::doCycle(const string &statfilename, int choice) {
   unsigned int i;
   int time_index;
-  double next_stat_time = statfreq_;
+  // double next_stat_time = statfreq_;
+  RestoreSystem iniLattice;
 
   ///
   /// This block arbitrarily sets the leaching initiation time to 100 days if
@@ -211,8 +199,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
   }
 
   /*
-  kineticController_->setSattack_time(sattack_time_);
-  kineticController_->setLeach_time(leach_time_);
+   kineticController_->setSattack_time(sattack_time_);
+   kineticController_->setLeach_time(leach_time_);
   */
 
   chemSys_->setSulfateAttackTime(sattack_time_);
@@ -227,19 +215,6 @@ void Controller::doCycle(const string &statfilename, int choice) {
   }
 
   lattice_->findInterfaces();
-
-  if (verbose_) {
-    cout << "Controller::Entering Main time loop" << endl;
-  }
-
-  ///
-  /// The next for loop is the main computation cycle loop, iterating over
-  /// the array of cycle times and executing all the tasks of
-  /// a computational cycle.
-  ///
-  /// If the time is greater than or equal to one of the output times just
-  /// defined, then output the microstructure to an ASCII file and a PNG file
-  ///
 
   double timestep = 0.0;
   bool capwater = true; // True if some capillary water is available
@@ -260,12 +235,42 @@ void Controller::doCycle(const string &statfilename, int choice) {
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
 
-  cout << "Before doCycle:" << endl;
-  cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
-  cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
-  cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
+  int timesGEMFailed_loc = 0;
 
-  for (i = 0; (i < time_.size()) && (capwater); ++i) {
+  // init to 0 all DC moles corresponding to the kinetic controlled microphases
+  //      these DCmoles will be updated by
+  //      KineticController::calculateKineticStep and passedd to GEM together
+  //      the other DC moles in the stystem (ChemicalSystem::calculateState)
+  int numMicPh = chemSys_->getNumMicroPhases();
+  // cout << "numMicPh : " << numMicPh << endl;
+
+  int DCId;
+  for (int i = FIRST_SOLID; i < numMicPh; i++) {
+    if (chemSys_->isKinetic(i)) {
+      DCId = chemSys_->getMicroPhaseDCMembers(i, 0);
+      // chemSys_->setDCMoles(DCId,0.0); //coment if DCLowerLimit in
+      // kineticControllerStep/GEM_from_MT
+      chemSys_->setIsDCKinetic(DCId, true);
+    }
+  }
+  cout << endl
+       << "***   numGEMPhases_  = " << chemSys_->getNumGEMPhases() << endl;
+  cout << "***   numDCs_        = " << chemSys_->getNumDCs() << endl;
+  cout << "***   numICs_        = " << chemSys_->getNumICs() << endl;
+
+  // cout << "Starting with a pore solution without dissolved DCs  => all
+  // microPhaseSI_ = 0" << endl; init to 0 all microPhaseSI_
+  // chemSys_->setZeroMicroPhaseSI();
+
+  bool writeICsDCs = true;
+  if (writeICsDCs)
+    writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
+
+  cout << endl << "     ===== START SIMULATION =====" << endl;
+
+  int cyc;
+  for (i = 0; (i < time_.size()) && (capwater);
+       ++i) { // main computation cycle loop
 
     ///
     /// Do not advance the time step if GEM_run failed the last time
@@ -274,14 +279,18 @@ void Controller::doCycle(const string &statfilename, int choice) {
     bool isFirst = (i == 0) ? true : false;
 
     if (chemSys_->getTimesGEMFailed() > 0)
-      i -= 1;
+      i -= 1; // if(i > 69)DCUpperLimit_[i] = 0;
 
-    cout << "Time = " << time_[i] << endl;
+    // cout << "Time = " << time_[i] << endl;
+    cyc = i + 1;
+    cout << endl
+         << "Controller::doCycle     i/cyc/Time(i.e. time_[i]) : " << i << " / "
+         << cyc << " / " << time_[i] << endl;
 
-    time_t lt10 = time(NULL);
-    struct tm *time10;
-    time10 = localtime(&lt10);
-    cout << asctime(time10);
+    // time_t lt10 = time(NULL);
+    // struct tm *time10;
+    // time10 = localtime(&lt10);
+    // cout << asctime(time10);
 
     timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
 
@@ -295,17 +304,14 @@ void Controller::doCycle(const string &statfilename, int choice) {
     ///
 
     try {
-      calculateState(time_[i], timestep, isFirst);
+
+      timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
+
     } catch (GEMException gex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
       throw gex;
     }
-
-    cout << "After calculateState:" << endl;
-    cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
-    cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
-    cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
 
     ///
     /// Once the change in state is determined, propagate the consequences
@@ -314,16 +320,18 @@ void Controller::doCycle(const string &statfilename, int choice) {
     /// function without doing anything else
     ///
 
-    if (chemSys_->getTimesGEMFailed() > 0) {
+    if (timesGEMFailed_loc > 0) {
       // Skip the remainder of this iteration and go to the next iteration
       if (warning_) {
-        cout << "Controller::doCycle  WARNING: Previous call to "
+        cout << "Controller::doCycle WARNING: Previous call to "
              << "GEM_run failed, so I will" << endl
-             << "Controller::doCycle  not update the microstructure "
+             << "Controller::doCycle not update the microstructure "
              << "or do anything else" << endl
-             << "controller::doCycle  during this time step" << endl;
+             << "controller::doCycle during this time step" << endl;
         cout.flush();
       }
+      cout << "i/cyc/time[i]/getTimesGEMFailed: " << i << " / " << cyc << " / "
+           << time_[i] << "\t" << timesGEMFailed_loc << endl;
       continue;
     }
 
@@ -337,11 +345,189 @@ void Controller::doCycle(const string &statfilename, int choice) {
     /// Next function can encounter EOB exceptions within but they
     /// are caught there and the program will then exit from within
     /// this function rather than throwing an exception itself
-    ////
+    ///
 
     try {
-      // lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
-      lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater);
+      // set iniLattice i.e. a copy of initial lattice/system configuration
+      // (including all DCs values) from ChemicalSystem:
+      iniLattice.DCMoles = kineticController_->getDCMoles();
+
+      // from Lattice:
+      iniLattice.count = lattice_->getCount();
+      iniLattice.site.clear();
+      RestoreSite site_l;                           // only one declaration
+      int dimLatticeSite = lattice_->getNumsites(); // only one declaration
+      for (int i = 0; i < dimLatticeSite; i++) {
+        site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
+        site_l.dissolution = (lattice_->getSite(i))->getDissolutionPhases();
+        site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
+        site_l.wmc = (lattice_->getSite(i))->getWmc();
+        site_l.wmc0 = (lattice_->getSite(i))->getWmc0();
+        site_l.visit = 0;
+        iniLattice.site.push_back(site_l);
+      }
+      iniLattice.interface.clear();
+      RestoreInterface interface_l; // only one declaration
+      int dimLatticeInterface =
+          lattice_->getInterfaceSize(); // only one declaration
+      for (int i = 0; i < dimLatticeInterface; i++) {
+        interface_l.microPhaseId = lattice_->getInterface(i).getMicroPhaseId();
+        interface_l.growthSites = lattice_->getInterface(i).getGrowthSites();
+        interface_l.dissolutionSites =
+            lattice_->getInterface(i).getDissolutionSites();
+        iniLattice.interface.push_back(interface_l);
+      }
+
+      /*
+      int sizeG, sizeD;
+      string nameFileG;
+      string nameFileD;
+      for(int i = 0; i < dimLatticeInterface; i++){
+          nameFileG = "contrGrow_0_" + to_string(i) + ".dat";
+          nameFileD = "contrDiss_0_" + to_string(i) + ".dat";
+          ofstream outG(nameFileG.c_str());
+          ofstream outD(nameFileD.c_str());
+          sizeG = iniLattice.interface[i].growthSites.size();
+          sizeD = iniLattice.interface[i].dissolutionSites.size();
+          outG << "interface_[" << i << "]growthSites.size() = " << sizeG
+               << "\t& microPhaseId_ = " << iniLattice.interface[i].microPhaseId
+      << endl; for(int j = 0; j < sizeG; j++){ outG <<
+      iniLattice.interface[i].growthSites[j].getId() << "\t"
+                   << iniLattice.interface[i].growthSites[j].getAffinity() <<
+      "\t"
+                   << iniLattice.interface[i].growthSites[j].getVerbose() <<
+      "\t"
+                   << iniLattice.interface[i].growthSites[j].getProb() << "\t"
+                   << iniLattice.interface[i].growthSites[j].getProbIni() <<
+      endl;
+          }
+          outG.close();
+          outD << "interfacsolidMasse_[" << i << "]dissolutionSites.size() = "
+               << sizeD << "\t& microPhaseId_ = "
+               << iniLattice.interface[i].microPhaseId << endl;
+          for(int j = 0; j < sizeD; j++){
+              outD << iniLattice.interface[i].dissolutionSites[j].getId() <<
+      "\t"
+                   << iniLattice.interface[i].dissolutionSites[j].getAffinity()
+      << "\t"
+                   << iniLattice.interface[i].dissolutionSites[j].getVerbose()
+      << "\t"
+                   << iniLattice.interface[i].dissolutionSites[j].getProb() <<
+      "\t"
+                   << iniLattice.interface[i].dissolutionSites[j].getProbIni()
+      << endl;
+          }
+          outD.close();
+      }
+      */
+
+      int numDiff = 1000, phDiff = 1000;
+      string nameDiff = "testDiff";
+      int changeLattice;
+      int whileCount = 0;
+      changeLattice =
+          lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater,
+                                         numDiff, phDiff, nameDiff, whileCount);
+
+      // if error from changeMicrostructure (not all the voxels given by GEM can
+      // be switched to a new DCId):
+      //   - comeback to the initial system configuration contained by
+      //   iniLattice
+      //   - re-run GEM with restrictions impossed by the system configuration
+      //   (DC distribution
+      //       on the lattice sites) i.e.
+      //       the primal solution must contained a number of moles
+      //       corresponding to "numDiff" lattice sites for the microphase
+      //       "phDiff"
+      //
+      // restore initial system:
+      while (changeLattice ==
+             0) { //} // - for many phases or more loops for the same phase!
+                  // if (changeLattice == 0) {
+        DCId = chemSys_->getMicroPhaseDCMembers(phDiff, 0);
+        // cout << endl << "phDiff/DCId = " << phDiff << " / " << DCId
+        //      << "\tvolMol: " << chemSys_->getDCMolarVolume(phDiff) << " / "
+        //      << chemSys_->getDCMolarVolume(DCId) << endl <<
+        //      endl;cout.flush();
+        double volMolDiff = chemSys_->getDCMolarVolume(DCId);  // m3/mol
+        double molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
+
+        double vfracDiff = ((double)numDiff) / ((double)dimLatticeSite);
+
+        double microPhaseMassDiff =
+            vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
+
+        double scaledMassDiff =
+            microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
+
+        double numMolesDiff = scaledMassDiff / molarMassDiff;
+
+        // for ChemicalSystem:
+        unsigned int numDCs = chemSys_->getNumDCs();
+        for (int i = 0; i < numDCs; i++) {
+          chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
+        }
+
+        // for Lattice:
+        lattice_->setCount(iniLattice.count);
+
+        for (int i = 0; i < dimLatticeSite; i++) {
+          (lattice_->getSite(i))
+              ->setMicroPhaseId(iniLattice.site[i].microPhaseId);
+          (lattice_->getSite(i))
+              ->setDissolutionSite(iniLattice.site[i].dissolution);
+          (lattice_->getSite(i))->setGrowthPhases(iniLattice.site[i].growth);
+          (lattice_->getSite(i))->setWmc(iniLattice.site[i].wmc);
+          (lattice_->getSite(i))->setWmc0(iniLattice.site[i].wmc0);
+          (lattice_->getSite(i))->setVisit(iniLattice.site[i].visit); // or 0!
+        }
+
+        for (int i = 0; i < dimLatticeInterface; i++) {
+          lattice_->setInterfaceMicroPhaseId(
+              i, iniLattice.interface[i].microPhaseId); // same as before!
+          lattice_->setGrowthSites(i, iniLattice.interface[i].growthSites);
+          lattice_->setDissolutionSites(
+              i, iniLattice.interface[i].dissolutionSites);
+        }
+
+        chemSys_->setDCLowerLimit(DCId, numMolesDiff);
+        int timesGEMFailed_recall =
+            chemSys_->calculateState(time_[i], isFirst, cyc, true);
+        chemSys_->setDCLowerLimit(DCId, 0);
+        if (timesGEMFailed_recall > 0) {
+          // Skip the remainder of this iteration and go to the next iteration
+          if (warning_) {
+            cout << "Controller::doCycle WARNING: Previous call to "
+                 << "GEM_run failed, so I will" << endl
+                 << "Controller::doCycle not update the microstructure "
+                 << "or do anything else" << endl
+                 << "controller::doCycle during this time step" << endl;
+            cout.flush();
+          }
+          cout << "i/time[i]/getTimesGEMFailed_recall: " << i << "\t"
+               << time_[i] << "\t" << timesGEMFailed_recall << endl;
+          continue;
+        }
+
+        if (verbose_) {
+          cout << endl
+               << "*Returned from ChemicalSystem::calculateState" << endl;
+          cout << "*called by function Controller::calculateState" << endl;
+          cout << "*timesGEMFailed = " << timesGEMFailed_recall << endl;
+          cout.flush();
+        }
+
+        numDiff = 5000, phDiff = 5000;
+        nameDiff = "testDiff_recall";
+
+        whileCount++;
+        changeLattice = lattice_->changeMicrostructure(
+            time_[i], sim_type_, isFirst, capwater, numDiff, phDiff, nameDiff,
+            whileCount);
+        // if(changeLattice != 1 ) {cout << endl << " end changeLattice recall
+        // changeLattice = " << changeLattice << endl; exit(0);}
+      }
+
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
@@ -355,6 +541,11 @@ void Controller::doCycle(const string &statfilename, int choice) {
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
       throw mex;
     }
+
+    // write output .dat files
+    if (writeICsDCs)
+      writeTxtOutputFiles_onlyICsDCs(time_[i]);
+    writeTxtOutputFiles(time_[i]);
 
     ///
     /// Calculate the pore size distribution and saturation
@@ -393,7 +584,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
     double watervolume = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
 
     if (watervolume < 2.0e-18) { // Units in m3, so this is about two voxels,
-                                 // we will stop hydration
+      // we will stop hydration
       if (warning_) {
         cout << "Controller::doCycle WARNING: System is out of capillary pore "
                 "water."
@@ -449,8 +640,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
       ///
 
       /*
-      expansion.clear();
-      */
+expansion.clear();
+*/
 
       if (expansion.size() > 1) {
 
@@ -500,8 +691,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
           Site *ste;
           ste = lattice_->getSite(expindex);
           /*
-          lattice_->dWaterchange(poreintroduce);
-          */
+lattice_->dWaterchange(poreintroduce);
+*/
 
           double dwmcval = poreintroduce;
           lattice_->dWmc(expindex, dwmcval);
@@ -588,7 +779,6 @@ void Controller::doCycle(const string &statfilename, int choice) {
           /// something?
           ///
           /// @note Associating the last clinker phase with id 5 is a kluge
-
           /// @todo Give each phase a calcstress property or something like that
           ///       that can be checked instead of hardwiring phase ids
 
@@ -618,8 +808,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
                   if ((stenb->getWmc() > 0.0) &&
                       (stenb->getMicroPhaseId() != ELECTROLYTEID) &&
                       (stenb->getMicroPhaseId() != VOIDID)) {
-                    lattice_->addDissolutionSiteMod(stenb,
-                                                    stenb->getMicroPhaseId());
+                    lattice_->addDissolutionSite(stenb,
+                                                 stenb->getMicroPhaseId());
                   }
                 }
                 for (int j = ste->nbSize(1); j < ste->nbSize(2); j++) {
@@ -628,21 +818,21 @@ void Controller::doCycle(const string &statfilename, int choice) {
                 }
 
                 /*
-                vector<double> damageexp;
-                damageexp.clear();
-                double poreindamage = 0.6;
-                damageexp.resize(3,(1.0 / 3.0 * poreindamage));
-                lattice_->setExpansion(index,damageexp);
-                vector<int> coordin;
-                coordin.clear();
-                coordin.resize(3,0);
-                coordin[0] = ste->getX();
-                coordin[1] = ste->getY();
-                coordin[2] = ste->getZ();
-                lattice_->setExpansionCoordin(index,coordin);
-                lattice_->dWaterchange(poreindamage);
-                ste->setVolume(VOIDID,poreindamage);
-                */
+vector<double> damageexp;
+damageexp.clear();
+double poreindamage = 0.6;
+damageexp.resize(3,(1.0 / 3.0 * poreindamage));
+lattice_->setExpansion(index,damageexp);
+vector<int> coordin;
+coordin.clear();
+coordin.resize(3,0);
+coordin[0] = ste->getX();
+coordin[1] = ste->getY();
+coordin[2] = ste->getZ();
+lattice_->setExpansionCoordin(index,coordin);
+lattice_->dWaterchange(poreindamage);
+ste->setVolume(VOIDID,poreindamage);
+*/
               }
             }
           }
@@ -677,9 +867,11 @@ void Controller::doCycle(const string &statfilename, int choice) {
   return;
 }
 
-void Controller::calculateState(double time, double dt, bool isFirst) {
-  try {
+int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
+  int timesGEMFailed = 0;
+
+  try {
     if (isFirst) {
 
       double T = chemSys_->getTemperature();
@@ -687,28 +879,22 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     }
 
     ///
+    /// We must pass some vectors to the `calculateKineticStep` method that
+    /// will hold the amounts of impurity elements released from the clinker
+    /// phases.  These values do not go in the `ChemicalSystem` object, but will
+    /// still need to be processed afterward.
+    ///
+
+    // vector<double> impurityrelease;
+    // impurityrelease.clear();
+    // impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
+
+    ///
     /// Get the number of moles of each IC dissolved from kinetically controlled
     /// phases
     ///
 
     double T = lattice_->getTemperature();
-
-    if (verbose_) {
-      cout << "Controller::calculateState at time " << time << endl;
-      cout << "    Number of ICs = " << chemSys_->getNumICs() << endl;
-      for (int i = 0; i < chemSys_->getNumICs(); ++i) {
-        cout << "        " << chemSys_->getICName(i) << ": "
-             << chemSys_->getICMoles(i) << " moles" << endl;
-      }
-      // cout << endl;
-      // cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
-      // for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
-      // cout << "        " << chemSys_->getDCName(i) << ": "
-      // << chemSys_->getDCMoles(i) << " moles" << endl;
-      // }
-      cout << endl;
-      cout.flush();
-    }
 
     /// The thermodynamic calculation returns the saturation index of phases,
     /// which is needed for calculations of driving force for dissolution
@@ -721,71 +907,12 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     /// except to prohibit users from defining mixtures of CSD phases
     /// as microstructure phases.
 
-    chemSys_->setMicroPhaseSI();
+    chemSys_->setMicroPhaseSI(cyc);
 
-    kineticController_->calculateKineticEvents(dt, T, isFirst);
+    kineticController_->calculateKineticStep(dt, T, cyc);
+    // kineticController_->calculateKineticEvents(dt, T, isFirst);
 
-    if (verbose_) {
-      cout << "Controller::calculateState after KineticController " << time
-           << endl;
-      cout << "    Number of ICs = " << chemSys_->getNumICs() << endl;
-      for (int i = 0; i < chemSys_->getNumICs(); ++i) {
-        cout << "        " << chemSys_->getICName(i) << ": "
-             << chemSys_->getICMoles(i) << " moles" << endl;
-      }
-      // cout << endl;
-      cout << endl;
-
-      cout << "Controller::calculateState post KineticController DC limits:"
-           << endl;
-      cout << "    Number of DCs = " << chemSys_->getNumDCs() << endl;
-      for (int i = 0; i < chemSys_->getNumDCs(); ++i) {
-        cout << "        " << chemSys_->getDCName(i) << ": ["
-             << chemSys_->getDCLowerLimit(i) << ", "
-             << chemSys_->getDCUpperLimit(i) << "] moles" << endl;
-      }
-      cout << endl;
-      cout.flush();
-    }
-
-    ///
-    /// The next block only operates for sulfate attack iterations
-    /// It determines how many IC moles of hydrogen, oxygen, sulfur, etc to add
-    ///
-
-    if (time >= sattack_time_) {
-
-      double addwatervol = lattice_->getWaterchange() /
-                           lattice_->getNumsites() *
-                           chemSys_->getInitMicroVolume();
-
-      ///
-      /// Get the molar volume of water from the GEM node
-      ///
-
-      double water_v0 = chemSys_->getNode()->DC_V0(
-          chemSys_->getMicroPhaseDCMembers(ELECTROLYTEID, 0), chemSys_->getP(),
-          chemSys_->getTemperature());
-      double addwatermol = addwatervol / water_v0;
-
-      if (verbose_) {
-        cout << "Controller::calculateState Molar volume of water is: "
-             << water_v0 << endl;
-        cout << "Controller::calculateState The moles of water added into the "
-                "system are: "
-             << addwatermol << endl;
-        cout.flush();
-      }
-
-      for (int i = 0; i < chemSys_->getNumICs(); i++) {
-        if (chemSys_->getICName(i) == "H") {
-          chemSys_->setICMoles(i, (chemSys_->getICMoles(i) + 2 * addwatermol));
-        }
-        if (chemSys_->getICName(i) == "O") {
-          chemSys_->setICMoles(i, (chemSys_->getICMoles(i) + addwatermol));
-        }
-      }
-    }
+    // if (time >= sattack_time_) {// for sulfate attack iterations}
 
     ///
     /// Now that the method is done determining the change in moles of each IC,
@@ -794,11 +921,8 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     /// The `ChemicalSystem` object provides an interface for these calculations
     ///
 
-    int timesGEMFailed = 0;
-
     try {
-      timesGEMFailed = chemSys_->calculateState(time, isFirst);
-
+      timesGEMFailed = chemSys_->calculateState(time, isFirst, cyc, false);
       if (verbose_) {
         cout << "*Returned from ChemicalSystem::calculateState" << endl;
         cout << "*called by function Controller::calculateState" << endl;
@@ -810,237 +934,60 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
       exit(1);
     }
 
-    cout << "After ChemicalSystem::calculateState" << endl;
-    cout << "    [Ca+2] = " << chemSys_->getDCConcentration("Ca+2") << endl;
-    cout << "    [CaOH+] = " << chemSys_->getDCConcentration("CaOH+") << endl;
-    cout << "    [OH-] = " << chemSys_->getDCConcentration("OH-") << endl;
-
     if (verbose_) {
       cout << "Done!" << endl;
       cout.flush();
     }
 
-    if (chemSys_->getTimesGEMFailed() > 0) {
-      return;
+    ///
+    /// The thermodynamic calculation returns the saturation index of phases,
+    /// which is needed for calculations of driving force for dissolution
+    /// or growth.  Assign this to the lattice in case crystallization pressures
+    /// should be calculated.
+    ///
+
+    if (timesGEMFailed > 0)
+      return timesGEMFailed;
+
+    /*
+    - all these must be done after the lattice update -
+    try {
+        double aveSI = 0.0;
+        double moles = 0.0;
+        vector<int> microPhaseMembers;
+        for (int i = 0; i < chemSys_->getNumMicroPhases(); ++i) {
+            string pname = chemSys_->getMicroPhaseName(i);
+            int newMicroPhaseId =
+                chemSys_->getMicroPhaseId(chemSys_->getMicroPhaseName(i));
+            aveSI = moles = 0.0;
+            microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
+            for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
+                int newGEMPhaseId = microPhaseMembers[ii];
+                aveSI += ((solut_->getSI(newGEMPhaseId) *
+                           chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
+                moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
+            }
+            if (moles > 0.0) {
+                aveSI = aveSI / moles;
+            } else {
+                aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
+            }
+            lattice_->setSI(newMicroPhaseId, aveSI);
+        }
+    } catch (EOBException eex) {
+        eex.printException();
+        exit(1);
     }
 
     if (isFirst) {
-      chemSys_->writeChemSys();
+        chemSys_->writeChemSys();
     }
-
-    // BULLARD: These are the kinds of changes that need to be made
-    //
-    // kineticController_->calculatePrecipitationEvents(dt, T, isFirst);
-    // Then we need to rerun the SI calculations above.
-    //
-    // Another possibility is to use the dul and dll vectors for GEM_from_MT and
-    // maybe then we could do the entire dissolution and precipitation in one
-    // GEM_run calculation.
-
-    ///
-    /// Set the kinetic DC moles.  This adds the clinker components to the DC
-    /// moles of the GEM CSD. Not sure if this is helpful or maybe even an
-    /// error.
-    ///
-
-    kineticController_->setKineticDCMoles();
+    */
 
     // Output to files the solution composition data, phase data, DC data,
     // microstructure data, pH, and C-S-H composition and Ca/Si ratio
+    // DONE AFTER LATTICE UPDATE
 
-    string outfilename = jobroot_ + "_Solution.csv";
-    ofstream out3(outfilename.c_str(), ios::app);
-    if (!out3) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-
-    out3 << setprecision(5) << time;
-    char cc;
-    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
-      cc = chemSys_->getDCClassCode(i);
-      if (cc == 'S' || cc == 'T' || cc == 'W') {
-        out3 << "," << (chemSys_->getNode())->Get_cDC((long int)i);
-      }
-    }
-    out3 << endl;
-    out3.close();
-
-    outfilename = jobroot_ + "_DCMoles.csv";
-    ofstream out4(outfilename.c_str(), ios::app);
-    if (!out4) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-
-    out4 << setprecision(5) << time;
-    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
-      if (chemSys_->getDCMolarMass(i) > 0.0) {
-        cc = chemSys_->getDCClassCode(i);
-        if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-          string dcname = chemSys_->getDCName(i);
-          out4 << "," << chemSys_->getDCMoles(dcname);
-          // double V0 =
-          //     chemSys_->getDCMoles(dcname) *
-          //     chemSys_->getDCMolarVolume(dcname);
-          // out4 << "," << V0;
-          if (verbose_) {
-            cout << "Controller::calculateState    DC = "
-                 << chemSys_->getDCName(i)
-                 << ", moles = " << chemSys_->getDCMoles(i)
-                 << ", molar mass = " << chemSys_->getDCMolarMass(i) << endl;
-            cout.flush();
-          }
-        }
-      } else {
-        string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
-        out4.close();
-        throw FloatException("Controller", "calculateState", msg);
-      }
-    }
-    out4 << endl;
-    out4.close();
-
-    outfilename = jobroot_ + "_Microstructure.csv";
-    ofstream out5(outfilename.c_str(), ios::app);
-    if (!out5) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-
-    out5 << setprecision(5) << time;
-    for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
-      out5 << "," << (lattice_->getVolumefraction(i));
-    }
-    double micvol = lattice_->getMicrostructurevolume();
-    double initmicvol = lattice_->getInitialmicrostructurevolume();
-    out5 << "," << micvol << "," << (initmicvol - micvol);
-    out5 << endl;
-    out5.close();
-
-    outfilename = jobroot_ + "_pH.csv";
-    ofstream out6(outfilename.c_str(), ios::app);
-    if (!out6) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-    out6 << setprecision(5) << time;
-    out6 << "," << (chemSys_->getPH()) << endl;
-    out6.close();
-
-    chemSys_->setGEMPhaseStoich();
-
-    double *CSHcomp;
-    try {
-      CSHcomp =
-          chemSys_->getPGEMPhaseStoich(chemSys_->getGEMPhaseId(CSHGEMName));
-    } catch (EOBException eex) {
-      eex.printException();
-      exit(1);
-    }
-    if (verbose_) {
-      cout << "Done!" << endl;
-      cout.flush();
-    }
-    double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
-    outfilename = jobroot_ + "_CSH.csv";
-    ofstream out7(outfilename.c_str(), ios::app);
-    if (!out7) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-    out7 << setprecision(5) << time;
-    for (unsigned int i = 0; i < chemSys_->getNumICs(); i++) {
-      out7 << "," << CSHcomp[i];
-      if (chemSys_->getICName(i) == "Ca") {
-        CaMoles = CSHcomp[i];
-      }
-      if (chemSys_->getICName(i) == "Si") {
-        SiMoles = CSHcomp[i];
-      }
-    }
-    if (CaMoles < 1.0e-16)
-      CaMoles = 1.0e-16;
-    if (SiMoles < 1.0e-16)
-      SiMoles = 1.0e-16;
-    CaSiRatio = CaMoles / SiMoles;
-    out7 << "," << CaSiRatio << endl;
-    out7.close();
-
-    chemSys_->setGEMPhaseStoich();
-    double *phaseRecord;
-    int ICIndex;
-    CaMoles = SiMoles = 0.0;
-    outfilename = jobroot_ + "_CSratio_solid.csv";
-    ofstream out8(outfilename.c_str(), ios::app);
-    if (!out8) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-    out8 << setprecision(5) << time;
-    for (int i = 0; i < chemSys_->getNumGEMPhases(); i++) {
-      cc = chemSys_->getGEMPhaseClassCode(i);
-      if (cc == 's') {
-        phaseRecord = chemSys_->getPGEMPhaseStoich(i);
-        ICIndex = chemSys_->getICId("Ca");
-        CaMoles += phaseRecord[ICIndex];
-        ICIndex = chemSys_->getICId("Si");
-        SiMoles += phaseRecord[ICIndex];
-      }
-    }
-    if (SiMoles != 0) {
-      CaSiRatio = CaMoles / SiMoles;
-      out8 << "," << CaSiRatio << endl;
-    } else {
-      out8 << ",Si_moles is ZERO" << endl;
-    }
-    out8.close();
-
-    outfilename = jobroot_ + "_icmoles.csv";
-    ofstream out9(outfilename.c_str(), ios::app);
-    if (!out9) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-    out9 << setprecision(5) << time;
-    for (int i = 0; i < chemSys_->getNumICs(); i++) {
-      out9 << "," << chemSys_->getICMoles(i);
-    }
-    out9 << endl;
-    out9.close();
-
-    outfilename = jobroot_ + "_Enthalpy.csv";
-    ofstream out10(outfilename.c_str(), ios::app);
-    if (!out10) {
-      throw FileException("Controller", "calculateState", outfilename,
-                          "Could not append");
-    }
-    if (verbose_) {
-      cout << "Writing Enthalpy values...";
-      cout.flush();
-    }
-
-    double enth = 0.0;
-    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
-      enth += (chemSys_->getDCEnthalpy(i));
-    }
-
-    out10 << setprecision(5) << time;
-    out10 << "," << enth << endl;
-    if (verbose_) {
-      cout << "Done!" << endl;
-      cout.flush();
-    }
-    out10.close();
-
-    ///
-    /// Now that the end of the iteration is reached, zero out the kinetic
-    /// DC moles in preparation for the next iteration
-    ///
-    /// @todo Find out what this is doing and why it is needed
-    ///
-
-    kineticController_->zeroKineticDCMoles();
   } catch (FileException fex) {
     fex.printException();
     exit(1);
@@ -1048,7 +995,337 @@ void Controller::calculateState(double time, double dt, bool isFirst) {
     flex.printException();
     exit(1);
   }
-  return;
+  return timesGEMFailed;
+}
+
+void Controller::writeTxtOutputFiles(double time) {
+  ///
+  /// Set the kinetic DC moles.  This adds the clinker components to the DC
+  /// moles of the GEM CSD. Not sure if this is helpful or maybe even an
+  /// error.
+  ///
+  ///
+  int numICs = chemSys_->getNumICs();
+  int numDCs = chemSys_->getNumDCs();
+  int i, j;
+
+  // Output to files the solution composition data, phase data, DC data,
+  // microstructure data, pH, and C-S-H composition and Ca/Si ratio
+
+  string outfilename = jobroot_ + "_Solution.csv";
+  ofstream out3(outfilename.c_str(), ios::app);
+  if (!out3) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+
+  out3 << setprecision(5) << time;
+  char cc;
+  for (i = 0; i < numDCs; i++) {
+    cc = chemSys_->getDCClassCode(i);
+    if (cc == 'S' || cc == 'T' || cc == 'W') {
+      out3 << "," << (chemSys_->getNode())->Get_cDC((long int)i); // molality
+    }
+  }
+  out3 << endl;
+  out3.close();
+
+  outfilename = jobroot_ + "_DCMoles.csv";
+  ofstream out4(outfilename.c_str(), ios::app);
+  if (!out4) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+
+  out4 << setprecision(5) << time;
+  for (i = 0; i < numDCs; i++) {
+    if (chemSys_->getDCMolarMass(i) > 0.0) {
+      cc = chemSys_->getDCClassCode(i);
+      if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
+        string dcname = chemSys_->getDCName(i);
+        double V0 =
+            chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
+        out4 << "," << V0;
+        if (verbose_) {
+          cout << "Controller::calculateState    DC = "
+               << chemSys_->getDCName(i)
+               << ", moles = " << chemSys_->getDCMoles(i)
+               << ", molar mass = " << chemSys_->getDCMolarMass(i) << endl;
+          cout.flush();
+        }
+      }
+    } else {
+      string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
+      out4.close();
+      throw FloatException("Controller", "calculateState", msg);
+    }
+  }
+  out4 << endl;
+  out4.close();
+
+  outfilename = jobroot_ + "_Microstructure.csv";
+  ofstream out5(outfilename.c_str(), ios::app);
+  if (!out5) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+
+  out5 << setprecision(5) << time;
+  for (i = 0; i < chemSys_->getNumMicroPhases(); i++) {
+    out5 << "," << (lattice_->getVolumefraction(i));
+  }
+  double micvol = lattice_->getMicrostructurevolume();
+  double initmicvol = lattice_->getInitialmicrostructurevolume();
+  out5 << "," << micvol << "," << (initmicvol - micvol);
+  out5 << endl;
+  out5.close();
+
+  outfilename = jobroot_ + "_pH.csv";
+  ofstream out6(outfilename.c_str(), ios::app);
+  if (!out6) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+  out6 << setprecision(5) << time;
+  out6 << "," << (chemSys_->getPH()) << endl;
+  out6.close();
+
+  chemSys_->setGEMPhaseStoich();
+
+  double *CSHcomp;
+  try {
+    CSHcomp = chemSys_->getPGEMPhaseStoich(chemSys_->getGEMPhaseId(CSHGEMName));
+  } catch (EOBException eex) {
+    eex.printException();
+    exit(1);
+  }
+  if (verbose_) {
+    cout << "Done!" << endl;
+    cout.flush();
+  }
+  // double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
+  outfilename = jobroot_ + "_CSH.csv";
+  ofstream out7(outfilename.c_str(), ios::app);
+  if (!out7) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+  out7 << setprecision(5) << time;
+  for (i = 0; i < numICs; i++) {
+    out7 << "," << CSHcomp[i];
+    // if (chemSys_->getICName(i) == "Ca") {
+    //     CaMoles = CSHcomp[i];
+    // }
+    // if (chemSys_->getICName(i) == "Si") {
+    //     SiMoles = CSHcomp[i];
+    // }
+  }
+  int id_Ca = chemSys_->getICId("Ca");
+  int id_Si = chemSys_->getICId("Si");
+  double CaMoles = CSHcomp[id_Ca];
+  double SiMoles = CSHcomp[id_Si];
+  if (CaMoles < 1.0e-16)
+    CaMoles = 1.0e-16;
+  if (SiMoles < 1.0e-16)
+    SiMoles = 1.0e-16;
+  double CaSiRatio = CaMoles / SiMoles;
+  out7 << "," << CaSiRatio << endl;
+  out7.close();
+
+  // chemSys_->setGEMPhaseStoich();
+  double *phaseRecord;
+  int ICIndex;
+  CaMoles = SiMoles = 0.0;
+  outfilename = jobroot_ + "_CSratio_solid.csv";
+  ofstream out8(outfilename.c_str(), ios::app);
+  if (!out8) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+  out8 << setprecision(5) << time;
+  for (i = 0; i < chemSys_->getNumGEMPhases(); i++) {
+    cc = chemSys_->getGEMPhaseClassCode(i);
+    if (cc == 's') {
+      phaseRecord = chemSys_->getPGEMPhaseStoich(i);
+      // ICIndex = chemSys_->getICId("Ca");
+      // CaMoles += phaseRecord[ICIndex];
+      // ICIndex = chemSys_->getICId("Si");
+      // SiMoles += phaseRecord[ICIndex];
+      CaMoles += phaseRecord[id_Ca];
+      SiMoles += phaseRecord[id_Si];
+    }
+  }
+  if (SiMoles != 0) {
+    CaSiRatio = CaMoles / SiMoles;
+    out8 << "," << CaSiRatio << endl;
+  } else {
+    out8 << ",Si_moles is ZERO" << endl;
+  }
+  out8.close();
+
+  outfilename = jobroot_ + "_Enthalpy.csv";
+  ofstream out10(outfilename.c_str(), ios::app);
+  if (!out10) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+  if (verbose_) {
+    cout << "Writing Enthalpy values...";
+    cout.flush();
+  }
+
+  double enth = 0.0;
+  for (i = 0; i < numDCs; i++) {
+    enth += (chemSys_->getDCEnthalpy(i));
+  }
+
+  out10 << setprecision(5) << time;
+  out10 << "," << enth << endl;
+  if (verbose_) {
+    cout << "Done!" << endl;
+    cout.flush();
+  }
+  out10.close();
+}
+
+void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
+
+  int i, j;
+  int numICs = chemSys_->getNumICs();
+  int numDCs = chemSys_->getNumDCs();
+  vector<double> ICMoles;
+  ICMoles.resize(numICs, 0.0);
+  vector<double> DCMoles;
+  DCMoles.resize(numDCs, 0.0);
+  for (i = 0; i < numDCs; i++) {
+    DCMoles[i] = chemSys_->getDCMoles(i);
+  }
+
+  string outfilenameIC = jobroot_ + "_icmoles.csv";
+  string outfilenameDC = jobroot_ + "_dcmoles.csv";
+  if (time < 1.e-10) {
+    ofstream out0IC(outfilenameIC.c_str());
+    out0IC << "Time(d)";
+    for (i = 0; i < numICs; i++) {
+      out0IC << "," << chemSys_->getICName(i);
+    }
+    out0IC << endl;
+    out0IC.close();
+
+    ofstream out0DC(outfilenameDC.c_str());
+    out0DC << "Time(d)";
+    for (i = 0; i < numDCs; i++) {
+      out0DC << "," << chemSys_->getDCName(i);
+    }
+    out0DC << endl;
+    out0DC.close();
+  }
+
+  vector<int> impurityDCID;
+  impurityDCID.clear();
+  impurityDCID.push_back(chemSys_->getDCId("K2O"));
+  impurityDCID.push_back(chemSys_->getDCId("Na2O"));
+  impurityDCID.push_back(chemSys_->getDCId("Per"));
+  impurityDCID.push_back(chemSys_->getDCId("SO3"));
+
+  double scMass, molMass;
+  int mPhId;
+  double massImpurity, totMassImpurity;
+
+  // cout << endl << "getIsDCKinetic: " << endl;
+  for (j = 0; j < numDCs; j++) {
+    if (chemSys_->getIsDCKinetic(j)) {
+      // molMass = chemSys_->getDCMolarMass(j);
+      mPhId = chemSys_->getDC_to_MPhID(j);
+      scMass = chemSys_->getMicroPhaseMass(mPhId);
+
+      totMassImpurity = 0;
+
+      massImpurity = scMass * chemSys_->getK2o(mPhId);
+      totMassImpurity += massImpurity;
+      DCMoles[impurityDCID[0]] +=
+          massImpurity / chemSys_->getDCMolarMass("K2O");
+
+      massImpurity = scMass * chemSys_->getNa2o(mPhId);
+      totMassImpurity += massImpurity;
+      DCMoles[impurityDCID[1]] +=
+          massImpurity / chemSys_->getDCMolarMass("Na2O");
+
+      massImpurity = scMass * chemSys_->getMgo(mPhId);
+      totMassImpurity += massImpurity;
+      DCMoles[impurityDCID[2]] +=
+          massImpurity / chemSys_->getDCMolarMass("Per"); // MgO
+
+      massImpurity = scMass * chemSys_->getSo3(mPhId);
+      totMassImpurity += massImpurity;
+      DCMoles[impurityDCID[3]] +=
+          massImpurity / chemSys_->getDCMolarMass("SO3");
+
+      DCMoles[j] = (scMass - totMassImpurity) / chemSys_->getDCMolarMass(j);
+
+      // DCMoles[j] = scMass / molMass;
+      // DCMoles[impurityDCID[0]] += scMass * chemSys_->getK2o(mPhId) /
+      // chemSys_->getDCMolarMass("K2O"); DCMoles[impurityDCID[1]] += scMass *
+      // chemSys_->getNa2o(mPhId) / chemSys_->getDCMolarMass("Na2O");
+      // DCMoles[impurityDCID[2]] += scMass * chemSys_->getMgo(mPhId) /
+      // chemSys_->getDCMolarMass("Per");//MgO DCMoles[impurityDCID[3]] +=
+      // scMass * chemSys_->getSo3(mPhId) / chemSys_->getDCMolarMass("SO3");
+
+      // cout << j << "  scMass : " << scMass << "  mPhId :" << mPhId << "
+      // molMass : " << molMass << endl; cout << "      impurityDCID [0/1/2/3]
+      // : " << impurityDCID[0] << " / " << impurityDCID[1] << endl;
+      // cout.flush();
+      //                                     //  " / " << impurityDCID[2] << " /
+      //                                     " << impurityDCID[3] << endl;
+      //                                     cout.flush();
+      // cout << "      mass(%) K2O/Na2O/MgO/SO3 : " << chemSys_->getK2o(mPhId)
+      // << " / " << chemSys_->getNa2o(mPhId) << endl; cout.flush();
+      //                                     //  " / " <<
+      //                                     chemSys_->getMgo(mPhId) << " / " <<
+      //                                     chemSys_->getSo3(mPhId) << endl;
+      //                                     cout.flush();
+      // cout << "      molMass K2O/Na2O/MgO/SO3 : " <<
+      // chemSys_->getDCMolarMass("K2O") << " / " <<
+      // chemSys_->getDCMolarMass("Na2O") << endl; cout.flush();
+      //                                     //  " / " <<
+      //                                     chemSys_->getDCMolarMass("MgO") <<
+      //                                     " / " <<
+      //                                     chemSys_->getDCMolarMass("SO3") <<
+      //                                     endl; cout.flush();
+    }
+  }
+
+  for (j = 0; j < numDCs; j++) {
+    for (i = 0; i < numICs; i++) {
+      ICMoles[i] += DCMoles[j] * chemSys_->getDCStoich(j, i);
+    }
+  }
+
+  ofstream out1(outfilenameIC.c_str(), ios::app);
+  if (!out1) {
+    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                        outfilenameIC, "Could not append");
+  }
+
+  out1 << setprecision(5) << time;
+  for (i = 0; i < numICs; i++) {
+    out1 << "," << ICMoles[i];
+  }
+  out1 << endl;
+  out1.close();
+
+  ofstream out2(outfilenameDC.c_str(), ios::app);
+  if (!out2) {
+    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                        outfilenameDC, "Could not append");
+  }
+
+  out2 << setprecision(5) << time;
+  for (i = 0; i < numDCs; i++) {
+    out2 << "," << DCMoles[i];
+  }
+  out2 << endl;
+  out2.close();
 }
 
 void Controller::parseDoc(const string &docName) {

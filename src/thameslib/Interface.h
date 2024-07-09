@@ -109,6 +109,8 @@ public:
     return (unsigned int)(microPhaseId_);
   }
 
+  void setMicroPhaseId(unsigned int mPhId) { microPhaseId_ = mPhId; }
+
   /**
   @brief Gets the list of sites where growth of this phase can occur adjacent to
   the interface.
@@ -116,6 +118,16 @@ public:
   @return the vector of Isite objects where growth can occur
   */
   vector<Isite> getGrowthSites(void) { return growthSites_; }
+
+  void setGrowthSites(vector<Isite> vect) {
+    int dim = vect.size();
+    growthSites_.clear();
+    // cout << "dim_growthInterface: " << dim << endl;
+    for (int i = 0; i < dim; i++) {
+      growthSites_.push_back(vect[i]);
+    }
+    // cout << "dim_growthInterface after: " << growthSites_.size() << endl;
+  }
 
   int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
 
@@ -128,6 +140,17 @@ public:
   @return the vector of Isite objects where dissolution can occur
   */
   vector<Isite> getDissolutionSites(void) { return dissolutionSites_; }
+
+  void setDissolutionSites(vector<Isite> vect) {
+    int dim = vect.size();
+    dissolutionSites_.clear();
+    // cout << "dim_dissolutionInterface: " << dim << endl;
+    for (int i = 0; i < dim; i++) {
+      dissolutionSites_.push_back(vect[i]);
+    }
+    // cout << "dim_dissolutionInterface after: " << dissolutionSites_.size() <<
+    // endl;
+  }
 
   /**
   @brief Gets the number of sites where growth can occur adjacent to the
@@ -155,10 +178,9 @@ public:
   @param loc is a pointer to the site to add to the list of growth sites
   @return true if the site was added successfully, false otherwise
   */
+  bool addGrowthSite(Site *loc);
 
-  bool addGrowthSiteMod(Site *loc);
-
-  bool addGrowthSiteMod_newInterface(int id, int aff);
+  bool addGrowthSite_newInterface(int id, int aff);
 
   /**
   @brief Add a site to the list of sites where dissolution can occur at the
@@ -167,8 +189,7 @@ public:
   @param loc is a pointer to the site to add to the list of dissolution sites
   @return true if the site was added successfully, false otherwise
   */
-
-  bool addDissolutionSiteMod(Site *loc);
+  bool addDissolutionSite(Site *loc);
 
   /**
   @brief Sort the list of growth sites in descending order of potential for
@@ -200,10 +221,8 @@ public:
   @return true if the site was removed successfully, false otherwise
   */
   // bool removeGrowthSite(Site *loc);
-
-  bool removeGrowthSiteMod0_grow(Site *loc, int pos);
-
-  bool removeGrowthSiteMod1_grow(Site *loc);
+  bool removeGrowthSite_0(Site *loc, int pos);
+  bool removeGrowthSite_1(Site *loc);
 
   /**
   @brief Remove a site from the list of sites where dissolution can occur
@@ -212,12 +231,9 @@ public:
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-
   //  bool removeDissolutionSite(Site *loc);
-
-  bool removeDissolutionSiteMod_diss(Site *loc, int pos);
-
-  bool removeDissolutionSiteMod_grow(Site *loc);
+  bool removeDissolutionSite_diss(Site *loc, int pos);
+  bool removeDissolutionSite_grow(Site *loc);
 
   /**
   @brief Set the verbose flag
