@@ -17,7 +17,7 @@
   <xs:simpleType name="doubletype">
     <xs:restriction base="xs:double" />
   </xs:simpleType>
-
+  
   <xs:simpleType name="positiveDoubletype">
     <xs:restriction base="xs:double">
       <xs:minInclusive value="0" />
@@ -129,6 +129,7 @@
       <xs:element minOccurs="0" maxOccurs="1" name="k3" type="positiveDoubletype" />
       <xs:element minOccurs="0" maxOccurs="1" name="n1" type="positiveDoubletype" />
       <xs:element minOccurs="0" maxOccurs="1" name="n3" type="positiveDoubletype" />
+      <xs:element minOccurs="0" maxOccurs="1" name="HLK" type="positiveDoubletype" />
       <xs:element minOccurs="0" maxOccurs="1" name="activationEnergy" type="positiveDoubletype" />
       <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype" />
       <xs:element minOccurs="0" maxOccurs="1" name="dissolutionRateConst" type="positiveDoubletype" />
@@ -176,6 +177,7 @@
       <xs:element name="thamesname" type="stringtype" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="gemphase_data" type="gemphase_datatype" />
       <xs:element name="id" type="integertype" />
+      <xs:element name="cement_component" type="integertype" />
       <xs:element minOccurs="0" name="interface_data" type="interface_datatype" />
       <xs:element minOccurs='0' maxOccurs="1" name="poresizefilename" type="stringtype" />
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Rd" type="Rdtype" />
