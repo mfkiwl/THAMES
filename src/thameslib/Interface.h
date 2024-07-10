@@ -109,7 +109,7 @@ public:
     return (unsigned int)(microPhaseId_);
   }
 
-  void setMicroPhaseId(unsigned int mPhId) {microPhaseId_ = mPhId;}
+  void setMicroPhaseId(unsigned int mPhId) { microPhaseId_ = mPhId; }
 
   /**
   @brief Gets the list of sites where growth of this phase can occur adjacent to
@@ -119,23 +119,19 @@ public:
   */
   vector<Isite> getGrowthSites(void) { return growthSites_; }
 
-  void setGrowthSites(vector<Isite> vect){
-      int dim = vect.size();
-      growthSites_.clear();
-      //cout << "dim_growthInterface: " << dim << endl;
-      for(int i = 0; i < dim; i++){
-          growthSites_.push_back(vect[i]);
-      }
-      //cout << "dim_growthInterface after: " << growthSites_.size() << endl;
+  void setGrowthSites(vector<Isite> vect) {
+    int dim = vect.size();
+    growthSites_.clear();
+    // cout << "dim_growthInterface: " << dim << endl;
+    for (int i = 0; i < dim; i++) {
+      growthSites_.push_back(vect[i]);
+    }
+    // cout << "dim_growthInterface after: " << growthSites_.size() << endl;
   }
 
-  int getGrowthSitesId (int pos) {
-      return growthSites_[pos].getId();
-  }
+  int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
 
-  int getDissolutionSitesId (int pos) {
-      return dissolutionSites_[pos].getId();
-  }
+  int getDissolutionSitesId(int pos) { return dissolutionSites_[pos].getId(); }
 
   /**
   @brief Gets the list of sites where dissolution of this phase can occur at the
@@ -145,14 +141,15 @@ public:
   */
   vector<Isite> getDissolutionSites(void) { return dissolutionSites_; }
 
-  void setDissolutionSites(vector<Isite> vect){
-      int dim = vect.size();
-      dissolutionSites_.clear();
-      //cout << "dim_dissolutionInterface: " << dim << endl;
-      for(int i = 0; i < dim; i++){
-          dissolutionSites_.push_back(vect[i]);
-      }
-      //cout << "dim_dissolutionInterface after: " << dissolutionSites_.size() << endl;
+  void setDissolutionSites(vector<Isite> vect) {
+    int dim = vect.size();
+    dissolutionSites_.clear();
+    // cout << "dim_dissolutionInterface: " << dim << endl;
+    for (int i = 0; i < dim; i++) {
+      dissolutionSites_.push_back(vect[i]);
+    }
+    // cout << "dim_dissolutionInterface after: " << dissolutionSites_.size() <<
+    // endl;
   }
 
   /**
@@ -223,7 +220,7 @@ public:
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-  //bool removeGrowthSite(Site *loc);
+  // bool removeGrowthSite(Site *loc);
   bool removeGrowthSite_0(Site *loc, int pos);
   bool removeGrowthSite_1(Site *loc);
 
@@ -234,7 +231,7 @@ public:
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-//  bool removeDissolutionSite(Site *loc);
+  //  bool removeDissolutionSite(Site *loc);
   bool removeDissolutionSite_diss(Site *loc, int pos);
   bool removeDissolutionSite_grow(Site *loc);
 

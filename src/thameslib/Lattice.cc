@@ -483,7 +483,8 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
             cout << "Lattice::Lattice     Density = " << density << " g/cm3"
                  << endl;
             cout << "Lattice::Lattice     Volume Fraction = " << vfrac << endl;
-            cout << "Lattice::Lattice     Mass = " << (vfrac * density) << endl;
+            cout << "Lattice::Lattice     Mass density = " << (vfrac * density)
+                 << " g/cm3 of system" << endl;
             cout.flush();
           }
         }
@@ -553,6 +554,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
     // <<endl;
 
     chemSys_->setInitMicroVolume(totmicvol);
+    initialmicrostructurevolume_ = totmicvol;
 
     // Initially assume that all free water and void space
     // is capillary volume
@@ -2339,7 +2341,6 @@ endl; exit(1); } else { while (!in1.eof()) { int index; vector<int> coordin;
 cout << "expansion_.size() = " << expansion_.size() << " at the beginning of "
      << time << endl;
 */
-
   ///
   /// Zero out the amount of water to add to the microstructure.
   ///
@@ -2430,128 +2431,17 @@ cout << "expansion_.size() = " << expansion_.size() << " at the beginning of "
 
   if (simtype == SULFATE_ATTACK) {
     /*
-///
-///  Normalize to get volume fractions and compute number
-///  of sites of each phase needed
-///
-///  @todo Find out why we need to do all of this just because
-///  there will eventually be sulfate attack.  Why not wait until
-///  sulfate attack simulation actually starts?
-///
-
-int numMicroPhases = chemSys_->getNumMicroPhases();
-
-netsites.clear();
-netsites.resize(numMicroPhases, 0);
-pid.clear();
-pid.resize(numMicroPhases, 0);
-
-vector<int> growing;
-vector<vector<int>> shrinking;
-vector<vector<double>> volratios;
-growing.clear();
-shrinking.clear();
-volratios.clear();
-vector<int> idummy;
-idummy.clear();
-vector<double> ddummy;
-ddummy.clear();
-
-try {
-  // Hard wiring for sulfate attack here
-  // @todo Generalize to other phases
-
-  growing.push_back(chemSys_->getMicroPhaseId(AFTMicroName));
-  shrinking.resize(growing.size(), idummy);
-  volratios.resize(growing.size(), ddummy);
-  for (i = 0; i < growing.size(); ++i) {
-    if (MonosulfMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(MonosulfMicroName));
-      volratios[i].push_back(2.288);
-    }
-    if (MonocarbMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(MonocarbMicroName));
-      volratios[i].push_back(2.699);
-    }
-    if (HydrotalcMicroName.length() > 0) {
-      shrinking[i].push_back(chemSys_->getMicroPhaseId(HydrotalcMicroName));
-      volratios[i].push_back(3.211);
-    }
-  }
-
-  for (int ii = 0; ii < growing.size(); ++ii) {
-    for (i = 0; i < vfrac_next.size(); i++) {
-      cursites = (int)(count_.at(i) + 0.5);
-      newsites = (int)((numsites_ * vfrac_next.at(i)) + 0.5);
-      tnetsites = 0;
-      if (i != ELECTROLYTEID && i != VOIDID)
-        tnetsites = (newsites - cursites);
-      netsites.at(i) = tnetsites;
-      pid.at(i) = i;
-      if (i == growing[ii] && isFirst) {
-        netsites.at(i) = 0;
-        count_.at(i) = newsites;
-      }
-      if (verbose_) {
-        if (netsites.at(i) != 0) {
-          cout << "Lattice::changeMicrostructure ****netsites["
-               << phasenames.at(i) << "] in this state = " << netsites.at(i)
-               << endl;
-          cout.flush();
-        }
-      }
-    }
-
     ///
-    /// Next block gets executed only if we are now simulating
-    /// sulfate attack.
+    ///  Normalize to get volume fractions and compute number
+    ///  of sites of each phase needed
+    ///
+    ///  @todo Find out why we need to do all of this just because
+    ///  there will eventually be sulfate attack.  Why not wait until
+    ///  sulfate attack simulation actually starts?
     ///
 
-    if (time_ >= sattack_time_) {
-      if (verbose_) {
-        cout << "Lattice::changeMicrostructure Crystal-pressure "
-             << "transform at time_ = " << time_ << endl;
-        cout.flush();
-      }
-
-      ///
-      /// The relevant stress-free molar volume ratios for sulfate
-      /// attack phase transformations.
-      ///
-
-      vector<int> numchanged;
-      numchanged.clear();
-      int growid = growing[ii];
-      for (int iii = 0; iii < shrinking[ii].size(); ++iii) {
-        numchanged.resize(2, 0);
-        int shrinkid = shrinking[ii][iii];
-        double volrat = volratios[ii][iii];
-        if ((netsites.at(shrinkid) < 0) && (netsites.at(growid) > 0)) {
-          numchanged = transform(shrinkid, netsites.at(shrinkid), growid,
-                                 netsites.at(growid), volrat);
-
-          netsites.at(shrinkid) += numchanged[0];
-          netsites.at(growid) -= numchanged[1];
-          if (verbose_) {
-            cout << "Lattice::changeMicrostructure netsites.at(" << shrinkid
-                 << ") is: " << netsites.at(shrinkid) << endl;
-            cout << "Lattice::changeMicrostructure netsites.at(" << growid
-                 << ") is: " << netsites.at(growid) << endl;
-            cout.flush();
-          }
-        }
-      }
-    }
-  }
-}
-
-catch (out_of_range &oor) {
-  throw EOBException(
-      "Lattice", "changeMicrostructure",
-      "phasenames or count_ or pid or netsites or vfrac_next",
-      phasenames.size(), i);
-}
-*/
+    /// Used to be a bunch of sulfate atack stuff here
+    */
 
   } else {
 
@@ -2573,7 +2463,6 @@ catch (out_of_range &oor) {
         netsites.at(i) = newsites - cursites;
         pid.at(i) = i;
         phName[i] = phasenames.at(i);
-        // if ((verbose_) && (netsites.at(i) != 0)) {
         if (netsites.at(i) != 0) {
           cout << "Lattice::changeMicrostructure ***netsites["
                << phasenames.at(i) << "] in this state = " << netsites.at(i)
@@ -2591,12 +2480,10 @@ catch (out_of_range &oor) {
     }
   }
 
-  // cout << endl << "lattice 1st cicle" << endl; exit(0);
-
   ///
   /// Sort netsites in ascending order, except we will handle
   /// void space differently.
-  ///
+
   int netsitesSize_;
   netsitesSize_ = netsites.size();
   try {
@@ -2683,7 +2570,6 @@ catch (out_of_range &oor) {
         if (nuclei > 0)
           cout << "   NEED NUCLEATION FOR " << nuclei << " voxels" << endl;
 
-        // while (diff > 0) {
         while (nuclei > 0) {
           gs = interface_[pid.at(i)].getGrowthSites();
           ds = interface_[pid.at(i)].getDissolutionSites();
@@ -2956,11 +2842,6 @@ catch (out_of_range &oor) {
                        "volumefraction_ or count_", volumefraction_.size(), i);
   }
 
-  //    for (i = FIRST_SOLID; i < interface_.size(); i++) {
-  //        interface_[i].sortGrowthSites(site_, i);
-  //        interface_[i].sortDissolutionSites(site_, i);
-  //    }
-
   ///  This is a local variable and the value is never used.
   ///
   ///  @todo Why not eliminate this line completely?
@@ -3054,8 +2935,10 @@ void Lattice::adjustMicrostructureVolumes(vector<double> &vol, int volSize,
     // First need to trim off any extra water that lies outside the system
 
     voidvolume_ = nonsolidvolume_ - watervolume_;
+
     if (voidvolume_ < 0.0)
       watervolume_ = nonsolidvolume_;
+    cout << ")))) Water volume 02 = " << watervolume_ << endl;
 
     capillarywatervolume_ = watervolume_ - subvoxelporevolume_;
     if (capillarywatervolume_ < 0.0) {
@@ -4593,248 +4476,6 @@ void Lattice::makeMovie(const string &root) {
          ".movie.gif";
   system(buff.c_str());
 }
-
-/*
-vector<int> Lattice::transform(int shrinkingid, int netsites_shrinkingid,
-                               int growingid, int netsites_growingid,
-                               double volumeratio) {
-  ///
-  /// @todo Consider breaking this method into smaller pieces
-  ///
-
-  int expindex;
-
-  vector<double> expval;
-  expval.clear();
-  expval.resize(3, 0.0);
-
-  vector<int> coordin;
-  coordin.clear();
-  coordin.resize(3, 0);
-
-  vector<Isite> diss;
-  diss = interface_[shrinkingid].getDissolutionSites();
-
-  Site *ste;
-
-  ///
-  /// Construct the unordered list of sites to dissolve based only
-  /// on the phase id and whether or not the total number of sites to dissolve
-  /// has been reached.
-  ///
-  /// @remark Is this task biased by site position?  Has the list of sites been
-  /// randomized?
-  ///
-
-  if (diss.size() < (-netsites_shrinkingid)) {
-    for (int ii = 0; ii < numsites_; ii++) {
-      ste = &site_[ii];
-      if (ste->getMicroPhaseId() == shrinkingid) {
-        addDissolutionSite(ste, shrinkingid);
-      }
-    }
-  }
-
-  diss = interface_[shrinkingid].getDissolutionSites();
-
-  double alreadygrown = 0.0;
-  int numtransform = 0;
-  int max = (int)volumeratio;
-
-  for (int ii = (diss.size() - 1);
-       ii > 0 && alreadygrown < netsites_growingid &&
-       numtransform < (-netsites_shrinkingid);
-       ii--) {
-    ste = &site_[diss[ii].getId()];
-
-    expval.clear();
-
-    vector<Site *> porousneighbor, waterneighbor;
-    porousneighbor.clear();
-    waterneighbor.clear();
-    for (int j = 0; j < ste->nbSize(1); j++) {
-      Site *stenb;
-      stenb = ste->nb(j);
-      if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
-        waterneighbor.push_back(stenb);
-      } else if (chemSys_->isPorous(stenb->getMicroPhaseId())) {
-        porousneighbor.push_back(stenb);
-      }
-    }
-
-    if ((waterneighbor.size() + 1) <= max) { // count the site itself
-
-      /// Expansion should occur
-      ///
-      /// 1. Take the subvolume centered on aluminate site that will dissolve
-      ///
-
-      string fileName(jobroot_ + "_alsubvol.dat");
-      vector<unsigned int> alnb = writeSubVolume(fileName, ste, 1);
-      ste->setDamage();
-      int numWater, numPorous;
-      numWater = numPorous = 0;
-      for (int nb = 0; nb < alnb.size(); nb++) {
-        Site *alstenb = &site_[alnb[nb]];
-        if (alstenb->getMicroPhaseId() == ELECTROLYTEID) {
-          numWater++;
-        } else if (chemSys_->isPorous(alstenb->getMicroPhaseId())) {
-          numPorous++;
-          alstenb->setDamage();
-        } else if (chemSys_->isWeak(alstenb->getMicroPhaseId())) {
-          alstenb->setDamage();
-        }
-      }
-
-      ///
-      /// 2. Calculate the effective bulk modulus of this subvolume
-      ///
-
-      double subbulk = FEsolver_->getBulkModulus(fileName);
-
-      subbulk = subbulk * 1.0e3; // convert GPa to MPa
-      double subsolidbulk = subbulk;
-      subsolidbulk *=
-          ((1.0 + (double)numWater / 27.0) / (1.0 - (double)numWater / 27.0));
-
-      ///
-      /// @remark This seems like a double conversion.  Hasn't the conversion
-      /// been done?
-      ///
-
-      subsolidbulk = subsolidbulk * 1.0e3; // convert GPa to MPa
-
-      ///
-      /// 3. Calculate crystallization strain in this sub volume;
-      ///    porevolfrac is the volume fraction of pore space occupied by
-      ///    crystal
-      ///
-      ///    @todo generalize porous phase porosities in the block below instead
-      ///    of 0.25
-      ///
-
-      double porevolfrac = 0.0;
-      if (numWater != 0 || numPorous != 0) {
-        porevolfrac = (double)(volumeratio) / (numWater + (numPorous * 0.25));
-      } else {
-        porevolfrac = 1.0;
-      }
-
-      //  This is hard-wired right now
-      //  @todo generalize crystallization pressure to more phases
-
-      double exp = solut_->calculateCrystalStrain(SI_[growingid], porevolfrac,
-                                                  subbulk, subsolidbulk);
-
-      ///
-      /// 4. Apply expansion strain on each voxel in this sub volume
-      ///
-
-      applyExp(alnb, exp);
-
-      setMicroPhaseId(ste, growingid);
-
-      ///
-      /// The Al-bearing phase has dissolved, so remove it from the
-      /// list of dissolution sites of this phase
-      ///
-
-      removeDissolutionSite(ste, shrinkingid);
-      numtransform++;
-      alreadygrown++;
-      count_.at(growingid)++;
-
-      for (int i = 0; i < waterneighbor.size(); i++) {
-        setMicroPhaseId(waterneighbor[i], growingid);
-
-        ///
-        /// Ettringite has grown here, so remove this site from the
-        /// list of growth sites of this phase
-        ///
-
-        removeGrowthSite(waterneighbor[i], growingid);
-        count_.at(growingid)++;
-        alreadygrown++;
-
-        ///
-        /// Weighted mean curvature (wmc) is changed by the difference
-        /// between the growing phase's porosity and the template's porosity.
-        ///
-        /// @todo Determine why the calculation works this way.
-        ///
-
-        double dwmcval = chemSys_->getMicroPhasePorosity(growingid) -
-                         chemSys_->getMicroPhasePorosity(ELECTROLYTEID);
-        for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
-          Site *nb = waterneighbor[i]->nb(j);
-          nb->dWmc(dwmcval);
-        }
-      }
-
-      dWaterchange(volumeratio - (waterneighbor.size() + 1));
-      alreadygrown += (volumeratio - (waterneighbor.size() + 1));
-      count_.at(growingid) +=
-          (int)(volumeratio - (waterneighbor.size() + 1) + 0.5);
-
-    } else {
-
-      ///
-      /// Expansion should not occur because there is sufficient
-      /// free space for local ettringite growth.
-      ///
-
-      setMicroPhaseId(ste, growingid);
-
-      ///
-      /// The Al-bearing phase has dissolved, so remove it from the
-      /// list of dissolution sites of this phase
-      ///
-
-      removeDissolutionSite(ste, shrinkingid);
-      numtransform++;
-      alreadygrown++;
-      count_.at(growingid)++;
-      double thresh = 0.0, g = 0.0;
-      thresh = volumeratio - max;
-      g = rg_->Ran3();
-
-      int upperindex = (g < thresh) ? max : max - 1;
-      for (int i = 0; i < upperindex; i++) {
-        setMicroPhaseId(waterneighbor[i], growingid);
-        removeGrowthSite(waterneighbor[i], growingid);
-        alreadygrown++;
-        count_.at(growingid)++;
-
-        ///
-        /// Weighted mean curvature (wmc) is changed by the difference
-        /// between the growing phase's porosity and the template's porosity.
-        ///
-        /// @todo Determine why the calculation works this way.
-        ///
-
-        double dwmcval = chemSys_->getMicroPhasePorosity(growingid) -
-                         chemSys_->getMicroPhasePorosity(ELECTROLYTEID);
-        for (int j = 0; j < waterneighbor[i]->nbSize(2); j++) {
-          Site *nb = waterneighbor[i]->nb(j);
-          nb->dWmc(dwmcval);
-        }
-      }
-    }
-  } // End of loop over all ettringite sites to form
-
-  //netsites.at(shrinkingid) += (int) numtransform;
-  //netsites.at(growingid) -= (int) alreadygrown;
-
-  vector<int> numchanged;
-  numchanged.clear();
-  numchanged.resize(2, 0);
-  numchanged[0] = numtransform;
-  numchanged[1] = (int)alreadygrown;
-
-  return numchanged;
-}
-
-*/
 
 vector<unsigned int> Lattice::writeSubVolume(string fileName, Site *centerste,
                                              int size) {
