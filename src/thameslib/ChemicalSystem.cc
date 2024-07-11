@@ -75,6 +75,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   GEMPhaseIdLookup_.clear();
   microPhaseToGEMPhase_.clear();
   DCStoich_.clear();
+  DCCharge_.clear();
   ICClassCode_.clear();
   DCClassCode_.clear();
   GEMPhaseClassCode_.clear();
@@ -457,12 +458,14 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   scplaceholder.clear();
   scplaceholder.resize(numICs_, 0);
   DCStoich_.resize(numDCs_, scplaceholder);
+  DCCharge_.resize(numDCs_, 0.0);
   amat = (node_->pCSD())->A;
   for (i = 0; i < numDCs_; i++) {
     for (j = 0; j < numICs_; j++) {
       DCStoich_[i][j] = (double)(*amat);
       amat++;
     }
+    DCCharge_[i] = (double)(DCStoich_[i][numICs_ - 1]);
   }
 
   ///
@@ -572,8 +575,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
       throw FileException("ChemicalSystem", "ChemicalSystem", interfaceFileName,
                           msg);
     }
-  } catch (FileException e) {
-    throw e;
+  } catch (FileException fex) {
+    throw fex;
+  } catch (DataException dex) {
+    throw dex;
   }
 
   ///
@@ -802,9 +807,17 @@ void ChemicalSystem::parseDoc(const string &docName) {
       if (satstate == 0)
         isSaturated_ = false;
     } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"electrolyte"))) {
-      parseSolutionComp(doc, cur);
+      try {
+        parseSolutionComp(doc, cur);
+      } catch (DataException dex) {
+        throw dex;
+      }
     } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"gas"))) {
-      parseGasComp(doc, cur);
+      try {
+        parseGasComp(doc, cur);
+      } catch (DataException dex) {
+        throw dex;
+      }
     } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
       try {
         parseMicroPhase(doc, cur, testnumEntries, phaseids, phaseData);
@@ -833,34 +846,35 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   cur = cur->xmlChildrenNode;
 
   while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCcomp"))) {
       parseDCInSolution(doc, cur);
     }
     cur = cur->next;
   }
 
-  return;
-}
+  // At this point all the composition constraints have been read
+  // Make sure they have charge balance
 
-void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
-  // Clear the associative map to initialize it
+  double totcharge = 0.0;
+  map<int, double>::iterator it = initialSolutionComposition_.begin();
+  while (it != initialSolutionComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseSolutionComp",
+                        "Initial electrolyte charge imbalance");
+  }
 
-  xmlChar *key;
-  double gassolidratio = 0.0;
-  fixedGasComposition_.clear();
-  initialGasComposition_.clear();
-
-  cur = cur->xmlChildrenNode;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      from_string(gassolidratio, (char *)key);
-      setGasSolidRatio(gassolidratio);
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
-      parseDCInGas(doc, cur);
-    }
-    cur = cur->next;
+  totcharge = 0.0;
+  it = fixedSolutionComposition_.begin();
+  while (it != fixedSolutionComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseSolutionComp",
+                        "Fixed electrolyte charge imbalance");
   }
 
   return;
@@ -908,6 +922,30 @@ void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
     } else {
       initialSolutionComposition_.insert(make_pair(DCId, DCConc));
     }
+  }
+
+  return;
+}
+
+void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
+  // Clear the associative map to initialize it
+
+  xmlChar *key;
+  double gassolidratio = 0.0;
+  fixedGasComposition_.clear();
+  initialGasComposition_.clear();
+
+  cur = cur->xmlChildrenNode;
+
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      from_string(gassolidratio, (char *)key);
+      setGasSolidRatio(gassolidratio);
+    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+      parseDCInGas(doc, cur);
+    }
+    cur = cur->next;
   }
 
   return;
@@ -1549,6 +1587,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   DCClassCode_ = obj.getDCClassCode();
   GEMPhaseClassCode_ = obj.getGEMPhaseClassCode();
   DCStoich_ = obj.getDCStoich();
+  DCCharge_ = obj.getDCCharge();
   pGEMPhaseStoich_ = obj.getPGEMPhaseStoich();
   GEMPhaseStoich_ = obj.getGEMPhaseStoich();
   ICResiduals_ = obj.getICResiduals();
@@ -1612,6 +1651,7 @@ ChemicalSystem::~ChemicalSystem(void) {
   microPhaseId_.clear();
   randomGrowth_.clear();
   DCStoich_.clear();
+  DCCharge_.clear();
   growthTemplate_.clear();
   affinity_.clear();
   microPhaseMembers_.clear();
@@ -2072,9 +2112,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// the generic designation given to the code that couples to GEMS, THAMES
   /// in this case.
   ///
-  ///
-  ///
-  ///
+
+  // Check and set chemical conditions on electrolyte
+  setElectrolyteComposition(isFirst);
 
   if (verbose_) {
     cout << "ChemicalSystem::calculateState Entering GEM_from_MT" << endl;
@@ -2684,6 +2724,41 @@ void ChemicalSystem::checkChemSys(void) {
     cout << "   " << GEMPhaseName_[i] << " "
          << getGEMPhaseIdLookup(GEMPhaseName_[i]) << endl;
   }
+}
+
+void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
+  if (isFirst && initialSolutionComposition_.size() > 0) {
+    double waterMoles = getDCMoles("H2O@");
+    double waterMass = 0.001 * waterMoles * getDCMolarMass("H2O@"); // in kg
+    map<int, double>::iterator it = initialSolutionComposition_.begin();
+    int DCId;
+    double DCconc; // mol/kgw units
+    while (it != initialSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != getDCId("H2O@")) {
+        DCconc = it->second;
+        setDCMoles(DCId, (DCconc * waterMass));
+      }
+      it++;
+    }
+    return;
+  } else if (fixedSolutionComposition_.size() > 0) {
+    double waterMoles = getDCMoles("H2O@");
+    double waterMass = 0.001 * waterMoles * getDCMolarMass("H2O@"); // in kg
+    map<int, double>::iterator it = fixedSolutionComposition_.begin();
+    int DCId;
+    double DCconc; // mol/kgw units
+    while (it != fixedSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != getDCId("H2O@")) {
+        DCconc = it->second;
+        setDCMoles(DCId, (DCconc * waterMass));
+      }
+      it++;
+    }
+    return;
+  }
+  return;
 }
 
 void ChemicalSystem::setMicroPhaseSI(void) {

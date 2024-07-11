@@ -119,11 +119,14 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
     stopProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
+  } catch (FileException fex) {
+    fex.printException();
     stopProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
+  } catch (GEMException gex) {
+    gex.printException();
+    stopProgram = true;
+  } catch (DataException dex) {
+    dex.printException();
     stopProgram = true;
   }
   if (stopProgram) {

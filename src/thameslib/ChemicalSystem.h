@@ -251,8 +251,8 @@ class ChemicalSystem {
   /**
   @brief Initial solution composition
 
-  This is a map of key-value pairs.  The key is the integer value of an
-  independent component (IC), and the value is the concentration of that IC in
+  This is a map of key-value pairs.  The key is the integer value of a
+  dependent component (DC), and the value is the concentration of that DC in
   molal units [mol/kgw].
   */
   map<int, double> initialSolutionComposition_;
@@ -260,8 +260,8 @@ class ChemicalSystem {
   /**
   @brief Fixed solution composition
 
-  This is a map of key-value pairs.  The key is the integer value of an
-  dependent component (DC), and the value is the concentration of that IC in
+  This is a map of key-value pairs.  The key is the integer value of a
+  dependent component (DC), and the value is the concentration of that DC in
   molal units [mol/kgw].
   */
   map<int, double> fixedSolutionComposition_;
@@ -271,8 +271,8 @@ class ChemicalSystem {
   /**
   @brief Initial gas composition
 
-  This is a map of key-value pairs.  The key is the integer value of an
-  dependent component (DC), and the value is the concentration of that IC in
+  This is a map of key-value pairs.  The key is the integer value of a
+  dependent component (DC), and the value is the concentration of that DC in
   molal units [mol/kgw].
   */
   map<int, double> initialGasComposition_;
@@ -280,8 +280,8 @@ class ChemicalSystem {
   /**
   @brief Fixed gas composition
 
-  This is a map of key-value pairs.  The key is the integer value of an
-  dependent component (DC), and the value is the concentration of that IC in
+  This is a map of key-value pairs.  The key is the integer value of a
+  dependent component (DC), and the value is the concentration of that DC in
   molal units [mol/kgw].
   */
   map<int, double> fixedGasComposition_;
@@ -333,6 +333,8 @@ class ChemicalSystem {
                               a given microstructure phase */
   vector<vector<double>>
       DCStoich_; /**< List of amount of moles of each IC in a DC */
+
+  vector<double> DCCharge_; /**< Charge associated with a DC */
 
   double *pGEMPhaseStoich_; /**< List of amount of moles of each IC in a
                                 GEM CSD phase (pointer form) */
@@ -4442,6 +4444,52 @@ public:
   vector<vector<double>> getDCStoich(void) const { return DCStoich_; }
 
   /**
+  @brief Get the charge of a particular DC.
+
+  Dependent components (DC) comprise one or (usually) more independent
+  components (IC). The last component is the electric charge (valence)
+
+  @param dcidx is the id of the DC being queried
+  @return the charge of the DC specified by dcidx (valence)
+  */
+  double getDCCharge(const int dcidx) {
+    try {
+      return DCCharge_.at(dcidx);
+    } catch (out_of_range &oor) {
+      EOBException ex("ChemicalSystem", "getDCCharge", "DCCharge_",
+                      DCStoich_.size(), dcidx);
+      ex.printException();
+      exit(1);
+    }
+  }
+
+  /**
+  @brief Get the charge of a particular DC.
+
+  Dependent components (DC) comprise one or (usually) more independent
+  components (IC). The last component is the electric charge (valence)
+
+  @param dcname is the name of the DC being queried
+  @return the charge of the DC specified by dcidx (valence)
+  */
+  double getDCCharge(const string &dcname) {
+    double chg = getDCCharge(getDCId(dcname));
+    return (chg);
+  }
+
+  /**
+  @brief Get the charges of all DCs.
+
+  Dependent components (DC) comprise one or (usually) more independent
+  components (IC). The last component is the electric charge (valence)
+
+  @note Used only in this class's copy constructor.
+
+  @return the charge of all DCs (valence)
+  */
+  vector<double> getDCCharge(void) const { return DCCharge_; }
+
+  /**
   @brief Get the number of moles all ICs in all GEM CSD phases.
 
   GEM phases comprise one or (usually) more independent components (IC).
@@ -5660,6 +5708,14 @@ public:
   @return the node status handle
   */
   int calculateState(double time, bool isFirst, int cyc, bool initial);
+
+  /**
+  @brief Check for electrolyte chemical composition requirements
+  the electrolyte and set the DC moles if necessary.
+
+  @param isFirst is true if this is the first cycle
+  */
+  void setElectrolyteComposition(const bool isFirst);
 
   /**
   @brief Update the number of moles of each IC based on changes to a dependent

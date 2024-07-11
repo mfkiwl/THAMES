@@ -491,45 +491,44 @@ microstructure modifications.
 */
 class MicrostructureException {
 private:
-    string description_;  /**< Description of the GEM exception */
-    string classname_;    /**< Name of the class that threw the exception */
-    string functionname_; /**< Number of function that threw the exception */
-    bool excp_;/**< true <-> for exception / false <-> for normal exit */
+  string description_;  /**< Description of the GEM exception */
+  string classname_;    /**< Name of the class that threw the exception */
+  string functionname_; /**< Number of function that threw the exception */
+  bool excp_; /**< true <-> for exception / false <-> for normal exit */
 
 public:
-
   /**
   @brief Default constructor initializes class members to default (blank)
   values.
 */
-MicrostructureException() {
+  MicrostructureException() {
     classname_ = "";
     functionname_ = "";
     description_ = "";
     excp_ = true;
-}
+  }
 
-/**
-  @brief Overloaded constructor that is typically invoked by THAMES.
+  /**
+    @brief Overloaded constructor that is typically invoked by THAMES.
 
-  @param cname is the class name where the exception was thrown
-  @param fileName is the method name where the exception was thrown
-  @param strd is the description of the exception
-  */
-    MicrostructureException(const string &cname, const string &fileName,
-                                                     const string &strd) {
-        classname_ = cname;
-        functionname_ = fileName;
-        description_ = strd;
-    }
+    @param cname is the class name where the exception was thrown
+    @param fileName is the method name where the exception was thrown
+    @param strd is the description of the exception
+    */
+  MicrostructureException(const string &cname, const string &fileName,
+                          const string &strd) {
+    classname_ = cname;
+    functionname_ = fileName;
+    description_ = strd;
+  }
 
-    MicrostructureException(const string &cname, const string &fileName,
-                                                     const string &strd, bool excp) {
-        classname_ = cname;
-        functionname_ = fileName;
-        description_ = strd;
-        excp_ = excp;
-    }
+  MicrostructureException(const string &cname, const string &fileName,
+                          const string &strd, bool excp) {
+    classname_ = cname;
+    functionname_ = fileName;
+    description_ = strd;
+    excp_ = excp;
+  }
 
   /**
   @brief Get the class name responsible for throwing the exception.
@@ -550,42 +549,42 @@ MicrostructureException() {
 
   @return the file name
   */
-    string &getDescription() const { return (string &)description_; }
+  string &getDescription() const { return (string &)description_; }
 
-     bool getExcp() { return excp_; }
+  bool getExcp() { return excp_; }
 
-    /**
-  @brief Provide formatted output of the exception details.
+  /**
+@brief Provide formatted output of the exception details.
 
-  */
-    void printException() {
-        //bool excp1_ = true;
-        if(excp_){
-            cout << endl << "Microstructure Exception Thrown:" << endl;
-            cout << "    Details: " << endl;
-            cout << "        Offending Function " << classname_ << "::" << functionname_
-                 << endl;
-            cout << "        Problem: " << description_ << endl;
-            cerr << endl << "Microstructure Exception Thrown:" << endl;
-            cerr << "    Details: " << endl;
-            cerr << "        Offending Function " << classname_ << "::" << functionname_
-                 << endl;
-            cerr << "        Problem: " << description_ << endl;
-        }else{
-            cout << endl << "Microstructure Exception Thrown:" << endl;
-            cout << "    Details: " << endl;
-            cout << "        From Function " << classname_ << "::" << functionname_
-                 << endl;
-            cout << "        reason: " << description_ << endl;
-            cerr << endl << "Microstructure Exception Thrown:" << endl;
-            cerr << "    Details: " << endl;
-            cerr << "        From Function " << classname_ << "::" << functionname_
-                 << endl;
-            cerr << "        reason: " << description_ << endl;
-        }
-
-        return;
+*/
+  void printException() {
+    // bool excp1_ = true;
+    if (excp_) {
+      cout << endl << "Microstructure Exception Thrown:" << endl;
+      cout << "    Details: " << endl;
+      cout << "        Offending Function " << classname_
+           << "::" << functionname_ << endl;
+      cout << "        Problem: " << description_ << endl;
+      cerr << endl << "Microstructure Exception Thrown:" << endl;
+      cerr << "    Details: " << endl;
+      cerr << "        Offending Function " << classname_
+           << "::" << functionname_ << endl;
+      cerr << "        Problem: " << description_ << endl;
+    } else {
+      cout << endl << "Microstructure Exception Thrown:" << endl;
+      cout << "    Details: " << endl;
+      cout << "        From Function " << classname_ << "::" << functionname_
+           << endl;
+      cout << "        reason: " << description_ << endl;
+      cerr << endl << "Microstructure Exception Thrown:" << endl;
+      cerr << "    Details: " << endl;
+      cerr << "        From Function " << classname_ << "::" << functionname_
+           << endl;
+      cerr << "        reason: " << description_ << endl;
     }
+
+    return;
+  }
 }; // End of MicrostructureException class
 
 /**
@@ -621,10 +620,10 @@ public:
   @param fileName is the method name where the exception was thrown
   @param strd is the description of the exception
   */
-  DataException(const string &cname, const string &fileName,
+  DataException(const string &cname, const string &functionName,
                 const string &strd) {
     classname_ = cname;
-    functionname_ = fileName;
+    functionname_ = functionName;
     description_ = strd;
   }
 

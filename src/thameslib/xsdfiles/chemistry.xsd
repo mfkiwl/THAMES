@@ -75,7 +75,7 @@
     </xs:simpleType>
 
     <!-- definition of complex types -->
-    <xs:complexType name="iccomptype">
+    <xs:complexType name="comptype">
         <xs:sequence>
             <xs:element name="name" type="stringtype" />
             <xs:element name="condition" type="bctype" />
@@ -85,13 +85,13 @@
 
     <xs:complexType name="electrolytecomptype">
         <xs:sequence>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type="iccomptype" />
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="DCcomp" type="comptype" />
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="gascomptype">
         <xs:sequence>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="ICcomp" type="iccomptype" />
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="DCcomp" type="comptype" />
         </xs:sequence>
     </xs:complexType>
 
@@ -211,7 +211,7 @@
                 <xs:element name="reftemperature" type="positiveDoubletype" />
                 <xs:element name="saturated" type="integertype" />
                 <xs:element minOccurs="0" maxOccurs="1" name="gas" type="gascomptype" />
-                <xs:element minOccurs="0" maxOccurs="1" name="electrolyte"
+                <xs:element minOccurs="0" maxOccurs="unbounded" name="electrolyte"
                     type="electrolytecomptype" />
                 <xs:element maxOccurs="unbounded" name="phase" type="phasetype" />
             </xs:sequence>

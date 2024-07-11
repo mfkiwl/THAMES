@@ -5,6 +5,7 @@
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
 | July 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
+| July 11 17:53 2024 | Implemented initial and fixed solution DC composition |
 | June 04 09:00 2024 | Saturation indices all reading zero no matter what. Debugging. |
 | May 22 10:51 2024 | Beginning to generalize dissolution and precipitation kinetics |
 | May 22 10:51 2024 | Propagated fix for StandardKineticModel to PozzolanicModel |
