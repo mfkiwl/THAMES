@@ -226,6 +226,7 @@ public:
   //bool removeGrowthSite(Site *loc);
   bool removeGrowthSite_0(Site *loc, int pos);
   bool removeGrowthSite_1(Site *loc);
+  bool removeEmptiedSite(int siteID);
 
   /**
   @brief Remove a site from the list of sites where dissolution can occur

@@ -77,7 +77,7 @@ void KineticModel::zeroKineticDCMoles() {
     chemSys_->setDCMoles(DCId_, 0.0);
   } catch (EOBException eex) {
     eex.printException();
-    exit(0);
+    exit(1);
   }
   return;
 }

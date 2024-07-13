@@ -123,7 +123,8 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
     cout << "KineticController::KineticController Finished reading "
             "chemistry.xml "
          << endl;
-    for (int i = 0; i < microPhaseId_.size(); ++i) {
+    int size = microPhaseId_.size();
+    for (int i = 0; i < size; ++i) {
       microPhaseId = microPhaseId_[i];
       if (isKinetic_[i]) {
         cout << "KineticController::KineticController kinetic phase "
@@ -642,7 +643,9 @@ void KineticController::calcPhaseMasses(void) {
   int microPhaseId;
   double pscaledMass = 0.0;
 
-  for (int i = 0; i < microPhaseId_.size(); i++) {
+  int size = microPhaseId_.size();
+
+  for (int i = 0; i < size; i++) {
     microPhaseId = microPhaseId_[i];
     if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
       pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
@@ -668,8 +671,8 @@ void KineticController::calcPhaseMasses(void) {
 double KineticController::getSolidMass(void) {
   int microPhaseId;
   double totmass = 0.0;
-
-  for (int i = 0; i < microPhaseId_.size(); i++) {
+  int size = microPhaseId_.size();
+  for (int i = 0; i < size; i++) {
     microPhaseId = microPhaseId_[i];
     if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
       totmass += chemSys_->getMicroPhaseMass(microPhaseId);
@@ -719,7 +722,9 @@ void KineticController::setPozzEffectOnPK(void) {
   double minpozzeffect = 1.0;
   double pozzeffect = 1.0;
 
-  for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+  int size = phaseKineticModel_.size();
+
+  for (int midx = 0; midx < size; ++midx) {
     loi = phaseKineticModel_[midx]->getLossOnIgnition();
     if (loi > maxloi)
       maxloi = loi;
@@ -748,7 +753,8 @@ void KineticController::setPozzEffectOnPK(void) {
   minpozzeffect *= (refloi / maxloi);
 
   /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
-  for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+
+  for (int midx = 0; midx < size; ++midx) {
     if (phaseKineticModel_[midx]->getType() == ParrotKillohType) {
       phaseKineticModel_[midx]->setPfk(minpozzeffect);
     }
@@ -982,7 +988,7 @@ void KineticController::calculateKineticStep (const double timestep,
                     cout << endl << "tweak after for cyc = " << cyc << endl;
                 }
 
-               // cout << endl << " ******************** kinetic models ************************" << endl; //exit(0);
+               // cout << endl << " ******************** kinetic models ************************" << endl;
                // cout << " midx/name_/phaseDissolvedId[midx] :" << endl;
                // for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
                //     cout << "  " << midx << "\tname: " << phaseKineticModel_[midx]->getName()
@@ -1038,8 +1044,6 @@ void KineticController::calculateKineticStep (const double timestep,
 
     cout << "end calculateKineticStep - cyc = " << cyc << endl << endl;
     cout.flush();
-    //exit(0);
-    //if(cyc == 1){cout << "stop calculateKineticStep after cyc = " << cyc << endl;exit(0);}
 
     return;
 }

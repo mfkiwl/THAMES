@@ -381,6 +381,8 @@ public:
     }
   }
 
+  void clearGrowthSite(void) {growth_.clear();}
+
   /**
   @brief Get the entire list of all phases that can grow at the site.
 

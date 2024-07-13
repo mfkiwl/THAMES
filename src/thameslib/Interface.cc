@@ -57,8 +57,9 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   ///
   /// Eliminate duplicate values from the growth site vector
   ///
-
-  if (gv.size() > 0) {
+  int gvsize = gv.size();
+  int dvsize = dv.size();
+  if (gvsize > 0) {
     sort(gv.begin(), gv.end());
     //i = 1;
     beginLocation = gv.begin();
@@ -70,7 +71,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   /// Now do the same thing to the dissolution site vector
   ///
 
-  if (dv.size() > 0) {
+  if (dvsize > 0) {
     sort(dv.begin(), dv.end());
     //i = 1;
     beginLocation = dv.begin();
@@ -81,8 +82,8 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   ///
   /// Now sort the growth sites according to the affinity
   ///
-
-  for (j = 0; j < gv.size(); j++) {
+  gvsize = gv.size();
+  for (j = 0; j < gvsize; j++) {
     afty = 0;
     for (i = 0; i < NN_NNN; i++) {
       afty += chemSys_->getAffinity(pid, gv[j]->nb(i)->getMicroPhaseId());
@@ -134,7 +135,8 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   ///
 
   try {
-    for (j = 0; j < dv.size(); j++) {
+    dvsize = dv.size();
+    for (j = 0; j < dvsize; j++) {
       afty = 0;
       for (i = 0; i < NN_NNN; i++) {
         afty += chemSys_->getAffinity(pid, dv[j]->nb(i)->getMicroPhaseId());
@@ -143,7 +145,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     }
   } catch (EOBException e) {
     e.printException();
-    exit(0);
+    exit(1);
   }
 
 /*
@@ -227,7 +229,8 @@ bool Interface::addDissolutionSite(Site *loc) {
     unsigned int siteId =loc->getId();
 
     /// See if site is already present
-    for (i = 0; i < dissolutionSites_.size(); i++) {
+    int size = dissolutionSites_.size();
+    for (i = 0; i < size; i++) {
         if (siteId == dissolutionSites_[i].getId()) {
            found = true;
            break;
@@ -410,6 +413,23 @@ bool Interface::removeGrowthSite_1(Site *loc) {
             loc->getId() << " / " << growthSites_.size() << endl;
         cout << "STOP:  Interface::removeGrowthSite_1(Site *loc)" << endl;
         exit(1);
+    }
+
+    return found;
+}
+
+bool Interface::removeEmptiedSite(int siteID) {
+
+    bool found = false;
+    int size = growthSites_.size();
+
+    for(int i = 0; i < size; i++){
+        if (growthSites_[i].getId() == siteID) {
+            growthSites_[i] = growthSites_[size - 1];
+            growthSites_.pop_back();
+            found = true;
+            break;
+        }
     }
 
     return found;

@@ -142,6 +142,9 @@ pores in GEM units */
   vector<Interface>interface_ini;
   double wcratio_;                /**< Water-to-cement mass ratio */
   //for tests 1
+
+  int numMicroPhases_;   /**< Number of microphases */
+
 public:
   /**
   @brief Constructor without input microstructure file name.
@@ -706,7 +709,10 @@ public:
   @param numtoadd is the number of sites to switch to this phase
   @return the actual number of sites that were changed
   */
-  int growPhase(unsigned int phaseid, int numtoadd, int trc);
+  vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
+                   vector<string> growPhNameVect, int &numadded_G, int totalTRC);
+
+  int nucleatePhase(int phaseID,int numLeft);
 
   /**
   @brief Remove a prescribed number of sites of a given phase from the
@@ -723,7 +729,8 @@ public:
   @return the actual number of sites that were changed
   */
   //int dissolvePhase(unsigned int phaseid, int numtoadd);
-  int dissolvePhase(unsigned int phaseid, int numtoadd, int trc);
+  int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
+                       vector<string> dissPhNameVect, int &numadded, int trc);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -922,9 +929,8 @@ public:
   //                          bool &capWater);
 
   int changeMicrostructure (double time, const int simtype, bool isFirst,
-                                bool &capWater, int &numDiff ,int &phDiff,
-                                string &nameDiff, int whileCount, int cyc);
-
+                           bool &capWater, int &numDiff ,int &phDiff,
+                           string &nameDiff, int whileCount, int cyc);
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
 
@@ -1454,7 +1460,8 @@ public:
   */
   double getLargestSaturatedPore(void) {
     double capsize = 1000.0; // nm of capillary pores
-    for (int i = 0; i < masterporevolume_.size(); i++) {
+    int size = masterporevolume_.size();
+    for (int i = 0; i < size; i++) {
       if (masterporevolume_[i].volfrac < 1.0) {
         return (masterporevolume_[i].diam);
       }

@@ -432,7 +432,8 @@ public:
 
   */
   void setKineticDCMoles() {
-    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+    int size = phaseKineticModel_.size();
+    for (int i = 0; i < size; ++i) {
       phaseKineticModel_[i]->setKineticDCMoles();
     }
     return;
@@ -443,7 +444,8 @@ public:
 
   */
   void zeroKineticDCMoles() {
-    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+    int size = phaseKineticModel_.size();
+    for (int i = 0; i < size; ++i) {
       phaseKineticModel_[i]->zeroKineticDCMoles();
     }
     return;

@@ -272,7 +272,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
     cout << endl << "     ===== START SIMULATION =====" << endl ;
 
     int cyc;
-    for (i = 0; (i < time_.size()) && (capwater); ++i) { //main computation cycle loop
+    int timeSize = time_.size();
+    for (i = 0; (i < timeSize) && (capwater); ++i) { //main computation cycle loop
 
         ///
         /// Do not advance the time step if GEM_run failed the last time
