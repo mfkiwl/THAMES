@@ -435,7 +435,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
             string nameDiff = "testDiff";
             int changeLattice;
             int whileCount = 0;
-            changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater, numDiff,
+            changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff,
                                                            phDiff, nameDiff, whileCount, cyc);
 
             //if error from changeMicrostructure (not all the voxels given by GEM can
@@ -516,7 +516,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
                 nameDiff = "testDiff_recall";
 
                 whileCount++;
-                changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, isFirst, capwater, numDiff, phDiff, nameDiff, whileCount, cyc);
+                changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff, phDiff, nameDiff, whileCount, cyc);
                 //if(changeLattice != 1 ) {cout << endl << " end changeLattice recall changeLattice = " << changeLattice << endl; exit(0);}
             }
 
@@ -900,7 +900,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
         chemSys_->setMicroPhaseSI(cyc);
 
-        kineticController_->calculateKineticStep(dt, T, cyc);
+        kineticController_->calculateKineticStep(dt, cyc);
         //kineticController_->calculateKineticEvents(dt, T, isFirst);
 
         //if (time >= sattack_time_) {// for sulfate attack iterations}

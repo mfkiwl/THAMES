@@ -49,9 +49,10 @@ int main(int argc, char **argv) {
   cin >> choice;
   cout << choice << endl;
 
-  //cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() << endl;
-  //cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() << endl;
-  //cout << "epsilon for float : \t" << numeric_limits<float>::epsilon() << endl;
+  // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
+  // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
+  // endl; cout << "epsilon for float : \t" << numeric_limits<float>::epsilon()
+  // << endl;
 
   if (choice <= QUIT_PROGRAM || choice > SULFATE_ATTACK) {
 
@@ -98,7 +99,8 @@ int main(int argc, char **argv) {
   // phase data
   //
 
-  cout << endl << "What is the name of the microstructure phase definition file? "
+  cout << endl
+       << "What is the name of the microstructure phase definition file? "
        << endl;
   getline(cin, buff);
   const string pi_filename(buff);
@@ -117,18 +119,21 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
     stopProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
+  } catch (FileException fex) {
+    fex.printException();
     stopProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
+  } catch (GEMException gex) {
+    gex.printException();
+    stopProgram = true;
+  } catch (DataException dex) {
+    dex.printException();
     stopProgram = true;
   }
   if (stopProgram) {
     if (ChemSys) {
       delete ChemSys;
     }
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     cout << "STOP Program";
     exit(1);
   }
@@ -164,12 +169,12 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
          << endl;
     stopProgram = true;
-  }catch (FileException ex) {
-      ex.printException();
-      stopProgram = true;
+  } catch (FileException ex) {
+    ex.printException();
+    stopProgram = true;
   } catch (GEMException ex) {
-      ex.printException();
-      stopProgram = true;
+    ex.printException();
+    stopProgram = true;
   }
   if (stopProgram) {
     if (ChemSys) {
@@ -178,7 +183,7 @@ int main(int argc, char **argv) {
     if (Mic) {
       delete Mic;
     }
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     cout << "STOP Program";
     exit(1);
   }
@@ -222,7 +227,7 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-        if (ChemSys) {
+      if (ChemSys) {
         delete ChemSys;
       }
       if (Mic) {
@@ -231,7 +236,7 @@ int main(int argc, char **argv) {
       if (ThermalStrainSolver) {
         delete ThermalStrainSolver;
       }
-      timeCount(starttime,lt);
+      timeCount(starttime, lt);
       cout << "STOP Program";
       exit(1);
     }
@@ -273,7 +278,7 @@ int main(int argc, char **argv) {
       if (AppliedStrainSolver) {
         delete AppliedStrainSolver;
       }
-      timeCount(starttime,lt);
+      timeCount(starttime, lt);
       cout << "STOP Program";
       exit(1);
     }
@@ -292,8 +297,8 @@ int main(int argc, char **argv) {
   //
 
   try {
-    KController = new KineticController(ChemSys, Mic, cement_filename,
-                                        VERBOSE, WARNING);
+    KController =
+        new KineticController(ChemSys, Mic, cement_filename, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
@@ -322,7 +327,7 @@ int main(int argc, char **argv) {
       delete KController;
     }
     cout << "STOP Program";
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     exit(1);
   }
 
@@ -382,7 +387,7 @@ int main(int argc, char **argv) {
       delete Ctrl;
     }
     cout << "STOP Program";
-    timeCount(starttime,lt);
+    timeCount(starttime, lt);
     exit(1);
   }
 
@@ -397,9 +402,9 @@ int main(int argc, char **argv) {
   // Launch the main controller to run the simulation
   //
 
-  //if (VERBOSE) {
-    cout << "Going into Controller::doCycle now" << endl;
-    cout.flush();
+  // if (VERBOSE) {
+  cout << "Going into Controller::doCycle now" << endl;
+  cout.flush();
   //}
 
   try {
@@ -420,7 +425,7 @@ int main(int argc, char **argv) {
   // Simulation is finished.  Record and output the timing data.
   //
 
-  timeCount(starttime,lt);
+  timeCount(starttime, lt);
 
   //
   // Delete the dynamically allocated memory
@@ -448,19 +453,19 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void timeCount(clock_t time_, time_t lt_){
+void timeCount(clock_t time_, time_t lt_) {
 
-    time_t lt1 = time(NULL);
-    struct tm *inittime1;
-    inittime1 = localtime(&lt1);
-    cout << endl << asctime(inittime1);
-    clock_t endtime = clock();
+  time_t lt1 = time(NULL);
+  struct tm *inittime1;
+  inittime1 = localtime(&lt1);
+  cout << endl << asctime(inittime1);
+  clock_t endtime = clock();
 
-    double elapsedtime = (double)(endtime - time_) / CLOCKS_PER_SEC;
-    double ltD = difftime(lt1, lt_);
-    cout << endl << "Total time = " << ltD << " seconds" << endl;
-    cout << endl
-         << "Total time with clock = " << elapsedtime << " seconds" << endl;
+  double elapsedtime = (double)(endtime - time_) / CLOCKS_PER_SEC;
+  double ltD = difftime(lt1, lt_);
+  cout << endl << "Total time = " << ltD << " seconds" << endl;
+  cout << endl
+       << "Total time with clock = " << elapsedtime << " seconds" << endl;
 }
 
 void printHelp(void) {

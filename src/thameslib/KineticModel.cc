@@ -19,12 +19,8 @@ KineticModel::KineticModel() {
   activationEnergy_ = 0.0;
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
-  waterId_ = 1;
-  ICNum_ = 0;
-  DCNum_ = 0;
   ICName_.clear();
   DCName_.clear();
-  GEMPhaseNum_ = 0;
   specificSurfaceArea_ = refSpecificSurfaceArea_ = 0.0;
   degreeOfReaction_ = lossOnIgnition_ = 0.0;
 

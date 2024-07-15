@@ -57,14 +57,11 @@ protected:
   int microPhaseId_; /**< Microstructure id controlled by this model */
   int DCId_;         /**< List of DC ids from the ChemicalSystem object */
   int GEMPhaseId_;   /**< List of phase ids from the ChemicalSystem object */
-  int waterId_;      /**< DC index for liquid water */
-  int ICNum_;        /**< Number of ICs in chemical system */
-  int DCNum_;        /**< Number of DCs in chemical system */
-  int GEMPhaseNum_;  /**< Number of GEM phases in chemical system */
+
   vector<string> ICName_;      /**< Names of ICs */
   vector<string> DCName_;      /**< Names of DCs */
   double scaledMass_;          /**< Phase mass percent, total solids basis */
-  double initScaledMass_;      /**< Initial phase mass percents */
+  double initScaledMass_;      /**< Initial phase scaled mass */
   double activationEnergy_;    /**< Apparent activation energy for the reaction
                                   [J/mol/K] */
   double specificSurfaceArea_; /**< Specific surface area (m2/kg) */
@@ -192,7 +189,7 @@ public:
   @param dor is the degree of reaction to set
   */
   virtual void setDegreeOfReaction(const double dor) {
-    degreeOfReaction_ = dor;
+    degreeOfReaction_ = dor >= 0.0 ? dor : 0.0;
   }
 
   /**
@@ -264,14 +261,14 @@ public:
 
   @param waterid is the index value to use
   */
-  void setWaterId(const int waterid) { waterId_ = waterid; }
+  //void setWaterId(const int waterid) { waterId_ = waterid; }
 
   /**
   @brief Get the DC index for liquid water
 
   @return the DC index for liquid water
   */
-  int getWaterId() const { return waterId_; }
+  //int getWaterId() const { return waterId_; }
 
   /**
   @brief Set the number of ICs
@@ -280,14 +277,14 @@ public:
 
   @param icnum is the number of ICs to specify
   */
-  void setICNum(const int icnum) { ICNum_ = icnum; }
+  //void setICNum(const int icnum) { ICNum_ = icnum; }
 
   /**
   @brief Get the number of ICs
 
   @return the number of ICs
   */
-  int getICNum() const { return ICNum_; }
+  //int getICNum() const { return ICNum_; }
 
   /**
   @brief Set the number of DCs
@@ -296,14 +293,14 @@ public:
 
   @param dcnum is number of DCs to specify
   */
-  void setDCNum(const int dcnum) { DCNum_ = dcnum; }
+  //void setDCNum(const int dcnum) { DCNum_ = dcnum; }
 
   /**
   @brief Get the number of DCs
 
   @return the number of DCs
   */
-  int getDCNum() const { return DCNum_; }
+  //int getDCNum() const { return DCNum_; }
 
   int getDCId() const { return DCId_; }
 
@@ -314,14 +311,14 @@ public:
 
   @param gpnum is number of GEM phases to specify
   */
-  void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
+  //void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
 
   /**
   @brief Get the number of GEM phases
 
   @return the number of GEM phases
   */
-  int getGEMPhaseNum() const { return GEMPhaseNum_; }
+  //int getGEMPhaseNum() const { return GEMPhaseNum_; }
 
   /**
   @brief Set the IC names
@@ -474,26 +471,62 @@ public:
   double getScaledMass() const { return scaledMass_; }
 
   /**
+  @brief Set the <i>initial</i> mass of the phase in the kinetic model.
+
+  The scaled mass of a phase is its mass in grams per unit system volume
+
+  @param initscaledmass is the value to set
+  */
+  void setInitScaledMass(const double initscaledmass) {
+    if (initscaledmass < 0.0) {
+      initScaledMass_ = 0.0;
+    } else {
+      initScaledMass_ = initscaledmass;
+    }
+    return;
+  }
+
+  /**
   @brief Get the <i>initial</i> mass of the phase in the kinetic model.
 
-  The scaled mass of a phase is its mass percent on a total solids basis.
+  The scaled mass of a phase is its mass in grams per unit system volume
 
-  @return the vector of initial scaled masses [percent solids]
+  @return the initial scaled mass
   */
   double getInitScaledMass() const { return initScaledMass_; }
 
   /**
+  @brief Set the <i>initial</i> scaled moles of the phase in the kinetic model.
+
+  The scaled moles of a phase is its moles per unit system volume
+
+  @param initscaledmoles is the value to set
+  */
+  // void setInitScaledMoles(const double initscaledmoles) {
+  //   if (initscaledmoles < 0.0) {
+  //     initScaledMoles_ = 0.0;
+  //   } else {
+  //     initScaledMoles_ = initscaledmoles;
+  //   }
+  //   return;
+  // }
+
+  /**
+  @brief Get the <i>initial</i> scaled moles of the phase in the kinetic model.
+
+  The scaled moles of a phase is its moles per unit system volume
+
+  @return the initial scaled moles
+  */
+  //double getInitScaledMoles() const { return initScaledMoles_; }
+
+  /**
   @brief Master method for implementing one kinetic time step.
 
-  In a given time step, a certain number of moles of each clinker phase will
-  dissolve, and the instantly soluble phases will dissolve in the first time
-  step.  This function determines the number of moles of each phase to dissolve,
-  based on the time interval being simulated.  It then calculates the number of
-  IC moles to promote to the thermodynamic system from those phases (which are
-  outside the thermodynamic system because they are kinetically controlled),
-  based on the stoichiometry.  Those IC moles are then added to the
-  thermodynamic system, and the moles and mass of each kinetically controlled
-  phase are changed accordingly.
+  In a given time step, a certain number of moles of kinetically controlled
+  phases may dissolve or precipitate.
+  This function determines the number of moles of each phase to change,
+  based on the time interval being simulated.
 
   This is now a pure virtual function.
 
@@ -506,24 +539,16 @@ public:
 
   @param timestep is the time interval to simulate [days]
   @param temperature is the absolute temperature during this step [K]
-  @param isFirst is true if this is the first time step of the simulation, false
-  otherwise
   @param rh is the internal relative humidity
-  @param dICMoles is the vector of moles of each IC change due to kinetics
-  @param dsolutICMoles is the vector of moles of each IC change in solution due
-  to kinetics
-  @param DCMoles is the vector of moles of each DC
-  @param GEMPhaseMoles is the vector of moles of each phase in GEMS
+  @param scaledMass is C-style array of the normalized mass of each
+  microstructure phase [g/100 g]
+  @param massDissolved is the C-style array of dissolved mass of each
+  microstructure phase [g/100g]
+  @param cyc is the cycle number (iteration of main loop)
+  @param totalDOR is the total degree of reaction [dimensionless]
   */
-  //virtual void calculateKineticStep(const double timestep,
-  //                                  const double temperature, bool isFirst,
-  //                                  double rh, vector<double> &dICMoles,
-  //                                  vector<double> &dsolutICMoles,
-  //                                  vector<double> &DCMoles,
-  //                                  vector<double> &GEMPhaseMoles, int cyc) = 0;
-
-  virtual void calculateKineticStep (const double timestep, const double temperature,
-                                    double rh, double &scaledMass, double &massDissolved, int cyc,
+  virtual void calculateKineticStep(const double timestep, double &scaledMass,
+                                    double &massDissolved, int cyc,
                                     double totalDOR) = 0;
 
   /**

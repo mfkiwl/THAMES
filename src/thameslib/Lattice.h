@@ -41,10 +41,10 @@ struct Sitesize {
   int nsize;  /**< Size of the domain of the phase at that size */
 };
 
-struct chemElem{
-    int z;
-    string symb;
-    double mass;
+struct chemElem {
+  int z;
+  string symb;
+  double mass;
 };
 
 using namespace std;
@@ -58,18 +58,18 @@ sites.
 class Lattice {
 
 private:
-  string version_;        /**< THAMES version for header information */
-  string jobroot_;        /**< The root name for output files */
-  unsigned int xdim_;     /**< Number of sites in the x dimension */
-  unsigned int ydim_;     /**< Number of sites in the y dimension */
-  unsigned int zdim_;     /**< Number of sites in the z dimension */
-  double resolution_;     /**< Voxel edge length [micrometers] */
-  RanGen *rg_;            /**< Pointer to random number generator object */
-  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
-  unsigned int numsites_; /**< Total number of sites */
-  unsigned int siteneighbors_;       /**< Number of neighbor sites to a given site */
-  ChemicalSystem *chemSys_; /**< Pointer to simulation's ChemicalSystem */
-  AppliedStrain *FEsolver_; /**< Pointer to simulation's FE elastic solver */
+  string version_;             /**< THAMES version for header information */
+  string jobroot_;             /**< The root name for output files */
+  unsigned int xdim_;          /**< Number of sites in the x dimension */
+  unsigned int ydim_;          /**< Number of sites in the y dimension */
+  unsigned int zdim_;          /**< Number of sites in the z dimension */
+  double resolution_;          /**< Voxel edge length [micrometers] */
+  RanGen *rg_;                 /**< Pointer to random number generator object */
+  vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
+  unsigned int numsites_;      /**< Total number of sites */
+  unsigned int siteneighbors_; /**< Number of neighbor sites to a given site */
+  ChemicalSystem *chemSys_;    /**< Pointer to simulation's ChemicalSystem */
+  AppliedStrain *FEsolver_;    /**< Pointer to simulation's FE elastic solver */
   vector<Interface> interface_;   /**< List of the different interface objects
                                           in the microstructure */
   double wsratio_;                /**< Water-to-solids mass ratio */
@@ -77,12 +77,9 @@ private:
                                           microstructure phase */
   vector<double> initvolumefraction_; /**< Array of initial volume fractions of
                                          each microstructure phase */
-  /**
-  @note Changed count_ from type double to type int
-  */
   vector<int> count_; /**< Number of sites of each different type */
-  vector<double> SI_; /**< Current saturation index of AFt phase,
-                              used only for sulfate attack simulation */
+  vector<double> SI_; /**< Current saturation indices */
+
   map<int, vector<double>>
       expansion_; /**< Map of expansion strain of each voxel */
   map<int, vector<int>> expansion_coordin_; /**< Map of coordinates of sites
@@ -130,18 +127,12 @@ pores in GEM units */
   bool verbose_;     /**< Flag to determine verbose output */
   bool warning_;     /**< Flag to determine warning message output */
 
-  //for output files in cfg format
-  vector <chemElem> cfgElem;
+  vector<chemElem> cfgElem_; /**< Holds periodic table information to output
+                                files in cfg format */
 
   double initSolidMass_;
-  // for tests 1
-  int numICs_ini ,numDCs_ini;
-  vector<double> ICMoles_ini, DCMoles_ini;
-  vector<int> count_ini;
-  vector<Site> site_ini;
-  vector<Interface>interface_ini;
-  double wcratio_;                /**< Water-to-cement mass ratio */
-  //for tests 1
+
+  double wcratio_;  /**< Water-to-cement mass ratio */
 
   int numMicroPhases_;   /**< Number of microphases */
 
@@ -173,20 +164,20 @@ public:
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
   */
-  Lattice(ChemicalSystem *cs, const string &fileName,
-          const bool verbose, const bool warning);
+  Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
+          const bool warning);
 
-   /**
-  @brief Destructor.
+  /**
+ @brief Destructor.
 
-  This destructor clears out the `interface_` and `site_` vectors, and
-  also deletes the allocated memory for the random number generator object,
-  since this is the class that allocated the memory for that object.
-  */
+ This destructor clears out the `interface_` and `site_` vectors, and
+ also deletes the allocated memory for the random number generator object,
+ since this is the class that allocated the memory for that object.
+ */
   ~Lattice();
 
-  void setChemElem (string);
-  chemElem getChemElem (int);
+  void setChemElem(string);
+  chemElem getChemElem(int);
 
   /**
   @brief Set the number of sites in the x dimension.
@@ -683,7 +674,8 @@ public:
   @param microPhaseMass is a vector of all the microstructure masses
   @param solidMass is the combined mass of all the solids
   */
-  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass, double solidMass);
+  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass,
+                            double solidMass);
 
   /**
   @brief Master method to locate the interfaces for each phase in the
@@ -695,42 +687,49 @@ public:
   void findInterfaces_check(void);
 
   /**
-  @brief Add a prescribed number of sites of a given phase to the
-  microstructure.
+  @brief Add (grow i.e. switch from electrolyte) the prescribed number of
+  sites of each microphase that has to grow
 
-  This method gets a list of all the <i>potential</i> growth sites. A site from
-  this list is selected with a probability computed based on the local
-  configuration: affinities that take into account the nature of the phase occupying
-  this site and phases occupying its nearest and next nearest neighbours.
-  Once switching the phase id of this site, the lists of growth sites and
-  dissolution sites are updated to account for the new local geometry.
-
-  @param phaseid is the id of the microstructure phase to add
-  @param numtoadd is the number of sites to switch to this phase
-  @return the actual number of sites that were changed
+  @param growPhaseIDVect is the vector of microphase IDs that must grow
+  @param numSiteGrowVect is a vector containing the number of voxels to add for each
+  microphase ID in growPhaseIDVect
+  @param growPhNameVect is a vector containing the name of each microphase in growPhaseIDVect
+  @param numtoadd_G is the number of sites switched by this call
+  @param totalTRC is the total call number of the changeMicrostructure method
+  @return the actual number of sites that were changed for each microphase ID from
+  the input growPhaseIDVect vector
   */
   vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
                    vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
+  /**
+  @brief nucleate a number of sites (numLeft) of a given phase (phaseID)
+  from the microstructure when the growth of all the requested number of
+  sites for this phase was not possible because the dimension of the
+  corresponding growth interface was zero.
+
+  @param phaseid is the id of the microstructure phase to nucleate
+  @param numLeft is the number of sites to nucleate/create for this phase
+  @return the actual dimension of the growth interface for this phase
+  */
   int nucleatePhase(int phaseID,int numLeft);
 
   /**
-  @brief Remove a prescribed number of sites of a given phase from the
-  microstructure.
+  @brief Remove (dissolve i.e. switch to electrolyte) the prescribed number of
+  sites of each microphase that has to dissolve
 
-  This method gets a list of all the <i>potential</i> dissolution sites, which
-  already is sorted in descending order of <i>growth</i> affinity.  The list is
-  then visited in reverse order one site at a time, switching the id of the
-  phase at the site.  Once this is done, the lists of growth sites and
-  dissolution sites are updated to account for the new local geometry.
-
-  @param phaseid is the id of the microstructure phase to remove
-  @param numtoadd is the number of sites to switch from this phase
-  @return the actual number of sites that were changed
+  @param dissPhaseIDVect is the vector of microphase IDs that must dissolve
+  @param numSiteDissVect is a vector containing the number of voxels to dissolve for each
+  microphase ID in dissPhaseIDVect
+  @param dissPhNameVect is a vector containing the name of each microphase in dissPhaseIDVect
+  @param numtoadd_D is the number of sites switched by this call
+  @param totalTRC is the total call number of the changeMicrostructure method
+  @return -1 if all requested numbers of voxels in numSiteDissVect have been switched
+  or the ID of the first microphase (in dissPhaseIDVect) for which this was not possible
   */
-  //int dissolvePhase(unsigned int phaseid, int numtoadd);
+  // int dissolvePhase(unsigned int phaseid, int numtoadd);
   int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
-                       vector<string> dissPhNameVect, int &numadded, int trc);
+                       vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -811,11 +810,13 @@ public:
       count_.at(i)++;
     } catch (out_of_range &oor) {
       msg = "Site does not exist?";
-        if (doing == "diss") {
-          throw EOBException("Lattice", "setMicroPhaseId in diss", msg, count_.size(), i);
-        } else { // "grow"
-          throw EOBException("Lattice", "setMicroPhaseId in grow", msg, count_.size(), i);
-        }
+      if (doing == "diss") {
+        throw EOBException("Lattice", "setMicroPhaseId in diss", msg,
+                           count_.size(), i);
+      } else { // "grow"
+        throw EOBException("Lattice", "setMicroPhaseId in grow", msg,
+                           count_.size(), i);
+      }
     }
     return;
   }
@@ -885,7 +886,7 @@ public:
   potential dissolution sites
   @param pid is the microstructure phase id
   */
-// void removeDissolutionSite(Site *loc, unsigned int pid);
+  // void removeDissolutionSite(Site *loc, unsigned int pid);
   void removeDissolutionSite_diss(Site *loc, unsigned int pid, int interfacePos);
   void removeDissolutionSite_grow(Site *loc, unsigned int pid);
 
@@ -897,7 +898,7 @@ public:
   potential growth sites
   @param pid is the microstructure phase id
   */
-//  void removeGrowthSite(Site *loc, unsigned int pid);
+  //  void removeGrowthSite(Site *loc, unsigned int pid);
   void removeGrowthSite_0(Site *loc, unsigned int pid, int interfacePos);
   void removeGrowthSite_1(Site *loc, unsigned int pid);
 
@@ -921,16 +922,25 @@ public:
 
   @param time is is the simulation time [days]
   @param simtype is the type of simulation (hydration, leaching, etc)
-  @param isFirst is true if this is the first microstructure update, false
-  otherwise
   @param capWater is true if there is any capillary pore water in the system.
-  */
-  //void changeMicrostructure(double time, const int simtype, bool isFirst,
-  //                          bool &capWater);
+  @param numDiff is the maximum number of voxels belonging to a given microphase,
+  voxels that can be dissolved according to the system configuration (lattice)
+  @param phDiff is the microphase ID for which a the number of voxels that can be
+  dissolved is smaller than the number requested by the corresponding kinetic model
+  @param nameDiff is the name of this microphase
+  @param whileCount counts the number of changeMicrostructure calls for a given cycle
+  (cyc)
+  @param cyc (cycle) is the iteration number in main iteration loop in
+  Controller::doCycle - each cycle corresponds to a time step
 
-  int changeMicrostructure (double time, const int simtype, bool isFirst,
-                           bool &capWater, int &numDiff ,int &phDiff,
-                           string &nameDiff, int whileCount, int cyc);
+  @return zero if okay or nonzero if not all requested voxels
+  for a certain microphase ID (phDiff) can be dissolved
+  */
+
+  int changeMicrostructure(double time, const int simtype, bool &capWater,
+                           int &numDiff, int &phDiff, string &nameDiff,
+                           int whileCount, int cyc);
+
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
 
@@ -1004,7 +1014,6 @@ public:
   void writeLatticeXYZ(double curtime, const int simtype, const string &root);
   void writeLatticeCFG(double curtime, const int simtype, const string &root);
   void writeLatticeCFG_test(int testPhase);
-
 
   /**
   @brief Write the 3D microstructure to a file.
@@ -1090,48 +1099,6 @@ public:
     } else {
       msg = "Could not find expansion_ match to index provided";
       throw EOBException("Lattice", "getExpansion", msg, expansion_.size(), 0);
-    }
-  }
-
-  /**
-  @brief Get the saturation index of a phase.
-
-  The saturation index is the ratio of the activity product for the assumed
-  dissolution reaction in the GEM database to the equilibrium value of that
-  activity product (<i>i.e.</i>, the equilibrium constant).
-
-  @note NOT USED.
-
-  @param idx is the microstructure phase id
-  @return the saturation index of that phase
-  */
-  double getSI(int idx) {
-    try {
-      return ((double)(SI_.at(idx)));
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "getSI", "SI_", SI_.size(), idx);
-      ex.printException();
-      exit(1);
-    }
-  }
-
-  /**
-  @brief Set the saturation index of a phase.
-
-  The saturation index is the ratio of the activity product for the assumed
-  dissolution reaction in the GEM database to the equilibrium value of that
-  activity product (<i>i.e.</i>, the equilibrium constant).
-
-  @param idx is the microstructure phase id
-  @param val is the saturation index.
-  */
-  void setSI(const int idx, const double val) {
-    try {
-      SI_.at(idx) = val;
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "setSI", "SI_", SI_.size(), idx);
-      ex.printException();
-      exit(1);
     }
   }
 
@@ -1621,28 +1588,30 @@ public:
   */
   bool getWarning() const { return warning_; }
 
-  vector<int> getCount (void) {return count_;}
-  void setCount (vector<int> vect) {
-      int dim = vect.size();
-      for(int i = 0; i < dim; i++){
-          count_[i] = vect[i];
-      }
+  vector<int> getCount(void) { return count_; }
+  void setCount(vector<int> vect) {
+    int dim = vect.size();
+    for (int i = 0; i < dim; i++) {
+      count_[i] = vect[i];
+    }
   }
-  int getInterfaceSize (void) {return interface_.size();}
-  Interface getInterface (int i) {return interface_[i];}
-  void setGrowthSites (int i, vector<Isite> vect) {
-      interface_[i].setGrowthSites(vect);
+  int getInterfaceSize(void) { return interface_.size(); }
+  Interface getInterface(int i) { return interface_[i]; }
+  void setGrowthSites(int i, vector<Isite> vect) {
+    interface_[i].setGrowthSites(vect);
   }
-  void setDissolutionSites (int i, vector<Isite> vect) {
-      interface_[i].setDissolutionSites(vect);
+  void setDissolutionSites(int i, vector<Isite> vect) {
+    interface_[i].setDissolutionSites(vect);
   }
   void setInterfaceMicroPhaseId(int i, int mPhId) {
-      interface_[i].setMicroPhaseId(mPhId);
+    interface_[i].setMicroPhaseId(mPhId);
   }
 
-  double getInitSolidMass(void) {return initSolidMass_;}
+  double getInitSolidMass(void) { return initSolidMass_; }
 
   void findIsolatedClusters(void);
+
+  void populateElementData(void);
 
 }; // End of Lattice class
 #endif
