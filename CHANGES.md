@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| July 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
 | July 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
 | July 11 17:53 2024 | Implemented initial and fixed solution DC composition |
 | June 04 09:00 2024 | Saturation indices all reading zero no matter what. Debugging. |
