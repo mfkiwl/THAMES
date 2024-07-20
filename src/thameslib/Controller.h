@@ -53,6 +53,10 @@ struct RestoreSystem {
     vector<RestoreSite> site;     /**< 1D list of Site objects (site = voxel) */
     //from Interface
     vector<RestoreInterface> interface;
+    int latticeRNGseed;
+    long int numRNGcall_0;
+    long int numRNGcallLONGMAX;
+    double lastRNG;
 };
 
 //from ChemicalSystem:

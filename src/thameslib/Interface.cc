@@ -19,11 +19,11 @@ Interface::Interface() {
   dissolutionSites_.clear();
 }
 
-Interface::Interface(RanGen *rg, const bool verbose) {
+Interface::Interface(const bool verbose) {
   microPhaseId_ = 0;
   growthSites_.clear();
   dissolutionSites_.clear();
-  rg_ = rg;
+
 
 #ifdef DEBUG
   verbose_ = true;
@@ -32,7 +32,7 @@ Interface::Interface(RanGen *rg, const bool verbose) {
 #endif
 }
 
-Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
+Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
                      vector<Site *> dv, unsigned int pid, const bool verbose) {
   unsigned int j;
   unsigned int i;
@@ -47,7 +47,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   verbose_ = verbose;
 #endif
 
-  rg_ = rg;
+
   microPhaseId_ = pid;
   chemSys_ = csys;
 
@@ -259,6 +259,7 @@ bool Interface::addDissolutionSite(Site *loc) {
   return answer;
 }
 
+/*
 bool Interface::sortGrowthSites(vector<Site> &ste, unsigned int pid) {
   unsigned int i, j;
   int afty;
@@ -367,6 +368,7 @@ bool Interface::sortDissolutionSites(vector<Site> &ste, unsigned int pid) {
 
   return true;
 }
+*/
 
 /*
 bool Interface::removeGrowthSite(Site *loc) {

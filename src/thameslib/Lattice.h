@@ -60,11 +60,16 @@ class Lattice {
 private:
   string version_;             /**< THAMES version for header information */
   string jobroot_;             /**< The root name for output files */
+
+  RanGen *rg_;                 /**< Pointer to random number generator object */
+  int latticeRNGseed_;
+  long int numRNGcall_0_, numRNGcallLONGMAX_;
+  double lastRNG_;
+
   unsigned int xdim_;          /**< Number of sites in the x dimension */
   unsigned int ydim_;          /**< Number of sites in the y dimension */
   unsigned int zdim_;          /**< Number of sites in the z dimension */
   double resolution_;          /**< Voxel edge length [micrometers] */
-  RanGen *rg_;                 /**< Pointer to random number generator object */
   vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
   unsigned int numsites_;      /**< Total number of sites */
   unsigned int siteneighbors_; /**< Number of neighbor sites to a given site */
@@ -703,16 +708,16 @@ public:
                    vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
   /**
-  @brief nucleate a number of sites (numLeft) of a given phase (phaseID)
-  from the microstructure when the growth of all the requested number of
-  sites for this phase was not possible because the dimension of the
+  @brief create a new growth interface for a given phase (phaseID) having a
+  size of numLeft sites; this is necessary when the "growth" of all requested
+  sites for this phase was not possible because the size of the
   corresponding growth interface was zero.
 
   @param phaseid is the id of the microstructure phase to nucleate
   @param numLeft is the number of sites to nucleate/create for this phase
-  @return the actual dimension of the growth interface for this phase
+  @return the actual size of the new interface (must equals numLeft!)
   */
-  int nucleatePhase(int phaseID,int numLeft);
+  int createNewGrowthInterface(int phaseID,int numLeft);
 
   /**
   @brief Remove (dissolve i.e. switch to electrolyte) the prescribed number of
@@ -1612,6 +1617,56 @@ public:
   void findIsolatedClusters(void);
 
   void populateElementData(void);
+
+  void createRNG(void) { rg_ = new RanGen(); }
+  double callRNG(void) {
+      numRNGcall_0_++;
+      if (numRNGcall_0_ == LONG_MAX) {
+          numRNGcallLONGMAX_++;
+          numRNGcall_0_ = 0;
+      }
+      lastRNG_ = rg_->Ran3();
+      return lastRNG_;
+  }
+  long int getNumRNGcall_0(void) { return numRNGcall_0_; }
+  long int getNumRNGcallLONGMAX(void) { return numRNGcallLONGMAX_; }
+  //void setNumRNGcall_0(long int val) { numRNGcall_0_ = val; }
+  //void setNumRNGcallLONGMAX(long int val) { numRNGcallLONGMAX_ = val; }
+  int getRNGseed(void) { return latticeRNGseed_; }
+  //void setRNGseed(int val) { latticeRNGseed_ = val; }
+  double getLastRNG(void) { return lastRNG_; }
+  void setRNGseed(int seed) { rg_->setSeed(seed); }
+
+  void resetRNG(int seed, long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
+      latticeRNGseed_ = seed;
+      rg_->setSeed(latticeRNGseed_);
+      numRNGcall_0_ = val_0;
+      numRNGcallLONGMAX_ = valLONGMAX;
+      long int count_0 = 0, count_1 = 0;
+      long int j0, j1, j11;
+      double lastRNGreset;
+      for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
+          for(j11 = 1; j11 <= LONG_MAX; j11++) {
+              lastRNGreset = rg_->Ran3();
+          }
+      }
+      for(j0 = 1; j0 <= val_0; j0++) {
+          lastRNGreset = rg_->Ran3();
+      }
+      lastRNG_ = lastRNGreset;
+
+      cout << endl << "Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+           << whileCount << " / " << latticeRNGseed_ << endl;
+      cout << "Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+           << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
+           << " / " << valRNG << endl;
+      if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
+        cout << "Lattice::resetRNG OK!" << endl;
+      } else {
+        cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
+        exit(0);
+      }
+  }
 
 }; // End of Lattice class
 #endif

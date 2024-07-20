@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
   // Set up the strainenergy vector.  We allow no more than 156 phases,
   // but this can be changed below.
   //
+
   cout << scientific << setprecision(15);
   checkargs(argc, argv);
 

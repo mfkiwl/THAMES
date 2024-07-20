@@ -30,7 +30,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   nodeHandle_ = 0;
   iterDone_ = 0;
   timesGEMFailed_ = 0;
-  maxGEMFails_ = 10; // = 3;
+  maxGEMFails_ = 100; // = 3;
 
   sulfateAttackTime_ = 1.0e10;
   leachTime_ = 1.0e10;
@@ -2092,9 +2092,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
-    cerr << "ERROR: Call to GEM_run in "
-         << "ChemicalSystem::calculateState had an issue..." << endl;
-    cerr << "       nodeStatus_ = " << nodeStatus_;
+      cerr << endl << "ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = " << nodeStatus_ << endl;
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
       msg = " Need GEM calc with auto initial approx (AIA)";
@@ -2107,7 +2105,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg = " Failed result with auto initial approx (AIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with auto initial approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2124,7 +2122,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      msg = " Failed result with smart initial approx (SIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with smart initial approx (SIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2149,9 +2147,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
   }
 
   if (timesGEMFailed_ > 0) {
-    cout << endl << "Call to GEM_run has failed " << timesGEMFailed_
+    cout << "ChemicalSystem::calculateState - GEM_run has failed " << timesGEMFailed_
            << " consecutive times  cyc = " << cyc << endl;
-        // << "Attempt this step again" << endl;
     return timesGEMFailed_;
   }
 

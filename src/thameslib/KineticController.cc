@@ -811,7 +811,7 @@ void KineticController::calculateKineticStep(const double timestep,
   if (doTweak) {
     hyd_time = hyd_time_ini + timestep;
     cout << endl
-         << "tweak before for cyc = " << cyc << "   hyd_time: " << hyd_time
+         << "KineticController::calculateKineticStep - tweak before for cyc = " << cyc << "   hyd_time: " << hyd_time
          << "   hyd_time_ini: " << hyd_time_ini << "   timestep: " << timestep
          << endl;
 
@@ -921,7 +921,7 @@ void KineticController::calculateKineticStep(const double timestep,
       double totalDOR =
           (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
           initScaledCementMass_;
-      cout << "kineticController initScaledCementMass_/scaledCementMass : "
+      cout << "KineticController::calculateKineticStep initScaledCementMass_/scaledCementMass : "
            << initScaledCementMass_ << " / " << chemSys_->getScaledCementMass()
            << endl;
       //*******
@@ -995,7 +995,7 @@ void KineticController::calculateKineticStep(const double timestep,
       }
 
       if (doTweak) {
-        cout << endl << "tweak after for cyc = " << cyc << endl;
+        cout << endl << "KineticController::calculateKineticStep - tweak after for cyc = " << cyc << endl;
       }
 
       // cout << endl << " ******************** kinetic models
@@ -1060,7 +1060,7 @@ void KineticController::calculateKineticStep(const double timestep,
     // " mol" << endl;
   }
 
-  cout << "end calculateKineticStep - cyc = " << cyc << endl << endl;
+  cout << "KineticController::calculateKineticStep end - cyc = " << cyc << endl;
   cout.flush();
   // exit(0);
   // if(cyc == 1){cout << "stop calculateKineticStep after cyc = " << cyc <<
