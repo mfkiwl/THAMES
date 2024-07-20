@@ -1325,16 +1325,20 @@ int Lattice::nucleatePhase(int phaseID,int numLeft){
             rng = rg_->Ran3();
 
             if(affSum != 0){
-
-                daffsum = affSum;
                 if (affMin < 0){
                     valAbs = abs(affMin);
-                    affSum += sizeWS * valAbs;
-                    watersites[0].prob = (watersites[0].aff + valAbs)/daffsum;
-                    for (k = 1; k < sizeWS; k++) {
-                        watersites[k].prob = watersites[k-1].prob + (watersites[k].aff + valAbs)/daffsum;
-                   }
+                    affSum += (sizeWS * valAbs);
+                    if (affSum != 0) {
+                        daffsum = affSum;
+                        watersites[0].prob = (watersites[0].aff + valAbs)/daffsum;
+                        for (k = 1; k < sizeWS; k++) {
+                            watersites[k].prob = watersites[k-1].prob + (watersites[k].aff + valAbs)/daffsum;
+                        }
+                    } else {
+                        fSiteWS = (int)(rng * sizeWS);
+                    }
                 }else{
+                    daffsum = affSum;
                     watersites[0].prob = (watersites[0].aff)/daffsum;
                     for (k = 1; k < sizeWS; k++) {
                         watersites[k].prob = watersites[k-1].prob + (watersites[k].aff)/daffsum;
@@ -1362,7 +1366,7 @@ int Lattice::nucleatePhase(int phaseID,int numLeft){
             affSum = 0;
             affMin = 1000000;
             for (k = 0; k < sizeWS; ++k) {
-                aff = watersites[fSiteWS].aff;
+                aff = watersites[k].aff;
                 affSum += aff;
                 if (aff < affMin) affMin = aff;
             }
