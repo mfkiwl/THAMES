@@ -122,10 +122,6 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
-  ICNum_ = chemSys_->getNumICs();
-  DCNum_ = chemSys_->getNumDCs();
-  GEMPhaseNum_ = chemSys_->getNumGEMPhases();
-
   name_ = kineticData.name;
   microPhaseId_ = kineticData.microPhaseId;
   DCId_ = kineticData.DCId;

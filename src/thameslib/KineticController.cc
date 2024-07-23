@@ -821,7 +821,6 @@ void KineticController::calculateKineticStep(const double timestep,
       cout << "     midx = " << midx
            << "     scaledMassIni[midx] = " << scaledMassIni[midx] << endl;
     }
-  }
 
     for (i = 0; i < DCNum_; i++) {
       DCMoles_[i] = DCMolesIni_[i];

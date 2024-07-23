@@ -140,6 +140,7 @@
             <xs:element minOccurs="0" maxOccurs="1" name="dorHcoeff" type="positiveDoubletype" />
             <xs:element minOccurs="0" maxOccurs="1" name="activationEnergy"
                 type="positiveDoubletype" />
+            <xs:element minOccurs="0" maxOccurs="1" name="critdoh" type="positiveDoubletype" />
             <xs:element minOccurs="0" maxOccurs="1" name="dissolutionRateConst"
                 type="positiveDoubletype" />
             <xs:element minOccurs="0" maxOccurs="1" name="diffusionRateConstEarly"

@@ -923,8 +923,8 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
     double rng;
 
 
-  string nameMicroPhaseTh;
-  double steWmc, stenbWmc, dwmcval;
+    string nameMicroPhaseTh;
+    double steWmc, stenbWmc, dwmcval;
 
     struct growProb_ {
       unsigned int id; /**< The id of the corresponding Site */
@@ -1264,10 +1264,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
             cout << "stop program" << endl;
             exit(0);
         }
-      } else {
-        rng = rg_->Ran3();
-        isitePos = (int)(rng * dim_isite);
-      }
 
         //growth probabilities based on affinities
         growProbVect.clear();
@@ -1319,142 +1315,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
         }
         growProbVectSize = growProbVect.size();
 
-      double wmcIni, wmcEnd;
-      wmcIni = ste->getWmc0();
-
-      // if (pid == ELECTROLYTEID) {
-      // removeGrowthSite(ste, phaseid);
-      removeGrowthSite_0(ste, phaseid, isitePos);
-      setMicroPhaseId(ste, phaseid, "grow");
-
-      vector<unsigned int> plist = ste->getGrowthPhases();
-      for (j = 0; j < plist.size(); j++) {
-        removeGrowthSite_1(ste, plist[j]);
-      }
-
-      ///
-      /// Weighted mean curvature (wmc) is changed by the difference
-      /// between the growing phase's porosity and the template's porosity.
-      ///
-      /// @todo Determine why the calculation works this way.
-      ///
-
-      nameMicroPhaseTh = chemSys_->getMicroPhaseName(phaseid);
-      if (nameMicroPhaseTh == "CSHQ") {
-        rng = rg_->Ran3();
-        if (rng >= thrPorosityCSH) {
-          wmcEnd = chemSys_->getMicroPhasePorosity(phaseid);
-        } else {
-          wmcEnd = 0;
-        }
-      } else {
-        wmcEnd = 0;
-      }
-      ste->setWmc0(wmcEnd);
-
-      // dwmcval = chemSys_->getMicroPhasePorosity(phaseid) -
-      //           chemSys_->getMicroPhasePorosity(pid);
-      dwmcval = wmcEnd - wmcIni;
-      ste->dWmc(dwmcval);
-
-      ///
-      /// Now that the site has been added, it is eligible for dissolution
-      /// later on, so we add it to the list of dissolution sites.
-      ///
-
-      steWmc = ste->getWmc();
-      // if (steWmc < 0.0 || steWmc > 19.0){
-      //    cout << endl <<"error Lattice::growPhase for steWmc - ste pid steWmc
-      //    phaseid trc trc_g bcl : "
-      //          << ste->getId() << "   "
-      //          << pid << "   " << steWmc << "   " << phaseid << "   "
-      //         << trc << "   " << trc_g << "   " << bcl << endl; cout.flush();
-      //     cout << endl << "nn & nnn siteId phaseId siteWmc :" << endl;
-      //     for (int i = 0; i < chemSys_->getNumMicroPhases(); i++){
-      //         cout << "   " << i << "   " << (ste->nb(i))->getId() << "   "
-      //              << (ste->nb(i))->getMicroPhaseId() << "   " <<
-      //              (ste->nb(i))->getWmc() << endl;
-      //     }
-      //     cout << endl << "stop program" << endl;
-      //     exit(1);
-      // }
-      if (steWmc > 0.0) {
-        addDissolutionSite(ste, phaseid);
-      }
-
-      ///
-      /// Update the wmc of the neighboring sites.  This can be done
-      /// because the wmc is originally calculated within a box around each
-      /// site, so any time the id of a site within that box changes, it
-      /// will change the wmc of the site at the box's center.
-      ///
-      /// NN_NNN = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
-      ///
-
-      for (j = 0; j < NN_NNN;
-           j++) { // for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
-        stenb = ste->nb(j);
-        stenb->dWmc(dwmcval);
-        stenbWmc = stenb->getWmc();
-        // if (stenbWmc < 0.0 || stenbWmc > 19.0){
-        //     cout << endl <<"error Lattice::growPhase for stenbWmc - ste pid
-        //     steWmc phaseid trc trc_g bcl stenb stenb_pid stenbWmc j : "
-        //          << ste->getId() << "   "
-        //          << pid << "   " << ste->getWmc() << "   " << phaseid << " "
-        //          << trc << "   " << trc_g << "   " << bcl << "   " <<
-        //          stenb->getId() << "   "
-        //          << stenb->getMicroPhaseId() << "   " << stenbWmc << "   " <<
-        //          j << endl; cout.flush();
-        //     cout << endl << "stop program" << endl;
-        //     exit(1);
-        // }
-        if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
-          addGrowthSite(stenb, phaseid);
-
-          if (j < NUM_NEAREST_NEIGHBORS) {
-            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases;
-                 phaseTmpl++) {
-              if (chemSys_->isGrowthTemplate(phaseTmpl, phaseid)) {
-                // addGrowthSite(stenb, nbgrowthtemp[jj]);
-                addGrowthSite(stenb, phaseTmpl);
-              }
-            }
-          }
-
-        } else if (stenbWmc == 0.0) {
-
-          // removeDissolutionSite(stenb, stenb->getMicroPhaseId());
-          removeDissolutionSite_grow(stenb, stenb->getMicroPhaseId());
-        }
-      }
-
-      numleft--;
-      numchange++;
-      // } else {
-      //     cout << "error test_removeGrowthSite phaseid numtoadd trc trc_g bcl
-      //     steId pid dim_isite numleft numchange  :  "
-      //          << phaseid << "   " << numtoadd << "   " << trc << "   " <<
-      //          trc_g << "   "
-      //          << bcl << "   " << ste->getId() << "   " << pid << "   " <<
-      //          dim_isite << "   "
-      //          << numleft << "   " << numchange << endl;
-      //     cout << endl << "stop program" << endl;
-      //     exit(1);
-      //     //removeGrowthSite(ste, phaseid);
-      // }
-
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), j);
-      ex.printException();
-      cout << endl
-           << "error grow phaseid numtoadd totalTRC trc_g bcl steId pid "
-              "dim_isite numleft numchange  :  "
-           << phaseid << "   " << numtoadd << "   " << totalTRC << "   "
-           << trc_g << "   " << bcl << "   " << ste->getId() << "   " << pid
-           << "   " << dim_isite << "   " << numleft << "   " << numchange
-           << endl;
-      cout.flush();
-      exit(1);
     }
 
     //findInterfaces_check();
@@ -1814,7 +1674,6 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
                         }
                     }
                 }
-              }
             }
 
             numLeftTot--;
@@ -1845,7 +1704,6 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
             cout << "stop program" << endl;
             exit(1);
         }
-      }
 
         // dissolution probabilities based on wmc
         dissProbVect.clear();
@@ -1900,18 +1758,6 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
         dissProbVectSize = dissProbVect.size();
 
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), i);
-      ex.printException();
-      cout << endl
-           << "error diss phaseid numtotake totalTRC trc_d bcl steId pid "
-              "dim_isite numleft numchange  :  "
-           << phaseid << "   " << numtotake << "   " << totalTRC << "   "
-           << trc_d << "   " << bcl << "   " << ste->getId() << "   " << pid
-           << "   " << dim_isite << "   " << numleft << "   " << numchange
-           << endl;
-      cout.flush();
-      exit(1);
     }
 
     //findInterfaces_check();
@@ -1937,9 +1783,6 @@ void Lattice::findInterfaces_check(void) {
   vector<Site *>::iterator beginLocation, endLocation;
   vector<Isite>::iterator start, end;
 
-  ///
-  /// An interface must have at least one adjacent site that is water or void
-  ///
 
   ///
   /// An interface must have at least one adjacent site that is water or void
@@ -2999,10 +2842,6 @@ cout << "expansion_.size() = " << expansion_.size() << " at the beginning of "
         return 0;
       }
     }
-  } catch (out_of_range &oor) {
-    throw EOBException("Lattice", "changeMicrostructure_0", "pid", pid.size(),
-                       ii);
-  }
 
     if (growPhaseIDVect.size() > 0){
 
