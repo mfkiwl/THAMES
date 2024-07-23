@@ -63,7 +63,7 @@ private:
   vector<double>
       refSpecificSurfaceArea_; /**< List of reference specific surface areas */
   vector<bool> isKinetic_;
-  int waterId_;     /**< DC index for liquid water */
+  // int waterId_;     /**< DC index for liquid water */
   int ICNum_;       /**< Number of ICs in chemical system */
   int DCNum_;       /**< Number of DCs in chemical system */
   int GEMPhaseNum_; /**< Number of GEM phases in chemical system */
@@ -432,7 +432,8 @@ public:
 
   */
   void setKineticDCMoles() {
-    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+    int size = phaseKineticModel_.size();
+    for (int i = 0; i < size; ++i) {
       phaseKineticModel_[i]->setKineticDCMoles();
     }
     return;
@@ -443,7 +444,8 @@ public:
 
   */
   void zeroKineticDCMoles() {
-    for (int i = 0; i < phaseKineticModel_.size(); ++i) {
+    int size = phaseKineticModel_.size();
+    for (int i = 0; i < size; ++i) {
       phaseKineticModel_[i]->zeroKineticDCMoles();
     }
     return;
@@ -479,8 +481,7 @@ public:
   otherwise
   */
 
-  void calculateKineticStep(const double timestep, const double temperature,
-                            int cyc);
+  void calculateKineticStep(const double timestep, int cyc);
 
   /**
   @brief Set the verbose flag

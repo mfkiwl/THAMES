@@ -58,7 +58,7 @@ private:
                                        adjacent growth */
   vector<Isite>
       dissolutionSites_; /**< The list of sites eligible for self-dissolution */
-  RanGen *rg_;           /**< The random number generator object */
+
   bool verbose_;         /**< Flag for verbose output */
 
 public:
@@ -75,7 +75,7 @@ public:
   @param rg is a pointer to the random number generator object to assign
   @param verbose is true if verbose output should be produced
   */
-  Interface(RanGen *rg, const bool verbose);
+  Interface(const bool verbose);
 
   /**
   @brief Overloaded constructor, initializing all members to prescribed values.
@@ -89,7 +89,7 @@ public:
   @param pid is the integer id of the phase associated with this interface
   @param verbose is true if verbose output should be produced
   */
-  Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
+  Interface(ChemicalSystem *csys, vector<Site *> gv,
             vector<Site *> dv, unsigned int pid, const bool verbose);
 
   /**
@@ -223,6 +223,7 @@ public:
   // bool removeGrowthSite(Site *loc);
   bool removeGrowthSite_0(Site *loc, int pos);
   bool removeGrowthSite_1(Site *loc);
+  bool removeEmptiedSite(int siteID);
 
   /**
   @brief Remove a site from the list of sites where dissolution can occur

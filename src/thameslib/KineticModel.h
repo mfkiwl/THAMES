@@ -57,15 +57,11 @@ protected:
   int microPhaseId_; /**< Microstructure id controlled by this model */
   int DCId_;         /**< List of DC ids from the ChemicalSystem object */
   int GEMPhaseId_;   /**< List of phase ids from the ChemicalSystem object */
-  int waterId_;      /**< DC index for liquid water */
-  int ICNum_;        /**< Number of ICs in chemical system */
-  int DCNum_;        /**< Number of DCs in chemical system */
-  int GEMPhaseNum_;  /**< Number of GEM phases in chemical system */
+
   vector<string> ICName_;      /**< Names of ICs */
   vector<string> DCName_;      /**< Names of DCs */
   double scaledMass_;          /**< Phase mass percent, total solids basis */
   double initScaledMass_;      /**< Initial phase scaled mass */
-  double initScaledMoles_;     /**< Initial phase scaled moles */
   double activationEnergy_;    /**< Apparent activation energy for the reaction
                                   [J/mol/K] */
   double specificSurfaceArea_; /**< Specific surface area (m2/kg) */
@@ -265,14 +261,14 @@ public:
 
   @param waterid is the index value to use
   */
-  void setWaterId(const int waterid) { waterId_ = waterid; }
+  //void setWaterId(const int waterid) { waterId_ = waterid; }
 
   /**
   @brief Get the DC index for liquid water
 
   @return the DC index for liquid water
   */
-  int getWaterId() const { return waterId_; }
+  //int getWaterId() const { return waterId_; }
 
   /**
   @brief Set the number of ICs
@@ -281,14 +277,14 @@ public:
 
   @param icnum is the number of ICs to specify
   */
-  void setICNum(const int icnum) { ICNum_ = icnum; }
+  //void setICNum(const int icnum) { ICNum_ = icnum; }
 
   /**
   @brief Get the number of ICs
 
   @return the number of ICs
   */
-  int getICNum() const { return ICNum_; }
+  //int getICNum() const { return ICNum_; }
 
   /**
   @brief Set the number of DCs
@@ -297,14 +293,14 @@ public:
 
   @param dcnum is number of DCs to specify
   */
-  void setDCNum(const int dcnum) { DCNum_ = dcnum; }
+  //void setDCNum(const int dcnum) { DCNum_ = dcnum; }
 
   /**
   @brief Get the number of DCs
 
   @return the number of DCs
   */
-  int getDCNum() const { return DCNum_; }
+  //int getDCNum() const { return DCNum_; }
 
   int getDCId() const { return DCId_; }
 
@@ -315,14 +311,14 @@ public:
 
   @param gpnum is number of GEM phases to specify
   */
-  void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
+  //void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
 
   /**
   @brief Get the number of GEM phases
 
   @return the number of GEM phases
   */
-  int getGEMPhaseNum() const { return GEMPhaseNum_; }
+  //int getGEMPhaseNum() const { return GEMPhaseNum_; }
 
   /**
   @brief Set the IC names
@@ -506,14 +502,14 @@ public:
 
   @param initscaledmoles is the value to set
   */
-  void setInitScaledMoles(const double initscaledmoles) {
-    if (initscaledmoles < 0.0) {
-      initScaledMoles_ = 0.0;
-    } else {
-      initScaledMoles_ = initscaledmoles;
-    }
-    return;
-  }
+  // void setInitScaledMoles(const double initscaledmoles) {
+  //   if (initscaledmoles < 0.0) {
+  //     initScaledMoles_ = 0.0;
+  //   } else {
+  //     initScaledMoles_ = initscaledmoles;
+  //   }
+  //   return;
+  // }
 
   /**
   @brief Get the <i>initial</i> scaled moles of the phase in the kinetic model.
@@ -522,7 +518,7 @@ public:
 
   @return the initial scaled moles
   */
-  double getInitScaledMoles() const { return initScaledMoles_; }
+  //double getInitScaledMoles() const { return initScaledMoles_; }
 
   /**
   @brief Master method for implementing one kinetic time step.
@@ -551,10 +547,9 @@ public:
   @param cyc is the cycle number (iteration of main loop)
   @param totalDOR is the total degree of reaction [dimensionless]
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, double rh,
-                                    double &scaledMass, double &massDissolved,
-                                    int cyc, double totalDOR) = 0;
+  virtual void calculateKineticStep(const double timestep, double &scaledMass,
+                                    double &massDissolved, int cyc,
+                                    double totalDOR) = 0;
 
   /**
   @brief Set up the number of moles of dependent components in the kinetic

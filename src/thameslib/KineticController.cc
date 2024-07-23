@@ -25,7 +25,7 @@ KineticController::KineticController() {
   specificSurfaceArea_.clear();
   refSpecificSurfaceArea_.clear();
   isKinetic_.clear();
-  waterId_ = 1;
+  // waterId_ = 1;
   ICNum_ = 0;
   ICName_.clear();
   DCNum_ = 0;
@@ -123,7 +123,8 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
     cout << "KineticController::KineticController Finished reading "
             "chemistry.xml "
          << endl;
-    for (int i = 0; i < microPhaseId_.size(); ++i) {
+    int size = microPhaseId_.size();
+    for (int i = 0; i < size; ++i) {
       microPhaseId = microPhaseId_[i];
       if (isKinetic_[i]) {
         cout << "KineticController::KineticController kinetic phase "
@@ -137,7 +138,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
 
   // Assign the DC index for water
 
-  waterId_ = chemSys_->getDCId(WaterDCName);
+  // waterId_ = chemSys_->getDCId(WaterDCName);
   ICNum_ = chemSys_->getNumICs();
   DCNum_ = chemSys_->getNumDCs();
   ICName_ = chemSys_->getICName();
@@ -413,18 +414,11 @@ void KineticController::parseKineticDataForParrotKilloh(
       from_string(kineticData.n3, st);
       xmlFree(key);
     }
-    // Parrot-Killoh HLK parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"HLK"))) {
+    // Parrot-Killoh DOR_Hcoeff parameter
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dorHcoeff"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(kineticData.HLK, st);
-      xmlFree(key);
-    }
-    // Parrot-Killoh critical DOH parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"critdoh"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.critDOR, st);
+      from_string(kineticData.dorHcoeff, st);
       xmlFree(key);
     }
     // Activation energy
@@ -642,7 +636,9 @@ void KineticController::calcPhaseMasses(void) {
   int microPhaseId;
   double pscaledMass = 0.0;
 
-  for (int i = 0; i < microPhaseId_.size(); i++) {
+  int size = microPhaseId_.size();
+
+  for (int i = 0; i < size; i++) {
     microPhaseId = microPhaseId_[i];
     if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
       pscaledMass = chemSys_->getMicroPhaseMass(microPhaseId);
@@ -668,8 +664,8 @@ void KineticController::calcPhaseMasses(void) {
 double KineticController::getSolidMass(void) {
   int microPhaseId;
   double totmass = 0.0;
-
-  for (int i = 0; i < microPhaseId_.size(); i++) {
+  int size = microPhaseId_.size();
+  for (int i = 0; i < size; i++) {
     microPhaseId = microPhaseId_[i];
     if (microPhaseId != VOIDID && microPhaseId != ELECTROLYTEID) {
       totmass += chemSys_->getMicroPhaseMass(microPhaseId);
@@ -719,7 +715,9 @@ void KineticController::setPozzEffectOnPK(void) {
   double minpozzeffect = 1.0;
   double pozzeffect = 1.0;
 
-  for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+  int size = phaseKineticModel_.size();
+
+  for (int midx = 0; midx < size; ++midx) {
     loi = phaseKineticModel_[midx]->getLossOnIgnition();
     if (loi > maxloi)
       maxloi = loi;
@@ -748,7 +746,7 @@ void KineticController::setPozzEffectOnPK(void) {
   minpozzeffect *= (refloi / maxloi);
 
   /// The way this is set up, 0.0 <= refloi / maxloi <= 1.0
-  for (int midx = 0; midx < phaseKineticModel_.size(); ++midx) {
+  for (int midx = 0; midx < size; ++midx) {
     if (phaseKineticModel_[midx]->getType() == ParrotKillohType) {
       phaseKineticModel_[midx]->setPfk(minpozzeffect);
     }
@@ -758,15 +756,12 @@ void KineticController::setPozzEffectOnPK(void) {
 }
 
 void KineticController::calculateKineticStep(const double timestep,
-                                             const double temperature,
                                              int cyc) {
   ///
   /// Initialize local variables
   ///
   ///
 
-  double T = temperature;
-  double arrhenius = 1.0;
   int i;
 
   // double massDissolved = 0.0;
@@ -807,7 +802,7 @@ void KineticController::calculateKineticStep(const double timestep,
   static double hyd_time_ini = 0.0;
   static double hyd_time = 0.0;
 
-  for (int i = 0; i < ICNum_; i++) {
+  for (i = 0; i < ICNum_; i++) {
     ICMoles_[i] = 0.0;
   }
 
@@ -816,7 +811,7 @@ void KineticController::calculateKineticStep(const double timestep,
   if (doTweak) {
     hyd_time = hyd_time_ini + timestep;
     cout << endl
-         << "tweak before for cyc = " << cyc << "   hyd_time: " << hyd_time
+         << "KineticController::calculateKineticStep - tweak before for cyc = " << cyc << "   hyd_time: " << hyd_time
          << "   hyd_time_ini: " << hyd_time_ini << "   timestep: " << timestep
          << endl;
 
@@ -826,8 +821,9 @@ void KineticController::calculateKineticStep(const double timestep,
       cout << "     midx = " << midx
            << "     scaledMassIni[midx] = " << scaledMassIni[midx] << endl;
     }
+  }
 
-    for (int i = 0; i < DCNum_; i++) {
+    for (i = 0; i < DCNum_; i++) {
       DCMoles_[i] = DCMolesIni_[i];
       // cout <<"hydT   " << i << "\tDCName: " << chemSys_->getDCName(i)
       //      << "\tDCId: " << chemSys_->getDCId(chemSys_->getDCName(i)) << "\t"
@@ -852,7 +848,7 @@ void KineticController::calculateKineticStep(const double timestep,
       scaledMassIni[midx] = chemSys_->getMicroPhaseMass(phaseDissolvedId[midx]);
     }
 
-    for (int i = 0; i < DCNum_; i++) {
+    for (i = 0; i < DCNum_; i++) {
       DCMoles_[i] = chemSys_->getDCMoles(i);
       DCMolesIni_[i] = DCMoles_[i];
       // cout <<"hydT   " << i << "\tDCName: " << chemSys_->getDCName(i)
@@ -910,10 +906,10 @@ void KineticController::calculateKineticStep(const double timestep,
       /// Assume a zero contact angle for now.
       /// @todo revisit the contact angle issue
 
-      double critporediam = lattice_->getLargestSaturatedPore(); // in nm
-      critporediam *= 1.0e-9;                                    // in m
-      double rh = exp(-6.23527e-7 / critporediam / T);
-      rh = rh > 0.55 ? rh : 0.551;
+      //double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+      //critporediam *= 1.0e-9;                                    // in m
+      //double rh = exp(-6.23527e-7 / critporediam / T);
+      //rh = rh > 0.55 ? rh : 0.551;
 
       /// Assume a zero contact angle for now.
       /// @todo revisit the contact angle issue
@@ -926,7 +922,7 @@ void KineticController::calculateKineticStep(const double timestep,
       double totalDOR =
           (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
           initScaledCementMass_;
-      cout << "kineticController initScaledCementMass_/scaledCementMass : "
+      cout << "KineticController::calculateKineticStep initScaledCementMass_/scaledCementMass : "
            << initScaledCementMass_ << " / " << chemSys_->getScaledCementMass()
            << endl;
       //*******
@@ -935,7 +931,7 @@ void KineticController::calculateKineticStep(const double timestep,
 
         DCId = phaseKineticModel_[midx]->getDCId();
         phaseKineticModel_[midx]->calculateKineticStep(
-            timestep, temperature, rh, scaledMass, massDissolved, cyc,
+            timestep, scaledMass, massDissolved, cyc,
             totalDOR);
 
         chemSys_->setMicroPhaseMass(phaseDissolvedId[midx], scaledMass);
@@ -1000,7 +996,7 @@ void KineticController::calculateKineticStep(const double timestep,
       }
 
       if (doTweak) {
-        cout << endl << "tweak after for cyc = " << cyc << endl;
+        cout << endl << "KineticController::calculateKineticStep - tweak after for cyc = " << cyc << endl;
       }
 
       // cout << endl << " ******************** kinetic models
@@ -1065,7 +1061,7 @@ void KineticController::calculateKineticStep(const double timestep,
     // " mol" << endl;
   }
 
-  cout << "end calculateKineticStep - cyc = " << cyc << endl << endl;
+  cout << "KineticController::calculateKineticStep end - cyc = " << cyc << endl;
   cout.flush();
   // exit(0);
   // if(cyc == 1){cout << "stop calculateKineticStep after cyc = " << cyc <<

@@ -60,11 +60,16 @@ class Lattice {
 private:
   string version_;             /**< THAMES version for header information */
   string jobroot_;             /**< The root name for output files */
+
+  RanGen *rg_;                 /**< Pointer to random number generator object */
+  int latticeRNGseed_;
+  long int numRNGcall_0_, numRNGcallLONGMAX_;
+  double lastRNG_;
+
   unsigned int xdim_;          /**< Number of sites in the x dimension */
   unsigned int ydim_;          /**< Number of sites in the y dimension */
   unsigned int zdim_;          /**< Number of sites in the z dimension */
   double resolution_;          /**< Voxel edge length [micrometers] */
-  RanGen *rg_;                 /**< Pointer to random number generator object */
   vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
   unsigned int numsites_;      /**< Total number of sites */
   unsigned int siteneighbors_; /**< Number of neighbor sites to a given site */
@@ -131,15 +136,11 @@ pores in GEM units */
                                 files in cfg format */
 
   double initSolidMass_;
-  // for tests 1
-  int numICs_ini, numDCs_ini;
-  vector<double> ICMoles_ini, DCMoles_ini;
 
-  vector<int> count_ini;
-  vector<Site> site_ini;
-  vector<Interface> interface_ini;
-  double wcratio_; /**< Water-to-cement mass ratio */
-  // for tests 1
+  double wcratio_;  /**< Water-to-cement mass ratio */
+
+  int numMicroPhases_;   /**< Number of microphases */
+
 public:
   /**
   @brief Constructor without input microstructure file name.
@@ -691,38 +692,49 @@ public:
   void findInterfaces_check(void);
 
   /**
-  @brief Add a prescribed number of sites of a given phase to the
-  microstructure.
+  @brief Add (grow i.e. switch from electrolyte) the prescribed number of
+  sites of each microphase that has to grow
 
-  This method gets a list of all the <i>potential</i> growth sites. A site from
-  this list is selected with a probability computed based on the local
-  configuration: affinities that take into account the nature of the phase
-  occupying this site and phases occupying its nearest and next nearest
-  neighbours. Once switching the phase id of this site, the lists of growth
-  sites and dissolution sites are updated to account for the new local geometry.
-
-  @param phaseid is the id of the microstructure phase to add
-  @param numtoadd is the number of sites to switch to this phase
-  @return the actual number of sites that were changed
+  @param growPhaseIDVect is the vector of microphase IDs that must grow
+  @param numSiteGrowVect is a vector containing the number of voxels to add for each
+  microphase ID in growPhaseIDVect
+  @param growPhNameVect is a vector containing the name of each microphase in growPhaseIDVect
+  @param numtoadd_G is the number of sites switched by this call
+  @param totalTRC is the total call number of the changeMicrostructure method
+  @return the actual number of sites that were changed for each microphase ID from
+  the input growPhaseIDVect vector
   */
-  int growPhase(unsigned int phaseid, int numtoadd, int trc);
+  vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
+                   vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
   /**
-  @brief Remove a prescribed number of sites of a given phase from the
-  microstructure.
+  @brief create a new growth interface for a given phase (phaseID) having a
+  size of numLeft sites; this is necessary when the "growth" of all requested
+  sites for this phase was not possible because the size of the
+  corresponding growth interface was zero.
 
-  This method gets a list of all the <i>potential</i> dissolution sites, which
-  already is sorted in descending order of <i>growth</i> affinity.  The list is
-  then visited in reverse order one site at a time, switching the id of the
-  phase at the site.  Once this is done, the lists of growth sites and
-  dissolution sites are updated to account for the new local geometry.
+  @param phaseid is the id of the microstructure phase to nucleate
+  @param numLeft is the number of sites to nucleate/create for this phase
+  @return the actual size of the new interface (must equals numLeft!)
+  */
+  int createNewGrowthInterface(int phaseID,int numLeft);
 
-  @param phaseid is the id of the microstructure phase to remove
-  @param numtoadd is the number of sites to switch from this phase
-  @return the actual number of sites that were changed
+  /**
+  @brief Remove (dissolve i.e. switch to electrolyte) the prescribed number of
+  sites of each microphase that has to dissolve
+
+  @param dissPhaseIDVect is the vector of microphase IDs that must dissolve
+  @param numSiteDissVect is a vector containing the number of voxels to dissolve for each
+  microphase ID in dissPhaseIDVect
+  @param dissPhNameVect is a vector containing the name of each microphase in dissPhaseIDVect
+  @param numtoadd_D is the number of sites switched by this call
+  @param totalTRC is the total call number of the changeMicrostructure method
+  @return -1 if all requested numbers of voxels in numSiteDissVect have been switched
+  or the ID of the first microphase (in dissPhaseIDVect) for which this was not possible
   */
   // int dissolvePhase(unsigned int phaseid, int numtoadd);
-  int dissolvePhase(unsigned int phaseid, int numtoadd, int trc);
+  int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
+                       vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -880,8 +892,7 @@ public:
   @param pid is the microstructure phase id
   */
   // void removeDissolutionSite(Site *loc, unsigned int pid);
-  void removeDissolutionSite_diss(Site *loc, unsigned int pid,
-                                  int interfacePos);
+  void removeDissolutionSite_diss(Site *loc, unsigned int pid, int interfacePos);
   void removeDissolutionSite_grow(Site *loc, unsigned int pid);
 
   /**
@@ -916,22 +927,24 @@ public:
 
   @param time is is the simulation time [days]
   @param simtype is the type of simulation (hydration, leaching, etc)
-  @param isFirst is true if this is the first microstructure update, false
-  otherwise
   @param capWater is true if there is any capillary pore water in the system.
-  @param numDiff is ...
-  @param phDiff is ...
-  @param nameDiff is ...
-  @param whileCount is ...
-  @param cyc is the iteration number in main iteration loop in
-  Controller::doCycle
+  @param numDiff is the maximum number of voxels belonging to a given microphase,
+  voxels that can be dissolved according to the system configuration (lattice)
+  @param phDiff is the microphase ID for which a the number of voxels that can be
+  dissolved is smaller than the number requested by the corresponding kinetic model
+  @param nameDiff is the name of this microphase
+  @param whileCount counts the number of changeMicrostructure calls for a given cycle
+  (cyc)
+  @param cyc (cycle) is the iteration number in main iteration loop in
+  Controller::doCycle - each cycle corresponds to a time step
 
-  @return zero if okay or nonzero if an error is encountered
+  @return zero if okay or nonzero if not all requested voxels
+  for a certain microphase ID (phDiff) can be dissolved
   */
 
-  int changeMicrostructure(double time, const int simtype, bool isFirst,
-                           bool &capWater, int &numDiff, int &phDiff,
-                           string &nameDiff, int whileCount, int cyc);
+  int changeMicrostructure(double time, const int simtype, bool &capWater,
+                           int &numDiff, int &phDiff, string &nameDiff,
+                           int whileCount, int cyc);
 
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
@@ -1419,7 +1432,8 @@ public:
   */
   double getLargestSaturatedPore(void) {
     double capsize = 1000.0; // nm of capillary pores
-    for (int i = 0; i < masterporevolume_.size(); i++) {
+    int size = masterporevolume_.size();
+    for (int i = 0; i < size; i++) {
       if (masterporevolume_[i].volfrac < 1.0) {
         return (masterporevolume_[i].diam);
       }
@@ -1603,6 +1617,56 @@ public:
   void findIsolatedClusters(void);
 
   void populateElementData(void);
+
+  void createRNG(void) { rg_ = new RanGen(); }
+  double callRNG(void) {
+      numRNGcall_0_++;
+      if (numRNGcall_0_ == LONG_MAX) {
+          numRNGcallLONGMAX_++;
+          numRNGcall_0_ = 0;
+      }
+      lastRNG_ = rg_->Ran3();
+      return lastRNG_;
+  }
+  long int getNumRNGcall_0(void) { return numRNGcall_0_; }
+  long int getNumRNGcallLONGMAX(void) { return numRNGcallLONGMAX_; }
+  //void setNumRNGcall_0(long int val) { numRNGcall_0_ = val; }
+  //void setNumRNGcallLONGMAX(long int val) { numRNGcallLONGMAX_ = val; }
+  int getRNGseed(void) { return latticeRNGseed_; }
+  //void setRNGseed(int val) { latticeRNGseed_ = val; }
+  double getLastRNG(void) { return lastRNG_; }
+  void setRNGseed(int seed) { rg_->setSeed(seed); }
+
+  void resetRNG(int seed, long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
+      latticeRNGseed_ = seed;
+      rg_->setSeed(latticeRNGseed_);
+      numRNGcall_0_ = val_0;
+      numRNGcallLONGMAX_ = valLONGMAX;
+      long int count_0 = 0, count_1 = 0;
+      long int j0, j1, j11;
+      double lastRNGreset;
+      for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
+          for(j11 = 1; j11 <= LONG_MAX; j11++) {
+              lastRNGreset = rg_->Ran3();
+          }
+      }
+      for(j0 = 1; j0 <= val_0; j0++) {
+          lastRNGreset = rg_->Ran3();
+      }
+      lastRNG_ = lastRNGreset;
+
+      cout << endl << "Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+           << whileCount << " / " << latticeRNGseed_ << endl;
+      cout << "Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+           << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
+           << " / " << valRNG << endl;
+      if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
+        cout << "Lattice::resetRNG OK!" << endl;
+      } else {
+        cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
+        exit(0);
+      }
+  }
 
 }; // End of Lattice class
 #endif

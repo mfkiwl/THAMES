@@ -49,14 +49,18 @@ struct RestoreInterface {
 };
 
 struct RestoreSystem {
-  // from ChemicalSystem (in fact from KineticController):
-  // vector<double> ICMoles;
-  vector<double> DCMoles;
-  // from Lattice:
-  vector<int> count;
-  vector<RestoreSite> site; /**< 1D list of Site objects (site = voxel) */
-  // from Interface
-  vector<RestoreInterface> interface;
+    //from ChemicalSystem (in fact from KineticController):
+    //vector<double> ICMoles;
+    vector<double> DCMoles;
+    //from Lattice:
+    vector<int> count;
+    vector<RestoreSite> site;     /**< 1D list of Site objects (site = voxel) */
+    //from Interface
+    vector<RestoreInterface> interface;
+    int latticeRNGseed;
+    long int numRNGcall_0;
+    long int numRNGcallLONGMAX;
+    double lastRNG;
 };
 
 // from ChemicalSystem:

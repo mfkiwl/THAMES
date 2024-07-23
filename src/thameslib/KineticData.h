@@ -71,6 +71,7 @@ struct KineticData {
   double k3;      /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
   double n1;      /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
   double n3;      /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
+  double dorHcoeff; /**< Lothenbach-Kulik H coefficient to compute critDOR */
   double critDOR; /**< Critical degree of reaction (hydration) for w/c effect */
   double dissolutionRateConst;    /**< Generic rate constant [mol/m2/s] */
   double diffusionRateConstEarly; /**< Generic rate constant [mol/m2/s] */
@@ -84,6 +85,7 @@ struct KineticData {
   double sio2;           /**< Mole fraction SiO2 in material */
   double al2o3;          /**< Mole fraction Al2O3 in material */
   double cao;            /**< Mole fraction CaO in material */
-  double HLK; //H_Lothenbach-Kulik
+  double rh;
+  double rhFactor;
 };
 #endif

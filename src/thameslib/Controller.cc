@@ -408,47 +408,417 @@ kineticController_->setLeach_time(leach_time_);
         iniLattice.interface.push_back(interface_l);
       }
 
-      /*
-      int sizeG, sizeD;
-      string nameFileG;
-      string nameFileD;
-      for(int i = 0; i < dimLatticeInterface; i++){
-          nameFileG = "contrGrow_0_" + to_string(i) + ".dat";
-          nameFileD = "contrDiss_0_" + to_string(i) + ".dat";
-          ofstream outG(nameFileG.c_str());
-          ofstream outD(nameFileD.c_str());
-          sizeG = iniLattice.interface[i].growthSites.size();
-          sizeD = iniLattice.interface[i].dissolutionSites.size();
-          outG << "interface_[" << i << "]growthSites.size() = " << sizeG
-               << "\t& microPhaseId_ = " << iniLattice.interface[i].microPhaseId
-      << endl; for(int j = 0; j < sizeG; j++){ outG <<
-      iniLattice.interface[i].growthSites[j].getId() << "\t"
-                   << iniLattice.interface[i].growthSites[j].getAffinity() <<
-      "\t"
-                   << iniLattice.interface[i].growthSites[j].getVerbose() <<
-      "\t"
-                   << iniLattice.interface[i].growthSites[j].getProb() << "\t"
-                   << iniLattice.interface[i].growthSites[j].getProbIni() <<
-      endl;
-          }
-          outG.close();
-          outD << "interfacsolidMasse_[" << i << "]dissolutionSites.size() = "
-               << sizeD << "\t& microPhaseId_ = "
-               << iniLattice.interface[i].microPhaseId << endl;
-          for(int j = 0; j < sizeD; j++){
-              outD << iniLattice.interface[i].dissolutionSites[j].getId() <<
-      "\t"
-                   << iniLattice.interface[i].dissolutionSites[j].getAffinity()
-      << "\t"
-                   << iniLattice.interface[i].dissolutionSites[j].getVerbose()
-      << "\t"
-                   << iniLattice.interface[i].dissolutionSites[j].getProb() <<
-      "\t"
-                   << iniLattice.interface[i].dissolutionSites[j].getProbIni()
-      << endl;
-          }
-          outD.close();
-      }
+    ///
+    /// Write the initial microstructure image and its png image
+    ///
+
+    lattice_->writeLattice(0.0, sim_type_, jobroot_);
+    lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
+
+    int timesGEMFailed_loc = 0;
+
+    // init to 0 all DC moles corresponding to the kinetic controlled microphases
+    //      these DCmoles will be updated by KineticController::calculateKineticStep and
+    //      passedd to GEM together the other DC moles in the stystem (ChemicalSystem::calculateState)
+    int numMicPh = chemSys_->getNumMicroPhases();
+    //cout << "numMicPh : " << numMicPh << endl;
+
+
+    int DCId;
+    for (int i = FIRST_SOLID; i < numMicPh; i++){
+        if(chemSys_->isKinetic(i)){
+            DCId = chemSys_->getMicroPhaseDCMembers(i, 0);
+            //chemSys_->setDCMoles(DCId,0.0); //coment if DCLowerLimit in kineticControllerStep/GEM_from_MT
+            chemSys_->setIsDCKinetic(DCId,true);
+        }
+    }
+    cout << endl << "***   numGEMPhases_  = " <<  chemSys_->getNumGEMPhases() << endl;
+    cout << "***   numDCs_        = " <<  chemSys_->getNumDCs() << endl;
+    cout << "***   numICs_        = " <<  chemSys_->getNumICs() << endl;
+
+    //cout << "Starting with a pore solution without dissolved DCs  => all microPhaseSI_ = 0" << endl;
+    //init to 0 all microPhaseSI_
+    //chemSys_->setZeroMicroPhaseSI();
+
+    bool writeICsDCs = true;
+    if (writeICsDCs) writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
+
+    cout << endl << "     ===== START SIMULATION =====" << endl ;
+
+    int cyc;
+    int timeSize = time_.size();
+    for (i = 0; (i < timeSize) && (capwater); ++i) { //main computation cycle loop
+
+        ///
+        /// Do not advance the time step if GEM_run failed the last time
+        ///
+
+        bool isFirst = (i == 0) ? true : false;
+
+
+        //if (chemSys_->getTimesGEMFailed() > 0)
+        //    i -= 1;//if(i > 69)DCUpperLimit_[i] = 0;
+
+        //cout << "i/Time0 = " << i << "   " << time_[i] << endl;cout.flush();
+        cyc = i + 1;
+
+        //time_t lt10 = time(NULL);
+        //struct tm *time10;
+        //time10 = localtime(&lt10);
+        //cout << asctime(time10);
+
+        //timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
+        if (timesGEMFailed_loc > 0) {
+          timestep += (time_[i] - time_[i - 1]);
+            if (i == 0) {
+              cout << endl << endl << "     ##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/timestep: "
+                   << i << " / " << cyc << " / " << time_[i] << " / " << timestep << " #####" << endl;
+            } else {
+                cout << endl << endl << "     ##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
+                   << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << " #####" << endl;
+            }
+        } else {
+          timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
+            if (i == 0) {
+              cout << endl << endl << "     ##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/timestep: "
+               << i << " / " << cyc << " / " << time_[i] << " / " << timestep << " #####" << endl;
+            } else {
+              cout << endl << endl << "     ##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
+                     << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << " #####" << endl;
+            }
+        }
+
+        ///
+        /// Assume that only capillary pore water is chemically reactive,
+        /// while water in nanopores is chemically inert.
+        ///
+        ///
+        /// This is the main step of the cycle; the calculateState method
+        /// runs all the major steps of a computational cycle
+        ///
+
+        try {
+
+            timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
+
+        } catch (GEMException gex) {
+            lattice_->writeLattice(time_[i], sim_type_, jobroot_);
+            lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+            throw gex;
+        }
+
+        ///
+        /// Once the change in state is determined, propagate the consequences
+        /// to the 3D microstructure only if the GEM_run calculation succeeded.
+        /// Otherwise we will need to tweak the IC moles so just return from
+        /// function without doing anything else
+        ///
+
+        if (timesGEMFailed_loc > 0) {
+            cout << endl << "Controller::doCycle first GEM_run failed i/cyc/time[i]/getTimesGEMFailed_loc: " << i << " / " << cyc << " / "
+                 << time_[i] << "\t" << timesGEMFailed_loc << endl;
+            continue;
+        } else {
+            cout << endl << "Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: " << i << " / " << cyc << " / "
+                 << time_[i] << "\t" << timesGEMFailed_loc << endl;
+        }
+
+        if (verbose_) {
+            cout << "Controller::doCycle Entering Lattice::changeMicrostructure"
+                 << endl;
+            cout.flush();
+        }
+
+        ///
+        /// Next function can encounter EOB exceptions within but they
+        /// are caught there and the program will then exit from within
+        /// this function rather than throwing an exception itself
+        ///
+
+        try {
+            //set iniLattice i.e. a copy of initial lattice/system configuration (including all DCs values)
+            //from ChemicalSystem:
+            iniLattice.DCMoles = kineticController_->getDCMoles();
+
+            //from Lattice:
+            iniLattice.count = lattice_->getCount();
+            iniLattice.site.clear();
+            RestoreSite site_l; // only one declaration
+            int dimLatticeSite = lattice_->getNumsites(); // only one declaration
+            for(int i = 0; i < dimLatticeSite; i++){
+                site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
+                site_l.dissolution = (lattice_->getSite(i))->getDissolutionPhases();
+                site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
+                site_l.wmc = (lattice_->getSite(i))->getWmc();
+                site_l.wmc0 = (lattice_->getSite(i))->getWmc0();
+                site_l.visit = 0;
+                iniLattice.site.push_back(site_l);
+            }
+            iniLattice.interface.clear();
+            RestoreInterface interface_l; //only one declaration
+            int dimLatticeInterface = lattice_->getInterfaceSize();  //only one declaration
+            for(int i = 0; i < dimLatticeInterface; i++){
+                interface_l.microPhaseId = lattice_->getInterface(i).getMicroPhaseId();
+                interface_l.growthSites = lattice_->getInterface(i).getGrowthSites();
+                interface_l.dissolutionSites = lattice_->getInterface(i).getDissolutionSites();
+                iniLattice.interface.push_back(interface_l);
+            }
+            iniLattice.latticeRNGseed = lattice_->getRNGseed();
+            iniLattice.numRNGcall_0 = lattice_->getNumRNGcall_0();
+            iniLattice.numRNGcallLONGMAX = lattice_->getNumRNGcallLONGMAX();
+            iniLattice.lastRNG = lattice_->getLastRNG();
+
+            /*
+            int sizeG, sizeD;
+            string nameFileG;
+            string nameFileD;
+            for(int i = 0; i < dimLatticeInterface; i++){
+                nameFileG = "contrGrow_0_" + to_string(i) + ".dat";
+                nameFileD = "contrDiss_0_" + to_string(i) + ".dat";
+                ofstream outG(nameFileG.c_str());
+                ofstream outD(nameFileD.c_str());
+                sizeG = iniLattice.interface[i].growthSites.size();
+                sizeD = iniLattice.interface[i].dissolutionSites.size();
+                outG << "interface_[" << i << "]growthSites.size() = " << sizeG
+                     << "\t& microPhaseId_ = " << iniLattice.interface[i].microPhaseId << endl;
+                for(int j = 0; j < sizeG; j++){
+                    outG << iniLattice.interface[i].growthSites[j].getId() << "\t"
+                         << iniLattice.interface[i].growthSites[j].getAffinity() << "\t"
+                         << iniLattice.interface[i].growthSites[j].getVerbose() << "\t"
+                         << iniLattice.interface[i].growthSites[j].getProb() << "\t"
+                         << iniLattice.interface[i].growthSites[j].getProbIni() << endl;
+                }
+                outG.close();
+                outD << "interfacsolidMasse_[" << i << "]dissolutionSites.size() = "
+                     << sizeD << "\t& microPhaseId_ = "
+                     << iniLattice.interface[i].microPhaseId << endl;
+                for(int j = 0; j < sizeD; j++){
+                    outD << iniLattice.interface[i].dissolutionSites[j].getId() << "\t"
+                         << iniLattice.interface[i].dissolutionSites[j].getAffinity() << "\t"
+                         << iniLattice.interface[i].dissolutionSites[j].getVerbose() << "\t"
+                         << iniLattice.interface[i].dissolutionSites[j].getProb() << "\t"
+                         << iniLattice.interface[i].dissolutionSites[j].getProbIni() << endl;
+                }
+                outD.close();
+            }
+            */
+
+            int numDiff = 1000, phDiff = 1000;
+            string nameDiff = "testDiff";
+            int changeLattice;
+            int whileCount = 0;
+            changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff,
+                                                           phDiff, nameDiff, whileCount, cyc);
+
+            //if error from changeMicrostructure (not all the voxels given by GEM can
+            //be switched to a new DCId):
+            //  - comeback to the initial system configuration contained by iniLattice
+            //  - re-run GEM with restrictions impossed by the system configuration (DC distribution
+            //      on the lattice sites) i.e.
+            //      the primal solution must contained a number of moles corresponding to
+            //      "numDiff" lattice sites for the microphase "phDiff"
+            //
+            //restore initial system:
+            if (changeLattice == 0) {
+                vector<int> vectDCId;
+                vectDCId.clear();
+                double volMolDiff, molarMassDiff, vfracDiff,
+                       microPhaseMassDiff, scaledMassDiff, numMolesDiff;
+                int numDCs;
+                int timesGEMFailed_recall = 0;
+                while (changeLattice == 0){ //} // - for many phases or more loops for the same phase!
+                    //if (changeLattice == 0) {
+
+                    DCId = chemSys_->getMicroPhaseDCMembers(phDiff,0);
+
+                    volMolDiff = chemSys_->getDCMolarVolume(DCId); // m3/mol
+                    molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
+
+                    vfracDiff = ((double)numDiff) / ((double)dimLatticeSite);
+
+                    microPhaseMassDiff = vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
+
+                    scaledMassDiff = microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
+
+                    numMolesDiff = scaledMassDiff / molarMassDiff;
+
+                    //for ChemicalSystem:
+                    numDCs = chemSys_->getNumDCs();
+                    for(int i = 0; i < numDCs; i++){
+                        chemSys_->setDCMoles(i,iniLattice.DCMoles[i]);
+                    }
+
+                    //for Lattice:
+                    lattice_->setCount(iniLattice.count);
+
+                    for(int i = 0; i < dimLatticeSite; i++){
+                        (lattice_->getSite(i))->setMicroPhaseId(iniLattice.site[i].microPhaseId);
+                        (lattice_->getSite(i))->setDissolutionSite(iniLattice.site[i].dissolution);
+                        (lattice_->getSite(i))->setGrowthPhases(iniLattice.site[i].growth);
+                        (lattice_->getSite(i))->setWmc(iniLattice.site[i].wmc);
+                        (lattice_->getSite(i))->setWmc0(iniLattice.site[i].wmc0);
+                        (lattice_->getSite(i))->setVisit(iniLattice.site[i].visit); //or 0!
+                    }
+
+                    for(int i = 0; i < dimLatticeInterface; i++){
+                        lattice_->setInterfaceMicroPhaseId(i,iniLattice.interface[i].microPhaseId); // same as before!
+                        lattice_->setGrowthSites(i,iniLattice.interface[i].growthSites);
+                        lattice_->setDissolutionSites(i,iniLattice.interface[i].dissolutionSites);
+                    }
+
+                    lattice_->resetRNG(iniLattice.latticeRNGseed, iniLattice.numRNGcall_0,
+                                       iniLattice.numRNGcallLONGMAX, iniLattice.lastRNG, cyc, whileCount);
+
+                    chemSys_->setDCLowerLimit(DCId,numMolesDiff);
+                    vectDCId.push_back(DCId);
+                    timesGEMFailed_recall = chemSys_->calculateState(time_[i], isFirst, cyc, true);
+                    //chemSys_->setDCLowerLimit(DCId,0);
+                    cout << endl << "Controller::doCycle GEM_run recalled for whileCount/cyc/phDiff/numDiff/nameDiff = "
+                         << whileCount << "   " << cyc << "   " << phDiff << "   " << numDiff << "   " << nameDiff << endl;
+                    cout << "Controller::doCycle i/time[i]/getTimesGEMFailed_recall: " << i << "\t"
+                         << time_[i] << "\t" << timesGEMFailed_recall << endl;
+                    if (timesGEMFailed_recall > 0) {
+                    // Skip the remainder of this iteration and go to the next iteration
+                    //if (warning_) {
+                        cout << "Controller::doCycle GEM_run failed for whileCount = " << whileCount << endl;
+                        cout << "Controller::doCycle not update the microstructure " << endl;
+                        cout << "Controller::doCycle time increases to time[i + 1]" << endl;
+                        cout.flush();
+                    //}
+                        timesGEMFailed_loc = timesGEMFailed_recall;
+                        break;
+                    } else {
+                       cout << "Controller::doCycle GEM_run OK for whileCount = " << whileCount << endl;
+                    }
+
+                    numDiff = 5000, phDiff = 5000;
+                    nameDiff = "testDiff_recall";
+
+                    whileCount++;
+                    changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff, phDiff, nameDiff, whileCount, cyc);
+                    //if(changeLattice != 1 ) {cout << endl << " end changeLattice recall changeLattice = " << changeLattice << endl; exit(0);}
+                }
+                int sizeVectDCId = vectDCId.size();
+                cout << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;
+                cout << "   vectDCId[i]:";
+                for (int i = 0; i < sizeVectDCId; i++) {
+                    cout << "  " << vectDCId[i];
+                    chemSys_->setDCLowerLimit(vectDCId[i],0);
+                }
+                //cout << endl;
+                if (timesGEMFailed_loc > 0) continue;
+            }
+
+
+        } catch (DataException dex) {
+            lattice_->writeLattice(time_[i], sim_type_, jobroot_);
+            lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+            throw dex;
+        } catch (EOBException ex) {
+            lattice_->writeLattice(time_[i], sim_type_, jobroot_);
+            lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+            throw ex;
+        } catch (MicrostructureException mex) {
+            lattice_->writeLattice(time_[i], sim_type_, jobroot_);
+            lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+            throw mex;
+        }
+
+        // write output .dat files
+        if (writeICsDCs) writeTxtOutputFiles_onlyICsDCs(time_[i]);
+        writeTxtOutputFiles(time_[i]);
+
+        ///
+        /// Calculate the pore size distribution and saturation
+        ///
+
+        lattice_->calculatePoreSizeDistribution();
+
+        ///
+        /// Check if there is any capillary pore water remaining.  If not then
+        /// we ASSUME hydration has stopped.
+        ///
+        /// @todo Generalize this idea to allow nanopore water to react by taking
+        /// into account its lower chemical potential.
+
+        if (verbose_) {
+            cout << "Controller::doCycle Returned from Lattice::changeMicrostructure" << endl;
+            cout.flush();
+        }
+
+        if ((time_[i] >= output_time_[time_index]) &&
+            (time_index < output_time_.size())) {
+            if (verbose_) {
+                cout << "Controller::doCycle Writing lattice at time_[" << i
+                     << "] = " << time_[i] << ", output_time_[" << time_index
+                     << "] = " << output_time_[time_index] << endl;
+            }
+            lattice_->writeLattice(time_[i], sim_type_, jobroot_);
+            lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+            lattice_->writePoreSizeDistribution(time_[i], sim_type_, jobroot_);
+
+            // lattice_->CheckPoint(jobroot_);
+            time_index++;
+        }
+
+        double watervolume = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
+
+        if (watervolume < 2.0e-18) { // Units in m3, so this is about two voxels,
+            // we will stop hydration
+            if (warning_) {
+                cout << "Controller::doCycle WARNING: System is out of capillary pore "
+                        "water."
+                     << endl;
+                cout << "Controller::doCycle          This version of code assumes "
+                        "that only capillary"
+                     << endl;
+                cout << "Controller::doCycle          water is chemically reactive, so "
+                        "the system is"
+                     << endl;
+                cout << "Controller::doCycle          is assumed to be incapable of "
+                        "further hydration."
+                     << endl;
+                cout.flush();
+            }
+        }
+
+        ///
+        /// The following block executes only for sulfate attack simulations
+        ///
+
+        if (time_[i] >= sattack_time_) {
+
+            cout << endl << " Controller::doCycle - for sulfate attack, check conditions for addDissolutionSites & coordination sphere " << endl;
+            cout << " program stops " << endl;
+            exit(1);
+
+
+            if (verbose_) {
+                cout << "Controller::doCycle Sulfate attack module" << endl;
+                cout.flush();
+            }
+            map<int, vector<double>> expansion;
+            expansion = lattice_->getExpansion();
+
+            ifstream instopexp("stopexp.dat");
+            if (!instopexp) {
+                if (verbose_)
+                    cout << "keep expanding." << endl;
+            } else {
+                expansion.clear();
+                cout << "expansion has been stopped due to the percolation of damage."
+                     << endl;
+            }
+            cout.flush();
+
+            ///
+            /// Stop FM temporarily
+            /// @todo What is this?  The following if block will never be run if
+            /// uncommented!
+            ///
+
+            /*
+      expansion.clear();
       */
 
       int numDiff = 1000, phDiff = 1000;
@@ -955,21 +1325,129 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
     ///
 
     try {
-      timesGEMFailed = chemSys_->calculateState(time, isFirst, cyc, false);
-      if (verbose_) {
-        cout << "*Returned from ChemicalSystem::calculateState" << endl;
-        cout << "*called by function Controller::calculateState" << endl;
-        cout << "*timesGEMFailed = " << timesGEMFailed << endl;
-        cout.flush();
-      }
-    } catch (GEMException gex) {
-      gex.printException();
-      exit(1);
-    }
 
-    if (verbose_) {
-      cout << "Done!" << endl;
-      cout.flush();
+        if (isFirst) {
+
+            double T = chemSys_->getTemperature();
+            lattice_->setTemperature(T);
+        }
+
+        ///
+        /// We must pass some vectors to the `calculateKineticStep` method that
+        /// will hold the amounts of impurity elements released from the clinker
+        /// phases.  These values do not go in the `ChemicalSystem` object, but will
+        /// still need to be processed afterward.
+        ///
+
+        //vector<double> impurityrelease;
+        //impurityrelease.clear();
+        //impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
+
+        ///
+        /// Get the number of moles of each IC dissolved from kinetically controlled
+        /// phases
+        ///
+
+        double T = lattice_->getTemperature();
+
+
+        /// The thermodynamic calculation returns the saturation index of phases,
+        /// which is needed for calculations of driving force for dissolution
+        /// or growth.
+        ///
+        /// 2024-05-29:  At the moment, if a microstructure phase is defined
+        /// to be one or more GEM phases, the SI of the microstructure phase
+        /// is calculated as the mole-weighted average of the SIs of the
+        /// constituent GEM CSD phases.  Can't think of a better way to do this
+        /// except to prohibit users from defining mixtures of CSD phases
+        /// as microstructure phases.
+
+        chemSys_->setMicroPhaseSI(cyc);
+
+        kineticController_->calculateKineticStep(dt, cyc);
+        //kineticController_->calculateKineticEvents(dt, T, isFirst);
+
+        //if (time >= sattack_time_) {// for sulfate attack iterations}
+
+        ///
+        /// Now that the method is done determining the change in moles of each IC,
+        /// launch a thermodynamic calculation to determine new equilibrium state
+        ///
+        /// The `ChemicalSystem` object provides an interface for these calculations
+        ///
+
+        try {
+            timesGEMFailed = chemSys_->calculateState(time, isFirst, cyc, false);
+            if (verbose_) {
+                cout << "*Returned from ChemicalSystem::calculateState" << endl;
+                cout << "*called by function Controller::calculateState" << endl;
+                cout << "*timesGEMFailed = " << timesGEMFailed << endl;
+                cout.flush();
+            }
+        } catch (GEMException gex) {
+            gex.printException();
+            exit(1);
+        }
+
+        if (verbose_) {
+            cout << "Done!" << endl;
+            cout.flush();
+        }
+
+        ///
+        /// The thermodynamic calculation returns the saturation index of phases,
+        /// which is needed for calculations of driving force for dissolution
+        /// or growth.  Assign this to the lattice in case crystallization pressures
+        /// should be calculated.
+        ///
+
+        if (timesGEMFailed > 0) return timesGEMFailed;
+
+        /*
+        - all these must be done after the lattice update -
+        try {
+            double aveSI = 0.0;
+            double moles = 0.0;
+            vector<int> microPhaseMembers;
+            for (int i = 0; i < chemSys_->getNumMicroPhases(); ++i) {
+                string pname = chemSys_->getMicroPhaseName(i);
+                int newMicroPhaseId =
+                    chemSys_->getMicroPhaseId(chemSys_->getMicroPhaseName(i));
+                aveSI = moles = 0.0;
+                microPhaseMembers = chemSys_->getMicroPhaseMembers(newMicroPhaseId);
+                for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
+                    int newGEMPhaseId = microPhaseMembers[ii];
+                    aveSI += ((solut_->getSI(newGEMPhaseId) *
+                               chemSys_->getGEMPhaseMoles(newGEMPhaseId)));
+                    moles += chemSys_->getGEMPhaseMoles(newGEMPhaseId);
+                }
+                if (moles > 0.0) {
+                    aveSI = aveSI / moles;
+                } else {
+                    aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
+                }
+                lattice_->setSI(newMicroPhaseId, aveSI);
+            }
+        } catch (EOBException eex) {
+            eex.printException();
+            exit(1);
+        }
+
+        if (isFirst) {
+            chemSys_->writeChemSys();
+        }
+        */
+
+        // Output to files the solution composition data, phase data, DC data,
+        // microstructure data, pH, and C-S-H composition and Ca/Si ratio
+        // DONE AFTER LATTICE UPDATE
+
+    } catch (FileException fex) {
+        fex.printException();
+        exit(1);
+    } catch (FloatException flex) {
+        flex.printException();
+        exit(1);
     }
 
     ///

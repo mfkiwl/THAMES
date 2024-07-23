@@ -19,11 +19,11 @@ Interface::Interface() {
   dissolutionSites_.clear();
 }
 
-Interface::Interface(RanGen *rg, const bool verbose) {
+Interface::Interface(const bool verbose) {
   microPhaseId_ = 0;
   growthSites_.clear();
   dissolutionSites_.clear();
-  rg_ = rg;
+
 
 #ifdef DEBUG
   verbose_ = true;
@@ -32,7 +32,7 @@ Interface::Interface(RanGen *rg, const bool verbose) {
 #endif
 }
 
-Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
+Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
                      vector<Site *> dv, unsigned int pid, const bool verbose) {
   unsigned int j;
   unsigned int i;
@@ -47,7 +47,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   verbose_ = verbose;
 #endif
 
-  rg_ = rg;
+
   microPhaseId_ = pid;
   chemSys_ = csys;
 
@@ -57,8 +57,9 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   ///
   /// Eliminate duplicate values from the growth site vector
   ///
-
-  if (gv.size() > 0) {
+  int gvsize = gv.size();
+  int dvsize = dv.size();
+  if (gvsize > 0) {
     sort(gv.begin(), gv.end());
     // i = 1;
     beginLocation = gv.begin();
@@ -70,7 +71,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   /// Now do the same thing to the dissolution site vector
   ///
 
-  if (dv.size() > 0) {
+  if (dvsize > 0) {
     sort(dv.begin(), dv.end());
     // i = 1;
     beginLocation = dv.begin();
@@ -137,7 +138,8 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
   ///
 
   try {
-    for (j = 0; j < dv.size(); j++) {
+    dvsize = dv.size();
+    for (j = 0; j < dvsize; j++) {
       afty = 0;
       for (i = 0; i < NN_NNN; i++) {
         afty += chemSys_->getAffinity(pid, dv[j]->nb(i)->getMicroPhaseId());
@@ -146,7 +148,7 @@ Interface::Interface(ChemicalSystem *csys, RanGen *rg, vector<Site *> gv,
     }
   } catch (EOBException e) {
     e.printException();
-    exit(0);
+    exit(1);
   }
 
   /*
@@ -231,7 +233,8 @@ bool Interface::addDissolutionSite(Site *loc) {
   unsigned int siteId = loc->getId();
 
   /// See if site is already present
-  for (i = 0; i < dissolutionSites_.size(); i++) {
+  int size = dissolutionSites_.size();
+  for (i = 0; i < size; i++) {
     if (siteId == dissolutionSites_[i].getId()) {
       found = true;
       break;
@@ -256,6 +259,7 @@ bool Interface::addDissolutionSite(Site *loc) {
   return answer;
 }
 
+/*
 bool Interface::sortGrowthSites(vector<Site> &ste, unsigned int pid) {
   unsigned int i, j;
   int afty;
@@ -364,6 +368,7 @@ bool Interface::sortDissolutionSites(vector<Site> &ste, unsigned int pid) {
 
   return true;
 }
+*/
 
 /*
 bool Interface::removeGrowthSite(Site *loc) {
@@ -421,6 +426,22 @@ bool Interface::removeGrowthSite_1(Site *loc) {
          << growthSites_.size() << endl;
     cout << "STOP:  Interface::removeGrowthSite_1(Site *loc)" << endl;
     exit(1);
+  }
+  return found;
+}
+
+bool Interface::removeEmptiedSite(int siteID) {
+
+  bool found = false;
+  int size = growthSites_.size();
+
+  for (int i = 0; i < size; i++) {
+    if (growthSites_[i].getId() == siteID) {
+      growthSites_[i] = growthSites_[size - 1];
+      growthSites_.pop_back();
+      found = true;
+      break;
+    }
   }
   return found;
 }

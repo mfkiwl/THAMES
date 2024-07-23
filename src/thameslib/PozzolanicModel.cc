@@ -49,6 +49,16 @@ PozzolanicModel::PozzolanicModel() {
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
 
+  T_ = lattice_->getTemperature();
+  double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+  critporediam *= 1.0e-9;                                    // in m
+  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = rh_ > 0.55 ? rh_ : 0.551;
+  rhFactor_ = rh_;
+
+  arrhenius_ =
+          exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -124,6 +134,16 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
+  T_ = lattice_->getTemperature();
+  double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+  critporediam *= 1.0e-9;                                    // in m
+  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = rh_ > 0.55 ? rh_ : 0.551;
+  rhFactor_ = rh_;
+
+  arrhenius_ =
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -137,7 +157,6 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
 }
 
 void PozzolanicModel::calculateKineticStep(const double timestep,
-                                           const double temperature, double rh,
                                            double &scaledMass,
                                            double &massDissolved, int cyc,
                                            double totalDOR) {
@@ -146,8 +165,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
   /// Initialize local variables
   ///
 
-  double T = temperature;
-  double arrhenius; // = 1.0;
+  //double arrhenius; // = 1.0;
 
   double dissrate = 1.0e9; // Nucleation and growth rate
   double diffrate = 1.0e9; // Diffusion rate
@@ -206,8 +224,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // double rh = exp(-6.23527e-7 / critporediam / T);
 
     // rh = rh > 0.55 ? rh : 0.551;
-    double rhFactor = rh;
-    // rhFactor = pow(((rh - 0.55)/0.45),4.0);
+    // double rhFactor = rh;
 
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
@@ -218,8 +235,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
                            "initScaledMass_ = 0.0");
     }
 
-    arrhenius =
-        exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
+    //arrhenius =
+    //    exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
     if (DOR < 1.0) {
 
@@ -275,11 +292,11 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       // hopefully the BET area and LOI will help do that.
 
       if (saturationIndex < 1.0) {
-        dissrate = baserateconst * rhFactor * pow(ohActivity, ohexp_) * area *
+        dissrate = baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
                    pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
                    (sio2_)*pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
       } else {
-        dissrate = -baserateconst * rhFactor * pow(ohActivity, ohexp_) * area *
+        dissrate = -baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
                    pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
                    (sio2_)*pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
       }
@@ -342,7 +359,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       if (abs(diffrate) < abs(rate))
         rate = diffrate;
       int rate_ini = rate;
-      rate *= (rhFactor * arrhenius);
+      rate *= (rhFactor_ * arrhenius_);
 
       massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
@@ -357,8 +374,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
            << "    microPhase = " << name_
            << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
            << endl;
-      cout << "PZM_hT   " << "rhFactor: " << rhFactor
-           << "\tarrhenius: " << arrhenius
+      cout << "PZM_hT   " << "rhFacto_r: " << rhFactor_
+           << "\tarrhenius_: " << arrhenius_
            << "\tsaturationIndex: " << saturationIndex
            << "\twaterActivity: " << waterActivity << endl;
       cout << "PZM_hT   " << "dissrate: " << dissrate

@@ -110,18 +110,22 @@ class ParrotKillohModel : public KineticModel {
 
 protected:
   double wsRatio_; /**< water-solid mass ratio */
-  double wcRatio_;
+  double wcRatio_; /**< water-cement mass ratio */
 
   double k1_; /**< List of Parrot and Killoh <i>K</i><sub>1</sub> values */
   double k2_; /**< List of Parrot and Killoh <i>K</i><sub>2</sub> values */
   double k3_; /**< List of Parrot and Killoh <i>K</i><sub>3</sub> values */
   double n1_; /**< List of Parrot and Killoh <i>N</i><sub>1</sub> values */
   double n3_; /**< List of Parrot and Killoh <i>N</i><sub>3</sub> values */
-  double HLK_;
+  double dorHcoeff_;
   double critDOR_; /**< List of critical degrees of hydration for w/c
                                    effect in the Parrot and Killoh model */
   double pfk_;     /**< Multiplicative factor for k's to account for
                         effects of pozzolanic additions */
+  double rh_;
+  double rhFactor_;
+  double T_;
+  double arrhenius_;
 
 public:
   /**
@@ -280,10 +284,9 @@ public:
   //                                   vector<double> &DCMoles,
   //                                   vector<double> &GEMPhaseMoles, int cyc);
 
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, double rh,
-                                    double &scaledMass, double &massDissolved,
-                                    int cyc, double totalDOR);
+  virtual void calculateKineticStep(const double timestep, double &scaledMass,
+                                    double &massDissolved, int cyc,
+                                    double totalDOR);
 
 }; // End of ParrotKillohModel class
 

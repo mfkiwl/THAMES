@@ -79,7 +79,7 @@ calculated
     - 'RdId' is a vector of all the ICs that can be incorporated into
          growing phases
     - 'RdVal' is a vector of maximum mass fractions of ICs that can be
-incorporated into growing phases growing phases
+incorporated into growing phases
     - `porosity` is the volume fraction of internal porosity in the phase,
        (e.g., C-S-H)
     - `red`, `green`, and `blue` are the rgb values for the color that the

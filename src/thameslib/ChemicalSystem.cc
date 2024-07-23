@@ -25,8 +25,15 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   unsigned int ii, jj;
   int k;
   bool found = false;
+
+  nodeStatus_ = NEED_GEM_AIA;
+  nodeHandle_ = 0;
+  iterDone_ = 0;
   timesGEMFailed_ = 0;
-  maxGEMFails_ = 3;
+  maxGEMFails_ = 100; // = 3;
+
+  sulfateAttackTime_ = 1.0e10;
+  leachTime_ = 1.0e10;
 
   ///  The constructor initializes all the members to default values,
   ///  then launches the initial thermodynamic calculation, and sets
@@ -38,6 +45,12 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///  are set to be consistent with neutral water at STP
   ///
 
+  Eh_ = 0.0;
+  T_ = 298.0;    // Default temperature [K]
+  P_ = 101325.0; // Default pressure in [Pa]
+  Vs_ = 1.0;
+  Gs_ = 0.0;
+  Ms_ = 0.0;
   verbose_ = verbose;
   jsonFormat_ = false;
   warning_ = warning;
@@ -48,6 +61,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   porousPhaseName_.clear();
   microPhaseId_.clear();
   isKinetic_.clear();
+  ICName_.clear();
   DCName_.clear();
   GEMPhaseName_.clear();
   numICs_ = numDCs_ = numGEMPhases_ = 0;
@@ -79,25 +93,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ICClassCode_.clear();
   DCClassCode_.clear();
   GEMPhaseClassCode_.clear();
-
-  Eh_ = 0.0;
-  T_ = 298.0;    // Default temperature [K]
-  P_ = 101325.0; // Default pressure in [Pa]
-  Vs_ = Ms_ = 1.0;
-  Gs_ = Ms_ = 0.0;
-  nodeStatus_ = NEED_GEM_AIA;
-  nodeHandle_ = iterDone_ = 0;
-  sulfateAttackTime_ = 1.0e10;
-  leachTime_ = 1.0e10;
-  ICName_.clear();
-  DCName_.clear();
-  GEMPhaseName_.clear();
-  ICIdLookup_.clear();
-  DCIdLookup_.clear();
-  GEMPhaseIdLookup_.clear();
   microPhaseVolume_.clear();
   microPhaseMass_.clear();
-  microPhasePorosity_.clear();
   microPhaseMassDissolved_.clear();
   initialSolutionComposition_.clear();
   fixedSolutionComposition_.clear();
@@ -119,7 +116,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   // char *cGEMdbrname = (char *)GEMdbrname.c_str();
   if (verbose_) {
     cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
-         << cGEMfilename << endl;
+         << cGEMfilename << endl; // *-dat.lst
   }
 
   /// Find out if the input data are in json format or in key-value format
@@ -244,7 +241,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
     cerr << "    Details:" << endl;
     cerr << "    Offending function ChemicalSystem::ChemicalSystem" << endl;
     cerr << "    Error in allocating memory for array " << exmsg << endl;
-    exit(0);
+    exit(1);
   }
 
   ///
@@ -1928,7 +1925,9 @@ void ChemicalSystem::setMicroPhaseMass(const unsigned int idx,
       fex.printException();
       exit(1);
     }
+
     setMicroPhaseVolume(idx, (val * v0 / dcmm));
+
   }
 
   return;
@@ -2063,41 +2062,38 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   nodeStatus_ = NEED_GEM_AIA;
 
-  //  cout << endl << "ChemSys before GEM_from_MT :
-  //  DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-  //  for(int i = 0; i < numDCs_; i++){
-  //    cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] <<
-  //    "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
-  //  }
-  //  cout << endl << "end ChemSys before GEM_from_MT :
-  //  DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-  // if (cyc == 1)exit(0);
+//  cout << endl << "ChemSys before0 checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
+//  for(int i = 0; i < numICs_; i++){
+//    cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
+//  }
+//  cout << endl << "ChemSys before GEM_from_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
+//  for(int i = 0; i < numDCs_; i++){
+//    cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] << "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
+// }
+//  cout << endl << "end ChemSys before GEM_from_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
+//  for(int i = 0; i < numDCs_; i++){
+//      for(int j = 0; j < numICs_; j++){
+//          ICMoles_[j] += DCMoles_[i]* getDCStoich(i,j);
+//      }
+//  }
+//  cout << endl << "ChemSys before checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
+//  for(int i = 0; i < numICs_; i++){
+//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
+//  }
+//   //  writeDCMoles();
 
-  //  for(int i = 0; i < numDCs_; i++){
-  //      for(int j = 0; j < numICs_; j++){
-  //          ICMoles_[j] += DCMoles_[i]* getDCStoich(i,j);
-  //      }
-  //  }
+  // ALL ICs/DCs in the system are set to zero in Lattice constructor before to call normalizePhaseMasses()
+  // DCs are updated in Lattice::normalizePhaseMasses
+  // only the ICMoles_ that are less than 10^-9 after the first call of calculateKineticStep(...) are set to 10^-9
 
-  //  cout << endl << "chemSys before checkICMoles for cyc = " << cyc << " :
-  //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
-  //      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-  //  }
-  //  writeDCMoles();
+  if(isFirst)checkICMoles();
 
-  // ALL ICs/DCs in the system are set to zero in Lattice constructor before to
-  // call normalizePhaseMasses() DCs are updated in
-  // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
-  // after the first call of calculateKineticStep(...) are set to 10^-9
-  if (isFirst)
-    checkICMoles();
-
-  //  cout << endl << "chemSys after checkICMoles for cyc = " << cyc << " :
-  //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
-  //      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-  //  }
-  //  writeDCMoles();
-  //  exit(0);
+//  cout << endl << "ChemSys after checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
+//  for(int i = 0; i < numICs_; i++){
+//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
+//  }
+//   //  writeDCMoles();
+//   //if (cyc == 1) {cout << "stop" << endl;exit(0);}
 
   ///
   /// Next function loads the input data for the THAMES node into the
@@ -2207,9 +2203,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
-    cerr << "ERROR: Call to GEM_run in "
-         << "ChemicalSystem::calculateState had an issue..." << endl;
-    cerr << "       nodeStatus_ = " << nodeStatus_;
+      cerr << endl << "ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = " << nodeStatus_ << endl;
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
       msg = " Need GEM calc with auto initial approx (AIA)";
@@ -2222,7 +2216,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg = " Failed result with auto initial approx (AIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with auto initial approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2239,7 +2233,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      msg = " Failed result with smart initial approx (SIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with smart initial approx (SIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2264,9 +2258,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (timesGEMFailed_ > 0) {
-    cout << "Call to GEM_run has failed " << timesGEMFailed_
-         << " consecutive times.  "
-         << "Attempt this step again" << endl;
+    cout << "ChemicalSystem::calculateState - GEM_run has failed " << timesGEMFailed_
+           << " consecutive times  cyc = " << cyc << endl;
     return timesGEMFailed_;
   }
 

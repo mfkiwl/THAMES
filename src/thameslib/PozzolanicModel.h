@@ -60,6 +60,11 @@ protected:
   double al2o3_;  /**< Mass fraction of Al2O3 (unitless) */
   double cao_;    /**< Mass fraction of CaO (unitless) */
 
+  double rh_;
+  double rhFactor_;
+  double T_;
+  double arrhenius_;
+
 public:
   /**
   @brief Default constructor.
@@ -333,10 +338,9 @@ public:
   @param cyc is the cycle number (iteration of main loop)
   @param totalDOR is the total degree of reaction [dimensionless]
   */
-  virtual void calculateKineticStep(const double timestep,
-                                    const double temperature, double rh,
-                                    double &scaledMass, double &massDissolved,
-                                    int cyc, double totalDOR);
+  virtual void calculateKineticStep(const double timestep, double &scaledMass,
+                                    double &massDissolved, int cyc,
+                                    double totalDOR);
 
 }; // End of PozzolanicModel class
 

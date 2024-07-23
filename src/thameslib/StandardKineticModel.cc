@@ -44,6 +44,16 @@ StandardKineticModel::StandardKineticModel() {
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
 
+  T_ = lattice_->getTemperature();
+  double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+  critporediam *= 1.0e-9;                                    // in m
+  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = rh_ > 0.55 ? rh_ : 0.551;
+  rhFactor_ = rh_;
+
+  arrhenius_ =
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -107,9 +117,16 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
-  ICNum_ = chemSys_->getNumICs();
-  DCNum_ = chemSys_->getNumDCs();
-  GEMPhaseNum_ = chemSys_->getNumGEMPhases();
+  T_ = lattice_->getTemperature();
+  double critporediam = lattice_->getLargestSaturatedPore(); // in nm
+  critporediam *= 1.0e-9;                                    // in m
+  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = rh_ > 0.55 ? rh_ : 0.551;
+  rhFactor_ = rh_;
+
+  arrhenius_ =
+          exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -124,21 +141,16 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
 }
 
 void StandardKineticModel::calculateKineticStep(const double timestep,
-                                                const double temperature,
-                                                double rh, double &scaledMass,
+                                                double &scaledMass,
                                                 double &massDissolved, int cyc,
                                                 double totalDOR) {
   ///
   /// Initialize local variables
   ///
 
-  double T = temperature;
-  double arrhenius = 1.0;
-
   double dissrate = 1.0e9; // Nucleation and growth rate
 
   double DOR, newDOR;
-  // double massDissolved = 0.0;
 
   ///
   /// Determine if this is a normal step or a necessary
@@ -181,7 +193,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     // double rh = exp(-6.23527e-7 / critporediam / T);
 
     // rh = rh > 0.55 ? rh : 0.551;
-    double rhFactor = rh;
+    // double rhFactor = rh;
     // rhFactor = pow(((rh - 0.55)/0.45),4.0);
 
     if (initScaledMass_ > 0.0) {
@@ -193,8 +205,8 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                            "initScaledMass_ = 0.0");
     }
 
-    arrhenius =
-        exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T)));
+    //arrhenius =
+    //    exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
     if (DOR < 1.0) {
 
@@ -236,7 +248,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       double dissrate_ini = dissrate;
 
-      dissrate *= (rhFactor * arrhenius);
+      dissrate *= (rhFactor_ * arrhenius_);
 
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
@@ -251,8 +263,8 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
            << "    microPhase = " << name_
            << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
            << endl;
-      cout << "SKM_hT   " << "rhFactor: " << rhFactor
-           << "\tarrhenius: " << arrhenius
+      cout << "SKM_hT   " << "rhFactor_: " << rhFactor_
+           << "\tarrhenius_: " << arrhenius_
            << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
            << endl;
       cout << "SKM_hT   " << "dissrate_ini: " << dissrate_ini
