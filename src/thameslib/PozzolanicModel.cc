@@ -57,7 +57,7 @@ PozzolanicModel::PozzolanicModel() {
   rhFactor_ = rh_;
 
   arrhenius_ =
-          exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -177,9 +177,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
   /// tweak from a failed GEM_run call
   ///
 
-  // static double hyd_time = 0.0;
-  // hyd_time = hyd_time + timestep;
-
   try {
 
     // Each component now has its own kinetic model and we
@@ -215,13 +212,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
 
-    // double critporediam = lattice_->getLargestSaturatedPore(); // in nm
-    // critporediam *= 1.0e-9;                                    // in m
-    // double rh = exp(-6.23527e-7 / critporediam / T);
-
-    // rh = rh > 0.55 ? rh : 0.551;
-    // double rhFactor = rh;
-
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
       // prevent DOR from prematurely stopping PK calculations
@@ -230,9 +220,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       throw FloatException("PozzolanicModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
-
-    //arrhenius =
-    //    exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
     if (DOR < 1.0) {
 
@@ -332,25 +319,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
         diffrate = -1.0e9;
       }
 
-      /*
-      cout << "PozzolanicModel::calculateKineticStep for " << name_ << "\tDCId_:
-      " << DCId_ << "\tmicroPhaseId_: " << microPhaseId_ << endl; cout << "
-      dissrate = " << dissrate << endl; cout << "    (baserateconst = " <<
-      baserateconst << ")" << endl; cout << "    (ssaFactor = " << ssaFactor_ <<
-      ")" << endl; cout << "    (DOR = " << DOR << ")" << endl; cout << "
-      (rhFactor = " << rhFactor << ")" << endl; cout << "    (arrhenius = " <<
-      arrhenius << ")" << endl; cout << "    (ohactivity = " << ohActivity <<
-      ")" << endl; cout << "    (waterterm = " << pow(waterActivity, 2.0) << ")"
-      << endl; cout << "    (area = " << area << ")" << endl; cout << "
-      (saturationIndex = " << saturationIndex << ")" << endl; cout << "    (LOI
-      = " << lossOnIgnition_ << ")" << endl; cout << "    (sio2 = " << sio2_ <<
-      ")" << endl; cout << "  diffrate = " << diffrate << endl; cout << "
-      (diffusionRateConstEarly = " << diffusionRateConstEarly_ << ")" << endl;
-      cout << "    (dissolvedUnits = " << dissolvedUnits_ << ")" << endl;
-      cout << "    (average_cdiff = " << average_cdiff << ")" << endl;
-      cout.flush();
-      */
-
       rate = dissrate;
       if (abs(diffrate) < abs(rate))
         rate = diffrate;
@@ -365,30 +333,25 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
       scaledMass = scaledMass_;
 
-      cout << "****************** PZM_hT = " << timestep << "\tcyc = " << cyc
-           << "\tmicroPhaseId_ = " << microPhaseId_
-           << "    microPhase = " << name_
-           << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
-           << endl;
-      cout << "PZM_hT   " << "rhFacto_r: " << rhFactor_
-           << "\tarrhenius_: " << arrhenius_
-           << "\tsaturationIndex: " << saturationIndex
-           << "\twaterActivity: " << waterActivity << endl;
-      cout << "PZM_hT   " << "dissrate: " << dissrate
-           << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
-           << "\trate: " << rate << endl;
-      cout << "PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-           << "\tinitScaledMass_: " << initScaledMass_
-           << "\tscaledMass_: " << scaledMass_
-           << "\tmassDissolved: " << massDissolved << endl;
-      cout.flush();
-
-      if (verbose_) {
-        cout << "PozzolanicModel::calculateKineticStep "
-             << "Original scaled mass = " << initScaledMass_
-             << ", dissolved scaled mass = " << massDissolved << endl;
+      // if (verbose_) {
+        cout << "****************** PZM_hT = " << timestep << "\tcyc = " << cyc
+             << "\tmicroPhaseId_ = " << microPhaseId_
+             << "    microPhase = " << name_
+             << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
+             << endl;
+        cout << "PZM_hT   " << "rhFacto_r: " << rhFactor_
+             << "\tarrhenius_: " << arrhenius_
+             << "\tsaturationIndex: " << saturationIndex
+             << "\twaterActivity: " << waterActivity << endl;
+        cout << "PZM_hT   " << "dissrate: " << dissrate
+             << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
+             << "\trate: " << rate << endl;
+        cout << "PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+             << "\tinitScaledMass_: " << initScaledMass_
+             << "\tscaledMass_: " << scaledMass_
+             << "\tmassDissolved: " << massDissolved << endl;
         cout.flush();
-      }
+      // }
 
     } else {
       throw DataException("PozzolanicModel", "calculateKineticStep",

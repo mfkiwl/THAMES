@@ -341,7 +341,7 @@ int main(int argc, char **argv) {
   par_filename.assign(buff);
   cout << "par_filename      : " << par_filename << endl;
 
-  cout << endl << "What is the root name of this job? " << endl;
+  cout << endl << "What is the root name of this job?" << endl;
   getline(cin, buff);
   jobroot.assign(buff);
   cout << "jobroot           : " << jobroot << endl;

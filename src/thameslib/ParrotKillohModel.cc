@@ -233,13 +233,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
                            "initScaledMass_ = 0.0");
     }
 
-    // cout << "PKM model for " << name_ << "    k1 = " << k1_ << "    k2 = " <<
-    // k2_ << "    k3 = " << k3_
-    //      << "    pfk = " << pfk_ << "    n1 = " << n1_ << "    n3 = " << n3_
-    //      << "    Ea = " << activationEnergy_ << "    ssaFactor_ = " <<
-    //      ssaFactor_ << "    DOR = " << DOR << endl;
-    // cout.flush();
-
     if (DOR < 1.0) {
       // Normal Parrott and Killoh implementation here
 
@@ -272,10 +265,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
       if (diffrate < rate)
         rate = diffrate;
 
-      //rhFactor = pow(((rh - 0.55) / 0.45), 4.0);
-      //arrhenius =
-      //    exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
-
       double rate_ini = rate;
 
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
@@ -286,8 +275,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
 
       if (totalDOR > critDOR_) {
         wcFactor = pow((1 + 3.333 * (critDOR_ - newDOR)), 4);
-        // prod = timestep * rate * pow((1 + 3.333 * (critDOR_ -
-        // newDOR)),4);
         prod = timestep * rate * wcFactor;
         newDOR = DOR + prod;
       }
@@ -295,45 +282,39 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
       scaledMass_ = initScaledMass_ * (1.0 - newDOR);
 
       // massDissolved = (newDOR - DOR) * initScaledMass_;
-
       massDissolved = initScaledMass_ * prod;
 
       scaledMass = scaledMass_;
 
-      cout << "****************** PKM_hT = " << timestep << "    cyc = " << cyc
-           << "    microPhaseId_ = " << microPhaseId_
-           << "    microPhase = " << name_
-           << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
-           << endl;
-      cout << "PKM_hT   " << "pfk_: " << pfk_ << "    k1 = " << k1_
-           << "    n1 = " << n1_ << "    k2 = " << k2_ << "    k3 = " << k3_
-           << "    n3 = " << n3_ << endl;
-      cout << "PKM_hT   " << "dorHcoeff_: " << dorHcoeff_
-           << "    Ea = " << activationEnergy_ << endl;
-      cout << "PKM_hT   " << "specificSurfaceArea_ = " << specificSurfaceArea_
-           << "    refSpecificSurfaceArea_ = " << refSpecificSurfaceArea_
-           << "    ssaFactor_ = " << ssaFactor_ << endl;
-      cout << "PKM_hT   " << "wcRatio_: " << wcRatio_
-           << "\twsRatio_: " << wsRatio_ << endl;
-      cout << "PKM_hT   " << "ngrate: " << ngrate << "\thsrate: " << hsrate
-           << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
-           << "\trate: " << rate << endl;
-      cout << "PKM_hT   " << "wcFactor: " << wcFactor
-           << "\trhFactor_: " << rhFactor_ << "\tarrhenius_: " << arrhenius_
-           << endl;
-      cout << "PKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-           << "\ttotalDOR: " << totalDOR
-           << "\tinitScaledMass_: " << initScaledMass_
-           << "\tscaledMass_: " << scaledMass_
-           << "\tmassDissolved: " << massDissolved << endl;
-      cout.flush();
-
-      if (verbose_) {
-        cout << "ParrotKillohModel::calculateKineticStep "
-             << "Original scaled mass = " << initScaledMass_
-             << ", dissolved scaled mass = " << massDissolved << endl;
+      //if (verbose_) {
+        cout << "****************** PKM_hT = " << timestep << "    cyc = " << cyc
+             << "    microPhaseId_ = " << microPhaseId_
+             << "    microPhase = " << name_
+             << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
+             << endl;
+        cout << "PKM_hT   " << "pfk_: " << pfk_ << "    k1 = " << k1_
+             << "    n1 = " << n1_ << "    k2 = " << k2_ << "    k3 = " << k3_
+             << "    n3 = " << n3_ << endl;
+        cout << "PKM_hT   " << "dorHcoeff_: " << dorHcoeff_
+             << "    Ea = " << activationEnergy_ << endl;
+        cout << "PKM_hT   " << "specificSurfaceArea_ = " << specificSurfaceArea_
+             << "    refSpecificSurfaceArea_ = " << refSpecificSurfaceArea_
+             << "    ssaFactor_ = " << ssaFactor_ << endl;
+        cout << "PKM_hT   " << "wcRatio_: " << wcRatio_
+             << "\twsRatio_: " << wsRatio_ << endl;
+        cout << "PKM_hT   " << "ngrate: " << ngrate << "\thsrate: " << hsrate
+             << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
+             << "\trate: " << rate << endl;
+        cout << "PKM_hT   " << "wcFactor: " << wcFactor
+             << "\trhFactor_: " << rhFactor_ << "\tarrhenius_: " << arrhenius_
+             << endl;
+        cout << "PKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+             << "\ttotalDOR: " << totalDOR
+             << "\tinitScaledMass_: " << initScaledMass_
+             << "\tscaledMass_: " << scaledMass_
+             << "\tmassDissolved: " << massDissolved << endl;
         cout.flush();
-      }
+      //}
 
     } else {
       throw DataException("ParrotKillohModel", "calculateKineticStep",

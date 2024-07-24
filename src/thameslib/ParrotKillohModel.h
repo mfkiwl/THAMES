@@ -277,13 +277,6 @@ public:
   @param cyc is the cycle number (iteration of main loop)
   @param totalDOR is the total degree of reaction [dimensionless]
   */
-  // virtual void calculateKineticStep (const double timestep,
-  //                                   const double temperature, bool isFirst,
-  //                                   double rh, vector<double> &dICMoles,
-  //                                   vector<double> &dsolutICMoles,
-  //                                   vector<double> &DCMoles,
-  //                                   vector<double> &GEMPhaseMoles, int cyc);
-
   virtual void calculateKineticStep(const double timestep, double &scaledMass,
                                     double &massDissolved, int cyc,
                                     double totalDOR);

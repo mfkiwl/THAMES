@@ -259,7 +259,6 @@ public:
   @param midx is the microstructure id of the phase to query
   @return the initial scaled mass [percent solids]
   */
-
   double getInitScaledMass(const int midx) {
     try {
       return initScaledMass_.at(midx);
@@ -281,14 +280,12 @@ public:
   this method also sets the initial moles of water in the
   chemical system definition.
   */
-
   void calcPhaseMasses(void);
 
   /**
   @brief Get sum of phase masses
 
   */
-
   double getSolidMass(void);
 
   /**
@@ -480,7 +477,6 @@ public:
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
   */
-
   void calculateKineticStep(const double timestep, int cyc);
 
   /**

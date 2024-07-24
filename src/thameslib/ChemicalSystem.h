@@ -1578,8 +1578,8 @@ public:
     if (p != DCIdLookup_.end()) {
       return p->second;
     } else {
-      // cout << "WARNING: Could not find DCIdLookup_ match to " << dcname <<
-      // endl; cout << "WARNING: Here are the ones I know about:" << endl;
+      cout << "WARNING: Could not find DCIdLookup_ match to " << dcname << endl;
+      // cout << "WARNING: Here are the ones I know about:" << endl;
       // cout.flush();
       // p = DCIdLookup_.begin();
       // while (p != DCIdLookup_.end()) {
@@ -1590,6 +1590,8 @@ public:
       // }
       // cout << "WARNING:" << endl;
       // cout.flush();
+      cout << "exit the program" << endl;
+      exit(1);
       return (numDCs_ + 9999);
     }
   }
@@ -1622,6 +1624,8 @@ public:
       if (warning_) {
         cout << "Could not find GEMPhaseIdLookup_ match to " << phasename
              << endl;
+        cout << "exit the program" << endl;
+        exit(1);
       }
       return (numGEMPhases_ + 9999);
     }

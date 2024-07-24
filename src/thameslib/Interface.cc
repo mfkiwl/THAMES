@@ -97,42 +97,6 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
     growthSites_.push_back(Isite(gv[j]->getId(), afty));
   }
 
-  /*
-    if (growthSites_.size() > 0) {
-      start = growthSites_.begin();
-      end = growthSites_.end();
-
-      ///
-      /// The sort is built in to the STL for vectors or portions of vectors,
-      /// as long as you give it a comparison function, which in this case is
-    the
-      /// `affinitySort` function already defined
-      ///
-      sort(start, end, affinitySort);
-    }
-
-    ///
-    /// At this point the sites are perfectly sorted in descending order of
-    /// affinity. Now shuffle the sorted sites according to the random growth
-    /// factor. Each phase has a certain amount of randomness to its growth,
-    which
-    /// can be accessed through the `getRandomgrowth` method of the
-    ChemicalSystem
-    /// object.
-    ///
-
-    unsigned int site1, site2;
-    unsigned int numgsites = growthSites_.size();
-
-    for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
-
-      // Choose two sites at random and switch their places
-      site1 = (unsigned int)(rg_->Ran3() * numgsites);
-      site2 = (unsigned int)(rg_->Ran3() * numgsites);
-      swap(growthSites_[site1], growthSites_[site2]);
-    }
-  */
-
   ///
   /// Now sort the dissolution sites according to the affinity
   ///
@@ -151,33 +115,6 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
     exit(1);
   }
 
-  /*
-    if (dissolutionSites_.size() > 0) {
-      start = dissolutionSites_.begin();
-      end = dissolutionSites_.end();
-      sort(start, end, affinitySort);
-    }
-
-    numgsites = dissolutionSites_.size();
-
-    ///
-    /// The dissolution sites are perfectly ordered by affinity, just like the
-    /// growth sites were.  Now add the randomness factor for this phase.
-    ///
-
-    try {
-      for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
-
-        // Choose two sites at random and switch their places
-        site1 = (unsigned int)(rg_->Ran3() * numgsites);
-        site2 = (unsigned int)(rg_->Ran2() * numgsites);
-        swap(dissolutionSites_[site1], dissolutionSites_[site2]);
-      }
-    } catch (EOBException e) {
-      e.printException();
-      exit(0);
-    }
-  */
 } // End of constructors
 
 Interface::~Interface() {
@@ -243,148 +180,12 @@ bool Interface::addDissolutionSite(Site *loc) {
 
   /// Add the site only if it was not found already
   if (!found) {
-    // int afty = 0;
-    // for (i = 0; i < loc->nbSize(2); i++) {
-    //    afty +=
-    //         chemSys_->getAffinity(microPhaseId_,
-    //         loc->nb(i)->getMicroPhaseId());
-    // }
-    // Isite tisite(siteId,afty);
-    // q = lower_bound(start, end, tisite, affinitySort);
-    // dissolutionSites_.insert(q, tisite);
     Isite tisite(siteId, 0);
     dissolutionSites_.push_back(tisite);
     answer = true;
   }
   return answer;
 }
-
-/*
-bool Interface::sortGrowthSites(vector<Site> &ste, unsigned int pid) {
-  unsigned int i, j;
-  int afty;
-  Site gs;
-
-  ///
-  /// The list of growth sites already exists or has been constructed, so we
-  /// only need to update the affinities for each site
-  ///
-
-  for (j = 0; j < growthSites_.size(); j++) {
-    afty = 0;
-    gs = ste[growthSites_[j].getId()];
-    for (i = 0; i < gs.nbSize(2); i++) {
-      afty += chemSys_->getAffinity(pid, gs.nb(i)->getMicroPhaseId());
-    }
-    growthSites_[j].setAffinity(afty);
-  }
-
-  ///
-  /// Now we sort the list of growth sites in descending order of affinity.
-  /// Remember that `affinitySort` is the comparison function, already defined
-  /// in this class, that must be passed to the STL sort function.
-  ///
-
-  if (growthSites_.size() > 0) {
-    vector<Isite>::iterator start, end;
-    start = growthSites_.begin();
-    end = growthSites_.end();
-    sort(start, end, affinitySort);
-  }
-
-  ///
-  /// At this point the growth sites are perfectly sorted in descending
-  /// order of affinity.  Next, we shuffle this sorting somewhat depending
-  /// on how much randomization of growth sites is indicated for this particular
-  /// phase.  The amount of randomness is obtained from the `getRandomgrowth`
-  /// method of the ChemicalSystem object for this simulation
-  ///
-
-  unsigned int site1, site2;
-  unsigned int numgsites = growthSites_.size();
-  for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numgsites); j++) {
-
-    ///
-    /// Choose two sites at random and switch their places
-    ///
-
-    site1 = (unsigned int)(rg_->Ran3() * numgsites);
-    site2 = (unsigned int)(rg_->Ran3() * numgsites);
-    swap(growthSites_[site1], growthSites_[site2]);
-  }
-
-  return true; // successful sorting
-}
-
-bool Interface::sortDissolutionSites(vector<Site> &ste, unsigned int pid) {
-  unsigned int i, j;
-  int afty;
-  Site ds;
-
-  ///
-  /// The list of dissolution sites already exists or has been constructed, so
-  /// we only need to update the affinities for each site
-  ///
-
-  for (j = 0; j < dissolutionSites_.size(); j++) {
-    afty = 0;
-    ds = ste[dissolutionSites_[j].getId()];
-    for (i = 0; i < ds.nbSize(2); i++) {
-      afty += chemSys_->getAffinity(pid, ds.nb(i)->getMicroPhaseId());
-    }
-    dissolutionSites_[j].setAffinity(afty);
-  }
-
-  ///
-  /// Now we sort the list of dissolution sites in descending order of affinity.
-  /// Remember that `affinitySort` is the comparison function, already defined
-  /// in this class, that must be passed to the STL sort function.
-  ///
-
-  if (dissolutionSites_.size() > 0) {
-    vector<Isite>::iterator start, end;
-    start = dissolutionSites_.begin();
-    end = dissolutionSites_.end();
-    sort(start, end, affinitySort);
-  }
-
-  ///
-  /// At this point the dissolution sites are perfectly sorted in descending
-  /// order of affinity.  Next, we shuffle this sorting somewhat depending
-  /// on how much randomization of growth sites is indicated for this particular
-  /// phase.  The amount of randomness is obtained from the `getRandomgrowth`
-  /// method of the ChemicalSystem object for this simulation
-  ///
-
-  unsigned int site1, site2;
-  unsigned int numdsites = dissolutionSites_.size();
-  for (j = 0; j < (chemSys_->getRandomGrowth(pid) * numdsites); j++) {
-
-    // Choose two sites at random and switch their places
-    site1 = (unsigned int)(rg_->Ran3() * numdsites);
-    site2 = (unsigned int)(rg_->Ran3() * numdsites);
-    swap(dissolutionSites_[site1], dissolutionSites_[site2]);
-  }
-
-  return true;
-}
-*/
-
-/*
-bool Interface::removeGrowthSite(Site *loc) {
-  bool found = false;
-  vector<Isite>::iterator p = growthSites_.begin();
-  while ((p != growthSites_.end()) && (!found)) {
-    if (p->getId() == loc->getId()) {
-      growthSites_.erase(p);
-      found = true;
-    }
-    p++;
-  }
-
-  return found;
-}
-*/
 
 bool Interface::removeGrowthSite_0(Site *loc, int pos) {
   bool found = false;
@@ -445,22 +246,6 @@ bool Interface::removeEmptiedSite(int siteID) {
   }
   return found;
 }
-
-/*
-bool Interface::removeDissolutionSite(Site *loc) {
-  bool found = false;
-  vector<Isite>::iterator p;
-  p = dissolutionSites_.begin();
-  for (int i = dissolutionSites_.size() - 1; (i >= 0 && (!found)); i--) {
-    if (dissolutionSites_[i].getId() == loc->getId()) {
-      p += i;
-      dissolutionSites_.erase(p);
-      found = true;
-    }
-  }
-  return found;
-}
-*/
 
 bool Interface::removeDissolutionSite_diss(Site *loc, int pos) {
   bool found = false;

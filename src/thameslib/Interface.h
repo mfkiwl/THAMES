@@ -126,7 +126,6 @@ public:
     for (int i = 0; i < dim; i++) {
       growthSites_.push_back(vect[i]);
     }
-    // cout << "dim_growthInterface after: " << growthSites_.size() << endl;
   }
 
   int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
@@ -148,8 +147,6 @@ public:
     for (int i = 0; i < dim; i++) {
       dissolutionSites_.push_back(vect[i]);
     }
-    // cout << "dim_dissolutionInterface after: " << dissolutionSites_.size() <<
-    // endl;
   }
 
   /**

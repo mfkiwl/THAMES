@@ -705,7 +705,7 @@ public:
   the input growPhaseIDVect vector
   */
   vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
-                   vector<string> growPhNameVect, int &numadded_G, int totalTRC);
+                        vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
   /**
   @brief create a new growth interface for a given phase (phaseID) having a
@@ -732,9 +732,8 @@ public:
   @return -1 if all requested numbers of voxels in numSiteDissVect have been switched
   or the ID of the first microphase (in dissPhaseIDVect) for which this was not possible
   */
-  // int dissolvePhase(unsigned int phaseid, int numtoadd);
   int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
-                       vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
+                    vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -891,7 +890,6 @@ public:
   potential dissolution sites
   @param pid is the microstructure phase id
   */
-  // void removeDissolutionSite(Site *loc, unsigned int pid);
   void removeDissolutionSite_diss(Site *loc, unsigned int pid, int interfacePos);
   void removeDissolutionSite_grow(Site *loc, unsigned int pid);
 
@@ -903,7 +901,6 @@ public:
   potential growth sites
   @param pid is the microstructure phase id
   */
-  //  void removeGrowthSite(Site *loc, unsigned int pid);
   void removeGrowthSite_0(Site *loc, unsigned int pid, int interfacePos);
   void removeGrowthSite_1(Site *loc, unsigned int pid);
 
@@ -941,7 +938,6 @@ public:
   @return zero if okay or nonzero if not all requested voxels
   for a certain microphase ID (phDiff) can be dissolved
   */
-
   int changeMicrostructure(double time, const int simtype, bool &capWater,
                            int &numDiff, int &phDiff, string &nameDiff,
                            int whileCount, int cyc);
@@ -1620,52 +1616,72 @@ public:
 
   void createRNG(void) { rg_ = new RanGen(); }
   double callRNG(void) {
-      numRNGcall_0_++;
-      if (numRNGcall_0_ == LONG_MAX) {
-          numRNGcallLONGMAX_++;
-          numRNGcall_0_ = 0;
-      }
-      lastRNG_ = rg_->Ran3();
-      return lastRNG_;
+    numRNGcall_0_++;
+    if (numRNGcall_0_ == LONG_MAX) {
+      numRNGcallLONGMAX_++;
+      numRNGcall_0_ = 0;
+    }
+    lastRNG_ = rg_->Ran3();
+    return lastRNG_;
   }
   long int getNumRNGcall_0(void) { return numRNGcall_0_; }
   long int getNumRNGcallLONGMAX(void) { return numRNGcallLONGMAX_; }
-  //void setNumRNGcall_0(long int val) { numRNGcall_0_ = val; }
-  //void setNumRNGcallLONGMAX(long int val) { numRNGcallLONGMAX_ = val; }
-  int getRNGseed(void) { return latticeRNGseed_; }
-  //void setRNGseed(int val) { latticeRNGseed_ = val; }
   double getLastRNG(void) { return lastRNG_; }
   void setRNGseed(int seed) { rg_->setSeed(seed); }
 
-  void resetRNG(int seed, long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
-      latticeRNGseed_ = seed;
-      rg_->setSeed(latticeRNGseed_);
-      numRNGcall_0_ = val_0;
-      numRNGcallLONGMAX_ = valLONGMAX;
-      long int count_0 = 0, count_1 = 0;
-      long int j0, j1, j11;
-      double lastRNGreset;
-      for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
-          for(j11 = 1; j11 <= LONG_MAX; j11++) {
-              lastRNGreset = rg_->Ran3();
-          }
+  void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
+    //latticeRNGseed_ = seed;
+    rg_->setSeed(latticeRNGseed_);
+    numRNGcall_0_ = val_0;
+    numRNGcallLONGMAX_ = valLONGMAX;
+    long int count_0 = 0, count_1 = 0;
+    long int j0, j1, j11;
+    double lastRNGreset;
+    for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
+      for(j11 = 1; j11 <= LONG_MAX; j11++) {
+        lastRNGreset = rg_->Ran3();
       }
-      for(j0 = 1; j0 <= val_0; j0++) {
-          lastRNGreset = rg_->Ran3();
-      }
-      lastRNG_ = lastRNGreset;
+    }
+    for(j0 = 1; j0 <= val_0; j0++) {
+      lastRNGreset = rg_->Ran3();
+    }
+    lastRNG_ = lastRNGreset;
 
-      cout << endl << "Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
-           << whileCount << " / " << latticeRNGseed_ << endl;
-      cout << "Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
-           << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
-           << " / " << valRNG << endl;
-      if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
-        cout << "Lattice::resetRNG OK!" << endl;
-      } else {
-        cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
-        exit(0);
+    cout << endl << "Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+         << whileCount << " / " << latticeRNGseed_ << endl;
+    cout << "Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+         << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
+         << " / " << valRNG << endl;
+    if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
+      cout << "Lattice::resetRNG OK!" << endl;
+    } else {
+      cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
+      exit(0);
+    }
+  }
+
+  void shiftAffinityPosVal(void){
+    //check affinities values
+    int minAff = 100000;
+    for (int i = 0; i < numMicroPhases_; i++) {
+      for (int j = 0; j < numMicroPhases_; j++) {
+        if (chemSys_->getAffinity(i, j) <= minAff) minAff =chemSys_->getAffinity(i, j);
       }
+    }
+    cout << endl << "   Lattice::shiftAffinityPosVal minAff = " << minAff << endl;
+    if (minAff < 0) {
+      int newAff;
+      int minAff_abs = abs(minAff);
+      for (int i = 0; i < numMicroPhases_; i++) {
+        for (int j = 0; j < numMicroPhases_; j++) {
+          newAff = chemSys_->getAffinity(i, j) + minAff_abs;
+          chemSys_->setAffinity(i, j, newAff);
+        }
+      }
+      cout << "   Lattice::shiftAffinityPosVal => all affinities have been shifted with abs(minAff) = " << minAff_abs << endl;
+    } else {
+      cout << "   Lattice::shiftAffinityPosVal => all affinities are positive!" << endl;
+    }
   }
 
 }; // End of Lattice class

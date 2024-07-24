@@ -39,7 +39,7 @@ protected:
   unsigned int microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
- unsigned int
+  unsigned int
       dissolution_; /**< phase that can dissolve at this site or -1 */
   vector<unsigned int>
       growth_;              /**< Vector of phases that can grow at this site */
@@ -122,16 +122,16 @@ public:
   int getVisit (void){return visit_;}
 
   void setInGrowInterface(int i, int val){
-      inGrowInterface_[i] = val;
+    inGrowInterface_[i] = val;
   }
   void setInDissInterface(int i, int val){
-      inDissInterface_[i] = val;
+    inDissInterface_[i] = val;
   }
   int getInGrowInterface(int i){
-      return inGrowInterface_[i];
+    return inGrowInterface_[i];
   }
   int getInDissInterface(int i){
-      return inDissInterface_[i];
+    return inDissInterface_[i];
   }
 
   /**
@@ -192,7 +192,7 @@ public:
   }
 
   vector<Site *> getNb(){
-      return nb_;
+    return nb_;
   }
 
   /**
@@ -321,8 +321,8 @@ public:
   the site
   */
   void setDissolutionSite(unsigned int pid) {
-      dissolution_ = pid;
-      growth_.clear();
+    dissolution_ = pid;
+    growth_.clear();
   }
 
   /**
@@ -366,18 +366,18 @@ public:
     int i = -1;
 
     for (i = 0; i < size; i++) {
-        if (growth_[i] == pid) {
-          growth_[i] = growth_[size - 1];
-          growth_.pop_back();
-          found = true;
-          break;
-        }
+      if (growth_[i] == pid) {
+        growth_[i] = growth_[size - 1];
+        growth_.pop_back();
+        found = true;
+        break;
+      }
     }
     if (found == false) {
-          cout <<endl <<" stop - void removeGrowthSite(unsigned int pid) " << endl;
-          cout.flush();
-          cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
-          exit(1);
+      cout <<endl <<" stop - void removeGrowthSite(unsigned int pid) " << endl;
+      cout.flush();
+      cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
+      exit(1);
     }
   }
 
@@ -394,7 +394,7 @@ public:
     int dim = vect.size();
     growth_.resize(dim,0);
     for(int i = 0; i < dim; i++){
-        growth_[i] = vect[i];
+      growth_[i] = vect[i];
     }
   }
 

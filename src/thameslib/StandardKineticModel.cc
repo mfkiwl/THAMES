@@ -125,7 +125,7 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   rhFactor_ = rh_;
 
   arrhenius_ =
-          exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
 
   ///
@@ -188,14 +188,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
 
-    // double critporediam = lattice_->getLargestSaturatedPore(); // in nm
-    // critporediam *= 1.0e-9;                                    // in m
-    // double rh = exp(-6.23527e-7 / critporediam / T);
-
-    // rh = rh > 0.55 ? rh : 0.551;
-    // double rhFactor = rh;
-    // rhFactor = pow(((rh - 0.55)/0.45),4.0);
-
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
       // prevent DOR from prematurely stopping PK calculations
@@ -204,9 +196,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       throw FloatException("StandardKineticModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
-
-    //arrhenius =
-    //    exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
     if (DOR < 1.0) {
 
@@ -217,7 +206,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       /// component
       /// @todo Generalize to multiple phases in a component (how?)
 
-      // double saturationIndex = chemSys_->getSI(GEMPhaseId_);
       double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
 
       // This equation basically implements the Dove and Crerar rate
@@ -232,20 +220,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                    pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
       }
 
-      // cout << endl << "StandardKineticModel::calculateKineticStep for " <<
-      // name_ << "\tDCId_: " << DCId_ << "\tmicroPhaseId_: " << microPhaseId_
-      //      << endl;
-      // cout << "  dissrate = " << dissrate << endl;
-      // cout << "    (DOR = " << DOR << ")" << endl;
-      // cout << "    (rhFactor = " << rhFactor << ")" << endl;
-      // cout << "    (arrhenius = " << arrhenius << ")" << endl;
-      // cout << "    (area = " << area << ")" << endl;
-      // cout << "    (saturationIndex = " << saturationIndex << ")" << endl;
-      // cout << "    (siexp = " << siexp_ << ")" << endl;
-      // cout << "    (dfexp = " << dfexp_ << ")" << endl;
-      // cout << "    (LOI = " << lossOnIgnition_ << ")" << endl;
-      // cout.flush();
-
       double dissrate_ini = dissrate;
 
       dissrate *= (rhFactor_ * arrhenius_);
@@ -258,35 +232,30 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       scaledMass = scaledMass_;
 
-      cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
-           << "    microPhaseId_ = " << microPhaseId_
-           << "    microPhase = " << name_
-           << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
-           << endl;
-      cout << "SKM_hT   " << "rhFactor_: " << rhFactor_
-           << "\tarrhenius_: " << arrhenius_
-           << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
-           << endl;
-      cout << "SKM_hT   " << "dissrate_ini: " << dissrate_ini
-           << "\tdissrate: " << dissrate << endl;
-      cout << "SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-           << "\tinitScaledMass_: " << initScaledMass_
-           << "\tscaledMass_: " << scaledMass_
-           << "\tmassDissolved: " << massDissolved << endl;
-      cout << "cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
-           << "    microPhaseName = " << name_
-           << "    saturationIndex = " << saturationIndex << "   Dc_a = "
-           << chemSys_->getNode()->DC_a(DCId_)
-           // << "   SI_["
-           << endl;
-      // exit(0);
-      cout.flush();
-
-      if (verbose_) {
-        cout << "StandardKineticModel::calculateKineticStep "
-             << "Original scaled mass = " << initScaledMass_
-             << ", dissolved scaled mass = " << massDissolved << endl;
-      }
+      //if (verbose_) {
+        cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
+             << "    microPhaseId_ = " << microPhaseId_
+             << "    microPhase = " << name_
+             << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
+             << endl;
+        cout << "SKM_hT   " << "rhFactor_: " << rhFactor_
+             << "\tarrhenius_: " << arrhenius_
+             << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
+             << endl;
+        cout << "SKM_hT   " << "dissrate_ini: " << dissrate_ini
+             << "\tdissrate: " << dissrate << endl;
+        cout << "SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+             << "\tinitScaledMass_: " << initScaledMass_
+             << "\tscaledMass_: " << scaledMass_
+             << "\tmassDissolved: " << massDissolved << endl;
+        cout << "cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+             << "    microPhaseName = " << name_
+             << "    saturationIndex = " << saturationIndex << "   Dc_a = "
+             << chemSys_->getNode()->DC_a(DCId_)
+             // << "   SI_["
+             << endl;
+        cout.flush();
+      //}
     } else {
       throw DataException("StandardKineticModel", "calculateKineticStep",
                           "DOR >= 1.0");

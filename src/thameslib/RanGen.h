@@ -19,6 +19,7 @@
 class RanGen {
 
 private:
+
   static int *seed_; /**< The random number seed, a negative integer */
 
 public:

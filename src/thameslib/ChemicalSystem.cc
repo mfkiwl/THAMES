@@ -668,28 +668,6 @@ vector<double> ChemicalSystem::getSolution(void) {
   }
   cout << endl;
 
-  /*
-  for (unsigned int i = 0; i < numDCs_; i++) {
-    char cc = getDCClassCode(i);
-    if (cc == 'S' || cc == 'T') {
-      double moles = node_->Get_cDC(i) * waterMass * 1.0e-3;
-      for (int j = 0; j < (numICs_ - 1); j++) {
-        tempICMoles[j] += moles * DCStoich_[i][j];
-      }
-    }
-  }
-
-  // Treat H2O separately
-
-  double waterMoles = DCMoles_[getDCId("H2O@")];
-  for (int j = 0; j < numICs_; j++) {
-    if (ICName_[j] == "H")
-      tempICMoles[j] += waterMoles * 2;
-    if (ICName_[j] == "O")
-      tempICMoles[j] += waterMoles;
-  }
-  */
-
   return tempICMoles;
 }
 
@@ -1978,38 +1956,13 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
 
   nodeStatus_ = NEED_GEM_AIA;
 
-//  cout << endl << "ChemSys before0 checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
-//  for(int i = 0; i < numICs_; i++){
-//    cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-//  }
-//  cout << endl << "ChemSys before GEM_from_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-//  for(int i = 0; i < numDCs_; i++){
-//    cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] << "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
-// }
-//  cout << endl << "end ChemSys before GEM_from_MT : DCLowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-//  for(int i = 0; i < numDCs_; i++){
-//      for(int j = 0; j < numICs_; j++){
-//          ICMoles_[j] += DCMoles_[i]* getDCStoich(i,j);
-//      }
-//  }
-//  cout << endl << "ChemSys before checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
-//  for(int i = 0; i < numICs_; i++){
-//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-//  }
-//   //  writeDCMoles();
+  //  writeDCMoles();
 
   // ALL ICs/DCs in the system are set to zero in Lattice constructor before to call normalizePhaseMasses()
   // DCs are updated in Lattice::normalizePhaseMasses
   // only the ICMoles_ that are less than 10^-9 after the first call of calculateKineticStep(...) are set to 10^-9
 
   if(isFirst)checkICMoles();
-
-//  cout << endl << "ChemSys after checkICMoles for cyc = " << cyc << " : ICMoles_/ICName_" << endl;
-//  for(int i = 0; i < numICs_; i++){
-//      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-//  }
-//   //  writeDCMoles();
-//   //if (cyc == 1) {cout << "stop" << endl;exit(0);}
 
   ///
   /// Next function loads the input data for the THAMES node into the
@@ -2174,26 +2127,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
                    &solutPhaseMass_[0], &pSolutPhaseStoich_[0], &carrier_[0],
                    &surfaceArea_[0], &pSolidStoich_[0]);
 
-/* //comentat daca transmit toti DCs catre calculateState si impun limita inferioara kineticController
-  bool test_isDCKinetic = false;
-  for(int i = 0; i < numDCs_; i++){
-      if(isDCKinetic_[i] && DCMoles_[i] > 1.e-20){
-          cout << endl << "kinetic controlled DCId = " << i
-               << "\t (DCName = " << DCName_[i] << ") still present after GEM_run: DCMoles = "
-               << DCMoles_[i] << endl;cout.flush();
-          test_isDCKinetic = true;
-      }
-  }
-  if(test_isDCKinetic){
-      cout << endl << "stop in ChemicalSystem::calculateState"<< endl;
-      cout << "   time = " << time << endl;
-      cout << "   isFirst = " << isFirst << endl;
-      cout << "   cyc = " << cyc << endl;
-      cout << "   initial = " << initial << endl;
-      exit(0);
-  }
-*/
-
   if (verbose_) {
     cout << "Done!" << endl;
     cout << "after GEM_to_MT...Ms_ = " << Ms_ << ", Hs_ = " << Hs_ << endl;
@@ -2331,13 +2264,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
         }
         DCMoles_[wDCId] += water_molesincr;
 
-        //for (int i = 0; i < numICs_; i++) { // included in H2O@
-        //    if (ICName_[i] == "H")
-        //        ICMoles_[i] += water_molesincr * 2.0;
-        //    if (ICName_[i] == "O")
-        //        ICMoles_[i] += water_molesincr;
-        //}
-
         double waterMolarMass = getDCMolarMass(wDCId);
         addWatterMassAndVolume(water_molesincr * waterMolarMass, initMicroVolume_ - microVolume_); //necessary
 
@@ -2353,18 +2279,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false, int cyc = 
     cout.flush();
   }
 
-  //not necessary here
-  //setGEMPhaseStoich();// call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]
-
   if (verbose_) {
     cout << "Leaving ChemicalSystem::calculateState now" << endl;
     cout.flush();
   }
-
-  //cout << endl << "setSI in chemSys_ for cyc = : " << cyc << endl;
-  //setSI();
-  //cout << endl << "calculateState end chemSys_ for cyc = " << cyc << endl;
-  //if (cyc == 0) exit (0);
 
   return timesGEMFailed_;
 }
@@ -2400,22 +2318,6 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
         for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
           int newDCId = microPhaseDCMembers.at(ii);
           tmoles = DCMoles_[newDCId];
-          //if ( microPhaseDCMembers.size() == 1) {
-          //  vector<int> microPhaseMembers = getMicroPhaseMembers(i);
-          //  int newGEMPhaseId = microPhaseMembers.at(0);
-          //  cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
-          //       << newDCId << "\tnewDCName: " << DCName_[newDCId]
-          //       << "\ttmoles: " << tmoles
-          //       << "\tDC_a: " << node_->DC_a(newDCId)
-          //       << "\tmono -> newGEMPhaseId: " << newGEMPhaseId
-          //       << "\tSI_: " << SI_[newGEMPhaseId] << endl;
-          //} else {
-          //  cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
-          //       << newDCId << "\tnewDCName: " << DCName_[newDCId]
-          //       << "\ttmoles: " << tmoles
-          //       << "\tDC_a: " << node_->DC_a(newDCId) << endl;
-          //}
-
           aveSI += (node_->DC_a(newDCId) * tmoles);
           moles += tmoles;
         }
