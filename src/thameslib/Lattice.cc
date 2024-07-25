@@ -5101,6 +5101,7 @@ void Lattice::populateElementData(void) {
   elem.z = 111;
   elem.symb = "Rg";
   elem.mass = 282.0;
+  cfgElem_.push_back(elem);
 
   elem.z = 112;
   elem.symb = "Cn";
