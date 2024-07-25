@@ -4,6 +4,9 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| July 25 09:16 2024 | Updated format of Colors.csv output |
+| July 24 11:01 2024 | Merged latest version of
+branch florinRecoverLatticeAndRNG onto main |
 | July 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
 | July 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
 | July 11 17:53 2024 | Implemented initial and fixed solution DC composition |

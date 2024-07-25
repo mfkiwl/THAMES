@@ -789,8 +789,10 @@ void Lattice::findInterfaces(void) {
   return;
 }
 
-vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
-                               vector<string> growPhNameVect, int &numadded_G, int totalTRC) {
+vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
+                               vector<int> numSiteGrowVect,
+                               vector<string> growPhNameVect, int &numadded_G,
+                               int totalTRC) {
 
   //*** for controll
   int bcl = 0;
@@ -801,9 +803,9 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
 
   int growPhaseIDVectSize = growPhaseIDVect.size();
   vector<int> numChange;
-  numChange.resize(growPhaseIDVectSize,0);
+  numChange.resize(growPhaseIDVectSize, 0);
   int numChangeTot = 0;
-  vector<int> numLeft = numSiteGrowVect; //numtotake
+  vector<int> numLeft = numSiteGrowVect; // numtotake
   int numLeftTot = 0;
   for (i = 0; i < growPhaseIDVectSize; i++) {
     numLeftTot += numSiteGrowVect[i];
@@ -826,13 +828,12 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
 
   int phaseID;
   vector<int> dim_isite;
-  dim_isite.resize(growPhaseIDVectSize,0);
+  dim_isite.resize(growPhaseIDVectSize, 0);
 
   int aff, affMin, affSum;
   double affSumDbl;
   int valAbs;
   double rng;
-
 
   string nameMicroPhaseTh;
   double steWmc, stenbWmc, dwmcval;
@@ -840,12 +841,13 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
   struct growProb_ {
     unsigned int id; /**< The id of the corresponding Site */
     int affinity;    /**< The affinity for growth of a phase at the site */
-    double prob;     /**< The growth probability of a phase at this site (computed according the affinity) */
+    double prob; /**< The growth probability of a phase at this site (computed
+                    according the affinity) */
     int posVect;
     int interfacePos;
   };
 
-  //growth probabilities based on affinities
+  // growth probabilities based on affinities
   vector<growProb_> growProbVect;
   growProbVect.clear();
   growProb_ growProb;
@@ -859,10 +861,13 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
     for (jj = 0; jj < dim_isite[i]; jj++) {
       siteID = isite[jj].getId();
       sitePhID = site_[siteID].getMicroPhaseId();
-      if (sitePhID == 0 || sitePhID > 1){
-        cout << endl << "     Lattice::growPhase => error for the interface of phase phaseID = "
+      if (sitePhID == 0 || sitePhID > 1) {
+        cout << endl
+             << "     Lattice::growPhase => error for the interface of phase "
+                "phaseID = "
              << phaseID << endl;
-        cout << "     siteID = " << siteID << "    sitePhID = " << sitePhID << endl;
+        cout << "     siteID = " << siteID << "    sitePhID = " << sitePhID
+             << endl;
         cout << "     totalTRC/trc_g/bcl :  "
              << "   " << totalTRC << "/" << trc_g << "/" << bcl << endl;
         cout << endl << "     stop program" << endl;
@@ -878,48 +883,56 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
   }
   int growProbVectSize = growProbVect.size();
 
-  cout << endl << "   Lattice::growPhase GROW_INI totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g << "/" << bcl << endl;
+  cout << endl
+       << "   Lattice::growPhase GROW_INI totalTRC/trc_g/bcl " << totalTRC
+       << "/" << trc_g << "/" << bcl << endl;
   cout << "     GROW_INI growPhaseIDVectSize = " << growPhaseIDVectSize
        << "   growProbVectSize = " << growProbVectSize
        << "   numLeftTot = " << numLeftTot
        << "   numChangeTot = " << numChangeTot << endl;
   for (i = 0; i < growPhaseIDVectSize; i++) {
     phaseID = growPhaseIDVect[i];
-    //isite = interface_[phaseID].getDissolutionSites();
-    //dim_isite = isite.size();
-    cout << "       GROW_INI for i = " << i << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
-         << phaseID << "   " << growPhNameVect[i] << "   " << count_[phaseID] << "   " << dim_isite[i] << "   "
-         << numLeft[i]<< "   " << numChange[i] << endl;
+    // isite = interface_[phaseID].getDissolutionSites();
+    // dim_isite = isite.size();
+    cout << "       GROW_INI for i = " << i
+         << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
+         << phaseID << "   " << growPhNameVect[i] << "   " << count_[phaseID]
+         << "   " << dim_isite[i] << "   " << numLeft[i] << "   "
+         << numChange[i] << endl;
   }
   cout.flush();
 
   int interfacePos;
   vector<bool> writeFirst;
-  writeFirst.resize(growPhaseIDVectSize,false);
+  writeFirst.resize(growPhaseIDVectSize, false);
 
-  //affAllPos = false;
+  // affAllPos = false;
   while ((numLeftTot > 0) && (growProbVectSize >= 1)) {
-    try{
-      bcl ++;
-      //growth probabilities based on affinities
+    try {
+      bcl++;
+      // growth probabilities based on affinities
 
-      // affAllPos - works with modified affinities in affinity_ table from ChemicalSystem (all positives!)
+      // affAllPos - works with modified affinities in affinity_ table from
+      // ChemicalSystem (all positives!)
       affSum = 0;
       for (j = 0; j < growProbVectSize; j++) {
         aff = growProbVect[j].affinity;
         affSum += aff;
       }
-      //calc probabilities & choose a site
+      // calc probabilities & choose a site
       rng = callRNG();
       if (affSum != 0) {
         affSumDbl = affSum;
-        growProbVect[0].prob = growProbVect[0].affinity/affSumDbl;
+        growProbVect[0].prob = growProbVect[0].affinity / affSumDbl;
         if (rng <= growProbVect[0].prob) {
           isitePos = 0;
         } else {
           for (isitePos = 1; isitePos < growProbVectSize; isitePos++) {
-            growProbVect[isitePos].prob = growProbVect[isitePos-1].prob + growProbVect[isitePos].affinity/affSumDbl;
-            if (rng <= growProbVect[isitePos].prob) break;
+            growProbVect[isitePos].prob =
+                growProbVect[isitePos - 1].prob +
+                growProbVect[isitePos].affinity / affSumDbl;
+            if (rng <= growProbVect[isitePos].prob)
+              break;
           }
         }
       } else {
@@ -933,11 +946,13 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       interfacePos = growProbVect[isitePos].interfacePos;
 
       if (pid != ELECTROLYTEID) {
-        cout << endl << "Lattice::growPhase error: phaseid != ELECTROLYTEID" << endl;
-        cout << "  phaseid totalTRC/trc_g/bcl count_ numLeftTot numChangeTot  :  "
+        cout << endl
+             << "Lattice::growPhase error: phaseid != ELECTROLYTEID" << endl;
+        cout << "  phaseid totalTRC/trc_g/bcl count_ numLeftTot numChangeTot  "
+                ":  "
              << phaseID << "   " << totalTRC << "/" << trc_g << "/" << bcl
-             << "   " << count_[phaseID] << "   "
-             << numLeftTot << "   " << numChangeTot << endl;
+             << "   " << count_[phaseID] << "   " << numLeftTot << "   "
+             << numChangeTot << endl;
         cout << " posVect interfacePos pid : " << posVect << "   "
              << interfacePos << "   " << pid << endl;
         cout << " ste.id numLeft numChange : " << ste->getId() << "   "
@@ -950,7 +965,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       wmcIni = ste->getWmc0();
 
       // if (pid == ELECTROLYTEID) {
-      //removeGrowthSite(ste, phaseid);
+      // removeGrowthSite(ste, phaseid);
       removeGrowthSite_0(ste, phaseID, interfacePos);
       setMicroPhaseId(ste, phaseID, "grow");
 
@@ -960,7 +975,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
         removeGrowthSite_1(ste, plist[j]);
       }
 
-
       ///
       /// Weighted mean curvature (wmc) is changed by the difference
       /// between the growing phase's porosity and the template's porosity.
@@ -969,11 +983,11 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       ///
 
       nameMicroPhaseTh = chemSys_->getMicroPhaseName(phaseID);
-      if (nameMicroPhaseTh == "CSHQ"){
+      if (nameMicroPhaseTh == "CSHQ") {
         rng = callRNG();
-        if (rng >= thrPorosityCSH){
+        if (rng >= thrPorosityCSH) {
           wmcEnd = chemSys_->getMicroPhasePorosity(phaseID);
-        }else {
+        } else {
           wmcEnd = 0;
         }
       } else {
@@ -981,8 +995,8 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       }
       ste->setWmc0(wmcEnd);
 
-      //dwmcval = chemSys_->getMicroPhasePorosity(phaseid) -
-      //          chemSys_->getMicroPhasePorosity(pid);
+      // dwmcval = chemSys_->getMicroPhasePorosity(phaseid) -
+      //           chemSys_->getMicroPhasePorosity(pid);
       dwmcval = wmcEnd - wmcIni;
       ste->dWmc(dwmcval);
 
@@ -992,21 +1006,23 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       ///
 
       steWmc = ste->getWmc();
-      //if (steWmc < 0.0 || steWmc > 19.0){
-      //   cout << endl <<"error Lattice::growPhase for steWmc - ste pid steWmc phaseid trc trc_g bcl : "
-      //         << ste->getId() << "   "
-      //         << pid << "   " << steWmc << "   " << phaseid << "   "
-      //        << trc << "   " << trc_g << "   " << bcl << endl; cout.flush();
-      //    cout << endl << "nn & nnn siteId phaseId siteWmc :" << endl;
-      //    for (int i = 0; i < numMicroPhases_; i++){
-      //        cout << "   " << i << "   " << (ste->nb(i))->getId() << "   "
-      //             << (ste->nb(i))->getMicroPhaseId() << "   " << (ste->nb(i))->getWmc() << endl;
-      //    }
-      //    cout << endl << "stop program" << endl;
-      //    exit(1);
-      //}
-      if (steWmc > 0.0 ) {
-        addDissolutionSite(ste,phaseID);
+      // if (steWmc < 0.0 || steWmc > 19.0){
+      //    cout << endl <<"error Lattice::growPhase for steWmc - ste pid steWmc
+      //    phaseid trc trc_g bcl : "
+      //          << ste->getId() << "   "
+      //          << pid << "   " << steWmc << "   " << phaseid << "   "
+      //         << trc << "   " << trc_g << "   " << bcl << endl; cout.flush();
+      //     cout << endl << "nn & nnn siteId phaseId siteWmc :" << endl;
+      //     for (int i = 0; i < numMicroPhases_; i++){
+      //         cout << "   " << i << "   " << (ste->nb(i))->getId() << "   "
+      //              << (ste->nb(i))->getMicroPhaseId() << "   " <<
+      //              (ste->nb(i))->getWmc() << endl;
+      //     }
+      //     cout << endl << "stop program" << endl;
+      //     exit(1);
+      // }
+      if (steWmc > 0.0) {
+        addDissolutionSite(ste, phaseID);
       }
 
       ///
@@ -1015,37 +1031,44 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       /// site, so any time the id of a site within that box changes, it
       /// will change the wmc of the site at the box's center.
       ///
-      ///NN_NNN = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
+      /// NN_NNN = NUM_NEAREST_NEIGHBORS +  NUM_SECONDNEAREST_NEIGHBORS;
       ///
 
-      for (j = 0; j < NN_NNN; j++) { //for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
+      for (j = 0; j < NN_NNN;
+           j++) { // for (j = 0; j < NUM_NEAREST_NEIGHBORS; j++) {
         stenb = ste->nb(j);
         stenb->dWmc(dwmcval);
         stenbWmc = stenb->getWmc();
-        //if (stenbWmc < 0.0 || stenbWmc > 19.0){
-        //    cout << endl <<"error Lattice::growPhase fornumLeft[i] stenbWmc - ste pid steWmc phaseid trc trc_g bcl stenb stenb_pid stenbWmc j : "
-        //         << ste->getId() << "   "
-        //         << pid << "   " << ste->getWmc() << "   " << phaseid << "   "
-        //         << trc << "   " << trc_g << "   " << bcl << "   " << stenb->getId() << "   "
-        //         << stenb->getMicroPhaseId() << "   " << stenbWmc << "   " << j << endl; cout.flush();
-        //    cout << endl << "stop program" << endl;
-        //    exit(1);
-        //}
+        // if (stenbWmc < 0.0 || stenbWmc > 19.0){
+        //     cout << endl <<"error Lattice::growPhase fornumLeft[i] stenbWmc -
+        //     ste pid steWmc phaseid trc trc_g bcl stenb stenb_pid stenbWmc j :
+        //     "
+        //          << ste->getId() << "   "
+        //          << pid << "   " << ste->getWmc() << "   " << phaseid << " "
+        //          << trc << "   " << trc_g << "   " << bcl << "   " <<
+        //          stenb->getId() << "   "
+        //          << stenb->getMicroPhaseId() << "   " << stenbWmc << "   " <<
+        //          j << endl; cout.flush();
+        //     cout << endl << "stop program" << endl;
+        //     exit(1);
+        // }
         if (stenb->getMicroPhaseId() == ELECTROLYTEID) {
           addGrowthSite(stenb, phaseID);
 
           if (j < NUM_NEAREST_NEIGHBORS) {
-            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_; phaseTmpl++) {
-              if (chemSys_->isGrowthTemplate(phaseTmpl,phaseID)){
-                //addGrowthSite(stenb, nbgrowthtemp[jj]);
-                addGrowthSite(stenb,phaseTmpl);
+            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_;
+                 phaseTmpl++) {
+              if (chemSys_->isGrowthTemplate(phaseTmpl, phaseID)) {
+                // addGrowthSite(stenb, nbgrowthtemp[jj]);
+                addGrowthSite(stenb, phaseTmpl);
               }
             }
           }
 
-        } else if ((stenbWmc == 0.0) && (stenb->getMicroPhaseId() > ELECTROLYTEID)) {
+        } else if ((stenbWmc == 0.0) &&
+                   (stenb->getMicroPhaseId() > ELECTROLYTEID)) {
 
-          //removeDissolutionSite(stenb, stenb->getMicroPhaseId());
+          // removeDissolutionSite(stenb, stenb->getMicroPhaseId());
           removeDissolutionSite_grow(stenb, stenb->getMicroPhaseId());
         }
       }
@@ -1056,14 +1079,16 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       numLeft[posVect]--;
       numChange[posVect]++;
 
-      if (numLeft[posVect] < 0){
-        cout << endl << "error_numLeft totalTRC trc_g bcl numLeftTot numChangeTot  :  "
+      if (numLeft[posVect] < 0) {
+        cout << endl
+             << "error_numLeft totalTRC trc_g bcl numLeftTot numChangeTot  :  "
              << totalTRC << "   " << trc_g << "   " << bcl << "   "
              << numLeftTot << "   " << numChangeTot << endl;
-        cout << "  phaseid totalTRC/trc_g/bcl count_ numLeftTot numChangeTot  :  "
+        cout << "  phaseid totalTRC/trc_g/bcl count_ numLeftTot numChangeTot  "
+                ":  "
              << phaseID << "   " << totalTRC << "/" << trc_g << "/" << bcl
-             << "   " << count_[phaseID] << "   "
-             << numLeftTot << "   " << numChangeTot << endl;
+             << "   " << count_[phaseID] << "   " << numLeftTot << "   "
+             << numChangeTot << endl;
         cout << " posVect interfacePos pid : " << posVect << "   "
              << interfacePos << "   " << pid << endl;
         cout << " ste.id numLeft numChange : " << ste->getId() << "   "
@@ -1077,40 +1102,47 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
       ex.printException();
 
       cout << endl << "Lattice::growPhase error" << endl;
-      cout << endl << "totalTRC trc_g bcl numLeftTot numChangeTot  :  "
-           << totalTRC << "   " << trc_g << "   " << bcl << "   "
-           << numLeftTot << "   " << numChangeTot << endl;
-      cout << endl <<"steId pid growProbVectSize :  "
-           << ste->getId() << "   " << pid << "   " << growProbVectSize << endl;
+      cout << endl
+           << "totalTRC trc_g bcl numLeftTot numChangeTot  :  " << totalTRC
+           << "   " << trc_g << "   " << bcl << "   " << numLeftTot << "   "
+           << numChangeTot << endl;
+      cout << endl
+           << "steId pid growProbVectSize :  " << ste->getId() << "   " << pid
+           << "   " << growProbVectSize << endl;
       cout.flush();
       for (i = 0; i < growPhaseIDVectSize; i++) {
         phaseID = growPhaseIDVect[i];
         isite = interface_[phaseID].getGrowthSites();
         dim_isite[i] = isite.size();
         cout << "        phaseid count_ dim_isite numleft numchange  :  "
-             << phaseID << "   " << "   " << count_[phaseID] << "   " << dim_isite[i] << "   "
-             << numLeft[i]<< "   " << numChange[i] << endl;
+             << phaseID << "   " << "   " << count_[phaseID] << "   "
+             << dim_isite[i] << "   " << numLeft[i] << "   " << numChange[i]
+             << endl;
       }
       cout << "stop program" << endl;
       exit(0);
     }
 
-    //growth probabilities based on affinities
+    // growth probabilities based on affinities
     growProbVect.clear();
     for (i = 0; i < growPhaseIDVectSize; i++) {
-      if (numLeft[i] > 0){
+      if (numLeft[i] > 0) {
 
         phaseID = growPhaseIDVect[i];
         isite = interface_[phaseID].getGrowthSites();
         dim_isite[i] = isite.size();
-        if (dim_isite[i] == 0){ // nucleation
-          cout << endl << "   Lattice::growPhase - need nucleation for phaseID = " << phaseID << endl;
-          cout << "     interface dimension dim_site["<< i << "] = " << dim_isite[i]
-               << " while numLeft[" << i << "] = " << numLeft[i] << endl;
-          cout << "     => for this microPhase (" << growPhNameVect[i] << ") a new interface having "
-               << numLeft[i] << " sites will be created! " << endl;
+        if (dim_isite[i] == 0) { // nucleation
+          cout << endl
+               << "   Lattice::growPhase - need nucleation for phaseID = "
+               << phaseID << endl;
+          cout << "     interface dimension dim_site[" << i
+               << "] = " << dim_isite[i] << " while numLeft[" << i
+               << "] = " << numLeft[i] << endl;
+          cout << "     => for this microPhase (" << growPhNameVect[i]
+               << ") a new interface having " << numLeft[i]
+               << " sites will be created! " << endl;
 
-          try{
+          try {
             nucleated[i] = createNewGrowthInterface(phaseID, numLeft[i]);
           } catch (MicrostructureException mex) {
             throw mex;
@@ -1118,7 +1150,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
 
           isite = interface_[phaseID].getGrowthSites();
           dim_isite[i] = isite.size();
-
         }
         for (jj = 0; jj < dim_isite[i]; jj++) {
           growProb.id = isite[jj].getId();
@@ -1129,33 +1160,35 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect, vector<int> numSiteG
           growProbVect.push_back(growProb);
         }
       } else {
-        if (writeFirst[i]){
+        if (writeFirst[i]) {
           continue;
         } else {
           writeFirst[i] = true;
-          cout << "   Lattice::growPhase GROW_END for i = " << i << "   totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g << "/" << bcl << endl;
+          cout << "   Lattice::growPhase GROW_END for i = " << i
+               << "   totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g << "/"
+               << bcl << endl;
           cout << "     GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                << "   growProbVectSize = " << growProbVectSize
                << "   numLeftTot = " << numLeftTot
                << "   numChangeTot = " << numChangeTot << endl;
-          cout << "       GROW_END phaseid count_ dim_isite numleft numchange  :  "
-               << growPhaseIDVect[i] << "   " << "   " << count_[growPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
-               << numLeft[i]<< "   " << numChange[i] << endl;
+          cout << "       GROW_END phaseid count_ dim_isite numleft numchange  "
+                  ":  "
+               << growPhaseIDVect[i] << "   " << "   "
+               << count_[growPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
+               << numLeft[i] << "   " << numChange[i] << endl;
           cout.flush();
         }
       }
-
     }
     growProbVectSize = growProbVect.size();
-
   }
 
-  //findInterfaces_check();
+  // findInterfaces_check();
   numadded_G = numChangeTot;
   return (nucleated);
 }
 
-int Lattice::createNewGrowthInterface(int phaseID,int numLeft){
+int Lattice::createNewGrowthInterface(int phaseID, int numLeft) {
 
   struct localStruct {
     int id;
@@ -1179,63 +1212,70 @@ int Lattice::createNewGrowthInterface(int phaseID,int numLeft){
     affMin = 1000000;
     watersites.clear();
     for (k = 0; k < numsites_; ++k) {
-      if (site_[k].getMicroPhaseId() == ELECTROLYTEID){
+      if (site_[k].getMicroPhaseId() == ELECTROLYTEID) {
         un.id = site_[k].getId();
         aff = 0;
-        localNb= site_[k].getNb();
+        localNb = site_[k].getNb();
         for (j = 0; j < NN_NNN; j++) {
           aff += chemSys_->getAffinity(phaseID, localNb[j]->getMicroPhaseId());
         }
         un.aff = aff;
         watersites.push_back(un);
         affSum += aff;
-        if (aff < affMin) affMin = aff;
+        if (aff < affMin)
+          affMin = aff;
       }
     }
     sizeWS = watersites.size();
-    cout << endl << "     Lattice::createNewGrowthInterface -ini- sizeWS/affSum/affMin: " << sizeWS << " / " << affSum << " / " << affMin << endl;
+    cout
+        << endl
+        << "     Lattice::createNewGrowthInterface -ini- sizeWS/affSum/affMin: "
+        << sizeWS << " / " << affSum << " / " << affMin << endl;
 
     dimNewInterface = 0;
-    while(dimNewInterface < numLeft){
+    while (dimNewInterface < numLeft) {
 
       rng = callRNG();
 
-      if(affSum != 0){
-        if (affMin < 0){
+      if (affSum != 0) {
+        if (affMin < 0) {
           valAbs = abs(affMin);
           affSum += (sizeWS * valAbs);
           if (affSum != 0) {
             daffsum = affSum;
-            watersites[0].prob = (watersites[0].aff + valAbs)/daffsum;
+            watersites[0].prob = (watersites[0].aff + valAbs) / daffsum;
             for (k = 1; k < sizeWS; k++) {
-              watersites[k].prob = watersites[k-1].prob + (watersites[k].aff + valAbs)/daffsum;
+              watersites[k].prob = watersites[k - 1].prob +
+                                   (watersites[k].aff + valAbs) / daffsum;
             }
           } else {
             fSiteWS = (int)(rng * sizeWS);
           }
-        }else{
+        } else {
           daffsum = affSum;
-          watersites[0].prob = (watersites[0].aff)/daffsum;
+          watersites[0].prob = (watersites[0].aff) / daffsum;
           for (k = 1; k < sizeWS; k++) {
-            watersites[k].prob = watersites[k-1].prob + (watersites[k].aff)/daffsum;
+            watersites[k].prob =
+                watersites[k - 1].prob + (watersites[k].aff) / daffsum;
           }
         }
 
-        for (fSiteWS = 0; fSiteWS < sizeWS; fSiteWS++){
-          if (rng <= watersites[fSiteWS].prob )break;
+        for (fSiteWS = 0; fSiteWS < sizeWS; fSiteWS++) {
+          if (rng <= watersites[fSiteWS].prob)
+            break;
         }
 
       } else {
 
         fSiteWS = (int)(rng * sizeWS);
-
       }
 
       site_[watersites[fSiteWS].id].setGrowthSite(phaseID);
-      interface_[phaseID].addGrowthSite_newInterface(watersites[fSiteWS].id, watersites[fSiteWS].aff);
+      interface_[phaseID].addGrowthSite_newInterface(watersites[fSiteWS].id,
+                                                     watersites[fSiteWS].aff);
       dimNewInterface++;
 
-      watersites[fSiteWS] = watersites[sizeWS-1];
+      watersites[fSiteWS] = watersites[sizeWS - 1];
       watersites.pop_back();
       sizeWS--;
 
@@ -1244,44 +1284,62 @@ int Lattice::createNewGrowthInterface(int phaseID,int numLeft){
       for (k = 0; k < sizeWS; ++k) {
         aff = watersites[k].aff;
         affSum += aff;
-        if (aff < affMin) affMin = aff;
+        if (aff < affMin)
+          affMin = aff;
       }
     }
   } else {
-    cout << endl << "     Lattice::createNewGrowthInterface => requested interface size (numLeft) is larger than the electrolyte voxel number!" << endl;
-    cout << "     numLeft > count_[ELECTROLYTEID] : " << numLeft << " > " << count_[ELECTROLYTEID] << endl;
-    cout << endl << "     There is no room to create a new interface => exit the program" << endl;
+    cout << endl
+         << "     Lattice::createNewGrowthInterface => requested interface "
+            "size (numLeft) is larger than the electrolyte voxel number!"
+         << endl;
+    cout << "     numLeft > count_[ELECTROLYTEID] : " << numLeft << " > "
+         << count_[ELECTROLYTEID] << endl;
+    cout
+        << endl
+        << "     There is no room to create a new interface => exit the program"
+        << endl;
     bool is_Error = false;
     throw MicrostructureException("Lattice", "createNewGrowthInterface",
-                                                          "no room for a new interface",is_Error);
-    //exit(0);
+                                  "no room for a new interface", is_Error);
+    // exit(0);
   }
 
   int siteID;
-  for (int i = 0; i < dimNewInterface; i++){
+  for (int i = 0; i < dimNewInterface; i++) {
     siteID = interface_[phaseID].getGrowthSitesId(i);
     if (site_[siteID].getMicroPhaseId() != ELECTROLYTEID) {
-      cout << endl << "    Lattice::createNewGrowthInterface error: microPhaseId() for site_[" << siteID << "] = "
-           << site_[siteID].getMicroPhaseId() << endl;
-      cout << "    Lattice::createNewGrowthInterface i/dimNewInterface: " << i << " / " << dimNewInterface << endl;
-      cout << "    Lattice::createNewGrowthInterface phaseID/numLeft: " << phaseID << " / " << numLeft << endl;
-      cout << "    Lattice::createNewGrowthInterface dimNewInterface: " << interface_[phaseID].getGrowthSites().size() << endl;
+      cout << endl
+           << "    Lattice::createNewGrowthInterface error: microPhaseId() for "
+              "site_["
+           << siteID << "] = " << site_[siteID].getMicroPhaseId() << endl;
+      cout << "    Lattice::createNewGrowthInterface i/dimNewInterface: " << i
+           << " / " << dimNewInterface << endl;
+      cout << "    Lattice::createNewGrowthInterface phaseID/numLeft: "
+           << phaseID << " / " << numLeft << endl;
+      cout << "    Lattice::createNewGrowthInterface dimNewInterface: "
+           << interface_[phaseID].getGrowthSites().size() << endl;
       cout << "    stop" << endl;
       exit(1);
       //} else {
-      //    cout << "     i: " << i << "   siteID: " << siteID << "   microPhaseId: " << site_[siteID].getMicroPhaseId() << endl;
+      //    cout << "     i: " << i << "   siteID: " << siteID << "
+      //    microPhaseId: " << site_[siteID].getMicroPhaseId() << endl;
     }
   }
-  cout << "     Lattice::createNewGrowthInterface -end- dimNewInterface: " << dimNewInterface << endl << endl;
+  cout << "     Lattice::createNewGrowthInterface -end- dimNewInterface: "
+       << dimNewInterface << endl
+       << endl;
 
   return dimNewInterface;
 }
 
-int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
-                           vector<string> dissPhNameVect, int &numadded_D, int totalTRC) {
+int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
+                           vector<int> numSiteDissVect,
+                           vector<string> dissPhNameVect, int &numadded_D,
+                           int totalTRC) {
 
   //*** controll
-  int bcl=0;
+  int bcl = 0;
   int static trc_d;
   trc_d++;
 
@@ -1289,9 +1347,9 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
   int dissPhaseIDVectSize = dissPhaseIDVect.size();
   vector<int> numChange;
-  numChange.resize(dissPhaseIDVectSize,0);
+  numChange.resize(dissPhaseIDVectSize, 0);
   int numChangeTot = 0;
-  vector<int> numLeft = numSiteDissVect; //numtotake
+  vector<int> numLeft = numSiteDissVect; // numtotake
   int numLeftTot = 0;
   for (i = 0; i < dissPhaseIDVectSize; i++) {
     numLeftTot += numSiteDissVect[i];
@@ -1312,13 +1370,13 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
   int isitePos;
   unsigned int pid;
 
-  vector<unsigned int>growth_local;
+  vector<unsigned int> growth_local;
   int grLocSize;
   int nbid;
   int nb_id, nb_pid; // for nn & nnn
   bool phaseid_exist;
 
-  struct dissProb{
+  struct dissProb {
     int id;
     int posVect;
     int nbElectr;
@@ -1327,13 +1385,13 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
     double prob_01;
     int interfacePos;
   };
-  vector <dissProb> dissProbVect;
+  vector<dissProb> dissProbVect;
   dissProbVect.clear();
   dissProb dissProb_;
 
   int phaseID;
   vector<int> dim_isite;
-  dim_isite.resize(dissPhaseIDVectSize,0);
+  dim_isite.resize(dissPhaseIDVectSize, 0);
   int stId;
   double sumWmc, stWmc;
   sumWmc = 0.0;
@@ -1360,18 +1418,22 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
   double rng;
 
-  cout << endl << "   Lattice::dissolvePhase DISS_INI totalTRC/trc_d/bcl " << totalTRC << "/" << trc_d << "/" << bcl << endl;
+  cout << endl
+       << "   Lattice::dissolvePhase DISS_INI totalTRC/trc_d/bcl " << totalTRC
+       << "/" << trc_d << "/" << bcl << endl;
   cout << "     DISS_INI dissPhaseIDVectSize = " << dissPhaseIDVectSize
        << "   dissProbVectSize = " << dissProbVectSize
        << "   numLeftTot = " << numLeftTot
        << "   numChangeTot = " << numChangeTot << endl;
   for (i = 0; i < dissPhaseIDVectSize; i++) {
     phaseID = dissPhaseIDVect[i];
-    //isite = interface_[phaseID].getDissolutionSites();
-    //dim_isite = isite.size();
-    cout << "       DISS_INI for i = " << i << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
-         << phaseID << "   " << dissPhNameVect[i] << "   " << count_[phaseID] << "   " << dim_isite[i] << "   "
-         << numLeft[i]<< "   " << numChange[i] << endl;
+    // isite = interface_[phaseID].getDissolutionSites();
+    // dim_isite = isite.size();
+    cout << "       DISS_INI for i = " << i
+         << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
+         << phaseID << "   " << dissPhNameVect[i] << "   " << count_[phaseID]
+         << "   " << dim_isite[i] << "   " << numLeft[i] << "   "
+         << numChange[i] << endl;
   }
   cout.flush();
 
@@ -1379,7 +1441,7 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
   bool goodEnd = true;
   int callGEM = -1;
   vector<bool> writeFirst;
-  writeFirst.resize(dissPhaseIDVectSize,false);
+  writeFirst.resize(dissPhaseIDVectSize, false);
 
   while ((numLeftTot > 0) && (dissProbVectSize >= 1)) {
     try {
@@ -1387,20 +1449,23 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
       // dissolution probabilities based on wmc
       rng = callRNG();
-      dissProbVect[0].prob = (dissProbVect[0].instab)/sumWmc;
+      dissProbVect[0].prob = (dissProbVect[0].instab) / sumWmc;
       dissProbVect[0].prob_01 = dissProbVect[0].prob;
       if (rng <= dissProbVect[0].prob_01) {
         isitePos = 0;
       } else {
         for (isitePos = 1; isitePos < dissProbVectSize; isitePos++) {
-          dissProbVect[isitePos].prob = (dissProbVect[isitePos].instab)/sumWmc;
-          dissProbVect[isitePos].prob_01 = dissProbVect[isitePos-1].prob_01 + dissProbVect[isitePos].prob;
-          if (rng <= dissProbVect[isitePos].prob_01) break;
+          dissProbVect[isitePos].prob =
+              (dissProbVect[isitePos].instab) / sumWmc;
+          dissProbVect[isitePos].prob_01 =
+              dissProbVect[isitePos - 1].prob_01 + dissProbVect[isitePos].prob;
+          if (rng <= dissProbVect[isitePos].prob_01)
+            break;
         }
       }
 
       ste = &site_.at(dissProbVect[isitePos].id);
-      pid = ste->getMicroPhaseId(); //intrebare pid diff phaseid ???
+      pid = ste->getMicroPhaseId(); // intrebare pid diff phaseid ???
       posVect = dissProbVect[isitePos].posVect;
       interfacePos = dissProbVect[isitePos].interfacePos;
 
@@ -1422,25 +1487,28 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
       dwmcval = wmcEnd - wmcIni;
       ste->dWmc(dwmcval);
-      //stWmc = ste->getWmc();
-      //if (stWmc < 0.0 || stWmc > 19.0){
-      //    cout << endl <<"error Lattice::dissolvePhase for steWmc - ste pid steWmc phaseid trc trc_d bcl : "
-      //         << ste->getId() << "   "
-      //         << pid << "   " << stWmc << "   " << phaseid << "   "
-      //         << trc << "   " << trc_d << "   " << bcl << endl; cout.flush();
-      //    cout << endl << "nn & nnn siteId phaseId siteWmc :" << endl;
-      //    for (int i = 0; i < numMicroPhases_; i++){
-      //        cout << "   " << i << "   " << (ste->nb(i))->getId() << "   "
-      //             << (ste->nb(i))->getMicroPhaseId() << "   " << (ste->nb(i))->getWmc() << endl;
-      //    }
-      //    cout << endl << "stop program" << endl;
-      //    exit(1);
-      //}
+      // stWmc = ste->getWmc();
+      // if (stWmc < 0.0 || stWmc > 19.0){
+      //     cout << endl <<"error Lattice::dissolvePhase for steWmc - ste pid
+      //     steWmc phaseid trc trc_d bcl : "
+      //          << ste->getId() << "   "
+      //          << pid << "   " << stWmc << "   " << phaseid << "   "
+      //          << trc << "   " << trc_d << "   " << bcl << endl;
+      //          cout.flush();
+      //     cout << endl << "nn & nnn siteId phaseId siteWmc :" << endl;
+      //     for (int i = 0; i < numMicroPhases_; i++){
+      //         cout << "   " << i << "   " << (ste->nb(i))->getId() << "   "
+      //              << (ste->nb(i))->getMicroPhaseId() << "   " <<
+      //              (ste->nb(i))->getWmc() << endl;
+      //     }
+      //     cout << endl << "stop program" << endl;
+      //     exit(1);
+      // }
 
-      //dwmcval = chemSys_->getMicroPhasePorosity(ELECTROLYTEID) -
-      //         chemSys_->getMicroPhasePorosity(pid);
+      // dwmcval = chemSys_->getMicroPhasePorosity(ELECTROLYTEID) -
+      //          chemSys_->getMicroPhasePorosity(pid);
 
-      //ste->dWmc(dwmcval);
+      // ste->dWmc(dwmcval);
 
       for (i = 0; i < NN_NNN; i++) {
         stenb = ste->nb(i);
@@ -1460,34 +1528,37 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
 
           if (i < NUM_NEAREST_NEIGHBORS) {
 
-            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_; phaseTmpl++) {
-              if (chemSys_->isGrowthTemplate(phaseTmpl,nbpid)){
+            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_;
+                 phaseTmpl++) {
+              if (chemSys_->isGrowthTemplate(phaseTmpl, nbpid)) {
 
                 addGrowthSite(ste, phaseTmpl);
               }
             }
           }
-        }else if (nbpid == ELECTROLYTEID) { // local update the growthSites_ interfaces for all phases in the system
+        } else if (nbpid ==
+                   ELECTROLYTEID) { // local update the growthSites_ interfaces
+                                    // for all phases in the system
           nbid = stenb->getId();
           growth_local = site_[nbid].getGrowthPhases();
           grLocSize = growth_local.size();
 
-          for ( ii = 0; ii < grLocSize; ii++){
+          for (ii = 0; ii < grLocSize; ii++) {
             phaseid_exist = false;
-            for ( jj = 0; jj < NN_NNN; jj++){
+            for (jj = 0; jj < NN_NNN; jj++) {
               nb_pid = site_[nbid].nb(jj)->getMicroPhaseId();
-              if(growth_local[ii] == nb_pid){
+              if (growth_local[ii] == nb_pid) {
                 phaseid_exist = true;
                 break;
               }
-              if(jj < NUM_NEAREST_NEIGHBORS){
-                if(chemSys_->isGrowthTemplate(growth_local[ii],nb_pid)){
+              if (jj < NUM_NEAREST_NEIGHBORS) {
+                if (chemSys_->isGrowthTemplate(growth_local[ii], nb_pid)) {
                   phaseid_exist = true;
                   break;
                 }
               }
             }
-            if(phaseid_exist == false){ // verif removeGrowthSite_1 !!
+            if (phaseid_exist == false) { // verif removeGrowthSite_1 !!
               removeGrowthSite_1(stenb, growth_local[ii]);
             }
           }
@@ -1505,19 +1576,22 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
       ex.printException();
 
       cout << endl << "Lattice::dissolvePhase error" << endl;
-      cout << endl << "totalTRC trc_g bcl numLeftTot numChangeTot  :  "
-           << totalTRC << "   " << trc_d << "   " << bcl << "   "
-           << numLeftTot << "   " << numChangeTot << endl;
-      cout << endl <<"steId pid dissProbVectSize :  "
-           << ste->getId() << "   " << pid << "   " << dissProbVectSize << endl;
+      cout << endl
+           << "totalTRC trc_g bcl numLeftTot numChangeTot  :  " << totalTRC
+           << "   " << trc_d << "   " << bcl << "   " << numLeftTot << "   "
+           << numChangeTot << endl;
+      cout << endl
+           << "steId pid dissProbVectSize :  " << ste->getId() << "   " << pid
+           << "   " << dissProbVectSize << endl;
       cout.flush();
       for (i = 0; i < dissPhaseIDVectSize; i++) {
         phaseID = dissPhaseIDVect[i];
         isite = interface_[phaseID].getDissolutionSites();
         dim_isite[i] = isite.size();
         cout << "        phaseid count_ dim_isite numleft numchange  :  "
-             << phaseID << "   " << "   " << count_[phaseID] << "   " << dim_isite[i] << "   "
-             << numLeft[i]<< "   " << numChange[i] << endl;
+             << phaseID << "   " << "   " << count_[phaseID] << "   "
+             << dim_isite[i] << "   " << numLeft[i] << "   " << numChange[i]
+             << endl;
       }
       cout << "stop program" << endl;
       exit(1);
@@ -1527,16 +1601,21 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
     dissProbVect.clear();
     sumWmc = 0.;
     for (i = 0; i < dissPhaseIDVectSize; i++) {
-      if (numLeft[i] > 0){
+      if (numLeft[i] > 0) {
         phaseID = dissPhaseIDVect[i];
         isite = interface_[phaseID].getDissolutionSites();
         dim_isite[i] = isite.size();
-        if (dim_isite[i] == 0){
-          cout << "Lattice::dissolvePhase - anormal end:  dimInterface["<< i << "] = 0" << endl;
-          cout << "    anormal end: phaseID[" << i << "] = " << phaseID << "  &  dim_site["<< i << "] = " << dim_isite[i]
+        if (dim_isite[i] == 0) {
+          cout << "Lattice::dissolvePhase - anormal end:  dimInterface[" << i
+               << "] = 0" << endl;
+          cout << "    anormal end: phaseID[" << i << "] = " << phaseID
+               << "  &  dim_site[" << i << "] = " << dim_isite[i]
                << " while numLeft[" << i << "] = " << numLeft[i] << endl;
-          cout << "    anormal end: totalTRC/trc_d/bcl " << totalTRC << "/" << trc_d << "/" << bcl << endl;
-          cout << "  need to call GEM after modifying DCLowerLimit_ for microPhase " << phaseID << endl;
+          cout << "    anormal end: totalTRC/trc_d/bcl " << totalTRC << "/"
+               << trc_d << "/" << bcl << endl;
+          cout << "  need to call GEM after modifying DCLowerLimit_ for "
+                  "microPhase "
+               << phaseID << endl;
           cout.flush();
 
           callGEM = i;
@@ -1555,30 +1634,34 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissV
           dissProbVect.push_back(dissProb_);
         }
       } else {
-        if (writeFirst[i]){
+        if (writeFirst[i]) {
           continue;
         } else {
           writeFirst[i] = true;
 
-          cout << "   Lattice::dissolvePhase DISS_END for i = " << i << "   totalTRC/trc_d/bcl " << totalTRC << "/" << trc_d << "/" << bcl << endl;
+          cout << "   Lattice::dissolvePhase DISS_END for i = " << i
+               << "   totalTRC/trc_d/bcl " << totalTRC << "/" << trc_d << "/"
+               << bcl << endl;
           cout << "     DISS_END dissPhaseIDVectSize = " << dissPhaseIDVectSize
                << "   dissProbVectSize = " << dissProbVectSize
                << "   numLeftTot = " << numLeftTot
                << "   numChangeTot = " << numChangeTot << endl;
-          cout << "       DISS_END phaseid count_ dim_isite numleft numchange  :  "
-               << dissPhaseIDVect[i] << "   " << "   " << count_[dissPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
-               << numLeft[i]<< "   " << numChange[i] << endl;
+          cout << "       DISS_END phaseid count_ dim_isite numleft numchange  "
+                  ":  "
+               << dissPhaseIDVect[i] << "   " << "   "
+               << count_[dissPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
+               << numLeft[i] << "   " << numChange[i] << endl;
           cout.flush();
         }
       }
     }
-    if (callGEM > -1) break;
+    if (callGEM > -1)
+      break;
 
     dissProbVectSize = dissProbVect.size();
-
   }
 
-  //findInterfaces_check();
+  // findInterfaces_check();
 
   numadded_D = numChangeTot;
   return (callGEM);
@@ -1600,7 +1683,6 @@ void Lattice::findInterfaces_check(void) {
 
   vector<Site *>::iterator beginLocation, endLocation;
   vector<Isite>::iterator start, end;
-
 
   ///
   /// An interface must have at least one adjacent site that is water or void
@@ -1767,7 +1849,6 @@ void Lattice::removeDissolutionSite(Site *ste, unsigned int pid) {
 }
 */
 
-
 void Lattice::removeDissolutionSite_diss(Site *ste, unsigned int pid,
                                          int interfacePos) {
   try {
@@ -1858,16 +1939,19 @@ int Lattice::emptyPorosity(int numsites, int cyc) {
   /// it.
   ///
 
-  cout << endl << "   Lattice::emptyPorosity - check for cyc = " << cyc
-       << " :      numsites = " << numsites; cout.flush();
+  cout << endl
+       << "   Lattice::emptyPorosity - check for cyc = " << cyc
+       << " :      numsites = " << numsites;
+  cout.flush();
 
   list<Sitesize> distlist =
       findDomainSizeDistribution(ELECTROLYTEID, numsites, maxsearchsize, 0);
   list<Sitesize>::iterator it;
 
-  //cout << endl << "Lattice::emptyPorosity - check for cyc = " << cyc
-  //     << " :      numsites = " << numsites
-  cout << "      distlist.size() = " << distlist.size() << endl; cout.flush();
+  // cout << endl << "Lattice::emptyPorosity - check for cyc = " << cyc
+  //      << " :      numsites = " << numsites
+  cout << "      distlist.size() = " << distlist.size() << endl;
+  cout.flush();
 
   if (verbose_) {
     cout << "Lattice::emptyPorosity Found " << distlist.size()
@@ -1880,8 +1964,10 @@ int Lattice::emptyPorosity(int numsites, int cyc) {
   ///
 
   if (distlist.size() < numsites) {
-    cout << endl << "   Lattice::emptyPorosity - Ran out of water in the system for cyc = " << cyc
-         << "   distlist.size(): " << distlist.size()
+    cout << endl
+         << "   Lattice::emptyPorosity - Ran out of water in the system for "
+            "cyc = "
+         << cyc << "   distlist.size(): " << distlist.size()
          << "   numsites: " << numsites << endl;
     string msg = "Ran out of water in the system";
     EOBException ex("Lattice", "emptysite", msg, distlist.size(), numsites);
@@ -1905,23 +1991,28 @@ int Lattice::emptyPorosity(int numsites, int cyc) {
       grVect = site_[siteID].getGrowthPhases();
       dimVect = grVect.size();
       itt++;
-      for (int i = 0; i < dimVect; i++){
-        if(!interface_[grVect[i]].removeEmptiedSite(siteID)){
-          cout << endl << "Lattice::emptyPorosity error: siteID = " << siteID
-               << "does not belong to the interface phaseID = " << grVect[i] << "!!!" << endl;
-          cout << "cyc = " << cyc << "   i = " << i << "   dimVect = " << dimVect
-               << "   siteIndex = " << siteIndex << "   itt = " << itt
-               << "   distlist.size = " << distlist.size() << endl;
+      for (int i = 0; i < dimVect; i++) {
+        if (!interface_[grVect[i]].removeEmptiedSite(siteID)) {
+          cout << endl
+               << "Lattice::emptyPorosity error: siteID = " << siteID
+               << "does not belong to the interface phaseID = " << grVect[i]
+               << "!!!" << endl;
+          cout << "cyc = " << cyc << "   i = " << i
+               << "   dimVect = " << dimVect << "   siteIndex = " << siteIndex
+               << "   itt = " << itt << "   distlist.size = " << distlist.size()
+               << endl;
           cout << "stop program" << endl;
           exit(1);
         }
       }
       site_[siteID].setWmc0(0);
       site_[siteID].dWmc(-1);
-      for (int i = 0; i < NN_NNN; i++){
+      for (int i = 0; i < NN_NNN; i++) {
         stenb = site_[siteID].nb(i);
         stenb->dWmc(-1);
-        if ((stenb->getWmc() == 0) && (stenb->getMicroPhaseId() > ELECTROLYTEID)) removeDissolutionSite_grow(stenb, stenb->getMicroPhaseId());
+        if ((stenb->getWmc() == 0) &&
+            (stenb->getMicroPhaseId() > ELECTROLYTEID))
+          removeDissolutionSite_grow(stenb, stenb->getMicroPhaseId());
       }
       site_[siteID].clearGrowthSite();
       numemptied++;
@@ -1959,16 +2050,19 @@ int Lattice::fillPorosity(int numsites, int cyc) {
     cout.flush();
   }
 
-  cout << endl << "   Lattice::fillPorosity - check for cyc = " << cyc
-       << " :      numsites = " << numsites; cout.flush();
+  cout << endl
+       << "   Lattice::fillPorosity - check for cyc = " << cyc
+       << " :      numsites = " << numsites;
+  cout.flush();
 
   list<Sitesize> distlist =
       findDomainSizeDistribution(VOIDID, numsites, maxsearchsize, 1);
   list<Sitesize>::iterator it;
 
-  //cout << endl << "Lattice::fillPorosity - check for cyc = " << cyc
-  //     << " :      numsites = " << numsites
-  cout << "      distlist.size() = " << distlist.size() << endl; cout.flush();
+  // cout << endl << "Lattice::fillPorosity - check for cyc = " << cyc
+  //      << " :      numsites = " << numsites
+  cout << "      distlist.size() = " << distlist.size() << endl;
+  cout.flush();
 
   ///
   /// We want to fill the sites with the smallest pore count
@@ -1978,14 +2072,14 @@ int Lattice::fillPorosity(int numsites, int cyc) {
   it = distlist.begin();
   int siteID, siteIndex;
   int nbpid, nbid;
-  try {    
+  try {
     while (it != distlist.end()) {
       siteIndex = (*it).siteid;
       siteID = site_[siteIndex].getId();
       setMicroPhaseId(siteID, ELECTROLYTEID);
       site_[siteID].setWmc0(1);
       site_[siteID].dWmc(1);
-      for (int i = 0; i < NN_NNN; i++){
+      for (int i = 0; i < NN_NNN; i++) {
         stenb = site_[siteID].nb(i);
         // wmcIni = stenb->getWmc();
         stenb->dWmc(1);
@@ -1994,8 +2088,9 @@ int Lattice::fillPorosity(int numsites, int cyc) {
           addDissolutionSite(stenb, nbpid);
           addGrowthSite(&site_[siteID], nbpid);
           if (i < NUM_NEAREST_NEIGHBORS) {
-            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_; phaseTmpl++) {
-              if (chemSys_->isGrowthTemplate(phaseTmpl,nbpid)){
+            for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_;
+                 phaseTmpl++) {
+              if (chemSys_->isGrowthTemplate(phaseTmpl, nbpid)) {
                 addGrowthSite(&site_[siteID], phaseTmpl);
               }
             }
@@ -2052,8 +2147,8 @@ int Lattice::countBox(int boxsize, unsigned int siteid) {
         for (ix = qxlo; ix <= qxhi; ix++) {
           hx = ix + checkBC(ix, xdim_);
           if (site_.at(getIndex(hx, hy, hz)).getMicroPhaseId() ==
-              ELECTROLYTEID || site_.at(getIndex(hx, hy, hz)).getMicroPhaseId()
-              == VOIDID) {
+                  ELECTROLYTEID ||
+              site_.at(getIndex(hx, hy, hz)).getMicroPhaseId() == VOIDID) {
             nfound++;
           }
         }
@@ -2180,9 +2275,9 @@ unsigned int Lattice::getIndex(int ix, int iy, int iz) const {
   return (unsigned int)(ix + (xdim_ * iy) + ((xdim_ * ydim_) * iz));
 }
 
-int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater,
-                                  int &numDiff, int &phDiff, string &nameDiff,
-                                  int repeat, int cyc) {
+int Lattice::changeMicrostructure(double time, const int simtype,
+                                  bool &capWater, int &numDiff, int &phDiff,
+                                  string &nameDiff, int repeat, int cyc) {
   unsigned int i, ii;
   int numadded, numadded_actual;
   unsigned int tpid;
@@ -2380,7 +2475,7 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
   numSiteGrowVect.clear();
   dissPhNameVect.clear();
   growPhNameVect.clear();
-  int numTotSitesToDissolve =0, numTotSitesToGrow = 0;
+  int numTotSitesToDissolve = 0, numTotSitesToGrow = 0;
 
   try {
     for (i = FIRST_SOLID; i < netsitesSize_; i++) {
@@ -2397,7 +2492,8 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
       }
     }
   } catch (out_of_range &oor) {
-    throw EOBException("Lattice", "changeMicrostructure_0", "pid", pid.size(),ii);
+    throw EOBException("Lattice", "changeMicrostructure_0", "pid", pid.size(),
+                       ii);
   }
 
   ///
@@ -2415,13 +2511,13 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
   unsigned int pid_;
   int numadded_D = 0, numadded_G = 0;
   vector<int> nucleatedPhases;
-  nucleatedPhases.resize(growPhaseIDVect.size(),0);
+  nucleatedPhases.resize(growPhaseIDVect.size(), 0);
 
   try {
-    if (dissPhaseIDVect.size() > 0){
+    if (dissPhaseIDVect.size() > 0) {
       int needRecallGEM = -1;
-      needRecallGEM = dissolvePhase(dissPhaseIDVect, numSiteDissVect, dissPhNameVect,
-                                    numadded_D, totalTRC);
+      needRecallGEM = dissolvePhase(dissPhaseIDVect, numSiteDissVect,
+                                    dissPhNameVect, numadded_D, totalTRC);
       if (needRecallGEM > -1) {
         phDiff = dissPhaseIDVect[needRecallGEM];
         nameDiff = dissPhNameVect[needRecallGEM];
@@ -2429,45 +2525,59 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
 
         cout << "Lattice::changeMicrostructure - anormal end" << endl;
         cout << "   phDiff,nameDiff,numDiff,count_[phDiff] : " << phDiff
-             << " , " << nameDiff << " , " << numDiff << " , "
-             << count_[phDiff] << endl;
+             << " , " << nameDiff << " , " << numDiff << " , " << count_[phDiff]
+             << endl;
         cout << "   numTotSitesToDissolve = " << numTotSitesToDissolve
              << "  while numTotSitesDissolved = " << numadded_D << endl;
-        cout << "=> recall GEM after (re)setDCLowerLimit according to the system configuration (lattice)"
-             << endl << endl;
+        cout << "=> recall GEM after (re)setDCLowerLimit according to the "
+                "system configuration (lattice)"
+             << endl
+             << endl;
         return 0;
       }
     }
 
-    if (growPhaseIDVect.size() > 0){
+    if (growPhaseIDVect.size() > 0) {
       try {
 
-      nucleatedPhases = growPhase(growPhaseIDVect, numSiteGrowVect, growPhNameVect,
-                                  numadded_G, totalTRC);
+        nucleatedPhases = growPhase(growPhaseIDVect, numSiteGrowVect,
+                                    growPhNameVect, numadded_G, totalTRC);
       } catch (MicrostructureException mex) {
         throw mex;
       }
-
     }
 
-    if ((numadded_D != numTotSitesToDissolve) || (numadded_G != numTotSitesToGrow)) {
+    if ((numadded_D != numTotSitesToDissolve) ||
+        (numadded_G != numTotSitesToGrow)) {
       cout << endl << "      Lattice::changeMicrostructure error: " << endl;
-      cout << "(numadded_D != numTotSitesToDissolve) || (numadded_G != numTotSitesToGrow)" << endl;
-      cout << endl << "numadded_D = " << numadded_D << "       numTotSitesToDissolve  = " << numTotSitesToDissolve << endl;
-      cout << endl << "numadded_G = " << numadded_G << "       numTotSitesToGrow  = " << numTotSitesToGrow << endl;
-      cout << endl << "   cyc / totalTRC / normalTRC : " << cyc << " / " << totalTRC << " / " << normalTRC << endl;
-      cout << endl << "   repeat / totalRepeat : " << repeat << " / " << totalRepeat << endl;
+      cout << "(numadded_D != numTotSitesToDissolve) || (numadded_G != "
+              "numTotSitesToGrow)"
+           << endl;
+      cout << endl
+           << "numadded_D = " << numadded_D
+           << "       numTotSitesToDissolve  = " << numTotSitesToDissolve
+           << endl;
+      cout << endl
+           << "numadded_G = " << numadded_G
+           << "       numTotSitesToGrow  = " << numTotSitesToGrow << endl;
+      cout << endl
+           << "   cyc / totalTRC / normalTRC : " << cyc << " / " << totalTRC
+           << " / " << normalTRC << endl;
+      cout << endl
+           << "   repeat / totalRepeat : " << repeat << " / " << totalRepeat
+           << endl;
       cout << endl << "   nucleatedPhases :" << endl;
       for (i = 0; i < growPhaseIDVect.size(); i++) {
-        cout << " i: " << i <<  "   phID: " << growPhaseIDVect[i] << "   phName: " << growPhNameVect[i]
-             << "   toGrow: " << numSiteGrowVect[i] << "   grownByNucl: " << nucleatedPhases[i] << endl;
+        cout << " i: " << i << "   phID: " << growPhaseIDVect[i]
+             << "   phName: " << growPhNameVect[i]
+             << "   toGrow: " << numSiteGrowVect[i]
+             << "   grownByNucl: " << nucleatedPhases[i] << endl;
       }
       cout << endl << "stop program" << endl;
       exit(1);
     }
   } catch (out_of_range &oor) {
-    throw EOBException("Lattice", "changeMicrostructure", "pid", pid.size(),
-                       i);
+    throw EOBException("Lattice", "changeMicrostructure", "pid", pid.size(), i);
   }
 
   cursites = count_.at(VOIDID);
@@ -2478,13 +2588,15 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
   int numEmptyFill = newsites - cursites;
   int numEmpty = 0, numFill = 0;
   // numEmpty = emptyPorosity(newsites - cursites, cyc);
-  //cout << endl << "Lattice::changeMicrostructure - before empty/fillPorosity - check for cyc = " << cyc << endl;cout.flush();
+  // cout << endl << "Lattice::changeMicrostructure - before empty/fillPorosity
+  // - check for cyc = " << cyc << endl;cout.flush();
   if (numEmptyFill > 0) {
     numEmpty = emptyPorosity(numEmptyFill, cyc);
   } else if (numEmptyFill < 0) {
     numFill = fillPorosity(-numEmptyFill, cyc);
   }
-  //cout << "Lattice::changeMicrostructure - after empty/fillPorosity - check for cyc = " << cyc << endl;cout.flush();
+  // cout << "Lattice::changeMicrostructure - after empty/fillPorosity - check
+  // for cyc = " << cyc << endl;cout.flush();
 
   if (verbose_) {
     cout << "Lattice::changeMicrostructure ***netsites["
@@ -2496,7 +2608,8 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
          << phasenames.at(ELECTROLYTEID)
          << "] in this state = " << (wnewsites - wcursites)
          << "; cursites = " << wcursites << " and newsites = " << wnewsites
-         << endl << endl;
+         << endl
+         << endl;
 
     // When creating void from water, we should
     // update the target volume fraction of water even though
@@ -2537,12 +2650,15 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
       }
     }
     if (totcount != numsites_) {
-      cout << endl << "Lattice::changeMicrostructure error => totcount != numsites_ : "
+      cout << endl
+           << "Lattice::changeMicrostructure error => totcount != numsites_ : "
            << totcount << " != " << numsites_ << endl;
-      cout << "time,simtype,capWater : " << time << " , " << simtype << " , " << capWater << endl;
-      cout << "numDiff,phDiff,nameDiff : " << numDiff << " , " << phDiff << " , " << nameDiff << endl;
+      cout << "time,simtype,capWater : " << time << " , " << simtype << " , "
+           << capWater << endl;
+      cout << "numDiff,phDiff,nameDiff : " << numDiff << " , " << phDiff
+           << " , " << nameDiff << endl;
       cout << "repeat  : " << repeat << endl;
-      cout << "cyc  : " <<  cyc << endl;
+      cout << "cyc  : " << cyc << endl;
       cout << "stop program" << endl;
       exit(1);
     }
@@ -2556,24 +2672,30 @@ int Lattice::changeMicrostructure(double time, const int simtype, bool &capWater
   ///  @todo Why not eliminate this line completely?
   ///
 
-  //double surfa = getSurfaceArea(chemSys_->getMicroPhaseId(CSHMicroName));
+  // double surfa = getSurfaceArea(chemSys_->getMicroPhaseId(CSHMicroName));
 
   if (volumefraction_[ELECTROLYTEID] <= 0.0) {
     capWater = false;
-    cout << endl << "Lattice::changeMicrostructure :  capWater = " << capWater << endl;
+    cout << endl
+         << "Lattice::changeMicrostructure :  capWater = " << capWater << endl;
     cout << "mPhId/vfrac_next_/volumefraction_/count_: " << endl;
     for (int i = 0; i < volNextSize; i++) {
-      cout << "   " << i << "  " << vfrac_next[i] << "  " << volumefraction_[i] << "  " << count_[i] << endl;
+      cout << "   " << i << "  " << vfrac_next[i] << "  " << volumefraction_[i]
+           << "  " << count_[i] << endl;
     }
-    cout << endl << "time, simtype, capWater : " << time << " , " << simtype << " , " << capWater << endl;
-    cout << "numDiff ,phDiff, nameDiff : " << numDiff << " , " << phDiff << " , " << nameDiff << endl;
+    cout << endl
+         << "time, simtype, capWater : " << time << " , " << simtype << " , "
+         << capWater << endl;
+    cout << "numDiff ,phDiff, nameDiff : " << numDiff << " , " << phDiff
+         << " , " << nameDiff << endl;
     cout << "repeat  : " << repeat << endl;
-    cout << "cyc  : " <<  cyc << endl;
+    cout << "cyc  : " << cyc << endl;
     cout << "no water in the system => normal end of the program" << endl;
     exit(0);
   }
 
-  cout << endl << "Lattice::changeMicrostructure -normal end- cyc = " << cyc << endl;
+  cout << endl
+       << "Lattice::changeMicrostructure -normal end- cyc = " << cyc << endl;
 
   return 1;
 }
@@ -2696,7 +2818,8 @@ void Lattice::adjustMicrostructureVolumes(vector<double> &vol, int volSize,
       cout.flush();
     }
 
-    cout << endl << "   Lattice::adjustMicrostructureVolumes - cyc = " << cyc << endl;
+    cout << endl
+         << "   Lattice::adjustMicrostructureVolumes - cyc = " << cyc << endl;
     cout << "     watervolume_/capPoreVol/capVoidVol/capWaterVol :   "
          << watervolume_ << " / " << capillaryporevolume_ << " / "
          << capillaryvoidvolume_ << " / " << capillarywatervolume_ << endl;
@@ -2733,51 +2856,51 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
 
   try {
 
-// Remember there are now two extra slots at the end of vfrac, just
-// like at the end of vol.  These two extra slots hold the capillary
-// pore space and the subvoxel pore space
+    // Remember there are now two extra slots at the end of vfrac, just
+    // like at the end of vol.  These two extra slots hold the capillary
+    // pore space and the subvoxel pore space
 
-// vfrac.clear();
-// vfrac.resize(vol.size(), 0.0);
+    // vfrac.clear();
+    // vfrac.resize(vol.size(), 0.0);
 
-// This model tries to reconcile two different volumes:
-//     (1) The total system volume according to GEMS (solid + liquid).
-//         This volume can change during the simulation.  If the
-//         GEMS volume is less than the initial volume of (solid + liquid),
-//         we make up the difference with void space.
-//     (2) The fixed RVE volume which is equal to the number of
-//         voxels multiplied by the volume per voxel
-//
-// We can either let the RVE change volume, which it generally does
-// prior to setting, or we can force it to remain constant, which
-// it approximately does after setting.
-//
-// As of 2023 April 9, we choose to keep the RVE volume fixed, so
-// the only way to reconcile its volume to the GEMS volume is to
-// ensure that the VOLUME FRACTIONS are the same in both.
-//
-// Microstructure volume consists of the sum of (1) the *apparent
-// volumes* of all the solid phases (solid plus subvoxel pores)
-// and (2) the capillary pore volume
+    // This model tries to reconcile two different volumes:
+    //     (1) The total system volume according to GEMS (solid + liquid).
+    //         This volume can change during the simulation.  If the
+    //         GEMS volume is less than the initial volume of (solid + liquid),
+    //         we make up the difference with void space.
+    //     (2) The fixed RVE volume which is equal to the number of
+    //         voxels multiplied by the volume per voxel
+    //
+    // We can either let the RVE change volume, which it generally does
+    // prior to setting, or we can force it to remain constant, which
+    // it approximately does after setting.
+    //
+    // As of 2023 April 9, we choose to keep the RVE volume fixed, so
+    // the only way to reconcile its volume to the GEMS volume is to
+    // ensure that the VOLUME FRACTIONS are the same in both.
+    //
+    // Microstructure volume consists of the sum of (1) the *apparent
+    // volumes* of all the solid phases (solid plus subvoxel pores)
+    // and (2) the capillary pore volume
 
-// Find total adjusted microstructure volume, including possibly voids
+    // Find total adjusted microstructure volume, including possibly voids
 
-// for (i = 0; i < vol.size(); ++i) {
-//     totmicvolume += vol.at(i);
-//     #ifdef DEBUG
-//         cout << "Lattice::adjustMicrostructureVolFracs Volume("
-//              << names.at(i) << ") = " << vol.at(i)
-//              << ", volfrac = " << vfrac.at(i) << endl;
-//         cout.flush();
-//     #endif
-// }
+    // for (i = 0; i < vol.size(); ++i) {
+    //     totmicvolume += vol.at(i);
+    //     #ifdef DEBUG
+    //         cout << "Lattice::adjustMicrostructureVolFracs Volume("
+    //              << names.at(i) << ") = " << vol.at(i)
+    //              << ", volfrac = " << vfrac.at(i) << endl;
+    //         cout.flush();
+    //     #endif
+    // }
 
-/// Above block is to get the current total volume
-/// Replacement below assumes RVE retains constant volume and makes
-/// adjustments based on capillary porosity
+    /// Above block is to get the current total volume
+    /// Replacement below assumes RVE retains constant volume and makes
+    /// adjustments based on capillary porosity
 
-// totmicvolume = chemSys_->getInitMicroVolume();
-// //initialmicrostructurevolume_
+    // totmicvolume = chemSys_->getInitMicroVolume();
+    // //initialmicrostructurevolume_
 
 #ifdef DEBUvoid
     cout << "Lattice::adjustMicrostructureVolFracsCalculated "
@@ -3198,7 +3321,7 @@ void Lattice::calculatePoreSizeDistribution(void) {
       //    cout.flush();
       //    }
     }
-    //cout << endl;
+    // cout << endl;
     cout.flush();
   }
 
@@ -3378,8 +3501,8 @@ void Lattice::writeMicroColors(const string &root) {
   for (int i = 0; i < numMicroPhases_; i++) {
     microPhaseId = chemSys_->getMicroPhaseId(i);
     colors = chemSys_->getColor(microPhaseId);
-    out << chemSys_->getMicroPhaseName(microPhaseId) << "," << colors[0] << ","
-        << colors[1] << "," << colors[2] << endl;
+    out << microPhaseId << " " << colors[0] << " " << colors[1] << " "
+        << colors[2] << endl;
   }
 
   out.flush();

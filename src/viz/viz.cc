@@ -113,9 +113,15 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
     getVcolors(red, green, blue);
   }
 
+  cout << "Made it 01" << endl;
+  cout.flush();
+
   if (getFileNamesAndTimes(names, times)) {
     return (1);
   }
+
+  cout << "Made it 02" << endl;
+  cout.flush();
 
   /****
    *    NOTE:  MUST READ
@@ -151,6 +157,7 @@ int processImageFiles(vector<string> &names, vector<string> &times) {
 
     cout << "Xsize = " << Xsize << "; Ysize = " << Ysize
          << "; Zsize = " << Zsize << endl;
+    cout.flush();
 
     // Create the Mic vector
     Mic.clear();
@@ -548,12 +555,13 @@ void getTcolors(vector<float> &red, vector<float> &green, vector<float> &blue) {
 
   for (int i = 0; i < numMicroPhases; ++i) {
     in >> sphaseid >> srval >> sgval >> sbval;
-    cout << sphaseid << " " << srval << " " << sgval << " " << sbval << endl;
+    // cout << sphaseid << " " << srval << " " << sgval << " " << sbval << endl;
     phaseid = stoi(sphaseid);
     rval = (stof(srval)) / 255.0;
     gval = (stof(sgval)) / 255.0;
     bval = (stof(sbval)) / 255.0;
     cout << phaseid << " " << rval << " " << gval << " " << bval << endl;
+    cout.flush();
     red[phaseid] = rval;
     green[phaseid] = gval;
     blue[phaseid] = bval;
