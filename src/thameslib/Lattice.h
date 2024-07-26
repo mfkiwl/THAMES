@@ -1014,7 +1014,6 @@ public:
   void writeLatticeIni(double curtime);
   void writeLatticeXYZ(double curtime, const int simtype, const string &root);
   void writeLatticeCFG(double curtime, const int simtype, const string &root);
-  void writeLatticeCFG_test(int testPhase);
 
   /**
   @brief Write the 3D microstructure to a file.

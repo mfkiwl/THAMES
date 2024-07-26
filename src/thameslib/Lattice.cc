@@ -3711,86 +3711,6 @@ void Lattice::writeLatticeXYZ(double curtime, const int simtype,
   out.close();
 }
 
-void Lattice::writeLatticeCFG_test(int testPhase) {
-
-  int tPh = testPhase;
-
-  int i, j;
-
-  vector<int> siteTest;
-  siteTest.clear();
-  siteTest.resize(numsites_, -1);
-  int ck_0 = 0;
-  for (j = 0; j < numsites_; j++) {
-    if (site_[j].getMicroPhaseId() == tPh) {
-      if (site_[j].getVisit() == 0) {
-        siteTest[j] = tPh;
-        ck_0++;
-        for (i = 0; i < NN_NNN; i++) {
-          siteTest[site_[j].nb(i)->getId()] = site_[j].nb(i)->getMicroPhaseId();
-        }
-      }
-    }
-  }
-  int nh = 0;
-  for (int i = 0; i < numsites_; i++) {
-    if (siteTest[i] != -1) {
-      nh++;
-    }
-  }
-
-  string ofileName_cfg = "testIni_1.cfg";
-  string ofileName_usr = "testIni_1.usr";
-  ofstream outCFG(ofileName_cfg.c_str());
-  ofstream outUSR(ofileName_usr.c_str());
-
-  outCFG << "Number of particles = " << nh << endl;
-
-  outCFG << "A = 2.0 Angstrom (basic length-scale)" << endl;
-
-  outCFG << "H0(1,1) = " << xdim_ << " A" << endl;
-  outCFG << "H0(1,2) = 0 A" << endl;
-  outCFG << "H0(1,3) = 0 A" << endl;
-
-  outCFG << "H0(2,1) = 0 A" << endl;
-  outCFG << "H0(2,2) = " << ydim_ << " A" << endl;
-  outCFG << "H0(2,3) = 0 A" << endl;
-
-  outCFG << "H0(3,1) = 0 A" << endl;
-  outCFG << "H0(3,2) = 0 A" << endl;
-  outCFG << "H0(3,3) = " << zdim_ << " A" << endl;
-  outCFG << ".NO_VELOCITY." << endl;
-  outCFG << "entry_count = 3" << endl;
-
-  double x, y, z;
-  vector<double> colors;
-  int mPhId;
-  bool mPhNotExist;
-  int ord = 0;
-  for (mPhId = 2; mPhId < numMicroPhases_; mPhId++) {
-    mPhNotExist = true;
-    colors = chemSys_->getColor(mPhId);
-    for (int i = 0; i < numsites_; i++) {
-      if (siteTest[i] == mPhId) {
-        if (mPhNotExist) {
-          outCFG << "  " << cfgElem_[mPhId].mass << endl;
-          outCFG << cfgElem_[mPhId].symb << endl;
-          mPhNotExist = false;
-        }
-        x = (site_[i].getX()) / (double)(xdim_);
-        y = (site_[i].getY()) / (double)(ydim_);
-        z = (site_[i].getZ()) / (double)(zdim_);
-        outCFG << x << "\t" << y << "\t" << z << endl;
-        outUSR << ord << "\t" << colors[0] << "\t" << colors[1] << "\t"
-               << colors[2] << "\t0.7051" << endl;
-        ord++;
-      }
-    }
-  }
-  outCFG.close();
-  outUSR.close();
-}
-
 void Lattice::writeLatticeCFG(double curtime, const int simtype,
                               const string &root) {
 
@@ -3828,17 +3748,17 @@ void Lattice::writeLatticeCFG(double curtime, const int simtype,
 
   outCFG << "A = 3.0 Angstrom (basic length-scale)" << endl;
 
-  outCFG << "H0(1,1) = " << xdim_ << " A" << endl;
+  outCFG << "H0(1,1) = " << xdim_-1 << " A" << endl;
   outCFG << "H0(1,2) = 0 A" << endl;
   outCFG << "H0(1,3) = 0 A" << endl;
 
   outCFG << "H0(2,1) = 0 A" << endl;
-  outCFG << "H0(2,2) = " << ydim_ << " A" << endl;
+  outCFG << "H0(2,2) = " << ydim_-1 << " A" << endl;
   outCFG << "H0(2,3) = 0 A" << endl;
 
   outCFG << "H0(3,1) = 0 A" << endl;
   outCFG << "H0(3,2) = 0 A" << endl;
-  outCFG << "H0(3,3) = " << zdim_ << " A" << endl;
+  outCFG << "H0(3,3) = " << zdim_-1 << " A" << endl;
   outCFG << ".NO_VELOCITY." << endl;
   outCFG << "entry_count = 3" << endl;
 
@@ -3855,9 +3775,9 @@ void Lattice::writeLatticeCFG(double curtime, const int simtype,
           outCFG << cfgElem_[mPhId].symb << endl;
           mPhNotExist = false;
         }
-        x = (site_[i].getX()) / (double)(xdim_);
-        y = (site_[i].getY()) / (double)(ydim_);
-        z = (site_[i].getZ()) / (double)(zdim_);
+        x = (site_[i].getX()) / (double)(xdim_-1);
+        y = (site_[i].getY()) / (double)(ydim_-1);
+        z = (site_[i].getZ()) / (double)(zdim_-1);
         outCFG << x << "\t" << y << "\t" << z << endl;
         outUSR << ord << "\t" << colors[0] << "\t" << colors[1] << "\t"
                << colors[2] << "\t0.7051" << endl;
