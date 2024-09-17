@@ -232,7 +232,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       scaledMass = scaledMass_;
 
-      //if (verbose_) {
+      if (verbose_) {
         cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
@@ -255,7 +255,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
              // << "   SI_["
              << endl;
         cout.flush();
-      //}
+      }
     } else {
       throw DataException("StandardKineticModel", "calculateKineticStep",
                           "DOR >= 1.0");

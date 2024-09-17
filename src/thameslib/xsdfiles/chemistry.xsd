@@ -104,7 +104,7 @@
 
     <xs:complexType mixed="true" name="interface_datatype">
         <xs:sequence>
-            <xs:element name="randomgrowth" type="doubletype" />
+            <xs:element minOccurs="0" maxOccurs="1" name="randomgrowth" type="doubletype" />
             <xs:element minOccurs="0" maxOccurs="unbounded" name="affinity" type="affinitytype" />
         </xs:sequence>
     </xs:complexType>
@@ -196,7 +196,7 @@
             <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype" />
             <xs:element minOccurs="0" maxOccurs="1" name="stresscalc" type="integertype" />
             <xs:element minOccurs="0" maxOccurs="1" name="weak" type="integertype" />
-            <xs:element name="display_data" type="display_datatype" />
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="display_data" type="display_datatype" />
         </xs:sequence>
     </xs:complexType>
 

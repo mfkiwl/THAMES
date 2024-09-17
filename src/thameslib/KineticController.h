@@ -230,14 +230,7 @@ public:
   */
 
   double getScaledMass(const int midx) {
-    try {
-      return scaledMass_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getScaledMass", "scaledMass_",
-                      scaledMass_.size(), midx);
-      ex.printException();
-      exit(1);
-    }
+      return scaledMass_[midx];
   }
 
   /**
@@ -260,14 +253,7 @@ public:
   @return the initial scaled mass [percent solids]
   */
   double getInitScaledMass(const int midx) {
-    try {
-      return initScaledMass_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getInitScaledMass",
-                      "initScaledMass_", initScaledMass_.size(), midx);
-      ex.printException();
-      exit(1);
-    }
+      return initScaledMass_[midx];
   }
 
   /**
@@ -303,15 +289,7 @@ public:
   @return the specific surface area [m2/kg]
   */
   double getSpecificSurfaceArea(const int midx) {
-    try {
-      return specificSurfaceArea_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getSpecificSurfaceArea",
-                      "specificSurfaceArea_", specificSurfaceArea_.size(),
-                      midx);
-      ex.printException();
-      exit(1);
-    }
+      return specificSurfaceArea_[midx];
   }
 
   /**
@@ -331,15 +309,7 @@ public:
   @return the reference specific surface area [m2/kg]
   */
   double getRefSpecificSurfaceArea(const int midx) {
-    try {
-      return refSpecificSurfaceArea_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getRefSpecificSurfaceArea",
-                      "refSpecificSurfaceArea_", refSpecificSurfaceArea_.size(),
-                      midx);
-      ex.printException();
-      exit(1);
-    }
+      return refSpecificSurfaceArea_[midx];
   }
 
   /**
@@ -415,13 +385,7 @@ public:
   @return the name of the phase with index i
   */
   string getName(const unsigned int i) const {
-    try {
-      return name_.at(i);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getName", "name_", name_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      return name_[i];
   }
 
   /**

@@ -286,7 +286,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
 
       scaledMass = scaledMass_;
 
-      //if (verbose_) {
+      if (verbose_) {
         cout << "****************** PKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
@@ -314,7 +314,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
              << "\tscaledMass_: " << scaledMass_
              << "\tmassDissolved: " << massDissolved << endl;
         cout.flush();
-      //}
+      }
 
     } else {
       throw DataException("ParrotKillohModel", "calculateKineticStep",

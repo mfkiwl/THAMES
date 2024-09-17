@@ -333,7 +333,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
       scaledMass = scaledMass_;
 
-      // if (verbose_) {
+      if (verbose_) {
         cout << "****************** PZM_hT = " << timestep << "\tcyc = " << cyc
              << "\tmicroPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
@@ -351,7 +351,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
              << "\tscaledMass_: " << scaledMass_
              << "\tmassDissolved: " << massDissolved << endl;
         cout.flush();
-      // }
+      }
 
     } else {
       throw DataException("PozzolanicModel", "calculateKineticStep",

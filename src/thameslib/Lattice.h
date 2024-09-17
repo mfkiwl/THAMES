@@ -31,6 +31,7 @@ exists, hydrates, and possibly deteriorates.
 #include "RanGen.h"
 #include "Site.h"
 #include "global.h"
+#include "../version.h"
 
 /**
 @struct Sitesize
@@ -38,13 +39,27 @@ exists, hydrates, and possibly deteriorates.
 */
 struct Sitesize {
   int siteid; /**< ID of the site in the site_ vector */
-  int nsize;  /**< Size of the domain of the phase at that size */
+  int nsize;  /**< Size of the domain of the phase at that site */
 };
 
 struct chemElem {
   int z;
   string symb;
   double mass;
+};
+
+struct structGrowVect
+{
+  int id;
+  int posVect;
+  int affinity;
+};
+
+struct structDissVect
+{
+  int id;
+  int posVect;
+  double wmc;
 };
 
 using namespace std;
@@ -55,10 +70,12 @@ using namespace std;
 sites.
 
 */
+
 class Lattice {
 
 private:
   string version_;             /**< THAMES version for header information */
+  string thamesVersion_;
   string jobroot_;             /**< The root name for output files */
 
   RanGen *rg_;                 /**< Pointer to random number generator object */
@@ -140,6 +157,11 @@ pores in GEM units */
   double wcratio_;  /**< Water-to-cement mass ratio */
 
   int numMicroPhases_;   /**< Number of microphases */
+
+  double particRadius_;  /**< used for graphical representation */
+
+  vector<int> growthInterfaceSize_; /**< growth interface size of each microphase */
+  vector<int> dissolutionInterfaceSize_; /**< dissolution interface size of each microphase */
 
 public:
   /**
@@ -253,14 +275,7 @@ public:
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
   void setVolumefraction(unsigned int i, double vfrac) {
-    try {
-      volumefraction_.at(i) = vfrac;
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "setVolumefraction", "volumefraction_",
-                      volumefraction_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      volumefraction_[i] = vfrac;
   }
 
   /**
@@ -270,14 +285,7 @@ public:
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
   void setInitvolumefraction(unsigned int i, double vfrac) {
-    try {
-      initvolumefraction_.at(i) = vfrac;
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "setInitialvolumefraction",
-                      "initvolumefraction_", initvolumefraction_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      initvolumefraction_[i] = vfrac;
   }
 
   /**
@@ -311,21 +319,11 @@ public:
   @return the volume fraction of phase i on a total microstructure basis
   */
   double getVolumefraction(unsigned int i) {
-    try {
       if (numsites_ == 0) {
         throw FloatException("Lattice", "getVolumefraction",
                              "Divide by zero (numsites_)");
       }
-      return (volumefraction_.at(i));
-    } catch (FloatException flex) {
-      flex.printException();
-      exit(1);
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "getVolumefraction", "volumefraction_",
-                      volumefraction_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      return (volumefraction_[i]);
   }
 
   /**
@@ -338,21 +336,11 @@ public:
   @return the initial volume fraction of phase i on a total microstructure basis
   */
   double getInitvolumefraction(unsigned int i) {
-    try {
       if (numsites_ == 0) {
         throw FloatException("Lattice", "getInitialvolumefraction",
                              "Divide by zero (numsites_)");
       }
-      return (initvolumefraction_.at(i));
-    } catch (FloatException flex) {
-      flex.printException();
-      exit(1);
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "getInitialvolumefraction",
-                      "initvolumefraction_", initvolumefraction_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      return (initvolumefraction_[i]);
   }
 
   /**
@@ -534,16 +522,7 @@ public:
   @return the x coordinate
   */
   unsigned int getX(const unsigned int i) const {
-    try {
-      if (i >= site_.size()) {
-        throw EOBException("Lattice", "getX", "site_", site_.size(),
-                           (unsigned int)i);
-      }
       return (site_[i].getX());
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -554,16 +533,7 @@ public:
   @return the y coordinate
   */
   unsigned int getY(const unsigned int i) const {
-    try {
-      if (i >= site_.size()) {
-        throw EOBException("Lattice", "getY", "site_", site_.size(),
-                           (unsigned int)i);
-      }
       return (site_[i].getY());
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -574,16 +544,7 @@ public:
   @return the x coordinate
   */
   unsigned int getZ(const unsigned int i) const {
-    try {
-      if (i >= site_.size()) {
-        throw EOBException("Lattice", "getY", "site_", site_.size(),
-                           (unsigned int)i);
-      }
       return (site_[i].getZ());
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -614,16 +575,7 @@ public:
   @return a pointer to the Site object in question
   */
   Site *getSite(int index) {
-    try {
-      if (index >= site_.size()) {
-        throw EOBException("Lattice", "getSite", "site_", site_.size(),
-                           (unsigned int)index);
-      }
       return &site_[index];
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -636,16 +588,7 @@ public:
   @param index is the index of the Site object in the `site_` array
   */
   void setDamage(int index) {
-    try {
-      if (index >= site_.size()) {
-        throw EOBException("Lattice", "setDamage", "site_", site_.size(),
-                           (unsigned int)index);
-      }
       site_[index].setDamage();
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -656,16 +599,7 @@ public:
   @param dwmcval is the increment to add to the wmc
   */
   void dWmc(int index, double dwmcval) {
-    try {
-      if (index >= site_.size()) {
-        throw EOBException("Lattice", "dWmc", "site_", site_.size(),
-                           (unsigned int)index);
-      }
       site_[index].setWmc(site_[index].getWmc() + dwmcval);
-    } catch (EOBException ex) {
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -689,8 +623,6 @@ public:
   */
   void findInterfaces(void);
 
-  void findInterfaces_check(void);
-
   /**
   @brief Add (grow i.e. switch from electrolyte) the prescribed number of
   sites of each microphase that has to grow
@@ -704,6 +636,8 @@ public:
   @return the actual number of sites that were changed for each microphase ID from
   the input growPhaseIDVect vector
   */
+  //void growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
+  //                      vector<string> growPhNameVect, int &numadded_G, int totalTRC);
   vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
                         vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
@@ -717,7 +651,8 @@ public:
   @param numLeft is the number of sites to nucleate/create for this phase
   @return the actual size of the new interface (must equals numLeft!)
   */
-  int createNewGrowthInterface(int phaseID,int numLeft);
+  void nucleatePhaseAff(int phaseID,int numLeft);
+  void nucleatePhaseRnd(int phaseID,int numLeft);
 
   /**
   @brief Remove (dissolve i.e. switch to electrolyte) the prescribed number of
@@ -754,7 +689,7 @@ public:
   This method constructs a list of all the void sites, based
   on whether there are multiple connected void sites in a cluster.
   The list is then sorted essentially by the effective pore size.  Only then
-  is the list visited and the prescribed number of sites switched to void.
+  is the list visited and the prescribed number of sites switched to water.
 
   @param numsites is the number of sites to switch from void to water
   @return the actual number of sites that were changed
@@ -806,23 +741,10 @@ public:
   @param s is a pointer to the Site object
   @param i is the phase index to set at that site
   */
-  void setMicroPhaseId(Site *s, const unsigned int i, string doing) {
-    string msg;
-    try {
-      count_.at(s->getMicroPhaseId())--;
+  void setMicroPhaseId(Site *s, const unsigned int i) {
+      count_[s->getMicroPhaseId()]--;
       s->setMicroPhaseId(i);
-      count_.at(i)++;
-    } catch (out_of_range &oor) {
-      msg = "Site does not exist?";
-      if (doing == "diss") {
-        throw EOBException("Lattice", "setMicroPhaseId in diss", msg,
-                           count_.size(), i);
-      } else { // "grow"
-        throw EOBException("Lattice", "setMicroPhaseId in grow", msg,
-                           count_.size(), i);
-      }
-    }
-    return;
+      count_[i]++;
   }
 
   /**
@@ -832,15 +754,9 @@ public:
   @param i is the phase index to set at that site
   */
   void setMicroPhaseId(const int sitenum, const unsigned int i) {
-    string msg;
-    try {
-      count_.at(site_.at(sitenum).getMicroPhaseId())--;
-      site_.at(sitenum).setMicroPhaseId(i);
-      count_.at(i)++;
-    } catch (out_of_range &oor) {
-      msg = "Site does not exist?";
-      throw EOBException("Lattice", "setMicroPhaseId", msg, count_.size(), i);
-    }
+      count_[site_[sitenum].getMicroPhaseId()]--;
+      site_[sitenum].setMicroPhaseId(i);
+      count_[i]++;
   }
 
   /**
@@ -850,16 +766,7 @@ public:
   @return the microstructure phase id at the site
   */
   int getMicroPhaseId(const int sitenum) {
-    try {
-      Site *ste;
-      ste = &site_[sitenum];
-      return (ste->getMicroPhaseId());
-    } catch (out_of_range &oor) {
-      EOBException ex("Lattice", "getMicroPhaseId", "sitenum", numsites_,
-                      sitenum);
-      ex.printException();
-      exit(1);
-    }
+    return (site_[sitenum].getMicroPhaseId());
   }
 
   /**
@@ -890,8 +797,8 @@ public:
   potential dissolution sites
   @param pid is the microstructure phase id
   */
-  void removeDissolutionSite_diss(Site *loc, unsigned int pid, int interfacePos);
-  void removeDissolutionSite_grow(Site *loc, unsigned int pid);
+  void removeDissolutionSite(Site *loc, unsigned int pid);
+  void removeDissolutionSite_M(Site *loc, unsigned int pid, int totalTRC);
 
   /**
   @brief Remove a site from the list of sites where growth of a given phase can
@@ -901,8 +808,9 @@ public:
   potential growth sites
   @param pid is the microstructure phase id
   */
-  void removeGrowthSite_0(Site *loc, unsigned int pid, int interfacePos);
-  void removeGrowthSite_1(Site *loc, unsigned int pid);
+  void removeGrowthSite_diss(Site *loc, unsigned int pid);
+  void removeGrowthSite_grow(Site *ste0, int pid);
+  void removeGrowthSite_nucleation(Site *loc, unsigned int pid);
 
   /**
   @brief Master method to update a microstructure during after a given time
@@ -1542,8 +1450,8 @@ public:
   @param sortorder is 0 if sorting in descending order, nonzero otherwise
   @return an STL list of the site ids according to the distribution
   */
-  list<Sitesize> findDomainSizeDistribution(int phaseid, const int numsites,
-                                            int maxsize, int sortorder);
+  vector<int> findDomainSizeDistribution(int phaseid, const int numsites,
+                                            int maxsize, int cyc, int sortorder);
 
   /**
   @brief Estimate the <i>linear size</i> of a domain
@@ -1613,6 +1521,8 @@ public:
 
   void populateElementData(void);
 
+  string getElemSymb(int index) { return cfgElem_[index].symb; }
+
   void createRNG(void) { rg_ = new RanGen(); }
   double callRNG(void) {
     numRNGcall_0_++;
@@ -1627,6 +1537,8 @@ public:
   long int getNumRNGcallLONGMAX(void) { return numRNGcallLONGMAX_; }
   double getLastRNG(void) { return lastRNG_; }
   void setRNGseed(int seed) { rg_->setSeed(seed); }
+
+
 
   void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
     //latticeRNGseed_ = seed;
@@ -1682,6 +1594,58 @@ public:
       cout << "   Lattice::shiftAffinityPosVal => all affinities are positive!" << endl;
     }
   }
+
+  void increaseLatticeVolume(void);
+
+  void checkSite(int stId){
+    int phId = site_[stId].getMicroPhaseId();
+    cout << endl << " Lattice::checkSite( " << stId << " ):" << endl;
+    cout << "    phaseId : " << site_[stId].getMicroPhaseId() << endl;
+    cout << "    inDissInterfacePos_ : " << site_[stId].getInDissInterfacePos() << endl;
+    if (site_[stId].getInDissInterfacePos() != -1) {
+      cout << "     in dissInterface on pos inDissInterfacePos_ : "
+           << interface_[site_[stId].getMicroPhaseId()].getDissolutionSitesId(site_[stId].getInDissInterfacePos()) << endl;
+    }
+
+    vector<unsigned int> growth = site_[stId].getGrowthPhases();
+    int size = growth.size();
+    cout << endl << " growth_.size() : " << size<< endl;
+    for (int k =0; k < size; k++) {
+      cout << "       k = " << k << "   growth_[k] = " << growth[k] << endl;
+    }
+    cout << endl << " inGrowInterfacePos_ : " << endl;
+    for (int k =0; k < numMicroPhases_; k++) {
+      cout << "       k = " << k << "   site_[stId].getInGrowInterfacePos(k) = " << site_[stId].getInGrowInterfacePos(k) << endl;
+    }
+
+    cout << endl << "     in growInterfaces on pos inGrowInterfacePos_ :" << endl;
+    for (int k = 0; k < numMicroPhases_; k++){
+      cout << "       k_ = " << k << endl; cout.flush();
+      if (site_[stId].getInGrowInterfacePos(k) > -1) {
+        size = growthInterfaceSize_[k];
+        cout << "       k = " << k << "   pos = " << site_[stId].getInGrowInterfacePos(k) << "   size = " << size << endl; cout.flush();
+        cout << "            siteId in grInt = "
+             << interface_[k].getGrowthSitesId(site_[stId].getInGrowInterfacePos(k)) << endl; cout.flush();
+      }
+    }
+  }
+
+  vector<int> getGrowthInterfaceSize(void) {
+    return growthInterfaceSize_;
+  }
+  void setGrowthInterfaceSize(vector<int> vect){
+    growthInterfaceSize_ = vect;
+  }
+  vector<int> getDissolutionInterfaceSize(void) {
+    return dissolutionInterfaceSize_;
+  }
+  void setDissolutionInterfaceSize(vector<int> vect) {
+    dissolutionInterfaceSize_ = vect;
+  }
+
+
+vector<int> chooseNucleationSitesRND(int phaseID,int numLeft);
+vector<int> chooseNucleationSitesAFF(int phaseID,int numLeft);
 
 }; // End of Lattice class
 #endif

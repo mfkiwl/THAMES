@@ -79,7 +79,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   so3_.clear();
   RdICId_.clear();
   Rd_.clear();
-  color_.clear();
   GEMPhaseStoich_.clear();
   GEMPhaseDCMembers_.clear();
   microPhaseDCPorosities_.clear();
@@ -99,6 +98,9 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   gasSolidRatio_ = 0.0;
   gasComposition_.clear();
   cementComponent_.clear();
+
+  color_.clear();
+  initColorMap();
 
   SI_.clear();
 
@@ -1266,8 +1268,8 @@ void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
       if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
         phaseData.microPhaseDCPorosities.push_back(porosity);
       } else {
-        phaseData.microPhaseDCPorosities.at(
-            phaseData.microPhaseDCPorosities.size() - 1) = porosity;
+        phaseData.microPhaseDCPorosities[
+            phaseData.microPhaseDCPorosities.size() - 1] = porosity;
       }
       xmlFree(key);
     }
@@ -1281,15 +1283,17 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
 
   xmlChar *key;
   cur = cur->xmlChildrenNode;
-  double red, green, blue;
+  int red, green, blue, gray;
 
-  red = green = blue = 0.0;
+  red = green = blue = gray = 0;
+  bool rgbBool = false;
 
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"red"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(red, st);
+      rgbBool = true;
       // if (verbose_) cout << "        red = " << red << endl;
       xmlFree(key);
     }
@@ -1297,6 +1301,7 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(green, st);
+      rgbBool = true;
       // if (verbose_) cout << "        green = " << green << endl;
       xmlFree(key);
     }
@@ -1304,13 +1309,15 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(blue, st);
+      rgbBool = true;
       // if (verbose_) cout << "        blue = " << blue << endl;
       xmlFree(key);
     }
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"gray"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(phaseData.gray, st);
+      from_string(gray, st);
+      rgbBool = true;
       // if (verbose_) cout << "        gray = " << phaseData.gray << endl;
       xmlFree(key);
     }
@@ -1321,6 +1328,24 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
   phaseData.colors.push_back(red);
   phaseData.colors.push_back(green);
   phaseData.colors.push_back(blue);
+  phaseData.gray = gray;
+
+  if (rgbBool) {
+    map<string, elemColor>::iterator it = colorN_.find(phaseData.thamesName);
+    if (it != colorN_.end()) {
+      colorN_[phaseData.thamesName].rgb[0] = red;
+      colorN_[phaseData.thamesName].rgb[1] = green;
+      colorN_[phaseData.thamesName].rgb[2] = blue;
+      colorN_[phaseData.thamesName].gray = gray;
+    } else {
+      colorN_[phaseData.thamesName].colorId = colorN_.size();
+      colorN_[phaseData.thamesName].altName = phaseData.thamesName;
+      colorN_[phaseData.thamesName].rgb.push_back(red);
+      colorN_[phaseData.thamesName].rgb.push_back(green);
+      colorN_[phaseData.thamesName].rgb.push_back(blue);
+      colorN_[phaseData.thamesName].gray = gray;
+    }
+  }
 
   return;
 }
@@ -1466,7 +1491,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   GEMPhaseDCMembers_ = obj.getGEMPhaseDCMembers();
   microPhaseId_ = obj.getMicroPhaseId();
   isKinetic_ = obj.getIsKinetic();
-  randomGrowth_ = obj.getRandomGrowth();
+  //randomGrowth_ = obj.getRandomGrowth();
   ICMoles_ = obj.getICMoles();
   DCMoles_ = obj.getDCMoles();
   ICMolarMass_ = obj.getICMolarMass();
@@ -1797,14 +1822,14 @@ void ChemicalSystem::writeChemSys(void) {
 
 void ChemicalSystem::setMicroPhaseMass(const unsigned int idx,
                                        const double val) {
-  try {
-    microPhaseMass_.at(idx) = val;
-  } catch (out_of_range &oor) {
-    EOBException ex("ChemicalSystem", "setMicroPhaseMass", "microPhaseMass_",
-                    microPhaseMass_.size(), idx);
-    ex.printException();
-    exit(1);
-  }
+  //try {
+    microPhaseMass_[idx] = val;
+  //} catch (out_of_range &oor) {
+  //  EOBException ex("ChemicalSystem", "setMicroPhaseMass", "microPhaseMass_",
+  //                  microPhaseMass_.size(), idx);
+  //  ex.printException();
+  //  exit(1);
+  //}
   int DCId = 0;
   if (idx == ELECTROLYTEID) {
     DCId = getDCId("H2O@");
@@ -2292,7 +2317,7 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
     microPhaseSI_.clear();
     microPhaseSI_.resize(getNumMicroPhases(), 0.0);
 
-    try {
+    //try {
       double aveSI = 0.0;
       double moles = 0.0;
       double tmoles = 0.0;
@@ -2306,9 +2331,9 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
 
       //setSI();
       //cout << endl << "ChemicalSystem::setMicroPhaseSI" << endl;cout.flush();
-      microPhaseSI_.at(0) = 0;
-      microPhaseSI_.at(1) = 0;
-      for (int i = 2; i < numMicroPhases_; ++i) {
+      microPhaseSI_[0] = 0;
+      microPhaseSI_[1] = 0;
+      for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
         pname = getMicroPhaseName(i);
         aveSI = moles = 0.0;
         microPhaseDCMembers = getMicroPhaseDCMembers(i);
@@ -2316,7 +2341,7 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
         //cout << endl << "   " << i << "\tpname: " << pname
         //     << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << " : " << endl;
         for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
-          int newDCId = microPhaseDCMembers.at(ii);
+          int newDCId = microPhaseDCMembers[ii];
           tmoles = DCMoles_[newDCId];
           aveSI += (node_->DC_a(newDCId) * tmoles);
           moles += tmoles;
@@ -2325,18 +2350,282 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
         if (moles > 0.0) {
           aveSI = aveSI / moles;
         }
-        microPhaseSI_.at(i) = aveSI;
+        microPhaseSI_[i] = aveSI;
         //cout << "          pname = " << pname << "  =>     microPhaseSI_(cyc = " << cyc
         //     << ") = " << microPhaseSI_[i] << "\tmoles: " << moles << endl;
       }
       //} //if (isFirst) {
       //cout << endl << "ChemicalSystem::setMicroPhaseSI end" << endl; exit(0);
-    } catch (EOBException eex) {
-        eex.printException();
-        exit(1);
-    }
+    //} catch (EOBException eex) {
+    //    eex.printException();
+    //    exit(1);
+    //}
 
-    return;
+    //return;
+}
+
+void ChemicalSystem::initColorMap(void)
+{
+  //struct elemColor {
+  //  int colorId;
+  //  string altName;
+  //  vector<int> rgb;
+  //  int gray;
+  //};'
+
+  colorN_["Void"].colorId = 0;
+  colorN_["Void"].altName = "Empty";
+  colorN_["Void"].rgb.push_back(0);
+  colorN_["Void"].rgb.push_back(0);
+  colorN_["Void"].rgb.push_back(0);
+  colorN_["Void"].gray = 0;
+
+  colorN_["Electrolyte"].colorId = 1;
+  colorN_["Electrolyte"].altName = "Porosity";
+  colorN_["Electrolyte"].rgb.push_back(0);
+  colorN_["Electrolyte"].rgb.push_back(25);
+  colorN_["Electrolyte"].rgb.push_back(25);
+  colorN_["Electrolyte"].gray = 25;
+
+  colorN_["AFm"].colorId = 2;
+  colorN_["AFm"].altName = "AFm";
+  colorN_["AFm"].rgb.push_back(244);
+  colorN_["AFm"].rgb.push_back(70);
+  colorN_["AFm"].rgb.push_back(203);
+  colorN_["AFm"].gray = 106;
+
+  colorN_["AFmc"].colorId = 3;
+  colorN_["AFmc"].altName = "AFm-c, Carboaluminate";
+  colorN_["AFmc"].rgb.push_back(250);
+  colorN_["AFmc"].rgb.push_back(198);
+  colorN_["AFmc"].rgb.push_back(220);
+  colorN_["AFmc"].gray = 108;
+
+  colorN_["AFt"].colorId = 4;
+  colorN_["AFt"].altName = "Ettringite";
+  colorN_["AFt"].rgb.push_back(127);
+  colorN_["AFt"].rgb.push_back(0);
+  colorN_["AFt"].rgb.push_back(255);
+  colorN_["AFt"].gray = 113;
+
+  colorN_["Alite"].colorId = 5;
+  colorN_["Alite"].altName = "C3S";
+  colorN_["Alite"].rgb.push_back(42);
+  colorN_["Alite"].rgb.push_back(42);
+  colorN_["Alite"].rgb.push_back(210);
+  colorN_["Alite"].gray = 220;
+
+  colorN_["Aluminate"].colorId = 6;
+  colorN_["Aluminate"].altName = "C3A";
+  colorN_["Aluminate"].rgb.push_back(178);
+  colorN_["Aluminate"].rgb.push_back(178);
+  colorN_["Aluminate"].rgb.push_back(178);
+  colorN_["Aluminate"].gray = 195;
+
+  colorN_["Anhydrite"].colorId = 7;
+  colorN_["Anhydrite"].altName = "Anhydrite";
+  colorN_["Anhydrite"].rgb.push_back(255);
+  colorN_["Anhydrite"].rgb.push_back(255);
+  colorN_["Anhydrite"].rgb.push_back(128);
+  colorN_["Anhydrite"].gray = 140;
+
+  colorN_["Arcanite"].colorId = 8;
+  colorN_["Arcanite"].altName = "K2SO4";
+  colorN_["Arcanite"].rgb.push_back(255);
+  colorN_["Arcanite"].rgb.push_back(0);
+  colorN_["Arcanite"].rgb.push_back(0);
+  colorN_["Arcanite"].gray = 100;
+
+  colorN_["Bassanite"].colorId = 9;
+  colorN_["Bassanite"].altName = "Hemihydrate";
+  colorN_["Bassanite"].rgb.push_back(255);
+  colorN_["Bassanite"].rgb.push_back(240);
+  colorN_["Bassanite"].rgb.push_back(86);
+  colorN_["Bassanite"].gray = 140;
+
+  colorN_["Belite"].colorId = 10;
+  colorN_["Belite"].altName = "C2S";
+  colorN_["Belite"].rgb.push_back(139);
+  colorN_["Belite"].rgb.push_back(79);
+  colorN_["Belite"].rgb.push_back(19);
+  colorN_["Belite"].gray = 200;
+
+  colorN_["C2AS"].colorId = 11;
+  colorN_["C2AS"].altName = "C2AS(am)";
+  colorN_["C2AS"].rgb.push_back(255);
+  colorN_["C2AS"].rgb.push_back(165);
+  colorN_["C2AS"].rgb.push_back(0);
+  colorN_["C2AS"].gray = 110;
+
+  colorN_["CA2S"].colorId = 12;
+  colorN_["CA2S"].altName = "CA2S(am)";
+  colorN_["CA2S"].rgb.push_back(255);
+  colorN_["CA2S"].rgb.push_back(192);
+  colorN_["CA2S"].rgb.push_back(65);
+  colorN_["CA2S"].gray = 108;
+
+  colorN_["Calcite"].colorId = 13;
+  colorN_["Calcite"].altName = "Limestone, CaCO3, Aragonite, Vaterite";
+  colorN_["Calcite"].rgb.push_back(0);
+  colorN_["Calcite"].rgb.push_back(204);
+  colorN_["Calcite"].rgb.push_back(0);
+  colorN_["Calcite"].gray = 121;
+
+  colorN_["CaO"].colorId = 14;
+  colorN_["CaO"].altName = "Free lime";
+  colorN_["CaO"].rgb.push_back(0);
+  colorN_["CaO"].rgb.push_back(230);
+  colorN_["CaO"].rgb.push_back(0);
+  colorN_["CaO"].gray = 123;
+
+  colorN_["CSHQ"].colorId = 15;
+  colorN_["CSHQ"].altName = "CSH, C-S-H";
+  colorN_["CSHQ"].rgb.push_back(245);
+  colorN_["CSHQ"].rgb.push_back(222);
+  colorN_["CSHQ"].rgb.push_back(179);
+  colorN_["CSHQ"].gray = 159;
+
+  colorN_["Diopside"].colorId = 16;
+  colorN_["Diopside"].altName = "Pyroxene";
+  colorN_["Diopside"].rgb.push_back(150);
+  colorN_["Diopside"].rgb.push_back(150);
+  colorN_["Diopside"].rgb.push_back(0);
+  colorN_["Diopside"].gray = 157;
+
+  colorN_["Ferrite"].colorId = 17;
+  colorN_["Ferrite"].altName = "C4AF";
+  colorN_["Ferrite"].rgb.push_back(253);
+  colorN_["Ferrite"].rgb.push_back(253);
+  colorN_["Ferrite"].rgb.push_back(253);
+  colorN_["Ferrite"].gray = 245;
+
+  colorN_["Forsterite"].colorId = 18;
+  colorN_["Forsterite"].altName = "Olivine";
+  colorN_["Forsterite"].rgb.push_back(127);
+  colorN_["Forsterite"].rgb.push_back(127);
+  colorN_["Forsterite"].rgb.push_back(0);
+  colorN_["Forsterite"].gray = 165;
+
+  colorN_["Goethite"].colorId = 19;
+  colorN_["Goethite"].altName = "Goethite";
+  colorN_["Goethite"].rgb.push_back(210);
+  colorN_["Goethite"].rgb.push_back(210);
+  colorN_["Goethite"].rgb.push_back(210);
+  colorN_["Goethite"].gray = 200;
+
+  colorN_["Gypsum"].colorId = 20;
+  colorN_["Gypsum"].altName = "Dihydrate";
+  colorN_["Gypsum"].rgb.push_back(255);
+  colorN_["Gypsum"].rgb.push_back(255);
+  colorN_["Gypsum"].rgb.push_back(0);
+  colorN_["Gypsum"].gray = 112;
+
+  colorN_["Hydrotalcite"].colorId = 21;
+  colorN_["Hydrotalcite"].altName = "Hydrotalcite";
+  colorN_["Hydrotalcite"].rgb.push_back(0);
+  colorN_["Hydrotalcite"].rgb.push_back(200);
+  colorN_["Hydrotalcite"].rgb.push_back(200);
+  colorN_["Hydrotalcite"].gray = 109;
+
+  colorN_["K6A2S"].colorId = 22;
+  colorN_["K6A2S"].altName = "K6A2S(am)";
+  colorN_["K6A2S"].rgb.push_back(255);
+  colorN_["K6A2S"].rgb.push_back(170);
+  colorN_["K6A2S"].rgb.push_back(128);
+  colorN_["K6A2S"].gray = 115;
+
+  colorN_["Monosulfate"].colorId = 23;
+  colorN_["Monosulfate"].altName = "Sulfoaluminate";
+  colorN_["Monosulfate"].rgb.push_back(152);
+  colorN_["Monosulfate"].rgb.push_back(93);
+  colorN_["Monosulfate"].rgb.push_back(175);
+  colorN_["Monosulfate"].gray = 106;
+
+  colorN_["Mullite"].colorId = 24;
+  colorN_["Mullite"].altName = "Mullite";
+  colorN_["Mullite"].rgb.push_back(178);
+  colorN_["Mullite"].rgb.push_back(34);
+  colorN_["Mullite"].rgb.push_back(34);
+  colorN_["Mullite"].gray = 128;
+
+  colorN_["Portlandite"].colorId = 25;
+  colorN_["Portlandite"].altName = "CH, Ca(OH)2";
+  colorN_["Portlandite"].rgb.push_back(7);
+  colorN_["Portlandite"].rgb.push_back(72);
+  colorN_["Portlandite"].rgb.push_back(142);
+  colorN_["Portlandite"].gray = 186;
+
+  colorN_["Pyrite"].colorId = 26;
+  colorN_["Pyrite"].altName = "FeS";
+  colorN_["Pyrite"].rgb.push_back(212);
+  colorN_["Pyrite"].rgb.push_back(175);
+  colorN_["Pyrite"].rgb.push_back(55);
+  colorN_["Pyrite"].gray = 235;
+
+  colorN_["Pyrrhotite"].colorId = 27;
+  colorN_["Pyrrhotite"].altName = "Pyrrhotite";
+  colorN_["Pyrrhotite"].rgb.push_back(49);
+  colorN_["Pyrrhotite"].rgb.push_back(142);
+  colorN_["Pyrrhotite"].rgb.push_back(7);
+  colorN_["Pyrrhotite"].gray = 240;
+
+  colorN_["Quartz"].colorId = 28;
+  colorN_["Quartz"].altName = "Silica";
+  colorN_["Quartz"].rgb.push_back(32);
+  colorN_["Quartz"].rgb.push_back(141);
+  colorN_["Quartz"].rgb.push_back(142);
+  colorN_["Quartz"].gray = 100;
+
+  colorN_["SilicaFume"].colorId = 29;
+  colorN_["SilicaFume"].altName = "Amorphous silica";
+  colorN_["SilicaFume"].rgb.push_back(40);
+  colorN_["SilicaFume"].rgb.push_back(173);
+  colorN_["SilicaFume"].rgb.push_back(175);
+  colorN_["SilicaFume"].gray = 100;
+
+  colorN_["Sodalite"].colorId = 30;
+  colorN_["Sodalite"].altName = "Sodalite";
+  colorN_["Sodalite"].rgb.push_back(100);
+  colorN_["Sodalite"].rgb.push_back(100);
+  colorN_["Sodalite"].rgb.push_back(255);
+  colorN_["Sodalite"].gray = 100;
+
+  colorN_["Syngenite"].colorId = 31;
+  colorN_["Syngenite"].altName = "Syngenite";
+  colorN_["Syngenite"].rgb.push_back(255);
+  colorN_["Syngenite"].rgb.push_back(192);
+  colorN_["Syngenite"].rgb.push_back(203);
+  colorN_["Syngenite"].gray = 210;
+
+  colorN_["Thenardite"].colorId = 32;
+  colorN_["Thenardite"].altName = "Na2SO4";
+  colorN_["Thenardite"].rgb.push_back(255);
+  colorN_["Thenardite"].rgb.push_back(20);
+  colorN_["Thenardite"].rgb.push_back(0);
+  colorN_["Thenardite"].gray = 95;
+
+  colorN_["Troilite"].colorId = 33;
+  colorN_["Troilite"].altName = "Troilite";
+  colorN_["Troilite"].rgb.push_back(255);
+  colorN_["Troilite"].rgb.push_back(178);
+  colorN_["Troilite"].rgb.push_back(220);
+  colorN_["Troilite"].gray = 232;
+
+  colorN_["ZeoliteY"].colorId = 34;
+  colorN_["ZeoliteY"].altName = "Zeolite Y";
+  colorN_["ZeoliteY"].rgb.push_back(130);
+  colorN_["ZeoliteY"].rgb.push_back(130);
+  colorN_["ZeoliteY"].rgb.push_back(255);
+  colorN_["ZeoliteY"].gray = 232;
+
+  /*
+  colorN_[""].colorId = ;
+  colorN_[""].altName = "";
+  colorN_[""].rgb.push_back(;
+  colorN_[""].rgb.push_back(;
+  colorN_[""].rgb.push_back(;
+  colorN_[""].gray = ;
+  */
 }
 
 //*@******************************************

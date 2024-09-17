@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 
   try {
     Mic = new Lattice(ChemSys, mic_filename, VERBOSE, WARNING);
-    cout << "Lattice creation done... " << endl;
+    cout << endl <<"Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
     cout << "Z size of lattice is " << Mic->getZDim() << endl;

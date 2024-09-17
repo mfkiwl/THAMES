@@ -219,6 +219,9 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
   lattice_->findInterfaces();
 
+  //lattice_->checkSite(8);
+  //cout << endl << " exit controller" << endl;// exit(0);
+
   //if (verbose_) {
   cout << endl << "Controller::Entering Main time loop" << endl;
   //}
@@ -361,16 +364,19 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
       //from Lattice:
       iniLattice.count = lattice_->getCount();
+      iniLattice.growthInterfaceSize = lattice_->getGrowthInterfaceSize();
+      iniLattice.dissolutionInterfaceSize = lattice_->getDissolutionInterfaceSize();
       iniLattice.site.clear();
       RestoreSite site_l; // only one declaration
       int dimLatticeSite = lattice_->getNumsites(); // only one declaration
       for(int i = 0; i < dimLatticeSite; i++){
         site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
-        site_l.dissolution = (lattice_->getSite(i))->getDissolutionPhases();
         site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
         site_l.wmc = (lattice_->getSite(i))->getWmc();
         site_l.wmc0 = (lattice_->getSite(i))->getWmc0();
         site_l.visit = 0;
+        site_l.inGrowInterfacePos = (lattice_->getSite(i))->getInGrowInterfacePosVector();
+        site_l.inDissInterfacePos = (lattice_->getSite(i))->getInDissInterfacePos();
         iniLattice.site.push_back(site_l);
       }
       iniLattice.interface.clear();
@@ -390,8 +396,10 @@ void Controller::doCycle(const string &statfilename, int choice) {
       string nameDiff = "testDiff";
       int changeLattice;
       int whileCount = 0;
-      changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff,
-                                                     phDiff, nameDiff, whileCount, cyc);
+      changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_,
+                                                     capwater, numDiff,
+                                                     phDiff, nameDiff,
+                                                     whileCount, cyc);
 
       //if error from changeMicrostructure (not all the voxels given by GEM can
       //be switched to a new DCId):
@@ -435,11 +443,12 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
           for(int i = 0; i < dimLatticeSite; i++){
             (lattice_->getSite(i))->setMicroPhaseId(iniLattice.site[i].microPhaseId);
-            (lattice_->getSite(i))->setDissolutionSite(iniLattice.site[i].dissolution);
             (lattice_->getSite(i))->setGrowthPhases(iniLattice.site[i].growth);
             (lattice_->getSite(i))->setWmc(iniLattice.site[i].wmc);
             (lattice_->getSite(i))->setWmc0(iniLattice.site[i].wmc0);
             (lattice_->getSite(i))->setVisit(iniLattice.site[i].visit); //or 0!
+            (lattice_->getSite(i))->setInGrowInterfacePosVector(iniLattice.site[i].inGrowInterfacePos);
+            (lattice_->getSite(i))->setInDissInterfacePos(iniLattice.site[i].inDissInterfacePos);
           }
 
           for(int i = 0; i < dimLatticeInterface; i++){
@@ -447,7 +456,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
             lattice_->setGrowthSites(i,iniLattice.interface[i].growthSites);
             lattice_->setDissolutionSites(i,iniLattice.interface[i].dissolutionSites);
           }
-
+          lattice_->setGrowthInterfaceSize(iniLattice.growthInterfaceSize);
+          lattice_->setDissolutionInterfaceSize(iniLattice.dissolutionInterfaceSize);
           lattice_->resetRNG(iniLattice.numRNGcall_0,
                              iniLattice.numRNGcallLONGMAX, iniLattice.lastRNG, cyc, whileCount);
 
@@ -474,7 +484,10 @@ void Controller::doCycle(const string &statfilename, int choice) {
           nameDiff = "testDiff_recall";
 
           whileCount++;
-          changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_, capwater, numDiff, phDiff, nameDiff, whileCount, cyc);
+          changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_,
+                                                         capwater, numDiff,
+                                                         phDiff, nameDiff,
+                                                         whileCount, cyc);
         }
         int sizeVectDCId = vectDCId.size();
         cout << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;

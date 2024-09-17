@@ -27,6 +27,7 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
   x_ = xp;
   y_ = yp;
   z_ = zp;
+  visit_ = 0;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -34,7 +35,6 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
   verbose_ = verbose;
 #endif
 
-  dissolution_ = -1;
   growth_.clear();
 
   id_ = (unsigned int)(x_ + (xs * y_) + ((xs * ys) * z_));
@@ -46,10 +46,14 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
 
   expstrain_ = 0.0;
 
-  inGrowInterface_.clear();
-  inDissInterface_.clear();
-  inGrowInterface_.resize(chemSys_->getNumMicroPhases(), -1);
-  inDissInterface_.resize(chemSys_->getNumMicroPhases(), -1);
+  inGrowInterfacePos_.clear();
+  inGrowInterfacePos_.resize(chemSys_->getNumMicroPhases(), -1);
+  inDissInterfacePos_ = -1;
+
+  inGrowthVectorPos_.clear();
+  inGrowthVectorPos_.resize(chemSys_->getNumMicroPhases(), -1);
+  inDissolutionVectorPos_ = -1;
+
 }
 
 void Site::calcWmc(void) {
