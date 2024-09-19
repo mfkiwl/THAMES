@@ -5,8 +5,7 @@
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
 | July 25 09:16 2024 | Updated format of Colors.csv output |
-| July 24 11:01 2024 | Merged latest version of
-branch florinRecoverLatticeAndRNG onto main |
+| July 24 11:01 2024 | Merged latest version of branch florinRecoverLatticeAndRNG onto main |
 | July 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
 | July 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
 | July 11 17:53 2024 | Implemented initial and fixed solution DC composition |
@@ -25,8 +24,7 @@ branch florinRecoverLatticeAndRNG onto main |
 | Apr 26 22:49 2024 | Cleaned up install instructions; force initial microstructure output |
 | Apr 26 17:43 2024 | Writing PNG files now done directly. |
 | Apr 24 13:24 2024 | minpozzeffect is set only if at least one kinetically pozzolanic component is detected. |
-| Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix
-later. |
+| Apr 24 11:19 2024 | KineticController has minpozzeffect as a kluge; must fix later. |
 | Apr 23 15:07 2024 | Copied thameslib source files from florinTH branch. |
 | Apr 04 12:13 2024 | Changed naming convention of img files, with time string now in minutes. |
 | Mar 19 14:49 2024 | Better handling of color scheme for visualization of microstructure |
@@ -42,10 +40,8 @@ later. |
 | Jan 18 10:16 2024 | Cleaned up some debugging output |
 | Jan 17 00:58 2024 | Debugged behavior for adding growth sites |
 | Dec 29 19:21 2023 | Formatting uniformity and added viz to build |
-| Dec 23 22:34 2023 | Streamlined adjustment
-of microstructure volumes and output chemical shrinkage in Microstructure csv file |
-| Dec 22 13:51 2023 | Total microstructure volume now forced constant and
-capillary porosity modified to keep it that way; actual volume still tracked |
+| Dec 23 22:34 2023 | Streamlined adjustment of microstructure volumes and output chemical shrinkage in Microstructure csv file |
+| Dec 22 13:51 2023 | Total microstructure volume now forced constant and capillary porosity modified to keep it that way; actual volume still tracked |
 | Dec 20 16:43 2023 | Modified pozzolanic rate law; all solid phases are increasing in volume fraction (needs debug) |
 | Dec 19 22:51 2023 | Fixed retrieval of saturation index from solution object for pozzolanic kinetic step |
 | Dec 19 17:18 2023 | Debugging of pozzolanic kinetics; code compiles but does not run correctly |
