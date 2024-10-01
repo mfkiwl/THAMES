@@ -726,16 +726,16 @@ void KineticController::setPozzEffectOnPK(void) {
       pozzeffect = pow((sio2val / refsio2val), 2.0) * (betval / refbetval);
       if (pozzeffect < minpozzeffect)
         minpozzeffect = pozzeffect;
-      cout << "KineticController::setPozzEffectOnPK for model " << midx << " ("
+      cout << endl << "KineticController::setPozzEffectOnPK for model " << midx << " ("
            << phaseKineticModel_[midx]->getType() << ")" << endl;
-      cout << "  Ref LOI = " << loi << endl;
-      cout << "  LOI = " << refloi << endl;
-      cout << "  Max LOI = " << refloi << endl;
-      cout << "  SiO2 = " << sio2val << endl;
+      cout << "  Ref LOI = " << refloi << endl;
+      cout << "  LOI     = " << loi << endl;
+      cout << "  Max LOI = " << maxloi << endl;
+      cout << "  SiO2     = " << sio2val << endl;
       cout << "  Ref SiO2 = " << refsio2val << endl;
-      cout << "  BET = " << betval << endl;
-      cout << "  Ref BET = " << refbetval << endl;
-      cout << "  Pozz Effect = " << pozzeffect << endl;
+      cout << "  BET      = " << betval << endl;
+      cout << "  Ref BET  = " << refbetval << endl;
+      cout << "  Pozz Effect     = " << pozzeffect << endl;
       cout << "  Min Pozz Effect = " << minpozzeffect << endl;
       cout.flush();
     }

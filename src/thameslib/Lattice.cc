@@ -56,8 +56,6 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
   deptheffect_ = true;
   masterporevolume_.clear();
 
-
-
 #ifdef DEBUG
   verbose_ = true;
   warning_ = true;
@@ -128,9 +126,6 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
     cout << "Lattice::Lattice     zdim_ = " << zdim_ << endl;
     cout.flush();
   }
-
-
-
   numsites_ = (unsigned int)(xdim_ * ydim_ * zdim_);
   if (verbose_) {
     cout << "Lattice::Lattice    numsites_ = " << numsites_ << endl;
@@ -563,7 +558,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
     // Set the initial total volume of the microstructure
 
     double totmicvol = 0.0;
-    int totCount_ = 0;
+    //int totCount_ = 0;
     // cout << endl << "count_ : " << endl;
     for (int i = 0; i < numMicroPhases_; i++) {
       microPhaseId = chemSys_->getMicroPhaseId(i);
@@ -832,11 +827,11 @@ void Lattice::findInterfaces(void) {
   cout << "***   numMicroPhases = " << numMicroPhases_ << endl;
 
   for (int i = 0; i < numMicroPhases_; i++) {
-    cout << "  " << i << "   " << chemSys_->getMicroPhaseName(i)
-         << "   id: " << chemSys_->getMicroPhaseId(i)
-         << "     count_ = " << count_[i] << "     dissolutionInterfaceSize_ =  "
-         << dissolutionInterfaceSize_[i]
-         << "     growthInterfaceSize_ =  " << growthInterfaceSize_[i]
+    cout << "  " << setw(3) << i << " : " << setw(15) << left << chemSys_->getMicroPhaseName(i)
+         << setw(4) << right << " id:" << setw(3) << chemSys_->getMicroPhaseId(i)
+         << "     count_ = " << setw(8) << count_[i] << "     dissolutionInterfaceSize_ =  "
+         << setw(8) << dissolutionInterfaceSize_[i]
+         << "     growthInterfaceSize_ =  " << setw(8) << growthInterfaceSize_[i]
          << "     porosity : " << chemSys_->getMicroPhasePorosity(i)
          << "     templates : ";
     for (int j = 0; j < numMicroPhases_; j++) {
@@ -850,7 +845,7 @@ void Lattice::findInterfaces(void) {
   }
   cout.flush();
 
-  //cout << "***   findInterfaces exit" << endl; exit(0);
+  // cout << "***   findInterfaces exit" << endl; exit(0);
 
   return;
 }
@@ -947,14 +942,14 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
        << "   numChangeTot = " << numChangeTot << endl;
   for (i = 0; i < growPhaseIDVectSize; i++) {
     phaseID = growPhaseIDVect[i];
-    cout << "       GROW_INI for i = " << i
+    cout << "       GROW_INI for i = " << setw(3) << i
          << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
-         << phaseID << "   " << growPhNameVect[i] << "   " << count_[phaseID]
-         << "   " << dim_isite[i] << "   " << numLeft[i] << "   "
-         << numChange[i] << endl;
+         << setw(3) << phaseID << "   " << setw(15) << left << growPhNameVect[i] << "   "
+         << setw(8) << right << count_[phaseID]
+         << "   " << setw(8) << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   "
+         << setw(8) << numChange[i] << endl;
   }
   cout.flush();
-
 
   while ((numLeftTot > 0) && (growthVectorSize >= 1)) {
       bcl++;
@@ -1232,12 +1227,12 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
                  << totalTRC << "/" << trc_g << "/" << bcl << endl;
             cout << "     GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                  << "   growthVectorSize = " << growthVectorSize << "   numLeftTot = " << numLeftTot
-                 << "   numChangeTot = " << numChangeTot << endl;
+                 << "   numChangeTot = " << numChangeTot << endl;     
             cout << "       GROW_END phaseid count_ dim_isite numleft numchange  "
-                    ":  "
-                 << growPhaseIDVect[i] << "   "
-                 << "   " << count_[growPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
-                 << numLeft[i] << "   " << numChange[i] << endl;
+                  ":  "
+               << setw(3) << growPhaseIDVect[i] << "   " << setw(8) << right << count_[growPhaseIDVect[i]]
+               << "   " << setw(8) << dim_isite[i] << "   "
+               << setw(8) << numLeft[i] << "   " << setw(8) << numChange[i] << endl;
             cout.flush();
 
             needUpdate = true;
@@ -1476,7 +1471,7 @@ void Lattice::nucleatePhaseRnd(int phaseID,int numLeft) {
          << count_[ELECTROLYTEID] << endl;
     cout
         << endl
-        << "     There is no room to nucleate => exit the program"
+        << "     There is no room to nucleate => normal exit of the program"
         << endl;
     bool is_Error = false;
     throw MicrostructureException("Lattice", "nucleatePhaseRnd",
@@ -1877,7 +1872,7 @@ void Lattice::nucleatePhaseAff(int phaseID,int numLeft) {
          << count_[ELECTROLYTEID] << endl;
     cout
         << endl
-        << "       There is no room to nucleate => exit the program"
+        << "       There is no room to nucleate => normal exit of the program"
         << endl;
     bool is_Error = false;
     throw MicrostructureException("Lattice", "nucleatePhaseAff",
@@ -2127,11 +2122,12 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
     phaseID = dissPhaseIDVect[i];
     // isite = interface_[phaseID].getDissolutionSites();
     // dim_isite = isite.size();
-    cout << "       DISS_INI for i = " << i
+    cout << "       DISS_INI for i = " << setw(3) << i
          << "  => phaseID phaseName count_ dim_isite numleft numchange  :  "
-         << phaseID << "   " << dissPhNameVect[i] << "   " << count_[phaseID]
-         << "   " << dim_isite[i] << "   " << numLeft[i] << "   "
-         << numChange[i] << endl;
+         << setw(3) << phaseID << "   " << setw(15) << left << dissPhNameVect[i] << "   "
+         << setw(8) << right << count_[phaseID]
+         << "   " << setw(8) << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   "
+         << setw(8) << numChange[i] << endl;
   }
   cout.flush();
 
@@ -2377,9 +2373,9 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
                << "   numChangeTot = " << numChangeTot << endl;
           cout << "       DISS_END phaseid count_ dim_isite numleft numchange  "
                   ":  "
-               << dissPhaseIDVect[i] << "   " << count_[dissPhaseIDVect[i]]
-               << "   " << dim_isite[i] << "   "
-               << numLeft[i] << "   " << numChange[i] << endl;
+               << setw(3) << dissPhaseIDVect[i] << "   " << setw(8) << right << count_[dissPhaseIDVect[i]]
+               << "   " << setw(8) << dim_isite[i] << "   "
+               << setw(8) << numLeft[i] << "   " << setw(8) << numChange[i] << endl;
           cout.flush();
 
           dissolutionVectorSize = dissolutionVector.size();
@@ -3009,11 +3005,16 @@ int Lattice::changeMicrostructure(double time, const int simtype,
         pid[i] = i;
         phName[i] = phasenames[i];
         if (netsites[i] != 0) {
-          cout << "Lattice::changeMicrostructure ***netsites["
-               << phasenames[i] << "] in this state = " << netsites[i]
-               << "; cursites = " << cursites << " and newsites = " << newsites
-               << "   -> phaseID = "
-               << chemSys_->getMicroPhaseId(phasenames[i]) << endl;
+          //cout << "Lattice::changeMicrostructure ***netsites["
+          //     << phasenames[i] << "] in this state = " << netsites[i]
+          //     << "; cursites = " << cursites << " and newsites = " << newsites
+          //     << "   -> phaseID = "
+          //     << chemSys_->getMicroPhaseId(phasenames[i]) << endl;
+          cout << "Lattice::changeMicrostructure ***for " << setw(15) << left
+               << phasenames[i] << " netsites in this state = " << setw(9) << right
+               << netsites[i] << "; cursites = " << setw(9) << cursites
+               << " and newsites = " << setw(9) << newsites << "   -> phaseID = "
+               << setw(3) << chemSys_->getMicroPhaseId(phasenames[i]) << endl;
           cout.flush();
         }
       }
@@ -3400,7 +3401,6 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
   cout << "Lattice::adjustMicrostructureVolFracs" << endl;
   cout.flush();
 #endif
-
 
     // Remember there are now two extra slots at the end of vfrac, just
     // like at the end of vol.  These two extra slots hold the capillary
@@ -4828,8 +4828,6 @@ int Lattice::findDomainSize(int siteid, int maxsize) {
   return nfound;
 }
 
-
-
 vector<int> Lattice::findDomainSizeDistribution(int phaseid,
                                                 const int numsites,
                                                 int maxsize, int cyc,
@@ -4952,7 +4950,6 @@ vector<int> Lattice::findDomainSizeDistribution(int phaseid,
 
   return (selectedSites);
 }
-
 
 void Lattice::findIsolatedClusters(void) {
   // voxels without contact with electrolyte i.e. voxels having low probability
@@ -5626,575 +5623,3 @@ void Lattice::populateElementData(void) {
 
   return;
 }
-
-void Lattice::increaseLatticeVolume(void) {
-
-    int xdim_ini = xdim_;
-    int ydim_ini = ydim_;
-    int zdim_ini = zdim_;
-    int numsites_ini = numsites_;
-
-    int increaseXYZ = 2;
-
-    xdim_ *= increaseXYZ;
-    ydim_ *= increaseXYZ;
-    zdim_ *= increaseXYZ;
-
-    numsites_ = xdim_ * ydim_ * zdim_;
-
-    cout << endl
-         << "    xdim_ini/ydim_ini/zdim_ini/numsites_ini : " << xdim_ini << " / " << ydim_ini
-         << " / " << zdim_ini << " / " << numsites_ini << endl;
-    cout << endl << "    increaseXYZ : " << increaseXYZ << endl;
-    cout << endl
-         << "    new xdim_/ydim_/zdim_/numsites_ : " << xdim_ << " / " << ydim_ << " / " << zdim_
-         << " / " << numsites_ << endl;
-    //cout << endl << "    exit" << endl; exit(0);
-
-    for (int k = 0; k < zdim_; k++) {
-      for (int j = 0; j < ydim_; j++) {
-        for (int i = 0; i < xdim_; i++) {
-          addSite(i, j, k);
-        }
-      }
-    }
-
-    ///
-    /// Set up the array of neighbors for each site
-    ///
-
-    int xn, yn, zn, idn;
-    for (int ii = 0; ii < numsites_; ii++) {
-      for (int j = 0; j < NN_NNN; j++) {
-        ///
-        /// Store up to 2nd nearest neighbors
-        ///
-
-        switch (j) {
-        case 0: // West neighbor
-          xn = site_[ii].getX() - 1;
-          if (xn < 0 && BC != 1)
-            xn += xdim_;
-          if (xn < 0 && BC == 1)
-            xn = 0;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ();
-          break;
-        case 1: // East neighbor
-          xn = site_[ii].getX() + 1;
-          if (xn >= xdim_ && BC != 1)
-            xn -= xdim_;
-          if (xn >= xdim_ && BC == 1)
-            xn -= 1;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ();
-          break;
-        case 2: // South neighbor
-          yn = site_[ii].getY() - 1;
-          if (yn < 0 && BC != 2)
-            yn += ydim_;
-          if (yn < 0 && BC == 2)
-            yn = 0;
-          xn = site_[ii].getX();
-          zn = site_[ii].getZ();
-          break;
-        case 3: // North neighbor
-          yn = site_[ii].getY() + 1;
-          if (yn >= ydim_ && BC != 2)
-            yn -= ydim_;
-          if (yn >= ydim_ && BC == 2)
-            yn -= 1;
-          xn = site_[ii].getX();
-          zn = site_[ii].getZ();
-          break;
-        case 4: // Down neighbor
-          zn = site_[ii].getZ() - 1;
-          if (zn < 0 && BC != 3)
-            zn += zdim_;
-          if (zn < 0 && BC == 3)
-            zn = 0;
-          xn = site_[ii].getX();
-          yn = site_[ii].getY();
-          break;
-        case 5: // Up neighbor
-          zn = site_[ii].getZ() + 1;
-          if (zn >= zdim_ && BC != 3)
-            zn -= zdim_;
-          if (zn >= zdim_ && BC == 3)
-            zn -= 1;
-          xn = site_[ii].getX();
-          yn = site_[ii].getY();
-          break;
-        case 6: // Southwest neighbor
-          xn = site_[ii].getX() - 1;
-          if (xn < 0 && BC != 1)
-            xn += xdim_;
-          if (xn < 0 && BC == 1)
-            xn = 0;
-          yn = site_[ii].getY() - 1;
-          if (yn < 0 && BC != 2)
-            yn += ydim_;
-          if (yn < 0 && BC == 2)
-            yn = 0;
-          zn = site_[ii].getZ();
-          break;
-        case 7: // Northwest neighbor
-          xn = site_[ii].getX() - 1;
-          if (xn < 0 && BC != 1)
-            xn += xdim_;
-          if (xn < 0 && BC == 1)
-            xn = 0;
-          yn = site_[ii].getY() + 1;
-          if (yn >= ydim_ && BC != 2)
-            yn -= ydim_;
-          if (yn >= ydim_ && BC == 2)
-            yn -= 1;
-          zn = site_[ii].getZ();
-          break;
-        case 8: // Northeast neighbor
-          xn = site_[ii].getX() + 1;
-          if (xn >= xdim_ && BC != 1)
-            xn -= xdim_;
-          if (xn >= xdim_ && BC == 1)
-            xn -= 1;
-          yn = site_[ii].getY() + 1;
-          if (yn >= ydim_ && BC != 2)
-            yn -= ydim_;
-          if (yn >= ydim_ && BC == 2)
-            yn -= 1;
-          zn = site_[ii].getZ();
-          break;
-        case 9: // Southeast neighbor
-          xn = site_[ii].getX() + 1;
-          if (xn >= xdim_ && BC != 1)
-            xn -= xdim_;
-          if (xn >= xdim_ && BC == 1)
-            xn -= 1;
-          yn = site_[ii].getY() - 1;
-          if (yn < 0 && BC != 2)
-            yn += ydim_;
-          if (yn < 0 && BC == 2)
-            yn = 0;
-          zn = site_[ii].getZ();
-          break;
-        case 10: // Downwest neighbor
-          xn = site_[ii].getX() - 1;
-          if (xn < 0 && BC != 1)
-            xn += xdim_;
-          if (xn < 0 && BC == 1)
-            xn = 0;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ() - 1;
-          if (zn < 0 && BC != 3)
-            zn += zdim_;
-          if (zn < 0 && BC == 3)
-            zn = 0;
-          break;
-        case 11: // Downnorth neighbor
-          xn = site_[ii].getX();
-          yn = site_[ii].getY() + 1;
-          if (yn >= ydim_ && BC != 2)
-            yn -= ydim_;
-          if (yn >= ydim_ && BC == 2)
-            yn -= 1;
-          zn = site_[ii].getZ() - 1;
-          if (zn < 0 && BC != 3)
-            zn += zdim_;
-          if (zn < 0 && BC == 3)
-            zn = 0;
-          break;
-        case 12: // Downeast neighbor
-          xn = site_[ii].getX() + 1;
-          if (xn >= xdim_ && BC != 1)
-            xn -= xdim_;
-          if (xn >= xdim_ && BC == 1)
-            xn -= 1;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ() - 1;
-          if (zn < 0 && BC != 3)
-            zn += zdim_;
-          if (zn < 0 && BC == 3)
-            zn = 0;
-          break;
-        case 13: // Downsouth neighbor
-          xn = site_[ii].getX();
-          yn = site_[ii].getY() - 1;
-          if (yn < 0 && BC != 2)
-            yn += ydim_;
-          if (yn < 0 && BC == 2)
-            yn = 0;
-          zn = site_[ii].getZ() - 1;
-          if (zn < 0 && BC != 3)
-            zn += zdim_;
-          if (zn < 0 && BC == 3)
-            zn = 0;
-          break;
-        case 14: // Upwest neighbor
-          xn = site_[ii].getX() - 1;
-          if (xn < 0 && BC != 1)
-            xn += xdim_;
-          if (xn < 0 && BC == 1)
-            xn = 0;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ() + 1;
-          if (zn >= zdim_ && BC != 3)
-            zn -= zdim_;
-          if (zn >= zdim_ && BC == 3)
-            zn -= 1;
-          break;
-        case 15: // Upnorth neighbor
-          xn = site_[ii].getX();
-          yn = site_[ii].getY() + 1;
-          if (yn >= ydim_ && BC != 2)
-            yn -= ydim_;
-          if (yn >= ydim_ && BC == 2)
-            yn -= 1;
-          zn = site_[ii].getZ() + 1;
-          if (zn >= zdim_ && BC != 3)
-            zn -= zdim_;
-          if (zn >= zdim_ && BC == 3)
-            zn -= 1;
-          break;
-        case 16: // Upeast neighbor
-          xn = site_[ii].getX() + 1;
-          if (xn >= xdim_ && BC != 1)
-            xn -= xdim_;
-          if (xn >= xdim_ && BC == 1)
-            xn -= 1;
-          yn = site_[ii].getY();
-          zn = site_[ii].getZ() + 1;
-          if (zn >= zdim_ && BC != 3)
-            zn -= zdim_;
-          if (zn >= zdim_ && BC == 3)
-            zn -= 1;
-          break;
-        case 17: // Upsouth neighbor
-          xn = site_[ii].getX();
-          yn = site_[ii].getY() - 1;
-          if (yn < 0 && BC != 2)
-            yn += ydim_;
-          if (yn < 0 && BC == 2)
-            yn = 0;
-          zn = site_[ii].getZ() + 1;
-          if (zn >= zdim_ && BC != 3)
-            zn -= zdim_;
-          if (zn >= zdim_ && BC == 3)
-            zn -= 1;
-          break;
-        }
-
-        idn = (unsigned int) (xn + (xdim_ * yn) + ((xdim_ * ydim_) * zn));
-        site_[ii].setNb(j, &site_[idn]);
-      }
-    }
-
-    ///
-    /// This loop reads the phase for each site and assigns it,
-    /// also updating the count of the phase.
-    ///
-
-    int pid;
-    int xp, yp, zp;
-    int xp1, yp1, zp1;
-    int mz;
-    int dxy = xdim_ini * ydim_ini;
-    int dx = xdim_ini, dy = ydim_ini, dz = zdim_ini;
-    int idp;
-    for (int i = 0; i < numsites_ini; i++) {
-
-      //in >> pid; // write image input file
-
-      zp = i / dxy;
-      mz = i - zp * dxy;
-      yp = mz / dx;
-      xp = mz - yp * dx;
-
-      //site_[i].setMicroPhaseId(pid);
-      //count_[pid]++;
-
-      xp1 = xp;
-      yp1 = yp;
-      zp1 = zp;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test1 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test1 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test1 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit1 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit1 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit1 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp + dx;
-      yp1 = yp;
-      zp1 = zp;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test2 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test2 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test2 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit2 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit2 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit2 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp;
-      yp1 = yp + dy;
-      zp1 = zp;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test3 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test3 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test3 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit3 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit3 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit3 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp + dx;
-      yp1 = yp + dy;
-      zp1 = zp;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test4 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test4 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test4 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit4 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit4 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit4 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      //**********************
-
-      xp1 = xp;
-      yp1 = yp;
-      zp1 = zp + dz;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test5 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test5 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test5 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit5 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit5 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit5 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp + dx;
-      yp1 = yp;
-      zp1 = zp + dz;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test6 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test6 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test6 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit6 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit6 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit6 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp;
-      yp1 = yp + dy;
-      zp1 = zp + dz;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test7 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test7 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test7 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit7 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit7 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit7 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      xp1 = xp + dx;
-      yp1 = yp + dy;
-      zp1 = zp + dz;
-      idp = xp1 + xdim_ * yp1 + xdim_ * ydim_ * zp1;
-      if (xp1 != site_[idp].getX() || yp1 != site_[idp].getY() || zp1 != site_[idp].getZ()) {
-        cout << endl << "   error xp1 != site_[idp].getX()" << endl;
-        cout << endl
-             << "   test8 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / " << zp1
-             << " / " << idp << endl;
-        cout << endl
-             << "   test8 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   test8 : exit" << endl;
-        exit(0);
-      }
-      if (site_[idp].getVisit() > 0) {
-        cout << endl << "   error site_[idp].getVisit() > 0" << endl;
-        cout << endl
-             << "   visit8 i/xp1/yp1/zp1/idp : " << i << " / " << xp1 << " / " << yp1 << " / "
-             << zp1 << " / " << idp << endl;
-        cout << endl
-             << "   visit8 getX()/getY()/getZ() : " << site_[idp].getX() << " / "
-             << site_[idp].getY() << " / " << site_[idp].getZ() << endl;
-        cout << endl << "   visit8 : exit" << endl;
-        exit(0);
-      } else {
-        site_[idp].setVisit(1);
-      }
-      site_[idp].setMicroPhaseId(pid);
-      count_[pid]++;
-
-      //if (i != idp) {
-      //  cout << endl << "   error i != idp" << endl;
-      //  cout << endl << "   test1 i/xp/yp/zp/idp : " << i << " / " << xp << " / " << yp << " / " << zp << " / " << idp << endl;
-      //  cout << endl << "   test1 : exit" << endl; exit(0);
-      //}
-
-      //if (xp != site_[i].getX() || yp != site_[i].getY() ||  zp != site_[i].getZ()) {
-      //  cout << endl << "   error xp != site_[i].getX()" << endl;
-      //  cout << endl << "   test2 i/xp/yp/zp/idp : " << i << " / " << xp << " / " << yp << " / " << zp << " / " << idp << endl;
-      //  cout << endl << "   test2 getX()/getY()/getZ() : " << site_[i].getX() << " / " << site_[i].getY() << " / " << site_[i].getZ() << endl;
-      //  cout << endl << "   test2 : exit" << endl; exit(0);
-      //}
-
-      //cout << endl << "   test i/xp/yp/zp/idp : " << i << " / " << xp << " / " << yp << " / " << zp << " / " << idp << endl;
-    }
-
-    cout << endl << "   end test/visit : OK " << endl; //exit(0);
-
-    for (int i = 0; i < numsites_; i++) {
-      if (site_[i].getVisit() == 0) {
-        cout << endl << "   errorF site_[i].getVisit() == 0" << endl;
-        cout << endl
-             << "   errorF i/getX()/getY()/getZ() : " << i << " / " << site_[i].getX() << " / "
-             << site_[i].getY() << " / " << site_[i].getZ() << endl;
-        cout << endl << "   errorF : exit" << endl;
-        exit(0);
-      }
-    }
-
-    string latticeRoot = "lattTest";
-    writeLatticeXYZ(0, 1, latticeRoot);
-    writeLatticeIni(0);
-
-    cout << endl << "   end errorF : OK => exit" << endl;
-    exit(0);
-  }

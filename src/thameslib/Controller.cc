@@ -238,14 +238,12 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
   lattice_->writeMicroColors(jobroot_);
 
-
   ///
   /// Write the initial microstructure image and its png image
   ///
 
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
-
   int timesGEMFailed_loc = 0;
 
   // init to 0 all DC moles corresponding to the kinetic controlled microphases
@@ -256,11 +254,12 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
 
   int DCId;
-  for (int i = FIRST_SOLID; i < numMicPh; i++){
-    if(chemSys_->isKinetic(i)){
+  for (int i = FIRST_SOLID; i < numMicPh; i++) {
+    if (chemSys_->isKinetic(i)) {
       DCId = chemSys_->getMicroPhaseDCMembers(i, 0);
-      //chemSys_->setDCMoles(DCId,0.0); //coment if DCLowerLimit in kineticControllerStep/GEM_from_MT
-      chemSys_->setIsDCKinetic(DCId,true);
+      // chemSys_->setDCMoles(DCId,0.0); //coment if DCLowerLimit in
+      // kineticControllerStep/GEM_from_MT
+      chemSys_->setIsDCKinetic(DCId, true);
     }
   }
   cout << endl << "***   numGEMPhases_  = " <<  chemSys_->getNumGEMPhases() << endl;
@@ -369,7 +368,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
       iniLattice.site.clear();
       RestoreSite site_l; // only one declaration
       int dimLatticeSite = lattice_->getNumsites(); // only one declaration
-      for(int i = 0; i < dimLatticeSite; i++){
+      for (int i = 0; i < dimLatticeSite; i++) {
         site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
         site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
         site_l.wmc = (lattice_->getSite(i))->getWmc();
@@ -382,7 +381,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
       iniLattice.interface.clear();
       RestoreInterface interface_l; //only one declaration
       int dimLatticeInterface = lattice_->getInterfaceSize();  //only one declaration
-      for(int i = 0; i < dimLatticeInterface; i++){
+      for (int i = 0; i < dimLatticeInterface; i++) {
         interface_l.microPhaseId = lattice_->getInterface(i).getMicroPhaseId();
         interface_l.growthSites = lattice_->getInterface(i).getGrowthSites();
         interface_l.dissolutionSites = lattice_->getInterface(i).getDissolutionSites();
@@ -493,7 +492,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
         cout << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;
         cout << "   vectDCId[i]:";
         for (int i = 0; i < sizeVectDCId; i++) {
-          cout << "  " << vectDCId[i];
+          cout << "  " << vectDCId[i] << "(" << chemSys_->getDCName(vectDCId[i]) << ")";
           chemSys_->setDCLowerLimit(vectDCId[i],0);
         }
         if (timesGEMFailed_loc > 0) continue;
@@ -580,7 +579,6 @@ void Controller::doCycle(const string &statfilename, int choice) {
       cout << endl << " Controller::doCycle - for sulfate attack, check conditions for addDissolutionSites & coordination sphere " << endl;
       cout << " program stops " << endl;
       exit(1);
-
 
       if (verbose_) {
         cout << "Controller::doCycle Sulfate attack module" << endl;
@@ -864,7 +862,6 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
     double T = lattice_->getTemperature();
 
-
     /// The thermodynamic calculation returns the saturation index of phases,
     /// which is needed for calculations of driving force for dissolution
     /// or growth.
@@ -880,7 +877,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
     kineticController_->calculateKineticStep(dt, cyc);
 
-    //if (time >= sattack_time_) {// for sulfate attack iterations}
+    // if (time >= sattack_time_) {// for sulfate attack iterations}
 
     ///
     /// Now that the method is done determining the change in moles of each IC,
@@ -926,7 +923,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
   return timesGEMFailed;
 }
 
-void Controller::writeTxtOutputFiles (double time){
+void Controller::writeTxtOutputFiles (double time) {
   ///
   /// Set the kinetic DC moles.  This adds the clinker components to the DC
   /// moles.
@@ -1116,25 +1113,24 @@ void Controller::writeTxtOutputFiles (double time){
     cout.flush();
   }
   out10.close();
-
 }
 
-void Controller::writeTxtOutputFiles_onlyICsDCs(double time){
+void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
   int i, j;
   int numICs = chemSys_->getNumICs();
   int numDCs = chemSys_->getNumDCs();
   vector<double> ICMoles;
-  ICMoles.resize(numICs,0.0);
+  ICMoles.resize(numICs, 0.0);
   vector<double> DCMoles;
-  DCMoles.resize(numDCs,0.0);
-  for (i = 0; i < numDCs; i++){
+  DCMoles.resize(numDCs, 0.0);
+  for (i = 0; i < numDCs; i++) {
     DCMoles[i] = chemSys_->getDCMoles(i);
   }
 
   string outfilenameIC = jobroot_ + "_icmoles.csv";
   string outfilenameDC = jobroot_ + "_dcmoles.csv";
-  if(time < 1.e-10){
+  if (time < 1.e-10) {
     ofstream out0IC(outfilenameIC.c_str());
     out0IC << "Time(d)";
     for (i = 0; i < numICs; i++) {
@@ -1152,7 +1148,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time){
     out0DC.close();
   }
 
-  vector <int> impurityDCID;
+  vector<int> impurityDCID;
   impurityDCID.clear();
   impurityDCID.push_back(chemSys_->getDCId("K2O"));
   impurityDCID.push_back(chemSys_->getDCId("Na2O"));
@@ -1164,8 +1160,8 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time){
   double massImpurity, totMassImpurity;
 
   //cout << endl << "getIsDCKinetic: " << endl;
-  for(j = 0; j < numDCs; j++){
-    if(chemSys_->getIsDCKinetic(j)){
+  for (j = 0; j < numDCs; j++) {
+    if (chemSys_->getIsDCKinetic(j)) {
       //molMass = chemSys_->getDCMolarMass(j);
       mPhId = chemSys_->getDC_to_MPhID(j);
       scMass = chemSys_->getMicroPhaseMass(mPhId);
@@ -1182,7 +1178,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time){
 
       massImpurity = scMass * chemSys_->getMgo(mPhId);
       totMassImpurity += massImpurity;
-      DCMoles[impurityDCID[2]] += massImpurity / chemSys_->getDCMolarMass("Per");//MgO
+      DCMoles[impurityDCID[2]] += massImpurity / chemSys_->getDCMolarMass("Per"); //MgO
 
       massImpurity = scMass * chemSys_->getSo3(mPhId);
       totMassImpurity += massImpurity;
@@ -1193,9 +1189,9 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time){
     }
   }
 
-  for(j = 0; j < numDCs; j++){
-    for(i = 0; i < numICs; i++){
-      ICMoles[i] += DCMoles[j]* chemSys_->getDCStoich(j,i);
+  for (j = 0; j < numDCs; j++) {
+    for (i = 0; i < numICs; i++) {
+      ICMoles[i] += DCMoles[j] * chemSys_->getDCStoich(j, i);
     }
   }
 

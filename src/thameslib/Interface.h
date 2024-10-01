@@ -125,14 +125,11 @@ public:
   int getGrowthSize(void) { return growthSites_.size(); }
   int getDissolutionSize(void) { return dissolutionSites_.size(); }
 
-
-  int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
-
   void setGrowthSites(vector<Isite> vect) {
-    //growthSitesSize_ = vect.size();
     growthSites_ = vect;
   }
 
+  int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
 
   int getDissolutionSitesId(int pos) { return dissolutionSites_[pos].getId(); }
 
@@ -145,7 +142,6 @@ public:
   vector<Isite> getDissolutionSites(void) { return dissolutionSites_; }
 
   void setDissolutionSites(vector<Isite> vect) {
-    //dissolutionSitesSize_ = vect.size();
     dissolutionSites_ = vect;
   }
 

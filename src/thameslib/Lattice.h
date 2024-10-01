@@ -70,7 +70,6 @@ using namespace std;
 sites.
 
 */
-
 class Lattice {
 
 private:
@@ -275,7 +274,7 @@ public:
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
   void setVolumefraction(unsigned int i, double vfrac) {
-      volumefraction_[i] = vfrac;
+    volumefraction_[i] = vfrac;
   }
 
   /**
@@ -285,7 +284,7 @@ public:
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
   void setInitvolumefraction(unsigned int i, double vfrac) {
-      initvolumefraction_[i] = vfrac;
+    initvolumefraction_[i] = vfrac;
   }
 
   /**
@@ -319,11 +318,11 @@ public:
   @return the volume fraction of phase i on a total microstructure basis
   */
   double getVolumefraction(unsigned int i) {
-      if (numsites_ == 0) {
-        throw FloatException("Lattice", "getVolumefraction",
-                             "Divide by zero (numsites_)");
-      }
-      return (volumefraction_[i]);
+    if (numsites_ == 0) {
+      throw FloatException("Lattice", "getVolumefraction",
+                           "Divide by zero (numsites_)");
+    }
+    return (volumefraction_[i]);
   }
 
   /**
@@ -336,11 +335,11 @@ public:
   @return the initial volume fraction of phase i on a total microstructure basis
   */
   double getInitvolumefraction(unsigned int i) {
-      if (numsites_ == 0) {
-        throw FloatException("Lattice", "getInitialvolumefraction",
-                             "Divide by zero (numsites_)");
-      }
-      return (initvolumefraction_[i]);
+    if (numsites_ == 0) {
+      throw FloatException("Lattice", "getInitialvolumefraction",
+                           "Divide by zero (numsites_)");
+    }
+    return (initvolumefraction_[i]);
   }
 
   /**
@@ -522,7 +521,7 @@ public:
   @return the x coordinate
   */
   unsigned int getX(const unsigned int i) const {
-      return (site_[i].getX());
+    return (site_[i].getX());
   }
 
   /**
@@ -533,7 +532,7 @@ public:
   @return the y coordinate
   */
   unsigned int getY(const unsigned int i) const {
-      return (site_[i].getY());
+    return (site_[i].getY());
   }
 
   /**
@@ -544,7 +543,7 @@ public:
   @return the x coordinate
   */
   unsigned int getZ(const unsigned int i) const {
-      return (site_[i].getZ());
+    return (site_[i].getZ());
   }
 
   /**
@@ -575,7 +574,7 @@ public:
   @return a pointer to the Site object in question
   */
   Site *getSite(int index) {
-      return &site_[index];
+    return &site_[index];
   }
 
   /**
@@ -588,7 +587,7 @@ public:
   @param index is the index of the Site object in the `site_` array
   */
   void setDamage(int index) {
-      site_[index].setDamage();
+    site_[index].setDamage();
   }
 
   /**
@@ -599,7 +598,7 @@ public:
   @param dwmcval is the increment to add to the wmc
   */
   void dWmc(int index, double dwmcval) {
-      site_[index].setWmc(site_[index].getWmc() + dwmcval);
+    site_[index].setWmc(site_[index].getWmc() + dwmcval);
   }
 
   /**
@@ -636,8 +635,6 @@ public:
   @return the actual number of sites that were changed for each microphase ID from
   the input growPhaseIDVect vector
   */
-  //void growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
-  //                      vector<string> growPhNameVect, int &numadded_G, int totalTRC);
   vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
                         vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
@@ -798,7 +795,6 @@ public:
   @param pid is the microstructure phase id
   */
   void removeDissolutionSite(Site *loc, unsigned int pid);
-  void removeDissolutionSite_M(Site *loc, unsigned int pid, int totalTRC);
 
   /**
   @brief Remove a site from the list of sites where growth of a given phase can

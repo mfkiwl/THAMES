@@ -304,8 +304,19 @@ public:
   */
   bool getWarning() const { return warning_; }
 
-  void writeTxtOutputFiles (double time);
-  void writeTxtOutputFiles_onlyICsDCs (double time);
+  /**
+  @brief Master function for writing ascii text files
+
+  @param time is the simulation time
+  */
+  void writeTxtOutputFiles(double time);
+
+  /**
+  @brief Master function for writing ascii text files of ICs and DCs
+
+  @param time is the simulation time
+  */
+  void writeTxtOutputFiles_onlyICsDCs(double time);
 
 }; // End of Controller class
 #endif
