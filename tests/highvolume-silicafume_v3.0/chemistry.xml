@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" 
-  xs:noNamespaceSchemaLocation="https://github.tamu.edu/jwbullard/THAMES/blob/master/src/thameslib/xsdfiles/chemistry.xsd">
-<!--The number of possible phases in the microstructure not counting Void-->  
+  xs:noNamespaceSchemaLocation="chemistry.xsd">
+<!--The number of possible phases in the microstructure not counting Void-->
  <numentries>17</numentries>
-<!--Temperature in K--> 
+<!--Temperature in K-->
  <temperature>298.15</temperature>
-<!--Do not change next value, used for Parrott and Killoh kinetic model--> 
+<!--Do not change next value, used for Parrott and Killoh kinetic model-->
  <reftemperature>298.15</reftemperature>
-<!--Set to 1 for saturated, 0 for sealed--> 
+<!--Set to 1 for saturated, 0 for sealed-->
  <saturated>1</saturated>
 <!--Void phase should always be present and first in the list-->
  <phase>
   <thamesname>Void</thamesname>
-<!--Unique integer id for microstructure phase-->   
+<!--Unique integer id for microstructure phase-->
   <id>0</id>
-<!--This microstructure phase is not a cement component (value = 0; if yes, value = 1)-->   
+<!--This microstructure phase is not a cement component (value = 0; if yes, value = 1)-->
   <cement_component>0</cement_component>
-<!--Display rgb colors, 0 to 255 (set by default => optional)-->   
+<!--Display rgb colors, 0 to 255 (set by default => optional)-->
   <display_data>
    <red>0.0</red>
    <green>0.0</green>
@@ -24,10 +24,10 @@
    <gray>0.0</gray>
   </display_data>
  </phase>
-<!--Water phase should always be present and  in the list--> 
+<!--Water phase should always be present and  in the list-->
  <phase>
   <thamesname>Electrolyte</thamesname>
-<!--Which GEM phase(s) and DC(s) are linked to this microstructure phase?-->  
+<!--Which GEM phase(s) and DC(s) are linked to this microstructure phase?-->
   <gemphase_data>
    <gemphasename>aq_gen</gemphasename>
    <gemdc>
@@ -319,8 +319,8 @@
    </gemdc>
   </gemphase_data>
   <id>2</id>
-  <cement_component>1</cement_component>  
-<!--Solid phases have meaningful interface data-->  
+  <cement_component>1</cement_component>
+<!--Solid phases have meaningful interface data-->
   <interface_data>
 <!--Affinity is the relative strength of the attraction between this phase
     and a template phase.  If a template is not listed, it takes the default
@@ -332,34 +332,34 @@
    </affinity>
   </interface_data>
 <!--We can specify minority impurity concentrations in a solid phase, which
-    will be released in proportion during dissolution-->  
+    will be released in proportion during dissolution-->
   <impurity_data>
-<!--K2O mole fraction-->  
+<!--K2O mole fraction-->
    <k2ocoeff>0.00087</k2ocoeff>
-<!--Na2O mole fraction-->   
+<!--Na2O mole fraction-->
    <na2ocoeff>0.0</na2ocoeff>
-<!--MgO mole fraction-->   
+<!--MgO mole fraction-->
    <mgocoeff>0.00861</mgocoeff>
-<!--SO3 mole fraction-->   
+<!--SO3 mole fraction-->
    <so3coeff>0.007942</so3coeff>
   </impurity_data>
-<!--This phase is controlled by a kinetic model: Standard/ParrotKilloh/Pozzolanic-->   
+<!--This phase is controlled by a kinetic model: Standard/ParrotKilloh/Pozzolanic-->
   <kinetic_data>
-<!--Which kinetic model applies to this phase-->    
+<!--Which kinetic model applies to this phase-->
    <type>ParrotKilloh</type>
    <specificSurfaceArea>402.0</specificSurfaceArea>
    <refSpecificSurfaceArea>385.0</refSpecificSurfaceArea>
 <!--k1, k2, k3, n1, n3 are Parrott and Killoh parameters 
-    (Kulik et al., RILEM Technical Letters 6(2021)36, Supp Material). Do not change-->   
+    (Kulik et al., RILEM Technical Letters 6(2021)36, Supp Material). Do not change-->
    <k1>1.5</k1>
    <k2>0.05</k2>
    <k3>1.1</k3>
    <n1>0.7</n1>
    <n3>3.3</n3>
 <!--Lothenbach-Kulik H coefficient to compute critDOR  critical Degree Of Reaction; 
-    is a P&K parameter--> 
+    is a P&K parameter-->
    <dorHcoeff>2.0</dorHcoeff>
-<!--Apparent activation energy for dissolution - another P&K parameter-->   
+<!--Apparent activation energy for dissolution - another P&K parameter-->
    <activationEnergy>41570.0</activationEnergy>
    <loi>0.0</loi>
   </kinetic_data>
@@ -390,7 +390,7 @@
    </gemdc>
   </gemphase_data>
   <id>4</id>
-  <cement_component>1</cement_component>  
+  <cement_component>1</cement_component>
   <interface_data>
    <affinity>
     <affinityphase>Belite</affinityphase>
@@ -426,7 +426,7 @@
    </gemdc>
   </gemphase_data>
   <id>5</id>
-  <cement_component>1</cement_component>  
+  <cement_component>1</cement_component>
   <interface_data>
    <affinity>
     <affinityphase>Ferrite</affinityphase>
@@ -641,8 +641,7 @@
   </gemphase_data>
   <id>11</id>
   <cement_component>0</cement_component>
-  <interface_data>
-  </interface_data>
+  <interface_data></interface_data>
  </phase>
  <phase>
   <thamesname>AFm</thamesname>

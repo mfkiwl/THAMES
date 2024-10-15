@@ -109,7 +109,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   cementComponent_.clear();
 
   color_.clear();
-  colorN_.clear(); //used in initColorMap() and output files
+  colorN_.clear(); // used in initColorMap() and output files
   initColorMap();
 
   SI_.clear();
@@ -122,7 +122,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   char *cGEMfilename = (char *)GEMfilename.c_str();
-  //char *cGEMdbrname = (char *)GEMdbrname.c_str();
+  // char *cGEMdbrname = (char *)GEMdbrname.c_str();
   if (verbose_) {
     cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
          << cGEMfilename << endl; // *-dat.lst
@@ -273,11 +273,11 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
@@ -593,7 +593,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   initMicroVolume_ = 0.0;
-  //microPhaseBelongsToCement_.resize(numMicroPhases_,false);
+  // microPhaseBelongsToCement_.resize(numMicroPhases_,false);
   for (unsigned int i = 0; i < numMicroPhases_; i++) {
     microPhaseToGEMPhase_.insert(make_pair((int)i, microPhaseMembers_[i]));
   }
@@ -828,7 +828,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
       try {
         parseMicroPhase(doc, cur, testnumEntries, phaseids, phaseData);
       } catch (FileException fex) {
-        //fex.printException();
+        // fex.printException();
         throw fex;
         cout << endl;
       } catch (GEMException gex) {
@@ -865,6 +865,8 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   map<int, double>::iterator it = initialSolutionComposition_.begin();
   while (it != initialSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
+    cout << DCName_[it->first]
+         << ": Total initial charge so far = " << totcharge << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -876,6 +878,8 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   it = fixedSolutionComposition_.begin();
   while (it != fixedSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
+    cout << DCName_[it->first] << ": Total fixed charge so far = " << totcharge
+         << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -1037,10 +1041,10 @@ void ChemicalSystem::parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
   }
   phaseids.insert(make_pair(pname, pid));
   cementComponent_.push_back(cemComp);
-  //cout << endl;
-  //cout << "  parseMicroPhaseNames pid : " << pid
-  //     << "\tpname : " << pname << "\tcemComp : " << cemComp << endl;
-  //cout << endl;
+  // cout << endl;
+  // cout << "  parseMicroPhaseNames pid : " << pid
+  //      << "\tpname : " << pname << "\tcemComp : " << cemComp << endl;
+  // cout << endl;
 }
 
 void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
@@ -1587,7 +1591,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   GEMPhaseDCMembers_ = obj.getGEMPhaseDCMembers();
   microPhaseId_ = obj.getMicroPhaseId();
   isKinetic_ = obj.getIsKinetic();
-  //randomGrowth_ = obj.getRandomGrowth();
+  // randomGrowth_ = obj.getRandomGrowth();
   ICMoles_ = obj.getICMoles();
   DCMoles_ = obj.getDCMoles();
   ICMolarMass_ = obj.getICMolarMass();
@@ -2145,6 +2149,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // Check and set chemical conditions on electrolyte
   setElectrolyteComposition(isFirst);
 
+  // TEST Some testing code here.  REMOVE as soon as testing is over
+  /* TEST */ setDCMoles(getDCId("O2"), 1.0e-3); /* highest value */
+
   if (verbose_) {
     cout << "ChemicalSystem::calculateState Entering GEM_from_MT" << endl;
     cout << "DCMoles:" << endl;
@@ -2160,8 +2167,12 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout.flush();
   }
 
+  /* TEST */ cout << "WOW 01: O2 moles = " << getDCMoles("O2") << endl;
+
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
                      DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_);
+
+  /* TEST */ cout << "WOW 02: O2 moles = " << getDCMoles("O2") << endl;
 
   if (isFirst) {
     for (int i = 0; i < numICs_; i++) {
@@ -2218,11 +2229,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   nodeStatus_ = node_->GEM_run(true);
@@ -2234,7 +2245,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
-    cerr << endl << "ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = " << nodeStatus_ << endl;
+    cerr << endl
+         << "ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = "
+         << nodeStatus_ << endl;
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
       msg = " Need GEM calc with auto initial approx (AIA)";
@@ -2247,7 +2260,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg = "ChemicalSystem::calculateState - Failed result with auto initial approx (AIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with auto initial "
+            "approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2264,7 +2278,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      msg = "ChemicalSystem::calculateState - Failed result with smart initial approx (SIA)";
+      msg = "ChemicalSystem::calculateState - Failed result with smart initial "
+            "approx (SIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2289,8 +2304,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (timesGEMFailed_ > 0) {
-    cout << "ChemicalSystem::calculateState - GEM_run has failed " << timesGEMFailed_
-           << " consecutive times  cyc = " << cyc << endl;
+    cout << "ChemicalSystem::calculateState - GEM_run has failed "
+         << timesGEMFailed_ << " consecutive times  cyc = " << cyc << endl;
     return timesGEMFailed_;
   }
 
@@ -2309,12 +2324,16 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// @todo Check carefully whether this function can throw an exception
   ///
 
+  /* TEST */ cout << "WOW 03: O2 moles = " << getDCMoles("O2") << endl;
+
   node_->GEM_to_MT(nodeHandle_, nodeStatus_, iterDone_, Vs_, Ms_, Gs_, Hs_,
                    ionicStrength_, pH_, pe_, Eh_, &ICResiduals_[0],
                    &ICChemicalPotential_[0], &DCMoles_[0], &DCActivityCoeff_[0],
                    &solutPhaseMoles_[0], &solutPhaseVolume_[0],
                    &solutPhaseMass_[0], &pSolutPhaseStoich_[0], &carrier_[0],
                    &surfaceArea_[0], &pSolidStoich_[0]);
+
+  /* TEST */ cout << "WOW 04: O2 moles = " << getDCMoles("O2") << endl;
 
   /* //comentat daca transmit toti DCs catre calculateState si impun limita
     inferioara kineticController bool test_isDCKinetic = false; for(int i = 0; i
@@ -2355,7 +2374,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // writePhasemoles();
 
   microVolume_ = 0.0;
-  setPGEMPhaseStoich(); // call getPGEMPhaseStoich() => pGEMPhaseStoich_[i]
+  setPGEMPhaseStoich();   // call getPGEMPhaseStoich() => pGEMPhaseStoich_[i]
                           // number of moles all ICs in all GEM CSD phases.
   setGEMPhaseStoich();    // call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]
   setGEMPhaseMass();      // => GEMPhaseMass_[i]
@@ -2586,14 +2605,13 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
   return;
 }
 
-void ChemicalSystem::initColorMap(void)
-{
-  //struct elemColor {
-  //  int colorId;
-  //  string altName;
-  //  vector<int> rgb;
-  //  int gray;
-  //};'
+void ChemicalSystem::initColorMap(void) {
+  // struct elemColor {
+  //   int colorId;
+  //   string altName;
+  //   vector<int> rgb;
+  //   int gray;
+  // };'
 
   colorN_["Void"].colorId = 0;
   colorN_["Void"].altName = "Empty";
