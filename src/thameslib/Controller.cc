@@ -393,7 +393,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
       int numDiff = 1000, phDiff = 1000;
       string nameDiff = "testDiff";
-      int changeLattice;
+      int changeLattice = -100;
       int whileCount = 0;
       changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_,
                                                      capwater, numDiff,

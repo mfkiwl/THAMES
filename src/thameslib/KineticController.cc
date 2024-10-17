@@ -879,8 +879,9 @@ void KineticController::calculateKineticStep(const double timestep,
       /// Loop over all kinetic models
 
       //*******
-      double totalDOR =
-          (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
+      double totalDOR = 0;
+
+      if (initScaledCementMass_> 0) totalDOR = (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
           initScaledCementMass_;
       cout << "KineticController::calculateKineticStep initScaledCementMass_/scaledCementMass : "
            << initScaledCementMass_ << " / " << chemSys_->getScaledCementMass()

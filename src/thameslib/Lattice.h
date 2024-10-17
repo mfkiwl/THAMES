@@ -1543,7 +1543,7 @@ public:
     numRNGcallLONGMAX_ = valLONGMAX;
     long int count_0 = 0, count_1 = 0;
     long int j0, j1, j11;
-    double lastRNGreset;
+    double lastRNGreset = -1.e-16;
     for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
       for(j11 = 1; j11 <= LONG_MAX; j11++) {
         lastRNGreset = rg_->Ran3();

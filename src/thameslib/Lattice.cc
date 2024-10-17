@@ -149,6 +149,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
   numRNGcall_0_ = 0;
   numRNGcallLONGMAX_ = 0;
   setRNGseed(latticeRNGseed_);
+  lastRNG_ = 1.e-16;
 
   growthInterfaceSize_.clear();
   dissolutionInterfaceSize_.clear();
@@ -2171,6 +2172,15 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
       wmcIni = ste->getWmc0();
       sumWmc -= ste->getWmc();
 
+      if (ste->getInDissInterfacePos() == -1) {
+        cout << endl << "    Lattice::dissolvePhase error: ste->getInDissInterfacePos() = -1" << endl;
+        cout << "    Lattice::dissolvePhase error: steId/pid/posVect  " << ste->getId()
+               << "/" << pid << "/" << posVect << endl;
+        cout << "    Lattice::dissolvePhase error: totalTRC/trc_d/bcl  " << totalTRC
+               << "/" << trc_d << "/" << bcl << endl;
+        cout << "    Lattice::dissolvePhase error: exit" << endl;
+        exit(0);
+      }
       removeDissolutionSite(ste, pid);
       setMicroPhaseId(ste, ELECTROLYTEID);
 
@@ -2674,19 +2684,21 @@ int Lattice::fillPorosity(int numsites, int cyc) {
     setMicroPhaseId(siteID, ELECTROLYTEID);
     site_[siteID].setWmc0(1);
     site_[siteID].dWmc(1);
+    site_[siteID].clearGrowth();
     for (int i = 0; i < NN_NNN; i++) {
       stenb = site_[siteID].nb(i);
       // wmcIni = stenb->getWmc();
       stenb->dWmc(1);
       nbpid = stenb->getMicroPhaseId();
       if (nbpid > ELECTROLYTEID) {
-        addDissolutionSite(stenb, nbpid);
-        addGrowthSite(&site_[siteID], nbpid);
+        if (stenb->getInDissInterfacePos() == -1) addDissolutionSite(stenb, nbpid);
+        if (site_[siteID].getInGrowInterfacePos(nbpid) == -1) addGrowthSite(&site_[siteID], nbpid);
         if (i < NUM_NEAREST_NEIGHBORS) {
-          for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_;
-               phaseTmpl++) {
+          for (int phaseTmpl = FIRST_SOLID; phaseTmpl < numMicroPhases_; phaseTmpl++) {
             if (chemSys_->isGrowthTemplate(phaseTmpl, nbpid)) {
-              addGrowthSite(&site_[siteID], phaseTmpl);
+              if (site_[siteID].getInGrowInterfacePos(phaseTmpl) == -1) {
+                addGrowthSite(&site_[siteID], phaseTmpl);
+              }
             }
           }
         }
