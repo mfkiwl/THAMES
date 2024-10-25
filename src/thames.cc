@@ -387,7 +387,7 @@ int main(int argc, char **argv) {
     if (Ctrl) {
       delete Ctrl;
     }
-    cout << "STOP Program";
+    cout << endl << "STOP Program" << endl;
     timeCount(starttime, lt);
     exit(1);
   }
@@ -426,6 +426,7 @@ int main(int argc, char **argv) {
   // Simulation is finished.  Record and output the timing data.
   //
 
+  cout << endl << "THAMES END" << endl;
   timeCount(starttime, lt);
 
   //

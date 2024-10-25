@@ -519,6 +519,7 @@ class ChemicalSystem {
       microPhaseVolume_; /**< Absolute volume of each microstructure phase */
 
   double microVolume_;     /**< Absolute volume of the microstructure */
+  //double newMicroVolume_;  /**< Absolute volume of the microstructure */
   double initMicroVolume_; /**< Initial absolute volume of the microstructure */
   double
       microVoidVolume_; /**< Absolute volume of void space in microstrucxture */
@@ -4103,6 +4104,8 @@ public:
   */
   double getMicroVolume(void) const { return microVolume_; }
 
+  //double getNewMicroVolume(void) const { return newMicroVolume_; }
+
   /**
   @brief Set the initial total microstructure volume.
 
@@ -5766,7 +5769,7 @@ public:
   @param isFirst is true if this is the first state calculation, false otherwise
   @return the node status handle
   */
-  int calculateState(double time, bool isFirst, int cyc, bool initial);
+  int calculateState(double time, bool isFirst, int cyc, bool update);
 
   /**
   @brief Check for electrolyte chemical composition requirements
@@ -6194,10 +6197,13 @@ public:
   }
 
   bool getCementComponent(int i) { return cementComponent_[i]; }
+
   void setInitScaledCementMass(double val) {
     initScaledCementMass_ = scaledCementMass_ = val;
   }
+
   double getInitScaledCementMass(void) { return initScaledCementMass_; }
+
   double getScaledCementMass(void) { return scaledCementMass_; }
 
   void setZeroMicroPhaseSI(void) { microPhaseSI_.resize(numMicroPhases_, 0.0); }
@@ -6234,10 +6240,39 @@ public:
       }
       cout << endl << "After modiffing and saving the chemistry.xml file, please restart the program." << endl << endl;
       exit(0);
-
     }
+  }
 
-
+  void updateMicroPhaseMasses(int idx, double val, int called) {
+    int DCId = 0;
+    if (idx > ELECTROLYTEID) {
+      microPhaseMassDissolved_[idx] = microPhaseMass_[idx] - val;
+      microPhaseMass_[idx] = val;
+      DCId = getMicroPhaseDCMembers(idx, 0);
+      double v0 = node_->DC_V0(DCId, P_, T_);
+      double dcmm = getDCMolarMass(DCId);
+      if (dcmm < 1.0e-9) {
+        FloatException fex("ChemicalSystem", "updateKCMicroPhaseMassess",
+                           "Divide by zero (dcmm)");
+        fex.printException();
+        exit(1);
+      }
+      //setMicroPhaseVolume(idx, (val * v0 / dcmm));
+      microPhaseVolume_[idx] = val * v0 / dcmm;
+      if (called == 0) {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess (called = 0) => updated scaledMass = " << val
+             << " and volume = " << microPhaseVolume_[idx] << endl;
+      } else {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess  (called = 1) => updated scaledMass = " << val
+             << " and volume = " << microPhaseVolume_[idx] << endl;
+      }
+      cout.flush();
+    } else {
+      cout << endl << "   error in ChemicalSystem::setKCMicroPhaseMasses : idx = "
+           << idx << endl;
+      cout << endl << "   exit" << endl;
+      exit(1);
+    }
   }
 
 }; // End of ChemicalSystem class

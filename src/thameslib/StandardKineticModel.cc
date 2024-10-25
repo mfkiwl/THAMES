@@ -109,6 +109,7 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
+  modelName_ = "StandardKineticModel";
   name_ = kineticData.name;
   microPhaseId_ = kineticData.microPhaseId;
   DCId_ = kineticData.DCId;
@@ -226,6 +227,9 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
+      cout << "    StandardKineticModel::calculateKineticStep dissrate/massDissolved : "
+           << dissrate << " / " << massDissolved << endl;
+
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
 
       newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
@@ -233,22 +237,22 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "****************** SKM_hT = " << timestep << "    cyc = " << cyc
+        cout << "  ****************** SKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
-        cout << "SKM_hT   " << "rhFactor_: " << rhFactor_
+        cout << "   SKM_hT   " << "rhFactor_: " << rhFactor_
              << "\tarrhenius_: " << arrhenius_
              << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
              << endl;
-        cout << "SKM_hT   " << "dissrate_ini: " << dissrate_ini
+        cout << "   SKM_hT   " << "dissrate_ini: " << dissrate_ini
              << "\tdissrate: " << dissrate << endl;
-        cout << "SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+        cout << "   SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
              << "\tinitScaledMass_: " << initScaledMass_
              << "\tscaledMass_: " << scaledMass_
              << "\tmassDissolved: " << massDissolved << endl;
-        cout << "cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+        cout << "   cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
              << "    microPhaseName = " << name_
              << "    saturationIndex = " << saturationIndex << "   Dc_a = "
              << chemSys_->getNode()->DC_a(DCId_)
@@ -282,3 +286,4 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
   return;
 }
+

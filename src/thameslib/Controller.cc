@@ -290,19 +290,19 @@ void Controller::doCycle(const string &statfilename, int choice) {
     if (timesGEMFailed_loc > 0) {
       timestep += (time_[i] - time_[i - 1]);
       if (i == 0) {
-        cout << endl << endl << "     ##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/timestep: "
+        cout << endl << endl << endl << "##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/timestep: "
              << i << " / " << cyc << " / " << time_[i] << " / " << timestep << " #####" << endl;
       } else {
-        cout << endl << endl << "     ##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
+        cout << endl << endl << endl << "##### Controller::doCycle  GEMFailed => add next timestep before to START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
              << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << " #####" << endl;
       }
     } else {
       timestep = (i > 0) ? (time_[i] - time_[i - 1]) : (time_[i]);
       if (i == 0) {
-        cout << endl << endl << "     ##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/timestep: "
+        cout << endl << endl << endl << "##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/timestep: "
              << i << " / " << cyc << " / " << time_[i] << " / " << timestep << " #####" << endl;
       } else {
-        cout << endl << endl << "     ##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
+        cout << endl << endl << endl << "##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
              << i << " / " << cyc << " / " << time_[i] << " / " << time_[i-1] << " / " << timestep << " #####" << endl;
       }
     }
@@ -391,53 +391,63 @@ void Controller::doCycle(const string &statfilename, int choice) {
       iniLattice.numRNGcallLONGMAX = lattice_->getNumRNGcallLONGMAX();
       iniLattice.lastRNG = lattice_->getLastRNG();
 
-      int numDiff = 1000, phDiff = 1000;
+      int numSitesNotAvailable = 0, phDiff = 0; //init wo effect if changeLattice = 1
       string nameDiff = "testDiff";
       int changeLattice = -100;
       int whileCount = 0;
       changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_,
-                                                     capwater, numDiff,
+                                                     capwater, numSitesNotAvailable,
                                                      phDiff, nameDiff,
                                                      whileCount, cyc);
 
-      //if error from changeMicrostructure (not all the voxels given by GEM can
-      //be switched to a new DCId):
+      //if not all the voxels requested by KM/GEM for a certain microphase     
+      // phDiff (DCId)can be dissolved because of the system configuration
+      // (lattice):
       //  - comeback to the initial system configuration contained by iniLattice
-      //  - re-run GEM with restrictions impossed by the system configuration (DC distribution
-      //      on the lattice sites) i.e.
-      //      the primal solution must contained a number of moles corresponding to
-      //      "numDiff" lattice sites for the microphase "phDiff"
-      //
+      //  - re-run GEM with restrictions impossed by the system configuration
+      //      (DC distribution on the lattice sites) i.e. the primal solution
+      //       must contain a number of moles corresponding to 
+      //       numSitesNotAvailable ("numDiff" in 
+      //       lattice_->changeMicrostructure" - sites that cannot be dissolved)
+      //       lattice sites for the microphase phDiff
+
       //restore initial system:
       if (changeLattice == 0) {
         vector<int> vectDCId;
         vectDCId.clear();
-        double volMolDiff, molarMassDiff, vfracDiff,
+        double volMolDiff, molarMassDiff, vfracDiff, massDissolved,
             microPhaseMassDiff, scaledMassDiff, numMolesDiff;
         int numDCs;
         int timesGEMFailed_recall = 0;
-        while (changeLattice == 0){ // - for many phases!
+        while (changeLattice == 0) { // - for many phases!
 
           DCId = chemSys_->getMicroPhaseDCMembers(phDiff,0);
 
           volMolDiff = chemSys_->getDCMolarVolume(DCId); // m3/mol
           molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
 
-          vfracDiff = ((double)numDiff) / ((double)dimLatticeSite);
+          vfracDiff = ((double)numSitesNotAvailable) / ((double)dimLatticeSite);
 
           microPhaseMassDiff = vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
 
           scaledMassDiff = microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
 
-          numMolesDiff = scaledMassDiff / molarMassDiff;
+          if (chemSys_->isKinetic(phDiff)) {
+            massDissolved = kineticController_->updateKineticStep(cyc, phDiff, scaledMassDiff);
+          } else {
 
-          //for ChemicalSystem:
-          numDCs = chemSys_->getNumDCs();
-          for(int i = 0; i < numDCs; i++){
-            chemSys_->setDCMoles(i,iniLattice.DCMoles[i]);
+            numMolesDiff = scaledMassDiff / molarMassDiff;
+
+            chemSys_->setDCLowerLimit(DCId,numMolesDiff);
+
+            //reset for ChemicalSystem:
+            numDCs = chemSys_->getNumDCs();
+            for (int i = 0; i < numDCs; i++) {
+              chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
+            }
           }
 
-          //for Lattice:
+          //reset for Lattice:
           lattice_->setCount(iniLattice.count);
 
           for(int i = 0; i < dimLatticeSite; i++){
@@ -460,12 +470,13 @@ void Controller::doCycle(const string &statfilename, int choice) {
           lattice_->resetRNG(iniLattice.numRNGcall_0,
                              iniLattice.numRNGcallLONGMAX, iniLattice.lastRNG, cyc, whileCount);
 
-          chemSys_->setDCLowerLimit(DCId,numMolesDiff);
           vectDCId.push_back(DCId);
           timesGEMFailed_recall = chemSys_->calculateState(time_[i], isFirst, cyc, true);
-          //chemSys_->setDCLowerLimit(DCId,0);
-          cout << endl << "Controller::doCycle GEM_run recalled for whileCount/cyc/phDiff/numDiff/nameDiff = "
-               << whileCount << "   " << cyc << "   " << phDiff << "   " << numDiff << "   " << nameDiff << endl;
+
+          cout << endl << "Controller::doCycle GEM_run recalled for "
+                  "whileCount/cyc/phDiff/numSitesNotAvailable/nameDiff/count = " << whileCount
+               << "   " << cyc << "   " << phDiff << "   " << numSitesNotAvailable << "   "
+               << nameDiff << "   " << lattice_->getCount(phDiff) << endl;
           cout << "Controller::doCycle i/time[i]/getTimesGEMFailed_recall: " << i << "\t"
                << time_[i] << "\t" << timesGEMFailed_recall << endl;
           if (timesGEMFailed_recall > 0) {
@@ -479,23 +490,30 @@ void Controller::doCycle(const string &statfilename, int choice) {
             cout << "Controller::doCycle GEM_run OK for whileCount = " << whileCount << endl;
           }
 
-          numDiff = 5000, phDiff = 5000;
           nameDiff = "testDiff_recall";
 
           whileCount++;
           changeLattice = lattice_->changeMicrostructure(time_[i], sim_type_,
-                                                         capwater, numDiff,
+                                                         capwater, numSitesNotAvailable,
                                                          phDiff, nameDiff,
                                                          whileCount, cyc);
+          cout << endl << "Controller::doCycle cyc/whileCount/changeLattice = " << cyc
+               << " / " << whileCount << " / " << changeLattice << endl;
         }
+        if (timesGEMFailed_loc > 0) continue;
+        //chemSys_->updateMicroPhaseMasses(phDiff, scaledMassDiff);
         int sizeVectDCId = vectDCId.size();
-        cout << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;
+        cout << endl << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;
         cout << "   vectDCId[i]:";
         for (int i = 0; i < sizeVectDCId; i++) {
           cout << "  " << vectDCId[i] << "(" << chemSys_->getDCName(vectDCId[i]) << ")";
           chemSys_->setDCLowerLimit(vectDCId[i],0);
         }
-        if (timesGEMFailed_loc > 0) continue;
+        cout << endl << "Controller::doCycle => normal end after reset system for cyc = "
+             << cyc << " (i = " << i << ")" << endl;
+      } else {
+        cout << endl << "Controller::doCycle => normal end for cyc = "
+             << cyc << " (i = " << i << ")" << endl;
       }
 
 

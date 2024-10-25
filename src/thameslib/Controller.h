@@ -143,6 +143,7 @@ protected:
   double imgfreq_;          /**< Frequency to output microstructure image */
   ChemicalSystem *chemSys_; /**< Pointer to `ChemicalSystem` object */
   vector<double> time_;     /**< List of simulation times for each iteration */
+  vector<double> timeInitial_;     /**< List of simulation times for each iteration */
   vector<double> output_time_; /**< List of times to output image */
   double statfreq_;            /**< Frequency to output statistics */
 

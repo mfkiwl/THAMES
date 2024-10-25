@@ -805,7 +805,9 @@ public:
   @param pid is the microstructure phase id
   */
   void removeGrowthSite_diss(Site *loc, unsigned int pid);
+
   void removeGrowthSite_grow(Site *ste0, int pid);
+
   void removeGrowthSite_nucleation(Site *loc, unsigned int pid);
 
   /**
@@ -877,7 +879,7 @@ public:
   */
   void adjustMicrostructureVolFracs(vector<string> &names,
                                     const vector<double> vol,
-                                    vector<double> &vfrac, int volSize);
+                                    vector<double> &vfrac, int volSize, int cyc);
 
   /**
   @brief Calculate the pore size distribution data
@@ -915,8 +917,11 @@ public:
   @param root is the root name of the output file to create
   */
   void writeLattice(double curtime, const int simtype, const string &root);
+
   void writeLatticeIni(double curtime);
+
   void writeLatticeXYZ(double curtime, const int simtype, const string &root);
+
   void writeLatticeCFG(double curtime, const int simtype, const string &root);
 
   /**
@@ -1493,17 +1498,19 @@ public:
   bool getWarning() const { return warning_; }
 
   vector<int> getCount(void) { return count_; }
-  void setCount(vector<int> vect) {
-    int dim = vect.size();
-    for (int i = 0; i < dim; i++) {
-      count_[i] = vect[i];
-    }
-  }
+
+  int getCount(int phId) { return count_[phId]; }
+
+  void setCount(vector<int> vect) { count_ = vect; }
+
   int getInterfaceSize(void) { return interface_.size(); }
+
   Interface getInterface(int i) { return interface_[i]; }
+
   void setGrowthSites(int i, vector<Isite> vect) {
     interface_[i].setGrowthSites(vect);
   }
+
   void setDissolutionSites(int i, vector<Isite> vect) {
     interface_[i].setDissolutionSites(vect);
   }
@@ -1520,6 +1527,7 @@ public:
   string getElemSymb(int index) { return cfgElem_[index].symb; }
 
   void createRNG(void) { rg_ = new RanGen(); }
+
   double callRNG(void) {
     numRNGcall_0_++;
     if (numRNGcall_0_ == LONG_MAX) {
@@ -1529,12 +1537,14 @@ public:
     lastRNG_ = rg_->Ran3();
     return lastRNG_;
   }
+
   long int getNumRNGcall_0(void) { return numRNGcall_0_; }
+
   long int getNumRNGcallLONGMAX(void) { return numRNGcallLONGMAX_; }
+
   double getLastRNG(void) { return lastRNG_; }
+
   void setRNGseed(int seed) { rg_->setSeed(seed); }
-
-
 
   void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
     //latticeRNGseed_ = seed;
@@ -1543,7 +1553,7 @@ public:
     numRNGcallLONGMAX_ = valLONGMAX;
     long int count_0 = 0, count_1 = 0;
     long int j0, j1, j11;
-    double lastRNGreset = -1.e-16;
+    double lastRNGreset = 1.e-16;
     for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
       for(j11 = 1; j11 <= LONG_MAX; j11++) {
         lastRNGreset = rg_->Ran3();
@@ -1554,13 +1564,13 @@ public:
     }
     lastRNG_ = lastRNGreset;
 
-    cout << endl << "Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+    cout << endl << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
          << whileCount << " / " << latticeRNGseed_ << endl;
-    cout << "Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+    cout << "  Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
          << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
          << " / " << valRNG << endl;
     if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
-      cout << "Lattice::resetRNG OK!" << endl;
+      cout << "  Lattice::resetRNG OK!" << endl;
     } else {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);
@@ -1629,18 +1639,25 @@ public:
   vector<int> getGrowthInterfaceSize(void) {
     return growthInterfaceSize_;
   }
+
   void setGrowthInterfaceSize(vector<int> vect){
     growthInterfaceSize_ = vect;
   }
+
   vector<int> getDissolutionInterfaceSize(void) {
     return dissolutionInterfaceSize_;
   }
+
+  int getDissolutionInterfaceSize(int phId) {
+    return dissolutionInterfaceSize_[phId];
+  }
+
   void setDissolutionInterfaceSize(vector<int> vect) {
     dissolutionInterfaceSize_ = vect;
   }
 
-
 vector<int> chooseNucleationSitesRND(int phaseID,int numLeft);
+
 vector<int> chooseNucleationSitesAFF(int phaseID,int numLeft);
 
 }; // End of Lattice class

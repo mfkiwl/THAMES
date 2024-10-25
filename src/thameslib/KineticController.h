@@ -74,6 +74,15 @@ private:
   vector<double> DCMoles_;
   vector<double> DCMolesIni_;
   vector<double> ICMolesTot_;
+  vector<double> scaledMassIni_; /**< List of scaled masses before a given time step*/
+
+  vector<int> impurityDCID_;
+  vector<double> impurity_K2O_;
+  vector<double> impurity_Na2O_;
+  vector<double> impurity_Per_;
+  vector<double> impurity_SO3_;
+
+  int pKMsize_;
 
   double initScaledCementMass_;
 
@@ -443,6 +452,8 @@ public:
   */
   void calculateKineticStep(const double timestep, int cyc);
 
+  double updateKineticStep(int cyc, int pId, double scaledMass);
+
   /**
   @brief Set the verbose flag
 
@@ -478,7 +489,10 @@ public:
   bool getWarning() const { return warning_; }
 
   vector<double> getICMoles(void) { return ICMoles_; }
+
   vector<double> getDCMoles(void) { return DCMoles_; }
+
+  vector<bool> getIsKinetic(void) { return isKinetic_; }
 
 }; // End of KineticController class
 
