@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| October 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |
 | July 25 09:16 2024 | Updated format of Colors.csv output |
 | July 24 11:01 2024 | Merged latest version of branch florinRecoverLatticeAndRNG onto main |
 | July 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |

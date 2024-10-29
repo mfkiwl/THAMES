@@ -40,6 +40,7 @@ THAMES allows some flexibility in defining different types of kinetic models.
 class KineticModel {
 
 protected:
+  string modelName_;
   int numPhases_; /**< Total number of phases in the kinetic model */
   ChemicalSystem *
       chemSys_; /**< Pointer to the ChemicalSystem object for this simulation */
@@ -605,6 +606,7 @@ public:
   */
   bool getWarning() const { return warning_; }
 
+  string getModelName(void) { return modelName_; }
 }; // End of KineticModel class
 
 #endif

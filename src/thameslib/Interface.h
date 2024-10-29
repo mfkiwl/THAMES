@@ -52,10 +52,13 @@ class Interface {
 private:
   unsigned int
       microPhaseId_; /**< The phase id of the voxels at this interface */
+
   ChemicalSystem
       *chemSys_; /**< The `ChemicalSystem` object for the simulation */
+
   vector<Isite> growthSites_; /**< The list of all sites eligible for
                                        adjacent growth */
+
   vector<Isite>
       dissolutionSites_; /**< The list of sites eligible for self-dissolution */
 
@@ -119,13 +122,11 @@ public:
   */
   vector<Isite> getGrowthSites(void) { return growthSites_; }
 
+  int getGrowthSize(void) { return growthSites_.size(); }
+  int getDissolutionSize(void) { return dissolutionSites_.size(); }
+
   void setGrowthSites(vector<Isite> vect) {
-    int dim = vect.size();
-    growthSites_.clear();
-    // cout << "dim_growthInterface: " << dim << endl;
-    for (int i = 0; i < dim; i++) {
-      growthSites_.push_back(vect[i]);
-    }
+    growthSites_ = vect;
   }
 
   int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
@@ -141,32 +142,8 @@ public:
   vector<Isite> getDissolutionSites(void) { return dissolutionSites_; }
 
   void setDissolutionSites(vector<Isite> vect) {
-    int dim = vect.size();
-    dissolutionSites_.clear();
-    // cout << "dim_dissolutionInterface: " << dim << endl;
-    for (int i = 0; i < dim; i++) {
-      dissolutionSites_.push_back(vect[i]);
-    }
+    dissolutionSites_ = vect;
   }
-
-  /**
-  @brief Gets the number of sites where growth can occur adjacent to the
-  interface.
-
-  @note NOT USED.
-
-  @return the number of potential growth sites adjacent to the interface
-  */
-  unsigned int getGrowthNumSites(void) { return growthSites_.size(); }
-
-  /**
-  @brief Gets the number of sites where dissolution can occur at the interface.
-
-  @note NOT USED.
-
-  @return the number of potential dissolution sites adjacent to the interface
-  */
-  unsigned int getDissolutionNumSites(void) { return dissolutionSites_.size(); }
 
   /**
   @brief Add a site to the list of sites where growth can occur adjacent to the
@@ -175,9 +152,7 @@ public:
   @param loc is a pointer to the site to add to the list of growth sites
   @return true if the site was added successfully, false otherwise
   */
-  bool addGrowthSite(Site *loc);
-
-  bool addGrowthSite_newInterface(int id, int aff);
+  void addGrowthSite(Site *loc);
 
   /**
   @brief Add a site to the list of sites where dissolution can occur at the
@@ -186,7 +161,7 @@ public:
   @param loc is a pointer to the site to add to the list of dissolution sites
   @return true if the site was added successfully, false otherwise
   */
-  bool addDissolutionSite(Site *loc);
+  void addDissolutionSite(Site *loc);
 
   /**
   @brief Sort the list of growth sites in descending order of potential for
@@ -218,9 +193,8 @@ public:
   @return true if the site was removed successfully, false otherwise
   */
   // bool removeGrowthSite(Site *loc);
-  bool removeGrowthSite_0(Site *loc, int pos);
-  bool removeGrowthSite_1(Site *loc);
-  bool removeEmptiedSite(int siteID);
+  void removeGrowthSite(int pos0, int pos1);
+  void removeEmptiedSite(int pos0, int pos1);
 
   /**
   @brief Remove a site from the list of sites where dissolution can occur
@@ -229,9 +203,7 @@ public:
   @param loc is a pointer to the site to remove from the list of growth sites
   @return true if the site was removed successfully, false otherwise
   */
-  //  bool removeDissolutionSite(Site *loc);
-  bool removeDissolutionSite_diss(Site *loc, int pos);
-  bool removeDissolutionSite_grow(Site *loc);
+  void removeDissolutionSite(int pos0, int pos1);
 
   /**
   @brief Set the verbose flag
@@ -249,6 +221,14 @@ public:
   @return the verbose flag
   */
   bool getVerbose(void) const { return verbose_; }
+
+  void updateAffinity(int pos, int afty) {
+    growthSites_[pos].updateAffinity(afty);
+  }
+
+  int getAffinity(int pos) {
+    return growthSites_[pos].getAffinity();
+  }
 
 }; // End of Interface class
 

@@ -87,6 +87,7 @@ public:
   @param num is the growth affinity of the corresponding Site object
   */
   void setAffinity(int num) { affinity_ = num; }
+  void updateAffinity(int afty) { affinity_ += afty; }
 
   void setProb(double num) {prob_ = num; };
   void setProbIni(double num) {probIni_ = num; };
