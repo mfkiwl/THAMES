@@ -43,6 +43,8 @@ doc/BuildGuide/*.synctex.gz
 
 # ignore files that will be created upon complilation
 src/version.h
+src/Doxyfile
+src/Doxyfile$
 src/thameslib/myconfig.h
 src/vcctl2thames/vcctl2thames.h
 src/GEMS3K-standalone/Resources
