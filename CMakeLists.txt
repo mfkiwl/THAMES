@@ -19,16 +19,53 @@ configure_file (
     "${CMAKE_SOURCE_DIR}/src/vcctl2thames/vcctl2thames.h"
     )
 
+option(BUILD_DOC "Build API documentation" ON)
 # look for doxygen capability
 find_package (Doxygen)
 if (DOXYGEN_FOUND)
-    configure_file ("${CMAKE_SOURCE_DIR}/Doxyfile.in" "${CMAKE_BINARY_DIR}/Doxyfile" @ONLY)
-    add_custom_target (doc
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating API documentation with Doxygen" VERBATIM
-        )
+  # set input and output files
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/src/Doxyfile.in)
+  set(DOXYGEN_OUT ${CMAKE_SOURCE_DIR}/src/Doxyfile)
+  # request to configure the file
+  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT}$ @ONLY)
+  message("Doxygen build started")
+
+  add_custom_target (doc ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating API documentation with Doxygen" VERBATIM
+  )
+else (DOXYGEN_FOUND)
+  message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
+
+find_program (
+  DOT
+  NAMES dot
+  HINTS "/opt/homebrew/bin/dot /opt/local/bin /usr/local/bin /usr/bin"
+)
+
+if (DOT)
+  message("DOT found... yes")
+  set (HAVE_DOT YES)
+else()
+  message("DOT found... no")
+  set (HAVE_DOT NO)
+  set (NO_DOT_WARNING "@warning Install graphviz/dot (http://www.graphviz.org)
+  to create graphs and diagrams in this documentation")
+endif()
+
+find_program (
+  PDFLATEX
+  NAMES pdflatex
+  HINTS "/Library/TeX/texbin /usr/bin /usr/local/bin"
+)
+
+if (PDFLATEX)
+  message("pdflatex found... yes")
+else()
+  message("pdflatex found... no")
+endif()
 
 find_package (LibXml2)
 if (LIBXML2_FOUND)
