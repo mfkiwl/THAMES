@@ -122,6 +122,7 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
+  modelName_ = "PozzolanicModel";
   name_ = kineticData.name;
   microPhaseId_ = kineticData.microPhaseId;
   DCId_ = kineticData.DCId;
@@ -327,31 +328,34 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
       massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
+      cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
+           << rate << " / " << massDissolved << endl;
+
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
 
       newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
 
       scaledMass = scaledMass_;
 
-      // if (verbose_) {
-        cout << "****************** PZM_hT = " << timestep << "\tcyc = " << cyc
+      if (verbose_) {
+        cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
              << "\tmicroPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
-        cout << "PZM_hT   " << "rhFacto_r: " << rhFactor_
+        cout << "   PZM_hT   " << "rhFacto_r: " << rhFactor_
              << "\tarrhenius_: " << arrhenius_
              << "\tsaturationIndex: " << saturationIndex
              << "\twaterActivity: " << waterActivity << endl;
-        cout << "PZM_hT   " << "dissrate: " << dissrate
+        cout << "   PZM_hT   " << "dissrate: " << dissrate
              << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
              << "\trate: " << rate << endl;
-        cout << "PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+        cout << "   PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
              << "\tinitScaledMass_: " << initScaledMass_
              << "\tscaledMass_: " << scaledMass_
              << "\tmassDissolved: " << massDissolved << endl;
         cout.flush();
-      // }
+      }
 
     } else {
       throw DataException("PozzolanicModel", "calculateKineticStep",
@@ -379,3 +383,4 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
   return;
 }
+

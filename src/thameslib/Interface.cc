@@ -38,9 +38,6 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
   unsigned int i;
   int afty;
 
-  vector<Site *>::iterator beginLocation, endLocation;
-  vector<Isite>::iterator start, end;
-
 #ifdef DEBUG
   verbose_ = true;
 #else
@@ -55,35 +52,11 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
   growthSites_.clear();
 
   ///
-  /// Eliminate duplicate values from the growth site vector
+  /// create growth interface for microPhaseId_
   ///
+
   int gvsize = gv.size();
-  int dvsize = dv.size();
-  if (gvsize > 0) {
-    sort(gv.begin(), gv.end());
-    // i = 1;
-    beginLocation = gv.begin();
-    endLocation = unique(gv.begin(), gv.end());
-    gv.erase(endLocation, gv.end());
-  }
-
-  ///
-  /// Now do the same thing to the dissolution site vector
-  ///
-
-  if (dvsize > 0) {
-    sort(dv.begin(), dv.end());
-    // i = 1;
-    beginLocation = dv.begin();
-    endLocation = unique(dv.begin(), dv.end());
-    dv.erase(endLocation, dv.end());
-  }
-
-  ///
-  /// Now sort the growth sites according to the affinity
-  ///
-
-  for (j = 0; j < gv.size(); j++) {
+  for (j = 0; j < gvsize; j++) {
     afty = 0;
     for (i = 0; i < NN_NNN; i++) {
       afty += chemSys_->getAffinity(pid, gv[j]->nb(i)->getMicroPhaseId());
@@ -98,11 +71,10 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
   }
 
   ///
-  /// Now sort the dissolution sites according to the affinity
+  /// create dissolution interface for microPhaseId_
   ///
 
-  try {
-    dvsize = dv.size();
+    int dvsize = dv.size();
     for (j = 0; j < dvsize; j++) {
       afty = 0;
       for (i = 0; i < NN_NNN; i++) {
@@ -110,10 +82,6 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
       }
       dissolutionSites_.push_back(Isite(dv[j]->getId(), afty));
     }
-  } catch (EOBException e) {
-    e.printException();
-    exit(1);
-  }
 
 } // End of constructors
 
@@ -122,172 +90,51 @@ Interface::~Interface() {
   dissolutionSites_.clear();
 }
 
-bool Interface::addGrowthSite_newInterface(int id, int aff) {
-  Isite tisite(id, aff);
-  growthSites_.push_back(tisite);
-  return true;
-}
-
-bool Interface::addGrowthSite(Site *loc) {
-  bool answer = false;
-  bool found = false;
-  unsigned int i;
+void Interface::addGrowthSite(Site *loc) {
   // vector<Isite>::iterator p, q, start, end;
   // start = growthSites_.begin();
   // end = growthSites_.end();
 
-  /// See if site is already present
-  int size = growthSites_.size();
-  int id = loc->getId();
-  for (i = 0; i < size; i++) {
-    if (id == growthSites_[i].getId()) {
-      found = true;
-      break;
-    }
+  //loc->setInGrowInterfacePos(microPhaseId_, growthSitesSize_);
+  int afty = 0;
+  for (int i = 0; i < NN_NNN; i++) {
+    afty += chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
   }
-
-  /// Add the site only if it was not found already
-  if (!found) {
-    int afty = 0;
-    for (i = 0; i < NN_NNN;
-         i++) { // NN_NNN = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS
-      afty +=
-          chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
-    }
-    Isite tisite(id, afty);
-    // q = lower_bound(start, end, tisite, affinitySort);
-    // growthSites_.insert(q, tisite);
-    growthSites_.push_back(tisite);
-    answer = true;
-  }
-  return answer;
+  Isite tisite(loc->getId(), afty);
+  // q = lower_bound(start, end, tisite, affinitySort);
+  // growthSites_.insert(q, tisite);
+  growthSites_.push_back(tisite);
 }
 
-bool Interface::addDissolutionSite(Site *loc) {
-  bool answer = false;
-  bool found = false;
-  unsigned int i;
-  unsigned int siteId = loc->getId();
-
-  /// See if site is already present
-  int size = dissolutionSites_.size();
-  for (i = 0; i < size; i++) {
-    if (siteId == dissolutionSites_[i].getId()) {
-      found = true;
-      break;
-    }
-  }
-
-  /// Add the site only if it was not found already
-  if (!found) {
-    Isite tisite(siteId, 0);
-    dissolutionSites_.push_back(tisite);
-    answer = true;
-  }
-  return answer;
+void Interface::addDissolutionSite(Site *loc) {
+  Isite tisite(loc->getId(), 0);
+  dissolutionSites_.push_back(tisite);
 }
 
-bool Interface::removeGrowthSite_0(Site *loc, int pos) {
-  bool found = false;
-  // int size = growthSites_.size();
-  if (growthSites_[pos].getId() == loc->getId()) {
-    growthSites_[pos] = growthSites_[growthSites_.size() - 1];
+void Interface::removeGrowthSite(int pos0, int pos1) {
+    //if (pos0 != pos1)
+    growthSites_[pos0] = growthSites_[pos1];
     growthSites_.pop_back();
-    found = true;
-  } else {
-    cout << endl
-         << "error site doesn't belong to this interface or wrong site "
-            "position - phaseId/siteId/isitePos/growthSites_.size(): "
-         << loc->getMicroPhaseId() << " / " << loc->getId() << " / " << pos
-         << " / " << growthSites_.size() << endl;
-    cout << "STOP:  Interface::removeGrowthSite_0(Site *loc, int pos)" << endl;
-    exit(1);
-  }
-  return found;
 }
 
-bool Interface::removeGrowthSite_1(Site *loc) {
-  bool found = false;
-  int size = growthSites_.size();
-  int siteId = loc->getId();
-
-  for (int i = 0; i < size; i++) {
-    if (growthSites_[i].getId() == siteId) {
-      growthSites_[i] = growthSites_[size - 1];
-      growthSites_.pop_back();
-      found = true;
-      break;
-    }
-  }
-  if (found == false) {
-    cout << endl;
-    cout << "error site doesn't belong to this interface - "
-            "phaseId/siteId/growthSites_.size(): "
-         << loc->getMicroPhaseId() << " / " << loc->getId() << " / "
-         << growthSites_.size() << endl;
-    cout << "STOP:  Interface::removeGrowthSite_1(Site *loc)" << endl;
-    exit(1);
-  }
-  return found;
+void Interface::removeEmptiedSite(int pos0, int pos1) { //kept even same as removeGrowthSite
+    //if (pos0 != pos1)
+  //try {
+    growthSites_[pos0] = growthSites_[pos1];
+    growthSites_.pop_back();
+  //} catch (out_of_range &oor) {
+  //  cout << endl << "EOB Interface::removeEmptiedSite pos0/pos1 = " << pos0 <<" / " << pos1 << " => exit" << endl;
+  //  exit(1);
+  //}
 }
 
-bool Interface::removeEmptiedSite(int siteID) {
-
-  bool found = false;
-  int size = growthSites_.size();
-
-  for (int i = 0; i < size; i++) {
-    if (growthSites_[i].getId() == siteID) {
-      growthSites_[i] = growthSites_[size - 1];
-      growthSites_.pop_back();
-      found = true;
-      break;
-    }
-  }
-  return found;
-}
-
-bool Interface::removeDissolutionSite_diss(Site *loc, int pos) {
-  bool found = false;
-  // int size = dissolutionSites_.size();
-  if (dissolutionSites_[pos].getId() == loc->getId()) {
-    dissolutionSites_[pos] = dissolutionSites_[dissolutionSites_.size() - 1];
+void Interface::removeDissolutionSite(int pos0, int pos1) {
+    //if (pos0 != pos1)
+  //try {
+    dissolutionSites_[pos0] = dissolutionSites_[pos1];
     dissolutionSites_.pop_back();
-    found = true;
-  } else {
-    cout << endl
-         << "error site doesn't belong to this interface or wrong site position"
-            "- phaseId/siteId/isitePos/dissolutionSites_.size(): "
-         << loc->getMicroPhaseId() << " / " << loc->getId() << " / " << pos
-         << " / " << dissolutionSites_.size() << endl;
-    cout << "STOP:  Interface::removeDissolutionSite_diss(Site *loc, int pos)"
-         << endl;
-    exit(1);
-  }
-  return found;
-}
-
-bool Interface::removeDissolutionSite_grow(Site *loc) {
-  bool found = false;
-  int size_ = dissolutionSites_.size();
-  int id = loc->getId();
-
-  for (int i = 0; i < size_; i++) {
-    if (id == dissolutionSites_[i].getId()) {
-      dissolutionSites_[i] = dissolutionSites_[size_ - 1];
-      dissolutionSites_.pop_back();
-      found = true;
-      break;
-    }
-  }
-  if (found == false) {
-    cout << endl
-         << "error site doesn't belong to this interface - "
-            "phaseId/siteId/growthSites_.size(): "
-         << loc->getMicroPhaseId() << " / " << loc->getId() << " / "
-         << growthSites_.size() << endl;
-    cout << "STOP:  Interface::removeDissolutionSite_grow(Site *loc)" << endl;
-    exit(1);
-  }
-  return found;
+  //} catch (out_of_range &oor) {
+  //  cout << endl << "EOB Interface::removeDissolutionSite pos0/pos1 = " << pos0 <<" / " << pos1 << " => exit" << endl;
+  //  exit(1);
+  //}
 }

@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.7)
 
 project (THAMES)
 
-set (THAMES_VERSION 2.6)
-set (THAMES_VERSION_MAJOR 2)
-set (THAMES_VERSION_MINOR 6.0)
+set (THAMES_VERSION 3.0)
+set (THAMES_VERSION_MAJOR 3)
+set (THAMES_VERSION_MINOR 0)
 
 set (thames_XSDFILES_DIR "${CMAKE_SOURCE_DIR}/src/thameslib/xsdfiles")
 

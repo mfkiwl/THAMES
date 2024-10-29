@@ -23,12 +23,13 @@ using namespace std;
 
 struct RestoreSite{
     //for each site in site_:
-    unsigned int microPhaseId;   // The microstructure phase assignment
-    unsigned int dissolution;    // phase that can dissolve at this site or -1
-    vector<unsigned int> growth; // Vector of phases that can grow at this site
-    double wmc;                  // total porosity ("surface curvature") at this site
-    double wmc0;                 // this site internal porosity (its own contribution at wmc_ value)
-    int visit;                   // reset to 0
+    unsigned int microPhaseId;       // The microstructure phase assignment
+    vector<unsigned int> growth;     // vector of phases that can grow at this site
+    vector<int> inGrowInterfacePos;  // vector of the site position in each growth interface
+    int inDissInterfacePos;          // site position in the corresponding dissolution interface
+    double wmc;                      // total porosity ("surface curvature") at this site
+    double wmc0;                     // this site internal porosity (its own contribution at wmc_ value)
+    int visit;                       // reset to 0
 };
 
 struct RestoreInterface{
@@ -50,6 +51,8 @@ struct RestoreSystem {
     vector<double> DCMoles;
     //from Lattice:
     vector<int> count;
+    vector<int> growthInterfaceSize;
+    vector<int> dissolutionInterfaceSize;
     vector<RestoreSite> site;     /**< 1D list of Site objects (site = voxel) */
     //from Interface
     vector<RestoreInterface> interface;
@@ -70,7 +73,6 @@ struct RestoreSystem {
 //  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
 //  for each site in site_:
 //    unsigned int microPhaseId_;   // The microstructure phase assignment
-//    unsigned int dissolution_;    // phase that can dissolve at this site or -1
 //    vector<unsigned int> growth_; // Vector of phases that can grow at this site
 //    double wmc_;                  // total porosity ("surface curvature") at this site
 //    double wmc0_;                 // this site internal porosity (its own contribution at wmc_ value)
@@ -141,6 +143,7 @@ protected:
   double imgfreq_;          /**< Frequency to output microstructure image */
   ChemicalSystem *chemSys_; /**< Pointer to `ChemicalSystem` object */
   vector<double> time_;     /**< List of simulation times for each iteration */
+  vector<double> timeInitial_;     /**< List of simulation times for each iteration */
   vector<double> output_time_; /**< List of times to output image */
   double statfreq_;            /**< Frequency to output statistics */
 
@@ -302,8 +305,19 @@ public:
   */
   bool getWarning() const { return warning_; }
 
-  void writeTxtOutputFiles (double time);
-  void writeTxtOutputFiles_onlyICsDCs (double time);
+  /**
+  @brief Master function for writing ascii text files
+
+  @param time is the simulation time
+  */
+  void writeTxtOutputFiles(double time);
+
+  /**
+  @brief Master function for writing ascii text files of ICs and DCs
+
+  @param time is the simulation time
+  */
+  void writeTxtOutputFiles_onlyICsDCs(double time);
 
 }; // End of Controller class
 #endif

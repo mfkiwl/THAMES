@@ -39,8 +39,6 @@ protected:
   unsigned int microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
-  unsigned int
-      dissolution_; /**< phase that can dissolve at this site or -1 */
   vector<unsigned int>
       growth_;              /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
@@ -81,8 +79,11 @@ protected:
 
   bool verbose_; /**< Flag to determine verbose output */
 
-  vector<int>inGrowInterface_;
-  vector<int>inDissInterface_;
+  vector<int> inGrowInterfacePos_; // vector of the site position in each growth interface
+  int inDissInterfacePos_; // site position in the corresponding dissolution interface
+
+  vector<int> inGrowthVectorPos_;
+  int inDissolutionVectorPos_;
 
   int visit_;
 
@@ -121,17 +122,39 @@ public:
   void setVisit(int sv){visit_ = sv;}
   int getVisit (void){return visit_;}
 
-  void setInGrowInterface(int i, int val){
-    inGrowInterface_[i] = val;
+  void setInGrowInterfacePos(int i, int val){
+    inGrowInterfacePos_[i] = val;
+  }  
+  int getInGrowInterfacePos(int i){
+    return inGrowInterfacePos_[i];
   }
-  void setInDissInterface(int i, int val){
-    inDissInterface_[i] = val;
+
+  vector<int> getInGrowInterfacePosVector(){
+    return inGrowInterfacePos_;
   }
-  int getInGrowInterface(int i){
-    return inGrowInterface_[i];
+  void setInGrowInterfacePosVector(vector<int> vect) {
+    inGrowInterfacePos_ = vect;
   }
-  int getInDissInterface(int i){
-    return inDissInterface_[i];
+
+  void setInDissInterfacePos(int val){
+    inDissInterfacePos_ = val;
+  }
+  int getInDissInterfacePos(void){
+    return inDissInterfacePos_;
+  }
+
+  void setInGrowthVectorPos(int i, int val){
+    inGrowthVectorPos_[i] = val;
+  }
+  int getInGrowthVectorPos(int i){
+    return inGrowthVectorPos_[i];
+  }
+
+  void setInDissolutionVectorPos(int val) {
+    inDissolutionVectorPos_ = val;
+  }
+  int getInDissolutionVectorPos(void) {
+    return inDissolutionVectorPos_;
   }
 
   /**
@@ -320,8 +343,7 @@ public:
   @param pid is the microstructure phase id of the phase that can dissolve at
   the site
   */
-  void setDissolutionSite(unsigned int pid) {
-    dissolution_ = pid;
+  void clearGrowth(void) {
     growth_.clear();
   }
 
@@ -337,19 +359,11 @@ public:
     vector<unsigned int>::iterator p = find(start, end, pid);
     if (p == growth_.end())
       growth_.push_back(pid);
-    dissolution_ = -1;
   }
 
-  /**
-  @brief Remove a phase from the list of phases that can dissolve from the site.
-
-  Only one phase can be at a site at a time, so the list of dissolution sites
-  is guaranteed to have only one member (if there is a solid phase there) or
-  zero members (if it is a water of void site).
-
-  @param pid is the id of the microstructure phase to remove
-  */
-  void removeDissolutionSite(void) { dissolution_ = -1;}
+  void addGrowthPhaseId(unsigned int pid) {
+    growth_.push_back(pid);
+  }
 
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
@@ -381,8 +395,6 @@ public:
     }
   }
 
-  void clearGrowthSite(void) {growth_.clear();}
-
   /**
   @brief Get the entire list of all phases that can grow at the site.
 
@@ -391,25 +403,9 @@ public:
   vector<unsigned int> getGrowthPhases() const { return growth_; }
 
   void setGrowthPhases(vector<unsigned int> vect) {
-    int dim = vect.size();
-    growth_.resize(dim,0);
-    for(int i = 0; i < dim; i++){
-      growth_[i] = vect[i];
-    }
+    growth_.clear();
+    growth_ = vect;
   }
-
-  /**
-  @brief Get the entire list of all phases that can grow at the site.
-
-  Only one phase can be at a site at a time, so the list of dissolution sites
-  is guaranteed to have only one member (if there is a solid phase there) or
-  zero members (if it is a water of void site).
-
-  @note NOT USED.
-
-  @return the list of ids of all microstructure phases that can grow at the site
-  */
-  unsigned int getDissolutionPhases() const { return dissolution_; }
 
   /**
   @brief Find out if the site is designated as damaged by some kind of

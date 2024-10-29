@@ -74,6 +74,15 @@ private:
   vector<double> DCMoles_;
   vector<double> DCMolesIni_;
   vector<double> ICMolesTot_;
+  vector<double> scaledMassIni_; /**< List of scaled masses before a given time step*/
+
+  vector<int> impurityDCID_;
+  vector<double> impurity_K2O_;
+  vector<double> impurity_Na2O_;
+  vector<double> impurity_Per_;
+  vector<double> impurity_SO3_;
+
+  int pKMsize_;
 
   double initScaledCementMass_;
 
@@ -230,14 +239,7 @@ public:
   */
 
   double getScaledMass(const int midx) {
-    try {
-      return scaledMass_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getScaledMass", "scaledMass_",
-                      scaledMass_.size(), midx);
-      ex.printException();
-      exit(1);
-    }
+      return scaledMass_[midx];
   }
 
   /**
@@ -260,14 +262,7 @@ public:
   @return the initial scaled mass [percent solids]
   */
   double getInitScaledMass(const int midx) {
-    try {
-      return initScaledMass_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getInitScaledMass",
-                      "initScaledMass_", initScaledMass_.size(), midx);
-      ex.printException();
-      exit(1);
-    }
+      return initScaledMass_[midx];
   }
 
   /**
@@ -303,15 +298,7 @@ public:
   @return the specific surface area [m2/kg]
   */
   double getSpecificSurfaceArea(const int midx) {
-    try {
-      return specificSurfaceArea_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getSpecificSurfaceArea",
-                      "specificSurfaceArea_", specificSurfaceArea_.size(),
-                      midx);
-      ex.printException();
-      exit(1);
-    }
+      return specificSurfaceArea_[midx];
   }
 
   /**
@@ -331,15 +318,7 @@ public:
   @return the reference specific surface area [m2/kg]
   */
   double getRefSpecificSurfaceArea(const int midx) {
-    try {
-      return refSpecificSurfaceArea_.at(midx);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getRefSpecificSurfaceArea",
-                      "refSpecificSurfaceArea_", refSpecificSurfaceArea_.size(),
-                      midx);
-      ex.printException();
-      exit(1);
-    }
+      return refSpecificSurfaceArea_[midx];
   }
 
   /**
@@ -415,13 +394,7 @@ public:
   @return the name of the phase with index i
   */
   string getName(const unsigned int i) const {
-    try {
-      return name_.at(i);
-    } catch (out_of_range &oor) {
-      EOBException ex("KineticController", "getName", "name_", name_.size(), i);
-      ex.printException();
-      exit(1);
-    }
+      return name_[i];
   }
 
   /**
@@ -479,6 +452,8 @@ public:
   */
   void calculateKineticStep(const double timestep, int cyc);
 
+  double updateKineticStep(int cyc, int pId, double scaledMass);
+
   /**
   @brief Set the verbose flag
 
@@ -514,7 +489,10 @@ public:
   bool getWarning() const { return warning_; }
 
   vector<double> getICMoles(void) { return ICMoles_; }
+
   vector<double> getDCMoles(void) { return DCMoles_; }
+
+  vector<bool> getIsKinetic(void) { return isKinetic_; }
 
 }; // End of KineticController class
 
