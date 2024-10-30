@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Oct 30 17:51 2024 | Fixed gas and electrolyte composition functionality |
 | Oct 29 11:19 2024 | Small tweaks here and there |
 | Oct 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |
 | Jul 25 09:16 2024 | Updated format of Colors.csv output |

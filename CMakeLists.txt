@@ -30,7 +30,7 @@ if (DOXYGEN_FOUND)
   configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT}$ @ONLY)
   message("Doxygen build started")
 
-  add_custom_target (doc ALL
+  add_custom_target (doc
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM
@@ -109,36 +109,6 @@ if (MATH_LIB)
     set (EXTRA_LIBS ${EXTRA_LIBS} ${MATH_LIB})
 else ()
     message (FATAL_ERROR "Did not find MATH lib")
-endif ()
-
-find_library (
-    Z_LIB
-    NAMES z libz # what to look for
-    HINTS "${CMAKE_SOURCE_DIR}/src/Resources/lib" # where to look
-)
-
-message(STATUS "Z_LIB: [${Z_LIB}]")
-
-if (Z_LIB)
-    message ("Found Z_LIB: [${Z_LIB}]")
-    set (EXTRA_LIBS ${EXTRA_LIBS} ${Z_LIB})
-else ()
-    message (FATAL_ERROR "Did not find Z lib")
-endif ()
-
-find_library (
-    PNG_LIB
-    NAMES png png16 # what to look for
-    HINTS "${CMAKE_SOURCE_DIR}/src/Resources/lib" # where to look
-)
-
-message(STATUS "PNG_LIB: [${PNG_LIB}]")
-
-if (PNG_LIB)
-    message ("Found PNG_LIB: [${PNG_LIB}]")
-    set (EXTRA_LIBS ${EXTRA_LIBS} ${PNG_LIB})
-else ()
-    message (FATAL_ERROR "Did not find PNG lib")
 endif ()
 
 set (THAMES_INCLUDE_PATH "-I${CMAKE_SOURCE_DIR}/src -I/usr/local/include")

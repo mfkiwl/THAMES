@@ -273,11 +273,11 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
@@ -855,7 +855,7 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   cur = cur->xmlChildrenNode;
 
   while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCcomp"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCconc"))) {
       parseDCInSolution(doc, cur);
     }
     cur = cur->next;
@@ -868,8 +868,8 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   map<int, double>::iterator it = initialSolutionComposition_.begin();
   while (it != initialSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    //cout << DCName_[it->first]
-    //     << ": Total initial charge so far = " << totcharge << endl;
+    // cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -881,8 +881,9 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   it = fixedSolutionComposition_.begin();
   while (it != fixedSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    //cout << DCName_[it->first] << ": Total fixed charge so far = " << totcharge
-    //     << endl;
+    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // totcharge
+    //      << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -894,6 +895,7 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
 }
 
 void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
+
   xmlChar *key;
   int DCId = -1;
   bool fixed = false;
@@ -943,22 +945,46 @@ void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
 void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
   // Clear the associative map to initialize it
 
-  xmlChar *key;
-  double gassolidratio = 0.0;
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
 
   cur = cur->xmlChildrenNode;
 
   while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      from_string(gassolidratio, (char *)key);
-      setGasSolidRatio(gassolidratio);
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCmoles"))) {
       parseDCInGas(doc, cur);
     }
     cur = cur->next;
+  }
+
+  // At this point all the composition constraints have been read
+  // Make sure they have charge balance
+
+  double totcharge = 0.0;
+  map<int, double>::iterator it = initialGasComposition_.begin();
+  while (it != initialGasComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseGasComp",
+                        "Initial gas charge imbalance");
+  }
+
+  totcharge = 0.0;
+  it = fixedGasComposition_.begin();
+  while (it != fixedGasComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // totcharge
+    //      << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseGasComp",
+                        "Fixed gas charge imbalance");
   }
 
   return;
@@ -969,7 +995,7 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
   int DCId = -1;
   bool fixed = false;
   string DCName;
-  double DCConc = -1.0;
+  double DCMoles = -1.0;
 
   cur = cur->xmlChildrenNode;
 
@@ -980,10 +1006,10 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
       DCId = getDCId(DCName);
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"moles"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(DCConc, st);
+      from_string(DCMoles, st);
       xmlFree(key);
     }
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"condition"))) {
@@ -998,10 +1024,15 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
     cur = cur->next;
   }
 
-  if (fixed) {
-    fixedGasComposition_.insert(make_pair(DCId, DCConc));
-  } else {
-    initialGasComposition_.insert(make_pair(DCId, DCConc));
+  // Only add the data if this is a gas component
+
+  if (DCClassCode_[DCId] == 'G' || DCClassCode_[DCId] == 'V' ||
+      DCClassCode_[DCId] == 'H' || DCClassCode_[DCId] == 'N') {
+    if (fixed) {
+      fixedGasComposition_.insert(make_pair(DCId, DCMoles));
+    } else {
+      initialGasComposition_.insert(make_pair(DCId, DCMoles));
+    }
   }
 
   return;
@@ -2072,7 +2103,7 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     }
   }
 
-  //setMicroPhasePorosity(idx, porosity);
+  // setMicroPhasePorosity(idx, porosity);
   microPhasePorosity_[idx] = porosity;
 
   return;
@@ -2099,14 +2130,17 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   vector<string> microPhaseNames = getMicroPhaseName();
 
   nodeStatus_ = NEED_GEM_AIA;
-  //if (cyc == 139) {
-  //  cout << endl << "ChemSys before GEM_from_MT : LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-  //  for(int i = 0; i < numDCs_; i++){
-  //    cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] <<
-  //    "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
-  //  }
-  //  cout << endl << "end ChemSys before GEM_from_MT :  LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl << endl;
-  //}
+  // if (cyc == 139) {
+  //   cout << endl << "ChemSys before GEM_from_MT :
+  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
+  //   for(int i = 0; i < numDCs_; i++){
+  //     cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] <<
+  //     "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
+  //   }
+  //   cout << endl << "end ChemSys before GEM_from_MT :
+  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl <<
+  //   endl;
+  // }
 
   //  for(int i = 0; i < numDCs_; i++){
   //      for(int j = 0; j < numICs_; j++){
@@ -2124,8 +2158,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // call normalizePhaseMasses() DCs are updated in
   // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
   // after the first call of calculateKineticStep(...) are set to 10^-9
-  if (isFirst)
+
+  if (isFirst) {
     checkICMoles();
+  }
 
   //  cout << endl << "chemSys after checkICMoles for cyc = " << cyc << " :
   //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
@@ -2148,12 +2184,16 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// in this case.
   ///
 
-  // Check and set chemical conditions on electrolyte
+  // Check and set chemical conditions on electrolyte and gas phase
   setElectrolyteComposition(isFirst);
-  //setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
+  setGasComposition(isFirst);
+
+  // setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
 
   if (verbose_) {
-    cout << endl << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc << endl;
+    cout << endl
+         << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc
+         << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
       cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
@@ -2225,11 +2265,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   nodeStatus_ = node_->GEM_run(true);
@@ -2241,7 +2281,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
-    cerr << endl << "  ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = " << nodeStatus_ << endl;
+    cerr << endl
+         << "  ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = "
+         << nodeStatus_ << endl;
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
       msg = "    Need GEM calc with auto initial approx (AIA)";
@@ -2254,8 +2296,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg = "  ChemicalSystem::calculateState - Failed result with auto initial "
-            "approx (AIA)";
+      msg =
+          "  ChemicalSystem::calculateState - Failed result with auto initial "
+          "approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2272,7 +2315,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      msg = "    ChemicalSystem::calculateState - Failed result with smart initial "
+      msg = "    ChemicalSystem::calculateState - Failed result with smart "
+            "initial "
             "approx (SIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
@@ -2325,11 +2369,14 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
                    &solutPhaseMass_[0], &pSolutPhaseStoich_[0], &carrier_[0],
                    &surfaceArea_[0], &pSolidStoich_[0]);
 
-  cout << endl << "  ChemicalSystem::calculateState GEM_from_MT OK for cyc = " << cyc << endl;
-
   if (verbose_) {
+    cout << endl
+         << "   ChemicalSystem::calculateState GEM_to_MT OK for cyc = " << cyc
+         << endl;
+
     cout << endl << "Done!" << endl;
-    cout << "ChemicalSystem::calculateState Exiting GEM_from_MT cyc = " << cyc << endl;
+    cout << "ChemicalSystem::calculateState Exiting GEM_to_MT cyc = " << cyc
+         << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
       cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
@@ -2354,7 +2401,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   setGEMPhaseMolarMass(); // =>GEMPhaseMolarMass_[pidx]
 
   if (verbose_) {
-    cout << endl << "    ~~~~>After calculateState, "
+    cout << endl
+         << "    ~~~~>After calculateState, "
          << "printing microPhaseVolumes" << endl;
     for (int i = 0; i < microPhaseVolumes.size(); ++i) {
       cout << "    Phase name " << microPhaseNames[i]
@@ -2396,7 +2444,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
     if (!isKinetic(i)) {
       calcMicroPhasePorosity(i);
-      //phi = getMicroPhasePorosity(i);
+      // phi = getMicroPhasePorosity(i);
       phi = microPhasePorosity_[i];
       microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
       for (unsigned int j = 0; j < microPhaseMembers_[i].size(); j++) {
@@ -2449,13 +2497,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
 
       cout << "  ChemicalSystem::calculateState for cyc = " << cyc
-           << "  &  update = " << update
-           << "  &  i = " << i
-           << endl;
+           << "  &  update = " << update << "  &  i = " << i << endl;
     }
   }
 
-  //newMicroVolume_ = microVolume_;
+  // newMicroVolume_ = microVolume_;
 
   scaledCementMass_ = 0;
   for (int i = 1; i < numMicroPhases_; i++) {
@@ -2494,7 +2540,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       cout << "  ChemicalSystem::calculateState for cyc = " << cyc
            << " => water_molesincr = " << water_molesincr << endl
            << endl;
-      //newMicroVolume_ = initMicroVolume_;
+      // newMicroVolume_ = initMicroVolume_;
     }
   }
 
@@ -2506,11 +2552,12 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (initMicroVolume_ < microVolume_) {
-    cout << "  ChemicalSystem::calculateState for cyc = " << cyc << "  &  update = " << update
-         << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_ << " < " << microVolume_
-         << endl;
-    //initMicroVolume_ = microVolume_;
-    //newMicroVolume_ = microVolume_;
+    cout << "  ChemicalSystem::calculateState for cyc = " << cyc
+         << "  &  update = " << update
+         << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_
+         << " < " << microVolume_ << endl;
+    // initMicroVolume_ = microVolume_;
+    // newMicroVolume_ = microVolume_;
   }
 
   if (verbose_) {
@@ -3052,6 +3099,33 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
         DCconc = it->second;
         setDCMoles(DCId, (DCconc * waterMass));
       }
+      it++;
+    }
+    return;
+  }
+  return;
+}
+
+void ChemicalSystem::setGasComposition(const bool isFirst) {
+  if (isFirst && initialGasComposition_.size() > 0) {
+    map<int, double>::iterator it = initialGasComposition_.begin();
+    int DCId;
+    double DCmoles; // mole units
+    while (it != initialGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      setDCMoles(DCId, DCmoles);
+      it++;
+    }
+    return;
+  } else if (fixedGasComposition_.size() > 0) {
+    map<int, double>::iterator it = fixedGasComposition_.begin();
+    int DCId;
+    double DCmoles; // mol units
+    while (it != fixedGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      setDCMoles(DCId, DCmoles);
       it++;
     }
     return;
