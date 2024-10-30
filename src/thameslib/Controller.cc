@@ -215,8 +215,6 @@ void Controller::doCycle(const string &statfilename, int choice) {
   cout << endl << "Controller::doCycle Entering Lattice::findInterfaces" << endl;
   //}
 
-  lattice_->shiftAffinityPosVal();
-
   lattice_->findInterfaces();
 
   //lattice_->checkSite(8);

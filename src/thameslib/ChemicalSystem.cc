@@ -71,6 +71,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   randomGrowth_.clear();
   growthTemplate_.clear();
   affinity_.clear();
+  contactAngle_.clear();
   microPhasePorosity_.clear();
   poreSizeDistribution_.clear();
   k2o_.clear();
@@ -561,7 +562,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
   /// Begin parsing the chemistry input XML file
   ///
-
   string msg;
   string xmlext = ".xml";
   size_t foundxml = interfaceFileName.find(xmlext);
@@ -611,6 +611,15 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   microPhaseSI_.clear();
   microPhaseSI_.resize(numMicroPhases_, 0.0);
+
+  //for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
+  //  cout << endl << "   affinity for i = " << i << endl;
+  //  for (unsigned int j = FIRST_SOLID; j < numMicroPhases_; j++) {
+  //    cout << "  " << j << "/" << affinity_[i][j] << "/" << contactAngle_[i][j];
+  //  }
+  //  cout << endl;
+  //}
+  //cout << " exit chemsys" << endl; exit(0);
 
   // checkChemSys();
 }
@@ -1059,12 +1068,25 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
 
   phaseData.growthTemplate.clear();
   phaseData.affinity.clear();
+  phaseData.contactAngle.clear();
 
   /// @note The affinity vector is always the same length, one entry for every
-  /// microstructure phase, and the default value is zero.  Therefore
-  /// the chemistry file does not need to include zero affinity values
+  /// microstructure phase, and the default value is zero (contactanglevalue = 180);
+  /// for self-affinity (the growing phase and the template are the same)
+  /// the default value is 1 (contactanglevalue = 0). Both, affinity and self-affinity
+  /// can be modified supplying, in the chemistry.xml file, the desired values for the
+  /// contact angle
 
-  phaseData.affinity.resize(numEntries, 0);
+    //f(th) = (2 - 3 cos(th) + (cos(th))^3)/4
+    //f(th) : [0, 1]
+    //f(th) = 0 when th = 0 (perfect wetting)
+    //f(th) = 1 when th = 180° (dewetting)
+    //affinity(th) = 1 - f(th)
+    //affinity(th) = 1 when th = 0 (perfect wetting)
+    //affinity(th) = 0 when th = 180° (dewetting)
+  phaseData.contactAngle.resize(numEntries, 180);
+  phaseData.affinity.resize(numEntries, 0.0);
+
   phaseData.GEMPhaseId.clear();
   phaseData.DCId.clear();
   phaseData.GEMPhaseName.clear();
@@ -1181,7 +1203,17 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   microPhaseId_.push_back(phaseData.id);
   microPhaseIdLookup_.insert(make_pair(phaseData.thamesName, phaseData.id));
   randomGrowth_.push_back(phaseData.randomGrowth);
+
+  double cs;
+  for (int i = FIRST_SOLID; i < numEntries; i++) {
+    if (i == phaseData.id && abs(phaseData.contactAngle[i] - 180.) <1.e16) {
+      phaseData.contactAngle[i] = 0;
+    }
+    cs = cos(phaseData.contactAngle[i] * Pi / 180.);
+    phaseData.affinity[i] = 1.0 - (2. - 3*cs + pow(cs, 3))/4.;
+  }
   affinity_.push_back(phaseData.affinity);
+  contactAngle_.push_back(phaseData.contactAngle);
 
   /// Growth template is based on positive affinities only
 
@@ -1518,9 +1550,10 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
                                        PhaseData &phaseData) {
   xmlChar *key;
   cur = cur->xmlChildrenNode;
-  int testaftyid, testaftyval;
+  int testaftyid; //, testaftyval;
+  double testangleval, cs;
   map<string, int>::iterator it = phaseids.begin();
-
+  testangleval = 0;
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityphase"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -1531,10 +1564,17 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
       }
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
+    //if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
+    //  key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+    //  string st((char *)key);
+    //  from_string(testaftyval, st);
+    //  xmlFree(key);
+    //}
+
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"contactanglevalue"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(testaftyval, st);
+      from_string(testangleval, st);
       xmlFree(key);
     }
     cur = cur->next;
@@ -1542,8 +1582,10 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
 
   // Must be a valid phase name to be added to the list
   if (it != phaseids.end()) {
-    phaseData.affinity[testaftyid] = ((int)testaftyval);
+    //phaseData.affinity[testaftyid] = ((int)testaftyval);
+    phaseData.contactAngle[testaftyid] = testangleval;
   }
+
   return;
 }
 
@@ -1601,6 +1643,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   DCMolarMass_ = obj.getDCMolarMass();
   growthTemplate_ = obj.getGrowthTemplate();
   affinity_ = obj.getAffinity();
+  contactAngle_ = obj.getContactAngle();
   microPhaseMembers_ = obj.getMicroPhaseMembers();
   microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
   microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
@@ -1690,6 +1733,7 @@ ChemicalSystem::~ChemicalSystem(void) {
   DCCharge_.clear();
   growthTemplate_.clear();
   affinity_.clear();
+  contactAngle_.clear();
   microPhaseMembers_.clear();
   microPhaseMemberVolumeFraction_.clear();
   microPhaseMass_.clear();

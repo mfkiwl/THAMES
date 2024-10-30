@@ -36,7 +36,7 @@ Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
                      vector<Site *> dv, unsigned int pid, const bool verbose) {
   unsigned int j;
   unsigned int i;
-  int afty;
+  double afty;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -96,7 +96,7 @@ void Interface::addGrowthSite(Site *loc) {
   // end = growthSites_.end();
 
   //loc->setInGrowInterfacePos(microPhaseId_, growthSitesSize_);
-  int afty = 0;
+  double afty = 0;
   for (int i = 0; i < NN_NNN; i++) {
     afty += chemSys_->getAffinity(microPhaseId_, loc->nb(i)->getMicroPhaseId());
   }

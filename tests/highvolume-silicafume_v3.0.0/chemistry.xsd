@@ -128,7 +128,6 @@
     <xs:complexType mixed="true" name="kinetic_datatype">
         <xs:sequence>
             <xs:element name="type" type="kineticTypetype" />
-            <xs:element minOccurs="0" maxOccurs="1" name="scaledmass" type="positiveDoubletype" />
             <xs:element minOccurs="1" maxOccurs="1" name="specificSurfaceArea"
                 type="positiveDoubletype" />
             <xs:element minOccurs="1" maxOccurs="1" name="refSpecificSurfaceArea"
@@ -197,7 +196,7 @@
             <xs:element minOccurs="0" name="kinetic_data" type="kinetic_datatype" />
             <xs:element minOccurs="0" maxOccurs="1" name="stresscalc" type="integertype" />
             <xs:element minOccurs="0" maxOccurs="1" name="weak" type="integertype" />
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="display_data" type="display_datatype" />
+            <xs:element minOccurs="0" maxOccurs="1" name="display_data" type="display_datatype" />
         </xs:sequence>
     </xs:complexType>
 

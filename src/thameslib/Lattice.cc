@@ -28,8 +28,6 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
                  const bool warning)
     : siteneighbors_(NN_NNN), chemSys_(cs) {
 
-  //used Lattice::shiftAffinityPosVal in Controller before Lattice::findInterfaces!!
-
   unsigned int i, j, k;
   unsigned int ii;
   string buff;
@@ -889,7 +887,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
                                vector<int> numSiteGrowVect,
                                vector<string> growPhNameVect, int &numadded_G,
                                int totalTRC) {
-  //used Lattice::shiftAffinityPosVal in Controller before Lattice::findInterfaces!!
 
   //*** for controll
   int bcl = 0;
@@ -915,11 +912,11 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
 
   double wmcIni, wmcEnd;
   double steWmc, stenbWmc, dwmcval;
-  double affSumDbl, rng, probRNG;
+  double rng, probRNG, afty;
 
   unsigned int pid;
   int stId, phId, pos, posGrowVect;
-  int isitePos, afty;
+  int isitePos;
   int posVect;
   int siteID, phaseID;
 
@@ -947,7 +944,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
   structGrowVect growStruct;
 
   int posProbVect = 0;
-  int affSum = 0;
+  double affSum = 0;
   for (i = 0; i < growPhaseIDVectSize; i++) {
     phaseID = growPhaseIDVect[i];
     isite = interface_[phaseID].getGrowthSites();
@@ -986,6 +983,81 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
   }
   cout.flush();
 
+  while ((numLeftTot > 0) && (growthVectorSize == 0)) {
+    cout << endl
+       << "    Lattice::growPhase growPhaseIDVectSize = 0" << endl;
+    cout << "      => need an initial nucleation for at least one of the growing phases" << endl;
+    cout << "      there is(are) " << growPhaseIDVectSize << " growing phase(s):" << endl;
+    cout << "      ";
+    for (int i = 0; i < growPhaseIDVectSize; i++) {
+      cout << "  " << growPhaseIDVect[i];
+    }
+    int nucPhaseId;
+    do {
+      nucPhaseId = (int)(rng * growPhaseIDVectSize);
+    } while(numLeft[nucPhaseId] == 0);
+    cout << endl << "      one of them is chosen randomly for nucleation: " << growPhaseIDVect[nucPhaseId] << endl;
+
+    phaseID = growPhaseIDVect[nucPhaseId];
+    dim_isite[nucPhaseId] = growthInterfaceSize_[phaseID];
+    if (dim_isite[nucPhaseId] == 0) { // nucleation
+      needNucleation = true;
+      cout << endl
+           << "    *** Lattice::growPhase - need nucleation for phaseID = " << phaseID << endl;
+      cout << "      interface dimension dim_site[" << nucPhaseId << "] = " << dim_isite[nucPhaseId]
+           << " while numLeft[" << nucPhaseId << "] = " << numLeft[nucPhaseId] << endl;
+      cout << "      => for this microPhase (" << growPhNameVect[nucPhaseId] << ") a number of "
+           << numLeft[nucPhaseId] << " seed(s)/site(s) will be nucleated" << endl;
+
+      //nucleatePhaseAff(phaseID, numLeft[i]);
+      nucleatePhaseRnd(phaseID, numLeft[nucPhaseId]);
+      nucleated[nucPhaseId] = numLeft[nucPhaseId];
+
+      numLeftTot = numLeftTot - numLeft[nucPhaseId];
+      numChangeTot = numChangeTot + numLeft[nucPhaseId];
+
+      numChange[nucPhaseId] = numChange[nucPhaseId] + numLeft[nucPhaseId];
+      numLeft[nucPhaseId] = 0;
+
+      writeFirst[i] = true;
+      cout << endl
+           << "    Lattice::growPhase GROW_END BY NUCLEATION for i = " << nucPhaseId
+           << "   totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g << "/" << bcl << endl;
+      cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
+           << "   growthVectorSize = " << growthVectorSize << "   numLeftTot = " << numLeftTot
+           << "   numChangeTot = " << numChangeTot << endl;
+      cout << "        GROW_END phaseid count_ dim_isite numleft numchange  :  "
+           << setw(3) << growPhaseIDVect[nucPhaseId] << "   "
+           << setw(8) << right << count_[phaseID] << "   "
+           << setw(8) << interface_[phaseID].getGrowthSites().size() << "   "
+           << setw(8) << numLeft[nucPhaseId] << "   "
+           << setw(8) << numChange[nucPhaseId] << endl;
+      cout.flush();
+
+      posProbVect = 0;
+      affSum = 0;
+      for (int j = 0; j < growPhaseIDVectSize; j++) {
+        if (numLeft[j] > 0) {
+          phaseID = growPhaseIDVect[j];
+          isite = interface_[phaseID].getGrowthSites();
+          dim_isite[j] = isite.size();
+
+          for (int jj = 0; jj < dim_isite[j]; jj++) {
+            afty = isite[jj].getAffinity();
+            affSum += afty;
+            growStruct.id = isite[jj].getId();
+            growStruct.posVect = j;
+            growStruct.affinity = afty;
+            growthVector.push_back(growStruct);
+            site_[isite[jj].getId()].setInGrowthVectorPos(phaseID, posProbVect);
+            posProbVect++;
+          }
+        }
+      }
+      growthVectorSize = growthVector.size();
+    }
+  }
+
   while ((numLeftTot > 0) && (growthVectorSize >= 1)) {
       bcl++;
 
@@ -1000,14 +1072,13 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
       //}
       // calc probabilities & choose a site
       rng = callRNG();
-      if (affSum != 0) {
-        affSumDbl = affSum;
-        probRNG = growthVector[0].affinity /affSumDbl;
+      if (affSum > 0) {
+        probRNG = growthVector[0].affinity /affSum;
         if (rng <= probRNG) {
           isitePos = 0;
         } else {
           for (isitePos = 1; isitePos < growthVectorSize; isitePos++) {
-            probRNG += (growthVector[isitePos].affinity / affSumDbl);
+            probRNG += (growthVector[isitePos].affinity / affSum);
             if (rng <= probRNG)
               break;
           }
@@ -1236,11 +1307,12 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
               cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                    << "   growthVectorSize = " << growthVectorSize << "   numLeftTot = " << numLeftTot
                    << "   numChangeTot = " << numChangeTot << endl;
-              cout << "        GROW_END phaseid count_ dim_isite numleft numchange  "
-                      ":  "
-                   << growPhaseIDVect[i] << "   "
-                   << "   " << count_[growPhaseIDVect[i]] << "   " << dim_isite[i] << "   "
-                   << numLeft[i] << "   " << numChange[i] << endl;
+              cout << "        GROW_END phaseid count_ dim_isite numleft numchange  :  "
+                   << setw(3) << growPhaseIDVect[i] << "   "
+                   << setw(8) << right << count_[growPhaseIDVect[i]] << "   "
+                   << setw(8) << dim_isite[i] << "   "
+                   << setw(8) << numLeft[i] << "   "
+                   << setw(8) << numChange[i] << endl;
               cout.flush();
 
               needUpdate = true;
@@ -1263,11 +1335,12 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
             cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                  << "   growthVectorSize = " << growthVectorSize << "   numLeftTot = " << numLeftTot
                  << "   numChangeTot = " << numChangeTot << endl;     
-            cout << "        GROW_END phaseid count_ dim_isite numleft numchange  "
-                  ":  "
-               << setw(3) << growPhaseIDVect[i] << "   " << setw(8) << right << count_[growPhaseIDVect[i]]
-               << "   " << setw(8) << dim_isite[i] << "   "
-               << setw(8) << numLeft[i] << "   " << setw(8) << numChange[i] << endl;
+            cout << "        GROW_END phaseid count_ dim_isite numleft numchange  :  "
+               << setw(3) << growPhaseIDVect[i] << "   "
+               << setw(8) << right << count_[growPhaseIDVect[i]] << "   "
+               << setw(8) << dim_isite[i] << "   "
+               << setw(8) << numLeft[i] << "   "
+               << setw(8) << numChange[i] << endl;
             cout.flush();
 
             needUpdate = true;
@@ -1315,9 +1388,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
 }
 
 void Lattice::nucleatePhaseRnd(int phaseID,int numLeft) {
-
-  //used Lattice::shiftAffinityPosVal in
-  // Controller before Lattice::findInterfaces!!
 
   int numLeftIni = numLeft;
 
@@ -1674,28 +1744,23 @@ void Lattice::nucleatePhaseRnd(int phaseID,int numLeft) {
        << growthInterfaceSize_[phaseID] << endl;
   cout << "        dissolutionInterfaceSize_ = "
        << dissolutionInterfaceSize_[phaseID] << endl;
-
 }
 
 void Lattice::nucleatePhaseAff(int phaseID,int numLeft) {
 
-  //used Lattice::shiftAffinityPosVal in
-  // Controller before Lattice::findInterfaces!!
-
   int numLeftIni = numLeft;
   struct localStruct {
     int id;
-    int aff;
+    double aff;
     double prob;
   };
   localStruct un;
   vector<localStruct> watersites;
-  int aff, affSum;
+  double aff, affSum;
   vector<Site *> localNb;
   int sizeWS;
   double rng;
   int fSiteWS;
-  double daffsum;
   int j, k;
   vector<int> seedID;
 
@@ -1870,11 +1935,10 @@ void Lattice::nucleatePhaseAff(int phaseID,int numLeft) {
 
       rng = callRNG();
 
-      if (affSum != 0) {
-        daffsum = affSum;
-        watersites[0].prob = (watersites[0].aff) / daffsum;
+      if (affSum > 0) {
+        watersites[0].prob = (watersites[0].aff) / affSum;
         for (k = 1; k < sizeWS; k++) {
-          watersites[k].prob = watersites[k - 1].prob + (watersites[k].aff) / daffsum;
+          watersites[k].prob = watersites[k - 1].prob + (watersites[k].aff) / affSum;
         }
 
         for (fSiteWS = 0; fSiteWS < sizeWS; fSiteWS++) {
