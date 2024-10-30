@@ -4,13 +4,14 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
-| October 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |
-| July 25 09:16 2024 | Updated format of Colors.csv output |
-| July 24 11:01 2024 | Merged latest version of branch florinRecoverLatticeAndRNG onto main |
-| July 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
-| July 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
-| July 11 17:53 2024 | Implemented initial and fixed solution DC composition |
-| June 04 09:00 2024 | Saturation indices all reading zero no matter what. Debugging. |
+| Oct 29 11:19 2024 | Small tweaks here and there |
+| Oct 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |
+| Jul 25 09:16 2024 | Updated format of Colors.csv output |
+| Jul 24 11:01 2024 | Merged latest version of branch florinRecoverLatticeAndRNG onto main |
+| Jul 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
+| Jul 10 21:02 2024 | Major changes to main branch, merging several branches onto main, includes all development since June 4 |
+| Jul 11 17:53 2024 | Implemented initial and fixed solution DC composition |
+| Jun 04 09:00 2024 | Saturation indices all reading zero no matter what. Debugging. |
 | May 22 10:51 2024 | Beginning to generalize dissolution and precipitation kinetics |
 | May 22 10:51 2024 | Propagated fix for StandardKineticModel to PozzolanicModel |
 | May 21 13:46 2024 | Fixed accidental resetting of ICmoles assignment in StandardKineticModel |

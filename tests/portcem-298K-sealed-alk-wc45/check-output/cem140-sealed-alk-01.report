@@ -1,0 +1,11 @@
+THAMES job cem140-sealed-alk-01 initialized on Sat May 13 16:18:03 2023
+
+
+INPUT FILES USED:
+   Microstructure file name: ccr140-w45-thames.img
+        GEM input file name: portcem-dat.lst
+
+OUTPUT FILES GENERATED:
+     Global phase fractions: cem140-sealed-alk-01.stats
+
+

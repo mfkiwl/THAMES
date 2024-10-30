@@ -1,0 +1,11 @@
+THAMES job HighVolSF initialized on Sat May 13 21:13:40 2023
+
+
+INPUT FILES USED:
+   Microstructure file name: thames-microstructure.img
+        GEM input file name: hvsf-dat.lst
+
+OUTPUT FILES GENERATED:
+     Global phase fractions: HighVolSF.stats
+
+
