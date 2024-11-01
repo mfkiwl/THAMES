@@ -865,7 +865,7 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   cur = cur->xmlChildrenNode;
 
   while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCcomp"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCconc"))) {
       parseDCInSolution(doc, cur);
     }
     cur = cur->next;
@@ -905,6 +905,7 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
 }
 
 void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
+
   xmlChar *key;
   int DCId = -1;
   bool fixed = false;
@@ -954,22 +955,46 @@ void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
 void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
   // Clear the associative map to initialize it
 
-  xmlChar *key;
-  double gassolidratio = 0.0;
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
 
   cur = cur->xmlChildrenNode;
 
   while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gassolidratio"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      from_string(gassolidratio, (char *)key);
-      setGasSolidRatio(gassolidratio);
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"ICcomp"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCmoles"))) {
       parseDCInGas(doc, cur);
     }
     cur = cur->next;
+  }
+
+  // At this point all the composition constraints have been read
+  // Make sure they have charge balance
+
+  double totcharge = 0.0;
+  map<int, double>::iterator it = initialGasComposition_.begin();
+  while (it != initialGasComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseGasComp",
+                        "Initial gas charge imbalance");
+  }
+
+  totcharge = 0.0;
+  it = fixedGasComposition_.begin();
+  while (it != fixedGasComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // totcharge
+    //      << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseGasComp",
+                        "Fixed gas charge imbalance");
   }
 
   return;
@@ -980,7 +1005,7 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
   int DCId = -1;
   bool fixed = false;
   string DCName;
-  double DCConc = -1.0;
+  double DCMoles = -1.0;
 
   cur = cur->xmlChildrenNode;
 
@@ -991,10 +1016,10 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
       DCId = getDCId(DCName);
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"moles"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(DCConc, st);
+      from_string(DCMoles, st);
       xmlFree(key);
     }
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"condition"))) {
@@ -1009,10 +1034,15 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
     cur = cur->next;
   }
 
-  if (fixed) {
-    fixedGasComposition_.insert(make_pair(DCId, DCConc));
-  } else {
-    initialGasComposition_.insert(make_pair(DCId, DCConc));
+  // Only add the data if this is a gas component
+
+  if (DCClassCode_[DCId] == 'G' || DCClassCode_[DCId] == 'V' ||
+      DCClassCode_[DCId] == 'H' || DCClassCode_[DCId] == 'N') {
+    if (fixed) {
+      fixedGasComposition_.insert(make_pair(DCId, DCMoles));
+    } else {
+      initialGasComposition_.insert(make_pair(DCId, DCMoles));
+    }
   }
 
   return;
@@ -2173,8 +2203,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // call normalizePhaseMasses() DCs are updated in
   // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
   // after the first call of calculateKineticStep(...) are set to 10^-9
-  if (isFirst)
+
+  if (isFirst) {
     checkICMoles();
+  }
 
   //  cout << endl << "chemSys after checkICMoles for cyc = " << cyc << " :
   //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
@@ -2197,8 +2229,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// in this case.
   ///
 
-  // Check and set chemical conditions on electrolyte
+  // Check and set chemical conditions on electrolyte and gas phase
   setElectrolyteComposition(isFirst);
+  setGasComposition(isFirst);
+
   // setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
 
   if (verbose_) {
@@ -3110,6 +3144,33 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
         DCconc = it->second;
         setDCMoles(DCId, (DCconc * waterMass));
       }
+      it++;
+    }
+    return;
+  }
+  return;
+}
+
+void ChemicalSystem::setGasComposition(const bool isFirst) {
+  if (isFirst && initialGasComposition_.size() > 0) {
+    map<int, double>::iterator it = initialGasComposition_.begin();
+    int DCId;
+    double DCmoles; // mole units
+    while (it != initialGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      setDCMoles(DCId, DCmoles);
+      it++;
+    }
+    return;
+  } else if (fixedGasComposition_.size() > 0) {
+    map<int, double>::iterator it = fixedGasComposition_.begin();
+    int DCId;
+    double DCmoles; // mol units
+    while (it != fixedGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      setDCMoles(DCId, DCmoles);
       it++;
     }
     return;
