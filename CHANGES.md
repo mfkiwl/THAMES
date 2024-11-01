@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Nov 01 09:45 2024 | Commit in preparation for v3.0.0 release |
 | Oct 30 17:51 2024 | Fixed gas and electrolyte composition functionality |
 | Oct 29 11:19 2024 | Small tweaks here and there |
 | Oct 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |

@@ -5,7 +5,7 @@
 # (should be read after the DCH file and before DBR files)
 
 # ID key of the initial chemical system definition
-<ID_key>  "Pyrrho    G  CemPyrrDC   1    0       1       25      3   "
+<ID_key>  "THAMES    G  thames-no-w 0    0       1       25      0   "
 
 ## (1) Flags that affect memory allocation
 # PE: Flag for using electroneutrality condition in GEM IPM calculations (1 or 0)
@@ -278,7 +278,6 @@
 0 0 
 0 0 
 0 0 
-0 0 
 # SorMc: Phase-related kinetics and sorption model parameters: [Fis][16]
 <SorMc>
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
@@ -322,11 +321,10 @@
 <kMod>
 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 
 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 
-'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 
+'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 'NNNNNN' 
 # LsKin: number of parallel reactions; of species in activity products; of parameter coeffs in parallel reaction;
 # of parameters per species; parameter coefficients in As correction; of (separately considered) crystal faces or surface patches ( 1 to 4 ) [Fi][6]
 <LsKin>
-0 0 0 0 0 0 
 0 0 0 0 0 0 
 0 0 0 0 0 0 
 0 0 0 0 0 0 
@@ -513,7 +511,6 @@
 1 
 1 
 1 
-1 
 # LsUpt: number of uptake kinetics model parameters (coefficients) numpC[k]; (reserved)
 <LsUpt>
 0 0 
@@ -540,7 +537,7 @@
 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
 
 # fDQF: DQF parameters of end members or pure gas fugacities, (J/mol/(RT) [nDC]
 <fDQF>
@@ -548,7 +545,7 @@
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
 # lnGmf: Natural logarithms of DC activity coefficients used at Simplex LP approximation only [nDC]
 <lnGmf>
@@ -556,7 +553,7 @@
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 6.90775527898214 0 6.90775527898214 0 0 0 0 6.90775527898214 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
 # (6) Metastability constraints on DC amounts from above (DUL) and below (DLL)
 # RLC: Code of metastability constraints for DCs {L U B (default)} [nDC]
@@ -565,7 +562,7 @@
 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 
 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 
 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 
-'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 
+'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 'B' 
 
 # RSC: Units of metastability/kinetic constraints for DCs {M} moles [nDC]
 <RSC>
@@ -573,7 +570,7 @@
 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 
 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 
 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 
-'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 
+'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 'M' 
 
 # DLL: Lower metastability constraints on DC amounts <xDC>, moles [nDC] (default: 0)
 <DLL>
@@ -581,7 +578,7 @@
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 
 # DUL: Upper metastability constraints on DC amounts <xDC>, moles [nDC] (default: 1e6)
 <DUL>
@@ -589,7 +586,7 @@
 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
-1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
+1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 1000000 
 
 # (7) Initial data for Phases
 
@@ -597,32 +594,32 @@
 <Aalp>
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
 
 # Sigw: Specific surface free energy for phase-water interface, J/m2 [nPH] (reserved)
 <Sigw>
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
 
 # Sigg: Specific surface free energy for phase-gas interface, J/m2 (not yet used) [nPH]
 <Sigg>
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
 
 # YOF: Surface free energy parameter for phases in J/g (to accomodate for variable phase composition)  [nPH]
 <YOF>
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
 # dcMod: Codes for PT corrections of DC thermodynamic data [nDC] (reserved)
 <dcMod>
 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'K3CN' 'K3CN' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'K3C' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'K3C' 'K3C' 'HKF' 'HKF' 'HKF' 'HKF' 'K3C' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 
 'HKF' 'HKF' 'K3C' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'CSCN' 'K3CN' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'HKF' 'K3C' 'HKF' 'HKF' 'HWF' 'CSN' 'CSN' 'CSN' 'CSN' 'CSN' 'CSN' 'CSNN' 'CSNN' 'CSCN' 'CSCN' 'CSCN' 
-'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'K3CN' 'K3CN' 'CSCN' 'CSCN' 'CSC' 'CSCN' 'CSC' 'CSC' 'CSNN' 'CSNN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSNN' 'CSNN' 'CSNN' 'CSNN' 'CSNN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 
-'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'K3CN' 'K3CN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSC' 'CSC' 'CSC' 'CSCN' 'CSCN' 'CSC' 'K3C' 'CSC' 'CSC' 'CSC' 'K3C' 'CSCN' 
-'CSC' 'CSC' 'CSEN' 'CSC' 'CSC' 'CSCN' 'CSNN' 'CSCN' 'CSCN' 'CSC' 'CSCN' 'CSC' 'CSCN' 'K3CN' 'K3CN' 'K3CN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSCN' 
+'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'K3CN' 'K3CN' 'CSCN' 'CSCN' 'CSC' 'CSCN' 'CSC' 'CSC' 'CSNN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 
+'CSCN' 'K3CN' 'K3CN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSC' 'CSC' 'CSC' 'CSCN' 'CSCN' 'CSC' 'K3C' 'CSC' 'CSC' 'CSC' 'K3C' 'CSCN' 'CSC' 'CSEN' 'CSCN' 'CSC' 'CSCN' 'CSCN' 
+'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSCN' 'CSC' 'CSCN' 'CSC' 'CSCN' 'K3CN' 'K3CN' 'K3CN' 'CSCN' 'CSC' 'CSC' 'CSCN' 'CSCN' 
 
 # mui: IC indices in parent RMULTS IC list (not used in standalone GEMS3K)
 <mui>
@@ -630,17 +627,17 @@
 
 # muk: Phase indices in parent RMULTS Phase list (not used in standalone GEMS3K)
 <muk>
-0 1 2 3 4 6 8 9 12 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 
-45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 
-85 86 87 88 89 90 91 92 93 94 95 96 97 
+0 1 2 3 4 6 8 9 12 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 
+46 47 48 49 50 51 52 53 54 55 56 57 58 60 61 62 63 64 67 68 69 70 71 72 73 74 75 77 78 79 81 82 83 84 85 86 87 88 89 90 
+91 92 93 95 96 97 98 100 101 102 103 104 
 
 # muj: DC indices in parent RMULTS DC list (not used in standalone GEMS3K)
 <muj>
 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 
 40 41 42 43 44 45 46 47 48 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 
 81 82 83 84 85 86 87 90 91 94 95 96 97 102 103 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 
-131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 
-171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 
+131 132 133 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 154 155 156 157 158 161 162 163 164 165 166 167 168 169 171 172 173 175 176 
+177 178 179 180 181 182 183 184 185 186 187 189 190 191 192 194 195 196 197 198 
 
 # End of file
 
