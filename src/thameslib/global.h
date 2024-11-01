@@ -175,4 +175,6 @@ const int EXTERNALFORMAT = 0;
 
 const double ICTHRESH = 1.0e-9;
 
+const double Pi = 3.14159265359;
+
 #endif

@@ -222,11 +222,11 @@ public:
   */
   bool getVerbose(void) const { return verbose_; }
 
-  void updateAffinity(int pos, int afty) {
+  void updateAffinity(int pos, double afty) {
     growthSites_[pos].updateAffinity(afty);
   }
 
-  int getAffinity(int pos) {
+  double getAffinity(int pos) {
     return growthSites_[pos].getAffinity();
   }
 

@@ -71,6 +71,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   randomGrowth_.clear();
   growthTemplate_.clear();
   affinity_.clear();
+  contactAngle_.clear();
   microPhasePorosity_.clear();
   poreSizeDistribution_.clear();
   k2o_.clear();
@@ -273,11 +274,11 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   (node_->pCNode())->NodeStatusCH = NEED_GEM_AIA;
@@ -561,7 +562,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
   /// Begin parsing the chemistry input XML file
   ///
-
   string msg;
   string xmlext = ".xml";
   size_t foundxml = interfaceFileName.find(xmlext);
@@ -611,6 +611,16 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   microPhaseSI_.clear();
   microPhaseSI_.resize(numMicroPhases_, 0.0);
+
+  // for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
+  //   cout << endl << "   affinity for i = " << i << endl;
+  //   for (unsigned int j = FIRST_SOLID; j < numMicroPhases_; j++) {
+  //     cout << "  " << j << "/" << affinity_[i][j] << "/" <<
+  //     contactAngle_[i][j];
+  //   }
+  //   cout << endl;
+  // }
+  // cout << " exit chemsys" << endl; exit(0);
 
   // checkChemSys();
 }
@@ -868,8 +878,8 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   map<int, double>::iterator it = initialSolutionComposition_.begin();
   while (it != initialSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    //cout << DCName_[it->first]
-    //     << ": Total initial charge so far = " << totcharge << endl;
+    // cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -881,8 +891,9 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   it = fixedSolutionComposition_.begin();
   while (it != fixedSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    //cout << DCName_[it->first] << ": Total fixed charge so far = " << totcharge
-    //     << endl;
+    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // totcharge
+    //      << endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -1059,12 +1070,25 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
 
   phaseData.growthTemplate.clear();
   phaseData.affinity.clear();
+  phaseData.contactAngle.clear();
 
   /// @note The affinity vector is always the same length, one entry for every
-  /// microstructure phase, and the default value is zero.  Therefore
-  /// the chemistry file does not need to include zero affinity values
+  /// microstructure phase, and the default value is zero (contactanglevalue =
+  /// 180); for self-affinity (the growing phase and the template are the same)
+  /// the default value is 1 (contactanglevalue = 0). Both, affinity and
+  /// self-affinity can be modified supplying, in the chemistry.xml file, the
+  /// desired values for the contact angle
 
-  phaseData.affinity.resize(numEntries, 0);
+  // f(th) = (2 - 3 cos(th) + (cos(th))^3)/4
+  // f(th) : [0, 1]
+  // f(th) = 0 when th = 0 (perfect wetting)
+  // f(th) = 1 when th = 180° (dewetting)
+  // affinity(th) = 1 - f(th)
+  // affinity(th) = 1 when th = 0 (perfect wetting)
+  // affinity(th) = 0 when th = 180° (dewetting)
+  phaseData.contactAngle.resize(numEntries, 180);
+  phaseData.affinity.resize(numEntries, 0.0);
+
   phaseData.GEMPhaseId.clear();
   phaseData.DCId.clear();
   phaseData.GEMPhaseName.clear();
@@ -1181,7 +1205,17 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   microPhaseId_.push_back(phaseData.id);
   microPhaseIdLookup_.insert(make_pair(phaseData.thamesName, phaseData.id));
   randomGrowth_.push_back(phaseData.randomGrowth);
+
+  double cs;
+  for (int i = FIRST_SOLID; i < numEntries; i++) {
+    if (i == phaseData.id && abs(phaseData.contactAngle[i] - 180.) < 1.e16) {
+      phaseData.contactAngle[i] = 0;
+    }
+    cs = cos(phaseData.contactAngle[i] * Pi / 180.);
+    phaseData.affinity[i] = 1.0 - (2. - 3 * cs + pow(cs, 3)) / 4.;
+  }
   affinity_.push_back(phaseData.affinity);
+  contactAngle_.push_back(phaseData.contactAngle);
 
   /// Growth template is based on positive affinities only
 
@@ -1518,9 +1552,10 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
                                        PhaseData &phaseData) {
   xmlChar *key;
   cur = cur->xmlChildrenNode;
-  int testaftyid, testaftyval;
+  int testaftyid; //, testaftyval;
+  double testangleval, cs;
   map<string, int>::iterator it = phaseids.begin();
-
+  testangleval = 0;
   while (cur != NULL) {
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityphase"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -1531,10 +1566,17 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
       }
       xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
+    // if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
+    //   key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+    //   string st((char *)key);
+    //   from_string(testaftyval, st);
+    //   xmlFree(key);
+    // }
+
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"contactanglevalue"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
-      from_string(testaftyval, st);
+      from_string(testangleval, st);
       xmlFree(key);
     }
     cur = cur->next;
@@ -1542,8 +1584,10 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
 
   // Must be a valid phase name to be added to the list
   if (it != phaseids.end()) {
-    phaseData.affinity[testaftyid] = ((int)testaftyval);
+    // phaseData.affinity[testaftyid] = ((int)testaftyval);
+    phaseData.contactAngle[testaftyid] = testangleval;
   }
+
   return;
 }
 
@@ -1601,6 +1645,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   DCMolarMass_ = obj.getDCMolarMass();
   growthTemplate_ = obj.getGrowthTemplate();
   affinity_ = obj.getAffinity();
+  contactAngle_ = obj.getContactAngle();
   microPhaseMembers_ = obj.getMicroPhaseMembers();
   microPhaseMemberVolumeFraction_ = obj.getMicroPhaseMemberVolumeFraction();
   microPhaseDCMembers_ = obj.getMicroPhaseDCMembers();
@@ -1690,6 +1735,7 @@ ChemicalSystem::~ChemicalSystem(void) {
   DCCharge_.clear();
   growthTemplate_.clear();
   affinity_.clear();
+  contactAngle_.clear();
   microPhaseMembers_.clear();
   microPhaseMemberVolumeFraction_.clear();
   microPhaseMass_.clear();
@@ -2072,7 +2118,7 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     }
   }
 
-  //setMicroPhasePorosity(idx, porosity);
+  // setMicroPhasePorosity(idx, porosity);
   microPhasePorosity_[idx] = porosity;
 
   return;
@@ -2099,14 +2145,17 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   vector<string> microPhaseNames = getMicroPhaseName();
 
   nodeStatus_ = NEED_GEM_AIA;
-  //if (cyc == 139) {
-  //  cout << endl << "ChemSys before GEM_from_MT : LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
-  //  for(int i = 0; i < numDCs_; i++){
-  //    cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] <<
-  //    "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
-  //  }
-  //  cout << endl << "end ChemSys before GEM_from_MT :  LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl << endl;
-  //}
+  // if (cyc == 139) {
+  //   cout << endl << "ChemSys before GEM_from_MT :
+  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl;
+  //   for(int i = 0; i < numDCs_; i++){
+  //     cout << i << "\t" << DCLowerLimit_[i] << "\t" << DCUpperLimit_[i] <<
+  //     "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
+  //   }
+  //   cout << endl << "end ChemSys before GEM_from_MT :
+  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl <<
+  //   endl;
+  // }
 
   //  for(int i = 0; i < numDCs_; i++){
   //      for(int j = 0; j < numICs_; j++){
@@ -2150,10 +2199,12 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   // Check and set chemical conditions on electrolyte
   setElectrolyteComposition(isFirst);
-  //setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
+  // setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
 
   if (verbose_) {
-    cout << endl << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc << endl;
+    cout << endl
+         << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc
+         << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
       cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
@@ -2225,11 +2276,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
   ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
   ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
-  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx, SIA)
-  ///    6 (OK_GEM_SIA)   : OK after GEM calc with SIA
-  ///    7 (BAD_GEM_SIA)  : Not fully trusworthy result after calc with SIA
-  ///    8 (ERR_GEM_SIA)  : Failure (no result) in GEM calc with SIA
-  ///    9 (T_ERROR_GEM ) : Terminal error (e.g., memory corruption). Need restart
+  ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
+  ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
+  ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
+  ///    Failure (no result) in GEM calc with SIA 9 (T_ERROR_GEM ) : Terminal
+  ///    error (e.g., memory corruption). Need restart
   ///
 
   nodeStatus_ = node_->GEM_run(true);
@@ -2241,7 +2292,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
-    cerr << endl << "  ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = " << nodeStatus_ << endl;
+    cerr << endl
+         << "  ChemicalSystem::calculateState - GEM_run ERROR: nodeStatus_ = "
+         << nodeStatus_ << endl;
     switch (nodeStatus_) {
     case NEED_GEM_AIA:
       msg = "    Need GEM calc with auto initial approx (AIA)";
@@ -2254,8 +2307,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg = "  ChemicalSystem::calculateState - Failed result with auto initial "
-            "approx (AIA)";
+      msg =
+          "  ChemicalSystem::calculateState - Failed result with auto initial "
+          "approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2272,7 +2326,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_SIA:
-      msg = "    ChemicalSystem::calculateState - Failed result with smart initial "
+      msg = "    ChemicalSystem::calculateState - Failed result with smart "
+            "initial "
             "approx (SIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
@@ -2325,11 +2380,14 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
                    &solutPhaseMass_[0], &pSolutPhaseStoich_[0], &carrier_[0],
                    &surfaceArea_[0], &pSolidStoich_[0]);
 
-  cout << endl << "  ChemicalSystem::calculateState GEM_from_MT OK for cyc = " << cyc << endl;
+  cout << endl
+       << "  ChemicalSystem::calculateState GEM_from_MT OK for cyc = " << cyc
+       << endl;
 
   if (verbose_) {
     cout << endl << "Done!" << endl;
-    cout << "ChemicalSystem::calculateState Exiting GEM_from_MT cyc = " << cyc << endl;
+    cout << "ChemicalSystem::calculateState Exiting GEM_from_MT cyc = " << cyc
+         << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
       cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
@@ -2354,7 +2412,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   setGEMPhaseMolarMass(); // =>GEMPhaseMolarMass_[pidx]
 
   if (verbose_) {
-    cout << endl << "    ~~~~>After calculateState, "
+    cout << endl
+         << "    ~~~~>After calculateState, "
          << "printing microPhaseVolumes" << endl;
     for (int i = 0; i < microPhaseVolumes.size(); ++i) {
       cout << "    Phase name " << microPhaseNames[i]
@@ -2396,7 +2455,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
     if (!isKinetic(i)) {
       calcMicroPhasePorosity(i);
-      //phi = getMicroPhasePorosity(i);
+      // phi = getMicroPhasePorosity(i);
       phi = microPhasePorosity_[i];
       microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
       for (unsigned int j = 0; j < microPhaseMembers_[i].size(); j++) {
@@ -2449,13 +2508,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
 
       cout << "  ChemicalSystem::calculateState for cyc = " << cyc
-           << "  &  update = " << update
-           << "  &  i = " << i
-           << endl;
+           << "  &  update = " << update << "  &  i = " << i << endl;
     }
   }
 
-  //newMicroVolume_ = microVolume_;
+  // newMicroVolume_ = microVolume_;
 
   scaledCementMass_ = 0;
   for (int i = 1; i < numMicroPhases_; i++) {
@@ -2494,7 +2551,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       cout << "  ChemicalSystem::calculateState for cyc = " << cyc
            << " => water_molesincr = " << water_molesincr << endl
            << endl;
-      //newMicroVolume_ = initMicroVolume_;
+      // newMicroVolume_ = initMicroVolume_;
     }
   }
 
@@ -2506,11 +2563,12 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (initMicroVolume_ < microVolume_) {
-    cout << "  ChemicalSystem::calculateState for cyc = " << cyc << "  &  update = " << update
-         << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_ << " < " << microVolume_
-         << endl;
-    //initMicroVolume_ = microVolume_;
-    //newMicroVolume_ = microVolume_;
+    cout << "  ChemicalSystem::calculateState for cyc = " << cyc
+         << "  &  update = " << update
+         << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_
+         << " < " << microVolume_ << endl;
+    // initMicroVolume_ = microVolume_;
+    // newMicroVolume_ = microVolume_;
   }
 
   if (verbose_) {

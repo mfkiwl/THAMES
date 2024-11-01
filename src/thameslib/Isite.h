@@ -24,7 +24,7 @@ class Isite {
 
 private:
   unsigned int id_; /**< The id of the corresponding Site */
-  int affinity_;    /**< The affinity for growth of a phase at the site */
+  double affinity_;    /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
   double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
   double probIni_;
@@ -45,7 +45,7 @@ public:
   @param aftyval is the prescribed value of the affinity to set
   @param verbose is the flag for verbose output
   */
-  Isite(unsigned int idval, int aftyval, const bool verbose = false, double prb = 0, double prbIni = 0);
+  Isite(unsigned int idval, double aftyval, const bool verbose = false, double prb = 0, double prbIni = 0);
 
   /**
   @brief Copy constructor.
@@ -77,7 +77,7 @@ public:
 
   @return the growth affinity of the corresponding Site object
   */
-  int getAffinity(void) const { return affinity_; }
+  double getAffinity(void) const { return affinity_; }
 
   /**
   @brief Set the growth affinity of the corresponding Site object.
@@ -86,8 +86,8 @@ public:
 
   @param num is the growth affinity of the corresponding Site object
   */
-  void setAffinity(int num) { affinity_ = num; }
-  void updateAffinity(int afty) { affinity_ += afty; }
+  void setAffinity(double num) { affinity_ = num; }
+  void updateAffinity(double afty) { affinity_ += afty; }
 
   void setProb(double num) {prob_ = num; };
   void setProbIni(double num) {probIni_ = num; };

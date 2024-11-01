@@ -52,7 +52,7 @@ struct structGrowVect
 {
   int id;
   int posVect;
-  int affinity;
+  double affinity;
 };
 
 struct structDissVect
@@ -1574,30 +1574,6 @@ public:
     } else {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);
-    }
-  }
-
-  void shiftAffinityPosVal(void){
-    //check affinities values
-    int minAff = 100000;
-    for (int i = 0; i < numMicroPhases_; i++) {
-      for (int j = 0; j < numMicroPhases_; j++) {
-        if (chemSys_->getAffinity(i, j) <= minAff) minAff =chemSys_->getAffinity(i, j);
-      }
-    }
-    cout << endl << "   Lattice::shiftAffinityPosVal minAff = " << minAff << endl;
-    if (minAff < 0) {
-      int newAff;
-      int minAff_abs = abs(minAff);
-      for (int i = 0; i < numMicroPhases_; i++) {
-        for (int j = 0; j < numMicroPhases_; j++) {
-          newAff = chemSys_->getAffinity(i, j) + minAff_abs;
-          chemSys_->setAffinity(i, j, newAff);
-        }
-      }
-      cout << "   Lattice::shiftAffinityPosVal => all affinities have been shifted with abs(minAff) = " << minAff_abs << endl;
-    } else {
-      cout << "   Lattice::shiftAffinityPosVal => all affinities are positive!" << endl;
     }
   }
 

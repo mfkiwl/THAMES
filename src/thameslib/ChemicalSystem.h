@@ -123,7 +123,9 @@ struct PhaseData {
   vector<double> microPhaseDCPorosities;
   vector<int> DCId;
   vector<int> growthTemplate;
-  vector<int> affinity;
+  //vector<int> affinity;
+  vector<double> affinity;
+  vector<double> contactAngle;
   vector<double> colors;
   vector<int>
       RdId; /**< Vector of IC ids of the partitioned components in the phase */
@@ -234,9 +236,13 @@ class ChemicalSystem {
   vector<vector<int>>
       growthTemplate_; /**< A list of the phases on which a given phase
                                is allowed to grow; one list for each phase */
-  vector<vector<int>> affinity_; /**< A list of the microstructure phases with
+  //vector<vector<int>> affinity_;
+                                   /**< A list of the microstructure phases with
                                     which a given microstructure phase has an
                                     affinity to associate when growing */
+  vector<vector<double>> affinity_;
+  vector<vector<double>> contactAngle_;
+
   map<int, vector<int>>
       microPhaseMembers_; /**< A list of all the CSD phase ids that are
                                 associated with a given microstructure phase */
@@ -1915,7 +1921,7 @@ public:
   @param idx is the vector of all affinities
   @return the ordered vector of those phases that have positive affinities
   */
-  vector<int> calcGrowthtemplate(vector<int> affty) {
+  vector<int> calcGrowthtemplate(vector<double> affty) {
     vector<int> posaffty;
     //string msg;
     //try {
@@ -2047,7 +2053,7 @@ public:
   @param avec is the list of integer affinities for growth of the phase on its
   templates
   */
-  void setAffinity(const unsigned int idx, vector<int> avec) {
+  void setAffinity(const unsigned int idx, vector<double> avec) {
     //string msg;
     //try {
       affinity_[idx] = avec;
@@ -2080,7 +2086,7 @@ public:
   list
   */
   void setAffinity(const unsigned int idx, const unsigned int jdx,
-                   const int val) {
+                   const double val) {
     string msg;
     if (idx >= affinity_.size()) {
       msg = "affinity_";
@@ -2117,7 +2123,7 @@ public:
   @return the list of integer affinities for all the templates for growth of
   phase idx
   */
-  vector<int> getAffinity(const unsigned int idx) {
+  vector<double> getAffinity(const unsigned int idx) {
     //try {
       return affinity_[idx];
     //} catch (out_of_range &oor) {
@@ -2143,7 +2149,7 @@ public:
   @param jdx is the element in the list of affinities being queried
   @return the affinity for the template phase associated with list element jdx
   */
-  int getAffinity(const unsigned int idx, const unsigned int jdx) {
+  double getAffinity(const unsigned int idx, const unsigned int jdx) {
     string msg;
     if (idx >= affinity_.size()) {
       msg = "affinity_";
@@ -2177,7 +2183,9 @@ public:
   @return the list of all integer affinities for all the templates for growth of
   all phases
   */
-  vector<vector<int>> getAffinity(void) const { return affinity_; }
+  vector<vector<double>> getAffinity(void) const { return affinity_; }
+
+  vector<vector<double>> getContactAngle(void) const { return contactAngle_; }
 
   /**
   @brief Set the potassium impurity content for a given clinker phase, on an

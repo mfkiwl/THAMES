@@ -15,7 +15,7 @@ Isite::Isite() {
   probIni_ = 0;
 }
 
-Isite::Isite(unsigned int idval, int aftyval, const bool verbose, double prbval, double prbIval) {
+Isite::Isite(unsigned int idval, double aftyval, const bool verbose, double prbval, double prbIval) {
   id_ = idval;
   affinity_ = aftyval;
   prob_ = prbval;
