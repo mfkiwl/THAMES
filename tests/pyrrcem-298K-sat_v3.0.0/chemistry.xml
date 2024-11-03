@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="chemistry.xsd">
   <!--The number of possible phases in the microstructure not counting Void-->
-  <numentries>21</numentries>
+  <numentries>20</numentries>
   <!--Temperature in K-->
   <temperature>298.15</temperature>
   <!--Do not change next value, used for Parrott and Killoh kinetic model-->
@@ -825,18 +825,6 @@
     <cement_component>0</cement_component>
   </phase>
   <phase>
-    <thamesname>Pyrite</thamesname>
-    <gemphase_data>
-      <gemphasename>Pyrite</gemphasename>
-      <gemdc>
-        <gemdcname>Py</gemdcname>
-      </gemdc>
-    </gemphase_data>
-    <id>19</id>
-    <cement_component>0</cement_component>
-    <interface_data></interface_data>
-  </phase>
-  <phase>
     <thamesname>Troilite</thamesname>
     <gemphase_data>
       <gemphasename>Troilite</gemphasename>
@@ -844,7 +832,7 @@
         <gemdcname>Tro</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>20</id>
+    <id>19</id>
     <cement_component>0</cement_component>
   </phase>
 </chemistry_data>

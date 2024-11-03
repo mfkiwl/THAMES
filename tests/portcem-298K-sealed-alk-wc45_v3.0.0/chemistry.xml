@@ -10,11 +10,11 @@
   <saturated>0</saturated>
   <!--Information for initial solution DC composition besides water, each in mol/kgw-->
   <electrolyte>
-    <DCcomp>
+    <DCconc>
       <name>KOH@</name>
       <condition>initial</condition>
       <conc>0.01</conc>
-    </DCcomp>
+    </DCconc>
   </electrolyte>
   <!--Void phase should always be present and first in the list-->
   <phase>
