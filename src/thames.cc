@@ -7,8 +7,6 @@
 #include "version.h"
 #include <limits>
 
-int *RanGen::seed_;
-
 /**
 @brief The main block for running THAMES.
 
@@ -33,6 +31,7 @@ int main(int argc, char **argv) {
   ThermalStrain *ThermalStrainSolver = NULL;
   AppliedStrain *AppliedStrainSolver = NULL;
   Controller *Ctrl = NULL;
+  RanGen *RNG = NULL;
 
   KineticController *KController = NULL;
 
@@ -144,7 +143,8 @@ int main(int argc, char **argv) {
   // ordered lists
   //
 
-  RanGen rg(-2814357);
+  int initialSeed = -2814357;
+  RNG = new RanGen(initialSeed);
 
   //
   // User must specifiy the file containing the 3D microstructure itself
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Mic = new Lattice(ChemSys, mic_filename, VERBOSE, WARNING);
+    Mic = new Lattice(ChemSys, RNG, mic_filename, VERBOSE, WARNING);
     cout << endl <<"Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
@@ -183,6 +183,9 @@ int main(int argc, char **argv) {
     }
     if (Mic) {
       delete Mic;
+    }
+    if (RNG) {
+      delete RNG;
     }
     timeCount(starttime, lt);
     cout << "STOP Program";
@@ -237,6 +240,9 @@ int main(int argc, char **argv) {
       if (ThermalStrainSolver) {
         delete ThermalStrainSolver;
       }
+      if (RNG) {
+        delete RNG;
+      }
       timeCount(starttime, lt);
       cout << "STOP Program";
       exit(1);
@@ -278,6 +284,9 @@ int main(int argc, char **argv) {
       }
       if (AppliedStrainSolver) {
         delete AppliedStrainSolver;
+      }
+      if (RNG) {
+        delete RNG;
       }
       timeCount(starttime, lt);
       cout << "STOP Program";
@@ -326,6 +335,9 @@ int main(int argc, char **argv) {
     }
     if (KController) {
       delete KController;
+    }
+    if (RNG) {
+      delete RNG;
     }
     cout << "STOP Program";
     timeCount(starttime, lt);
@@ -386,6 +398,9 @@ int main(int argc, char **argv) {
     }
     if (Ctrl) {
       delete Ctrl;
+    }
+    if (RNG) {
+      delete RNG;
     }
     cout << endl << "STOP Program" << endl;
     timeCount(starttime, lt);
@@ -450,6 +465,9 @@ int main(int argc, char **argv) {
   }
   if (ChemSys) {
     delete ChemSys;
+  }
+  if (RNG) {
+    delete RNG;
   }
 
   return 0;

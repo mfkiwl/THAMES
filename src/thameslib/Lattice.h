@@ -190,7 +190,7 @@ public:
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
   */
-  Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
+  Lattice(ChemicalSystem *cs, RanGen *rg, const string &fileName, const bool verbose,
           const bool warning);
 
   /**
@@ -1525,8 +1525,6 @@ public:
   void populateElementData(void);
 
   string getElemSymb(int index) { return cfgElem_[index].symb; }
-
-  void createRNG(void) { rg_ = new RanGen(); }
 
   double callRNG(void) {
     numRNGcall_0_++;

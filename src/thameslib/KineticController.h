@@ -116,7 +116,7 @@ public:
   /**
   @brief Destructor does nothing.
   */
-  virtual ~KineticController(){};
+  virtual ~KineticController();
 
   /**
   @brief Initialize the kinetic data structure

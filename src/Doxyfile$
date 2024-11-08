@@ -45,14 +45,14 @@ PROJECT_BRIEF          = "Thermodynamic Microstructure Evolution Software"
 # exceed 55 pixels and the maximum width should not exceed 200 pixels.
 # Doxygen will copy the logo to the output directory.
 
-PROJECT_LOGO           = /Users/jwbullard/Documents/Projects/Modeling/THAMES/images/thames_logo_small.png
+PROJECT_LOGO           = /home/staff/f/f.nita/THAMES/images/thames_logo_small.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = /Users/jwbullard/Documents/Projects/Modeling/THAMES/doc
+OUTPUT_DIRECTORY       = /home/staff/f/f.nita/THAMES/doc
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -668,7 +668,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = /Users/jwbullard/Documents/Projects/Modeling/THAMES/ /Users/jwbullard/Documents/Projects/Modeling/THAMES/src/thameslib
+INPUT                  = /home/staff/f/f.nita/THAMES/ /home/staff/f/f.nita/THAMES/src/thameslib
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
@@ -748,7 +748,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see
 # the \image command).
 
-IMAGE_PATH             = /Users/jwbullard/Documents/Projects/Modeling/THAMES/images
+IMAGE_PATH             = /home/staff/f/f.nita/THAMES/images
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

@@ -24,9 +24,9 @@ Lattice::Lattice(ChemicalSystem *cs) : siteneighbors_(NN_NNN), chemSys_(cs) {
 #endif
 }
 
-Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
+Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, const string &fileName, const bool verbose,
                  const bool warning)
-    : siteneighbors_(NN_NNN), chemSys_(cs) {
+    : siteneighbors_(NN_NNN), chemSys_(cs), rg_(rg) {
 
   unsigned int i, j, k;
   unsigned int ii;
@@ -96,7 +96,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
     /// size to 100 and resolution to 1.0 micrometers
     ///
     cout << endl << "Lattice::Lattice - .img input file "
-         "generated using VCCTL Version prior to VCCTL Version 3.0" << endl;
+         "generated using VCCTL Version prior to VCCTL Version 3.0.0" << endl;
     version_ = "2.0";
     double testres = 1.0;
     setResolution(testres);
@@ -108,7 +108,7 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
   ostrMIN << VERSION_MINOR;
   string majVers(ostrMAJ.str());
   string minVers(ostrMIN.str());
-  thamesVersion_ = majVers + "." + minVers;
+  thamesVersion_ = majVers + "." + minVers + "." + VERSIONBUGFIX;
   cout << endl << "Lattice::Lattice - .img output files generated using "
                   "THAMES Version: " << thamesVersion_ << endl;
 
@@ -135,18 +135,19 @@ Lattice::Lattice(ChemicalSystem *cs, const string &fileName, const bool verbose,
   /// Allocate a random number generator object and seed it
   ///
 
+  latticeRNGseed_ = -76241; //-142234;
+  cout << endl << "Lattice::Lattice   latticeRNGseed_ = " << latticeRNGseed_ << endl;
+  //setRNGseed(latticeRNGseed_);
   try {
-    createRNG();
+    rg_->setSeed(latticeRNGseed_);
   } catch (bad_alloc &ba) {
     cout << "Lattice constructor failed when allocating rg_";
     cout.flush();
     exit(1);
   }
-  latticeRNGseed_ = -76241; //-142234;
-  cout << endl << "Lattice::Lattice   latticeRNGseed_ = " << latticeRNGseed_ << endl;
+  // //cout << endl << "Lattice::Lattice   rg_->getSeed() = " << rg_->getSeed() << endl;
   numRNGcall_0_ = 0;
   numRNGcallLONGMAX_ = 0;
-  setRNGseed(latticeRNGseed_);
   lastRNG_ = 1.e-16;
 
   growthInterfaceSize_.clear();
@@ -630,7 +631,7 @@ Lattice::~Lattice() {
   interface_.clear();
   site_.clear();
   masterporevolume_.clear();
-  delete rg_;
+  //delete rg_;
 }
 
 void Lattice::addSite(const unsigned int x, const unsigned int y,
@@ -697,8 +698,6 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
         cout.flush();
       }
 
-      chemSys_->setInitScaledCementMass(cementMass * 100 / solidMass);
-
       totalSolidMass += pscaledMass;
       if (chemSys_->getCementComponent(microPhaseId))
         totalCementMass += pscaledMass;
@@ -709,6 +708,8 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       chemSys_->setMicroPhaseMassDissolved(microPhaseId, 0.0);
     }
   }
+
+  chemSys_->setInitScaledCementMass(cementMass * 100 / solidMass);
   // cout << "normalizePhaseMasses totalSolidMass/totalCementMass = "
   //      << totalSolidMass << " / " << totalCementMass << endl;
 
@@ -3814,8 +3815,7 @@ void Lattice::calculatePoreSizeDistribution(void) {
       maxsize = 1.0;
       int j = 0;
       while (j < porevolume[i].size()) {
-        while ((porevolume[i][j].diam <= maxsize) &&
-               (j < porevolume[i].size())) {
+        while ((j < porevolume[i].size()) && (porevolume[i][j].diam <= maxsize)) {
           cumulative_volume += porevolume[i][j].volume;
           cumulative_volfrac += porevolume[i][j].volfrac;
           j++;
@@ -3974,7 +3974,8 @@ void Lattice::calculatePoreSizeDistribution(void) {
   // if (excesswater > 0.0)
   //   isfullysaturated = true;
 
-  double water_volfrac = water_volume / microstructurevolume_;
+  //double water_volfrac = water_volume / microstructurevolume_;
+  double water_volfrac = water_volume / initialmicrostructurevolume_;
 
   // This is the total porosity including capillary
   // pore volume fraction and subvoxel pore volume
@@ -4112,8 +4113,16 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   // bool isfullysaturated = false;
   // if (excesswater > 0.0)
   //   isfullysaturated = true;
+  
+  //microstructurevolume_ = chemSys_->getMicroVolume();
+  //double water_volfrac = watervolume_ / microstructurevolume_;
+  double water_volfrac = watervolume_ / initialmicrostructurevolume_;
 
-  double water_volfrac = watervolume_ / microstructurevolume_;
+  // cout << endl << "--> watervolume_         : " << watervolume_ << endl;
+  // cout << "--> microstructurevolume_: " << microstructurevolume_ << endl;
+  // cout << "--> capillaryporevolume_ : " << capillaryporevolume_ << endl;
+  // cout << "--> subvoxelporevolume_  : " << subvoxelporevolume_ << endl;
+  // cout << "--> excesswater          : " << excesswater << endl;
 
   // This is the total porosity including capillary
   // pore volume fraction and subvoxel pore volume
@@ -4178,7 +4187,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   out << "Total void volume fraction = " << volumefraction_[VOIDID] << endl;
   out << "Pore size saturation data:" << endl;
   out << "Diameter (nm),Volume Fraction,Fraction Saturated" << endl;
-  for (int i = 0; i < masterporevolume_.size(); ++i) {
+  for (int i = 0; i < masterporevolume_.size(); i++) {
     if (masterporevolume_[i].volume > 0.0) {
       out << masterporevolume_[i].diam << "," << masterporevolume_[i].volume
           << "," << masterporevolume_[i].volfrac << endl;
@@ -4194,6 +4203,12 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   double capvoid_volfrac = volumefraction_[VOIDID] +
                            (volumefraction_[ELECTROLYTEID] - water_volfrac);
   double capspace_volfrac = capvoid_volfrac + capwater_volfrac;
+
+  // cout << endl << "--> water_volfrac           : " << water_volfrac << endl;
+  // cout << "--> volumefraction_[VOIDID]         : " << volumefraction_[VOIDID] << endl;
+  // cout << "--> volumefraction_[ELECTROLYTEID]  : " << volumefraction_[ELECTROLYTEID] << endl;
+  // cout << "--> capvoid_volfrac/capspace_volfrac: " << capvoid_volfrac << " / " << capspace_volfrac << endl;
+
   out << ">" << masterporevolume_[masterporevolume_.size() - 1].diam << ","
       << capspace_volfrac << "," << (1.0 - volumefraction_[VOIDID]) << endl;
   out.flush();
@@ -4220,15 +4235,17 @@ void Lattice::writeMicroColors(const string &root) {
   }
 
   int microPhaseId;
+  string microPhaseName;
   //int red, green, blue;
   vector<int> colors;
   out << numMicroPhases_ << endl;
   for (int i = 0; i < numMicroPhases_; i++) {
     microPhaseId = chemSys_->getMicroPhaseId(i);
+    microPhaseName = chemSys_->getMicroPhaseName(microPhaseId);
     //colors = chemSys_->getColor(microPhaseId);
     colors = chemSys_->getRGB(microPhaseId);
-    out << microPhaseId << " " << colors[0] << " " << colors[1] << " "
-        << colors[2] << endl;
+    out << microPhaseId << " " << microPhaseName << " "
+        << colors[0] << " " << colors[1] << " " << colors[2] << endl;
   }
 
   out.flush();

@@ -175,6 +175,12 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
   return;
 }
 
+KineticController::~KineticController() {
+  for (int midx = 0; midx < pKMsize_; ++midx) {
+    delete phaseKineticModel_[midx];
+  }
+}
+
 void KineticController::parseDoc(const string &docName) {
   int numEntry = -1; // Tracks number of solid phases
   int testgemid;
@@ -250,6 +256,7 @@ void KineticController::parseDoc(const string &docName) {
     chemSys_->setIsKinetic(isKinetic_);
 
     xmlFreeDoc(doc);
+    xmlFreeNode(cur);
   } catch (FileException fex) {
     fex.printException();
     exit(1);
@@ -363,10 +370,12 @@ void KineticController::parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
     }
 
     if (!typefound) {
+      xmlFree(key);
       throw HandleException("KineticController", "parseKineticData", "type",
                             "Model type not specified");
     }
   } catch (HandleException hex) {
+    xmlFree(key);
     hex.printException();
   }
 

@@ -20,7 +20,7 @@ class RanGen {
 
 private:
 
-  static int *seed_; /**< The random number seed, a negative integer */
+  int *seed_; /**< The random number seed, a negative integer */
 
 public:
 
@@ -29,28 +29,28 @@ public:
 
   @param s is the random number seed to set
   */
-  static void setSeed(int s) { *seed_ = ((s < 0) ? s : -s); }
+  void setSeed(int s) { *seed_ = ((s < 0) ? s : -s); }
 
   /**
   @brief Get the random number seed.
 
   @param s is the random number seed to set
   */
-  static int getSeed() { return *seed_; }
+  int getSeed() { return *seed_; }
 
   /**
   @brief Interface to the ran3 portable random number generator (see ran3.h)
 
   @return A uniform random number on [0,1]
   */
-  static double Ran3() { return ran3(seed_); }
+  double Ran3() { return ran3(seed_); }
 
   /**
   @brief Interface to the ran2 portable random number generator (see ran2.h)
 
   @return A uniform random number on [0,1]
   */
-  static double Ran2() { return ran2(seed_); }
+  double Ran2() { return ran2(seed_); }
 
   /**
   @brief Randomize the elements of a vector.
@@ -58,21 +58,21 @@ public:
   @param v is a reference ot the vector
   @param ntimes is the number of shuffling iterations to execute
   */
-  template <class X> static void shuffle(vector<X> &v, int ntimes = 1) {
-    X tmp;
-    int j;
-    int ii;
-    unsigned int i;
-
-    for (ii = 0; ii < ntimes; ii++) {
-      for (i = 0; i < v.size(); i++) {
-        j = (int)(Ran3() * v.size());
-        tmp = v[i];
-        v[i] = v[j];
-        v[j] = tmp;
-      }
-    }
-  }
+//  template <class X> static void shuffle(vector<X> &v, int ntimes = 1) {
+//    X tmp;
+//    int j;
+//    int ii;
+//    unsigned int i;
+//
+//    for (ii = 0; ii < ntimes; ii++) {
+//      for (i = 0; i < v.size(); i++) {
+//        j = (int)(Ran3() * v.size());
+//        tmp = v[i];
+//        v[i] = v[j];
+//        v[j] = tmp;
+//      }
+//    }
+//  }
 
   /**
   @brief Default constructor.

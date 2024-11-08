@@ -221,7 +221,7 @@ void Controller::doCycle(const string &statfilename, int choice) {
   //cout << endl << " exit controller" << endl;// exit(0);
 
   //if (verbose_) {
-  cout << endl << "Controller::Entering Main time loop" << endl;
+  cout << endl << "Controller::doCycle Entering Main time loop" << endl;
   //}
 
   static double timestep = 0.0;

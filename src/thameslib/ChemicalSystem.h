@@ -104,7 +104,7 @@ backscattered electron micrographs
 
 struct PhaseData {
   int id;
-  double randomGrowth;
+  //double randomGrowth;
   int stressCalc;
   int weak;
   double k2o;
@@ -112,10 +112,11 @@ struct PhaseData {
   double mgo;
   double so3;
   vector<struct PoreSizeVolume> poreSizeDist;
-  double red;
-  double green;
-  double blue;
-  double gray;
+  int red;
+  int green;
+  int blue;
+  int gray;
+  vector<int> colors;
   string thamesName;
   vector<char *> GEMPhaseName, DCName;
   vector<int> GEMPhaseDCMembers;
@@ -126,10 +127,10 @@ struct PhaseData {
   // vector<int> affinity;
   vector<double> affinity;
   vector<double> contactAngle;
-  vector<double> colors;
-  vector<int>
-      RdId; /**< Vector of IC ids of the partitioned components in the phase */
-  vector<double> RdVal; /**< Vector of Rd values for each IC */
+
+//  vector<int>
+//      RdId; /**< Vector of IC ids of the partitioned components in the phase */
+//  vector<double> RdVal; /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -221,11 +222,6 @@ class ChemicalSystem {
   vector<string> GEMPhaseName_; /**< Names of phases in the GEM CSD */
   vector<int> microPhaseId_; /**< Unique ids of THAMES microstructure phases */
 
-  vector<double>
-      randomGrowth_; /**< One real number for each microstructure phase,
-                     that indicates the tendency for growth in random
-                     directions (ballistic or diffusion-limited
-                     aggregation) as opposed to compact growth */
   vector<vector<int>>
       RdICId_; /**< List of ICs that can be an impurity in each phase */
   vector<vector<double>> Rd_;  /**< Rd values for each IC in each phase */
@@ -326,12 +322,12 @@ class ChemicalSystem {
   vector<double> so3_;       /**< Mass fraction of SO<sub>3</sub> dissolved in
                                    each phase, in units of
                                    g per 100 g of the phase */
-  vector<double> grayscale_; /**< A number on [0,255] giving the relative
+  vector<int> grayscale_;     /**< A number on [0,255] giving the relative
                                    grayscale brightness of the THAMES
                                    phases in a backscattered electron image */
-  vector<vector<double>> color_; /**< A list of <r,g,b> values specifying the
-                                       color of the THAMES phases in a false
-                                       color micrograph */
+  vector<vector<int>> color_; /**< A list of <r,g,b> values specifying the
+                                    color of the THAMES phases in a false
+                                    color micrograph */
 
   map<string, elemColor> colorN_;
 
@@ -738,7 +734,7 @@ public:
   @param phaseData is a reference to the PhaseData structure for temporarily
   storing the input parameters
   */
-  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData &phaseData);
+//  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData &phaseData);
 
   /**
   @brief Parse input about how to render a phase in an image.
@@ -1846,36 +1842,6 @@ public:
   */
   map<int, vector<int>> getMicroPhaseToGEMPhase(void) const {
     return microPhaseToGEMPhase_;
-  }
-
-  /**
-  @brief Set the random growth tendency parameter for a microstructure phase.
-
-  A given phase, whether hydration product or product of chemical degradation,
-  will generally grow in a compact form by make the growth potential highest
-  at sites with low mean curvature and lowest at point with high mean curvature.
-  The growth sites are ordered from lowest to highest mean curvature when the
-  random growth parameter is set to zero.  Higer values of random growth
-  parameter cause more severe shuffling of the ordered list of growth sites.
-
-  @note NOT USED.
-
-  @param idx is the microstructure phase id
-  @param gmval is the random growth parameter value to set for that phase
-  */
-  void setRandomGrowth(const unsigned int idx, double gmval) {
-    if (idx < randomGrowth_.size()) {
-      if (gmval > 1.0)
-        gmval = 1.0;
-      if (gmval < 0.0)
-        gmval = 0.0;
-      randomGrowth_[idx] = gmval;
-    } else {
-      EOBException ex("ChemicalSystem", "setRandomGrowth", "randomGrowth_",
-                      randomGrowth_.size(), idx);
-      ex.printException();
-      exit(1);
-    }
   }
 
   /**
@@ -5018,7 +4984,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @param val is the value of the red channel to set
   */
-  void setRed(const unsigned int mpidx, const double rval) {
+  void setRed(const unsigned int mpidx, const int rval) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "setRed", "color_", color_.size(),
                       mpidx);
@@ -5038,7 +5004,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @return the value of the red channel for this phase's color
   */
-  double getRed(const unsigned int mpidx) {
+  int getRed(const unsigned int mpidx) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "getRed", "color_", color_.size(),
                       mpidx);
@@ -5057,7 +5023,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @param val is the value of the green channel to set
   */
-  void setGreen(const unsigned int mpidx, const double rval) {
+  void setGreen(const unsigned int mpidx, const int rval) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "setGreen", "color_", color_.size(),
                       mpidx);
@@ -5076,7 +5042,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @return the value of the green channel for this phase's color
   */
-  double getGreen(const unsigned int mpidx) {
+  int getGreen(const unsigned int mpidx) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "getGreen", "color_", color_.size(),
                       mpidx);
@@ -5095,7 +5061,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @param val is the value of the blue channel to set
   */
-  void setBlue(const unsigned int mpidx, const double rval) {
+  void setBlue(const unsigned int mpidx, const int rval) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "setBlue", "color_", color_.size(),
                       mpidx);
@@ -5115,7 +5081,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @return the value of the blue channel for this phase's color
   */
-  double getBlue(const unsigned int mpidx) {
+  int getBlue(const unsigned int mpidx) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "getBlue", "color_", color_.size(),
                       mpidx);
@@ -5133,7 +5099,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @param cv is the vector of rgb values to set for that phase
   */
-  void setColor(const unsigned int mpidx, vector<double> cv) {
+  void setColor(const unsigned int mpidx, vector<int> cv) {
     if (mpidx >= color_.size()) {
       EOBException ex("ChemicalSystem", "setColor", "color_", color_.size(),
                       mpidx);
@@ -5150,7 +5116,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @return the vector of rgb values defining this phase's color
   */
-  vector<double> getColor(const unsigned int mpidx) {
+  vector<int> getColor(const unsigned int mpidx) {
     // try {
     return color_[mpidx];
     //} catch (out_of_range &oor) {
@@ -5168,7 +5134,7 @@ public:
 
   @param cv is the 2D matrix of rgb values to set each microstructure phase
   */
-  void setColor(vector<vector<double>> cv) { color_ = cv; }
+  void setColor(vector<vector<int>> cv) { color_ = cv; }
 
   /**
   @brief Get the 2D matrix of rgb triplets for color of every microstructure
@@ -5178,7 +5144,7 @@ public:
 
   @return the 2D matrix of rgb values of every microstructure phase
   */
-  vector<vector<double>> getColor(void) const { return color_; }
+  vector<vector<int>> getColor(void) const { return color_; }
 
   /**
   @brief Set the grayscale value of a microstructure phase.
@@ -5191,7 +5157,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @param rval is the grayscale value to set for that microstructure phase
   */
-  void setGrayscale(const unsigned int mpidx, const double rval) {
+  void setGrayscale(const unsigned int mpidx, const int rval) {
     // try {
     grayscale_[mpidx] = min(rval, COLORSATVAL);
     //} catch (out_of_range &oor) {
@@ -5214,7 +5180,7 @@ public:
   @param mpidx is the index of the microstructure phase
   @return the grayscale value for the microstructure phase
   */
-  double getGrayscale(const unsigned int mpidx) {
+  int getGrayscale(const unsigned int mpidx) {
     // try {
     return grayscale_[mpidx];
     //} catch (out_of_range &oor) {
@@ -5235,7 +5201,7 @@ public:
 
   @param gv is the list of grayscale values to set each microstructure phase
   */
-  void setGrayscale(vector<double> gv) { grayscale_ = gv; }
+  void setGrayscale(vector<int> gv) { grayscale_ = gv; }
 
   /**
   @brief Get the list of grayscale values of every microstructure phase.
@@ -5244,7 +5210,7 @@ public:
 
   @return the list of grayscale values of every microstructure phase
   */
-  vector<double> getGrayscale(void) const { return grayscale_; }
+  vector<int> getGrayscale(void) const { return grayscale_; }
 
   /**
   @brief Get the map of of the vector index of the microstructure phases by
@@ -6276,7 +6242,7 @@ public:
       cout << "</display_data>" << endl;
       cout << endl
            << "The following microphaseses are defined by default in THAMES "
-              "3.0: "
+              "3.0.0: "
            << endl;
       int i = 0;
       for (map<string, elemColor>::iterator pp = colorN_.begin();

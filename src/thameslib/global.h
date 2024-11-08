@@ -21,6 +21,8 @@ using namespace std;
 // String indicating THAMES version in the input microstructure file
 const string VERSIONSTRING = "#THAMES:Version:";
 
+const string VERSIONBUGFIX = "0";
+
 // String indicating the voxel resolution in micrometers
 // for the THAMES input microstructure file
 const string IMGRESSTRING("#THAMES:Image_Resolution:");
@@ -167,7 +169,7 @@ const unsigned int WMC = 1;
 const unsigned int IWMC = 2;
 
 // Saturation value for colors
-const double COLORSATVAL = 255.0;
+const int COLORSATVAL = 255;
 
 // Flags for data formats (NOT USED)
 const int GEMSFORMAT = 0;

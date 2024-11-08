@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <chemistry_data xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="chemistry.xsd">
-  <!--The number of possible phases in the microstructure not counting Void-->
-  <numentries>17</numentries>
-  <!--Temperature in K-->
+  <numentries>22</numentries>
   <temperature>298.15</temperature>
-  <!--Do not change next value, used for Parrott and Killoh kinetic model-->
   <reftemperature>298.15</reftemperature>
-  <!--Set to 1 for saturated, 0 for sealed-->
-  <saturated>0</saturated>
-  <!--Void phase should always be present and first in the list-->
+  <saturated>1</saturated>
   <phase>
     <thamesname>Void</thamesname>
-    <!--Unique integer id for microstructure phase-->
     <id>0</id>
-    <!--This microstructure phase is not a cement component (value = 0; if yes, value = 1)-->
     <cement_component>0</cement_component>
-    <!--Display rgb colors, 0 to 255 (set by default => optional)-->
     <display_data>
       <red>0.0</red>
       <green>0.0</green>
@@ -23,10 +15,10 @@
       <gray>0.0</gray>
     </display_data>
   </phase>
-  <!--Water phase should always be present and  in the list-->
   <phase>
     <thamesname>Electrolyte</thamesname>
-    <!--Which GEM phase(s) and DC(s) are linked to this microstructure phase?-->
+    <id>1</id>
+    <cement_component>0</cement_component>
     <gemphase_data>
       <gemphasename>aq_gen</gemphasename>
       <gemdc>
@@ -306,21 +298,14 @@
         <gemdcporosity>1.0</gemdcporosity>
       </gemdc>
     </gemphase_data>
-    <id>1</id>
-    <cement_component>0</cement_component>
   </phase>
   <phase>
     <thamesname>Alite</thamesname>
-    <gemphase_data>
-      <gemphasename>Alite</gemphasename>
-      <gemdc>
-        <gemdcname>C3S</gemdcname>
-      </gemdc>
-    </gemphase_data>
     <id>2</id>
     <cement_component>1</cement_component>
     <!--Solid phases have meaningful interface data-->
-    <interface_data><!--Affinity is the relative strength (from 0 to 1) of the attraction between this phase
+    <interface_data>
+    <!--Affinity is the relative strength (from 0 to 1) of the attraction between this phase
     and a template phase. It is computed based on the contact angle (degrees) of this 
     phase and its template. If the contactanglevalue = 0 => affinity = 1 and if the
     contactanglevalue = 180 => affinity = 0. If a template is not listed, the 
@@ -328,18 +313,26 @@
     for self-affinity (the growing phase and the template are the same) the default value is 1
     (contactanglevalue = 0), but this value can be modified, if necessary, supplying a desired
     contactangle value.
---><!--
-   by default:
-   <affinity>
-    <affinityphase>Alite</affinityphase>
-    <contactanglevalue>0</contactanglevalue>
-   </affinity>
-   or,:
-   <affinity>
-    <affinityphase>Alite</affinityphase>
-    <contactanglevalue>25</contactanglevalue>
-   </affinity>  
---></interface_data>
+    -->
+    <!--
+     by default:
+     <affinity>
+       <affinityphase>Alite</affinityphase>
+       <contactanglevalue>0</contactanglevalue>
+     </affinity>
+     or,:
+     <affinity>
+      <affinityphase>Alite</affinityphase>
+      <contactanglevalue>25</contactanglevalue>
+     </affinity>  
+    -->
+    </interface_data>
+    <gemphase_data>
+      <gemphasename>Alite</gemphasename>
+      <gemdc>
+        <gemdcname>C3S</gemdcname>
+      </gemdc>
+    </gemphase_data>
     <!--We can specify minority impurity concentrations in a solid phase, which
     will be released in proportion during dissolution-->
     <impurity_data>
@@ -374,45 +367,15 @@
     </kinetic_data>
   </phase>
   <phase>
-    <thamesname>Belite</thamesname>
-    <gemphase_data>
-      <gemphasename>Belite</gemphasename>
-      <gemdc>
-        <gemdcname>C2S</gemdcname>
-      </gemdc>
-    </gemphase_data>
+    <thamesname>Aluminate</thamesname>
     <id>3</id>
     <cement_component>1</cement_component>
-    <impurity_data>
-      <k2ocoeff>0.01152000</k2ocoeff>
-      <na2ocoeff>0.00000000</na2ocoeff>
-      <mgocoeff>0.00380000</mgocoeff>
-      <so3coeff>0.01052800</so3coeff>
-    </impurity_data>
-    <kinetic_data>
-      <type>ParrotKilloh</type>
-      <specificSurfaceArea>402.0</specificSurfaceArea>
-      <refSpecificSurfaceArea>385.0</refSpecificSurfaceArea>
-      <k1>0.5</k1>
-      <k2>0.02</k2>
-      <k3>0.7</k3>
-      <n1>1</n1>
-      <n3>5</n3>
-      <dorHcoeff>1.55</dorHcoeff>
-      <activationEnergy>20785.000</activationEnergy>
-      <loi>0.0</loi>
-    </kinetic_data>
-  </phase>
-  <phase>
-    <thamesname>Aluminate</thamesname>
     <gemphase_data>
       <gemphasename>Aluminate</gemphasename>
       <gemdc>
         <gemdcname>C3A</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>4</id>
-    <cement_component>1</cement_component>
     <impurity_data>
       <k2ocoeff>0.00979000</k2ocoeff>
       <na2ocoeff>0.00000000</na2ocoeff>
@@ -434,20 +397,72 @@
     </kinetic_data>
   </phase>
   <phase>
+    <thamesname>Anhydrite</thamesname>
+    <id>4</id>
+    <cement_component>1</cement_component>
+    <gemphase_data>
+      <gemphasename>Anhydrite</gemphasename>
+      <gemdc>
+        <gemdcname>Anh</gemdcname>
+      </gemdc>
+    </gemphase_data>
+  </phase>
+  <phase>
+    <thamesname>Arcanite</thamesname>
+    <id>5</id>
+    <cement_component>1</cement_component>
+    <gemphase_data>
+      <gemphasename>arcanite</gemphasename>
+      <gemdc>
+        <gemdcname>K2SO4</gemdcname>
+      </gemdc>
+    </gemphase_data>
+  </phase>
+  <phase>
+    <thamesname>Belite</thamesname>
+    <id>6</id>
+    <cement_component>1</cement_component>
+    <gemphase_data>
+      <gemphasename>Belite</gemphasename>
+      <gemdc>
+        <gemdcname>C2S</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.01152000</k2ocoeff>
+      <na2ocoeff>0.00000000</na2ocoeff>
+      <mgocoeff>0.00380000</mgocoeff>
+      <so3coeff>0.01052800</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>ParrotKilloh</type>
+      <specificSurfaceArea>402.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>385.0</refSpecificSurfaceArea>
+      <k1>0.5</k1>
+      <k2>0.02</k2>
+      <k3>0.7</k3>
+      <n1>1</n1>
+      <n3>5</n3>
+      <dorHcoeff>1.55</dorHcoeff>
+      <activationEnergy>20785.000</activationEnergy>
+      <loi>0.0</loi>
+    </kinetic_data>
+  </phase>
+  <phase>
     <thamesname>Ferrite</thamesname>
+    <id>7</id>
+    <cement_component>1</cement_component>
     <gemphase_data>
       <gemphasename>Ferrite</gemphasename>
       <gemdc>
         <gemdcname>C4AF</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>5</id>
-    <cement_component>1</cement_component>
     <impurity_data>
-      <k2ocoeff>0.00272</k2ocoeff>
-      <na2ocoeff>0.00000</na2ocoeff>
-      <mgocoeff>0.02292</mgocoeff>
-      <so3coeff>0.00000</so3coeff>
+      <k2ocoeff>0.00272000</k2ocoeff>
+      <na2ocoeff>0.00000000</na2ocoeff>
+      <mgocoeff>0.02292000</mgocoeff>
+      <so3coeff>0.00000000</so3coeff>
     </impurity_data>
     <kinetic_data>
       <type>ParrotKilloh</type>
@@ -464,69 +479,262 @@
     </kinetic_data>
   </phase>
   <phase>
-    <thamesname>Arcanite</thamesname>
-    <gemphase_data>
-      <gemphasename>arcanite</gemphasename>
-      <gemdc>
-        <gemdcname>K2SO4</gemdcname>
-      </gemdc>
-    </gemphase_data>
-    <id>6</id>
-    <cement_component>1</cement_component>
-  </phase>
-  <phase>
     <thamesname>Gypsum</thamesname>
+    <id>8</id>
+    <cement_component>1</cement_component>
     <gemphase_data>
       <gemphasename>Gypsum</gemphasename>
       <gemdc>
         <gemdcname>Gp</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>7</id>
-    <cement_component>1</cement_component>
   </phase>
   <phase>
     <thamesname>Bassanite</thamesname>
+    <id>9</id>
+    <cement_component>1</cement_component>
     <gemphase_data>
       <gemphasename>hemihydrate</gemphasename>
       <gemdc>
         <gemdcname>hemihydrate</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>8</id>
-    <cement_component>1</cement_component>
   </phase>
   <phase>
-    <thamesname>Calcite</thamesname>
-    <gemphase_data>
-      <gemphasename>Calcite</gemphasename>
-      <gemdc>
-        <gemdcname>Cal</gemdcname>
-      </gemdc>
-    </gemphase_data>
-    <id>9</id>
-    <cement_component>0</cement_component>
-  </phase>
-  <phase>
-    <thamesname>Portlandite</thamesname>
-    <gemphase_data>
-      <gemphasename>Portlandite</gemphasename>
-      <gemdc>
-        <gemdcname>Portlandite</gemdcname>
-      </gemdc>
-    </gemphase_data>
+    <thamesname>Quartz</thamesname>
     <id>10</id>
     <cement_component>0</cement_component>
     <interface_data>
-      <!--Portlandite should be 180 on alite and belite, and 0 on CSHQ-->
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+    </interface_data>
+    <gemphase_data>
+      <gemphasename>Quartz</gemphasename>
+      <gemdc>
+        <gemdcname>Qtz</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.0000</k2ocoeff>
+      <na2ocoeff>0.0000</na2ocoeff>
+      <mgocoeff>0.0010</mgocoeff>
+      <so3coeff>0.0000</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>Pozzolanic</type>
+      <specificSurfaceArea>298.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>240.0</refSpecificSurfaceArea>
+      <activationEnergy>40000.000</activationEnergy>
+      <dissolutionRateConst>5.0e-8</dissolutionRateConst>
+      <diffusionRateConstEarly>1.0e-8</diffusionRateConstEarly>
+      <diffusionRateConstLate>1.0e-8</diffusionRateConstLate>
+      <siexp>1.0</siexp>
+      <dfexp>1.0</dfexp>
+      <dorexp>0.5</dorexp>
+      <ohexp>1.0</ohexp>
+      <sio2>0.987</sio2>
+      <loi>1.3</loi>
+    </kinetic_data>
+    <display_data>
+      <red>153.0</red>
+      <green>0.0</green>
+      <blue>0.0</blue>
+      <gray>100.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>Mullite</thamesname>
+    <id>11</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+    </interface_data>
+    <gemphase_data>
+      <gemphasename>Mullite</gemphasename>
+      <gemdc>
+        <gemdcname>Mul</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.0000</k2ocoeff>
+      <na2ocoeff>0.0000</na2ocoeff>
+      <mgocoeff>0.0010</mgocoeff>
+      <so3coeff>0.0000</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>Pozzolanic</type>
+      <specificSurfaceArea>298.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>240.0</refSpecificSurfaceArea>
+      <activationEnergy>40000.000</activationEnergy>
+      <dissolutionRateConst>5.0e-8</dissolutionRateConst>
+      <diffusionRateConstEarly>1.0e-8</diffusionRateConstEarly>
+      <diffusionRateConstLate>1.0e-8</diffusionRateConstLate>
+      <siexp>1.0</siexp>
+      <dfexp>1.0</dfexp>
+      <dorexp>0.5</dorexp>
+      <ohexp>1.0</ohexp>
+      <sio2>0.987</sio2>
+      <loi>1.3</loi>
+    </kinetic_data>
+    <display_data>
+      <red>128.0</red>
+      <green>250.0</green>
+      <blue>128.0</blue>
+      <gray>128.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>C2AS</thamesname>
+    <id>12</id>
+    <cement_component>0</cement_component>
+    <gemphase_data>
+      <gemphasename>C2AS(am)</gemphasename>
+      <gemdc>
+        <gemdcname>C2AS</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.0000</k2ocoeff>
+      <na2ocoeff>0.0000</na2ocoeff>
+      <mgocoeff>0.0010</mgocoeff>
+      <so3coeff>0.0000</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>Pozzolanic</type>
+      <specificSurfaceArea>298.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>240.0</refSpecificSurfaceArea>
+      <activationEnergy>40000.000</activationEnergy>
+      <dissolutionRateConst>0.5</dissolutionRateConst>
+      <diffusionRateConstEarly>0.3</diffusionRateConstEarly>
+      <diffusionRateConstLate>0.3</diffusionRateConstLate>
+      <siexp>1.0</siexp>
+      <dfexp>1.0</dfexp>
+      <dorexp>0.5</dorexp>
+      <ohexp>1.0</ohexp>
+      <sio2>0.987</sio2>
+      <loi>1.3</loi>
+    </kinetic_data>
+    <display_data>
+      <red>255.0</red>
+      <green>165.0</green>
+      <blue>0.0</blue>
+      <gray>110.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>CA2S</thamesname>
+    <id>13</id>
+    <cement_component>0</cement_component>
+    <gemphase_data>
+      <gemphasename>CA2S(am)</gemphasename>
+      <gemdc>
+        <gemdcname>CA2S</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.00000000</k2ocoeff>
+      <na2ocoeff>0.00000000</na2ocoeff>
+      <mgocoeff>0.00100000</mgocoeff>
+      <so3coeff>0.00000000</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>Pozzolanic</type>
+      <specificSurfaceArea>298.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>240.0</refSpecificSurfaceArea>
+      <activationEnergy>40000.000</activationEnergy>
+      <dissolutionRateConst>0.1</dissolutionRateConst>
+      <diffusionRateConstEarly>0.3</diffusionRateConstEarly>
+      <diffusionRateConstLate>0.3</diffusionRateConstLate>
+      <siexp>1.0</siexp>
+      <dfexp>1.0</dfexp>
+      <dorexp>0.5</dorexp>
+      <ohexp>1.0</ohexp>
+      <sio2>0.987</sio2>
+      <loi>1.3</loi>
+    </kinetic_data>
+    <display_data>
+      <red>0.0</red>
+      <green>0.0</green>
+      <blue>128.0</blue>
+      <gray>108.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>K6A2S</thamesname>
+    <id>14</id>
+    <cement_component>0</cement_component>
+    <gemphase_data>
+      <gemphasename>K6A2S(am)</gemphasename>
+      <gemdc>
+        <gemdcname>K6A2S</gemdcname>
+      </gemdc>
+    </gemphase_data>
+    <impurity_data>
+      <k2ocoeff>0.00000000</k2ocoeff>
+      <na2ocoeff>0.00000000</na2ocoeff>
+      <mgocoeff>0.00100000</mgocoeff>
+      <so3coeff>0.00000000</so3coeff>
+    </impurity_data>
+    <kinetic_data>
+      <type>Pozzolanic</type>
+      <specificSurfaceArea>298.0</specificSurfaceArea>
+      <refSpecificSurfaceArea>240.0</refSpecificSurfaceArea>
+      <activationEnergy>40000.000</activationEnergy>
+      <dissolutionRateConst>0.3</dissolutionRateConst>
+      <diffusionRateConstEarly>0.3</diffusionRateConstEarly>
+      <diffusionRateConstLate>0.3</diffusionRateConstLate>
+      <siexp>1.0</siexp>
+      <dfexp>1.0</dfexp>
+      <dorexp>0.5</dorexp>
+      <ohexp>1.0</ohexp>
+      <sio2>0.987</sio2>
+      <loi>1.3</loi>
+    </kinetic_data>
+    <display_data>
+      <red>255.0</red>
+      <green>170.0</green>
+      <blue>128.0</blue>
+      <gray>115.0</gray>
+    </display_data>
+  </phase>
+  <phase>
+    <thamesname>CSHQ</thamesname>
+    <id>15</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <!--CSHQ should be 30 on alite, belite, and CaCO3 and should be 0 on portlandite-->
+      <!--   
       <affinity>
         <affinityphase>CSHQ</affinityphase>
         <contactanglevalue>0</contactanglevalue>
       </affinity>
+      -->
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>30</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>30</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Portlandite</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
     </interface_data>
-  </phase>
-  <phase>
-    <thamesname>CSHQ</thamesname>
     <gemphase_data>
       <gemphasename>CSHQ</gemphasename>
       <gemdc>
@@ -554,33 +762,6 @@
         <gemdcporosity>0.1825</gemdcporosity>
       </gemdc>
     </gemphase_data>
-    <id>11</id>
-    <cement_component>0</cement_component>
-    <interface_data>
-      <!--CSHQ should be 30 on alite, belite, and CaCO3 and should be 0 on portlandite-->
-      <!--   
-   <affinity>
-    <affinityphase>CSHQ</affinityphase>
-    <contactanglevalue>0</contactanglevalue>
-   </affinity>
--->
-      <affinity>
-        <affinityphase>Alite</affinityphase>
-        <contactanglevalue>30</contactanglevalue>
-      </affinity>
-      <affinity>
-        <affinityphase>Belite</affinityphase>
-        <contactanglevalue>30</contactanglevalue>
-      </affinity>
-      <affinity>
-        <affinityphase>Calcite</affinityphase>
-        <contactanglevalue>30</contactanglevalue>
-      </affinity>
-      <affinity>
-        <affinityphase>Portlandite</affinityphase>
-        <contactanglevalue>0</contactanglevalue>
-      </affinity>
-    </interface_data>
     <poresizefilename>CSH-PoreSizeDistribution.csv</poresizefilename>
     <Rd>
       <Rdelement>K</Rdelement>
@@ -592,7 +773,41 @@
     </Rd>
   </phase>
   <phase>
+    <thamesname>Portlandite</thamesname>
+    <id>16</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <!--Portlandite should be 180 on alite and belite, and 0 on CSHQ-->
+      <affinity>
+        <affinityphase>CSHQ</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+    </interface_data>
+    <gemphase_data>
+      <gemphasename>Portlandite</gemphasename>
+      <gemdc>
+        <gemdcname>Portlandite</gemdcname>
+      </gemdc>
+    </gemphase_data>
+  </phase>
+  <phase>
     <thamesname>AFm</thamesname>
+    <id>17</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <affinity>
+        <affinityphase>Aluminate</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+    </interface_data>
     <gemphase_data>
       <gemphasename>C3AH6</gemphasename>
       <gemdc>
@@ -617,11 +832,34 @@
         <gemdcname>C4AH19</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>12</id>
-    <cement_component>0</cement_component>
   </phase>
   <phase>
     <thamesname>AFmc</thamesname>
+    <id>18</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <!--AFmc should be 0 on AFt and on AFm, and 180 on alite and belite-->
+      <affinity>
+        <affinityphase>AFm</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>AFt</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Aluminate</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+    </interface_data>
     <gemphase_data>
       <gemphasename>C4Ac0.5H105</gemphasename>
       <gemdc>
@@ -652,22 +890,30 @@
         <gemdcname>monocarb9</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>13</id>
-    <cement_component>0</cement_component>
-    <interface_data>
-      <!--AFmc should be 0 on AFt and on AFm, and 180 on alite and belite-->
-      <affinity>
-        <affinityphase>AFm</affinityphase>
-        <contactanglevalue>0</contactanglevalue>
-      </affinity>
-      <affinity>
-        <affinityphase>AFt</affinityphase>
-        <contactanglevalue>0</contactanglevalue>
-      </affinity>
-    </interface_data>
   </phase>
   <phase>
     <thamesname>AFt</thamesname>
+    <id>19</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <!--AFt should be 180 for alite and belite and 0 on Monosulfate-->
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Monosulfate</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Aluminate</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+    </interface_data>
     <gemphase_data>
       <gemphasename>C6AsH13</gemphasename>
       <gemdc>
@@ -707,18 +953,26 @@
         <gemdcname>Fe-ettr05</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>14</id>
-    <cement_component>0</cement_component>
-    <interface_data>
-      <!--AFt should be 180 for alite and belite and 0 on Monosulfate-->
-      <affinity>
-        <affinityphase>Monosulfate</affinityphase>
-        <contactanglevalue>0</contactanglevalue>
-      </affinity>
-    </interface_data>
   </phase>
   <phase>
     <thamesname>Monosulfate</thamesname>
+    <id>20</id>
+    <cement_component>0</cement_component>
+    <interface_data>
+      <!--Monosulfate should be 0 on AFt and 180 on alite and belite-->
+      <affinity>
+        <affinityphase>AFt</affinityphase>
+        <contactanglevalue>0</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Alite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+      <affinity>
+        <affinityphase>Belite</affinityphase>
+        <contactanglevalue>180</contactanglevalue>
+      </affinity>
+    </interface_data>
     <gemphase_data>
       <gemphasename>C4AsH105</gemphasename>
       <gemdc>
@@ -758,18 +1012,11 @@
         <gemdcname>Fe-monosulf05</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>15</id>
-    <cement_component>0</cement_component>
-    <interface_data>
-      <!--Monosulfate should be 0 on AFt and 180 on alite and belite-->
-      <affinity>
-        <affinityphase>AFt</affinityphase>
-        <contactanglevalue>0</contactanglevalue>
-      </affinity>
-    </interface_data>
   </phase>
   <phase>
     <thamesname>Hydrotalcite</thamesname>
+    <id>21</id>
+    <cement_component>0</cement_component>
     <gemphase_data>
       <gemphasename>hydrotalc-pyro</gemphasename>
       <gemdc>
@@ -779,7 +1026,5 @@
         <gemdcname>Mg3FeC0.5OH</gemdcname>
       </gemdc>
     </gemphase_data>
-    <id>16</id>
-    <cement_component>0</cement_component>
   </phase>
 </chemistry_data>
