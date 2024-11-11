@@ -353,9 +353,14 @@ int main(int argc, char **argv) {
   par_filename.assign(buff);
   cout << "par_filename      : " << par_filename << endl;
 
-  cout << endl << "What is the root name of this job?" << endl;
+  cout << endl << "What is the root name of output files?" << endl;
   getline(cin, buff);
   jobroot.assign(buff);
+  cout << "files root name   : " << jobroot << endl;
+
+  buff = "mkdir -p Result";
+  system(buff.c_str());
+  jobroot = "Result/" + jobroot;
   cout << "jobroot           : " << jobroot << endl;
 
   statfilename = jobroot + ".stats";
