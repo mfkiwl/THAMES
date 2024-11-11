@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Nov 11 10:14 2024 | Merged branch florinnita_THAMES_v3.0.1-v4.0.0 which fixed some memory leaks and updated test input files |
 | Nov 01 09:45 2024 | Commit in preparation for v3.0.0 release |
 | Oct 30 17:51 2024 | Fixed gas and electrolyte composition functionality |
 | Oct 29 11:19 2024 | Small tweaks here and there |
