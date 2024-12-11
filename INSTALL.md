@@ -123,26 +123,45 @@ static libraries in the PathToTHAMES/lib directory.
 ## Building on Windows
 
 Windows does not come prebuilt with any kind
-of system for compiling C/C++ code.  Therefore
-you must first install **MinGW** and **MSYS**. Assuming these are installed, execute the following steps.
+of system for compiling C/C++ code, but it they have made it easier to get a full Linux environment set up, which is part of these instructions.  Therefore
 
-1. Open mingw64 shell at C:\msys64\mingw64.exe
-2. Build GEMS3K library
-	* cd /PathToTHAMES/THAMES/src/GEMS3K-standalone
-	* mkdir build
-	* cd build
-	* cmake .. -G "MinGW Makefile" -DCMAKE\_CSS\_FLAGS=-fPIC -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../Resources
-	* mingw32-make.exe
-	* mingw32-make.exe install
-3. Build THAMES
-	* cd /PathToTHAMES/THAMES/build
-	* cmake .. -G "MinGW Makefile" -DCMAKE\_BUILD\_TYPE=Release -DCMAKE\_INSTALL\_PREFIX=../bin
-	* mingw32-make.exe
-	* mingw32-make.exe install
-	* mingw32-make.exe doc
+### Install WSL
 
-This will install the "thames" executable in the /PathToTHAMES/bin directory, and the
-static libraries in the PathToTHAMES/lib directory.
+- Switch to admin user
+- Type `powershell` in the search bar.
+- In the powershell window, type `wsl --install`
+- Reboot computer, select userid and password
+
+### Install GEMS3K Library
+
+- Start up Ubuntu by typing `ubuntu` in the search bar.
+- sudo apt update
+- sudo apt install git
+- sudo apt install cmake
+- sudo apt install build-essential
+- sudo apt-get install libxml2-dev
+- git clone https://github.com/jwbullard/THAMES.git
+- Wait for the THAMES folder to fully download
+- In the Windows file explorer, navigate to Linux/home/THAMES/src/GEMS3K-standalone
+- Open the file install.h with Notepad
+- Comment out the line that begins with `cmake ..` by placing a `#` in the first column.
+- Add a line directly below it that reads
+
+```
+cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../../Resources 
+```
+- Save the `install.sh` file and close the file explorer
+- Back in the powershell, `cd THAMES/src/GEMS3K-standalone`
+- ./install.sh
+- cd ../../build
+- Run this command:
+```
+cmake .. -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_CXX_COMPILER=/usr/bin/g++ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../bin 
+```
+- make
+- make install
+
+This procedure should install the `thames` and `viz` executables in the Linux/home/THAMES/bin folder
 
 ## UNINSTALLING
 
