@@ -80,7 +80,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
 
   ///
   /// Clear out the vectors so they can be populated with values from the
-  /// XML input file
+  /// JSON input file
   ///
 
   name_.clear();
@@ -96,21 +96,21 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
   leachTime_ = 1.0e10;
 
   ///
-  /// Open the input XML file for kinetic data and parse it
+  /// Open the input JSON file for kinetic data and parse it
   ///
 
-  string xmlext = ".xml";
-  size_t foundxml;
-  foundxml = fileName.find(xmlext);
+  string jsonext = ".json";
+  size_t foundjson;
+  foundjson = fileName.find(jsonext);
   try {
-    if (foundxml != string::npos) {
+    if (foundjson != string::npos) {
       if (verbose_) {
-        cout << "KineticModel data file is an XML file" << endl;
+        cout << "KineticModel data file is an JSON file" << endl;
       }
       parseDoc(fileName);
     } else {
       throw FileException("KineticModel", "KineticModel", fileName,
-                          "NOT in XML format");
+                          "NOT in JSON format");
     }
   } catch (FileException fex) {
     fex.printException();
@@ -121,7 +121,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
 
   if (verbose_) {
     cout << "KineticController::KineticController Finished reading "
-            "chemistry.xml "
+            "chemistry.json "
          << endl;
     int size = microPhaseId_.size();
     for (int i = 0; i < size; ++i) {
@@ -193,70 +193,47 @@ void KineticController::parseDoc(const string &docName) {
 
   struct KineticData kineticData;
 
-  ///
-  /// This method uses the libxml library, so it needs to be added and linked
-  /// at compile time.
-  ///
+  /// Test for JSON existenc
 
-  xmlDocPtr doc;
-  xmlChar *key;
-  xmlNodePtr cur;
-
-  cout.flush();
-  doc = xmlParseFile(docName.c_str());
-
-  ///
-  /// Check if the xml file is valid and parse it if so.
-  /// @note This block requires schema file to be local
+  ifstream f(docName.c_str());
+  cout << "Contents of " << docName << ":" << endl;
+  cout << "#######" << endl;
+  json data = json::parse(f);
+  cout << "#######" << endl;
+  f.close();
 
   try {
-    string rxcsd = "chemistry.xsd";
-    if (!is_xml_valid(doc, rxcsd.c_str())) {
-      throw FileException("KineticModel", "KineticModel", docName,
-                          "xml NOT VALID");
+
+    /// Get an iterator to the root node of the JSON file
+    /// @todo Add a better JSON validity check.
+
+    json::iterator it = data.find("simulation_parameters");
+    json::iterator cdi = it.value().begin();
+
+    // Test for non-emptiness
+    if (cdi == it.value().end() || it == data.end()) {
+      throw FileException("Controller", "parseDoc", docName, "Empty JSON file");
     }
 
-    if (doc == NULL) {
-      throw FileException("KineticModel", "KineticModel", docName,
-                          "xml NOT parsed successfully");
-    }
-
-    cur = xmlDocGetRootElement(doc);
-
-    if (cur == NULL) {
-      xmlFreeDoc(doc);
-      throw FileException("KineticModel", "KineticModel", docName,
-                          "xml document is empty");
-    }
-
-    cur = cur->xmlChildrenNode;
-    while (cur != NULL) {
-      if ((!xmlStrcmp(cur->name, (const xmlChar *)"temperature"))) {
-        key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-        string st((char *)key);
-        from_string(temperature_, st);
-        xmlFree(key);
-      } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"reftemperature"))) {
-        key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-        string st((char *)key);
-        from_string(refT_, st);
-        xmlFree(key);
-      } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
+    while (cdi != it.value().end()) {
+      if (cdi.key() == "temperature") {
+        temperature_ = cdi.value();
+      } else if (cde.key() == "reftemperature") {
+        refT_ = cdi.value();
+      } else if (cdi.key() == "phase") {
 
         /// Each phase is a more complicated grouping of data that
         /// has a separate method for parsing.
 
-        parseMicroPhase(doc, cur, numEntry, kineticData);
+        parseMicroPhase(cdi, numEntry, kineticData);
       }
-      cur = cur->next;
+      ++cdi;
     }
 
     /// Push a copy of the isKinetic vector to the ChemicalSystem
 
     chemSys_->setIsKinetic(isKinetic_);
 
-    xmlFreeDoc(doc);
-    xmlFreeNode(cur);
   } catch (FileException fex) {
     fex.printException();
     exit(1);
@@ -271,10 +248,8 @@ void KineticController::parseDoc(const string &docName) {
   return;
 }
 
-void KineticController::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
-                                        int &numEntry,
+void KineticController::parseMicroPhase(const json::iterator cdi, int &numEntry,
                                         struct KineticData &kineticData) {
-  xmlChar *key;
   int proposedgemphaseid, proposedDCid;
   int testgemid, testdcid;
   string testname;
@@ -286,19 +261,17 @@ void KineticController::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
 
   initKineticData(kineticData);
 
-  cur = cur->xmlChildrenNode;
-
   isKinetic_.push_back(false);
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string testname((char *)key);
+  json::iterator p = cdi.value().begin();
+
+  while (p != cdi.value().end()) {
+    if (p.key() == "thamesname") {
+      testname = p.value();
       kineticData.name = testname;
       kineticData.microPhaseId = chemSys_->getMicroPhaseId(testname);
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"kinetic_data"))) {
+    if (p.key() == "kinetic_data") {
       numEntry += 1;
       kineticfound = true;
       isKinetic_[isKinetic_.size() - 1] = true;
@@ -312,10 +285,10 @@ void KineticController::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       /// so there is a method written just for parsing that grouping
       ///
 
-      parseKineticData(doc, cur, kineticData);
+      parseKineticData(p, kineticData);
     }
 
-    cur = cur->next;
+    ++p;
   }
 
   if (kineticfound) {
@@ -338,44 +311,38 @@ void KineticController::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-void KineticController::parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
+void KineticController::parseKineticData(const json::iterator p,
                                          struct KineticData &kineticData) {
   bool typefound = false;
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
+
+  json::iterator pp = p.value().begin();
 
   try {
-    while (cur != NULL) {
-      if ((!xmlStrcmp(cur->name, (const xmlChar *)"type"))) {
-        key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-        string st((char *)key);
-        kineticData.type = st;
+    while (pp != p.value().end()) {
+      if (pp.key() == "type") {
+        kineticData.type = pp.value();
         if (kineticData.type == ParrotKillohType) {
           typefound = true;
-          parseKineticDataForParrotKilloh(doc, cur, kineticData);
+          parseKineticDataForParrotKilloh(pp, kineticData);
         } else if (kineticData.type == StandardType) {
           typefound = true;
-          parseKineticDataForStandard(doc, cur, kineticData);
+          parseKineticDataForStandard(pp, kineticData);
         } else if (kineticData.type == PozzolanicType) {
           typefound = true;
-          parseKineticDataForPozzolanic(doc, cur, kineticData);
+          parseKineticDataForPozzolanic(pp, kineticData);
         } else {
-          xmlFree(key);
           throw HandleException("KineticController", "parseKineticData", "type",
                                 "Model type not found");
         }
-        xmlFree(key);
       }
-      cur = cur->next;
+      ++pp;
     }
 
     if (!typefound) {
-      xmlFree(key);
       throw HandleException("KineticController", "parseKineticData", "type",
                             "Model type not specified");
     }
   } catch (HandleException hex) {
-    xmlFree(key);
     hex.printException();
   }
 
@@ -383,278 +350,203 @@ void KineticController::parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
 }
 
 void KineticController::parseKineticDataForParrotKilloh(
-    xmlDocPtr doc, xmlNodePtr cur, struct KineticData &kineticData) {
-  xmlChar *key;
-  cur = cur->next;
+    const json::iterator pp, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing PK data for " << kineticData.name << endl;
     cout.flush();
   }
-  while (cur != NULL) {
+
+  json::iterator ppp = pp.value().begin();
+  while (ppp != pp.value().end()) {
 
     // Specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.specificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "specificSurfaceArea") {
+      kineticData.specificSurfaceArea = ppp.value();
     }
     // Reference specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.refSpecificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "refSpecificSurfaceArea") {
+      kineticData.refSpecificSurfaceArea = ppp.value();
     }
     // Parrot-Killoh k1 parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"k1"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.k1, st);
-      xmlFree(key);
+    if (ppp.key() == "k1") {
+      kineticData.k1 = ppp.value();
     }
     // Parrot-Killoh k2 parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.k2, st);
-      xmlFree(key);
+    if (ppp.key() == "k2") {
+      kineticData.k2 = ppp.value();
     }
     // Parrot-Killoh k3 parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"k3"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.k3, st);
-      xmlFree(key);
+    if (ppp.key() == "k3") {
+      kineticData.k3 = ppp.value();
     }
     // Parrot-Killoh n1 parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"n1"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.n1, st);
-      xmlFree(key);
+    if (ppp.key() == "n1") {
+      kineticData.n1 = ppp.value();
     }
     // Parrot-Killoh n3 parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"n3"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.n3, st);
-      xmlFree(key);
+    if (ppp.key() == "n3") {
+      kineticData.n3 = ppp.value();
     }
     // Parrot-Killoh DOR_Hcoeff parameter
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dorHcoeff"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dorHcoeff, st);
-      xmlFree(key);
+    if (ppp.key() == "dorHcoeff") {
+      kineticData.dorHcoeff = ppp.value();
     }
     // Activation energy
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.activationEnergy, st);
-      xmlFree(key);
+    if (ppp.key() == "activationEnergy") {
+      kineticData.activationEnergy = ppp.value();
     }
-    cur = cur->next;
+    ++ppp;
   }
 
   return;
 }
 
 void KineticController::parseKineticDataForStandard(
-    xmlDocPtr doc, xmlNodePtr cur, struct KineticData &kineticData) {
-  xmlChar *key;
-  cur = cur->next;
+    const json::iterator pp, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing standard kinetic data for " << kineticData.name
          << endl;
     cout.flush();
   }
-  while (cur != NULL) {
+
+  json::iterator ppp = pp.value().begin();
+
+  while (ppp != pp.value().end()) {
 
     // Specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.specificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "specificSurfaceArea") {
+      kineticData.specificSurfaceArea = ppp.value();
     }
 
     // Reference specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.refSpecificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "refSpecificSurfaceArea") {
+      kineticData.refSpecificSurfaceArea = ppp.value();
     }
 
     // Dissolution rate constant (mol/m2/s)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolutionRateConst"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dissolutionRateConst, st);
-      xmlFree(key);
+    if (ppp.key() == "dissolutionRateConst") {
+      kineticData.dissolutionRateConst = ppp.value();
     }
+
     // Number of DC units produced in dissociation reaction
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolvedUnits"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dissolvedUnits, st);
-      xmlFree(key);
+    if (ppp.key() == "dissolvedUnits") {
+      kineticData.dissolvedUnits = ppp.value();
     }
+
     // Exponent on  the saturation index in the rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"siexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.siexp, st);
-      xmlFree(key);
+    if (ppp.key() == "siexp") {
+      kineticData.siexp = ppp.value();
     }
+
     // Exponent on  the driving force term in the rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dfexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dfexp, st);
-      xmlFree(key);
+    if (ppp.key() == "dfexp") {
+      kineticData.dfexp = ppp.value();
     }
+
     // Loss on ignition of the material
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"loi"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.loi, st);
-      xmlFree(key);
+    if (ppp.key() == "loi") {
+      kineticData.loi = ppp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.activationEnergy, st);
-      xmlFree(key);
+
+    // Activation energy for dissolution
+    if (ppp.key() == "activationEnergy") {
+      kineticData.activationEnergy = ppp.value();
     }
-    cur = cur->next;
+
+    ++ppp;
   }
 
   return;
 }
 
 void KineticController::parseKineticDataForPozzolanic(
-    xmlDocPtr doc, xmlNodePtr cur, struct KineticData &kineticData) {
-  xmlChar *key;
-  cur = cur->next;
+    const json::iterator pp, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing pozzolanic data for " << kineticData.name << endl;
     cout.flush();
   }
-  while (cur != NULL) {
+
+  json::iterator ppp = pp.value().begin();
+  while (ppp != pp.value().end()) {
 
     // Specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"specificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.specificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "specificSurfaceArea") {
+      kineticData.specificSurfaceArea = ppp.value();
     }
 
     // Reference specific surface area (m2/kg)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"refSpecificSurfaceArea"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.refSpecificSurfaceArea, st);
-      xmlFree(key);
+    if (ppp.key() == "refSpecificSurfaceArea") {
+      kineticData.refSpecificSurfaceArea = ppp.value();
     }
 
     // Dissolution rate constant (mol/m2/s)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolutionRateConst"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dissolutionRateConst, st);
-      xmlFree(key);
+    if (ppp.key() == "dissolutionRateConst") {
+      kineticData.dissolutionRateConst = ppp.value();
     }
+
     // Early-age diffusion rate constant (mol/m2/s)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"diffusionRateConstEarly"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.diffusionRateConstEarly, st);
-      xmlFree(key);
+    if (ppp.key() == "diffusionRateConstEarly") {
+      kineticData.diffusionRateConstEarly = ppp.value();
     }
+
     // Number of DC units produced in dissociation reaction
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dissolvedUnits"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dissolvedUnits, st);
-      xmlFree(key);
+    if (ppp.key() == "dissolvedUnits") {
+      kineticData.dissolvedUnits = ppp.value();
     }
+
     // Later-age diffusion rate constant (mol/m2/s)
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"diffusionRateConstLate"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.diffusionRateConstLate, st);
-      xmlFree(key);
+    if (ppp.key() == "diffusionRateConstLate") {
+      kineticData.diffusionRateConstLate = ppp.value();
     }
-    // Exponent on  the saturation index in the rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"siexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.siexp, st);
-      xmlFree(key);
+
+    // Exponent on the saturation index in the rate equation
+    if (ppp.key() == "siexp") {
+      kineticData.siexp = ppp.value();
     }
-    // Exponent on  the driving force term in the rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dfexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dfexp, st);
-      xmlFree(key);
+
+    // Exponent on the driving force term in the rate equation
+    if (ppp.key() == "dfexp") {
+      kineticData.dfexp = ppp.value();
     }
-    // Exponent on  the degree of reaction term in the diffusion rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"dorexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.dorexp, st);
-      xmlFree(key);
+
+    // Exponent on the degree of reaction term in the diffusion rate equation
+    if (ppp.key() == "dorexp") {
+      kineticData.dorexp = ppp.value();
     }
-    // Exponent on  the hydroxy ion activity in the rate equation
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"ohexp"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.ohexp, st);
-      xmlFree(key);
+
+    // Exponent on the hydroxy ion activity in the rate equation
+    if (ppp.key() == "ohexp") {
+      kineticData.ohexp = ppp.value();
     }
+
     // SiO2 mass fraction in the material
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"sio2"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.sio2, st);
-      xmlFree(key);
+    if (ppp.key() == "sio2") {
+      kineticData.sio2 = ppp.value();
     }
+
     // Al2O3 mass fraction in the material
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"al2o3"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.al2o3, st);
-      xmlFree(key);
+    if (ppp.key() == "al2o3") {
+      kineticData.al2o3 = ppp.value();
     }
+
     // CaO mass fraction in the material
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"cao"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.cao, st);
-      xmlFree(key);
+    if (ppp.key() == "cao") {
+      kineticData.cao = ppp.value();
     }
+
     // Loss on ignition of the material
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"loi"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.loi, st);
-      xmlFree(key);
+    if (ppp.key() == "loi") {
+      kineticData.loi = ppp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"activationEnergy"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(kineticData.activationEnergy, st);
-      xmlFree(key);
+
+    if (ppp.key() == "activationEnergy") {
+      kineticData.activationEnergy = ppp.value();
     }
-    cur = cur->next;
+
+    ++ppp;
   }
 
   return;
@@ -704,8 +596,7 @@ double KineticController::getSolidMass(void) {
   return (totmass);
 }
 
-void KineticController::makeModel(xmlDocPtr doc, xmlNodePtr cur,
-                                  struct KineticData &kineticData) {
+void KineticController::makeModel(struct KineticData &kineticData) {
   KineticModel *km = NULL;
 
   if (kineticData.type == ParrotKillohType) {

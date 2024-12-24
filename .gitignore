@@ -48,6 +48,9 @@ src/Doxyfile$
 src/thameslib/myconfig.h
 src/vcctl2thames/vcctl2thames.h
 src/GEMS3K-standalone/Resources
-src/Resources
+src/Resources/bin/*
+src/Resources/include/GEMS3K
+src/Resources/lib/*.*
+src/Resources/share/*
 
 run_work_Jeff/

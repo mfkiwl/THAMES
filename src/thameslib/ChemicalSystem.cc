@@ -559,13 +559,13 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   }
 
   ///
-  /// Begin parsing the chemistry input XML file
+  /// Begin parsing the chemistry input JSON file
   ///
   string msg;
-  string xmlext = ".xml";
-  size_t foundxml = interfaceFileName.find(xmlext);
+  string jsonext = ".json";
+  size_t foundjson = interfaceFileName.find(jsonext);
   try {
-    if (foundxml != string::npos) {
+    if (foundjson != string::npos) {
       parseDoc(interfaceFileName);
       microPhaseVolume_.resize(numMicroPhases_, 0.0);
       microPhaseMass_.resize(numMicroPhases_, 0.0);
@@ -576,7 +576,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
       }
       microPhaseMassDissolved_.resize(numMicroPhases_, 0.0);
     } else {
-      msg = "Not an XML file";
+      msg = "Not a JSON file";
       throw FileException("ChemicalSystem", "ChemicalSystem", interfaceFileName,
                           msg);
     }
@@ -744,58 +744,35 @@ void ChemicalSystem::parseDoc(const string &docName) {
 
   string msg;
   PhaseData phaseData;
-  xmlDocPtr doc;
-  xmlChar *key;
-  xmlNodePtr cur;
-  cout.flush();
-  doc = xmlParseFile(docName.c_str());
 
-  /// Check if the xml file is valid
-  /// @note This block requires the schema file to be local
+  /// Test for JSON existence and non-emptiness
+  /// @todo Add a better JSON validity check.
 
-  string rxcsd = "chemistry.xsd";
-  if (!is_xml_valid(doc, rxcsd.c_str())) {
-    cout << "Chemistry xml is NOT valid" << endl;
-    cout.flush();
-  } else if (verbose_) {
-    cout << "Chemistry xml IS valid" << endl;
-    cout.flush();
-  }
+  ifstream f(docName.c_str());
+  cout << "Contents of " << docName << ":" << endl;
+  cout << "#######" << endl;
+  json data = json::parse(f);
+  cout << "#######" << endl;
+  f.close();
 
-  if (doc == NULL) {
-    msg = "XML file not parsed successfully";
-    throw FileException("ChemicalSystem", "parseDoc", docName, msg);
-  }
+  // Get an iterator to the root node of the JSON file
+  json::iterator it = data.find("chemistry_data");
+  json::iterator cdi = it.value().begin();
 
-  cur = xmlDocGetRootElement(doc);
-
-  if (cur == NULL) {
-    msg = "XML file is empty";
-    xmlFreeDoc(doc);
-    throw FileException("ChemicalSystem", "parseDoc", docName, msg);
-  }
-
-  /// XML file is valid and non-empty
-  /// Do a first scan through to get the phase names and ids
-  ///
-
-  cur = cur->xmlChildrenNode;
   map<string, int> phaseids;
   phaseids.clear();
-  if (verbose_) {
-    cout << "Parsing phase names" << endl;
-    cout.flush();
-  }
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
-      parseMicroPhaseNames(doc, cur, phaseids);
+  cout << "Finding all phase names" << endl;
+  while (cdi != it.value().end()) {
+    if (cdi.key() == "phase") {
+      parseMicroPhaseNames(cdi, phaseids);
     }
-    cur = cur->next;
+    ++cdi;
   }
+  cout << "Done finding all phase names" << endl;
 
   ///
-  /// Now back up to the beginning and scan properly
+  /// Now start the iterator at the beginning and scan properly
   ///
   /// The interface file contains information about each microstructure
   /// phase that is defined, including the list of GEM CSD phases that
@@ -804,42 +781,36 @@ void ChemicalSystem::parseDoc(const string &docName) {
   ///
 
   if (verbose_) {
-    cout << "Back to the top of the xml file to parse properly" << endl;
+    cout << "Back to the beginning to mine data from JSON file" << endl;
     cout.flush();
   }
-  cur = xmlDocGetRootElement(doc);
-  cur = cur->xmlChildrenNode;
   int testnumEntries = 0;
   int satstate = 1;
   isSaturated_ = true;
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"numentries"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(testnumEntries, st);
-      xmlFree(key);
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"saturated"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(satstate, st);
+  cdi = it.value().begin();
+  // Get the number of entries
+  while (cdi != it.value().end()) {
+    if (cdi.key() == "numentries") {
+      testnumEntries = cdi.value();
+    } else if (cdi.key() == "saturated") {
+      satstate = cdi.value();
       if (satstate == 0)
         isSaturated_ = false;
-      xmlFree(key);
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"electrolyte"))) {
+    } else if (cdi.key() == "electrolyte") {
       try {
-        parseSolutionComp(doc, cur);
+        parseSolutionComp(cdi); // WORKING ON THIS ONE
       } catch (DataException dex) {
         throw dex;
       }
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"gas"))) {
+    } else if (cdi.key() == "gas") {
       try {
-        parseGasComp(doc, cur);
+        parseGasComp(cdi);
       } catch (DataException dex) {
         throw dex;
       }
-    } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"phase"))) {
+    } else if (cdi.key() == "phase") {
       try {
-        parseMicroPhase(doc, cur, testnumEntries, phaseids, phaseData);
+        parseMicroPhase(cdi, testnumEntries, phaseids, phaseData);
       } catch (FileException fex) {
         // fex.printException();
         throw fex;
@@ -849,26 +820,24 @@ void ChemicalSystem::parseDoc(const string &docName) {
         cout << endl;
       }
     }
-    cur = cur->next;
+    ++cdi;
   }
 
-  xmlFreeDoc(doc);
   return;
 }
 
-void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
+void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   // Clear the associative map to initialize it
 
   fixedSolutionComposition_.clear();
   initialSolutionComposition_.clear();
 
-  cur = cur->xmlChildrenNode;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCconc"))) {
-      parseDCInSolution(doc, cur);
+  json::iterator p = cdi.value().begin();
+  while (p != cdi.value().end()) {
+    if (p.key() == "DCconc") {
+      parseDCInSolution(p);
     }
-    cur = cur->next;
+    ++p;
   }
 
   // At this point all the composition constraints have been read
@@ -904,39 +873,29 @@ void ChemicalSystem::parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur) {
   return;
 }
 
-void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
+void ChemicalSystem::parseDCInSolution(const json::iterator p) {
 
-  xmlChar *key;
   int DCId = -1;
   bool fixed = false;
   string DCName;
   double DCConc = -1.0;
 
-  cur = cur->xmlChildrenNode;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"name"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      from_string(DCName, (char *)key);
+  json::iterator pp = p.value().begin();
+  while (pp != p.value().end()) {
+    if (pp.key() == "name") {
+      DCName = pp.value();
       DCId = getDCId(DCName);
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"conc"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(DCConc, st);
-      xmlFree(key);
+    if (pp.key() == "conc") {
+      DCConc = pp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"condition"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      xmlFree(key);
-      if (st == "fixed") {
+    if (pp.key() == "condition") {
+      if (pp.value() == "fixed") {
         fixed = true;
       }
     }
 
-    cur = cur->next;
+    ++pp;
   }
 
   // Only add the data if this is a solution component
@@ -952,19 +911,18 @@ void ChemicalSystem::parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur) {
   return;
 }
 
-void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
+void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   // Clear the associative map to initialize it
 
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
 
-  cur = cur->xmlChildrenNode;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"DCmoles"))) {
-      parseDCInGas(doc, cur);
+  json::iterator p = cdi.value().begin();
+  while (p != cdi.value().end()) {
+    if (p.key() == "DCmoles") {
+      parseDCInGas(p);
     }
-    cur = cur->next;
+    ++p;
   }
 
   // At this point all the composition constraints have been read
@@ -1000,38 +958,29 @@ void ChemicalSystem::parseGasComp(xmlDocPtr doc, xmlNodePtr cur) {
   return;
 }
 
-void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
-  xmlChar *key;
+void ChemicalSystem::parseDCInGas(const json::iterator p) {
   int DCId = -1;
   bool fixed = false;
   string DCName;
   double DCMoles = -1.0;
 
-  cur = cur->xmlChildrenNode;
+  json::iterator pp = p.value().begin();
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"name"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      from_string(DCName, (char *)key);
+  while (pp != p.value().end()) {
+    if (pp.key() == "name") {
+      DCName = pp.value();
       DCId = getDCId(DCName);
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"moles"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(DCMoles, st);
-      xmlFree(key);
+    if (pp.key() == "moles") {
+      DCMoles = pp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"condition"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      xmlFree(key);
-      if (st == "fixed") {
+    if (pp.key() == "condition") {
+      if (pp.value() == "fixed") {
         fixed = true;
       }
     }
 
-    cur = cur->next;
+    ++pp;
   }
 
   // Only add the data if this is a gas component
@@ -1048,37 +997,28 @@ void ChemicalSystem::parseDCInGas(xmlDocPtr doc, xmlNodePtr cur) {
   return;
 }
 
-void ChemicalSystem::parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseMicroPhaseNames(const json::iterator cdi,
                                           map<string, int> &phaseids) {
 
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
+  json::iterator p = cdi.value().begin();
+
   int pid;
   string pname;
   bool cemComp;
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"id"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(pid, st);
-      xmlFree(key);
+  while (p != cdi.value().end()) {
+    if (p.key() == "id") {
+      pid = p.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname")) ||
-        (!xmlStrcmp(cur->name, (const xmlChar *)"microphasename"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      pname = st;
-      xmlFree(key);
+    if ((p.key() == "thamesname") || (p.key() == "microphasename")) {
+      pname = p.value();
     }
-    if (!xmlStrcmp(cur->name, (const xmlChar *)"cement_component")) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(cemComp, st);
-      xmlFree(key);
+    if (p.key() == "cement_component") {
+      cemComp = (p.value() == 1) ? true : false;
     }
-    cur = cur->next;
+    ++p;
   }
+
   if (verbose_) {
     cout << "    Phase name = " << pname << endl;
     cout.flush();
@@ -1091,10 +1031,9 @@ void ChemicalSystem::parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
   // cout << endl;
 }
 
-void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
-                                     int numEntries, map<string, int> phaseids,
+void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
+                                     map<string, int> phaseids,
                                      PhaseData &phaseData) {
-  xmlChar *key;
 
   string poreSizeFileName;
 
@@ -1106,7 +1045,7 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   /// microstructure phase, and the default value is zero (contactanglevalue =
   /// 180); for self-affinity (the growing phase and the template are the same)
   /// the default value is 1 (contactanglevalue = 0). Both, affinity and
-  /// self-affinity can be modified supplying, in the chemistry.xml file, the
+  /// self-affinity can be modified supplying, in the chemistry.json file, the
   /// desired values for the contact angle
 
   // f(th) = (2 - 3 cos(th) + (cos(th))^3)/4
@@ -1132,38 +1071,28 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   phaseData.GEMPhaseId.clear();
   phaseData.GEMPhaseName.clear();
   phaseData.microPhaseDCPorosities.clear();
-//  phaseData.RdId.clear();
-//  phaseData.RdVal.clear();
+  //  phaseData.RdId.clear();
+  //  phaseData.RdVal.clear();
   phaseData.stressCalc = 0;
   phaseData.weak = 0;
 
-  cur = cur->xmlChildrenNode;
+  json::iterator p = cdi.value().begin();
 
   /// @note This parsing ignores the kinetic data portion for each
   /// phase.  The kinetic data parsing is handled by the KineticModel class
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"id"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.id, st);
-      xmlFree(key);
+  while (p != cdi.value().end()) {
+    if (p.key() == "id") {
+      phaseData.id = p.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname")) ||
-        (!xmlStrcmp(cur->name, (const xmlChar *)"microphasename"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      phaseData.thamesName = st;
-      xmlFree(key);
+    if (p.key() == "thamesname" || p.key() == "microphasename") {
+      phaseData.thamesName = p.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphase_data"))) {
-      parseGEMPhaseData(doc, cur, phaseData);
+    if (p.key() == "gemphase_data") {
+      parseGEMPhaseData(p, phaseData);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizefilename"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(poreSizeFileName, st);
-      xmlFree(key);
+    if (p.key() == "poresizefilename") {
+      poreSizeFileName = p.value();
       try {
         parsePoreSizeDistribution(poreSizeFileName, phaseData);
       } catch (FileException fex) {
@@ -1172,40 +1101,34 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
         cout << endl;
       }
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.stressCalc, st);
-      xmlFree(key);
+    if (p.key() == "stresscalc") {
+      phaseData.stressCalc = p.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"weak"))) {
+    if (p.key() == "weak") {
       // Weak means the phase can be damaged by stress
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.weak, st);
-      xmlFree(key);
+      phaseData.weak = p.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"display_data"))) {
-      parseDisplayData(doc, cur, phaseData);
+    if (p.key() == "display_data") {
+      parseDisplayData(p, phaseData);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"impurity_data"))) {
-      parseImpurityData(doc, cur, phaseData);
+    if (p.key() == "impurity_data") {
+      parseImpurityData(p, phaseData);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
-      parseInterfaceData(doc, cur, phaseids, phaseData);
+    if (p.key() == "interface_data") {
+      parseInterfaceData(p, phaseids, phaseData);
     }
-//    // Impurity partitioning data
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-//
-//      ///
-//      /// The data about partitioning of impurities among the clinker
-//      /// phases are grouped within a complex field in the input XML
-//      /// file, so we have a special method to parse it.
-//      ///
-//
-//      parseRdData(doc, cur, phaseData);
-//    }
-    cur = cur->next;
+    //    // Impurity partitioning data
+    //    if (p.key() == "Rd") {
+    //
+    //      ///
+    //      /// The data about partitioning of impurities among the clinker
+    //      /// phases are grouped within a complex field in the input
+    //      /// file, so we have a special method to parse it.
+    //      ///
+    //
+    //      parseRdData(p, phaseData);
+    //    }
+    ++p;
   }
 
   if (phaseData.stressCalc > 0) {
@@ -1275,8 +1198,8 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   na2o_.push_back(phaseData.na2o);
   mgo_.push_back(phaseData.mgo);
   so3_.push_back(phaseData.so3);
-//  RdICId_.push_back(phaseData.RdId);
-//  Rd_.push_back(phaseData.RdVal);
+  //  RdICId_.push_back(phaseData.RdId);
+  //  Rd_.push_back(phaseData.RdVal);
   microPhaseMembers_.insert(make_pair(phaseData.id, phaseData.GEMPhaseId));
   microPhaseDCMembers_.insert(make_pair(phaseData.id, phaseData.DCId));
 
@@ -1322,8 +1245,8 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
     phaseData.poreSizeDist.push_back(datarow);
     if (verbose_) {
       // i++;
-      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " << datarow.volfrac << endl;
-      // cout.flush();
+      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " <<
+      // datarow.volfrac << endl; cout.flush();
       cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
       cout.flush();
     }
@@ -1334,7 +1257,8 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
   phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
 
   if (verbose_) {
-    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : " << phaseData.poreSizeDist.size() << endl;
+    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
+         << phaseData.poreSizeDist.size() << endl;
     cout.flush();
   }
   in.close();
@@ -1349,22 +1273,19 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
   return;
 }
 
-void ChemicalSystem::parseGEMPhaseData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
                                        PhaseData &phaseData) {
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
-
   int GEMPhaseId = 0;
   int dcid = 0;
   string mypstr;
   phaseData.GEMPhaseDCMembers.clear();
   bool scrapeWaterDCs = false;
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphasename"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      phaseData.GEMPhaseName.push_back((char *)key);
-      mypstr = (char *)key;
+  json::iterator pp = p.value().begin();
+  while (pp != p.value().end()) {
+    if (pp.key() == "gemphasename") {
+      mypstr = pp.value().get<string>();
+      phaseData.GEMPhaseName.push_back(const_cast<char *>(mypstr.c_str()));
       if (mypstr == WaterGEMName) {
         scrapeWaterDCs = true;
       } else {
@@ -1383,35 +1304,33 @@ void ChemicalSystem::parseGEMPhaseData(xmlDocPtr doc, xmlNodePtr cur,
       if (mypstr == HydrotalcGEMName) {
         HydrotalcMicroName = phaseData.thamesName;
       }
-      GEMPhaseId = getGEMPhaseId((char *)key);
+      GEMPhaseId = getGEMPhaseId(mypstr);
       phaseData.GEMPhaseId.push_back(GEMPhaseId);
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdc"))) {
-      parseGEMPhaseDCData(doc, cur, phaseData);
+    if (pp.key() == "gemdc") {
+      parseGEMPhaseDCData(pp, phaseData);
     }
-    cur = cur->next;
+    ++pp;
   }
   GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId, phaseData.GEMPhaseDCMembers));
 
   return;
 }
 
-void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
                                          PhaseData &phaseData) {
-  xmlChar *key;
   string mydcstr;
-  cur = cur->xmlChildrenNode;
+  // char *mydchar = const_cast<char *>(str.c_str());
 
   int dcid = 0;
   double porosity = 0.0;
   bool scrapeWaterDCs = false;
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcname"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      phaseData.DCName.push_back((char *)key);
-      mydcstr = (char *)key;
+  json::iterator ppp = pp.value().begin();
+  while (ppp != pp.value().end()) {
+    if (ppp.key() == "gemdcname") {
+      mydcstr = ppp.value().get<string>();
+      phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
       // cout << "  GEM DC name = " << mydcstr // << endl;
       //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
       // cout.flush();
@@ -1424,7 +1343,7 @@ void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
       if (!scrapeWaterDCs || mydcstr == WaterDCName) {
         // Only for aqueous solution, we keep only the water DC,
         // not all the dissolved components
-        dcid = getDCId((char *)key);
+        dcid = getDCId(mydcstr);
         phaseData.DCId.push_back(dcid);
         phaseData.GEMPhaseDCMembers.push_back(dcid);
         // cout << "    GEM DC id = " << dcid // << endl;
@@ -1435,13 +1354,9 @@ void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
       if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
         phaseData.microPhaseDCPorosities.push_back(0.0);
       }
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemdcporosity"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(porosity, st);
-      xmlFree(key);
+    if (ppp.key() == "gemdcporosity") {
+      porosity = ppp.value();
       // Make certain that there will be a porosity associated
       // with this DC
       if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
@@ -1452,54 +1367,41 @@ void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
       }
     }
 
-    cur = cur->next;
+    ++ppp;
   }
 }
 
-void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseDisplayData(const json::iterator p,
                                       PhaseData &phaseData) {
 
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
   int red, green, blue, gray;
 
   red = green = blue = gray = 0;
   bool rgbBool = false;
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"red"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(red, st);
+  json::iterator pp = p.value().begin();
+  while (pp != p.value().end()) {
+    if (pp.key() == "red") {
+      red = pp.value();
       rgbBool = true;
       // if (verbose_) cout << "        red = " << red << endl;
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"green"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(green, st);
+    if (pp.key() == "green") {
+      green = pp.value();
       rgbBool = true;
       // if (verbose_) cout << "        green = " << green << endl;
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"blue"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(blue, st);
+    if (pp.key() == "blue") {
+      blue = pp.value();
       rgbBool = true;
       // if (verbose_) cout << "        blue = " << blue << endl;
-      xmlFree(key);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"gray"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(gray, st);
+    if (pp.key() == "gray") {
+      gray = pp.value();
       rgbBool = true;
       // if (verbose_) cout << "        gray = " << phaseData.gray << endl;
-      xmlFree(key);
     }
-    cur = cur->next;
+    ++pp;
   }
 
   phaseData.colors.clear();
@@ -1528,92 +1430,67 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-void ChemicalSystem::parseImpurityData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseImpurityData(const json::iterator p,
                                        PhaseData &phaseData) {
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
 
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"k2ocoeff"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.k2o, st);
-      // if (verbose_) cout << "        k2ocoeff = " << phaseData.k2o << endl;
-      xmlFree(key);
+  json::iterator pp = p.value().begin();
+  while (pp != p.value().end()) {
+    if (pp.key() == "k2ocoeff") {
+      phaseData.k2o = pp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"na2ocoeff"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.na2o, st);
-      // if (verbose_) cout << "        na2ocoeff = " << phaseData.na2o << endl;
-      xmlFree(key);
+    if (pp.key() == "na2ocoeff") {
+      phaseData.na2o = pp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"mgocoeff"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.mgo, st);
-      // if (verbose_) cout << "        mgocoeff = " << phaseData.mgo << endl;
-      xmlFree(key);
+    if (pp.key() == "mgocoeff") {
+      phaseData.mgo = pp.value();
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"so3coeff"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(phaseData.so3, st);
-      // if (verbose_) cout << "        so3coeff = " << phaseData.so3 << endl;
-      xmlFree(key);
+    if (pp.key() == "so3coeff") {
+      phaseData.so3 = pp.value();
     }
-    cur = cur->next;
+    ++pp;
   }
   return;
 }
 
-void ChemicalSystem::parseInterfaceData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseInterfaceData(const json::iterator p,
                                         map<string, int> &phaseids,
                                         PhaseData &phaseData) {
 
-  cur = cur->xmlChildrenNode;
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinity"))) {
-      parseAffinityData(doc, cur, phaseids, phaseData);
+  json::iterator pp = p.value().begin();
+  while (pp != p.value().end()) {
+    if (pp.key() == "affinity") {
+      parseAffinityData(pp, phaseids, phaseData);
     }
-    cur = cur->next;
+    ++pp;
   }
   return;
 }
 
-void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
+void ChemicalSystem::parseAffinityData(const json::iterator pp,
                                        map<string, int> &phaseids,
                                        PhaseData &phaseData) {
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
   int testaftyid; //, testaftyval;
   double testangleval, cs;
   map<string, int>::iterator it = phaseids.begin();
   testangleval = 0;
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityphase"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
+
+  json::iterator ppp = pp.value().begin();
+  while (ppp != pp.value().end()) {
+    if (ppp.key() == "affinityphase") {
+      string st(ppp.value());
       map<string, int>::iterator it = phaseids.find(st);
       if (it != phaseids.end()) {
         testaftyid = it->second;
       }
-      xmlFree(key);
     }
-    // if ((!xmlStrcmp(cur->name, (const xmlChar *)"affinityvalue"))) {
-    //   key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-    //   string st((char *)key);
-    //   from_string(testaftyval, st);
-    //   xmlFree(key);
+    // if (ppp.key() == "affinityvalue") {
+    //   testaftyval = ppp.value();
     // }
 
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"contactanglevalue"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(testangleval, st);
-      xmlFree(key);
+    if (ppp.key() == "contactanglevalue") {
+      testangleval = ppp.value();
     }
-    cur = cur->next;
+    ++ppp;
   }
 
   // Must be a valid phase name to be added to the list
@@ -1625,32 +1502,26 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-//void ChemicalSystem::parseRdData(xmlDocPtr doc, xmlNodePtr cur,
-//                                 struct PhaseData &phaseData) {
-//  xmlChar *key;
-//  cur = cur->xmlChildrenNode;
-//  int RdId;
-//  double RdVal;
+// void ChemicalSystem::parseRdData(const json::iterator p,
+//                                  struct PhaseData &phaseData) {
+//   int RdId;
+//   double RdVal;
 //
-//  while (cur != NULL) {
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
-//      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-//      string st((char *)key);
-//      RdId = getICId(st);
-//      phaseData.RdId.push_back(RdId);
-//      xmlFree(key);
-//    }
+//   json::iterator pp = p.value().begin();
+//   while (pp != p.value().end()) {
+//     if (pp.key() == "Rdelement") {
+//       string st(pp.value());
+//       RdId = getICId(st);
+//       phaseData.RdId.push_back(RdId);
+//     }
 //
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
-//      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-//      string st((char *)key);
-//      from_string(RdVal, st);
-//      phaseData.RdVal.push_back(RdVal);
-//      xmlFree(key);
-//    }
-//    cur = cur->next;
-//  }
-//}
+//     if (pp.key() == "Rdvalue") {
+//       RdVal = pp.value();
+//       phaseData.RdVal.push_back(RdVal);
+//     }
+//     ++pp;
+//   }
+// }
 
 ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
 

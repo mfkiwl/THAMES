@@ -50,8 +50,6 @@ its applications can also be found in the following references:
  * Source code available at https://bitbucket.org/gems4/gems3gui.git
  * Binaries available at https://gems.web.psi.ch
 
-* libxml2
-
 ## Building on Mac OS
 
 As already stated, modern Mac OS uses the Apple Clang compiler by default,
@@ -139,7 +137,6 @@ of system for compiling C/C++ code, but it they have made it easier to get a ful
 - sudo apt install git
 - sudo apt install cmake
 - sudo apt install build-essential
-- sudo apt-get install libxml2-dev
 - git clone https://github.com/jwbullard/THAMES.git
 - Wait for the THAMES folder to fully download
 - In the Windows file explorer, navigate to Linux/home/THAMES/src/GEMS3K-standalone

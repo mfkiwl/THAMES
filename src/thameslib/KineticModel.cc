@@ -8,7 +8,7 @@
 KineticModel::KineticModel() {
   ///
   /// Clear out the vectors so they can be populated with values from the
-  /// XML input file
+  /// JSON input file
   ///
 
   numPhases_ = 0;
