@@ -218,7 +218,7 @@ void KineticController::parseDoc(const string &docName) {
     while (cdi != it.value().end()) {
       if (cdi.key() == "temperature") {
         temperature_ = cdi.value();
-      } else if (cde.key() == "reftemperature") {
+      } else if (cdi.key() == "reftemperature") {
         refT_ = cdi.value();
       } else if (cdi.key() == "phase") {
 
@@ -296,7 +296,7 @@ void KineticController::parseMicroPhase(const json::iterator cdi, int &numEntry,
         chemSys_->getMicroPhaseMass(kineticData.microPhaseId);
     kineticData.temperature = temperature_;
     kineticData.reftemperature = refT_;
-    makeModel(doc, cur, kineticData);
+    makeModel(kineticData);
   }
 
   /// Some items should be added to vectors whether kinetically controlled or

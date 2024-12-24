@@ -12,6 +12,7 @@ exists, hydrates, and possibly deteriorates.
 #define LATTICEH
 
 #include <algorithm>
+#include <climits>
 #include <cmath>
 #include <ctime>
 #include <fstream>

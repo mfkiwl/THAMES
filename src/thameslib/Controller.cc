@@ -1312,7 +1312,7 @@ void Controller::parseDoc(const string &docName) {
   // check if the json file exists
 
   ifstream f(docName.c_str());
-  if (!f.isopen()) {
+  if (!f.is_open()) {
     cout << "JSON parameter file not found" << endl;
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }

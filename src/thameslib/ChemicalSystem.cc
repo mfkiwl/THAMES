@@ -749,6 +749,10 @@ void ChemicalSystem::parseDoc(const string &docName) {
   /// @todo Add a better JSON validity check.
 
   ifstream f(docName.c_str());
+  if (!f.is_open()) {
+    cout << "JSON parameter file not found" << endl;
+    throw FileException("Controller", "parseDoc", docName, "File not found");
+  }
   cout << "Contents of " << docName << ":" << endl;
   cout << "#######" << endl;
   json data = json::parse(f);
