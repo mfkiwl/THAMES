@@ -104,7 +104,7 @@ backscattered electron micrographs
 
 struct PhaseData {
   int id;
-  //double randomGrowth;
+  // double randomGrowth;
   int stressCalc;
   int weak;
   double k2o;
@@ -128,9 +128,10 @@ struct PhaseData {
   vector<double> affinity;
   vector<double> contactAngle;
 
-//  vector<int>
-//      RdId; /**< Vector of IC ids of the partitioned components in the phase */
-//  vector<double> RdVal; /**< Vector of Rd values for each IC */
+  //  vector<int>
+  //      RdId; /**< Vector of IC ids of the partitioned components in the phase
+  //      */
+  //  vector<double> RdVal; /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -138,7 +139,9 @@ struct elemColor {
   int colorId;
   string altName;
   vector<int> rgb;
+  vector<float> rgbf;
   int gray;
+  float grayf;
 };
 
 /**
@@ -310,18 +313,18 @@ class ChemicalSystem {
   */
   vector<vector<struct PoreSizeVolume>> poreSizeDistribution_;
 
-  vector<double> k2o_;       /**< Mass fraction of K<sub>2</sub>O dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> na2o_;      /**< Mass fraction of Na<sub>2</sub>O dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> mgo_;       /**< Mass fraction of MgO dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> so3_;       /**< Mass fraction of SO<sub>3</sub> dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
+  vector<double> k2o_;        /**< Mass fraction of K<sub>2</sub>O dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> na2o_;       /**< Mass fraction of Na<sub>2</sub>O dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> mgo_;        /**< Mass fraction of MgO dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> so3_;        /**< Mass fraction of SO<sub>3</sub> dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
   vector<int> grayscale_;     /**< A number on [0,255] giving the relative
                                    grayscale brightness of the THAMES
                                    phases in a backscattered electron image */
@@ -734,7 +737,8 @@ public:
   @param phaseData is a reference to the PhaseData structure for temporarily
   storing the input parameters
   */
-//  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData &phaseData);
+  //  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData
+  //  &phaseData);
 
   /**
   @brief Parse input about how to render a phase in an image.
@@ -6262,6 +6266,50 @@ public:
     }
   }
 
+  vector<float> getRGBf(int pid) {
+    string mPhName = microPhaseName_[pid];
+    map<string, elemColor>::iterator p = colorN_.find(mPhName);
+    if (p != colorN_.end()) {
+      return colorN_[mPhName].rgbf;
+    } else {
+      cout << endl << "**********************************************" << endl;
+      cout << endl
+           << "   Microphase " << mPhName
+           << " has no associated rgb values by default!" << endl;
+      cout << endl << "   => program stops !" << endl;
+      cout << endl
+           << "Please add in the chemistry file before " << mPhName
+           << " close phase definition tag (</phase>)," << endl
+           << "the following lines replacing VALUE with convenient integer "
+              "numbers in [0,255]: "
+           << endl;
+      cout << endl << "<display_data>" << endl;
+      cout << " <red> VALUE </red>" << endl;
+      cout << " <green> VALUE </green>" << endl;
+      cout << " <blue> VALUE </blue>" << endl;
+      cout << " <gray> VALUE </gray>" << endl;
+      cout << "</display_data>" << endl;
+      cout << endl
+           << "The following microphaseses are defined by default in THAMES "
+              "3.0.0: "
+           << endl;
+      int i = 0;
+      for (map<string, elemColor>::iterator pp = colorN_.begin();
+           pp != colorN_.end(); pp++) {
+        cout << "   " << setw(3) << i << " : " << setw(15) << left << pp->first
+             << setw(5) << right << "rgb:" << setw(5) << pp->second.rgb[0]
+             << setw(5) << pp->second.rgb[1] << setw(5) << pp->second.rgb[2]
+             << setw(10) << "gray:" << setw(5) << pp->second.gray << endl;
+        i++;
+      }
+      cout << endl
+           << "After modiffing and saving the chemistry.xml file, please "
+              "restart the program."
+           << endl
+           << endl;
+      exit(0);
+    }
+  }
   void updateMicroPhaseMasses(int idx, double val, int called) {
     int DCId = 0;
     if (idx > ELECTROLYTEID) {

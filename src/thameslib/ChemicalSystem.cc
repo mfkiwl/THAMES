@@ -1132,8 +1132,8 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   phaseData.GEMPhaseId.clear();
   phaseData.GEMPhaseName.clear();
   phaseData.microPhaseDCPorosities.clear();
-//  phaseData.RdId.clear();
-//  phaseData.RdVal.clear();
+  //  phaseData.RdId.clear();
+  //  phaseData.RdVal.clear();
   phaseData.stressCalc = 0;
   phaseData.weak = 0;
 
@@ -1194,17 +1194,17 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
       parseInterfaceData(doc, cur, phaseids, phaseData);
     }
-//    // Impurity partitioning data
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
-//
-//      ///
-//      /// The data about partitioning of impurities among the clinker
-//      /// phases are grouped within a complex field in the input XML
-//      /// file, so we have a special method to parse it.
-//      ///
-//
-//      parseRdData(doc, cur, phaseData);
-//    }
+    //    // Impurity partitioning data
+    //    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rd"))) {
+    //
+    //      ///
+    //      /// The data about partitioning of impurities among the clinker
+    //      /// phases are grouped within a complex field in the input XML
+    //      /// file, so we have a special method to parse it.
+    //      ///
+    //
+    //      parseRdData(doc, cur, phaseData);
+    //    }
     cur = cur->next;
   }
 
@@ -1275,8 +1275,8 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   na2o_.push_back(phaseData.na2o);
   mgo_.push_back(phaseData.mgo);
   so3_.push_back(phaseData.so3);
-//  RdICId_.push_back(phaseData.RdId);
-//  Rd_.push_back(phaseData.RdVal);
+  //  RdICId_.push_back(phaseData.RdId);
+  //  Rd_.push_back(phaseData.RdVal);
   microPhaseMembers_.insert(make_pair(phaseData.id, phaseData.GEMPhaseId));
   microPhaseDCMembers_.insert(make_pair(phaseData.id, phaseData.DCId));
 
@@ -1322,8 +1322,8 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
     phaseData.poreSizeDist.push_back(datarow);
     if (verbose_) {
       // i++;
-      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " << datarow.volfrac << endl;
-      // cout.flush();
+      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " <<
+      // datarow.volfrac << endl; cout.flush();
       cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
       cout.flush();
     }
@@ -1334,7 +1334,8 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
   phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
 
   if (verbose_) {
-    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : " << phaseData.poreSizeDist.size() << endl;
+    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
+         << phaseData.poreSizeDist.size() << endl;
     cout.flush();
   }
   in.close();
@@ -1523,6 +1524,14 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
       colorN_[phaseData.thamesName].rgb.push_back(blue);
       colorN_[phaseData.thamesName].gray = gray;
     }
+    colorN_[phaseData.thamesName].rgbf[0] =
+        (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+    colorN_[phaseData.thamesName].rgbf[1] =
+        (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+    colorN_[phaseData.thamesName].rgbf[2] =
+        (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+    colorN_[phaseData.thamesName].grayf =
+        (float)(colorN_[phaseData.thamesName].gray) / 255.0;
   }
 
   return;
@@ -1625,32 +1634,32 @@ void ChemicalSystem::parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-//void ChemicalSystem::parseRdData(xmlDocPtr doc, xmlNodePtr cur,
-//                                 struct PhaseData &phaseData) {
-//  xmlChar *key;
-//  cur = cur->xmlChildrenNode;
-//  int RdId;
-//  double RdVal;
+// void ChemicalSystem::parseRdData(xmlDocPtr doc, xmlNodePtr cur,
+//                                  struct PhaseData &phaseData) {
+//   xmlChar *key;
+//   cur = cur->xmlChildrenNode;
+//   int RdId;
+//   double RdVal;
 //
-//  while (cur != NULL) {
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
-//      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-//      string st((char *)key);
-//      RdId = getICId(st);
-//      phaseData.RdId.push_back(RdId);
-//      xmlFree(key);
-//    }
+//   while (cur != NULL) {
+//     if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdelement"))) {
+//       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+//       string st((char *)key);
+//       RdId = getICId(st);
+//       phaseData.RdId.push_back(RdId);
+//       xmlFree(key);
+//     }
 //
-//    if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
-//      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-//      string st((char *)key);
-//      from_string(RdVal, st);
-//      phaseData.RdVal.push_back(RdVal);
-//      xmlFree(key);
-//    }
-//    cur = cur->next;
-//  }
-//}
+//     if ((!xmlStrcmp(cur->name, (const xmlChar *)"Rdvalue"))) {
+//       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+//       string st((char *)key);
+//       from_string(RdVal, st);
+//       phaseData.RdVal.push_back(RdVal);
+//       xmlFree(key);
+//     }
+//     cur = cur->next;
+//   }
+// }
 
 ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
 
@@ -2957,6 +2966,15 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].rgb.push_back(100);
   colorN_["Brucite"].rgb.push_back(26);
   colorN_["Brucite"].gray = 83;
+
+  map<string, elemColor>::iterator it = colorN_.begin();
+  while (it != colorN_.end()) {
+    (it->second).rgbf[0] = (float)((it->second).rgb[0]) / 255.0;
+    (it->second).rgbf[1] = (float)((it->second).rgb[1]) / 255.0;
+    (it->second).rgbf[2] = (float)((it->second).rgb[2]) / 255.0;
+    (it->second).grayf = (float)((it->second).gray) / 255.0;
+    ++it;
+  }
 
   /*
   colorN_[""].colorId = ;
