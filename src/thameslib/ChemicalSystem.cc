@@ -561,6 +561,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
   /// Begin parsing the chemistry input XML file
   ///
+
   string msg;
   string xmlext = ".xml";
   size_t foundxml = interfaceFileName.find(xmlext);
@@ -2968,13 +2969,21 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].gray = 83;
 
   map<string, elemColor>::iterator it = colorN_.begin();
+  cout << "Created iterator" << endl;
+  cout.flush();
+
   while (it != colorN_.end()) {
-    (it->second).rgbf[0] = (float)((it->second).rgb[0]) / 255.0;
-    (it->second).rgbf[1] = (float)((it->second).rgb[1]) / 255.0;
-    (it->second).rgbf[2] = (float)((it->second).rgb[2]) / 255.0;
+    cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
+    cout.flush();
+    (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
+    (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
+    (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
     (it->second).grayf = (float)((it->second).gray) / 255.0;
     ++it;
   }
+
+  cout << "Made it past iterator" << endl;
+  cout.flush();
 
   /*
   colorN_[""].colorId = ;
