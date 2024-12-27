@@ -11,10 +11,10 @@ string HydrotalcMicroName("");
 string AFTMicroName("");
 string MonosulfMicroName("");
 
-ChemicalSystem::ChemicalSystem(const string &GEMfilename,
-                               const string &GEMdbrname,
-                               const string &interfaceFileName,
-                               const bool verbose, const bool warning) {
+ChemicalSystem::ChemicalSystem(
+    const string &GEMfilename,
+    //                               const string &GEMdbrname,
+    const string &interfaceFileName, const bool verbose, const bool warning) {
   unsigned int i, j;
   double *amat;
   string exmsg;
@@ -1917,15 +1917,13 @@ void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
   stream << "------------------------------------------------------" << endl;
 }
 
-void ChemicalSystem::writeChemSys(void) {
+void ChemicalSystem::writeChemSys(ofstream &out) {
   unsigned int j;
 
   ///
   /// First we will list details for the ICs
   ///
 
-  string CSfilename("chemsys.report");
-  ofstream out(CSfilename.c_str());
   out << "Report on the Material Database" << endl;
   out << "-------------- ChemicalSystem -----------------" << endl << endl;
   out << endl << "List of Independent Components :" << endl;

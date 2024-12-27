@@ -560,13 +560,13 @@ public:
   all the information read from the GEM input files.
 
   @param GEMfilename is the name of the file holding GEM input data
-  @param GEMdbrname is the name of the GEM data bridge file
   @param Interfacefilename is the name of the file containing information about
   how to relate GEM phases to microstructure phases
   @param verbose is true if producing verbose output
   @param warning is true if producing verbose output
   */
-  ChemicalSystem(const string &GEMfilename, const string &GEMdbrname,
+  ChemicalSystem(const string &GEMfilename,
+                 //                  const string &GEMdbrname,
                  const string &Interfacefilename, const bool verbose,
                  const bool warning = false);
 
@@ -5719,16 +5719,9 @@ public:
   /**
   @brief Formatted writing of ChemicalSystem data to a stream.
 
-  The output stream is defined, opened, and closed within the function itself
+  @param out is the output file stream to which to direct output
   */
-  void writeChemSys(void);
-
-  /**
-  @brief Formatted writing of ChemicalSystem data to a prescribed stream.
-
-  @param out is the output stream to which to direct output
-  */
-  void writeChemSys(ostream &out);
+  void writeChemSys(ofstream &out);
 
   /**
   @brief Calculates new equilibrium state of the GEM system and relate to
