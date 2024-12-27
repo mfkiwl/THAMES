@@ -109,13 +109,13 @@ Department of Commerce, April, 2000.
 #ifndef THAMESH
 #define THAMESH
 
-#include "thameslib/RanGen.h"
 #include "thameslib/AppliedStrain.h"
 #include "thameslib/ChemicalSystem.h"
 #include "thameslib/Controller.h"
 #include "thameslib/Interface.h"
 #include "thameslib/KineticController.h"
 #include "thameslib/Lattice.h"
+#include "thameslib/RanGen.h"
 #include "thameslib/Site.h"
 #include "thameslib/StrainEnergy.h"
 #include "thameslib/ThermalStrain.h"
@@ -136,6 +136,11 @@ bool VERBOSE;
 @brief Flag for warning message output
 */
 bool WARNING;
+
+/**
+@brief Flag for creating an xyz file for 3D movie
+*/
+bool XYZ;
 
 /**
 @brief The vector of component elastic energies.

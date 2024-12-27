@@ -8,7 +8,7 @@
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
                        const string &parfilename, const string &jobname,
-                       const bool verbose, const bool warning)
+                       const bool verbose, const bool warning, const bool xyz)
     : lattice_(msh), kineticController_(kc), chemSys_(cs), sim_type_(simtype),
       thermalstr_(thmstr), jobroot_(jobname) {
   unsigned int i;
@@ -18,6 +18,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   const string imgfreqstr = "Image_frequency:";
   const string outtimestr = "OutTime:";
   const string calctimestr = "CalcTime:";
+
+  xyz_ = xyz;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -242,7 +244,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
-  lattice_->appendXYZ(0.0, sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(0.0, sim_type_, jobroot_);
   int timesGEMFailed_loc = 0;
 
   // init to 0 all DC moles corresponding to the kinetic controlled microphases
@@ -346,7 +349,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
     } catch (GEMException gex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-      lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw gex;
     }
 
@@ -579,17 +583,20 @@ void Controller::doCycle(const string &statfilename, int choice) {
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-      lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw dex;
     } catch (EOBException ex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-      lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw ex;
     } catch (MicrostructureException mex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-      lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw mex;
     }
 
@@ -626,7 +633,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
       }
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-      lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       lattice_->writePoreSizeDistribution(time_[i], sim_type_, jobroot_);
 
       time_index++;
@@ -710,7 +718,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
         lattice_->writeLattice(time_[i], sim_type_, jobroot_);
         lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
-        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+        if (xyz_)
+          lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
         string ofileName(jobroot_);
         ostringstream ostr1, ostr2;
         ostr1 << (int)(time_[i] * 100);
@@ -915,7 +924,8 @@ void Controller::doCycle(const string &statfilename, int choice) {
 
   lattice_->writeLattice(time_[i - 1], sim_type_, jobroot_);
   lattice_->writeLatticePNG(time_[i - 1], sim_type_, jobroot_);
-  lattice_->appendXYZ(time_[i - 1], sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(time_[i - 1], sim_type_, jobroot_);
 
   return;
 }

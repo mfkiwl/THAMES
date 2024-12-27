@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
 
   try {
     Mic = new Lattice(ChemSys, RNG, mic_filename, VERBOSE, WARNING);
-    cout << endl <<"Lattice creation done... " << endl;
+    cout << endl << "Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
     cout << "Z size of lattice is " << Mic->getZDim() << endl;
@@ -372,8 +372,9 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Ctrl = new Controller(Mic, KController, ChemSys, ThermalStrainSolver,
-                          simtype, par_filename, jobroot, VERBOSE, WARNING);
+    Ctrl =
+        new Controller(Mic, KController, ChemSys, ThermalStrainSolver, simtype,
+                       par_filename, jobroot, VERBOSE, WARNING, XYZ);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
@@ -498,6 +499,7 @@ void printHelp(void) {
   cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
   cout << "        --verbose [-v]      Produce verbose output" << endl;
   cout << "        --suppress [-s]     Suppress warning messages" << endl;
+  cout << "        --xyz [-x]          Create 3D visualization movie" << endl;
   cout << "        --help [-h]         Print this help message" << endl;
   cout << endl;
 
@@ -512,11 +514,13 @@ void checkargs(int argc, char **argv) {
   const char *const short_opts = "vsh";
   const option long_opts[] = {{"verbose", no_argument, nullptr, 'v'},
                               {"suppress", no_argument, nullptr, 's'},
+                              {"xyz", no_argument, nullptr, 'x'},
                               {"help", no_argument, nullptr, 'h'},
                               {nullptr, no_argument, nullptr, 0}};
 
   VERBOSE = false;
   WARNING = true;
+  XYZ = false;
 
   while (true) {
 
@@ -532,6 +536,10 @@ void checkargs(int argc, char **argv) {
       break;
     case 's':
       WARNING = false; // Verbose defined in thameslib global.h
+      cout << "**Will suppress warning messages**" << endl;
+      break;
+    case 'x':
+      XYZ = true; // Verbose defined in thameslib global.h
       cout << "**Will suppress warning messages**" << endl;
       break;
     case 'h': // -h or --help
