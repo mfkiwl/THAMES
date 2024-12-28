@@ -4,6 +4,8 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Dec 27 22:08 2024 | 
+Fixed small runtime bug in pore distributions |
 | Dec 27 21:49 2024 | 
 Pore size distribution now with microstructure definition file |
 | Dec 27 12:23 2024 | 

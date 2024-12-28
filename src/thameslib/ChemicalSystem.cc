@@ -1405,8 +1405,6 @@ void ChemicalSystem::parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
     sum += phaseData.poreSizeDist[i].volfrac;
   }
 
-  // phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
-
   if (verbose_) {
     cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
          << phaseData.poreSizeDist.size() << endl;
