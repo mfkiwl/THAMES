@@ -11,10 +11,9 @@ string HydrotalcMicroName("");
 string AFTMicroName("");
 string MonosulfMicroName("");
 
-ChemicalSystem::ChemicalSystem(
-    const string &GEMfilename,
-    //                               const string &GEMdbrname,
-    const string &interfaceFileName, const bool verbose, const bool warning) {
+ChemicalSystem::ChemicalSystem(const string &GEMfilename,
+                               const string &interfaceFileName,
+                               const bool verbose, const bool warning) {
   unsigned int i, j;
   double *amat;
   string exmsg;
@@ -122,7 +121,6 @@ ChemicalSystem::ChemicalSystem(
   ///
 
   char *cGEMfilename = (char *)GEMfilename.c_str();
-  // char *cGEMdbrname = (char *)GEMdbrname.c_str();
   if (verbose_) {
     cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
          << cGEMfilename << endl; // *-dat.lst
@@ -1160,18 +1158,8 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphase_data"))) {
       parseGEMPhaseData(doc, cur, phaseData);
     }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizefilename"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(poreSizeFileName, st);
-      xmlFree(key);
-      try {
-        parsePoreSizeDistribution(poreSizeFileName, phaseData);
-      } catch (FileException fex) {
-        // fex.printException();
-        throw fex;
-        cout << endl;
-      }
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizedistribution"))) {
+      parsePoreSizeDistribution(doc, cur, phaseData);
     }
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -1291,66 +1279,6 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
-                                               PhaseData &phaseData) {
-  if (verbose_) {
-    cout << "Reading Pore Size Distribution:" << endl;
-    cout.flush();
-    int i = 0;
-  }
-
-  ifstream in(poreSizeFileName);
-  if (!in) {
-    throw FileException("ChemicalSystem", "parsePoreSizeDistribution",
-                        poreSizeFileName, "Could not open");
-  }
-
-  // Read the header line
-  string headerline;
-  getline(in, headerline);
-
-  struct PoreSizeVolume datarow;
-  double diam, vfrac;
-
-  phaseData.poreSizeDist.clear();
-
-  // Now read the data row by row
-  double sum = 0.0;
-  while (!in.eof()) {
-    in >> datarow.diam >> datarow.volfrac;
-    sum += datarow.volfrac;
-    datarow.volume = 0.0;
-    phaseData.poreSizeDist.push_back(datarow);
-    if (verbose_) {
-      // i++;
-      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " <<
-      // datarow.volfrac << endl; cout.flush();
-      cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
-      cout.flush();
-    }
-    in.peek();
-  }
-
-  sum -= datarow.volfrac;
-  phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
-
-  if (verbose_) {
-    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
-         << phaseData.poreSizeDist.size() << endl;
-    cout.flush();
-  }
-  in.close();
-
-  // Normalize the pore size distribution in case it is not already
-  if (sum > 0.0) {
-    for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
-      phaseData.poreSizeDist[i].volfrac *= (1.0 / sum);
-    }
-  }
-
-  return;
-}
-
 void ChemicalSystem::parseGEMPhaseData(xmlDocPtr doc, xmlNodePtr cur,
                                        PhaseData &phaseData) {
   xmlChar *key;
@@ -1456,6 +1384,70 @@ void ChemicalSystem::parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur,
 
     cur = cur->next;
   }
+}
+
+void ChemicalSystem::parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
+                                               PhaseData &phaseData) {
+  xmlChar *key;
+  cur = cur->xmlChildrenNode;
+
+  phaseData.poreSizeDist.clear();
+  double sum = 0.0;
+
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"datarow"))) {
+      parsePSDDataRow(doc, cur, phaseData);
+    }
+    cur = cur->next;
+  }
+
+  for (int i = 0; i < phaseData.poreSizeDist.size() - 1; ++i) {
+    sum += phaseData.poreSizeDist[i].volfrac;
+  }
+
+  // phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
+
+  if (verbose_) {
+    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
+         << phaseData.poreSizeDist.size() << endl;
+    cout.flush();
+  }
+
+  // Normalize the pore size distribution in case it is not already
+  if (sum > 0.0) {
+    double normfactor = 1.0 / sum;
+    for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
+      phaseData.poreSizeDist[i].volfrac *= normfactor;
+    }
+  }
+}
+
+void ChemicalSystem::parsePSDDataRow(xmlDocPtr doc, xmlNodePtr cur,
+                                     PhaseData &phaseData) {
+  xmlChar *key;
+  cur = cur->xmlChildrenNode;
+
+  struct PoreSizeVolume datarow;
+  datarow.diam = 0.0;
+  datarow.volfrac = 0.0;
+  datarow.volume = 0.0;
+
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"diameter"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(datarow.diam, st);
+      xmlFree(key);
+    }
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"volumefraction"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(datarow.volfrac, st);
+      xmlFree(key);
+    }
+    cur = cur->next;
+  }
+  phaseData.poreSizeDist.push_back(datarow);
 }
 
 void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,

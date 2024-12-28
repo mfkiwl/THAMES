@@ -565,10 +565,8 @@ public:
   @param verbose is true if producing verbose output
   @param warning is true if producing verbose output
   */
-  ChemicalSystem(const string &GEMfilename,
-                 //                  const string &GEMdbrname,
-                 const string &Interfacefilename, const bool verbose,
-                 const bool warning = false);
+  ChemicalSystem(const string &GEMfilename, const string &Interfacefilename,
+                 const bool verbose, const bool warning = false);
 
   /**
   @brief Copy constructor.
@@ -716,29 +714,30 @@ public:
   /**
   @brief Parse a phase's sub-voxel pore size distribution from a file
 
+  The pore size distribution must be given in a series of rows, with
+  each row having a diameter in nanometers and a volume fraction.
+  The volume fraction is normalized after all the data are read.
+
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
+  @param phaseData holds the structure of collected phase data from the document
+  */
+  void parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
+                                 PhaseData &phaseData);
+
+  /**
+  @brief Parse a row of data from pore size distribution
+
   The file must have a header line that will be discarded.  The rest of
   the file must be two column csv with pore diameter in the first column
   (nanometers) and the volume fraction in the second column.  After
   the data are read the volume fraction is normalized.
 
-  @param poreSizeFilename is the name of the file containing the data
-  @param phaseData holds the structure of collected phase data from the document
-  */
-  void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
-
-  /**
-  @brief Parse the Rd data (impurity partitioning) for one phase in the XML
-  input file.
-
-  This method uses the libxml library, so this must be included.
-
   @param doc is a libxml pointer to the document head
   @param cur is a libxml pointer to the current node being parsed
-  @param phaseData is a reference to the PhaseData structure for temporarily
-  storing the input parameters
+  @param phaseData holds the structure of collected phase data from the document
   */
-  //  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData
-  //  &phaseData);
+  void parsePSDDataRow(xmlDocPtr doc, xmlNodePtr cur, PhaseData &phaseData);
 
   /**
   @brief Parse input about how to render a phase in an image.
