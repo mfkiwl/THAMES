@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 01 23:44 2024 | Updated CMakeLists.txt |
 | Dec 27 22:08 2024 | 
 Fixed small runtime bug in pore distributions |
 | Dec 27 21:49 2024 | 
