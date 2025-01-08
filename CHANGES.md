@@ -5,6 +5,7 @@
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
 | Jan 08 14:49 2025 | Fixed some runtime errors related to json iterator misassignments |
+| Jan 01 23:44 2024 | Updated CMakeLists.txt |
 | Dec 23 23:03 2024 | Fixed all compile-time errors in json branch. |
 | Nov 11 10:14 2024 | Merged branch florinnita\_THAMES\_v3.0.1-v4.0.0 which fixed some memory leaks and updated test input files; tagged v3.0.0 |
 | Nov 01 09:45 2024 | Commit in preparation for v3.0.0 release |
