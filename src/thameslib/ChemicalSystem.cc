@@ -761,19 +761,15 @@ void ChemicalSystem::parseDoc(const string &docName) {
 
   // Get an iterator to the root node of the JSON file
   json::iterator it = data.find("chemistry_data");
-  json::iterator cdi = it.value().begin();
+  json::iterator cdi = it.value().find("phases");
 
   map<string, int> phaseids;
   phaseids.clear();
 
   cout << "Finding all phase names" << endl;
-  while (cdi != it.value().end()) {
-    if (cdi.key() == "phase") {
-      parseMicroPhaseNames(cdi, phaseids);
-    }
-    ++cdi;
-  }
-  cout << "Done finding all phase names" << endl;
+  parseMicroPhaseNames(cdi, phaseids);
+  cout << "Done finding all " << phaseids.size() << " phase names" << endl;
+  cout.flush();
 
   ///
   /// Now start the iterator at the beginning and scan properly
@@ -788,60 +784,86 @@ void ChemicalSystem::parseDoc(const string &docName) {
     cout << "Back to the beginning to mine data from JSON file" << endl;
     cout.flush();
   }
-  int testnumEntries = 0;
-  int satstate = 1;
-  isSaturated_ = true;
-  cdi = it.value().begin();
-  // Get the number of entries
-  while (cdi != it.value().end()) {
-    if (cdi.key() == "numentries") {
-      testnumEntries = cdi.value();
-    } else if (cdi.key() == "saturated") {
-      satstate = cdi.value();
-      if (satstate == 0)
-        isSaturated_ = false;
-    } else if (cdi.key() == "electrolyte") {
-      try {
-        parseSolutionComp(cdi); // WORKING ON THIS ONE
-      } catch (DataException dex) {
-        throw dex;
-      }
-    } else if (cdi.key() == "gas") {
-      try {
-        parseGasComp(cdi);
-      } catch (DataException dex) {
-        throw dex;
-      }
-    } else if (cdi.key() == "phase") {
-      try {
-        parseMicroPhase(cdi, testnumEntries, phaseids, phaseData);
-      } catch (FileException fex) {
-        // fex.printException();
-        throw fex;
-        cout << endl;
-      } catch (GEMException gex) {
-        gex.printException();
-        cout << endl;
-      }
+
+  // Remember cdi is a json interator over the main data object chemistry_data
+
+  // Find number of phase entries
+  cdi = it.value().find("numentries");
+  int testnumEntries = cdi.value();
+
+  // Find saturation state
+  cdi = it.value().find("saturated");
+  int satstate = cdi.value();
+  isSaturated_ = (satstate != 0) ? true : false;
+
+  // See if electrolyte composition is specified
+  cdi = it.value().find("electrolyte");
+  if (cdi != it.value().end()) {
+
+    try {
+      parseSolutionComp(cdi);
+    } catch (DataException dex) {
+      throw dex;
     }
-    ++cdi;
+  }
+
+  // See if gas composition is specified
+  cdi = it.value().find("gas");
+
+  if (cdi != it.value().end()) {
+    try {
+      parseGasComp(cdi);
+    } catch (DataException dex) {
+      throw dex;
+    }
+  }
+
+  // Parse all the phases
+  cdi = it.value().find("phases");
+
+  try {
+    parseMicroPhases(cdi, testnumEntries, phaseids, phaseData);
+  } catch (FileException fex) {
+    // fex.printException();
+    throw fex;
+    cout << endl;
+  } catch (GEMException gex) {
+    gex.printException();
+    cout << endl;
   }
 
   return;
 }
 
 void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
-  // Clear the associative map to initialize it
 
+  // Clear the associative map to initialize it
   fixedSolutionComposition_.clear();
   initialSolutionComposition_.clear();
 
+  string testName, testCondition;
+  double testConc;
+  int testDCId;
+  bool fixed = false;
+
   json::iterator p = cdi.value().begin();
-  while (p != cdi.value().end()) {
-    if (p.key() == "DCconc") {
-      parseDCInSolution(p);
+  for (int i = 0; i < cdi.value().size(); ++i) {
+    p = cdi.value()[i].find("DCname");
+    testName = p.value();
+    testDCId = getDCId(testName);
+    p = cdi.value()[i].find("condition");
+    testCondition = p.value();
+    fixed = (testCondition != "fixed") ? false : true;
+    p = cdi.value()[i].find("concentration");
+    testConc = p.value();
+    // Only add the data if this is a solution component
+    if (DCClassCode_[testDCId] == 'S' || DCClassCode_[testDCId] == 'T') {
+      if (fixed) {
+        fixedSolutionComposition_.insert(make_pair(testDCId, testConc));
+      } else {
+        initialSolutionComposition_.insert(make_pair(testDCId, testConc));
+      }
     }
-    ++p;
   }
 
   // At this point all the composition constraints have been read
@@ -877,56 +899,36 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   return;
 }
 
-void ChemicalSystem::parseDCInSolution(const json::iterator p) {
-
-  int DCId = -1;
-  bool fixed = false;
-  string DCName;
-  double DCConc = -1.0;
-
-  json::iterator pp = p.value().begin();
-  while (pp != p.value().end()) {
-    if (pp.key() == "name") {
-      DCName = pp.value();
-      DCId = getDCId(DCName);
-    }
-    if (pp.key() == "conc") {
-      DCConc = pp.value();
-    }
-    if (pp.key() == "condition") {
-      if (pp.value() == "fixed") {
-        fixed = true;
-      }
-    }
-
-    ++pp;
-  }
-
-  // Only add the data if this is a solution component
-
-  if (DCClassCode_[DCId] == 'S' || DCClassCode_[DCId] == 'T') {
-    if (fixed) {
-      fixedSolutionComposition_.insert(make_pair(DCId, DCConc));
-    } else {
-      initialSolutionComposition_.insert(make_pair(DCId, DCConc));
-    }
-  }
-
-  return;
-}
-
 void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   // Clear the associative map to initialize it
 
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
 
+  string DCName, testCondition;
+  double DCMoles;
+  int DCId;
+  bool fixed = false;
+
   json::iterator p = cdi.value().begin();
-  while (p != cdi.value().end()) {
-    if (p.key() == "DCmoles") {
-      parseDCInGas(p);
+  for (int i = 0; i < cdi.value().size(); ++i) {
+    p = cdi.value()[i].find("name");
+    DCName = p.value();
+    DCId = getDCId(DCName);
+    p = cdi.value()[i].find("condition");
+    testCondition = p.value();
+    fixed = (testCondition != "fixed") ? false : true;
+    p = cdi.value()[i].find("moles");
+    DCMoles = p.value();
+    // Only add the data if this is a gas component
+    if (DCClassCode_[DCId] == 'G' || DCClassCode_[DCId] == 'V' ||
+        DCClassCode_[DCId] == 'H' || DCClassCode_[DCId] == 'N') {
+      if (fixed) {
+        fixedGasComposition_.insert(make_pair(DCId, DCMoles));
+      } else {
+        initialGasComposition_.insert(make_pair(DCId, DCMoles));
+      }
     }
-    ++p;
   }
 
   // At this point all the composition constraints have been read
@@ -962,82 +964,35 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   return;
 }
 
-void ChemicalSystem::parseDCInGas(const json::iterator p) {
-  int DCId = -1;
-  bool fixed = false;
-  string DCName;
-  double DCMoles = -1.0;
-
-  json::iterator pp = p.value().begin();
-
-  while (pp != p.value().end()) {
-    if (pp.key() == "name") {
-      DCName = pp.value();
-      DCId = getDCId(DCName);
-    }
-    if (pp.key() == "moles") {
-      DCMoles = pp.value();
-    }
-    if (pp.key() == "condition") {
-      if (pp.value() == "fixed") {
-        fixed = true;
-      }
-    }
-
-    ++pp;
-  }
-
-  // Only add the data if this is a gas component
-
-  if (DCClassCode_[DCId] == 'G' || DCClassCode_[DCId] == 'V' ||
-      DCClassCode_[DCId] == 'H' || DCClassCode_[DCId] == 'N') {
-    if (fixed) {
-      fixedGasComposition_.insert(make_pair(DCId, DCMoles));
-    } else {
-      initialGasComposition_.insert(make_pair(DCId, DCMoles));
-    }
-  }
-
-  return;
-}
-
 void ChemicalSystem::parseMicroPhaseNames(const json::iterator cdi,
                                           map<string, int> &phaseids) {
 
-  json::iterator p = cdi.value().begin();
-
-  int pid;
+  json::iterator cii = cdi.value()[0].find("thamesname");
   string pname;
+  int pid, cemcompval;
   bool cemComp;
 
-  while (p != cdi.value().end()) {
-    if (p.key() == "id") {
-      pid = p.value();
+  for (int pnum = 0; pnum < cdi.value().size(); ++pnum) {
+    cii = cdi.value()[pnum].find("thamesname");
+    pname = cii.value();
+    cii = cdi.value()[pnum].find("id");
+    pid = cii.value();
+    if (verbose_) {
+      cout << "    Phase name = " << pname << " with id " << pid << endl;
+      cout.flush();
     }
-    if ((p.key() == "thamesname") || (p.key() == "microphasename")) {
-      pname = p.value();
-    }
-    if (p.key() == "cement_component") {
-      cemComp = (p.value() == 1) ? true : false;
-    }
-    ++p;
+    cii = cdi.value()[pnum].find("cement_component");
+    cemcompval = cii.value();
+    cemComp = (cemcompval == 1) ? true : false;
+    phaseids.insert(make_pair(pname, pid));
+    cementComponent_.push_back(cemComp);
   }
-
-  if (verbose_) {
-    cout << "    Phase name = " << pname << endl;
-    cout.flush();
-  }
-  phaseids.insert(make_pair(pname, pid));
-  cementComponent_.push_back(cemComp);
-  // cout << endl;
-  // cout << "  parseMicroPhaseNames pid : " << pid
-  //      << "\tpname : " << pname << "\tcemComp : " << cemComp << endl;
-  // cout << endl;
+  return;
 }
 
-void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
-                                     map<string, int> phaseids,
-                                     PhaseData &phaseData) {
+void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
+                                      map<string, int> phaseids,
+                                      PhaseData &phaseData) {
 
   string poreSizeFileName;
 
@@ -1047,8 +1002,8 @@ void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
 
   /// @note The affinity vector is always the same length, one entry for every
   /// microstructure phase, and the default value is zero (contactanglevalue =
-  /// 180); for self-affinity (the growing phase and the template are the same)
-  /// the default value is 1 (contactanglevalue = 0). Both, affinity and
+  /// 180); for self-affinity (the growing phase and the template are the
+  /// same) the default value is 1 (contactanglevalue = 0). Both, affinity and
   /// self-affinity can be modified supplying, in the chemistry.json file, the
   /// desired values for the contact angle
 
@@ -1059,6 +1014,7 @@ void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
   // affinity(th) = 1 - f(th)
   // affinity(th) = 1 when th = 0 (perfect wetting)
   // affinity(th) = 0 when th = 180° (dewetting)
+  //
   phaseData.contactAngle.resize(numEntries, 180);
   phaseData.affinity.resize(numEntries, 0.0);
   phaseData.k2o = 0.0;
@@ -1080,22 +1036,45 @@ void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
   phaseData.stressCalc = 0;
   phaseData.weak = 0;
 
-  json::iterator p = cdi.value().begin();
+  json::iterator p;
 
   /// @note This parsing ignores the kinetic data portion for each
   /// phase.  The kinetic data parsing is handled by the KineticModel class
 
-  while (p != cdi.value().end()) {
-    if (p.key() == "id") {
-      phaseData.id = p.value();
-    }
-    if (p.key() == "thamesname" || p.key() == "microphasename") {
+  for (int i = 0; i < cdi.value().size(); ++i) {
+    p = cdi.value()[i].find("id");
+    phaseData.id = p.value();
+    cout << "Entry " << i << ": with id " << phaseData.id << endl;
+    cout.flush();
+    p = cdi.value()[i].find("thamesname");
+    if (p != cdi.value()[i].end()) {
+      cout << "  Found thamesname key" << endl;
+      cout.flush();
       phaseData.thamesName = p.value();
+    } else {
+      p = cdi.value()[i].find("microphasename");
+      if (p != cdi.value()[i].end()) {
+        cout << "  Found microphasename key" << endl;
+        cout.flush();
+        phaseData.thamesName = p.value();
+      } else {
+        throw DataException("ChemicalSystem", "parseMicroPhases",
+                            "Microstructure phase name not found");
+      }
     }
-    if (p.key() == "gemphase_data") {
-      parseGEMPhaseData(p, phaseData);
+    p = cdi.value()[i].find("gemphase_data");
+    if (p != cdi.value()[i].end()) {
+      try {
+        parseGEMPhaseData(p, phaseData);
+      } catch (DataException dex) {
+        throw dex;
+      }
+    } else if (phaseData.id != VOIDID) {
+      throw DataException("ChemicalSystem", "parseMicroPhases",
+                          "No GEM phase data for a microstructure phase");
     }
-    if (p.key() == "poresizefilename") {
+    p = cdi.value()[i].find("poresizefilename");
+    if (p != cdi.value()[i].end()) {
       poreSizeFileName = p.value();
       try {
         parsePoreSizeDistribution(poreSizeFileName, phaseData);
@@ -1105,115 +1084,136 @@ void ChemicalSystem::parseMicroPhase(const json::iterator cdi, int numEntries,
         cout << endl;
       }
     }
-    if (p.key() == "stresscalc") {
+    p = cdi.value()[i].find("stresscalc");
+    if (p != cdi.value()[i].end()) {
       phaseData.stressCalc = p.value();
     }
-    if (p.key() == "weak") {
+    p = cdi.value()[i].find("weak");
+    if (p != cdi.value()[i].end()) {
       // Weak means the phase can be damaged by stress
       phaseData.weak = p.value();
     }
-    if (p.key() == "display_data") {
-      parseDisplayData(p, phaseData);
+    p = cdi.value()[i].find("display_data");
+    if (p != cdi.value()[i].end()) {
+      try {
+        parseDisplayData(p, phaseData);
+      } catch (DataException dex) {
+        throw dex;
+      }
     }
-    if (p.key() == "impurity_data") {
-      parseImpurityData(p, phaseData);
+    p = cdi.value()[i].find("impurity_data");
+    if (p != cdi.value()[i].end()) {
+      try {
+        parseImpurityData(p, phaseData);
+      } catch (DataException dex) {
+        throw dex;
+      }
     }
-    if (p.key() == "interface_data") {
-      parseInterfaceData(p, phaseids, phaseData);
+    p = cdi.value()[i].find("interface_data");
+    if (p != cdi.value()[i].end()) {
+      try {
+        parseInterfaceData(p, phaseids, phaseData);
+      } catch (DataException dex) {
+        throw dex;
+      }
     }
     //    // Impurity partitioning data
-    //    if (p.key() == "Rd") {
+    //    p = cdi.value()[pnum].find("Rd");
+    //    if (p != cdi.value().end()) {
     //
     //      ///
-    //      /// The data about partitioning of impurities among the clinker
-    //      /// phases are grouped within a complex field in the input
+    //      /// The data about partitioning of impurities among the hydration
+    //      /// product phases as they grow are grouped within a complex
+    //      /// field in the input
     //      /// file, so we have a special method to parse it.
     //      ///
-    //
-    //      parseRdData(p, phaseData);
+    //      try {
+    //        parseRdData(p, phaseData);
+    //      }
     //    }
-    ++p;
-  }
 
-  if (phaseData.stressCalc > 0) {
-    stressPhaseName_.push_back(phaseData.thamesName);
-    stressPhaseId_.push_back(phaseData.id);
-  }
-  if (phaseData.weak > 0) {
-    weakPhaseName_.push_back(phaseData.thamesName);
-    weakPhaseId_.push_back(phaseData.id);
-  }
+    // We have now found all the findable data for
+    // this microstructure phase.  Time to process it
 
-  // Figure out if this is a porous phase or not
-  // The criterion is that at least one of the constituent GEM phases
-  // shall have at least one DC with porosity between 0.0 and 1.0
+    if (phaseData.stressCalc > 0) {
+      stressPhaseName_.push_back(phaseData.thamesName);
+      stressPhaseId_.push_back(phaseData.id);
+    }
+    if (phaseData.weak > 0) {
+      weakPhaseName_.push_back(phaseData.thamesName);
+      weakPhaseId_.push_back(phaseData.id);
+    }
 
-  bool done = false;
-  for (int i = 0; i < phaseData.microPhaseDCPorosities.size() && !done; ++i) {
-    if (phaseData.microPhaseDCPorosities[i] > 0.0 &&
-        phaseData.microPhaseDCPorosities[i] < 1.0) {
-      porousPhaseName_.push_back(phaseData.thamesName);
-      porousPhaseId_.push_back(phaseData.id);
-      done = true;
+    // Figure out if this is a porous phase or not
+    // The criterion is that at least one of the constituent GEM phases
+    // shall have at least one DC with porosity between 0.0 and 1.0
+
+    bool done = false;
+    for (int j = 0; j < phaseData.microPhaseDCPorosities.size() && !done; ++j) {
+      if (phaseData.microPhaseDCPorosities[j] > 0.0 &&
+          phaseData.microPhaseDCPorosities[j] < 1.0) {
+        porousPhaseName_.push_back(phaseData.thamesName);
+        porousPhaseId_.push_back(phaseData.id);
+        done = true;
+      }
+    }
+
+    // Next is a lookup table that will return
+    // the ordered list of DC porosities for a given microstructure phase id
+
+    microPhaseDCPorosities_.insert(
+        make_pair(phaseData.id, phaseData.microPhaseDCPorosities));
+
+    phaseData.microPhaseDCPorosities.clear();
+
+    microPhaseName_.push_back(phaseData.thamesName);
+    microPhaseId_.push_back(phaseData.id);
+    microPhaseIdLookup_.insert(make_pair(phaseData.thamesName, phaseData.id));
+
+    double cs;
+    for (int j = FIRST_SOLID; j < numEntries; j++) {
+      if (j == phaseData.id && abs(phaseData.contactAngle[j] - 180.) < 1.e16) {
+        phaseData.contactAngle[j] = 0;
+      }
+      cs = cos(phaseData.contactAngle[j] * Pi / 180.);
+      phaseData.affinity[j] = 1.0 - (2. - 3 * cs + pow(cs, 3)) / 4.;
+    }
+    affinity_.push_back(phaseData.affinity);
+    contactAngle_.push_back(phaseData.contactAngle);
+
+    /// Growth template is based on positive affinities only
+
+    growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
+
+    poreSizeDistribution_.push_back(phaseData.poreSizeDist);
+    if (verbose_) {
+      cout << "Pushed pore size distribution data for phase "
+           << phaseData.thamesName << endl;
+      cout << "This phase distribution has " << phaseData.poreSizeDist.size()
+           << " entries" << endl;
+      cout << "Have now registered " << poreSizeDistribution_.size() << " PSDs"
+           << endl;
+      cout.flush();
+    }
+    phaseData.poreSizeDist.clear();
+    grayscale_.push_back(phaseData.gray);
+    color_.push_back(phaseData.colors);
+    k2o_.push_back(phaseData.k2o);
+    na2o_.push_back(phaseData.na2o);
+    mgo_.push_back(phaseData.mgo);
+    so3_.push_back(phaseData.so3);
+    //  RdICId_.push_back(phaseData.RdId);
+    //  Rd_.push_back(phaseData.RdVal);
+    microPhaseMembers_.insert(make_pair(phaseData.id, phaseData.GEMPhaseId));
+    microPhaseDCMembers_.insert(make_pair(phaseData.id, phaseData.DCId));
+
+    numMicroPhases_++;
+
+    if (verbose_) {
+      cout << "Parsed phase " << phaseData.thamesName << endl;
+      cout.flush();
     }
   }
-
-  // The following is a lookup table that will return
-  // the ordered list of DC porosities for a given microstructure phase id
-
-  microPhaseDCPorosities_.insert(
-      make_pair(phaseData.id, phaseData.microPhaseDCPorosities));
-
-  phaseData.microPhaseDCPorosities.clear();
-
-  microPhaseName_.push_back(phaseData.thamesName);
-  microPhaseId_.push_back(phaseData.id);
-  microPhaseIdLookup_.insert(make_pair(phaseData.thamesName, phaseData.id));
-
-  double cs;
-  for (int i = FIRST_SOLID; i < numEntries; i++) {
-    if (i == phaseData.id && abs(phaseData.contactAngle[i] - 180.) < 1.e16) {
-      phaseData.contactAngle[i] = 0;
-    }
-    cs = cos(phaseData.contactAngle[i] * Pi / 180.);
-    phaseData.affinity[i] = 1.0 - (2. - 3 * cs + pow(cs, 3)) / 4.;
-  }
-  affinity_.push_back(phaseData.affinity);
-  contactAngle_.push_back(phaseData.contactAngle);
-
-  /// Growth template is based on positive affinities only
-
-  growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
-
-  poreSizeDistribution_.push_back(phaseData.poreSizeDist);
-  if (verbose_) {
-    cout << "Pushed pore size distribution data for phase "
-         << phaseData.thamesName << endl;
-    cout << "This phase distribution has " << phaseData.poreSizeDist.size()
-         << " entries" << endl;
-    cout << "Have now registered " << poreSizeDistribution_.size() << " PSDs"
-         << endl;
-    cout.flush();
-  }
-  phaseData.poreSizeDist.clear();
-  grayscale_.push_back(phaseData.gray);
-  color_.push_back(phaseData.colors);
-  k2o_.push_back(phaseData.k2o);
-  na2o_.push_back(phaseData.na2o);
-  mgo_.push_back(phaseData.mgo);
-  so3_.push_back(phaseData.so3);
-  //  RdICId_.push_back(phaseData.RdId);
-  //  Rd_.push_back(phaseData.RdVal);
-  microPhaseMembers_.insert(make_pair(phaseData.id, phaseData.GEMPhaseId));
-  microPhaseDCMembers_.insert(make_pair(phaseData.id, phaseData.DCId));
-
-  numMicroPhases_++;
-
-  if (verbose_) {
-    cout << "Parsed phase " << phaseData.thamesName << endl;
-    cout.flush();
-  }
-
   return;
 }
 
@@ -1249,8 +1249,8 @@ void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
     phaseData.poreSizeDist.push_back(datarow);
     if (verbose_) {
       // i++;
-      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , " <<
-      // datarow.volfrac << endl; cout.flush();
+      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , "
+      // << datarow.volfrac << endl; cout.flush();
       cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
       cout.flush();
     }
@@ -1283,13 +1283,18 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
   int dcid = 0;
   string mypstr;
   phaseData.GEMPhaseDCMembers.clear();
+  phaseData.microPhaseDCPorosities.clear();
   bool scrapeWaterDCs = false;
 
-  json::iterator pp = p.value().begin();
-  while (pp != p.value().end()) {
-    if (pp.key() == "gemphasename") {
+  json::iterator pp;
+
+  for (int i = 0; i < p.value().size(); ++i) {
+    pp = p.value()[i].find("gemphasename");
+    if (pp != p.value()[i].end()) {
       mypstr = pp.value().get<string>();
       phaseData.GEMPhaseName.push_back(const_cast<char *>(mypstr.c_str()));
+      // mypstr = pp.value();
+      // phaseData.GEMPhaseName.push_back(mypstr);
       if (mypstr == WaterGEMName) {
         scrapeWaterDCs = true;
       } else {
@@ -1310,14 +1315,25 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
       }
       GEMPhaseId = getGEMPhaseId(mypstr);
       phaseData.GEMPhaseId.push_back(GEMPhaseId);
+    } else {
+      throw DataException("ChemicalSystem", "parseGEMPhaseData",
+                          "No GEM phase name given");
     }
-    if (pp.key() == "gemdc") {
-      parseGEMPhaseDCData(pp, phaseData);
-    }
-    ++pp;
-  }
-  GEMPhaseDCMembers_.insert(make_pair(GEMPhaseId, phaseData.GEMPhaseDCMembers));
 
+    pp = p.value()[i].find("gemdc");
+    if (pp != p.value()[i].end()) {
+      try {
+        parseGEMPhaseDCData(pp, phaseData);
+      } catch (DataException dex) {
+        throw dex;
+      }
+    } else {
+      throw DataException("ChemicalSystem", "parseGEMPhaseData",
+                          "No GEM DCs specified");
+    }
+    GEMPhaseDCMembers_.insert(
+        make_pair(GEMPhaseId, phaseData.GEMPhaseDCMembers));
+  }
   return;
 }
 
@@ -1329,15 +1345,16 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
   int dcid = 0;
   double porosity = 0.0;
   bool scrapeWaterDCs = false;
+  phaseData.GEMPhaseDCMembers.clear();
 
   json::iterator ppp = pp.value().begin();
-  while (ppp != pp.value().end()) {
-    if (ppp.key() == "gemdcname") {
+  for (int i = 0; i < pp.value().size(); ++i) {
+    ppp = pp.value()[i].find("gemdcname");
+    if (ppp != pp.value()[i].end()) {
       mydcstr = ppp.value().get<string>();
       phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
-      // cout << "  GEM DC name = " << mydcstr // << endl;
-      //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
-      // cout.flush();
+      // mydcstr = ppp.value();
+      // phaseData.DCName.push_back(mydcstr);
       if (mydcstr == AFTDCName) {
         AFTMicroName = phaseData.thamesName;
       }
@@ -1358,8 +1375,13 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
       if (phaseData.microPhaseDCPorosities.size() < phaseData.DCName.size()) {
         phaseData.microPhaseDCPorosities.push_back(0.0);
       }
+    } else {
+      throw DataException("ChemicalSystem", "parseGEMPhaseDCData",
+                          "No DC name given");
     }
-    if (ppp.key() == "gemdcporosity") {
+
+    ppp = pp.value()[i].find("gemdcporosity");
+    if (ppp != pp.value()[i].end()) {
       porosity = ppp.value();
       // Make certain that there will be a porosity associated
       // with this DC
@@ -1370,9 +1392,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
             phaseData.microPhaseDCPorosities.size() - 1) = porosity;
       }
     }
-
-    ++ppp;
   }
+  return;
 }
 
 void ChemicalSystem::parseDisplayData(const json::iterator p,
@@ -1383,29 +1404,25 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
   red = green = blue = gray = 0;
   bool rgbBool = false;
 
-  json::iterator pp = p.value().begin();
-  while (pp != p.value().end()) {
-    if (pp.key() == "red") {
-      red = pp.value();
-      rgbBool = true;
-      // if (verbose_) cout << "        red = " << red << endl;
-    }
-    if (pp.key() == "green") {
-      green = pp.value();
-      rgbBool = true;
-      // if (verbose_) cout << "        green = " << green << endl;
-    }
-    if (pp.key() == "blue") {
-      blue = pp.value();
-      rgbBool = true;
-      // if (verbose_) cout << "        blue = " << blue << endl;
-    }
-    if (pp.key() == "gray") {
-      gray = pp.value();
-      rgbBool = true;
-      // if (verbose_) cout << "        gray = " << phaseData.gray << endl;
-    }
-    ++pp;
+  json::iterator pp = p.value().find("red");
+  if (pp != p.value().end()) {
+    red = pp.value();
+    rgbBool = true;
+  }
+  pp = p.value().find("green");
+  if (pp != p.value().end()) {
+    green = pp.value();
+    rgbBool = true;
+  }
+  pp = p.value().find("blue");
+  if (pp != p.value().end()) {
+    blue = pp.value();
+    rgbBool = true;
+  }
+  pp = p.value().find("gray");
+  if (pp != p.value().end()) {
+    gray = pp.value();
+    rgbBool = true;
   }
 
   phaseData.colors.clear();
@@ -1460,12 +1477,13 @@ void ChemicalSystem::parseInterfaceData(const json::iterator p,
                                         map<string, int> &phaseids,
                                         PhaseData &phaseData) {
 
-  json::iterator pp = p.value().begin();
-  while (pp != p.value().end()) {
-    if (pp.key() == "affinity") {
+  json::iterator pp = p.value().find("affinity");
+  if (pp != p.value().end()) {
+    try {
       parseAffinityData(pp, phaseids, phaseData);
+    } catch (DataException dex) {
+      throw dex;
     }
-    ++pp;
   }
   return;
 }
@@ -1474,33 +1492,32 @@ void ChemicalSystem::parseAffinityData(const json::iterator pp,
                                        map<string, int> &phaseids,
                                        PhaseData &phaseData) {
   int testaftyid; //, testaftyval;
-  double testangleval, cs;
+  double testangleval = 0.0;
   map<string, int>::iterator it = phaseids.begin();
-  testangleval = 0;
+  string mystr("Null");
 
-  json::iterator ppp = pp.value().begin();
-  while (ppp != pp.value().end()) {
-    if (ppp.key() == "affinityphase") {
-      string st(ppp.value());
-      map<string, int>::iterator it = phaseids.find(st);
+  json::iterator ppp;
+  for (int i = 0; i < pp.value().size(); ++i) {
+    cout << "    " << phaseData.thamesName << ": affinity " << i << endl;
+    cout.flush();
+    ppp = pp.value()[i].find("affinityphase");
+    if (ppp != pp.value()[i].end()) {
+      mystr = ppp.value();
+      map<string, int>::iterator it = phaseids.find(mystr);
       if (it != phaseids.end()) {
         testaftyid = it->second;
+        phaseData.contactAngle[testaftyid] = testangleval;
       }
     }
-    // if (ppp.key() == "affinityvalue") {
-    //   testaftyval = ppp.value();
-    // }
 
-    if (ppp.key() == "contactanglevalue") {
+    ppp = pp.value()[i].find("contactanglevalue");
+    if (ppp != pp.value()[i].end()) {
       testangleval = ppp.value();
     }
-    ++ppp;
-  }
-
-  // Must be a valid phase name to be added to the list
-  if (it != phaseids.end()) {
-    // phaseData.affinity[testaftyid] = ((int)testaftyval);
-    phaseData.contactAngle[testaftyid] = testangleval;
+    if (mystr == "Null" && testangleval > 1.0e-16) {
+      throw DataException("ChemicalSystem", "parseAffinityData",
+                          "Contact angle given but no substrate specified");
+    }
   }
 
   return;
@@ -1953,15 +1970,10 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
          << getMicroPhaseName(idx) << endl;
     cout << "    This phase's GEM phase id = " << gemphaseid
          << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
-    cout << "    The DC members for this GEM phase are:" << endl;
-    for (int ii = 0; ii < DClist.size(); ++ii) {
-      cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii]) << ")"
-           << endl;
-      cout.flush();
-    }
   }
 
-  /// @todo Do we need to check that DClist and DCporosities are the same size?
+  /// @todo Do we need to check that DClist and DCporosities are the same
+  /// size?
   /// @todo Do we need to check that DClist and DCporosities are in the same
   /// order?
   /// @note I think this is already guaranteed when we parse the phase data
@@ -2066,8 +2078,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   //     "\t" << DCMoles_[i] << "\t" << DCName_[i] << endl;
   //   }
   //   cout << endl << "end ChemSys before GEM_from_MT :
-  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl <<
-  //   endl;
+  //   LowerLimit_/DCUpperLimit_/DCMoles_/DCName_ for cyc = " << cyc << endl
+  //   << endl;
   // }
 
   //  for(int i = 0; i < numDCs_; i++){
@@ -2082,8 +2094,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   //  }
   //  writeDCMoles();
 
-  // ALL ICs/DCs in the system are set to zero in Lattice constructor before to
-  // call normalizePhaseMasses() DCs are updated in
+  // ALL ICs/DCs in the system are set to zero in Lattice constructor before
+  // to call normalizePhaseMasses() DCs are updated in
   // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
   // after the first call of calculateKineticStep(...) are set to 10^-9
 
@@ -2177,22 +2189,23 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// Attempt to run GEM with automatic initial approximation (AIA)
   ///
   /// This starts the thermodynamic calculation and returns the results,
-  /// including the ionic strength, pH, IC chemical potentials, DC moles, phase
-  /// moles, phase volumes, and other results of the calculation.  All of these
-  /// parameters are loaded into the THAMES vectors that keep track of these
-  /// things, since, they were passed to the GEM calculation by reference.
+  /// including the ionic strength, pH, IC chemical potentials, DC moles,
+  /// phase moles, phase volumes, and other results of the calculation.  All
+  /// of these parameters are loaded into the THAMES vectors that keep track
+  /// of these things, since, they were passed to the GEM calculation by
+  /// reference.
   ///
   /// The argument is false if we want to use activity coefficients and
   /// speciation from a previous GEM_run, but is true if we want to use the
-  /// activity coefficients and speciation stored in a DBR memory structure read
-  /// from a DBR file
+  /// activity coefficients and speciation stored in a DBR memory structure
+  /// read from a DBR file
   ///
   /// Possible return values for nodeStatus_:
   ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
   ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
-  ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
-  ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+  ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP
+  ///    AIA 4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
   ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
   ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
   ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
@@ -2224,9 +2237,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case ERR_GEM_AIA:
-      msg =
-          "  ChemicalSystem::calculateState - Failed result with auto initial "
-          "approx (AIA)";
+      msg = "  ChemicalSystem::calculateState - Failed result with auto "
+            "initial "
+            "approx (AIA)";
       cerr << msg << ", GEMS failed " << timesGEMFailed_ << " times" << endl;
       node_->GEM_print_ipm("IPM_dump.txt");
       timesGEMFailed_++;
@@ -2360,8 +2373,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// Account for subvoxel porosity within each microstructure phase here
   /// We used to do this in the Lattice class but it is cleaner here
 
-  double phi; // local variable to store subvoxel volume fraction of pores of a
-              // phase 0 <= phi <= 1
+  double phi; // local variable to store subvoxel volume fraction of pores of
+              // a phase 0 <= phi <= 1
 
   for (unsigned int i = 1; i < numMicroPhases_; i++) {
     if (verbose_) {
@@ -2523,8 +2536,8 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
       microPhaseDCMembers = getMicroPhaseDCMembers(i);
       sizeMicroPhaseDCMembers = microPhaseDCMembers.size();
       // cout << endl << "   " << i << "\tpname: " << pname
-      //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << " :
-      //      " << endl;
+      //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
+      //      : " << endl;
       for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
         int newDCId = microPhaseDCMembers.at(ii);
         tmoles = DCMoles_[newDCId];
@@ -2552,8 +2565,8 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
         aveSI = aveSI / moles;
       }
       microPhaseSI_.at(i) = aveSI;
-      // cout << "          pname = " << pname << "  =>     microPhaseSI_(cyc =
-      // " << cyc
+      // cout << "          pname = " << pname << "  =>     microPhaseSI_(cyc
+      // = " << cyc
       //      << ") = " << microPhaseSI_[i] << "\tmoles: " << moles << endl;
     }
     //} //if (isFirst) {

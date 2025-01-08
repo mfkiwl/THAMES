@@ -163,11 +163,13 @@ public:
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseMicroPhase(const json::iterator cdi, int &numEntry,
-                       struct KineticData &kineticData);
+  void parseMicroPhases(const json::iterator cdi, int &numEntry,
+                        struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for one phase in the JSON input file.
+
+  @todo Need error checking for what to do if a required entry is not present
 
   @param p is an iterator over the JSON data
   @param kineticData is a reference to the KineticData structure for temporarily
@@ -179,6 +181,8 @@ public:
   /**
   @brief Parse the kinetic data for the Parrot-Killoh kinetic model.
 
+  @todo Need error checking for what to do if a required entry is not present
+
   @param pp is an iterator over the JSON data
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
@@ -189,6 +193,8 @@ public:
   /**
   @brief Parse the kinetic data for the standard kinetic model.
 
+  @todo Need error checking for what to do if a required entry is not present
+
   @param pp is an iterator over the JSON data
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
@@ -198,6 +204,8 @@ public:
 
   /**
   @brief Parse the kinetic data for the pozzolanic kinetic model.
+
+  @todo Need error checking for what to do if a required entry is not present
 
   @param pp is an iterator over the JSON data
   @param kineticData is a reference to the KineticData structure for temporarily

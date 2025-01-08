@@ -1324,37 +1324,33 @@ void Controller::parseDoc(const string &docName) {
   f.close();
 
   try {
-    int boolval;
 
     /// Get an iterator to the root node of the JSON file
     /// @todo Add a better JSON validity check.
 
     json::iterator it = data.find("simulation_parameters");
-    json::iterator cdi = it.value().begin();
+    json::iterator cdi = it.value().find("calctime");
 
     if (cdi == it.value().end() || it == data.end()) {
       throw FileException("Controller", "parseDoc", docName, "Empty JSON file");
     }
 
-    while (cdi != it.value().end()) {
-      if (cdi.key() == "calctime") {
-        int calctimenum = cdi.value().size();
-        for (int i = 0; i < calctimenum; ++i) {
-          testtime = cdi.value()[i];
-          time_.push_back(testtime);
-        }
-      }
-      if (cdi.key() == "outtime") {
-        int outtimenum = cdi.value().size();
-        for (int i = 0; i < outtimenum; ++i) {
-          testtime = cdi.value()[i];
-          output_time_.push_back(testtime);
-        }
-      }
-      if (cdi.key() == "image_frequency") {
-        imgfreq_ = cdi.value();
-      }
-      ++cdi;
+    int calctimenum = cdi.value().size();
+    for (int i = 0; i < calctimenum; ++i) {
+      testtime = cdi.value()[i];
+      time_.push_back(testtime);
+    }
+
+    cdi = it.value().find("calctime");
+    int outtimenum = cdi.value().size();
+    for (int i = 0; i < outtimenum; ++i) {
+      testtime = cdi.value()[i];
+      output_time_.push_back(testtime);
+    }
+
+    cdi = it.value().find("image_frequency");
+    if (cdi != it.value().end()) {
+      imgfreq_ = cdi.value();
     }
   } catch (FileException fex) {
     fex.printException();
