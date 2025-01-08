@@ -996,52 +996,52 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
 
   string poreSizeFileName;
 
-  phaseData.growthTemplate.clear();
-  phaseData.affinity.clear();
-  phaseData.contactAngle.clear();
-
-  /// @note The affinity vector is always the same length, one entry for every
-  /// microstructure phase, and the default value is zero (contactanglevalue =
-  /// 180); for self-affinity (the growing phase and the template are the
-  /// same) the default value is 1 (contactanglevalue = 0). Both, affinity and
-  /// self-affinity can be modified supplying, in the chemistry.json file, the
-  /// desired values for the contact angle
-
-  // f(th) = (2 - 3 cos(th) + (cos(th))^3)/4
-  // f(th) : [0, 1]
-  // f(th) = 0 when th = 0 (perfect wetting)
-  // f(th) = 1 when th = 180° (dewetting)
-  // affinity(th) = 1 - f(th)
-  // affinity(th) = 1 when th = 0 (perfect wetting)
-  // affinity(th) = 0 when th = 180° (dewetting)
-  //
-  phaseData.contactAngle.resize(numEntries, 180);
-  phaseData.affinity.resize(numEntries, 0.0);
-  phaseData.k2o = 0.0;
-  phaseData.na2o = 0.0;
-  phaseData.mgo = 0.0;
-  phaseData.so3 = 0.0;
-  phaseData.red = 0;
-  phaseData.green = 0;
-  phaseData.blue = 0;
-  phaseData.gray = 0;
-
-  phaseData.DCId.clear();
-  phaseData.DCName.clear();
-  phaseData.GEMPhaseId.clear();
-  phaseData.GEMPhaseName.clear();
-  phaseData.microPhaseDCPorosities.clear();
-  //  phaseData.RdId.clear();
-  //  phaseData.RdVal.clear();
-  phaseData.stressCalc = 0;
-  phaseData.weak = 0;
-
   json::iterator p;
-
-  /// @note This parsing ignores the kinetic data portion for each
-  /// phase.  The kinetic data parsing is handled by the KineticModel class
-
   for (int i = 0; i < cdi.value().size(); ++i) {
+
+    phaseData.growthTemplate.clear();
+    phaseData.affinity.clear();
+    phaseData.contactAngle.clear();
+
+    /// @note The affinity vector is always the same length, one entry for every
+    /// microstructure phase, and the default value is zero (contactanglevalue =
+    /// 180); for self-affinity (the growing phase and the template are the
+    /// same) the default value is 1 (contactanglevalue = 0). Both, affinity and
+    /// self-affinity can be modified supplying, in the chemistry.json file, the
+    /// desired values for the contact angle
+
+    // f(th) = (2 - 3 cos(th) + (cos(th))^3)/4
+    // f(th) : [0, 1]
+    // f(th) = 0 when th = 0 (perfect wetting)
+    // f(th) = 1 when th = 180° (dewetting)
+    // affinity(th) = 1 - f(th)
+    // affinity(th) = 1 when th = 0 (perfect wetting)
+    // affinity(th) = 0 when th = 180° (dewetting)
+    //
+    phaseData.contactAngle.resize(numEntries, 180);
+    phaseData.affinity.resize(numEntries, 0.0);
+    phaseData.k2o = 0.0;
+    phaseData.na2o = 0.0;
+    phaseData.mgo = 0.0;
+    phaseData.so3 = 0.0;
+    phaseData.red = 0;
+    phaseData.green = 0;
+    phaseData.blue = 0;
+    phaseData.gray = 0;
+
+    phaseData.DCId.clear();
+    phaseData.DCName.clear();
+    phaseData.GEMPhaseId.clear();
+    phaseData.GEMPhaseName.clear();
+    phaseData.microPhaseDCPorosities.clear();
+    //  phaseData.RdId.clear();
+    //  phaseData.RdVal.clear();
+    phaseData.stressCalc = 0;
+    phaseData.weak = 0;
+
+    /// @note This parsing ignores the kinetic data portion for each
+    /// phase.  The kinetic data parsing is handled by the KineticModel class
+
     p = cdi.value()[i].find("id");
     phaseData.id = p.value();
     cout << "Entry " << i << ": with id " << phaseData.id << endl;
@@ -1300,9 +1300,10 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
       } else {
         scrapeWaterDCs = false;
       }
-      // cout << endl << "GEM Phase name = " << mypstr // << endl;
-      //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
-      // cout.flush();
+      cout << endl
+           << "GEM Phase name = " << mypstr // << endl;
+           << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+      cout.flush();
       //  Assign the global microstructure phase name associated with CSH
       if (mypstr == CSHGEMName) {
         CSHMicroName = phaseData.thamesName;
@@ -1353,8 +1354,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
     if (ppp != pp.value()[i].end()) {
       mydcstr = ppp.value().get<string>();
       phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
-      // mydcstr = ppp.value();
-      // phaseData.DCName.push_back(mydcstr);
+      cout << "Phase " << phaseData.thamesName << " found DC " << mydcstr
+           << endl;
       if (mydcstr == AFTDCName) {
         AFTMicroName = phaseData.thamesName;
       }
@@ -1367,8 +1368,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
         dcid = getDCId(mydcstr);
         phaseData.DCId.push_back(dcid);
         phaseData.GEMPhaseDCMembers.push_back(dcid);
-        // cout << "    GEM DC id = " << dcid // << endl;
-        //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+        cout << "    GEM DC id = " << dcid // << endl;
+             << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
       }
       // Make certain that there will be a porosity associated
       // with this DC
@@ -2002,16 +2003,6 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     porosity = DCporosities[0];
     conc = 1.0;
     vol = conc * getDCMolarVolume(DCId);
-    if (verbose_) {
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") concentration = " << conc << endl;
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") porosity = " << porosity << endl;
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
-      cout << "****" << endl;
-      cout.flush();
-    }
   } else {
     for (int i = 0; i < DClist.size(); ++i) {
       DCId = DClist[i];
@@ -2020,16 +2011,6 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
       vol = conc * getDCMolarVolume(DCId);
       weightedporosities += (vol * porosity);
       sumvol += vol;
-      if (verbose_) {
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") concentration = " << conc << endl;
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") porosity = " << porosity << endl;
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
-        cout << "****" << endl;
-        cout.flush();
-      }
     }
     if (sumvol > 0.0) {
       porosity = (weightedporosities / sumvol);
@@ -2475,8 +2456,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       // }
 
       double waterMolarMass = getDCMolarMass(wDCId);
-      addWatterMassAndVolume(water_molesincr * waterMolarMass,
-                             initMicroVolume_ - microVolume_); // necessary
+      addWaterMassAndVolume(water_molesincr * waterMolarMass,
+                            initMicroVolume_ - microVolume_); // necessary
 
       cout << "  ChemicalSystem::calculateState for cyc = " << cyc
            << " => water_molesincr = " << water_molesincr << endl

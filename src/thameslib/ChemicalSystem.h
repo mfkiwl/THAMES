@@ -6149,7 +6149,7 @@ public:
 
   int getDC_to_MPhID(int i) { return DC_to_MPhID_[i]; }
 
-  void addWatterMassAndVolume(double massVal, double volVal) {
+  void addWaterMassAndVolume(double massVal, double volVal) {
 
     // int wMPhID = getMicroPhaseId("Electrolyte");
     // cout << "wMPhID = " << wMPhID << endl;

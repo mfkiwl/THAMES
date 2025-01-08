@@ -267,6 +267,8 @@ void KineticController::parseMicroPhases(const json::iterator cdi,
     testname = p.value();
     kineticData.name = testname;
     kineticData.microPhaseId = chemSys_->getMicroPhaseId(testname);
+    kineticfound = ispozz = isParrotKilloh = false;
+    ;
 
     p = cdi.value()[i].find("kinetic_data");
     if (p != cdi.value()[i].end()) {

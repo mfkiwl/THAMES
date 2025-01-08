@@ -1,6 +1,6 @@
 {
   "chemistry_data": {
-    "numentries": 18,
+    "numentries": 17,
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 1,
@@ -32,299 +32,305 @@
         "thamesname": "Electrolyte",
         "id": 1,
         "cement_component": 0,
-        "gemphase_data": {
-          "gemphasename": "aq_gen",
-          "gemdc": [
-            {
-              "gemdcname": "Al(SO4)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Al(SO4)2-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Al+3",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlO+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlO2-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlO2H@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlOH+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlHSiO3+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "AlSiO5-3",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Ca(CO3)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Ca(HCO3)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Ca(SO4)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Ca+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "CaOH+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Ca(HSiO3)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "CaSiO3@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(CO3)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(HCO3)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(HSO4)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(SO4)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeOH+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(HSO4)+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(SO4)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe(SO4)2-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe+3",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe2(OH)2+4",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Fe3(OH)4+5",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeO+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeO2-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeO2H@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeOH+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "FeHSiO3+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "K(SO4)-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "K+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "KOH@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Mg(CO3)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Mg(HCO3)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Mg+2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "MgOH+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "MgSO4@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Mg(HSiO3)+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "MgSiO3@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Na(CO3)-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Na(HCO3)@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Na(SO4)-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "Na+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "NaOH@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "HSiO3-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "SiO2@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "SiO3-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "CO2@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "CO3-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "HCO3-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "CH4@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "H2@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "N2@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "O2@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "S2O3-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "HSO3-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "SO3-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "HSO4-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "SO4-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "H2S@",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "HS-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "S-2",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "OH-",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "H+",
-              "gemdcporosity": 1
-            },
-            {
-              "gemdcname": "H2O@",
-              "gemdcporosity": 1
-            }
-          ]
-        }
+        "gemphase_data": [
+          {
+            "gemphasename": "aq_gen",
+            "gemdc": [
+              {
+                "gemdcname": "Al(SO4)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Al(SO4)2-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Al+3",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlO+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlO2-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlO2H@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlOH+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlHSiO3+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "AlSiO5-3",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Ca(CO3)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Ca(HCO3)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Ca(SO4)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Ca+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "CaOH+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Ca(HSiO3)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "CaSiO3@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(CO3)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(HCO3)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(HSO4)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(SO4)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeOH+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(HSO4)+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(SO4)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe(SO4)2-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe+3",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe2(OH)2+4",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Fe3(OH)4+5",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeO+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeO2-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeO2H@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeOH+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "FeHSiO3+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "K(SO4)-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "K+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "KOH@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Mg(CO3)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Mg(HCO3)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Mg+2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "MgOH+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "MgSO4@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Mg(HSiO3)+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "MgSiO3@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Na(CO3)-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Na(HCO3)@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Na(SO4)-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "Na+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "NaOH@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "HSiO3-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "SiO2@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "SiO3-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "CO2@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "CO3-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "HCO3-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "CH4@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "H2@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "N2@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "O2@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "S2O3-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "HSO3-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "SO3-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "HSO4-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "SO4-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "H2S@",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "HS-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "S-2",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "OH-",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "H+",
+                "gemdcporosity": 1
+              },
+              {
+                "gemdcname": "H2O@",
+                "gemdcporosity": 1
+              }
+            ]
+          }
+        ]
       },
       {
         "thamesname": "Alite",
         "id": 2,
         "cement_component": 1,
         "interface_data": {},
-        "gemphase_data": {
-          "gemphasename": "Alite",
-          "gemdc": {
-            "gemdcname": "C3S"
+        "gemphase_data": [
+          {
+            "gemphasename": "Alite",
+            "gemdc": [
+              {
+                "gemdcname": "C3S"
+              }
+            ]
           }
-        },
+        ],
         "impurity_data": {
           "k2ocoeff": 0.00087,
           "na2ocoeff": 0,
@@ -349,12 +355,16 @@
         "thamesname": "Belite",
         "id": 3,
         "cement_component": 1,
-        "gemphase_data": {
-          "gemphasename": "Belite",
-          "gemdc": {
-            "gemdcname": "C2S"
+        "gemphase_data": [
+          {
+            "gemphasename": "Belite",
+            "gemdc": [
+              {
+                "gemdcname": "C2S"
+              }
+            ]
           }
-        },
+        ],
         "impurity_data": {
           "k2ocoeff": 0.01152,
           "na2ocoeff": 0,
@@ -379,12 +389,16 @@
         "thamesname": "Aluminate",
         "id": 4,
         "cement_component": 1,
-        "gemphase_data": {
-          "gemphasename": "Aluminate",
-          "gemdc": {
-            "gemdcname": "C3A"
+        "gemphase_data": [
+          {
+            "gemphasename": "Aluminate",
+            "gemdc": [
+              {
+                "gemdcname": "C3A"
+              }
+            ]
           }
-        },
+        ],
         "impurity_data": {
           "k2ocoeff": 0.00979,
           "na2ocoeff": 0,
@@ -409,12 +423,16 @@
         "thamesname": "Ferrite",
         "id": 5,
         "cement_component": 1,
-        "gemphase_data": {
-          "gemphasename": "Ferrite",
-          "gemdc": {
-            "gemdcname": "C4AF"
+        "gemphase_data": [
+          {
+            "gemphasename": "Ferrite",
+            "gemdc": [
+              {
+                "gemdcname": "C4AF"
+              }
+            ]
           }
-        },
+        ],
         "impurity_data": {
           "k2ocoeff": 0.00272,
           "na2ocoeff": 0,
@@ -436,30 +454,23 @@
         }
       },
       {
-        "thamesname": "Arcanite",
+        "thamesname": "Gypsum",
         "id": 6,
         "cement_component": 1,
-        "gemphase_data": {
-          "gemphasename": "arcanite",
-          "gemdc": {
-            "gemdcname": "K2SO4"
+        "gemphase_data": [
+          {
+            "gemphasename": "Gypsum",
+            "gemdc": [
+              {
+                "gemdcname": "Gp"
+              }
+            ]
           }
-        }
-      },
-      {
-        "thamesname": "Gypsum",
-        "id": 7,
-        "cement_component": 1,
-        "gemphase_data": {
-          "gemphasename": "Gypsum",
-          "gemdc": {
-            "gemdcname": "Gp"
-          }
-        }
+        ]
       },
       {
         "thamesname": "Bassanite",
-        "id": 8,
+        "id": 7,
         "cement_component": 1,
         "interface_data": {
           "affinity": [
@@ -476,40 +487,48 @@
         "gemphase_data": [
           {
             "gemphasename": "hemihydrate",
-            "gemdc": {
-              "gemdcname": "hemihydrate"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "hemihydrate"
+              }
+            ]
           },
           {
             "gemphasename": "Anhydrite",
-            "gemdc": {
-              "gemdcname": "Anh"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "Anh"
+              }
+            ]
           }
         ]
       },
       {
         "thamesname": "Dolomite",
-        "id": 9,
+        "id": 8,
         "cement_component": 0,
         "gemphase_data": [
           {
             "gemphasename": "Dolomite-dis",
-            "gemdc": {
-              "gemdcname": "Dis-Dol"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "Dis-Dol"
+              }
+            ]
           },
           {
             "gemphasename": "Dolomite-ord",
-            "gemdc": {
-              "gemdcname": "Ord-Dol"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "Ord-Dol"
+              }
+            ]
           }
         ]
       },
       {
         "thamesname": "Portlandite",
-        "id": 10,
+        "id": 9,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -527,16 +546,20 @@
             }
           ]
         },
-        "gemphase_data": {
-          "gemphasename": "Portlandite",
-          "gemdc": {
-            "gemdcname": "Portlandite"
+        "gemphase_data": [
+          {
+            "gemphasename": "Portlandite",
+            "gemdc": [
+              {
+                "gemdcname": "Portlandite"
+              }
+            ]
           }
-        }
+        ]
       },
       {
         "thamesname": "CSHQ",
-        "id": 11,
+        "id": 10,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -554,35 +577,37 @@
             }
           ]
         },
-        "gemphase_data": {
-          "gemphasename": "CSHQ",
-          "gemdc": [
-            {
-              "gemdcname": "CSHQ-JenD",
-              "gemdcporosity": 0.4935
-            },
-            {
-              "gemdcname": "CSHQ-JenH",
-              "gemdcporosity": 0.4935
-            },
-            {
-              "gemdcname": "CSHQ-TobD",
-              "gemdcporosity": 0.2004
-            },
-            {
-              "gemdcname": "CSHQ-TobH",
-              "gemdcporosity": 0.2004
-            },
-            {
-              "gemdcname": "KSiOH",
-              "gemdcporosity": 0.1825
-            },
-            {
-              "gemdcname": "NaSiOH",
-              "gemdcporosity": 0.1825
-            }
-          ]
-        },
+        "gemphase_data": [
+          {
+            "gemphasename": "CSHQ",
+            "gemdc": [
+              {
+                "gemdcname": "CSHQ-JenD",
+                "gemdcporosity": 0.4935
+              },
+              {
+                "gemdcname": "CSHQ-JenH",
+                "gemdcporosity": 0.4935
+              },
+              {
+                "gemdcname": "CSHQ-TobD",
+                "gemdcporosity": 0.2004
+              },
+              {
+                "gemdcname": "CSHQ-TobH",
+                "gemdcporosity": 0.2004
+              },
+              {
+                "gemdcname": "KSiOH",
+                "gemdcporosity": 0.1825
+              },
+              {
+                "gemdcname": "NaSiOH",
+                "gemdcporosity": 0.1825
+              }
+            ]
+          }
+        ],
         "poresizefilename": "CSH-PoreSizeDistribution.csv",
         "Rd": [
           {
@@ -597,50 +622,62 @@
       },
       {
         "thamesname": "AFm",
-        "id": 12,
+        "id": 11,
         "cement_component": 0,
         "interface_data": {
-          "affinity": {
-            "affinityphase": "AFmc",
-            "contactanglevalue": 0
-          }
+          "affinity": [
+            {
+              "affinityphase": "AFmc",
+              "contactanglevalue": 0
+            }
+          ]
         },
         "gemphase_data": [
           {
             "gemphasename": "C3AH6",
-            "gemdc": {
-              "gemdcname": "C3AH6"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "C3AH6"
+              }
+            ]
           },
           {
             "gemphasename": "C3FH6",
-            "gemdc": {
-              "gemdcname": "C3FH6"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "C3FH6"
+              }
+            ]
           },
           {
             "gemphasename": "C4AH11",
-            "gemdc": {
-              "gemdcname": "C4AH11"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "C4AH11"
+              }
+            ]
           },
           {
             "gemphasename": "C4AH13",
-            "gemdc": {
-              "gemdcname": "C4AH13"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "C4AH13"
+              }
+            ]
           },
           {
             "gemphasename": "C4AH19",
-            "gemdc": {
-              "gemdcname": "C4AH19"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "C4AH19"
+              }
+            ]
           }
         ]
       },
       {
         "thamesname": "AFmc",
-        "id": 13,
+        "id": 12,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -665,51 +702,65 @@
         "gemphase_data": [
           {
             "gemphasename": "C4Ac0.5H105",
-            "gemdc": {
-              "gemdcname": "hemicarb10.5"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "hemicarb10.5"
+              }
+            ]
           },
           {
             "gemphasename": "C4Ac0.5H12",
-            "gemdc": {
-              "gemdcname": "hemicarb"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "hemicarb"
+              }
+            ]
           },
           {
             "gemphasename": "C4Ac0.5H9",
-            "gemdc": {
-              "gemdcname": "hemicarb9"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "hemicarb9"
+              }
+            ]
           },
           {
             "gemphasename": "C4AcH11",
-            "gemdc": {
-              "gemdcname": "monocarb"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "monocarb"
+              }
+            ]
           },
           {
             "gemphasename": "C4AcH9",
-            "gemdc": {
-              "gemdcname": "monocarb9"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "monocarb9"
+              }
+            ]
           },
           {
             "gemphasename": "C4Fc05H10",
-            "gemdc": {
-              "gemdcname": "Fe-hemicarb"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "Fe-hemicarb"
+              }
+            ]
           },
           {
             "gemphasename": "C4FcH12",
-            "gemdc": {
-              "gemdcname": "Femonocarb"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "Femonocarb"
+              }
+            ]
           }
         ]
       },
       {
         "thamesname": "Monosulfate",
-        "id": 14,
+        "id": 13,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -750,21 +801,27 @@
         "gemphase_data": [
           {
             "gemphasename": "C4AsH105",
-            "gemdc": {
-              "gemdcname": "monosulf10.5"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "monosulf10.5"
+              }
+            ]
           },
           {
             "gemphasename": "C4AsH14",
-            "gemdc": {
-              "gemdcname": "monosulf14"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "monosulf14"
+              }
+            ]
           },
           {
             "gemphasename": "C4AsH9",
-            "gemdc": {
-              "gemdcname": "monosulf9"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "monosulf9"
+              }
+            ]
           },
           {
             "gemphasename": "monosulf-AlFe",
@@ -781,7 +838,7 @@
       },
       {
         "thamesname": "AFt",
-        "id": 15,
+        "id": 14,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -806,15 +863,19 @@
         "gemphase_data": [
           {
             "gemphasename": "C6AsH13",
-            "gemdc": {
-              "gemdcname": "ettr13"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "ettr13"
+              }
+            ]
           },
           {
             "gemphasename": "C6AsH9",
-            "gemdc": {
-              "gemdcname": "ettr9"
-            }
+            "gemdc": [
+              {
+                "gemdcname": "ettr9"
+              }
+            ]
           },
           {
             "gemphasename": "SO4_CO3_AFt",
@@ -853,7 +914,7 @@
       },
       {
         "thamesname": "Brucite",
-        "id": 16,
+        "id": 15,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
@@ -883,28 +944,34 @@
             }
           ]
         },
-        "gemphase_data": {
-          "gemphasename": "Brucite",
-          "gemdc": {
-            "gemdcname": "Brc"
+        "gemphase_data": [
+          {
+            "gemphasename": "Brucite",
+            "gemdc": [
+              {
+                "gemdcname": "Brc"
+              }
+            ]
           }
-        }
+        ]
       },
       {
         "thamesname": "Hydrotalcite",
-        "id": 17,
+        "id": 16,
         "cement_component": 0,
-        "gemphase_data": {
-          "gemphasename": "hydrotalc-pyro",
-          "gemdc": [
-            {
-              "gemdcname": "Mg3AlC0.5OH"
-            },
-            {
-              "gemdcname": "Mg3FeC0.5OH"
-            }
-          ]
-        }
+        "gemphase_data": [
+          {
+            "gemphasename": "hydrotalc-pyro",
+            "gemdc": [
+              {
+                "gemdcname": "Mg3AlC0.5OH"
+              },
+              {
+                "gemdcname": "Mg3FeC0.5OH"
+              }
+            ]
+          }
+        ]
       }
     ]
   }

@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 08 17:36 2025 | Fixed more runtime errors related to how json parses chemistry file |
 | Jan 08 14:49 2025 | Fixed some runtime errors related to json iterator misassignments |
 | Jan 01 23:44 2024 | Updated CMakeLists.txt |
 | Dec 23 23:03 2024 | Fixed all compile-time errors in json branch. |
