@@ -790,32 +790,47 @@ void ChemicalSystem::parseDoc(const string &docName) {
   // Find number of phase entries
   cdi = it.value().find("numentries");
   int testnumEntries = cdi.value();
+  cout << "Num entries = " << testnumEntries << endl;
+  cout.flush();
 
   // Find saturation state
   cdi = it.value().find("saturated");
   int satstate = cdi.value();
   isSaturated_ = (satstate != 0) ? true : false;
+  cout << "Saturated = " << satstate << endl;
+  cout.flush();
 
   // See if electrolyte composition is specified
-  cdi = it.value().find("electrolyte");
+  cdi = it.value().find("electrolyte_conditions");
   if (cdi != it.value().end()) {
-
+    cout << "Electrolyte condition found ";
+    cout.flush();
+    cout << "with " << cdi.value().size() << " components" << endl;
+    cout.flush();
     try {
       parseSolutionComp(cdi);
     } catch (DataException dex) {
       throw dex;
     }
+  } else {
+    cout << "Electrolyte condition NOT found" << endl;
+    cout.flush();
   }
 
   // See if gas composition is specified
-  cdi = it.value().find("gas");
+  cdi = it.value().find("gas_conditions");
 
   if (cdi != it.value().end()) {
+    cout << "Gas condition found" << endl;
+    cout.flush();
     try {
       parseGasComp(cdi);
     } catch (DataException dex) {
       throw dex;
     }
+  } else {
+    cout << "Gas condition NOT found" << endl;
+    cout.flush();
   }
 
   // Parse all the phases
@@ -846,16 +861,28 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   int testDCId;
   bool fixed = false;
 
-  json::iterator p = cdi.value().begin();
+  json::iterator p = cdi.value()[0].find("DCName");
+  cout << "JSON iterator okay so far" << endl;
+  cout.flush();
   for (int i = 0; i < cdi.value().size(); ++i) {
     p = cdi.value()[i].find("DCname");
-    testName = p.value();
+    // testName = p.value();
+    testName = p.value().get<string>();
+    cout << "  Found name " << testName << endl;
+    cout.flush();
     testDCId = getDCId(testName);
+    cout << "  testDCId " << testDCId << endl;
+    cout.flush();
     p = cdi.value()[i].find("condition");
-    testCondition = p.value();
+    // testCondition = p.value();
+    testCondition = p.value().get<string>();
+    cout << "  testCondition " << testCondition << endl;
+    cout.flush();
     fixed = (testCondition != "fixed") ? false : true;
     p = cdi.value()[i].find("concentration");
     testConc = p.value();
+    cout << "  testConc " << testConc << endl;
+    cout.flush();
     // Only add the data if this is a solution component
     if (DCClassCode_[testDCId] == 'S' || DCClassCode_[testDCId] == 'T') {
       if (fixed) {

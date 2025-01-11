@@ -1341,7 +1341,7 @@ void Controller::parseDoc(const string &docName) {
       time_.push_back(testtime);
     }
 
-    cdi = it.value().find("calctime");
+    cdi = it.value().find("outtime");
     int outtimenum = cdi.value().size();
     for (int i = 0; i < outtimenum; ++i) {
       testtime = cdi.value()[i];
