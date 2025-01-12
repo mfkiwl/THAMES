@@ -124,4 +124,6 @@ add_executable (thames ${SOURCES})
 target_link_libraries (thames thameslib ${EXTRA_LIBS})
 
 install (TARGETS thames viz vcctl2thames DESTINATION ${CMAKE_SOURCE_DIR}/bin)
-install (DIRECTORY ${CMAKE_SOURCE_DIR}/build/html DESTINATION ${CMAKE_SOURCE_DIR}/doc)
+if (EXISTS ${CMAKE_SOURCE_DIR}/build/html)
+  install (DIRECTORY ${CMAKE_SOURCE_DIR}/build/html DESTINATION ${CMAKE_SOURCE_DIR}/doc)
+endif()

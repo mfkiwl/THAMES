@@ -4,13 +4,11 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 12 17:45 2025 | Updated test input files to put pore size distribution data in microstructure definition file |
 | Jan 01 23:44 2024 | Updated CMakeLists.txt |
-| Dec 27 22:08 2024 | 
-Fixed small runtime bug in pore distributions |
-| Dec 27 21:49 2024 | 
-Pore size distribution now with microstructure definition file |
-| Dec 27 12:23 2024 | 
-Added command line option to toggle xyz output |
+| Dec 27 22:08 2024 | Fixed small runtime bug in pore distributions |
+| Dec 27 21:49 2024 | Pore size distribution now with microstructure definition file |
+| Dec 27 12:23 2024 | Added command line option to toggle xyz output |
 | Dec 24 21:20 2024 | Debugged run-time errors on xyzfile branch |
 | Dec 24 17:32 2024 | Create xyzfile branch and integrate xyz file writing internally |
 | Nov 11 10:14 2024 | Merged branch florinnita\_THAMES\_v3.0.1-v4.0.0 which fixed some memory leaks and updated test input files; tagged v3.0.0 |

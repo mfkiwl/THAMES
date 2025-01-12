@@ -521,6 +521,9 @@ void printHelp(void) {
   cout << "        --verbose [-v]      Produce verbose output" << endl;
   cout << "        --suppress [-s]     Suppress warning messages" << endl;
   cout << "        --xyz [-x]          Create 3D visualization movie" << endl;
+  cout << "        --outfolder [-o]    Name of folder for output data (default "
+          "is Result)"
+       << endl;
   cout << "        --help [-h]         Print this help message" << endl;
   cout << endl;
 
