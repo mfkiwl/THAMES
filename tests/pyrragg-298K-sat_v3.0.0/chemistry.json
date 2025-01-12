@@ -4,10 +4,10 @@
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 1,
-    "electrolyte": [
-        { "DCname": "Ca+2", "condition": "initial", "concentration": 0.05 },
-        { "DCname": "K+", "condition": "initial", "concentration": 0.10 },
-        { "DCname": "OH-", "condition": "initial", "concentration": 0.20 }
+    "electrolyte_conditions": [
+      { "DCname": "Ca+2", "condition": "initial", "concentration": 0.05 },
+      { "DCname": "K+", "condition": "initial", "concentration": 0.1 },
+      { "DCname": "OH-", "condition": "initial", "concentration": 0.2 }
     ],
     "phases": [
       {
@@ -107,16 +107,16 @@
           }
         ],
         "impurity_data": {
-          "k2ocoeff": 0.0000,
-          "na2ocoeff": 0.0000,
-          "mgocoeff": 0.0000,
-          "so3coeff": 0.0000
+          "k2ocoeff": 0.0,
+          "na2ocoeff": 0.0,
+          "mgocoeff": 0.0,
+          "so3coeff": 0.0
         },
         "kinetic_data": {
           "type": "Standard",
           "specificSurfaceArea": 298.0,
           "refSpecificSurfaceArea": 1.0,
-          "activationEnergy": 40000.000,
+          "activationEnergy": 40000.0,
           "dissolutionRateConst": 2.5e-5,
           "diffusionRateConstEarly": 5.0e-10,
           "diffusionRateConstLate": 5.0e-10,
@@ -138,16 +138,16 @@
           }
         ],
         "impurity_data": {
-          "k2ocoeff": 0.0000,
-          "na2ocoeff": 0.0000,
-          "mgocoeff": 0.0000,
-          "so3coeff": 0.0000
+          "k2ocoeff": 0.0,
+          "na2ocoeff": 0.0,
+          "mgocoeff": 0.0,
+          "so3coeff": 0.0
         },
         "kinetic_data": {
           "type": "Standard",
           "specificSurfaceArea": 298.0,
           "refSpecificSurfaceArea": 0.001,
-          "activationEnergy": 40000.000,
+          "activationEnergy": 40000.0,
           "dissolutionRateConst": 5.0e-12,
           "diffusionRateConstEarly": 1.0e-15,
           "diffusionRateConstLate": 1.0e-15,
@@ -266,7 +266,9 @@
         "id": 8,
         "cement_component": 0,
         "interface_data": {
-          "affinity": [{ "affinityphase": "Monosulfate", "contactanglevalue": 0 }]
+          "affinity": [
+            { "affinityphase": "Monosulfate", "contactanglevalue": 0 }
+          ]
         },
         "gemphase_data": [
           {
@@ -286,17 +288,11 @@
           },
           {
             "gemphasename": "ettr",
-            "gemdc": [
-              { "gemdcname": "ettr" },
-              { "gemdcname": "ettr30" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr" }, { "gemdcname": "ettr30" }]
           },
           {
             "gemphasename": "ettr-AlFe",
-            "gemdc": [
-              { "gemdcname": "ettr05" },
-              { "gemdcname": "Fe-ettr05" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr05" }, { "gemdcname": "Fe-ettr05" }]
           }
         ]
       },

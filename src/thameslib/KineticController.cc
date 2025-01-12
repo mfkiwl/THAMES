@@ -696,9 +696,10 @@ void KineticController::parseKineticDataForPozzolanic(
     kineticData.sio2 = pp.value();
     cout << "sio2 = " << kineticData.sio2 << endl;
     cout.flush();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "sio2 not found");
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "sio2 not found");
   }
 
   // Al2O3 mass fraction in the material
@@ -707,9 +708,10 @@ void KineticController::parseKineticDataForPozzolanic(
     kineticData.al2o3 = pp.value();
     cout << "al2o3 = " << kineticData.al2o3 << endl;
     cout.flush();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "al2o3 not found");
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "al2o3 not found");
   }
 
   // CaO mass fraction in the material
@@ -718,9 +720,10 @@ void KineticController::parseKineticDataForPozzolanic(
     kineticData.cao = pp.value();
     cout << "cao = " << kineticData.cao << endl;
     cout.flush();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "cao not found");
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "cao not found");
   }
 
   // Loss on ignition of the material
@@ -729,9 +732,10 @@ void KineticController::parseKineticDataForPozzolanic(
     kineticData.loi = pp.value();
     cout << "loi = " << kineticData.loi << endl;
     cout.flush();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "loi not found");
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "loi not found");
   }
 
   pp = p.value().find("activationEnergy");

@@ -753,10 +753,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
     cout << "JSON parameter file not found" << endl;
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }
-  cout << "Contents of " << docName << ":" << endl;
-  cout << "#######" << endl;
   json data = json::parse(f);
-  cout << "#######" << endl;
   f.close();
 
   // Get an iterator to the root node of the JSON file
@@ -790,47 +787,32 @@ void ChemicalSystem::parseDoc(const string &docName) {
   // Find number of phase entries
   cdi = it.value().find("numentries");
   int testnumEntries = cdi.value();
-  cout << "Num entries = " << testnumEntries << endl;
-  cout.flush();
 
   // Find saturation state
   cdi = it.value().find("saturated");
   int satstate = cdi.value();
   isSaturated_ = (satstate != 0) ? true : false;
-  cout << "Saturated = " << satstate << endl;
-  cout.flush();
 
   // See if electrolyte composition is specified
   cdi = it.value().find("electrolyte_conditions");
   if (cdi != it.value().end()) {
-    cout << "Electrolyte condition found ";
-    cout.flush();
-    cout << "with " << cdi.value().size() << " components" << endl;
-    cout.flush();
     try {
       parseSolutionComp(cdi);
     } catch (DataException dex) {
       throw dex;
     }
-  } else {
-    cout << "Electrolyte condition NOT found" << endl;
-    cout.flush();
   }
 
   // See if gas composition is specified
   cdi = it.value().find("gas_conditions");
 
   if (cdi != it.value().end()) {
-    cout << "Gas condition found" << endl;
-    cout.flush();
     try {
       parseGasComp(cdi);
     } catch (DataException dex) {
       throw dex;
     }
   } else {
-    cout << "Gas condition NOT found" << endl;
-    cout.flush();
   }
 
   // Parse all the phases
@@ -868,21 +850,13 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
     p = cdi.value()[i].find("DCname");
     // testName = p.value();
     testName = p.value().get<string>();
-    cout << "  Found name " << testName << endl;
-    cout.flush();
     testDCId = getDCId(testName);
-    cout << "  testDCId " << testDCId << endl;
-    cout.flush();
     p = cdi.value()[i].find("condition");
     // testCondition = p.value();
     testCondition = p.value().get<string>();
-    cout << "  testCondition " << testCondition << endl;
-    cout.flush();
     fixed = (testCondition != "fixed") ? false : true;
     p = cdi.value()[i].find("concentration");
     testConc = p.value();
-    cout << "  testConc " << testConc << endl;
-    cout.flush();
     // Only add the data if this is a solution component
     if (DCClassCode_[testDCId] == 'S' || DCClassCode_[testDCId] == 'T') {
       if (fixed) {
@@ -1071,18 +1045,12 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
 
     p = cdi.value()[i].find("id");
     phaseData.id = p.value();
-    cout << "Entry " << i << ": with id " << phaseData.id << endl;
-    cout.flush();
     p = cdi.value()[i].find("thamesname");
     if (p != cdi.value()[i].end()) {
-      cout << "  Found thamesname key" << endl;
-      cout.flush();
       phaseData.thamesName = p.value();
     } else {
       p = cdi.value()[i].find("microphasename");
       if (p != cdi.value()[i].end()) {
-        cout << "  Found microphasename key" << endl;
-        cout.flush();
         phaseData.thamesName = p.value();
       } else {
         throw DataException("ChemicalSystem", "parseMicroPhases",
@@ -1327,10 +1295,10 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
       } else {
         scrapeWaterDCs = false;
       }
-      cout << endl
-           << "GEM Phase name = " << mypstr // << endl;
-           << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
-      cout.flush();
+      // cout << endl
+      //      << "GEM Phase name = " << mypstr // << endl;
+      //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+      // cout.flush();
       //  Assign the global microstructure phase name associated with CSH
       if (mypstr == CSHGEMName) {
         CSHMicroName = phaseData.thamesName;
@@ -1381,8 +1349,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
     if (ppp != pp.value()[i].end()) {
       mydcstr = ppp.value().get<string>();
       phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
-      cout << "Phase " << phaseData.thamesName << " found DC " << mydcstr
-           << endl;
+      // cout << "Phase " << phaseData.thamesName << " found DC " << mydcstr
+      //     << endl;
       if (mydcstr == AFTDCName) {
         AFTMicroName = phaseData.thamesName;
       }
@@ -1519,32 +1487,28 @@ void ChemicalSystem::parseInterfaceData(const json::iterator p,
 void ChemicalSystem::parseAffinityData(const json::iterator pp,
                                        map<string, int> &phaseids,
                                        PhaseData &phaseData) {
-  int testaftyid; //, testaftyval;
-  double testangleval = 0.0;
+  int testaftyid;
+  double testangleval = 90.0;
   map<string, int>::iterator it = phaseids.begin();
   string mystr("Null");
 
   json::iterator ppp;
   for (int i = 0; i < pp.value().size(); ++i) {
-    cout << "    " << phaseData.thamesName << ": affinity " << i << endl;
-    cout.flush();
     ppp = pp.value()[i].find("affinityphase");
     if (ppp != pp.value()[i].end()) {
       mystr = ppp.value();
       map<string, int>::iterator it = phaseids.find(mystr);
       if (it != phaseids.end()) {
         testaftyid = it->second;
-        phaseData.contactAngle[testaftyid] = testangleval;
+        ppp = pp.value()[i].find("contactanglevalue");
+        if (ppp != pp.value()[i].end()) {
+          testangleval = ppp.value();
+          phaseData.contactAngle[testaftyid] = testangleval;
+        }
       }
-    }
-
-    ppp = pp.value()[i].find("contactanglevalue");
-    if (ppp != pp.value()[i].end()) {
-      testangleval = ppp.value();
-    }
-    if (mystr == "Null" && testangleval > 1.0e-16) {
-      throw DataException("ChemicalSystem", "parseAffinityData",
-                          "Contact angle given but no substrate specified");
+    } else {
+      cout << "      WARNING: No valid substrate given... skipping" << endl;
+      cout.flush();
     }
   }
 
@@ -1998,6 +1962,12 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
          << getMicroPhaseName(idx) << endl;
     cout << "    This phase's GEM phase id = " << gemphaseid
          << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
+    cout << "    The DC members for this GEM phase are:" << endl;
+    for (int ii = 0; ii < DClist.size(); ++ii) {
+      cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii]) << ")"
+           << endl;
+      cout.flush();
+    }
   }
 
   /// @todo Do we need to check that DClist and DCporosities are the same
@@ -2030,6 +2000,16 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     porosity = DCporosities[0];
     conc = 1.0;
     vol = conc * getDCMolarVolume(DCId);
+    if (verbose_) {
+      cout << "    " << getDCName(DCId) << " (" << DCId
+           << ") concentration = " << conc << endl;
+      cout << "    " << getDCName(DCId) << " (" << DCId
+           << ") porosity = " << porosity << endl;
+      cout << "    " << getDCName(DCId) << " (" << DCId
+           << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+      cout << "****" << endl;
+      cout.flush();
+    }
   } else {
     for (int i = 0; i < DClist.size(); ++i) {
       DCId = DClist[i];
@@ -2038,6 +2018,16 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
       vol = conc * getDCMolarVolume(DCId);
       weightedporosities += (vol * porosity);
       sumvol += vol;
+      if (verbose_) {
+        cout << "    " << getDCName(DCId) << " (" << DCId
+             << ") concentration = " << conc << endl;
+        cout << "    " << getDCName(DCId) << " (" << DCId
+             << ") porosity = " << porosity << endl;
+        cout << "    " << getDCName(DCId) << " (" << DCId
+             << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
+        cout << "****" << endl;
+        cout.flush();
+      }
     }
     if (sumvol > 0.0) {
       porosity = (weightedporosities / sumvol);

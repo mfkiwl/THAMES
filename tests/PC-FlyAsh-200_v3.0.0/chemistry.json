@@ -287,17 +287,19 @@
           "dissolutionRateConst": 5.0e-8,
           "diffusionRateConstEarly": 1.0e-8,
           "diffusionRateConstLate": 1.0e-8,
-          "dissolvedUnits": 1,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "ohexp": 1.0,
           "sio2": 0.987,
-          "al2o3": 1.0e-6,
-          "cao": 1.0e-6,
           "loi": 1.3
         },
-        "display_data": { "red": 153.0, "green": 0.0, "blue": 0.0, "gray": 100.0 }
+        "display_data": {
+          "red": 153.0,
+          "green": 0.0,
+          "blue": 0.0,
+          "gray": 100.0
+        }
       },
       {
         "thamesname": "Mullite",
@@ -329,17 +331,19 @@
           "dissolutionRateConst": 5.0e-8,
           "diffusionRateConstEarly": 1.0e-8,
           "diffusionRateConstLate": 1.0e-8,
-          "dissolvedUnits": 2,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "ohexp": 1.0,
-          "sio2": 0.33,
-          "al2o3": 0.67,
-          "cao": 1.0e-6,
+          "sio2": 0.987,
           "loi": 1.3
         },
-        "display_data": { "red": 128.0, "green": 250.0, "blue": 128.0, "gray": 128.0 }
+        "display_data": {
+          "red": 128.0,
+          "green": 250.0,
+          "blue": 128.0,
+          "gray": 128.0
+        }
       },
       {
         "thamesname": "C2AS",
@@ -365,17 +369,19 @@
           "dissolutionRateConst": 0.5,
           "diffusionRateConstEarly": 0.3,
           "diffusionRateConstLate": 0.3,
-          "dissolvedUnits": 7,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "ohexp": 1.0,
-          "sio2": 0.25,
-          "al2o3": 0.25,
-          "cao": 0.5,
+          "sio2": 0.987,
           "loi": 1.3
         },
-        "display_data": { "red": 255.0, "green": 165.0, "blue": 0.0, "gray": 110.0 }
+        "display_data": {
+          "red": 255.0,
+          "green": 165.0,
+          "blue": 0.0,
+          "gray": 110.0
+        }
       },
       {
         "thamesname": "CA2S",
@@ -401,17 +407,19 @@
           "dissolutionRateConst": 0.1,
           "diffusionRateConstEarly": 0.3,
           "diffusionRateConstLate": 0.3,
-          "dissolvedUnits": 4,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "ohexp": 1.0,
-          "sio2": 0.25,
-          "al2o3": 0.5,
-          "cao": 0.25,
+          "sio2": 0.987,
           "loi": 1.3
         },
-        "display_data": { "red": 0.0, "green": 0.0, "blue": 128.0, "gray": 108.0 }
+        "display_data": {
+          "red": 0.0,
+          "green": 0.0,
+          "blue": 128.0,
+          "gray": 108.0
+        }
       },
       {
         "thamesname": "K6A2S",
@@ -437,17 +445,19 @@
           "dissolutionRateConst": 0.3,
           "diffusionRateConstEarly": 0.3,
           "diffusionRateConstLate": 0.3,
-          "dissolvedUnits": 9,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "ohexp": 1.0,
-          "sio2": 0.111,
-          "al2o3": 0.222,
-          "cao": 0.000001,
+          "sio2": 0.987,
           "loi": 1.3
         },
-        "display_data": { "red": 255.0, "green": 170.0, "blue": 128.0, "gray": 115.0 }
+        "display_data": {
+          "red": 255.0,
+          "green": 170.0,
+          "blue": 128.0,
+          "gray": 115.0
+        }
       },
       {
         "thamesname": "CSHQ",
@@ -589,17 +599,11 @@
           },
           {
             "gemphasename": "ettr",
-            "gemdc": [
-              { "gemdcname": "ettr" },
-              { "gemdcname": "ettr30" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr" }, { "gemdcname": "ettr30" }]
           },
           {
             "gemphasename": "ettr-AlFe",
-            "gemdc": [
-              { "gemdcname": "ettr05" },
-              { "gemdcname": "Fe-ettr05" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr05" }, { "gemdcname": "Fe-ettr05" }]
           }
         ]
       },
@@ -654,11 +658,10 @@
             "gemdc": [
               { "gemdcname": "Mg3AlC0.5OH" },
               { "gemdcname": "Mg3FeC0.5OH" }
-           ]
+            ]
           }
         ]
       }
     ]
   }
 }
-

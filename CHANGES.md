@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 12 09:16 2025 | Fixed a bug with json parsing and also with Pozzolanic kinetic model |
 | Jan 11 02:59 2025 | Tested json on all test cases |
 | Jan 08 17:36 2025 | Fixed more runtime errors related to how json parses chemistry file |
 | Jan 08 14:49 2025 | Fixed some runtime errors related to json iterator misassignments |
