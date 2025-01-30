@@ -6278,20 +6278,16 @@ public:
       }
       // setMicroPhaseVolume(idx, (val * v0 / dcmm));
       microPhaseVolume_[idx] = val * v0 / dcmm;
-      if (verbose_) {
-        if (called == 0) {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
-               << " (called = 0) => updated scaledMass = " << val
-               << " and volume = " << microPhaseVolume_[idx] << endl;
-        } else {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
-               << " (called = 1) => updated scaledMass = " << val
-               << " and volume = " << microPhaseVolume_[idx] << endl;
-        }
-        cout.flush();
+      if (called == 0) {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess (called = 0) => "
+                "updated scaledMass = "
+             << val << " and volume = " << microPhaseVolume_[idx] << endl;
+      } else {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess  (called = 1) => "
+                "updated scaledMass = "
+             << val << " and volume = " << microPhaseVolume_[idx] << endl;
       }
+      cout.flush();
     } else {
       cout << endl
            << "   error in ChemicalSystem::setKCMicroPhaseMasses : idx = "

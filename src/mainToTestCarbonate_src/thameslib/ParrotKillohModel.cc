@@ -287,11 +287,10 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
 
       scaledMass = scaledMass_;
 
-      if (verbose_) {
-        cout << "    ParrotKillochModel::calculateKineticStep rate/wcFactor/massDissolved : "
-             << rate << " / " << wcFactor << " / " << massDissolved << endl;
+      cout << "    ParrotKillochModel::calculateKineticStep rate/wcFactor/massDissolved : "
+           << rate << " / " << wcFactor << " / " << massDissolved << endl;
 
-        // if (verbose_) {
+      if (verbose_) {
         cout << "  ****************** PKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_

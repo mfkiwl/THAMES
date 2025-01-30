@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
   // but this can be changed below.
   //
 
+  cout << scientific << setprecision(15);
   checkargs(argc, argv);
 
   strainenergy.clear();
@@ -58,17 +59,6 @@ int main(int argc, char **argv) {
     cout << "Exiting program now." << endl << endl;
     exit(1);
   }
-
-  int seedRNG = -25943; // -142234;
-  //cin >> seedRNG;
-  cout << "The seed of the RNG is          : seedRNG = " << seedRNG << endl;
-
-  double elemTimeInterval = 1.e-7;
-  //cin >> elemTimeInterval;
-  cout << "The elementary time interval is : elemTimeInterval = " << elemTimeInterval << endl;
-
-  cout << scientific << setprecision(15);
-  cout << endl;
 
   time_t lt = time(NULL);
   struct tm *inittime;
@@ -149,11 +139,12 @@ int main(int argc, char **argv) {
   }
 
   //
-  // Create the random number generator for phase placement
+  // Create the random number generator for phase placement and for shuffling
+  // ordered lists
   //
 
-  RNG = new RanGen(seedRNG);
-
+  int initialSeed = -2814357;
+  RNG = new RanGen(initialSeed);
 
   //
   // User must specifiy the file containing the 3D microstructure itself
@@ -169,7 +160,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    Mic = new Lattice(ChemSys, RNG, seedRNG, mic_filename, VERBOSE, WARNING);
+    Mic = new Lattice(ChemSys, RNG, mic_filename, VERBOSE, WARNING);
     cout << endl <<"Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
@@ -214,8 +205,7 @@ int main(int argc, char **argv) {
     // cin >> buff;  // C++ >> operator does not allow spaces
     getline(cin, buff);
     const string phasemod_fileName(buff);
-    cout << "phasemod_fileName : " << phasemod_fileName << endl;
-    //cout << phasemod_fileName << endl;
+    cout << phasemod_fileName << endl;
 
     //
     // Create the ThermalStrain FE solver, which handles phase transformation
@@ -440,7 +430,7 @@ int main(int argc, char **argv) {
 
   try {
 
-    Ctrl->doCycle(statfilename, choice, elemTimeInterval);
+    Ctrl->doCycle(statfilename, choice);
 
   } catch (GEMException gex) {
     gex.printException();

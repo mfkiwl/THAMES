@@ -227,8 +227,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
-      cout << "    StandardKineticModel::calculateKineticStep dissrate/massDissolved : "
-           << dissrate << " / " << massDissolved << endl;
+      if (verbose_) {
+        cout << "    StandardKineticModel::calculateKineticStep dissrate/massDissolved : "
+             << dissrate << " / " << massDissolved << endl;
+      }
 
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
 
