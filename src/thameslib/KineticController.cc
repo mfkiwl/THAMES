@@ -1066,7 +1066,8 @@ double KineticController::updateKineticStep(int cyc, int pId, double scaledMass)
   modelName = phaseKineticModel_[midx]->getModelName();// updateKineticStep(scaledMass , massDissolved);
   cout << endl
        << "  KineticController::updateKineticStep - for cyc = " << cyc << " & phaseId = " << pId
-       << endl;
+       << " [" << phaseKineticModel_[midx]->getName() << " / DCId:"
+       << chemSys_->getMicroPhaseDCMembers(pId, 0) << "]" << endl;
   cout << "    midx = " << midx << "   modelName : " << modelName
        << "   scaledMassIni[midx] = " << scaledMassIni_[midx] << "   scaledMass = " << scaledMass
        << endl;
@@ -1086,14 +1087,14 @@ double KineticController::updateKineticStep(int cyc, int pId, double scaledMass)
   //}
 
 
-  for (i = 0; i < DCNum_; i++) {
-    if (chemSys_->getIsDCKinetic(i)) {
-      if (i == DCId) DCMoles_[DCId] = DCMolesIni_[DCId];
-    } else {
-      if ((i != impurityDCID_[0]) && (i != impurityDCID_[1]) &&
-      (i != impurityDCID_[2]) && (i != impurityDCID_[3])) DCMoles_[i] = DCMolesIni_[i];
-    }
-  }
+  //for (i = 0; i < DCNum_; i++) {
+  //  if (chemSys_->getIsDCKinetic(i)) {
+  //    if (i == DCId) DCMoles_[DCId] = DCMolesIni_[DCId];
+  //  } else {
+  //    if ((i != impurityDCID_[0]) && (i != impurityDCID_[1]) &&
+  //    (i != impurityDCID_[2]) && (i != impurityDCID_[3])) DCMoles_[i] = DCMolesIni_[i];
+  //  }
+  //}
   //DCMoles_[DCId] = DCMolesIni_[DCId];
   DCMoles_[impurityDCID_[0]] -= impurity_K2O_[midx];
   DCMoles_[impurityDCID_[1]] -= impurity_Na2O_[midx];

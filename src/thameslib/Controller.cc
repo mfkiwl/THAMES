@@ -276,7 +276,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
   vector<int> vectDCId;
   double volMolDiff, molarMassDiff, vfracDiff, massDissolved, microPhaseMassDiff, scaledMassDiff,
       numMolesDiff;
-  int numDCs;
+  int numDCs = chemSys_->getNumDCs();
   int timesGEMFailed_recall;
 
   cout << endl << "     ===== START SIMULATION =====" << endl ;
@@ -292,6 +292,9 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
   double delta2Time;
   int numGenMax = 1000000;
   int numGen;
+
+  int dcId;
+  bool no_dcId;
 
   for (i = 0; (i < timeSize) && (capwater); ++i) { //main computation cycle loop
 
@@ -325,6 +328,9 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
         //timestep1 = timeTemp - time_[i - 1];
         timestep1 = timeTemp - timeIni;
         // if timestep1 <= 0 ?
+        for (int jj = 0; jj < numDCs; jj++) {
+          chemSys_->setDCLowerLimit(jj, 0.0);
+        }
         timesGEMFailed_loc1 = calculateState(timeTemp, timestep1, isFirst, cyc);
         if (timesGEMFailed_loc1 == 0) {
           timesGEMFailed_loc = 0;
@@ -391,6 +397,9 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
     if (timesGEMFailed_loc1 != 0) {
       try {
+        for (int jj = 0; jj < numDCs; jj++) {
+          chemSys_->setDCLowerLimit(jj, 0.0);
+        }
         timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
 
       } catch (GEMException gex) {
@@ -432,6 +441,23 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
     /// are caught there and the program will then exit from within
     /// this function rather than throwing an exception itself
     ///
+
+    cout << endl
+         << "Controller::doCycle - i/cyc : " << i << " / " << cyc
+         << "  -  DCLowerLimit /= 0 for next DCId (DCName/phaseId/phaseName) : " << endl;
+    no_dcId = true;
+    for (int ii = FIRST_SOLID; ii < numMicPh; ii++) {
+      dcId = chemSys_->getMicroPhaseDCMembers(ii, 0);
+      if (chemSys_->getDCLowerLimit(dcId) > 0) {
+        no_dcId = false;
+        cout << "           " << setw(4) << right << dcId
+             << " (" << setw(15) << left << chemSys_->getDCName(dcId)
+             << " / " << setw(4) << right << ii << " / "
+             << chemSys_->getMicroPhaseName(ii) << ")" << endl;
+      }
+    }
+    if (no_dcId)
+      cout << " no DCLowerLimit /= 0" << endl;
 
     try {
       //set iniLattice i.e. a copy of initial lattice/system configuration
@@ -514,7 +540,6 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
             chemSys_->setDCLowerLimit(DCId,numMolesDiff);
 
             //reset for ChemicalSystem:
-            numDCs = chemSys_->getNumDCs();
             for (int i = 0; i < numDCs; i++) {
               chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
             }
@@ -576,11 +601,12 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
         //if (timesGEMFailed_loc > 0) continue;
         //chemSys_->updateMicroPhaseMasses(phDiff, scaledMassDiff);
         int sizeVectDCId = vectDCId.size();
-        cout << endl << "Controller::doCycle sizeVectDCId = " << sizeVectDCId << endl;
-        cout << "   vectDCId[i]:";
-        for (int i = 0; i < sizeVectDCId; i++) {
-          cout << "  " << vectDCId[i] << "(" << chemSys_->getDCName(vectDCId[i]) << ")";
-          chemSys_->setDCLowerLimit(vectDCId[i],0);
+        cout << endl << "Controller::doCycle i/cyc/sizeVectDCId = "
+             << i << " / " << cyc << " / " << sizeVectDCId << endl;
+        cout << "   Controller::doCycle i/cyc/vectDCId[ii] : " << i << " / " << cyc;
+        for (int ii = 0; ii < sizeVectDCId; ii++) {
+          cout  << " / " << vectDCId[ii] << "(" << chemSys_->getDCName(vectDCId[ii]) << ")";
+          //chemSys_->setDCLowerLimit(vectDCId[ii],0);
         }
 
         if (timesGEMFailed_loc > 0) {

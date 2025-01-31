@@ -2522,7 +2522,9 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
           cout << endl << "    Lattice::dissolvePhase - anormal end:  dimInterface[" << i
                << "] = 0" << endl;
           cout << "      anormal end: phaseID[" << i << "] = " << phaseID
-               << "  &  dim_isite[" << i << "] = " << dim_isite[i]
+               << " [" << dissPhNameVect[i]
+               << " / DCId:" << chemSys_->getMicroPhaseDCMembers(phaseID, 0)
+               << "]  &  dim_isite[" << i << "] = " << dim_isite[i]
                << " while numLeft[" << i << "] = " << numLeft[i] << endl;
           cout << "      anormal end: totalTRC/trc_d/bcl " << totalTRC << "/"
                << trc_d << "/" << bcl << endl;
