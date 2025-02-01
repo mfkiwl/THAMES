@@ -4,12 +4,13 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Feb 01 11:41 2025 | Merged branch `florinnita_THAMES_avoidGEMfailure` to take small time steps to get past a GEM_run failure |
 | Jan 07 14:24 2025 | Removed Doxyfile$ file which only records local changes to environment |
-| Nov 11 10:14 2024 | Merged branch florinnita\_THAMES\_v3.0.1-v4.0.0 which fixed some memory leaks and updated test input files; tagged v3.0.0 |
+| Nov 11 10:14 2024 | Merged branch `florinnita\_THAMES\_v3.0.1-v4.0.0` which fixed some memory leaks and updated test input files; tagged v3.0.0 |
 | Nov 01 09:45 2024 | Commit in preparation for v3.0.0 release |
 | Oct 30 17:51 2024 | Fixed gas and electrolyte composition functionality |
 | Oct 29 11:19 2024 | Small tweaks here and there |
-| Oct 28 13:31 2024 | Merged florinnita_THAMES_Version3.0 branch |
+| Oct 28 13:31 2024 | Merged `florinnita_THAMES_Version3.0` branch |
 | Jul 25 09:16 2024 | Updated format of Colors.csv output |
 | Jul 24 11:01 2024 | Merged latest version of branch florinRecoverLatticeAndRNG onto main |
 | Jul 18 15:49 2024 | Merged changes to main branch for dealing with critDOH effect in PK model |
