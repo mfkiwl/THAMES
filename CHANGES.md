@@ -4,6 +4,10 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Jan 12 09:16 2025 | Fixed a bug with json parsing and also with Pozzolanic kinetic model |
+| Jan 11 02:59 2025 | Tested json on all test cases |
+| Jan 08 17:36 2025 | Fixed more runtime errors related to how json parses chemistry file |
+| Jan 08 14:49 2025 | Fixed some runtime errors related to json iterator misassignments |
 | Jan 01 23:44 2024 | Updated CMakeLists.txt |
 | Dec 23 23:03 2024 | Fixed all compile-time errors in json branch. |
 | Nov 11 10:14 2024 | Merged branch florinnita\_THAMES\_v3.0.1-v4.0.0 which fixed some memory leaks and updated test input files; tagged v3.0.0 |

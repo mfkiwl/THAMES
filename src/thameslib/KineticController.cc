@@ -105,7 +105,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
   try {
     if (foundjson != string::npos) {
       if (verbose_) {
-        cout << "KineticModel data file is an JSON file" << endl;
+        cout << "KineticModel data file is a JSON file" << endl;
       }
       parseDoc(fileName);
     } else {
@@ -114,6 +114,9 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
     }
   } catch (FileException fex) {
     fex.printException();
+    exit(1);
+  } catch (DataException dex) {
+    dex.printException();
     exit(1);
   }
 
@@ -207,7 +210,7 @@ void KineticController::parseDoc(const string &docName) {
     /// Get an iterator to the root node of the JSON file
     /// @todo Add a better JSON validity check.
 
-    json::iterator it = data.find("simulation_parameters");
+    json::iterator it = data.find("chemistry_data");
     json::iterator cdi = it.value().begin();
 
     // Test for non-emptiness
@@ -215,19 +218,19 @@ void KineticController::parseDoc(const string &docName) {
       throw FileException("Controller", "parseDoc", docName, "Empty JSON file");
     }
 
-    while (cdi != it.value().end()) {
-      if (cdi.key() == "temperature") {
-        temperature_ = cdi.value();
-      } else if (cdi.key() == "reftemperature") {
-        refT_ = cdi.value();
-      } else if (cdi.key() == "phase") {
+    cdi = it.value().find("temperature");
+    temperature_ = cdi.value();
+    cdi = it.value().find("reftemperature");
+    refT_ = cdi.value();
+    cdi = it.value().find("phases");
 
-        /// Each phase is a more complicated grouping of data that
-        /// has a separate method for parsing.
+    /// Each phase is a more complicated grouping of data that
+    /// has a separate method for parsing.
 
-        parseMicroPhase(cdi, numEntry, kineticData);
-      }
-      ++cdi;
+    try {
+      parseMicroPhases(cdi, numEntry, kineticData);
+    } catch (DataException dex) {
+      throw dex;
     }
 
     /// Push a copy of the isKinetic vector to the ChemicalSystem
@@ -248,8 +251,9 @@ void KineticController::parseDoc(const string &docName) {
   return;
 }
 
-void KineticController::parseMicroPhase(const json::iterator cdi, int &numEntry,
-                                        struct KineticData &kineticData) {
+void KineticController::parseMicroPhases(const json::iterator cdi,
+                                         int &numEntry,
+                                         struct KineticData &kineticData) {
   int proposedgemphaseid, proposedDCid;
   int testgemid, testdcid;
   string testname;
@@ -265,13 +269,16 @@ void KineticController::parseMicroPhase(const json::iterator cdi, int &numEntry,
 
   json::iterator p = cdi.value().begin();
 
-  while (p != cdi.value().end()) {
-    if (p.key() == "thamesname") {
-      testname = p.value();
-      kineticData.name = testname;
-      kineticData.microPhaseId = chemSys_->getMicroPhaseId(testname);
-    }
-    if (p.key() == "kinetic_data") {
+  for (int i = 0; i < cdi.value().size(); ++i) {
+    p = cdi.value()[i].find("thamesname");
+    testname = p.value();
+    kineticData.name = testname;
+    kineticData.microPhaseId = chemSys_->getMicroPhaseId(testname);
+    kineticfound = ispozz = isParrotKilloh = false;
+    ;
+
+    p = cdi.value()[i].find("kinetic_data");
+    if (p != cdi.value()[i].end()) {
       numEntry += 1;
       kineticfound = true;
       isKinetic_[isKinetic_.size() - 1] = true;
@@ -285,28 +292,29 @@ void KineticController::parseMicroPhase(const json::iterator cdi, int &numEntry,
       /// so there is a method written just for parsing that grouping
       ///
 
-      parseKineticData(p, kineticData);
+      try {
+        parseKineticData(p, kineticData);
+      } catch (DataException dex) {
+        throw dex;
+      }
+    }
+    if (kineticfound) {
+      kineticData.scaledMass =
+          chemSys_->getMicroPhaseMass(kineticData.microPhaseId);
+      kineticData.temperature = temperature_;
+      kineticData.reftemperature = refT_;
+      makeModel(kineticData);
     }
 
-    ++p;
+    /// Some items should be added to vectors whether kinetically controlled or
+    /// not
+
+    name_.push_back(kineticData.name);
+    microPhaseId_.push_back(kineticData.microPhaseId);
+    initScaledMass_.push_back(0.0);
+    scaledMass_.push_back(0.0);
+    scaledMassIni_.push_back(0.0);
   }
-
-  if (kineticfound) {
-    kineticData.scaledMass =
-        chemSys_->getMicroPhaseMass(kineticData.microPhaseId);
-    kineticData.temperature = temperature_;
-    kineticData.reftemperature = refT_;
-    makeModel(kineticData);
-  }
-
-  /// Some items should be added to vectors whether kinetically controlled or
-  /// not
-
-  name_.push_back(kineticData.name);
-  microPhaseId_.push_back(kineticData.microPhaseId);
-  initScaledMass_.push_back(0.0);
-  scaledMass_.push_back(0.0);
-  scaledMassIni_.push_back(0.0);
 
   return;
 }
@@ -315,27 +323,33 @@ void KineticController::parseKineticData(const json::iterator p,
                                          struct KineticData &kineticData) {
   bool typefound = false;
 
-  json::iterator pp = p.value().begin();
-
   try {
-    while (pp != p.value().end()) {
-      if (pp.key() == "type") {
-        kineticData.type = pp.value();
-        if (kineticData.type == ParrotKillohType) {
-          typefound = true;
-          parseKineticDataForParrotKilloh(pp, kineticData);
-        } else if (kineticData.type == StandardType) {
-          typefound = true;
-          parseKineticDataForStandard(pp, kineticData);
-        } else if (kineticData.type == PozzolanicType) {
-          typefound = true;
-          parseKineticDataForPozzolanic(pp, kineticData);
-        } else {
-          throw HandleException("KineticController", "parseKineticData", "type",
-                                "Model type not found");
-        }
+    json::iterator pp = p.value().find("type");
+    kineticData.type = pp.value();
+    if (kineticData.type == ParrotKillohType) {
+      typefound = true;
+      try {
+        parseKineticDataForParrotKilloh(p, kineticData);
+      } catch (DataException dex) {
+        throw dex;
       }
-      ++pp;
+    } else if (kineticData.type == StandardType) {
+      typefound = true;
+      try {
+        parseKineticDataForStandard(p, kineticData);
+      } catch (DataException dex) {
+        throw dex;
+      }
+    } else if (kineticData.type == PozzolanicType) {
+      typefound = true;
+      try {
+        parseKineticDataForPozzolanic(p, kineticData);
+      } catch (DataException dex) {
+        throw dex;
+      }
+    } else {
+      throw HandleException("KineticController", "parseKineticData", "type",
+                            "Model type not found");
     }
 
     if (!typefound) {
@@ -350,60 +364,73 @@ void KineticController::parseKineticData(const json::iterator p,
 }
 
 void KineticController::parseKineticDataForParrotKilloh(
-    const json::iterator pp, struct KineticData &kineticData) {
+    const json::iterator p, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing PK data for " << kineticData.name << endl;
     cout.flush();
   }
 
-  json::iterator ppp = pp.value().begin();
-  while (ppp != pp.value().end()) {
+  json::iterator pp = p.value().find("specificSurfaceArea");
+  kineticData.specificSurfaceArea = pp.value();
+  cout << "  Specific surface area = " << kineticData.specificSurfaceArea
+       << endl;
+  cout.flush();
 
-    // Specific surface area (m2/kg)
-    if (ppp.key() == "specificSurfaceArea") {
-      kineticData.specificSurfaceArea = ppp.value();
-    }
-    // Reference specific surface area (m2/kg)
-    if (ppp.key() == "refSpecificSurfaceArea") {
-      kineticData.refSpecificSurfaceArea = ppp.value();
-    }
-    // Parrot-Killoh k1 parameter
-    if (ppp.key() == "k1") {
-      kineticData.k1 = ppp.value();
-    }
-    // Parrot-Killoh k2 parameter
-    if (ppp.key() == "k2") {
-      kineticData.k2 = ppp.value();
-    }
-    // Parrot-Killoh k3 parameter
-    if (ppp.key() == "k3") {
-      kineticData.k3 = ppp.value();
-    }
-    // Parrot-Killoh n1 parameter
-    if (ppp.key() == "n1") {
-      kineticData.n1 = ppp.value();
-    }
-    // Parrot-Killoh n3 parameter
-    if (ppp.key() == "n3") {
-      kineticData.n3 = ppp.value();
-    }
-    // Parrot-Killoh DOR_Hcoeff parameter
-    if (ppp.key() == "dorHcoeff") {
-      kineticData.dorHcoeff = ppp.value();
-    }
-    // Activation energy
-    if (ppp.key() == "activationEnergy") {
-      kineticData.activationEnergy = ppp.value();
-    }
-    ++ppp;
-  }
+  // Reference specific surface area (m2/kg)
+  pp = p.value().find("refSpecificSurfaceArea");
+  kineticData.refSpecificSurfaceArea = pp.value();
+  cout << "  Reference specific surface area = "
+       << kineticData.refSpecificSurfaceArea << endl;
+  cout.flush();
+
+  // Parrot-Killoh k1 parameter
+  pp = p.value().find("k1");
+  kineticData.k1 = pp.value();
+  cout << "  k1 = " << kineticData.k1 << endl;
+  cout.flush();
+
+  // Parrot-Killoh k2 parameter
+  pp = p.value().find("k2");
+  kineticData.k2 = pp.value();
+  cout << "  k2 = " << kineticData.k2 << endl;
+  cout.flush();
+
+  // Parrot-Killoh k3 parameter
+  pp = p.value().find("k3");
+  kineticData.k3 = pp.value();
+  cout << "  k3 = " << kineticData.k3 << endl;
+  cout.flush();
+
+  // Parrot-Killoh n1 parameter
+  pp = p.value().find("n1");
+  kineticData.n1 = pp.value();
+  cout << "  n1 = " << kineticData.n1 << endl;
+  cout.flush();
+
+  // Parrot-Killoh n3 parameter
+  pp = p.value().find("n3");
+  kineticData.n3 = pp.value();
+  cout << "  n3 = " << kineticData.n3 << endl;
+  cout.flush();
+
+  // Parrot-Killoh DOR_Hcoeff parameter
+  pp = p.value().find("dorHcoeff");
+  kineticData.dorHcoeff = pp.value();
+  cout << "  dorHcoeff = " << kineticData.dorHcoeff << endl;
+  cout.flush();
+
+  // Activation energy
+  pp = p.value().find("activationEnergy");
+  kineticData.activationEnergy = pp.value();
+  cout << "  activationEnergy = " << kineticData.activationEnergy << endl;
+  cout.flush();
 
   return;
 }
 
 void KineticController::parseKineticDataForStandard(
-    const json::iterator pp, struct KineticData &kineticData) {
+    const json::iterator p, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing standard kinetic data for " << kineticData.name
@@ -411,142 +438,314 @@ void KineticController::parseKineticDataForStandard(
     cout.flush();
   }
 
-  json::iterator ppp = pp.value().begin();
+  // Specific surface area (m2/kg)
+  json::iterator pp = p.value().find("specificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.specificSurfaceArea = pp.value();
+    cout << "specificSurfaceArea = " << kineticData.specificSurfaceArea << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForStandard",
+                        "specificSurfaceArea not found");
+  }
 
-  while (ppp != pp.value().end()) {
+  // Reference specific surface area (m2/kg)
+  pp = p.value().find("refSpecificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.refSpecificSurfaceArea = pp.value();
+    cout << "refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForStandard",
+                        "refSpecificSurfaceArea not found");
+  }
 
-    // Specific surface area (m2/kg)
-    if (ppp.key() == "specificSurfaceArea") {
-      kineticData.specificSurfaceArea = ppp.value();
-    }
+  // Dissolution rate constant (mol/m2/s)
+  pp = p.value().find("dissolutionRateConst");
+  if (pp != p.value().end()) {
+    kineticData.dissolutionRateConst = pp.value();
+    cout << "dissolutionRateConst = " << kineticData.dissolutionRateConst
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForStandard",
+                        "dissolutionRateConst not found");
+  }
 
-    // Reference specific surface area (m2/kg)
-    if (ppp.key() == "refSpecificSurfaceArea") {
-      kineticData.refSpecificSurfaceArea = ppp.value();
-    }
+  // Rate constant for early-age diffusion (mol/m2/s)
+  pp = p.value().find("diffusionRateConstEarly");
+  if (pp != p.value().end()) {
+    kineticData.diffusionRateConstEarly = pp.value();
+    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstEarly
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForStandard",
+                        "diffusionRateConstEarly not found");
+  }
 
-    // Dissolution rate constant (mol/m2/s)
-    if (ppp.key() == "dissolutionRateConst") {
-      kineticData.dissolutionRateConst = ppp.value();
-    }
+  // Dissolution rate constant (mol/m2/s)
+  pp = p.value().find("diffusionRateConstLate");
+  if (pp != p.value().end()) {
+    kineticData.diffusionRateConstLate = pp.value();
+    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstLate
+         << endl;
+    cout.flush();
+  } else {
+    kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
+    cout << "WARNING: For " << kineticData.name
+         << " diffusionRateConstLate not found; setting it to "
+            "diffusionRateConstEarly"
+         << endl;
+  }
 
-    // Number of DC units produced in dissociation reaction
-    if (ppp.key() == "dissolvedUnits") {
-      kineticData.dissolvedUnits = ppp.value();
-    }
+  // Number of DC units produced in dissociation reaction
+  pp = p.value().find("dissolvedUnits");
+  if (pp != p.value().end()) {
+    kineticData.dissolvedUnits = pp.value();
+    cout << "dissolvedUnits = " << kineticData.dissolvedUnits << endl;
+    cout.flush();
+  } else {
+    kineticData.dissolvedUnits = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " dissolvedUnits not found; setting it to 1" << endl;
+  }
 
-    // Exponent on  the saturation index in the rate equation
-    if (ppp.key() == "siexp") {
-      kineticData.siexp = ppp.value();
-    }
+  // Exponent on  the saturation index in the rate equation
+  pp = p.value().find("siexp");
+  if (pp != p.value().end()) {
+    kineticData.siexp = pp.value();
+    cout << "sio2 = " << kineticData.sio2 << endl;
+    cout.flush();
+  } else {
+    kineticData.sio2 = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " sio2 not found; setting it to 1" << endl;
+  }
 
-    // Exponent on  the driving force term in the rate equation
-    if (ppp.key() == "dfexp") {
-      kineticData.dfexp = ppp.value();
-    }
+  // Exponent on  the driving force term in the rate equation
+  pp = p.value().find("dfexp");
+  if (pp != p.value().end()) {
+    kineticData.dfexp = pp.value();
+    cout << "dfexp = " << kineticData.dfexp << endl;
+    cout.flush();
+  } else {
+    kineticData.dfexp = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " dfexp not found; setting it to 1" << endl;
+  }
 
-    // Loss on ignition of the material
-    if (ppp.key() == "loi") {
-      kineticData.loi = ppp.value();
-    }
+  // Loss on ignition of the material
+  pp = p.value().find("loi");
+  if (pp != p.value().end()) {
+    kineticData.loi = pp.value();
+    cout << "loi = " << kineticData.loi << endl;
+    cout.flush();
+  } else {
+    kineticData.loi = 1.0e-6;
+    cout << "WARNING: For " << kineticData.name
+         << " loi not found; setting it to 1.0e-6" << endl;
+  }
 
-    // Activation energy for dissolution
-    if (ppp.key() == "activationEnergy") {
-      kineticData.activationEnergy = ppp.value();
-    }
-
-    ++ppp;
+  // Activation energy for dissolution
+  pp = p.value().find("activationEnergy");
+  if (pp != p.value().end()) {
+    kineticData.activationEnergy = pp.value();
+    cout << "activationEnergy = " << kineticData.activationEnergy << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForStandard",
+                        "activationEnergy not found");
   }
 
   return;
 }
 
 void KineticController::parseKineticDataForPozzolanic(
-    const json::iterator pp, struct KineticData &kineticData) {
+    const json::iterator p, struct KineticData &kineticData) {
 
   if (verbose_) {
     cout << "--->Parsing pozzolanic data for " << kineticData.name << endl;
     cout.flush();
   }
 
-  json::iterator ppp = pp.value().begin();
-  while (ppp != pp.value().end()) {
+  json::iterator pp = p.value().find("specificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.specificSurfaceArea = pp.value();
+    cout << "specificSurfaceArea = " << kineticData.specificSurfaceArea << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForPozzolanic",
+                        "specificSurfaceArea not found");
+  }
 
-    // Specific surface area (m2/kg)
-    if (ppp.key() == "specificSurfaceArea") {
-      kineticData.specificSurfaceArea = ppp.value();
-    }
+  pp = p.value().find("refSpecificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.refSpecificSurfaceArea = pp.value();
+    cout << "refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForPozzolanic",
+                        "refSpecificSurfaceArea not found");
+  }
 
-    // Reference specific surface area (m2/kg)
-    if (ppp.key() == "refSpecificSurfaceArea") {
-      kineticData.refSpecificSurfaceArea = ppp.value();
-    }
+  // Dissolution rate constant (mol/m2/s)
+  pp = p.value().find("dissolutionRateConst");
+  if (pp != p.value().end()) {
+    kineticData.dissolutionRateConst = pp.value();
+    cout << "dissolutionRateConst = " << kineticData.dissolutionRateConst
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForPozzolanic",
+                        "dissolutionRateConst not found");
+  }
 
-    // Dissolution rate constant (mol/m2/s)
-    if (ppp.key() == "dissolutionRateConst") {
-      kineticData.dissolutionRateConst = ppp.value();
-    }
+  // Early-age diffusion rate constant (mol/m2/s)
+  pp = p.value().find("diffusionRateConstEarly");
+  if (pp != p.value().end()) {
+    kineticData.diffusionRateConstEarly = pp.value();
+    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstEarly
+         << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForPozzolanic",
+                        "diffusionRateConstEarly not found");
+  }
 
-    // Early-age diffusion rate constant (mol/m2/s)
-    if (ppp.key() == "diffusionRateConstEarly") {
-      kineticData.diffusionRateConstEarly = ppp.value();
-    }
+  // Later-age diffusion rate constant (mol/m2/s)
+  pp = p.value().find("diffusionRateConstLate");
+  if (pp != p.value().end()) {
+    kineticData.diffusionRateConstLate = pp.value();
+    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstLate
+         << endl;
+    cout.flush();
+  } else {
+    kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
+    cout << "WARNING: For " << kineticData.name
+         << " diffusionRateConstLate not found; setting it to "
+            "diffusionRateConstEarly"
+         << endl;
+  }
 
-    // Number of DC units produced in dissociation reaction
-    if (ppp.key() == "dissolvedUnits") {
-      kineticData.dissolvedUnits = ppp.value();
-    }
+  // Number of DC units produced in dissociation reaction
+  pp = p.value().find("dissolvedUnits");
+  if (pp != p.value().end()) {
+    kineticData.dissolvedUnits = pp.value();
+    cout << "dissolvedUnits = " << kineticData.dissolvedUnits << endl;
+    cout.flush();
+  } else {
+    kineticData.dissolvedUnits = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " dissolvedUnits not found; setting it to 1" << endl;
+  }
 
-    // Later-age diffusion rate constant (mol/m2/s)
-    if (ppp.key() == "diffusionRateConstLate") {
-      kineticData.diffusionRateConstLate = ppp.value();
-    }
+  // Exponent on the saturation index in the rate equation
+  pp = p.value().find("siexp");
+  if (pp != p.value().end()) {
+    kineticData.siexp = pp.value();
+    cout << "siexp = " << kineticData.siexp << endl;
+    cout.flush();
+  } else {
+    kineticData.siexp = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " siexp not found; setting it to 1" << endl;
+  }
 
-    // Exponent on the saturation index in the rate equation
-    if (ppp.key() == "siexp") {
-      kineticData.siexp = ppp.value();
-    }
+  // Exponent on the driving force term in the rate equation
+  pp = p.value().find("dfexp");
+  if (pp != p.value().end()) {
+    kineticData.dfexp = pp.value();
+    cout << "dfexp = " << kineticData.dfexp << endl;
+    cout.flush();
+  } else {
+    kineticData.dfexp = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " dfexp not found; setting it to 1" << endl;
+  }
 
-    // Exponent on the driving force term in the rate equation
-    if (ppp.key() == "dfexp") {
-      kineticData.dfexp = ppp.value();
-    }
+  // Exponent on the degree of reaction term in the diffusion rate equation
+  pp = p.value().find("dorexp");
+  if (pp != p.value().end()) {
+    kineticData.dorexp = pp.value();
+    cout << "dorexp = " << kineticData.dorexp << endl;
+    cout.flush();
+  } else {
+    kineticData.dorexp = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " dorexp not found; setting it to 1" << endl;
+  }
 
-    // Exponent on the degree of reaction term in the diffusion rate equation
-    if (ppp.key() == "dorexp") {
-      kineticData.dorexp = ppp.value();
-    }
+  // Exponent on the hydroxy ion activity in the rate equation
+  pp = p.value().find("ohexp");
+  if (pp != p.value().end()) {
+    kineticData.ohexp = pp.value();
+    cout << "ohexp = " << kineticData.ohexp << endl;
+    cout.flush();
+  } else {
+    kineticData.ohexp = 1.0;
+    cout << "WARNING: For " << kineticData.name
+         << " ohexp not found; setting it to 1" << endl;
+  }
 
-    // Exponent on the hydroxy ion activity in the rate equation
-    if (ppp.key() == "ohexp") {
-      kineticData.ohexp = ppp.value();
-    }
+  // SiO2 mass fraction in the material
+  pp = p.value().find("sio2");
+  if (pp != p.value().end()) {
+    kineticData.sio2 = pp.value();
+    cout << "sio2 = " << kineticData.sio2 << endl;
+    cout.flush();
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "sio2 not found");
+  }
 
-    // SiO2 mass fraction in the material
-    if (ppp.key() == "sio2") {
-      kineticData.sio2 = ppp.value();
-    }
+  // Al2O3 mass fraction in the material
+  pp = p.value().find("al2o3");
+  if (pp != p.value().end()) {
+    kineticData.al2o3 = pp.value();
+    cout << "al2o3 = " << kineticData.al2o3 << endl;
+    cout.flush();
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "al2o3 not found");
+  }
 
-    // Al2O3 mass fraction in the material
-    if (ppp.key() == "al2o3") {
-      kineticData.al2o3 = ppp.value();
-    }
+  // CaO mass fraction in the material
+  pp = p.value().find("cao");
+  if (pp != p.value().end()) {
+    kineticData.cao = pp.value();
+    cout << "cao = " << kineticData.cao << endl;
+    cout.flush();
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "cao not found");
+  }
 
-    // CaO mass fraction in the material
-    if (ppp.key() == "cao") {
-      kineticData.cao = ppp.value();
-    }
+  // Loss on ignition of the material
+  pp = p.value().find("loi");
+  if (pp != p.value().end()) {
+    kineticData.loi = pp.value();
+    cout << "loi = " << kineticData.loi << endl;
+    cout.flush();
+    // } else {
+    //   throw DataException("KineticController",
+    //   "parseKineticDataForPozzolanic",
+    //                       "loi not found");
+  }
 
-    // Loss on ignition of the material
-    if (ppp.key() == "loi") {
-      kineticData.loi = ppp.value();
-    }
-
-    if (ppp.key() == "activationEnergy") {
-      kineticData.activationEnergy = ppp.value();
-    }
-
-    ++ppp;
+  pp = p.value().find("activationEnergy");
+  if (pp != p.value().end()) {
+    kineticData.activationEnergy = pp.value();
+    cout << "activationEnergy = " << kineticData.activationEnergy << endl;
+    cout.flush();
+  } else {
+    throw DataException("KineticController", "parseKineticDataForPozzolanic",
+                        "activationEnergy not found");
   }
 
   return;

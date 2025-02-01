@@ -4,15 +4,13 @@
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 0,
-    "electrolyte": {
-      "DCconc": [
-        { "name": "Ca+2", "condition": "initial", "conc": 0.001 },
-        { "name": "OH-", "condition": "initial", "conc": 0.002 },
-        { "name": "K(SO4)-", "condition": "initial", "conc": 0.0005 },
-        { "name": "K+", "condition": "initial", "conc": 0.0005 }
-      ]
-    },
-    "phase": [
+    "electrolyte_conditions": [
+      { "DCname": "Ca+2", "condition": "initial", "concentration": 0.001 },
+      { "DCname": "OH-", "condition": "initial", "concentration": 0.002 },
+      { "DCname": "K(SO4)-", "condition": "initial", "concentration": 0.0005 },
+      { "DCname": "K+", "condition": "initial", "concentration": 0.0005 }
+    ],
+    "phases": [
       {
         "thamesname": "Void",
         "id": 0,
@@ -34,7 +32,6 @@
         "thamesname": "Alite",
         "id": 2,
         "cement_component": 1,
-        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "Alite",
@@ -110,4 +107,3 @@
     ]
   }
 }
-

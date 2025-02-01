@@ -638,39 +638,6 @@ public:
   void parseGasComp(const json::iterator cdi);
 
   /**
-  @brief Parse input about an individual IC in the intitial solution
-
-  The initial solution composition, if given, is parsed one IC at
-  a time by the parent function parseSolutionComp.  Each IC is
-  parsed one at a time by this function.  The composition will be
-  held in an associative map of key value pairs:
-
-  * key = integer id of a GEM independent component
-  * value = molal concentration of that component in the initial solution
-  [mol/kgw]
-
-  @param p is a JSON iterator pointing to the current location in json data
-  object
-  */
-  void parseDCInSolution(const json::iterator p);
-
-  /**
-  @brief Parse input about an individual IC in the gas
-
-  The gas composition, if given, is parsed one IC at
-  a time by the parent function parseGasComp.  Each IC is
-  parsed one at a time by this function.  The composition will be
-  held in an associative map of key value pairs:
-
-  * key = integer id of a GEM independent component
-  * value = molal concentration of that component in the gas [mol/kg-gas]
-
-  @param cdi is a JSON iterator pointing to the current location in json data
-  object
-  */
-  void parseDCInGas(const json::iterator cdi);
-
-  /**
   @brief Scan a JSON object
 
   @param cdi is an iterator over the JSON data
@@ -687,8 +654,8 @@ public:
   @param phaseids is a map associating phase names with id numbers
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseMicroPhase(const json::iterator cdi, int numEntries,
-                       map<string, int> phaseids, PhaseData &phaseData);
+  void parseMicroPhases(const json::iterator cdi, int numEntries,
+                        map<string, int> phaseids, PhaseData &phaseData);
 
   /**
   @brief Parse input about a GEM CSD phase from a JSON document.
@@ -6182,7 +6149,7 @@ public:
 
   int getDC_to_MPhID(int i) { return DC_to_MPhID_[i]; }
 
-  void addWatterMassAndVolume(double massVal, double volVal) {
+  void addWaterMassAndVolume(double massVal, double volVal) {
 
     // int wMPhID = getMicroPhaseId("Electrolyte");
     // cout << "wMPhID = " << wMPhID << endl;

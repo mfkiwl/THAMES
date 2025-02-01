@@ -579,17 +579,11 @@
           },
           {
             "gemphasename": "ettr",
-            "gemdc": [
-              { "gemdcname": "ettr" },
-              { "gemdcname": "ettr30" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr" }, { "gemdcname": "ettr30" }]
           },
           {
             "gemphasename": "ettr-AlFe",
-            "gemdc": [
-              { "gemdcname": "ettr05" },
-              { "gemdcname": "Fe-ettr05" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr05" }, { "gemdcname": "Fe-ettr05" }]
           }
         ]
       },
@@ -644,11 +638,10 @@
             "gemdc": [
               { "gemdcname": "Mg3AlC0.5OH" },
               { "gemdcname": "Mg3FeC0.5OH" }
-           ]
+            ]
           }
         ]
       }
     ]
   }
 }
-

@@ -245,6 +245,8 @@ public:
       - Length of time to calculate [days]
       - Frequency to output microstructure images
 
+  @todo Need some error checking for what to do if a required field is not found
+
   @param docname is the name of the JSON input file containing the Controller
   parameters
   */

@@ -4,14 +4,10 @@
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 0,
-    "electrolyte": {
-      "DCconc": {
-        "name": "KOH@",
-        "condition": "initial",
-        "conc": 0.01
-      }
-    },
-    "phase": [
+    "electrolyte_conditions": [
+      { "DCname": "KOH@", "condition": "initial", "concentration": 0.01 }
+    ],
+    "phases": [
       {
         "thamesname": "Void",
         "id": 0,
@@ -111,10 +107,10 @@
           }
         ],
         "impurity_data": {
-          "k2ocoeff": 0.00087000,
-          "na2ocoeff": 0.00000000,
-          "mgocoeff": 0.00861000,
-          "so3coeff": 0.00794200
+          "k2ocoeff": 0.00087,
+          "na2ocoeff": 0.0,
+          "mgocoeff": 0.00861,
+          "so3coeff": 0.007942
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
@@ -141,10 +137,10 @@
           }
         ],
         "impurity_data": {
-          "k2ocoeff": 0.01152000,
-          "na2ocoeff": 0.00000000,
-          "mgocoeff": 0.00380000,
-          "so3coeff": 0.01052800
+          "k2ocoeff": 0.01152,
+          "na2ocoeff": 0.0,
+          "mgocoeff": 0.0038,
+          "so3coeff": 0.010528
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
@@ -156,7 +152,7 @@
           "n1": 1,
           "n3": 5,
           "dorHcoeff": 1.55,
-          "activationEnergy": 20785.000,
+          "activationEnergy": 20785.0,
           "loi": 0.0
         }
       },
@@ -171,10 +167,10 @@
           }
         ],
         "impurity_data": {
-          "k2ocoeff": 0.00979000,
-          "na2ocoeff": 0.00000000,
-          "mgocoeff": 0.01091000,
-          "so3coeff": 0.00000000
+          "k2ocoeff": 0.00979,
+          "na2ocoeff": 0.0,
+          "mgocoeff": 0.01091,
+          "so3coeff": 0.0
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
@@ -186,7 +182,7 @@
           "n1": 0.85,
           "n3": 3.2,
           "dorHcoeff": 1.8,
-          "activationEnergy": 54040.000,
+          "activationEnergy": 54040.0,
           "loi": 0.0
         }
       },
@@ -202,9 +198,9 @@
         ],
         "impurity_data": {
           "k2ocoeff": 0.00272,
-          "na2ocoeff": 0.00000,
+          "na2ocoeff": 0.0,
           "mgocoeff": 0.02292,
-          "so3coeff": 0.00000
+          "so3coeff": 0.0
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
@@ -212,11 +208,11 @@
           "refSpecificSurfaceArea": 385.0,
           "k1": 0.37,
           "k2": 0.02,
-          "k3": 0.40,
+          "k3": 0.4,
           "n1": 0.7,
           "n3": 3.7,
           "dorHcoeff": 1.65,
-          "activationEnergy": 34087.000,
+          "activationEnergy": 34087.0,
           "loi": 0.0
         }
       },
@@ -466,17 +462,11 @@
           },
           {
             "gemphasename": "ettr",
-            "gemdc": [
-              { "gemdcname": "ettr" },
-              { "gemdcname": "ettr30" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr" }, { "gemdcname": "ettr30" }]
           },
           {
             "gemphasename": "ettr-AlFe",
-            "gemdc": [
-              { "gemdcname": "ettr05" },
-              { "gemdcname": "Fe-ettr05" }
-            ]
+            "gemdc": [{ "gemdcname": "ettr05" }, { "gemdcname": "Fe-ettr05" }]
           }
         ]
       },
