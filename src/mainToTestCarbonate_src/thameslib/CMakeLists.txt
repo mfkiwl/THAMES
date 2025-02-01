@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.7)
 
-project (Viz_project)
+project (ThamesLibrary_project)
 
-add_executable (viz ${CMAKE_SOURCE_DIR}/src/viz/viz.cc)
+file (GLOB SOURCES "${CMAKE_SOURCE_DIR}/src/thameslib/*.cc")
 
 #find_package (LibXml2)
 #if (LIBXML2_FOUND)
@@ -17,8 +17,11 @@ add_executable (viz ${CMAKE_SOURCE_DIR}/src/viz/viz.cc)
 
 #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XML_INCLUDE_PATH}")
 
-set (CMAKE_CXX_FLAGS "-O2 -std=c++17 -I${CMAKE_SOURCE_DIR}/src/viz")
+message ("THAMES lib directory, CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
-message ("viz directory, CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
+add_library (thameslib STATIC ${SOURCES})
 
-install (TARGETS viz DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+# target_link_libraries(thameslib ${EXTRA_LIBS})
+target_link_libraries(thameslib)
+
+install (TARGETS thameslib DESTINATION ${CMAKE_SOURCE_DIR}/lib)
