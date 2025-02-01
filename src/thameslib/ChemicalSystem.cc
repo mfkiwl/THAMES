@@ -812,7 +812,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
       } catch (DataException dex) {
         throw dex;
       }
-    } else if (cdi.key() == "phase") {
+    } else if (cdi.key() == "phases") {
       try {
         parseMicroPhase(cdi, testnumEntries, phaseids, phaseData);
       } catch (FileException fex) {

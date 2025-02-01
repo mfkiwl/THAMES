@@ -133,4 +133,4 @@
 | Apr 13 14:45 2017 | Testing markdown formatting of bulleted lists |
 | Apr 13 14:37 2017 | Initial committing of THAMES for GitHub remote repository |
 | Apr 13 13:12 2017 | Update README.md and corrected name spelling |
-| Apr 27 11:22 2015 | Initial commit |
+| Apr 27 11:22 2015 | Initial commiq
