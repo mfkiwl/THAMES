@@ -127,10 +127,7 @@ int main(int argc, char **argv) {
   //
 
   try {
-    ChemSys =
-        new ChemicalSystem(gemInputName,
-                           //                                 geminput_dbrname,
-                           micDefName, VERBOSE, WARNING);
+    ChemSys = new ChemicalSystem(gemInputName, micDefName, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
@@ -145,6 +142,7 @@ int main(int argc, char **argv) {
     dex.printException();
     stopProgram = true;
   }
+
   if (stopProgram) {
     if (ChemSys) {
       delete ChemSys;
@@ -191,6 +189,7 @@ int main(int argc, char **argv) {
     ex.printException();
     stopProgram = true;
   }
+
   if (stopProgram) {
     if (ChemSys) {
       delete ChemSys;
@@ -245,6 +244,7 @@ int main(int argc, char **argv) {
       ex.printException();
       stopProgram = true;
     }
+
     if (stopProgram) {
       if (ChemSys) {
         delete ChemSys;
@@ -287,6 +287,7 @@ int main(int argc, char **argv) {
       ex.printException();
       stopProgram = true;
     }
+
     if (stopProgram) {
       if (ChemSys) {
         delete ChemSys;
@@ -335,6 +336,7 @@ int main(int argc, char **argv) {
     ex.printException();
     stopProgram = true;
   }
+
   if (stopProgram) {
     if (ChemSys) {
       delete ChemSys;
@@ -395,6 +397,7 @@ int main(int argc, char **argv) {
     ex.printException();
     stopProgram = true;
   }
+
   if (stopProgram) {
     if (ChemSys) {
       delete ChemSys;
@@ -438,78 +441,75 @@ int main(int argc, char **argv) {
   cout.flush();
   //}
 
-  Ctrl->doCycle(statFileName, choice, elemTimeInterval);
-}
-catch (GEMException gex) {
-  gex.printException();
-}
-catch (DataException dex) {
-  dex.printException();
-}
-catch (EOBException ex) {
-  ex.printException();
-}
-catch (MicrostructureException mex) {
-  mex.printException();
-}
+  try {
+    Ctrl->doCycle(statFileName, choice, elemTimeInterval);
+  } catch (GEMException gex) {
+    gex.printException();
+  } catch (DataException dex) {
+    dex.printException();
+  } catch (EOBException ex) {
+    ex.printException();
+  } catch (MicrostructureException mex) {
+    mex.printException();
+  }
 
-//
-// Simulation is finished.
-//
-// Move remaining output files to output folder
-//
+  //
+  // Simulation is finished.
+  //
+  // Move remaining output files to output folder
+  //
 
-string name = "ipmlog.txt";
-ifstream f(name.c_str());
-if (f.good()) {
-  buff = "mv -f ipmlog.txt " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
-  f.close();
-}
+  string name = "ipmlog.txt";
+  ifstream f(name.c_str());
+  if (f.good()) {
+    buff = "mv -f ipmlog.txt " + outputFolder + "/.";
+    system(buff.c_str());
+    cout << buff << endl;
+    f.close();
+  }
 
-name = "IPM_dump.txt";
-f.open(name.c_str());
-if (f.good()) {
-  buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
-  f.close();
-}
+  name = "IPM_dump.txt";
+  f.open(name.c_str());
+  if (f.good()) {
+    buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
+    system(buff.c_str());
+    cout << buff << endl;
+    f.close();
+  }
 
-// Record and output the timing data.
-//
+  // Record and output the timing data.
+  //
 
-cout << endl << "THAMES END" << endl;
-timeCount(starttime, lt);
+  cout << endl << "THAMES END" << endl;
+  timeCount(starttime, lt);
 
-//
-// Delete the dynamically allocated memory
-//
+  //
+  // Delete the dynamically allocated memory
+  //
 
-if (Ctrl) {
-  delete Ctrl;
-}
-if (KController) {
-  delete KController;
-}
-if (AppliedStrainSolver) {
-  delete AppliedStrainSolver;
-}
-if (ThermalStrainSolver) {
-  delete ThermalStrainSolver;
-}
-if (Mic) {
-  delete Mic;
-}
-if (ChemSys) {
-  delete ChemSys;
-}
-if (RNG) {
-  delete RNG;
-}
+  if (Ctrl) {
+    delete Ctrl;
+  }
+  if (KController) {
+    delete KController;
+  }
+  if (AppliedStrainSolver) {
+    delete AppliedStrainSolver;
+  }
+  if (ThermalStrainSolver) {
+    delete ThermalStrainSolver;
+  }
+  if (Mic) {
+    delete Mic;
+  }
+  if (ChemSys) {
+    delete ChemSys;
+  }
+  if (RNG) {
+    delete RNG;
+  }
 
-return 0;
+  return 0;
 }
 
 void timeCount(clock_t time_, time_t lt_) {

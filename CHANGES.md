@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Feb 01 14:39 2025 | Fixed compile-time bug in `thames.cc` after merging |
 | Feb 01 11:41 2025 | Merged branch `florinnita_THAMES_avoidGEMfailure` to take small time steps to get past a GEM_run failure |
 | Jan 12 17:45 2025 | Updated test input files to put pore size distribution data in microstructure definition file |
 | Jan 07 14:24 2025 | Removed Doxyfile$ file which only records local changes to environment |
