@@ -24,7 +24,7 @@ Lattice::Lattice(ChemicalSystem *cs) : siteneighbors_(NN_NNN), chemSys_(cs) {
 #endif
 }
 
-Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &fileName, const bool verbose,
+Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, const string &fileName, const bool verbose,
                  const bool warning)
     : siteneighbors_(NN_NNN), chemSys_(cs), rg_(rg) {
 
@@ -76,9 +76,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &file
   in >> buff;
   if (buff == VERSIONSTRING) {
     in >> version_;
-    cout << endl << "Lattice::Lattice - " << fileName
-         << " input file generated using "
-            "VCCTL Version : " << version_ << endl;
+    cout << endl << "Lattice::Lattice - .img  input file  generated using "
+                    "VCCTL Version : " << version_ << endl;
     in >> buff; // X size string identifier
     in >> xdim_;
     in >> buff; // Y size string identifier
@@ -96,9 +95,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &file
     /// Allow backward compatibility by defaulting system
     /// size to 100 and resolution to 1.0 micrometers
     ///
-    cout << endl << "Lattice::Lattice - " << fileName
-         << " input file generated using "
-            "VCCTL Version prior to VCCTL Version 3.0.0" << endl;
+    cout << endl << "Lattice::Lattice - .img input file "
+         "generated using VCCTL Version prior to VCCTL Version 3.0.0" << endl;
     version_ = "2.0";
     double testres = 1.0;
     setResolution(testres);
@@ -137,16 +135,16 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &file
   /// Allocate a random number generator object and seed it
   ///
 
-  latticeRNGseed_ = seedRNG; //-76241;
-  // cout << endl << "Lattice::Lattice   latticeRNGseed_ = " << latticeRNGseed_ << endl;
-  // setRNGseed(latticeRNGseed_);
-  // try {
-  //   rg_->setSeed(latticeRNGseed_);
-  // } catch (bad_alloc &ba) {
-  //   cout << "Lattice constructor failed when allocating rg_";
-  //  cout.flush();
-  //   exit(1);
-  // }
+  latticeRNGseed_ = -76241; //-142234;
+  cout << endl << "Lattice::Lattice   latticeRNGseed_ = " << latticeRNGseed_ << endl;
+  //setRNGseed(latticeRNGseed_);
+  try {
+    rg_->setSeed(latticeRNGseed_);
+  } catch (bad_alloc &ba) {
+    cout << "Lattice constructor failed when allocating rg_";
+    cout.flush();
+    exit(1);
+  }
   // //cout << endl << "Lattice::Lattice   rg_->getSeed() = " << rg_->getSeed() << endl;
   numRNGcall_0_ = 0;
   numRNGcallLONGMAX_ = 0;
@@ -545,7 +543,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &file
     int numDCs = chemSys_->getNumDCs();
     for (int i = 0; i < numDCs; i++) {
       chemSys_->setDCMoles(i, 0.0);
-      chemSys_->setDCLowerLimit(i, 0.0);
+      //chemSys_->setDCLowerLimit(i, 0.0);
       // cout << "   " << i << "\t" << chemSys_->getDCMoles(i)
       //      << "\t" << chemSys_->getDCClassCode(i) << "\t" <<
       //      chemSys_->getDCName(i) << endl;
@@ -1333,7 +1331,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
             writeFirst[i] = true;
             phaseID = growPhaseIDVect[i];
             dim_isite[i] = growthInterfaceSize_[phaseID];
-            /*
             cout << "    Lattice::growPhase GROW_END for i = " << i << "   totalTRC/trc_g/bcl "
                  << totalTRC << "/" << trc_g << "/" << bcl << endl;
             cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
@@ -1346,7 +1343,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
                << setw(8) << numLeft[i] << "   "
                << setw(8) << numChange[i] << endl;
             cout.flush();
-            */
 
             needUpdate = true;
           }
@@ -2522,9 +2518,7 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
           cout << endl << "    Lattice::dissolvePhase - anormal end:  dimInterface[" << i
                << "] = 0" << endl;
           cout << "      anormal end: phaseID[" << i << "] = " << phaseID
-               << " [" << dissPhNameVect[i]
-               << " / DCId:" << chemSys_->getMicroPhaseDCMembers(phaseID, 0)
-               << "]  &  dim_isite[" << i << "] = " << dim_isite[i]
+               << "  &  dim_site[" << i << "] = " << dim_isite[i]
                << " while numLeft[" << i << "] = " << numLeft[i] << endl;
           cout << "      anormal end: totalTRC/trc_d/bcl " << totalTRC << "/"
                << trc_d << "/" << bcl << endl;
@@ -2545,7 +2539,6 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
 
           phaseID = dissPhaseIDVect[i];
           dim_isite[i] = dissolutionInterfaceSize_[phaseID];
-          /*
           cout << "    Lattice::dissolvePhase DISS_END for i = " << i
                << "   totalTRC/trc_d/bcl " << totalTRC << "/" << trc_d << "/"
                << bcl << endl;
@@ -2559,7 +2552,6 @@ int Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
                << "   " << setw(8) << dim_isite[i] << "   "
                << setw(8) << numLeft[i] << "   " << setw(8) << numChange[i] << endl;
           cout.flush();
-          */
 
           dissolutionVectorSize = dissolutionVector.size();
           for (int i = 0; i < dissolutionVectorSize; i++) {

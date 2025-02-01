@@ -202,7 +202,7 @@ public:
   @param choice is an int flag to specify whether simulating hydration,
   leaching, or sulfate attack
   */
-  void doCycle(const string &statfilename, int choice, double elemTimeInterval);
+  void doCycle(const string &statfilename, int choice);
 
   /**
   @brief Calculate the state of the system (called by doCycle).

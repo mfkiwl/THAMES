@@ -190,7 +190,7 @@ public:
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
   */
-  Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &fileName, const bool verbose,
+  Lattice(ChemicalSystem *cs, RanGen *rg, const string &fileName, const bool verbose,
           const bool warning);
 
   /**
@@ -1543,8 +1543,6 @@ public:
   double getLastRNG(void) { return lastRNG_; }
 
   void setRNGseed(int seed) { rg_->setSeed(seed); }
-
-  int getRNGseed(void) { return latticeRNGseed_;}
 
   void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
     //latticeRNGseed_ = seed;

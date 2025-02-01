@@ -85,7 +85,6 @@ private:
   int pKMsize_;
 
   double initScaledCementMass_;
-  double hyd_time_ini_;
 
 public:
   /**
@@ -494,8 +493,6 @@ public:
   vector<double> getDCMoles(void) { return DCMoles_; }
 
   vector<bool> getIsKinetic(void) { return isKinetic_; }
-
-  void setHydTimeIni (double val) { hyd_time_ini_ = val; }
 
 }; // End of KineticController class
 
