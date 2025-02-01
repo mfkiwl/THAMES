@@ -24,9 +24,9 @@ as possible.
 #define CHEMSYSH
 
 #include "../Resources/include/GEMS3K/node.h"
-#include "../Resources/include/nlohmann/json.hpp"
 #include "global.h"
 #include "utils.h"
+#include "valid.h"
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -38,7 +38,6 @@ as possible.
 #include <typeinfo>
 
 using namespace std;
-using json = nlohmann::json;
 
 #ifndef CHEMSYSDATASTRUCT
 #define CHEMSYSDATASTRUCT
@@ -105,7 +104,7 @@ backscattered electron micrographs
 
 struct PhaseData {
   int id;
-  // double randomGrowth;
+  //double randomGrowth;
   int stressCalc;
   int weak;
   double k2o;
@@ -129,10 +128,9 @@ struct PhaseData {
   vector<double> affinity;
   vector<double> contactAngle;
 
-  //  vector<int>
-  //      RdId; /**< Vector of IC ids of the partitioned components in the phase
-  //      */
-  //  vector<double> RdVal; /**< Vector of Rd values for each IC */
+//  vector<int>
+//      RdId; /**< Vector of IC ids of the partitioned components in the phase */
+//  vector<double> RdVal; /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -312,18 +310,18 @@ class ChemicalSystem {
   */
   vector<vector<struct PoreSizeVolume>> poreSizeDistribution_;
 
-  vector<double> k2o_;        /**< Mass fraction of K<sub>2</sub>O dissolved in
-                                    each phase, in units of
-                                    g per 100 g of the phase */
-  vector<double> na2o_;       /**< Mass fraction of Na<sub>2</sub>O dissolved in
-                                    each phase, in units of
-                                    g per 100 g of the phase */
-  vector<double> mgo_;        /**< Mass fraction of MgO dissolved in
-                                    each phase, in units of
-                                    g per 100 g of the phase */
-  vector<double> so3_;        /**< Mass fraction of SO<sub>3</sub> dissolved in
-                                    each phase, in units of
-                                    g per 100 g of the phase */
+  vector<double> k2o_;       /**< Mass fraction of K<sub>2</sub>O dissolved in
+                                   each phase, in units of
+                                   g per 100 g of the phase */
+  vector<double> na2o_;      /**< Mass fraction of Na<sub>2</sub>O dissolved in
+                                   each phase, in units of
+                                   g per 100 g of the phase */
+  vector<double> mgo_;       /**< Mass fraction of MgO dissolved in
+                                   each phase, in units of
+                                   g per 100 g of the phase */
+  vector<double> so3_;       /**< Mass fraction of SO<sub>3</sub> dissolved in
+                                   each phase, in units of
+                                   g per 100 g of the phase */
   vector<int> grayscale_;     /**< A number on [0,255] giving the relative
                                    grayscale brightness of the THAMES
                                    phases in a backscattered electron image */
@@ -601,14 +599,14 @@ public:
                     string &ipmName, string &dbrName);
 
   /**
-  @brief Master function for parsing an input file in JSON format.
+  @brief Master function for parsing an input file in XML format.
 
-  @param docName is the name of the JSON document to parse
+  @param docName is the name of the XML document to parse
   */
   void parseDoc(const string &docName);
 
   /**
-  @brief Parse input about the initial solution composition from a JSON
+  @brief Parse input about the initial solution composition from an XML
   document.
 
   The initial solution composition, if given, is parsed by this function.
@@ -618,12 +616,13 @@ public:
   * value = molal concentration of that component in the initial solution
   [mol/kgw]
 
-  @param cdi is an iterator over the JSON data
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   */
-  void parseSolutionComp(const json::iterator cdi);
+  void parseSolutionComp(xmlDocPtr doc, xmlNodePtr cur);
 
   /**
-  @brief Parse input about the gas phase composition from a JSON document.
+  @brief Parse input about the gas phase composition from an XML document.
 
   The gas composition, if given, is parsed by this function.
   The composition will be held in an associative map of key value pairs:
@@ -632,47 +631,84 @@ public:
   * value = molal concentration of that component in the initial solution
   [mol/kgw]
 
-  @param cdi is a JSON iterator pointing to the current location in json data
-  object
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   */
-  void parseGasComp(const json::iterator cdi);
+  void parseGasComp(xmlDocPtr doc, xmlNodePtr cur);
 
   /**
-  @brief Scan a JSON object
+  @brief Parse input about an individual IC in the intitial solution
 
-  @param cdi is an iterator over the JSON data
+  The initial solution composition, if given, is parsed one IC at
+  a time by the parent function parseSolutionComp.  Each IC is
+  parsed one at a time by this function.  The composition will be
+  held in an associative map of key value pairs:
+
+  * key = integer id of a GEM independent component
+  * value = molal concentration of that component in the initial solution
+  [mol/kgw]
+
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
+  */
+  void parseDCInSolution(xmlDocPtr doc, xmlNodePtr cur);
+
+  /**
+  @brief Parse input about an individual IC in the gas
+
+  The gas composition, if given, is parsed one IC at
+  a time by the parent function parseGasComp.  Each IC is
+  parsed one at a time by this function.  The composition will be
+  held in an associative map of key value pairs:
+
+  * key = integer id of a GEM independent component
+  * value = molal concentration of that component in the gas [mol/kg-gas]
+
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
+  */
+  void parseDCInGas(xmlDocPtr doc, xmlNodePtr cur);
+
+  /**
+  @brief Scan an XML document for the phase names.
+
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseids is a map associating phase names with id numbers
   */
-  void parseMicroPhaseNames(const json::iterator cdi,
+  void parseMicroPhaseNames(xmlDocPtr doc, xmlNodePtr cur,
                             map<string, int> &phaseids);
 
   /**
-  @brief Parse input about a microstructure phase from a JSON document.
+  @brief Parse input about a microstructure phase from an XML document.
 
-  @param cdi is an iterator over the JSON data
-  @param numEntries is the number of entries in the JSON file
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
+  @param numEntries is the number of entries in the XML file
   @param phaseids is a map associating phase names with id numbers
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseMicroPhases(const json::iterator cdi, int numEntries,
-                        map<string, int> phaseids, PhaseData &phaseData);
+  void parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur, int numEntries,
+                       map<string, int> phaseids, PhaseData &phaseData);
 
   /**
-  @brief Parse input about a GEM CSD phase from a JSON document.
+  @brief Parse input about a GEM CSD phase from an XML document.
 
-  @param p is an iterator over the JSON data
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseGEMPhaseData(const json::iterator p, PhaseData &phaseData);
+  void parseGEMPhaseData(xmlDocPtr doc, xmlNodePtr cur, PhaseData &phaseData);
 
   /**
-  @brief Parse input about a GEM DC associated with a CSD phase from a JSON
+  @brief Parse input about a GEM DC associated with a CSD phase from an XML
   document.
 
-  @param pp is an iterator over the JSON data
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseGEMPhaseDCData(const json::iterator pp, PhaseData &phaseData);
+  void parseGEMPhaseDCData(xmlDocPtr doc, xmlNodePtr cur, PhaseData &phaseData);
 
   /**
   @brief Parse a phase's sub-voxel pore size distribution from a file
@@ -688,50 +724,57 @@ public:
   void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
 
   /**
-  @brief Parse the Rd data (impurity partitioning) for one phase in the JSON
+  @brief Parse the Rd data (impurity partitioning) for one phase in the XML
   input file.
 
-  @param p is an iterator over the JSON data object
+  This method uses the libxml library, so this must be included.
+
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param phaseData is a reference to the PhaseData structure for temporarily
   storing the input parameters
   */
-  //  void parseRdData(const json::iterator p, struct PhaseData &phaseData);
+//  void parseRdData(xmlDocPtr doc, xmlNodePtr cur, struct PhaseData &phaseData);
 
   /**
   @brief Parse input about how to render a phase in an image.
 
-  @param p is an iterator over the JSON data object
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseDisplayData(const json::iterator p, PhaseData &phaseData);
+  void parseDisplayData(xmlDocPtr doc, xmlNodePtr cur, PhaseData &phaseData);
 
   /**
   @brief Parse input about dissolved impurities within a phase.
 
-  @param p is an iterator over the JSON data object
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseImpurityData(const json::iterator p, PhaseData &phaseData);
+  void parseImpurityData(xmlDocPtr doc, xmlNodePtr cur, PhaseData &phaseData);
 
   /**
   @brief Parse input about interfaces associated with a phase.
 
-  @param p is an iterator over the JSON data object
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseids is a map associating phase names with id numbers
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseInterfaceData(const json::iterator p, map<string, int> &phaseids,
-                          PhaseData &phaseData);
+  void parseInterfaceData(xmlDocPtr doc, xmlNodePtr cur,
+                          map<string, int> &phaseids, PhaseData &phaseData);
 
   /**
   @brief Parse input about affinity for one phase to grow on another.
 
-  @param pp is an iterator over the JSON data object
+  @param doc points to the XML file
+  @param cur points to the current location within the XML file
   @param phaseids is a map associating phase names with id numbers
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parseAffinityData(const json::iterator pp, map<string, int> &phaseids,
-                         PhaseData &phaseData);
+  void parseAffinityData(xmlDocPtr doc, xmlNodePtr cur,
+                         map<string, int> &phaseids, PhaseData &phaseData);
 
   /**
   @brief Set the total number of possible microstructure phases in the system.
@@ -6149,7 +6192,7 @@ public:
 
   int getDC_to_MPhID(int i) { return DC_to_MPhID_[i]; }
 
-  void addWaterMassAndVolume(double massVal, double volVal) {
+  void addWatterMassAndVolume(double massVal, double volVal) {
 
     // int wMPhID = getMicroPhaseId("Electrolyte");
     // cout << "wMPhID = " << wMPhID << endl;
@@ -6186,7 +6229,7 @@ public:
            << " has no associated rgb values by default!" << endl;
       cout << endl << "   => program stops !" << endl;
       cout << endl
-           << "Please add in the chemistry.json file before " << mPhName
+           << "Please add in the chemistry.xml file before " << mPhName
            << " close phase definition tag (</phase>)," << endl
            << "the following lines replacing VALUE with convenient integer "
               "numbers in [0,255]: "
@@ -6211,7 +6254,7 @@ public:
         i++;
       }
       cout << endl
-           << "After modifying and saving the chemistry.json file, please "
+           << "After modiffing and saving the chemistry.xml file, please "
               "restart the program."
            << endl
            << endl;
@@ -6235,20 +6278,16 @@ public:
       }
       // setMicroPhaseVolume(idx, (val * v0 / dcmm));
       microPhaseVolume_[idx] = val * v0 / dcmm;
-      if (verbose_) {
-        if (called == 0) {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
-               << " (called = 0) => updated scaledMass = " << val
-               << " and volume = " << microPhaseVolume_[idx] << endl;
-        } else {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
-               << " (called = 1) => updated scaledMass = " << val
-               << " and volume = " << microPhaseVolume_[idx] << endl;
-        }
-        cout.flush();
+      if (called == 0) {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess (called = 0) => "
+                "updated scaledMass = "
+             << val << " and volume = " << microPhaseVolume_[idx] << endl;
+      } else {
+        cout << "    ChemicalSystem::updateMicroPhaseMassess  (called = 1) => "
+                "updated scaledMass = "
+             << val << " and volume = " << microPhaseVolume_[idx] << endl;
       }
+      cout.flush();
     } else {
       cout << endl
            << "   error in ChemicalSystem::setKCMicroPhaseMasses : idx = "

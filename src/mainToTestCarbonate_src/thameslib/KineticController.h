@@ -11,7 +11,6 @@ different kinetic models that govern the rate of hydration.
 #ifndef KINETICCONTROLLERH
 #define KINETICCONTROLLERH
 
-#include "../Resources/include/nlohmann/json.hpp"
 #include "ChemicalSystem.h"
 #include "KineticData.h"
 #include "KineticModel.h"
@@ -29,7 +28,6 @@ different kinetic models that govern the rate of hydration.
 #include <vector>
 
 using namespace std;
-using json = nlohmann::json;
 
 /**
 @class KineticController
@@ -76,8 +74,7 @@ private:
   vector<double> DCMoles_;
   vector<double> DCMolesIni_;
   vector<double> ICMolesTot_;
-  vector<double>
-      scaledMassIni_; /**< List of scaled masses before a given time step*/
+  vector<double> scaledMassIni_; /**< List of scaled masses before a given time step*/
 
   vector<int> impurityDCID_;
   vector<double> impurity_K2O_;
@@ -88,7 +85,6 @@ private:
   int pKMsize_;
 
   double initScaledCementMass_;
-  double hyd_time_ini_;
 
 public:
   /**
@@ -108,7 +104,7 @@ public:
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
   @param lattice is a pointer to the Lattice object holding the microstructure
-  @param fileName is the name of the JSON file with the input for the kinetic
+  @param fileName is the name of the XML file with the input for the kinetic
   model
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
@@ -148,71 +144,78 @@ public:
   }
 
   /**
-  @brief Master method controlling the parsing of JSON input to the kinetic
+  @brief Master method controlling the parsing of XML input to the kinetic
   model.
 
-  @param docName is the name of the (purported) JSON input file
+  @param docName is the name of the (purported) XML input file
   */
   void parseDoc(const string &docName);
 
   /**
-  @brief Parse the input data for one phase in the JSON input file.
+  @brief Parse the input data for one phase in the XML input file.
 
-  @param cdi is an iterator over the JSON data
-  @param numEntry is the number of solid entries in the JSON file, will be
+  This method uses the libxml library, so this must be included.
+
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
+  @param numEntry is the number of solid entries in the XML file, will be
   incremented
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseMicroPhases(const json::iterator cdi, int &numEntry,
-                        struct KineticData &kineticData);
+  void parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur, int &numEntry,
+                       struct KineticData &kineticData);
 
   /**
-  @brief Parse the kinetic data for one phase in the JSON input file.
+  @brief Parse the kinetic data for one phase in the XML input file.
 
-  @todo Need error checking for what to do if a required entry is not present
+  This method uses the libxml library, so this must be included.
 
-  @param p is an iterator over the JSON data
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseKineticData(const json::iterator p,
+  void parseKineticData(xmlDocPtr doc, xmlNodePtr cur,
                         struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for the Parrot-Killoh kinetic model.
 
-  @todo Need error checking for what to do if a required entry is not present
+  This method uses the libxml library, so this must be included.
 
-  @param pp is an iterator over the JSON data
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseKineticDataForParrotKilloh(const json::iterator pp,
+  void parseKineticDataForParrotKilloh(xmlDocPtr doc, xmlNodePtr cur,
                                        struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for the standard kinetic model.
 
-  @todo Need error checking for what to do if a required entry is not present
+  This method uses the libxml library, so this must be included.
 
-  @param pp is an iterator over the JSON data
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseKineticDataForStandard(const json::iterator pp,
+  void parseKineticDataForStandard(xmlDocPtr doc, xmlNodePtr cur,
                                    struct KineticData &kineticData);
 
   /**
   @brief Parse the kinetic data for the pozzolanic kinetic model.
 
-  @todo Need error checking for what to do if a required entry is not present
+  This method uses the libxml library, so this must be included.
 
-  @param pp is an iterator over the JSON data
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void parseKineticDataForPozzolanic(const json::iterator pp,
+  void parseKineticDataForPozzolanic(xmlDocPtr doc, xmlNodePtr cur,
                                      struct KineticData &kineticData);
 
   /**
@@ -235,7 +238,9 @@ public:
   @return the vector of scaled masses [percent solids]
   */
 
-  double getScaledMass(const int midx) { return scaledMass_[midx]; }
+  double getScaledMass(const int midx) {
+      return scaledMass_[midx];
+  }
 
   /**
   @brief Get the <i>initial</i> mass of the microstructure phases
@@ -256,7 +261,9 @@ public:
   @param midx is the microstructure id of the phase to query
   @return the initial scaled mass [percent solids]
   */
-  double getInitScaledMass(const int midx) { return initScaledMass_[midx]; }
+  double getInitScaledMass(const int midx) {
+      return initScaledMass_[midx];
+  }
 
   /**
   @brief Compute normalized initial microstructure phase masses
@@ -291,7 +298,7 @@ public:
   @return the specific surface area [m2/kg]
   */
   double getSpecificSurfaceArea(const int midx) {
-    return specificSurfaceArea_[midx];
+      return specificSurfaceArea_[midx];
   }
 
   /**
@@ -311,16 +318,21 @@ public:
   @return the reference specific surface area [m2/kg]
   */
   double getRefSpecificSurfaceArea(const int midx) {
-    return refSpecificSurfaceArea_[midx];
+      return refSpecificSurfaceArea_[midx];
   }
 
   /**
   @brief Make a kinetic model for a given phase
 
+  This method uses the libxml library, so this must be included.
+
+  @param doc is a libxml pointer to the document head
+  @param cur is a libxml pointer to the current node being parsed
   @param kineticData is a reference to the KineticData structure for temporarily
   storing the input parameters.
   */
-  void makeModel(struct KineticData &kineticData);
+  void makeModel(xmlDocPtr doc, xmlNodePtr cur,
+                 struct KineticData &kineticData);
 
   /**
   @brief Get the ChemicalSystem object for the simulation used by the kinetic
@@ -381,7 +393,9 @@ public:
   @param i is the index of the phase in the kinetic model
   @return the name of the phase with index i
   */
-  string getName(const unsigned int i) const { return name_[i]; }
+  string getName(const unsigned int i) const {
+      return name_[i];
+  }
 
   /**
   @brief Set kinetic model DC moles
@@ -479,8 +493,6 @@ public:
   vector<double> getDCMoles(void) { return DCMoles_; }
 
   vector<bool> getIsKinetic(void) { return isKinetic_; }
-
-  void setHydTimeIni (double val) { hyd_time_ini_ = val; }
 
 }; // End of KineticController class
 

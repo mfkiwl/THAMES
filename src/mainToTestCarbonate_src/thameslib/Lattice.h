@@ -12,7 +12,6 @@ exists, hydrates, and possibly deteriorates.
 #define LATTICEH
 
 #include <algorithm>
-#include <climits>
 #include <cmath>
 #include <ctime>
 #include <fstream>
@@ -25,7 +24,6 @@ exists, hydrates, and possibly deteriorates.
 #include <typeinfo>
 #include <vector>
 
-#include "../version.h"
 #include "AppliedStrain.h"
 #include "ChemicalSystem.h"
 #include "Interface.h"
@@ -33,6 +31,7 @@ exists, hydrates, and possibly deteriorates.
 #include "RanGen.h"
 #include "Site.h"
 #include "global.h"
+#include "../version.h"
 
 /**
 @struct Sitesize
@@ -49,13 +48,15 @@ struct chemElem {
   double mass;
 };
 
-struct structGrowVect {
+struct structGrowVect
+{
   int id;
   int posVect;
   double affinity;
 };
 
-struct structDissVect {
+struct structDissVect
+{
   int id;
   int posVect;
   double wmc;
@@ -72,11 +73,11 @@ sites.
 class Lattice {
 
 private:
-  string version_; /**< THAMES version for header information */
+  string version_;             /**< THAMES version for header information */
   string thamesVersion_;
-  string jobroot_; /**< The root name for output files */
+  string jobroot_;             /**< The root name for output files */
 
-  RanGen *rg_; /**< Pointer to random number generator object */
+  RanGen *rg_;                 /**< Pointer to random number generator object */
   int latticeRNGseed_;
   long int numRNGcall_0_, numRNGcallLONGMAX_;
   double lastRNG_;
@@ -152,16 +153,14 @@ pores in GEM units */
 
   double initSolidMass_;
 
-  double wcratio_; /**< Water-to-cement mass ratio */
+  double wcratio_;  /**< Water-to-cement mass ratio */
 
-  int numMicroPhases_; /**< Number of microphases */
+  int numMicroPhases_;   /**< Number of microphases */
 
-  double particRadius_; /**< used for graphical representation */
+  double particRadius_;  /**< used for graphical representation */
 
-  vector<int>
-      growthInterfaceSize_; /**< growth interface size of each microphase */
-  vector<int> dissolutionInterfaceSize_; /**< dissolution interface size of each
-                                            microphase */
+  vector<int> growthInterfaceSize_; /**< growth interface size of each microphase */
+  vector<int> dissolutionInterfaceSize_; /**< dissolution interface size of each microphase */
 
 public:
   /**
@@ -187,14 +186,12 @@ public:
   the voxel phase assignments can be made at each site.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param rg is a pointer to the random number generator object
-  @param seedRNG is the random number seed to use
   @param fileName is the name of the file containing the microstructure data
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
   */
-  Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG, const string &fileName,
-          const bool verbose, const bool warning);
+  Lattice(ChemicalSystem *cs, RanGen *rg, const string &fileName, const bool verbose,
+          const bool warning);
 
   /**
  @brief Destructor.
@@ -523,7 +520,9 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the x coordinate
   */
-  unsigned int getX(const unsigned int i) const { return (site_[i].getX()); }
+  unsigned int getX(const unsigned int i) const {
+    return (site_[i].getX());
+  }
 
   /**
   @brief Get the y coordinate of a site with a given index in the 1D `site_`
@@ -532,7 +531,9 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the y coordinate
   */
-  unsigned int getY(const unsigned int i) const { return (site_[i].getY()); }
+  unsigned int getY(const unsigned int i) const {
+    return (site_[i].getY());
+  }
 
   /**
   @brief Get the z coordinate of a site with a given index in the 1D `site_`
@@ -541,7 +542,9 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the x coordinate
   */
-  unsigned int getZ(const unsigned int i) const { return (site_[i].getZ()); }
+  unsigned int getZ(const unsigned int i) const {
+    return (site_[i].getZ());
+  }
 
   /**
   @brief Get a site's index in the 1D `site_` array, given its (x,y,z)
@@ -570,7 +573,9 @@ public:
   @param index is the index of the Site object in the `site_` array
   @return a pointer to the Site object in question
   */
-  Site *getSite(int index) { return &site_[index]; }
+  Site *getSite(int index) {
+    return &site_[index];
+  }
 
   /**
   @brief Designate a site as damaged.
@@ -581,7 +586,9 @@ public:
 
   @param index is the index of the Site object in the `site_` array
   */
-  void setDamage(int index) { site_[index].setDamage(); }
+  void setDamage(int index) {
+    site_[index].setDamage();
+  }
 
   /**
   @brief Change the wmc (weighted mean curvature) of a site by a prescribed
@@ -620,19 +627,16 @@ public:
   sites of each microphase that has to grow
 
   @param growPhaseIDVect is the vector of microphase IDs that must grow
-  @param numSiteGrowVect is a vector containing the number of voxels to add for
-  each microphase ID in growPhaseIDVect
-  @param growPhNameVect is a vector containing the name of each microphase in
-  growPhaseIDVect
+  @param numSiteGrowVect is a vector containing the number of voxels to add for each
+  microphase ID in growPhaseIDVect
+  @param growPhNameVect is a vector containing the name of each microphase in growPhaseIDVect
   @param numtoadd_G is the number of sites switched by this call
   @param totalTRC is the total call number of the changeMicrostructure method
-  @return the actual number of sites that were changed for each microphase ID
-  from the input growPhaseIDVect vector
+  @return the actual number of sites that were changed for each microphase ID from
+  the input growPhaseIDVect vector
   */
-  vector<int> growPhase(vector<int> growPhaseIDVect,
-                        vector<int> numSiteGrowVect,
-                        vector<string> growPhNameVect, int &numadded_G,
-                        int totalTRC);
+  vector<int> growPhase(vector<int> growPhaseIDVect, vector<int> numSiteGrowVect,
+                        vector<string> growPhNameVect, int &numadded_G, int totalTRC);
 
   /**
   @brief create a new growth interface for a given phase (phaseID) having a
@@ -644,27 +648,24 @@ public:
   @param numLeft is the number of sites to nucleate/create for this phase
   @return the actual size of the new interface (must equals numLeft!)
   */
-  void nucleatePhaseAff(int phaseID, int numLeft);
-  void nucleatePhaseRnd(int phaseID, int numLeft);
+  void nucleatePhaseAff(int phaseID,int numLeft);
+  void nucleatePhaseRnd(int phaseID,int numLeft);
 
   /**
   @brief Remove (dissolve i.e. switch to electrolyte) the prescribed number of
   sites of each microphase that has to dissolve
 
   @param dissPhaseIDVect is the vector of microphase IDs that must dissolve
-  @param numSiteDissVect is a vector containing the number of voxels to dissolve
-  for each microphase ID in dissPhaseIDVect
-  @param dissPhNameVect is a vector containing the name of each microphase in
-  dissPhaseIDVect
+  @param numSiteDissVect is a vector containing the number of voxels to dissolve for each
+  microphase ID in dissPhaseIDVect
+  @param dissPhNameVect is a vector containing the name of each microphase in dissPhaseIDVect
   @param numtoadd_D is the number of sites switched by this call
   @param totalTRC is the total call number of the changeMicrostructure method
-  @return -1 if all requested numbers of voxels in numSiteDissVect have been
-  switched or the ID of the first microphase (in dissPhaseIDVect) for which this
-  was not possible
+  @return -1 if all requested numbers of voxels in numSiteDissVect have been switched
+  or the ID of the first microphase (in dissPhaseIDVect) for which this was not possible
   */
   int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
-                    vector<string> dissPhNameVect, int &numadded_D,
-                    int totalTRC);
+                    vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -738,9 +739,9 @@ public:
   @param i is the phase index to set at that site
   */
   void setMicroPhaseId(Site *s, const unsigned int i) {
-    count_[s->getMicroPhaseId()]--;
-    s->setMicroPhaseId(i);
-    count_[i]++;
+      count_[s->getMicroPhaseId()]--;
+      s->setMicroPhaseId(i);
+      count_[i]++;
   }
 
   /**
@@ -750,9 +751,9 @@ public:
   @param i is the phase index to set at that site
   */
   void setMicroPhaseId(const int sitenum, const unsigned int i) {
-    count_[site_[sitenum].getMicroPhaseId()]--;
-    site_[sitenum].setMicroPhaseId(i);
-    count_[i]++;
+      count_[site_[sitenum].getMicroPhaseId()]--;
+      site_[sitenum].setMicroPhaseId(i);
+      count_[i]++;
   }
 
   /**
@@ -830,15 +831,13 @@ public:
   @param time is is the simulation time [days]
   @param simtype is the type of simulation (hydration, leaching, etc)
   @param capWater is true if there is any capillary pore water in the system.
-  @param numDiff is the maximum number of voxels belonging to a given
-  microphase, voxels that can be dissolved according to the system configuration
-  (lattice)
-  @param phDiff is the microphase ID for which a the number of voxels that can
-  be dissolved is smaller than the number requested by the corresponding kinetic
-  model
+  @param numDiff is the maximum number of voxels belonging to a given microphase,
+  voxels that can be dissolved according to the system configuration (lattice)
+  @param phDiff is the microphase ID for which a the number of voxels that can be
+  dissolved is smaller than the number requested by the corresponding kinetic model
   @param nameDiff is the name of this microphase
-  @param whileCount counts the number of changeMicrostructure calls for a given
-  cycle (cyc)
+  @param whileCount counts the number of changeMicrostructure calls for a given cycle
+  (cyc)
   @param cyc (cycle) is the iteration number in main iteration loop in
   Controller::doCycle - each cycle corresponds to a time step
 
@@ -880,8 +879,7 @@ public:
   */
   void adjustMicrostructureVolFracs(vector<string> &names,
                                     const vector<double> vol,
-                                    vector<double> &vfrac, int volSize,
-                                    int cyc);
+                                    vector<double> &vfrac, int volSize, int cyc);
 
   /**
   @brief Calculate the pore size distribution data
@@ -902,7 +900,7 @@ public:
   /**
   @brief Write the microstructure colors to a file
 
-  This is done to save processing the chemistry.json file just to get the colors
+  This is done to save processing the chemistry.xml file just to get the colors
   and will make post-processing of images easier.
 
   @param root is the root name of the output file to create
@@ -1454,7 +1452,7 @@ public:
   @return an STL list of the site ids according to the distribution
   */
   vector<int> findDomainSizeDistribution(int phaseid, const int numsites,
-                                         int maxsize, int cyc, int sortorder);
+                                            int maxsize, int cyc, int sortorder);
 
   /**
   @brief Estimate the <i>linear size</i> of a domain
@@ -1546,35 +1544,30 @@ public:
 
   void setRNGseed(int seed) { rg_->setSeed(seed); }
 
-  int getRNGseed(void) { return latticeRNGseed_; }
-
-  void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc,
-                int whileCount) {
-    // latticeRNGseed_ = seed;
+  void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc, int whileCount) {
+    //latticeRNGseed_ = seed;
     rg_->setSeed(latticeRNGseed_);
     numRNGcall_0_ = val_0;
     numRNGcallLONGMAX_ = valLONGMAX;
     long int count_0 = 0, count_1 = 0;
     long int j0, j1, j11;
     double lastRNGreset = 1.e-16;
-    for (j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
-      for (j11 = 1; j11 <= LONG_MAX; j11++) {
+    for(j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
+      for(j11 = 1; j11 <= LONG_MAX; j11++) {
         lastRNGreset = rg_->Ran3();
       }
     }
-    for (j0 = 1; j0 <= val_0; j0++) {
+    for(j0 = 1; j0 <= val_0; j0++) {
       lastRNGreset = rg_->Ran3();
     }
     lastRNG_ = lastRNGreset;
 
-    cout << endl
-         << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc
-         << " / " << whileCount << " / " << latticeRNGseed_ << endl;
-    cout << "  Lattice::resetRNG "
-            "numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
-         << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / "
-         << lastRNGreset << " / " << valRNG << endl;
-    if (abs(lastRNGreset - valRNG) <= 1.e-16) {
+    cout << endl << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+         << whileCount << " / " << latticeRNGseed_ << endl;
+    cout << "  Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+         << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
+         << " / " << valRNG << endl;
+    if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
       cout << "  Lattice::resetRNG OK!" << endl;
     } else {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
@@ -1584,54 +1577,46 @@ public:
 
   void increaseLatticeVolume(void);
 
-  void checkSite(int stId) {
+  void checkSite(int stId){
     int phId = site_[stId].getMicroPhaseId();
     cout << endl << " Lattice::checkSite( " << stId << " ):" << endl;
     cout << "    phaseId : " << site_[stId].getMicroPhaseId() << endl;
-    cout << "    inDissInterfacePos_ : " << site_[stId].getInDissInterfacePos()
-         << endl;
+    cout << "    inDissInterfacePos_ : " << site_[stId].getInDissInterfacePos() << endl;
     if (site_[stId].getInDissInterfacePos() != -1) {
       cout << "     in dissInterface on pos inDissInterfacePos_ : "
-           << interface_[site_[stId].getMicroPhaseId()].getDissolutionSitesId(
-                  site_[stId].getInDissInterfacePos())
-           << endl;
+           << interface_[site_[stId].getMicroPhaseId()].getDissolutionSitesId(site_[stId].getInDissInterfacePos()) << endl;
     }
 
     vector<unsigned int> growth = site_[stId].getGrowthPhases();
     int size = growth.size();
-    cout << endl << " growth_.size() : " << size << endl;
-    for (int k = 0; k < size; k++) {
+    cout << endl << " growth_.size() : " << size<< endl;
+    for (int k =0; k < size; k++) {
       cout << "       k = " << k << "   growth_[k] = " << growth[k] << endl;
     }
     cout << endl << " inGrowInterfacePos_ : " << endl;
-    for (int k = 0; k < numMicroPhases_; k++) {
-      cout << "       k = " << k << "   site_[stId].getInGrowInterfacePos(k) = "
-           << site_[stId].getInGrowInterfacePos(k) << endl;
+    for (int k =0; k < numMicroPhases_; k++) {
+      cout << "       k = " << k << "   site_[stId].getInGrowInterfacePos(k) = " << site_[stId].getInGrowInterfacePos(k) << endl;
     }
 
-    cout << endl
-         << "     in growInterfaces on pos inGrowInterfacePos_ :" << endl;
-    for (int k = 0; k < numMicroPhases_; k++) {
-      cout << "       k_ = " << k << endl;
-      cout.flush();
+    cout << endl << "     in growInterfaces on pos inGrowInterfacePos_ :" << endl;
+    for (int k = 0; k < numMicroPhases_; k++){
+      cout << "       k_ = " << k << endl; cout.flush();
       if (site_[stId].getInGrowInterfacePos(k) > -1) {
         size = growthInterfaceSize_[k];
-        cout << "       k = " << k
-             << "   pos = " << site_[stId].getInGrowInterfacePos(k)
-             << "   size = " << size << endl;
-        cout.flush();
+        cout << "       k = " << k << "   pos = " << site_[stId].getInGrowInterfacePos(k) << "   size = " << size << endl; cout.flush();
         cout << "            siteId in grInt = "
-             << interface_[k].getGrowthSitesId(
-                    site_[stId].getInGrowInterfacePos(k))
-             << endl;
-        cout.flush();
+             << interface_[k].getGrowthSitesId(site_[stId].getInGrowInterfacePos(k)) << endl; cout.flush();
       }
     }
   }
 
-  vector<int> getGrowthInterfaceSize(void) { return growthInterfaceSize_; }
+  vector<int> getGrowthInterfaceSize(void) {
+    return growthInterfaceSize_;
+  }
 
-  void setGrowthInterfaceSize(vector<int> vect) { growthInterfaceSize_ = vect; }
+  void setGrowthInterfaceSize(vector<int> vect){
+    growthInterfaceSize_ = vect;
+  }
 
   vector<int> getDissolutionInterfaceSize(void) {
     return dissolutionInterfaceSize_;
@@ -1645,9 +1630,9 @@ public:
     dissolutionInterfaceSize_ = vect;
   }
 
-  vector<int> chooseNucleationSitesRND(int phaseID, int numLeft);
+vector<int> chooseNucleationSitesRND(int phaseID,int numLeft);
 
-  vector<int> chooseNucleationSitesAFF(int phaseID, int numLeft);
+vector<int> chooseNucleationSitesAFF(int phaseID,int numLeft);
 
 }; // End of Lattice class
 #endif

@@ -29,7 +29,7 @@ ParrotKillohModel::ParrotKillohModel() {
 
   ///
   /// Clear out the vectors so they can be populated with values from the
-  /// JSON input file
+  /// XML input file
   ///
 
   name_ = "";
@@ -156,6 +156,7 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   arrhenius_ =
       exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
+
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
   /// 10 billion days or 27 million years
@@ -167,8 +168,7 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   return;
 }
 
-void ParrotKillohModel::calculateKineticStep(const double timestep,
-                                             double &scaledMass,
+void ParrotKillohModel::calculateKineticStep(const double timestep, double &scaledMass,
                                              double &massDissolved, int cyc,
                                              double totalDOR) {
 
@@ -287,14 +287,12 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       scaledMass = scaledMass_;
 
-      if (verbose_) {
-        cout << "    ParrotKillochModel::calculateKineticStep "
-                "rate/wcFactor/massDissolved : "
-             << rate << " / " << wcFactor << " / " << massDissolved << endl;
+      cout << "    ParrotKillochModel::calculateKineticStep rate/wcFactor/massDissolved : "
+           << rate << " / " << wcFactor << " / " << massDissolved << endl;
 
-        // if (verbose_) {
-        cout << "  ****************** PKM_hT = " << timestep
-             << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+      if (verbose_) {
+        cout << "  ****************** PKM_hT = " << timestep << "    cyc = " << cyc
+             << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
@@ -303,8 +301,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
              << "    n3 = " << n3_ << endl;
         cout << "   PKM_hT   " << "dorHcoeff_: " << dorHcoeff_
              << "    Ea = " << activationEnergy_ << endl;
-        cout << "   PKM_hT   "
-             << "specificSurfaceArea_ = " << specificSurfaceArea_
+        cout << "   PKM_hT   " << "specificSurfaceArea_ = " << specificSurfaceArea_
              << "    refSpecificSurfaceArea_ = " << refSpecificSurfaceArea_
              << "    ssaFactor_ = " << ssaFactor_ << endl;
         cout << "   PKM_hT   " << "wcRatio_: " << wcRatio_
@@ -348,3 +345,4 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
   return;
 }
+

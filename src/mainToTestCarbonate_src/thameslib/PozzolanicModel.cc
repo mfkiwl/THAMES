@@ -328,10 +328,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
       massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
-      if (verbose_) {
-        cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
-             << rate << " / " << massDissolved << endl;
-      }
+      cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
+           << rate << " / " << massDissolved << endl;
 
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
 
