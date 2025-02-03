@@ -1045,7 +1045,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     // " mol" << endl;
   }
 
-  if (verbose_) {
+  if (!doTweak) {
     cout << "  KineticController::calculateKineticStep end - cyc = " << cyc
          << endl;
     cout.flush();
