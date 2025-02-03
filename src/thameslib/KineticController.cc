@@ -262,19 +262,16 @@ void KineticController::parseMicroPhases(const json::iterator cdi,
   bool istherm = false;
   bool issol = false;
 
-  initKineticData(kineticData);
-
-  isKinetic_.push_back(false);
-
   json::iterator p = cdi.value().begin();
 
   for (int i = 0; i < cdi.value().size(); ++i) {
+    initKineticData(kineticData);
+    isKinetic_.push_back(false);
     p = cdi.value()[i].find("thamesname");
     testname = p.value();
     kineticData.name = testname;
     kineticData.microPhaseId = chemSys_->getMicroPhaseId(testname);
     kineticfound = ispozz = isParrotKilloh = false;
-    ;
 
     p = cdi.value()[i].find("kinetic_data");
     if (p != cdi.value()[i].end()) {
@@ -939,11 +936,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       if (initScaledCementMass_ > 0)
         totalDOR = (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
                    initScaledCementMass_;
-      cout << "  KineticController::calculateKineticStep "
-              "initScaledCementMass_/scaledCementMass : "
-           << initScaledCementMass_ << " / " << chemSys_->getScaledCementMass()
-           << endl;
-      //*******
 
       double dcmoles;
       for (int midx = 0; midx < pKMsize_; ++midx) {
@@ -1053,9 +1045,11 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     // " mol" << endl;
   }
 
-  cout << "  KineticController::calculateKineticStep end - cyc = " << cyc
-       << endl;
-  cout.flush();
+  if (verbose_) {
+    cout << "  KineticController::calculateKineticStep end - cyc = " << cyc
+         << endl;
+    cout.flush();
+  }
 
   return;
 }
