@@ -1375,21 +1375,6 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
           writeFirst[i] = true;
           phaseID = growPhaseIDVect[i];
           dim_isite[i] = growthInterfaceSize_[phaseID];
-          cout << "    Lattice::growPhase GROW_END for i = " << i
-               << "   totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g << "/"
-               << bcl << endl;
-          cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
-               << "   growthVectorSize = " << growthVectorSize
-               << "   numLeftTot = " << numLeftTot
-               << "   numChangeTot = " << numChangeTot << endl;
-          cout << "        GROW_END phaseid count_ dim_isite numleft numchange "
-                  " :  "
-               << setw(3) << growPhaseIDVect[i] << "   " << setw(8) << right
-               << count_[growPhaseIDVect[i]] << "   " << setw(8) << dim_isite[i]
-               << "   " << setw(8) << numLeft[i] << "   " << setw(8)
-               << numChange[i] << endl;
-          cout.flush();
-
           needUpdate = true;
         }
       }
