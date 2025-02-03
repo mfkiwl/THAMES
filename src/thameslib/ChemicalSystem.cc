@@ -1363,8 +1363,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
         dcid = getDCId(mydcstr);
         phaseData.DCId.push_back(dcid);
         phaseData.GEMPhaseDCMembers.push_back(dcid);
-        cout << "    GEM DC id = " << dcid // << endl;
-             << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+        // cout << "    GEM DC id = " << dcid // << endl;
+        //     << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
       }
       // Make certain that there will be a porosity associated
       // with this DC
