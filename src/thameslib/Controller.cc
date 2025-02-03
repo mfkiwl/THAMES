@@ -1414,7 +1414,7 @@ void Controller::parseDoc(const string &docName) {
 
   double testtime;
 
-  // check if the json file exists
+  /// check if the JSON file exists
 
   ifstream f(docName.c_str());
   if (!f.is_open()) {
@@ -1422,10 +1422,9 @@ void Controller::parseDoc(const string &docName) {
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }
 
-  cout << "Contents of " << docName << ":" << endl;
-  cout << "#######" << endl;
+  /// Parse the JSON file all at once
+
   json data = json::parse(f);
-  cout << "#######" << endl;
   f.close();
 
   try {

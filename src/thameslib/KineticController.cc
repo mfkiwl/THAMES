@@ -196,13 +196,12 @@ void KineticController::parseDoc(const string &docName) {
 
   struct KineticData kineticData;
 
-  /// Test for JSON existenc
+  /// Test for JSON existence
 
   ifstream f(docName.c_str());
-  cout << "Contents of " << docName << ":" << endl;
-  cout << "#######" << endl;
+
+  /// Parse the JSON file all at once
   json data = json::parse(f);
-  cout << "#######" << endl;
   f.close();
 
   try {
@@ -373,58 +372,38 @@ void KineticController::parseKineticDataForParrotKilloh(
 
   json::iterator pp = p.value().find("specificSurfaceArea");
   kineticData.specificSurfaceArea = pp.value();
-  cout << "  Specific surface area = " << kineticData.specificSurfaceArea
-       << endl;
-  cout.flush();
 
   // Reference specific surface area (m2/kg)
   pp = p.value().find("refSpecificSurfaceArea");
   kineticData.refSpecificSurfaceArea = pp.value();
-  cout << "  Reference specific surface area = "
-       << kineticData.refSpecificSurfaceArea << endl;
-  cout.flush();
 
   // Parrot-Killoh k1 parameter
   pp = p.value().find("k1");
   kineticData.k1 = pp.value();
-  cout << "  k1 = " << kineticData.k1 << endl;
-  cout.flush();
 
   // Parrot-Killoh k2 parameter
   pp = p.value().find("k2");
   kineticData.k2 = pp.value();
-  cout << "  k2 = " << kineticData.k2 << endl;
-  cout.flush();
 
   // Parrot-Killoh k3 parameter
   pp = p.value().find("k3");
   kineticData.k3 = pp.value();
-  cout << "  k3 = " << kineticData.k3 << endl;
-  cout.flush();
 
   // Parrot-Killoh n1 parameter
   pp = p.value().find("n1");
   kineticData.n1 = pp.value();
-  cout << "  n1 = " << kineticData.n1 << endl;
-  cout.flush();
 
   // Parrot-Killoh n3 parameter
   pp = p.value().find("n3");
   kineticData.n3 = pp.value();
-  cout << "  n3 = " << kineticData.n3 << endl;
-  cout.flush();
 
   // Parrot-Killoh DOR_Hcoeff parameter
   pp = p.value().find("dorHcoeff");
   kineticData.dorHcoeff = pp.value();
-  cout << "  dorHcoeff = " << kineticData.dorHcoeff << endl;
-  cout.flush();
 
   // Activation energy
   pp = p.value().find("activationEnergy");
   kineticData.activationEnergy = pp.value();
-  cout << "  activationEnergy = " << kineticData.activationEnergy << endl;
-  cout.flush();
 
   return;
 }
@@ -442,8 +421,6 @@ void KineticController::parseKineticDataForStandard(
   json::iterator pp = p.value().find("specificSurfaceArea");
   if (pp != p.value().end()) {
     kineticData.specificSurfaceArea = pp.value();
-    cout << "specificSurfaceArea = " << kineticData.specificSurfaceArea << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "specificSurfaceArea not found");
@@ -453,9 +430,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("refSpecificSurfaceArea");
   if (pp != p.value().end()) {
     kineticData.refSpecificSurfaceArea = pp.value();
-    cout << "refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "refSpecificSurfaceArea not found");
@@ -465,9 +439,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
-    cout << "dissolutionRateConst = " << kineticData.dissolutionRateConst
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "dissolutionRateConst not found");
@@ -477,9 +448,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("diffusionRateConstEarly");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstEarly = pp.value();
-    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstEarly
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "diffusionRateConstEarly not found");
@@ -489,9 +457,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("diffusionRateConstLate");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstLate = pp.value();
-    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstLate
-         << endl;
-    cout.flush();
   } else {
     kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
     cout << "WARNING: For " << kineticData.name
@@ -504,8 +469,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("dissolvedUnits");
   if (pp != p.value().end()) {
     kineticData.dissolvedUnits = pp.value();
-    cout << "dissolvedUnits = " << kineticData.dissolvedUnits << endl;
-    cout.flush();
   } else {
     kineticData.dissolvedUnits = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -516,8 +479,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("siexp");
   if (pp != p.value().end()) {
     kineticData.siexp = pp.value();
-    cout << "sio2 = " << kineticData.sio2 << endl;
-    cout.flush();
   } else {
     kineticData.sio2 = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -528,8 +489,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("dfexp");
   if (pp != p.value().end()) {
     kineticData.dfexp = pp.value();
-    cout << "dfexp = " << kineticData.dfexp << endl;
-    cout.flush();
   } else {
     kineticData.dfexp = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -540,8 +499,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("loi");
   if (pp != p.value().end()) {
     kineticData.loi = pp.value();
-    cout << "loi = " << kineticData.loi << endl;
-    cout.flush();
   } else {
     kineticData.loi = 1.0e-6;
     cout << "WARNING: For " << kineticData.name
@@ -552,8 +509,6 @@ void KineticController::parseKineticDataForStandard(
   pp = p.value().find("activationEnergy");
   if (pp != p.value().end()) {
     kineticData.activationEnergy = pp.value();
-    cout << "activationEnergy = " << kineticData.activationEnergy << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "activationEnergy not found");
@@ -573,8 +528,6 @@ void KineticController::parseKineticDataForPozzolanic(
   json::iterator pp = p.value().find("specificSurfaceArea");
   if (pp != p.value().end()) {
     kineticData.specificSurfaceArea = pp.value();
-    cout << "specificSurfaceArea = " << kineticData.specificSurfaceArea << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "specificSurfaceArea not found");
@@ -583,9 +536,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("refSpecificSurfaceArea");
   if (pp != p.value().end()) {
     kineticData.refSpecificSurfaceArea = pp.value();
-    cout << "refSpecificSurfaceArea = " << kineticData.refSpecificSurfaceArea
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "refSpecificSurfaceArea not found");
@@ -595,9 +545,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
-    cout << "dissolutionRateConst = " << kineticData.dissolutionRateConst
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "dissolutionRateConst not found");
@@ -607,9 +554,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("diffusionRateConstEarly");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstEarly = pp.value();
-    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstEarly
-         << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "diffusionRateConstEarly not found");
@@ -619,9 +563,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("diffusionRateConstLate");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstLate = pp.value();
-    cout << "diffusionRateConstEarly = " << kineticData.diffusionRateConstLate
-         << endl;
-    cout.flush();
   } else {
     kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
     cout << "WARNING: For " << kineticData.name
@@ -634,8 +575,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("dissolvedUnits");
   if (pp != p.value().end()) {
     kineticData.dissolvedUnits = pp.value();
-    cout << "dissolvedUnits = " << kineticData.dissolvedUnits << endl;
-    cout.flush();
   } else {
     kineticData.dissolvedUnits = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -646,8 +585,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("siexp");
   if (pp != p.value().end()) {
     kineticData.siexp = pp.value();
-    cout << "siexp = " << kineticData.siexp << endl;
-    cout.flush();
   } else {
     kineticData.siexp = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -658,8 +595,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("dfexp");
   if (pp != p.value().end()) {
     kineticData.dfexp = pp.value();
-    cout << "dfexp = " << kineticData.dfexp << endl;
-    cout.flush();
   } else {
     kineticData.dfexp = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -670,8 +605,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("dorexp");
   if (pp != p.value().end()) {
     kineticData.dorexp = pp.value();
-    cout << "dorexp = " << kineticData.dorexp << endl;
-    cout.flush();
   } else {
     kineticData.dorexp = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -682,8 +615,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("ohexp");
   if (pp != p.value().end()) {
     kineticData.ohexp = pp.value();
-    cout << "ohexp = " << kineticData.ohexp << endl;
-    cout.flush();
   } else {
     kineticData.ohexp = 1.0;
     cout << "WARNING: For " << kineticData.name
@@ -694,8 +625,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("sio2");
   if (pp != p.value().end()) {
     kineticData.sio2 = pp.value();
-    cout << "sio2 = " << kineticData.sio2 << endl;
-    cout.flush();
     // } else {
     //   throw DataException("KineticController",
     //   "parseKineticDataForPozzolanic",
@@ -706,8 +635,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("al2o3");
   if (pp != p.value().end()) {
     kineticData.al2o3 = pp.value();
-    cout << "al2o3 = " << kineticData.al2o3 << endl;
-    cout.flush();
     // } else {
     //   throw DataException("KineticController",
     //   "parseKineticDataForPozzolanic",
@@ -718,8 +645,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("cao");
   if (pp != p.value().end()) {
     kineticData.cao = pp.value();
-    cout << "cao = " << kineticData.cao << endl;
-    cout.flush();
     // } else {
     //   throw DataException("KineticController",
     //   "parseKineticDataForPozzolanic",
@@ -730,8 +655,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("loi");
   if (pp != p.value().end()) {
     kineticData.loi = pp.value();
-    cout << "loi = " << kineticData.loi << endl;
-    cout.flush();
     // } else {
     //   throw DataException("KineticController",
     //   "parseKineticDataForPozzolanic",
@@ -741,8 +664,6 @@ void KineticController::parseKineticDataForPozzolanic(
   pp = p.value().find("activationEnergy");
   if (pp != p.value().end()) {
     kineticData.activationEnergy = pp.value();
-    cout << "activationEnergy = " << kineticData.activationEnergy << endl;
-    cout.flush();
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "activationEnergy not found");

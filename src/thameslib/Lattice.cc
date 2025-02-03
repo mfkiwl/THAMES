@@ -77,7 +77,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
   if (buff == VERSIONSTRING) {
     in >> version_;
     cout << endl
-         << "Lattice::Lattice - .img  input file  generated using "
+         << "Lattice::Lattice - " << fileName
+         << " input file generated using "
             "Version "
          << version_ << endl;
     in >> buff; // X size string identifier
@@ -98,7 +99,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
     /// size to 100 and resolution to 1.0 micrometers
     ///
     cout << endl
-         << "Lattice::Lattice - .img input file "
+         << "Lattice::Lattice - " << fileName
+         << " input file "
             "generated using Version prior to Version 3.0.0"
          << endl;
     version_ = "2.0";
