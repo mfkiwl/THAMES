@@ -1068,16 +1068,9 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
       throw DataException("ChemicalSystem", "parseMicroPhases",
                           "No GEM phase data for a microstructure phase");
     }
-    p = cdi.value()[i].find("poresizefilename");
+    p = cdi.value()[i].find("poresize_distribution");
     if (p != cdi.value()[i].end()) {
-      poreSizeFileName = p.value();
-      try {
-        parsePoreSizeDistribution(poreSizeFileName, phaseData);
-      } catch (FileException fex) {
-        // fex.printException();
-        throw fex;
-        cout << endl;
-      }
+      parsePoreSizeDistribution(p, phaseData);
     }
     p = cdi.value()[i].find("stresscalc");
     if (p != cdi.value()[i].end()) {
@@ -1212,61 +1205,54 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
   return;
 }
 
-void ChemicalSystem::parsePoreSizeDistribution(string poreSizeFileName,
+void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
                                                PhaseData &phaseData) {
+
   if (verbose_) {
     cout << "Reading Pore Size Distribution:" << endl;
     cout.flush();
-    int i = 0;
   }
 
-  ifstream in(poreSizeFileName);
-  if (!in) {
-    throw FileException("ChemicalSystem", "parsePoreSizeDistribution",
-                        poreSizeFileName, "Could not open");
-  }
-
-  // Read the header line
-  string headerline;
-  getline(in, headerline);
-
+  double diam, volfrac, sum;
   struct PoreSizeVolume datarow;
-  double diam, vfrac;
+  json::iterator pp;
 
   phaseData.poreSizeDist.clear();
 
-  // Now read the data row by row
-  double sum = 0.0;
-  while (!in.eof()) {
-    in >> datarow.diam >> datarow.volfrac;
-    sum += datarow.volfrac;
-    datarow.volume = 0.0;
-    phaseData.poreSizeDist.push_back(datarow);
-    if (verbose_) {
-      // i++;
-      // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , "
-      // << datarow.volfrac << endl; cout.flush();
-      cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
+  sum = 0.0;
+  for (int i = 0; i < p.value().size(); ++i) {
+    pp = p.value()[i].find("diameter");
+    if (pp != p.value()[i].end()) {
+      datarow.diam = pp.value();
+      pp = p.value()[i].find("volumefraction");
+      if (pp != p.value()[i].end()) {
+        datarow.volfrac = pp.value();
+      } else {
+        cout << "      WARNING: Malformed data row for pore size distribution "
+             << "(no volume fraction)... assuming zero" << endl;
+        cout.flush();
+        datarow.volfrac = 0.0;
+      }
+      phaseData.poreSizeDist.push_back(datarow);
+      sum += datarow.volfrac;
+      if (verbose_) {
+        // i++;
+        // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , "
+        // << datarow.volfrac << endl; cout.flush();
+        cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
+        cout.flush();
+      }
+    } else {
+      cout << "      WARNING: Malformed data row for pore size distribution "
+           << "(no diameter)... skipping" << endl;
       cout.flush();
     }
-    in.peek();
   }
-
-  sum -= datarow.volfrac;
-  phaseData.poreSizeDist.erase(phaseData.poreSizeDist.end() - 1);
 
   if (verbose_) {
     cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
          << phaseData.poreSizeDist.size() << endl;
     cout.flush();
-  }
-  in.close();
-
-  // Normalize the pore size distribution in case it is not already
-  if (sum > 0.0) {
-    for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
-      phaseData.poreSizeDist[i].volfrac *= (1.0 / sum);
-    }
   }
 
   return;

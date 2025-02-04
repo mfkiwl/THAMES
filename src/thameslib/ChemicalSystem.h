@@ -682,10 +682,10 @@ public:
   (nanometers) and the volume fraction in the second column.  After
   the data are read the volume fraction is normalized.
 
-  @param poreSizeFilename is the name of the file containing the data
+  @param p is an iterator over the JSON data array
   @param phaseData holds the structure of collected phase data from the document
   */
-  void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
+  void parsePoreSizeDistribution(const json::iterator p, PhaseData &phaseData);
 
   /**
   @brief Parse the Rd data (impurity partitioning) for one phase in the JSON
@@ -6237,13 +6237,15 @@ public:
       microPhaseVolume_[idx] = val * v0 / dcmm;
       if (verbose_) {
         if (called == 0) {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
+          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = "
+               << setw(3) << right << idx << " : " << setw(15) << left
+               << microPhaseName_[idx]
                << " (called = 0) => updated scaledMass = " << val
                << " and volume = " << microPhaseVolume_[idx] << endl;
         } else {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
+          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = "
+               << setw(3) << right << idx << " : " << setw(15) << left
+               << microPhaseName_[idx]
                << " (called = 1) => updated scaledMass = " << val
                << " and volume = " << microPhaseVolume_[idx] << endl;
         }

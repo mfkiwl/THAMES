@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Feb 03 20:09 2025 | Pore size distribution data included in chemistry.json |
 | Feb 02 23:21 2025 | Corrected error preventing identification of kinetic phases |
 | Feb 01 11:41 2025 | Merged branch `florinnita_THAMES_avoidGEMfailure` to take small time steps to get past a GEM_run failure |
 | Jan 12 09:16 2025 | Fixed a bug with json parsing and also with Pozzolanic kinetic model |
