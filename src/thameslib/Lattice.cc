@@ -3044,7 +3044,9 @@ void Lattice::setResolution(const double res) {
     cout << resolution_ << " to " << res << endl;
     cout.flush();
   }
-  resolution_ = res;
+
+  // This will now be used in kinetic models to scale surface to volume ratio
+  resolution_ = res; // in micrometers
 }
 
 vector<unsigned int> Lattice::getNeighborhood(const unsigned int sitenum,

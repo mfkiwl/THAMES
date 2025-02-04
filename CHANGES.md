@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Feb 03 21:24 2025 | Created `surfacearea` branch from `json` to account for surface area scaling in kinetics |
 | Feb 03 21:02 2025 | Merged `xyzfile` branch into `json` branch |
 | Feb 03 20:09 2025 | Pore size distribution data included in chemistry.json |
 | Feb 02 23:21 2025 | Corrected error preventing identification of kinetic phases |
