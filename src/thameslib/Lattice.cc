@@ -79,7 +79,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
     cout << endl
          << "Lattice::Lattice - " << fileName
          << " input file generated using "
-            "Version "
+            "THAMES Version : "
          << version_ << endl;
     in >> buff; // X size string identifier
     in >> xdim_;
@@ -100,8 +100,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
     ///
     cout << endl
          << "Lattice::Lattice - " << fileName
-         << " input file "
-            "generated using Version prior to Version 3.0.0"
+         << " input file generated using "
+            "THAMES Version prior to THAMES Version 3.0.0"
          << endl;
     version_ = "2.0";
     double testres = 1.0;
@@ -4541,6 +4541,53 @@ void Lattice::writeLatticeXYZ(double curtime, const int simtype,
     // out << x << "\t" << y << "\t" << z
     //     << "\t" << colors[0] << "\t" << colors[1] << "\t" << colors[2]
     //     << "\t" << "0.0" << endl;
+  }
+  out.close();
+}
+
+void Lattice::appendXYZ(double curtime, const int simtype, const string &root) {
+  unsigned int i, j, k;
+
+  string ofileName(root);
+  ofileName = ofileName + ".xyz";
+  ofstream out;
+
+  if (curtime < 1.0e-8) {
+    // Create a new file
+    out.open(ofileName.c_str(), ios::out);
+  } else {
+    // File should already exist so append to it
+    out.open(ofileName.c_str(), ios::app);
+  }
+
+  int numvox = xdim_ * ydim_ * zdim_;
+
+  // Write the file headers
+  out << numvox << endl; // Number of voxels to visualize
+  out << "Lattice=\"" << (float)xdim_ << " 0.0 0.0 0.0 " << (float)ydim_
+      << " 0.0 0.0 0.0 " << (float)zdim_ << "\" ";
+  out << "Properties=pos:R:3:color:R:3:transparency:R:1 ";
+  out << "Time=" << curtime << endl;
+
+  // Loop over all voxels and write out the solid ones
+
+  float x, y, z;
+  int mPhId;
+  vector<float> colors;
+  string symb;
+  float transparency = 0.7;
+
+  for (int i = 0; i < numsites_; i++) {
+    x = site_[i].getX();
+    y = site_[i].getY();
+    z = site_[i].getZ();
+    mPhId = site_[i].getMicroPhaseId();
+    // symb = cfgElem_[mPhId].symb; //mPhIdgetElemSymb(mPhId);
+    colors = chemSys_->getRGBf(mPhId);
+
+    transparency = (mPhId > 1) ? 0.0 : 0.7;
+    out << x << "\t" << y << "\t" << z << "\t" << colors[0] << "\t" << colors[1]
+        << "\t" << colors[2] << "\t" << transparency << endl;
   }
   out.close();
 }

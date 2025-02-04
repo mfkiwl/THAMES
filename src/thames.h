@@ -138,6 +138,17 @@ bool VERBOSE;
 bool WARNING;
 
 /**
+@brief Flag for creating an xyz file for 3D movie
+*/
+bool XYZ;
+
+/**
+@brief Name of output folder for simulation results
+*/
+
+string outputFolder;
+
+/**
 @brief The vector of component elastic energies.
 
 The strainenergy vector is passed to the GEM3K library to modify the
@@ -160,8 +171,25 @@ This functions uses the GNU getopt_long functionality
 
 @param argc is the number of command line arguments
 @param argv is the array of the command line arguments
+@return 0 if no errors, non-zero if error
 */
-void checkargs(int argc, char **argv);
+int checkArgs(int argc, char **argv);
+
+/**
+@brief Create output folder and copy input files to it
+
+@param outputFolder is the output folder name to create
+@param jobRoot is the root name of the simulation job
+@param gemInputName is the name of the master GEM input file
+@param statFileName is the name of the master GEM input file
+@param initMicName is name of the initial microstructure image file
+@param micDefName is name of the initial microstructure image file
+@param parFileName is the name of the input parameter file
+*/
+void prepOutputFolder(const string &outputFolder, string &jobRoot,
+                      const string &gemInputName, string &statFileName,
+                      const string &initMicName, const string &micDefName,
+                      const string &parFileName);
 
 /**
 @brief Write the formatted report file listing job properties and input.
@@ -169,19 +197,22 @@ void checkargs(int argc, char **argv);
 Almost all the actual formatted output is done by the ChemicalSystem object
 through its `writeChemSys` method.
 
+If a file is not present, the file name should be given as an empty string.
+
 @param jobRoot is the root name of the THAMES simulation
 @param itime is the start time of the job
-@param mfileName is name of the initial microstructure image file
-@param parfilename is the name of the input parameter file
-@param csname is the name of the GEM chemical system definition (CSD) file
+@param initMicName is name of the initial microstructure image file
+@param micDefName is name of the initial microstructure image file
+@param parFileName is the name of the input parameter file
+@param csdName is the name of the GEM chemical system definition (CSD) file
 @param csys is a pointer to the ChemicalSystem object for the simulation
 @param ctr is a pointer to the Controller object for the simulation
 
-If a file is not present, the file name should be given as an empty string.
 */
 void writeReport(const string &jobroot, struct tm *itime,
-                 const string &mfileName, const string &parfilename,
-                 const string &csname, ChemicalSystem *csys, Controller *ctr);
+                 const string &initMicName, const string &micDefName,
+                 const string &parFileName, const string &csdName,
+                 ChemicalSystem *csys, Controller *ctr);
 
 /**
 @brief write the timing data

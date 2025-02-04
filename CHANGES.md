@@ -4,15 +4,23 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Feb 03 21:02 2025 | Merged `xyzfile` branch into `json` branch |
 | Feb 03 20:09 2025 | Pore size distribution data included in chemistry.json |
 | Feb 02 23:21 2025 | Corrected error preventing identification of kinetic phases |
+| Feb 01 14:39 2025 | Fixed compile-time bug in `thames.cc` after merging |
 | Feb 01 11:41 2025 | Merged branch `florinnita_THAMES_avoidGEMfailure` to take small time steps to get past a GEM_run failure |
+| Jan 12 17:45 2025 | Updated test input files to put pore size distribution data in microstructure definition file |
 | Jan 12 09:16 2025 | Fixed a bug with json parsing and also with Pozzolanic kinetic model |
 | Jan 11 02:59 2025 | Tested json on all test cases |
 | Jan 08 17:36 2025 | Fixed more runtime errors related to how json parses chemistry file |
 | Jan 08 14:49 2025 | Fixed some runtime errors related to json iterator misassignments |
 | Jan 07 14:24 2025 | Removed Doxyfile$ file which only records local changes to environment |
 | Jan 01 23:44 2024 | Updated CMakeLists.txt |
+| Dec 27 22:08 2024 | Fixed small runtime bug in pore distributions |
+| Dec 27 21:49 2024 | Pore size distribution now with microstructure definition file |
+| Dec 27 12:23 2024 | Added command line option to toggle xyz output |
+| Dec 24 21:20 2024 | Debugged run-time errors on xyzfile branch |
+| Dec 24 17:32 2024 | Create xyzfile branch and integrate xyz file writing internally |
 | Dec 23 23:03 2024 | Fixed all compile-time errors in json branch. |
 | Nov 11 10:14 2024 | Merged branch `florinnita_THAMES_v3.0.1-v4.0.0` which fixed some memory leaks and updated test input files; tagged v3.0.0 |
 | Nov 01 09:45 2024 | Commit in preparation for v3.0.0 release |

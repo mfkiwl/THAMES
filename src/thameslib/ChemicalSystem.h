@@ -140,7 +140,9 @@ struct elemColor {
   int colorId;
   string altName;
   vector<int> rgb;
+  vector<float> rgbf;
   int gray;
+  float grayf;
 };
 
 /**
@@ -559,15 +561,13 @@ public:
   all the information read from the GEM input files.
 
   @param GEMfilename is the name of the file holding GEM input data
-  @param GEMdbrname is the name of the GEM data bridge file
   @param Interfacefilename is the name of the file containing information about
   how to relate GEM phases to microstructure phases
   @param verbose is true if producing verbose output
   @param warning is true if producing verbose output
   */
-  ChemicalSystem(const string &GEMfilename, const string &GEMdbrname,
-                 const string &Interfacefilename, const bool verbose,
-                 const bool warning = false);
+  ChemicalSystem(const string &GEMfilename, const string &Interfacefilename,
+                 const bool verbose, const bool warning = false);
 
   /**
   @brief Copy constructor.
@@ -675,7 +675,7 @@ public:
   void parseGEMPhaseDCData(const json::iterator pp, PhaseData &phaseData);
 
   /**
-  @brief Parse a phase's sub-voxel pore size distribution from a file
+  @brief Parse a phase's sub-voxel pore size distribution
 
   The file must have a header line that will be discarded.  The rest of
   the file must be two column csv with pore diameter in the first column
@@ -5672,16 +5672,9 @@ public:
   /**
   @brief Formatted writing of ChemicalSystem data to a stream.
 
-  The output stream is defined, opened, and closed within the function itself
+  @param out is the output file stream to which to direct output
   */
-  void writeChemSys(void);
-
-  /**
-  @brief Formatted writing of ChemicalSystem data to a prescribed stream.
-
-  @param out is the output stream to which to direct output
-  */
-  void writeChemSys(ostream &out);
+  void writeChemSys(ofstream &out);
 
   /**
   @brief Calculates new equilibrium state of the GEM system and relate to
@@ -6219,6 +6212,50 @@ public:
     }
   }
 
+  vector<float> getRGBf(int pid) {
+    string mPhName = microPhaseName_[pid];
+    map<string, elemColor>::iterator p = colorN_.find(mPhName);
+    if (p != colorN_.end()) {
+      return colorN_[mPhName].rgbf;
+    } else {
+      cout << endl << "**********************************************" << endl;
+      cout << endl
+           << "   Microphase " << mPhName
+           << " has no associated rgb values by default!" << endl;
+      cout << endl << "   => program stops !" << endl;
+      cout << endl
+           << "Please add in the chemistry file before " << mPhName
+           << " close phase definition tag (</phase>)," << endl
+           << "the following lines replacing VALUE with convenient integer "
+              "numbers in [0,255]: "
+           << endl;
+      cout << endl << "<display_data>" << endl;
+      cout << " <red> VALUE </red>" << endl;
+      cout << " <green> VALUE </green>" << endl;
+      cout << " <blue> VALUE </blue>" << endl;
+      cout << " <gray> VALUE </gray>" << endl;
+      cout << "</display_data>" << endl;
+      cout << endl
+           << "The following microphaseses are defined by default in THAMES "
+              "3.0.0: "
+           << endl;
+      int i = 0;
+      for (map<string, elemColor>::iterator pp = colorN_.begin();
+           pp != colorN_.end(); pp++) {
+        cout << "   " << setw(3) << i << " : " << setw(15) << left << pp->first
+             << setw(5) << right << "rgb:" << setw(5) << pp->second.rgb[0]
+             << setw(5) << pp->second.rgb[1] << setw(5) << pp->second.rgb[2]
+             << setw(10) << "gray:" << setw(5) << pp->second.gray << endl;
+        i++;
+      }
+      cout << endl
+           << "After modiffing and saving the chemistry.xml file, please "
+              "restart the program."
+           << endl
+           << endl;
+      exit(0);
+    }
+  }
   void updateMicroPhaseMasses(int idx, double val, int called) {
     int DCId = 0;
     if (idx > ELECTROLYTEID) {

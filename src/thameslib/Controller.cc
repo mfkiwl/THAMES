@@ -8,7 +8,7 @@
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
                        const string &parfilename, const string &jobname,
-                       const bool verbose, const bool warning)
+                       const bool verbose, const bool warning, const bool xyz)
     : lattice_(msh), kineticController_(kc), chemSys_(cs), sim_type_(simtype),
       thermalstr_(thmstr), jobroot_(jobname) {
   unsigned int i;
@@ -18,6 +18,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   const string imgfreqstr = "Image_frequency:";
   const string outtimestr = "OutTime:";
   const string calctimestr = "CalcTime:";
+
+  xyz_ = xyz;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -243,6 +245,8 @@ void Controller::doCycle(const string &statfilename, int choice,
 
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(0.0, sim_type_, jobroot_);
   int timesGEMFailed_loc = 0;
   int timesGEMFailed_loc1 = -10;
 
@@ -435,8 +439,7 @@ void Controller::doCycle(const string &statfilename, int choice,
       ///
       /// Once the change in state is determined, propagate the consequences
       /// to the 3D microstructure only if the GEM_run calculation succeeded.
-      /// Otherwise we will just return from function without doing anything
-      /// else
+      /// Otherwise just return from function without doing anything else
       ///
 
       if (timesGEMFailed_loc > 0) {
@@ -548,6 +551,8 @@ void Controller::doCycle(const string &statfilename, int choice,
       //        lattice_->changeMicrostructure" - sites that cannot be
       //        dissolved) lattice sites for the microphase phDiff
 
+      // restore initial system:
+
       if (changeLattice == 0) {
         vectDCId.clear();
         timesGEMFailed_recall = 0;
@@ -575,6 +580,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
             chemSys_->setDCLowerLimit(DCId, numMolesDiff);
 
+            // reset for ChemicalSystem:
             for (int i = 0; i < numDCs; i++) {
               chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
             }
@@ -617,7 +623,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
           cout << endl
                << "Controller::doCycle - GEM_run recalled for "
-                  "whileCount/cyc/phDiff/numSitesNotAvailable/nameDiff/count = "
+               << "whileCount/cyc/phDiff/numSitesNotAvailable/nameDiff/count = "
                << whileCount << "   " << cyc << "   " << phDiff << "   "
                << numSitesNotAvailable << "   " << nameDiff << "   "
                << lattice_->getCount(phDiff) << endl;
@@ -635,7 +641,7 @@ void Controller::doCycle(const string &statfilename, int choice,
             timesGEMFailed_loc = timesGEMFailed_recall;
             break;
           } else {
-            cout << "Controller::doCycle - GEM_run OK for whileCount = "
+            cout << "Controller::doCycle GEM_run OK for whileCount = "
                  << whileCount << endl;
           }
 
@@ -668,9 +674,8 @@ void Controller::doCycle(const string &statfilename, int choice,
         } else {
           kineticController_->setHydTimeIni(time_[i]);
           cout << endl
-               << "Controller::doCycle => normal end after reset system for "
-                  "cyc = "
-               << cyc << " (i = " << i << ")" << endl;
+               << "Controller::doCycle => normal end after reset "
+               << " system for cyc = " << cyc << " (i = " << i << ")" << endl;
         }
       } else {
         kineticController_->setHydTimeIni(time_[i]);
@@ -682,14 +687,20 @@ void Controller::doCycle(const string &statfilename, int choice,
     } catch (DataException dex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw dex;
     } catch (EOBException ex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw ex;
     } catch (MicrostructureException mex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw mex;
     }
 
@@ -726,6 +737,8 @@ void Controller::doCycle(const string &statfilename, int choice,
       }
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       lattice_->writePoreSizeDistribution(time_[i], sim_type_, jobroot_);
 
       time_index++;
@@ -809,6 +822,8 @@ void Controller::doCycle(const string &statfilename, int choice,
 
         lattice_->writeLattice(time_[i], sim_type_, jobroot_);
         lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+        if (xyz_)
+          lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
         string ofileName(jobroot_);
         ostringstream ostr1, ostr2;
         ostr1 << (int)(time_[i] * 100);
@@ -1013,6 +1028,8 @@ void Controller::doCycle(const string &statfilename, int choice,
 
   lattice_->writeLattice(time_[i - 1], sim_type_, jobroot_);
   lattice_->writeLatticePNG(time_[i - 1], sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(time_[i - 1], sim_type_, jobroot_);
 
   return;
 }

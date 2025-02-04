@@ -188,7 +188,7 @@ public:
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
   @param rg is a pointer to the random number generator object
-  @param seedRNG is the random number seed to use
+  @param seedRNG is the random number seed
   @param fileName is the name of the file containing the microstructure data
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
@@ -923,6 +923,8 @@ public:
   void writeLatticeIni(double curtime);
 
   void writeLatticeXYZ(double curtime, const int simtype, const string &root);
+
+  void appendXYZ(double curtime, const int simtype, const string &root);
 
   void writeLatticeCFG(double curtime, const int simtype, const string &root);
 

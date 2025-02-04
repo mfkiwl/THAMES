@@ -12,7 +12,6 @@ string AFTMicroName("");
 string MonosulfMicroName("");
 
 ChemicalSystem::ChemicalSystem(const string &GEMfilename,
-                               const string &GEMdbrname,
                                const string &interfaceFileName,
                                const bool verbose, const bool warning) {
   unsigned int i, j;
@@ -122,7 +121,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   char *cGEMfilename = (char *)GEMfilename.c_str();
-  // char *cGEMdbrname = (char *)GEMdbrname.c_str();
   if (verbose_) {
     cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
          << cGEMfilename << endl; // *-dat.lst
@@ -561,6 +559,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
   /// Begin parsing the chemistry input JSON file
   ///
+
   string msg;
   string jsonext = ".json";
   size_t foundjson = interfaceFileName.find(jsonext);
@@ -1428,6 +1427,14 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
       colorN_[phaseData.thamesName].rgb.push_back(blue);
       colorN_[phaseData.thamesName].gray = gray;
     }
+    colorN_[phaseData.thamesName].rgbf[0] =
+        (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+    colorN_[phaseData.thamesName].rgbf[1] =
+        (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+    colorN_[phaseData.thamesName].rgbf[2] =
+        (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+    colorN_[phaseData.thamesName].grayf =
+        (float)(colorN_[phaseData.thamesName].gray) / 255.0;
   }
 
   return;
@@ -1777,15 +1784,13 @@ void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
   stream << "------------------------------------------------------" << endl;
 }
 
-void ChemicalSystem::writeChemSys(void) {
+void ChemicalSystem::writeChemSys(ofstream &out) {
   unsigned int j;
 
   ///
   /// First we will list details for the ICs
   ///
 
-  string CSfilename("chemsys.report");
-  ofstream out(CSfilename.c_str());
   out << "Report on the Material Database" << endl;
   out << "-------------- ChemicalSystem -----------------" << endl << endl;
   out << endl << "List of Independent Components :" << endl;
@@ -2871,6 +2876,23 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].rgb.push_back(100);
   colorN_["Brucite"].rgb.push_back(26);
   colorN_["Brucite"].gray = 83;
+
+  map<string, elemColor>::iterator it = colorN_.begin();
+  cout << "Created iterator" << endl;
+  cout.flush();
+
+  while (it != colorN_.end()) {
+    cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
+    cout.flush();
+    (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
+    (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
+    (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
+    (it->second).grayf = (float)((it->second).gray) / 255.0;
+    ++it;
+  }
+
+  cout << "Made it past iterator" << endl;
+  cout.flush();
 
   /*
   colorN_[""].colorId = ;

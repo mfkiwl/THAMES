@@ -167,6 +167,7 @@ private:
 
   bool verbose_; /**< Flag for verbose output */
   bool warning_; /**< Flag for warning output */
+  bool xyz_;     /**< Flag for 3D movie data output */
 
 public:
   /**
@@ -189,11 +190,12 @@ public:
   @param jobname is the root name to give to all output files
   @param verbose is true if verbose output should be produced
   @param warning is true if warning output should be produced
+  @param xyz is true if 3D visualization data should be produced
   */
   Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
              ThermalStrain *thmstr, const int simtype,
              const string &parfilename, const string &jobname,
-             const bool verbose, const bool warning);
+             const bool verbose, const bool warning, const bool xyz);
 
   /**
   @brief Run a computational iteration.
@@ -315,6 +317,23 @@ public:
   @return the warning flag
   */
   bool getWarning() const { return warning_; }
+
+  /**
+  @brief Set the xyz flag
+
+  @param isxyz is true if 3D visualization data output should be produced
+  */
+  void setXyz(const bool isxyz) {
+    xyz_ = isxyz;
+    return;
+  }
+
+  /**
+  @brief Get the xyz flag
+
+  @return the xyz flag
+  */
+  bool getXyz() const { return xyz_; }
 
   /**
   @brief Master function for writing ascii text files
