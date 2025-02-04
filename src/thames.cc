@@ -100,15 +100,6 @@ int main(int argc, char **argv) {
 
   cout << "gemInputName : " << gemInputName << endl;
   cout.flush();
-  //
-  // User must provide the name of the GEM data bridge (DBR) file
-  // for the whole system
-  //
-
-  // cout << endl << "What is the name of the GEM DBR file? " << endl;
-  // getline(cin, buff);
-  // const string geminput_dbrname(buff);
-  // cout << "geminput_dbrname  : " << geminput_dbrname << endl;
 
   //
   // User must provide the name of the file specifying the microstructre
