@@ -21,30 +21,39 @@ configure_file (
 
 option(BUILD_DOC "Build API documentation" ON)
 # look for doxygen capability
-find_package(Doxygen
-              REQUIRED dot
-              OPTIONAL_COMPONENTS mscgen dia)
-
+find_package (Doxygen)
 if (DOXYGEN_FOUND)
   # set input and output files
-  # set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/src/Doxyfile.in)
-  # set(DOXYGEN_OUT ${CMAKE_SOURCE_DIR}/src/Doxyfile)
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/src/Doxyfile.in)
+  set(DOXYGEN_OUT ${CMAKE_SOURCE_DIR}/src/Doxyfile)
   # request to configure the file
-  #configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT}$ @ONLY)
-  doxygen_add_docs(doc
-    filesOrDirs ${CMAKE_SOURCE_DIR}/src
+  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT}$ @ONLY)
+  message("Doxygen build started")
+
+  add_custom_target (doc
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
-
-  # message("Doxygen build started")
-
-  # add_custom_target (doc
-  #   COMMAND ${Doxygen::doxygen} ${DOXYGEN_OUT}
-  #   COMMENT "Generating API documentation with Doxygen" VERBATIM
-  # )
 else (DOXYGEN_FOUND)
-  message("Doxygen must be installed to generate the doxygen documentation")
+  message("Doxygen need to be installed to generate the doxygen documentation")
 endif (DOXYGEN_FOUND)
+
+find_program (
+  DOT
+  NAMES dot
+  HINTS "/opt/homebrew/bin/dot /opt/local/bin /usr/local/bin /usr/bin"
+)
+
+if (DOT)
+  message("DOT found... yes")
+  set (HAVE_DOT YES)
+else()
+  message("DOT found... no")
+  set (HAVE_DOT NO)
+  set (NO_DOT_WARNING "@warning Install graphviz/dot (http://www.graphviz.org)
+  to create graphs and diagrams in this documentation")
+endif()
 
 find_program (
   PDFLATEX
@@ -123,7 +132,4 @@ add_executable (thames ${SOURCES})
 
 target_link_libraries (thames thameslib ${EXTRA_LIBS})
 
-install (TARGETS thames viz vcctl2thames DESTINATION ${CMAKE_SOURCE_DIR}/bin)
-if (EXISTS ${CMAKE_SOURCE_DIR}/build/html)
-  install (DIRECTORY ${CMAKE_SOURCE_DIR}/build/html DESTINATION ${CMAKE_SOURCE_DIR}/doc)
-endif()
+install (TARGETS thames DESTINATION ${CMAKE_SOURCE_DIR}/bin)

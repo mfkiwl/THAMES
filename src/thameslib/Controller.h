@@ -21,83 +21,75 @@
 
 using namespace std;
 
-struct RestoreSite {
-  // for each site in site_:
-  unsigned int microPhaseId;      // The microstructure phase assignment
-  vector<unsigned int> growth;    // vector of phases that can grow at this site
-  vector<int> inGrowInterfacePos; // vector of the site position in each growth
-                                  // interface
-  int inDissInterfacePos; // site position in the corresponding dissolution
-                          // interface
-  double wmc;             // total porosity ("surface curvature") at this site
-  double
-      wmc0;  // this site internal porosity (its own contribution at wmc_ value)
-  int visit; // reset to 0
+struct RestoreSite{
+    //for each site in site_:
+    unsigned int microPhaseId;       // The microstructure phase assignment
+    vector<unsigned int> growth;     // vector of phases that can grow at this site
+    vector<int> inGrowInterfacePos;  // vector of the site position in each growth interface
+    int inDissInterfacePos;          // site position in the corresponding dissolution interface
+    double wmc;                      // total porosity ("surface curvature") at this site
+    double wmc0;                     // this site internal porosity (its own contribution at wmc_ value)
+    int visit;                       // reset to 0
 };
 
-struct RestoreInterface {
-  //  from Interface
-  unsigned int
-      microPhaseId; /**< The phase id of the voxels at this interface */
-  vector<Isite>
-      growthSites; /**< The list of all sites eligible foradjacent growth */
-  vector<Isite>
-      dissolutionSites; /**< The list of sites eligible for self-dissolution */
-                        //    for each Isite:
-  //      unsigned int id_; /**< The id of the corresponding Site */
-  //      int affinity_;    /**< The affinity for growth of a phase at the site
-  //      */ bool verbose_;    /**< Flag for whether to produce verbose output
-  //      */ double prob_;     /**< The growth probability of a phase at this
-  //      site (computed according the affinity) */ double probIni_;
+struct RestoreInterface{
+    //  from Interface
+    unsigned int microPhaseId; /**< The phase id of the voxels at this interface */
+    vector<Isite> growthSites; /**< The list of all sites eligible foradjacent growth */
+    vector<Isite> dissolutionSites; /**< The list of sites eligible for self-dissolution */
+    //    for each Isite:
+    //      unsigned int id_; /**< The id of the corresponding Site */
+    //      int affinity_;    /**< The affinity for growth of a phase at the site */
+    //      bool verbose_;    /**< Flag for whether to produce verbose output */
+    //      double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
+    //      double probIni_;
 };
 
 struct RestoreSystem {
-  // from ChemicalSystem (in fact from KineticController):
-  // vector<double> ICMoles;
-  vector<double> DCMoles;
-  // from Lattice:
-  vector<int> count;
-  vector<int> growthInterfaceSize;
-  vector<int> dissolutionInterfaceSize;
-  vector<RestoreSite> site; /**< 1D list of Site objects (site = voxel) */
-  // from Interface
-  vector<RestoreInterface> interface;
+    //from ChemicalSystem (in fact from KineticController):
+    //vector<double> ICMoles;
+    vector<double> DCMoles;
+    //from Lattice:
+    vector<int> count;
+    vector<int> growthInterfaceSize;
+    vector<int> dissolutionInterfaceSize;
+    vector<RestoreSite> site;     /**< 1D list of Site objects (site = voxel) */
+    //from Interface
+    vector<RestoreInterface> interface;
 
-  long int numRNGcall_0;
-  long int numRNGcallLONGMAX;
-  double lastRNG;
+    long int numRNGcall_0;
+    long int numRNGcallLONGMAX;
+    double lastRNG;
 };
 
-// from ChemicalSystem:
-//   double *ICMoles_;     /**< List of number of moles of each IC in system */
-//   double *DCMoles_;             /**< List of moles of each DC */
-//   double *prevGEMPhaseMoles_; /**< List of moles of each phase in the system
-//   in the previous time step */ double *prevGEMPhaseMass_;  /**< List of mass
-//   of each phase in the system in the previous time step */ double
-//   *prevGEMPhaseVolume_; /**< List of volume of each phase in the system in
-//   the previous time step */
+//from ChemicalSystem:
+//  double *ICMoles_;     /**< List of number of moles of each IC in system */
+//  double *DCMoles_;             /**< List of moles of each DC */
+//  double *prevGEMPhaseMoles_; /**< List of moles of each phase in the system in the previous time step */
+//  double *prevGEMPhaseMass_;  /**< List of mass of each phase in the system in the previous time step */
+//  double *prevGEMPhaseVolume_; /**< List of volume of each phase in the system in the previous time step */
 //
-// from Lattice:
-//   vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
-//   for each site in site_:
-//     unsigned int microPhaseId_;   // The microstructure phase assignment
-//     vector<unsigned int> growth_; // Vector of phases that can grow at this
-//     site double wmc_;                  // total porosity ("surface
-//     curvature") at this site double wmc0_;                 // this site
-//     internal porosity (its own contribution at wmc_ value)
-//     >>int visit_;<<               // reset to 0
-// vector<Interface> interface_;     //
-//   from Interface
-//     microPhaseId_; /**< The phase id of the voxels at this interface */
-//     vector<Isite> growthSites_; /**< The list of all sites eligible
-//     foradjacent growth */ vector<Isite> dissolutionSites_; /**< The list of
-//     sites eligible for self-dissolution */ for each Isite:
-//       unsigned int id_; /**< The id of the corresponding Site */
-//       int affinity_;    /**< The affinity for growth of a phase at the site
-//       */ bool verbose_;    /**< Flag for whether to produce verbose output */
-//       double prob_;     /**< The growth probability of a phase at this site
-//       (computed according the affinity) */ double probIni_;
-// vector<int> count_;               // recreate or restored
+//from Lattice:
+//  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
+//  for each site in site_:
+//    unsigned int microPhaseId_;   // The microstructure phase assignment
+//    vector<unsigned int> growth_; // Vector of phases that can grow at this site
+//    double wmc_;                  // total porosity ("surface curvature") at this site
+//    double wmc0_;                 // this site internal porosity (its own contribution at wmc_ value)
+//    >>int visit_;<<               // reset to 0
+//vector<Interface> interface_;     //
+//  from Interface
+//    microPhaseId_; /**< The phase id of the voxels at this interface */
+//    vector<Isite> growthSites_; /**< The list of all sites eligible foradjacent growth */
+//    vector<Isite> dissolutionSites_; /**< The list of sites eligible for self-dissolution */
+//    for each Isite:
+//      unsigned int id_; /**< The id of the corresponding Site */
+//      int affinity_;    /**< The affinity for growth of a phase at the site */
+//      bool verbose_;    /**< Flag for whether to produce verbose output */
+//      double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
+//      double probIni_;
+//vector<int> count_;               // recreate or restored
+
 
 /**
 @class Controller
@@ -151,8 +143,7 @@ protected:
   double imgfreq_;          /**< Frequency to output microstructure image */
   ChemicalSystem *chemSys_; /**< Pointer to `ChemicalSystem` object */
   vector<double> time_;     /**< List of simulation times for each iteration */
-  vector<double>
-      timeInitial_; /**< List of simulation times for each iteration */
+  vector<double> timeInitial_;     /**< List of simulation times for each iteration */
   vector<double> output_time_; /**< List of times to output image */
   double statfreq_;            /**< Frequency to output statistics */
 
@@ -167,7 +158,6 @@ private:
 
   bool verbose_; /**< Flag for verbose output */
   bool warning_; /**< Flag for warning output */
-  bool xyz_;     /**< Flag for 3D movie data output */
 
 public:
   /**
@@ -190,12 +180,11 @@ public:
   @param jobname is the root name to give to all output files
   @param verbose is true if verbose output should be produced
   @param warning is true if warning output should be produced
-  @param xyz is true if 3D visualization data should be produced
   */
   Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
              ThermalStrain *thmstr, const int simtype,
              const string &parfilename, const string &jobname,
-             const bool verbose, const bool warning, const bool xyz);
+             const bool verbose, const bool warning);
 
   /**
   @brief Run a computational iteration.
@@ -235,7 +224,7 @@ public:
   @param isFirst is true if this is the first state calculation
   (initialization)
   */
-  // void calculateState(double time, double dt, bool isFirst, int cyc);
+  //void calculateState(double time, double dt, bool isFirst, int cyc);
 
   int calculateState(double time, double dt, bool isFirst, int cyc);
 
@@ -315,23 +304,6 @@ public:
   @return the warning flag
   */
   bool getWarning() const { return warning_; }
-
-  /**
-  @brief Set the xyz flag
-
-  @param isxyz is true if 3D visualization data output should be produced
-  */
-  void setXyz(const bool isxyz) {
-    xyz_ = isxyz;
-    return;
-  }
-
-  /**
-  @brief Get the xyz flag
-
-  @return the xyz flag
-  */
-  bool getXyz() const { return xyz_; }
 
   /**
   @brief Master function for writing ascii text files
