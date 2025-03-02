@@ -62,7 +62,7 @@ PozzolanicModel::PozzolanicModel() {
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114,000 years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -144,7 +144,7 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114,000 years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -162,7 +162,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
   /// Initialize local variables
   ///
 
-  //double arrhenius; // = 1.0;
+  // double arrhenius; // = 1.0;
 
   double dissrate = 1.0e9; // Nucleation and growth rate
   double diffrate = 1.0e9; // Diffusion rate
@@ -329,8 +329,9 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
       if (verbose_) {
-        cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
-             << rate << " / " << massDissolved << endl;
+        cout
+            << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
+            << rate << " / " << massDissolved << endl;
       }
 
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
@@ -340,8 +341,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
-             << "\tmicroPhaseId_ = " << microPhaseId_
+        cout << "  ****************** PZM_hT = " << timestep
+             << "\tcyc = " << cyc << "\tmicroPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
@@ -385,4 +386,3 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
   return;
 }
-

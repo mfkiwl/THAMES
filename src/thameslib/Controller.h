@@ -160,9 +160,9 @@ protected:
 
 private:
   double sattack_time_; /**< Simulation time at which to begin sulfate attack,
-                                in days */
+                                in hours */
   double leach_time_;   /**< Simulation time at which to begin leaching,
-                                in days */
+                                in hours */
   int damagecount_;     /**< Number of pixels in the lattice that are damaged */
 
   bool verbose_; /**< Flag for verbose output */
@@ -230,8 +230,8 @@ public:
       - Updating the microstructure
       - Outputting the microstructure phase volume fractions and other data
 
-  @param time is the simulation time [days]
-  @param dt is the change in simulation time used by the kinetic model [days]
+  @param time is the simulation time [hours]
+  @param dt is the change in simulation time used by the kinetic model [hours]
   @param isFirst is true if this is the first state calculation
   (initialization)
   */
@@ -244,7 +244,7 @@ public:
 
   Controller parameters that need to be input are
 
-      - Length of time to calculate [days]
+      - Length of time to calculate [hours]
       - Frequency to output microstructure images
 
   @todo Need some error checking for what to do if a required field is not found
@@ -257,7 +257,7 @@ public:
   /**
   @brief Set the simulation time at which to begin sulfate attack simulation.
 
-  @param sattacktime is the simulation time to begin sulfate attack [days]
+  @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
   void setSattack_time(const double sattacktime) {
     sattack_time_ = sattacktime;
@@ -266,7 +266,7 @@ public:
   /**
   @brief Get the simulation time at which to begin sulfate attack simulation.
 
-  @return the simulation time to begin sulfate attack [days]
+  @return the simulation time to begin sulfate attack [hours]
   */
   double getSattack_time(void) const { return sattack_time_; }
 

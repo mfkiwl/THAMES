@@ -320,7 +320,7 @@ public:
 
   @note Argument time is NOT USED.
 
-  @param time is the simulation time [days] (not used currently)
+  @param time is the simulation time [hours] (not used currently)
   @param kmax is the maximum number of total conjugate gradient iterations
   allowed
   */
@@ -359,7 +359,7 @@ public:
 
   @note Argument index is NOT USED.
 
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   @param fileName is the file name containing the prior equilibrium displacement
   field if needed
   @param exx is the xx component of the macrostrain

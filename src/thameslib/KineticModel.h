@@ -16,6 +16,7 @@ used.
 #define KINETICSH
 
 #include "ChemicalSystem.h"
+#include <algorithm>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -51,8 +52,8 @@ protected:
   double temperature_;   /**< Temperature [K] */
   double refT_;          /**< Reference temperature for PK model [K] */
   double sulfateAttackTime_; /**< Time at which sulfate attack simulation starts
-                                [days] */
-  double leachTime_; /**< Time at which leaching simulation starts [days] */
+                                [h] */
+  double leachTime_; /**< Time at which leaching simulation starts [h] */
 
   string name_;      /**< Name of phase controlled by this kinetic model */
   int microPhaseId_; /**< Microstructure id controlled by this model */
@@ -90,7 +91,7 @@ public:
   /**
   @brief Destructor does nothing.
   */
-  virtual ~KineticModel(){};
+  virtual ~KineticModel() {};
 
   /**
   @brief Get the ChemicalSystem object for the simulation used by the kinetic
@@ -262,14 +263,14 @@ public:
 
   @param waterid is the index value to use
   */
-  //void setWaterId(const int waterid) { waterId_ = waterid; }
+  // void setWaterId(const int waterid) { waterId_ = waterid; }
 
   /**
   @brief Get the DC index for liquid water
 
   @return the DC index for liquid water
   */
-  //int getWaterId() const { return waterId_; }
+  // int getWaterId() const { return waterId_; }
 
   /**
   @brief Set the number of ICs
@@ -278,14 +279,14 @@ public:
 
   @param icnum is the number of ICs to specify
   */
-  //void setICNum(const int icnum) { ICNum_ = icnum; }
+  // void setICNum(const int icnum) { ICNum_ = icnum; }
 
   /**
   @brief Get the number of ICs
 
   @return the number of ICs
   */
-  //int getICNum() const { return ICNum_; }
+  // int getICNum() const { return ICNum_; }
 
   /**
   @brief Set the number of DCs
@@ -294,14 +295,14 @@ public:
 
   @param dcnum is number of DCs to specify
   */
-  //void setDCNum(const int dcnum) { DCNum_ = dcnum; }
+  // void setDCNum(const int dcnum) { DCNum_ = dcnum; }
 
   /**
   @brief Get the number of DCs
 
   @return the number of DCs
   */
-  //int getDCNum() const { return DCNum_; }
+  // int getDCNum() const { return DCNum_; }
 
   int getDCId() const { return DCId_; }
 
@@ -312,14 +313,14 @@ public:
 
   @param gpnum is number of GEM phases to specify
   */
-  //void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
+  // void setGEMPhaseNum(const int gpnum) { GEMPhaseNum_ = gpnum; }
 
   /**
   @brief Get the number of GEM phases
 
   @return the number of GEM phases
   */
-  //int getGEMPhaseNum() const { return GEMPhaseNum_; }
+  // int getGEMPhaseNum() const { return GEMPhaseNum_; }
 
   /**
   @brief Set the IC names
@@ -374,7 +375,7 @@ public:
   /**
   @brief Set the simulation time at which to begin external sulfate attack.
 
-  @param sattacktime is the simulation time to begin sulfate attack [days]
+  @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
   void setSulfateAttackTime(double sattacktime) {
     sulfateAttackTime_ = sattacktime;
@@ -385,14 +386,14 @@ public:
 
   @note NOT USED.
 
-  @return the simulation time to begin sulfate attack [days]
+  @return the simulation time to begin sulfate attack [hours]
   */
   double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulation time at which to begin leaching.
 
-  @param leachtime is the simulation time to begin leaching [days]
+  @param leachtime is the simulation time to begin leaching [hours]
   */
   void setLeachTime(double leachtime) { leachTime_ = leachtime; }
 
@@ -401,7 +402,7 @@ public:
 
   @note NOT USED.
 
-  @return the simulation time to begin leaching [days]
+  @return the simulation time to begin leaching [hours]
   */
   double getLeachTime(void) const { return leachTime_; }
 
@@ -519,7 +520,7 @@ public:
 
   @return the initial scaled moles
   */
-  //double getInitScaledMoles() const { return initScaledMoles_; }
+  // double getInitScaledMoles() const { return initScaledMoles_; }
 
   /**
   @brief Master method for implementing one kinetic time step.
@@ -538,7 +539,7 @@ public:
   @todo Make the methods more general, less hardwiring of parameters
   @todo Make the local variable names more descriptive
 
-  @param timestep is the time interval to simulate [days]
+  @param timestep is the time interval to simulate [hours]
   @param temperature is the absolute temperature during this step [K]
   @param rh is the internal relative humidity
   @param scaledMass is C-style array of the normalized mass of each

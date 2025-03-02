@@ -471,7 +471,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
       for (ii = 0; ii < numMicroPhases_; ii++) {
         microPhaseId = chemSys_->getMicroPhaseId(ii);
         myname = chemSys_->getMicroPhaseName(microPhaseId);
-        vfrac = ((double)count_[ii]) / numsites_;
+        vfrac = (static_cast<double>(count_[ii])) /
+                (static_cast<double>(numsites_));
         setVolumefraction(microPhaseId, vfrac);
         setInitvolumefraction(microPhaseId, vfrac);
         if (verbose_) {
@@ -694,12 +695,17 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID, 0.0);
 
     } else if (microPhaseId != VOIDID) {
+      // microPhaseMass has units of grams per cm3 of whole microstructure
+      // solidMass is the sum of all microPhaseMass values
+      // So pscaledMass (p stands for percent) is mass percent on a total solids
+      // basis
       pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
       DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId, 0);
       chemSys_->setDC_to_MPhID(DCId, microPhaseId);
       molarMass = chemSys_->getDCMolarMass(DCId);
       if (verbose_) {
-        cout << "Lattice::normalizePhaseMasses Microstructure scaled mass of "
+        cout << "Lattice::normalizePhaseMasses, 1 cm3 of microstructure has "
+                "mass of "
              << i << "   " << chemSys_->getMicroPhaseName(microPhaseId) << " ("
              << microPhaseId << ") = " << microPhaseMass[microPhaseId]
              << " g out of " << solidMass << " g total" << endl;
@@ -708,17 +714,19 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
         cout.flush();
       }
 
-      totalSolidMass += pscaledMass;
+      totalSolidMass += pscaledMass; // totalSolidMass should be 100.00
       if (chemSys_->getCementComponent(microPhaseId))
         totalCementMass += pscaledMass;
       chemSys_->setMicroPhaseMass(microPhaseId, pscaledMass);
 
+      // ChemicalSystem DC moles is in units of moles per 100 g of total solid
       chemSys_->setDCMoles(DCId, (pscaledMass / molarMass));
 
       chemSys_->setMicroPhaseMassDissolved(microPhaseId, 0.0);
     }
   }
 
+  // initScaledCementMass is percent of all solid mass that is cement
   chemSys_->setInitScaledCementMass(cementMass * 100 / solidMass);
   // cout << "normalizePhaseMasses totalSolidMass/totalCementMass = "
   //      << totalSolidMass << " / " << totalCementMass << endl;
@@ -1014,7 +1022,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
     }
     int nucPhaseId;
     do {
-      nucPhaseId = (int)(rng * growPhaseIDVectSize);
+      nucPhaseId = static_cast<int>(rng * growPhaseIDVectSize);
     } while (numLeft[nucPhaseId] == 0);
     cout << endl
          << "      one of them is chosen randomly for nucleation: "
@@ -1111,7 +1119,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
         }
       }
     } else {
-      isitePos = (int)(rng * growthVectorSize);
+      isitePos = static_cast<int>(rng * growthVectorSize);
     }
 
     ste = &site_[growthVector[isitePos].id];
@@ -1608,7 +1616,7 @@ void Lattice::nucleatePhaseRnd(int phaseID, int numLeft) {
 
     while (numLeftIni > 0) {
       rng = callRNG();
-      fSiteWS = (int)(rng * sizeWS);
+      fSiteWS = static_cast<int>(rng * sizeWS);
 
       seedID.push_back(watersites[fSiteWS]);
 
@@ -2004,7 +2012,7 @@ void Lattice::nucleatePhaseAff(int phaseID, int numLeft) {
         }
       } else {
 
-        fSiteWS = (int)(rng * sizeWS);
+        fSiteWS = static_cast<int>(rng * sizeWS);
       }
 
       seedID.push_back(watersites[fSiteWS].id);
@@ -3076,7 +3084,7 @@ vector<unsigned int> Lattice::getNeighborhood(const unsigned int sitenum,
         dist += static_cast<double>(((yc - yp) * (yc - yp)));
         dist += static_cast<double>(((zc - zp) * (zc - zp)));
 
-        if ((sqrt(dist) - 0.5) <= (double)size) {
+        if ((sqrt(dist) - 0.5) <= static_cast<double>(size)) {
             nh.push_back(getIndex(xp,yp,zp));
         }
         */
@@ -3095,39 +3103,39 @@ unsigned int Lattice::getIndex(int ix, int iy, int iz) const {
     } else {
       ix = 0;
     }
-  } else if (ix >= (int)xdim_) {
+  } else if (ix >= static_cast<int>(xdim_)) {
     if (BC != 1) {
-      ix -= (int)xdim_;
+      ix -= static_cast<int>(xdim_);
     } else {
-      ix = (int)xdim_ - 1;
+      ix = static_cast<int>(xdim_ - 1);
     }
   }
 
   if (iy < 0) {
     if (BC != 2) {
-      iy += (int)ydim_;
+      iy += static_cast<int>(ydim_);
     } else {
       iy = 0;
     }
-  } else if (iy >= (int)ydim_) {
+  } else if (iy >= static_cast<int>(ydim_)) {
     if (BC != 2) {
-      iy -= (int)ydim_;
+      iy -= static_cast<int>(ydim_);
     } else {
-      iy = (int)ydim_ - 1;
+      iy = static_cast<int>(ydim_ - 1);
     }
   }
 
   if (iz < 0) {
     if (BC != 3) {
-      iz += (int)zdim_;
+      iz += static_cast<int>(zdim_);
     } else {
       iz = 0;
     }
-  } else if (iz >= (int)zdim_) {
+  } else if (iz >= static_cast<int>(zdim_)) {
     if (BC != 3) {
-      iz -= (int)zdim_;
+      iz -= static_cast<int>(zdim_);
     } else {
-      iz = (int)zdim_ - 1;
+      iz = static_cast<int>(zdim_ - 1);
     }
   }
 
@@ -3247,8 +3255,9 @@ int Lattice::changeMicrostructure(double time, const int simtype,
     for (i = 0; i < volNextSize; i++) {
       cout << "Lattice::changeMicrostructure ****Volume fraction["
            << phasenames[i] << "] in next state should be = " << vfrac_next[i];
-      cout << ", or " << (int)((double)(numsites_ * vfrac_next[i])) << " sites"
-           << endl;
+      cout << ", or "
+           << static_cast<int>(static_cast<double>(numsites_ * vfrac_next[i]))
+           << " sites" << endl;
     }
     cout << "Lattice::changeMicrostructure ****Volume fraction[capillary "
          << "pores] in next state"
@@ -3438,7 +3447,7 @@ int Lattice::changeMicrostructure(double time, const int simtype,
   }
 
   cursites = count_[VOIDID];
-  newsites = (int)((numsites_ * vfrac_next[VOIDID]) + 0.5);
+  newsites = static_cast<int>((numsites_ * vfrac_next[VOIDID]) + 0.5);
   wcursites = count_[ELECTROLYTEID];
   wnewsites = wcursites - (newsites - cursites);
 
@@ -3499,8 +3508,8 @@ int Lattice::changeMicrostructure(double time, const int simtype,
     cout << "Lattice::changeMicrostructure Target CAPIILARY WATER "
          << "volume fraction IS " << vfrac_next[ELECTROLYTEID] << endl;
 
-    // vfrac_next[ELECTROLYTEID] -= ((double)(newsites -
-    // cursites)/(double)(numsites_)); cout << "But WILL BE " <<
+    // vfrac_next[ELECTROLYTEID] -= (static_cast<double>(newsites -
+    // cursites)/static_cast<double>(numsites_)); cout << "But WILL BE " <<
     // vfrac_next[ELECTROLYTEID] << " after creating void space" << endl;
 
     cout << "Lattice::changeMicrostructure Number CAPILLARY VOXELS "
@@ -3789,7 +3798,8 @@ void Lattice::adjustMicrostructureVolFracs(vector<string> &names,
            << "fraction[" << names[i] << "] should be " << vfrac[i] << ", ("
            << vol[i] << "/" << initialmicrostructurevolume_ // totmicvolume
            << ") and volume fraction NOW is "
-           << (double)(count_[i]) / (double)(numsites_) << endl;
+           << static_cast<double>(count_[i]) / static_cast<double>(numsites_)
+           << endl;
       cout.flush();
     }
   }
@@ -4246,7 +4256,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   string ofileName(root);
   ostringstream ostr1, ostr2;
   // Add the time in minutes
-  ostr1 << setfill('0') << setw(6) << (int)((curtime * 24.0 * 60.0) + 0.5);
+  ostr1 << setfill('0') << setw(6) << static_cast<int>((curtime * 60.0) + 0.5);
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4267,7 +4277,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   // Write the header
 
   if (verbose_) {
-    cout << "Time = " << (curtime * 24.0) << " h" << endl;
+    cout << "Time = " << (curtime) << " h" << endl;
     cout << "Capillary pore volume fraction (> 100 nm) = "
          << capillaryporevolumefraction_ << endl;
     cout << "Capillary void volume fraction = " << volumefraction_[VOIDID]
@@ -4284,7 +4294,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
     cout.flush();
   }
 
-  out << "Time = " << (curtime * 24.0) << " h" << endl;
+  out << "Time = " << (curtime) << " h" << endl;
   out << "Capillary pore volume fraction (> 100 nm) = "
       << capillaryporevolumefraction_ << endl;
   out << "Capillary void volume fraction = " << volumefraction_[VOIDID] << endl;
@@ -4370,7 +4380,7 @@ void Lattice::writeLattice(double curtime, const int simtype,
   string ofileName(root);
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4459,7 +4469,7 @@ void Lattice::writeLatticeIni(double curtime) {
   unsigned int i, j, k;
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4496,7 +4506,7 @@ void Lattice::writeLatticeXYZ(double curtime, const int simtype,
   string ofileName(root);
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4601,7 +4611,7 @@ void Lattice::writeLatticeCFG(double curtime, const int simtype,
   string ofileNameUSR(root);
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4659,9 +4669,9 @@ void Lattice::writeLatticeCFG(double curtime, const int simtype,
           outCFG << cfgElem_[mPhId].symb << endl;
           mPhNotExist = false;
         }
-        x = (site_[i].getX()) / (double)(xdim_ - 1);
-        y = (site_[i].getY()) / (double)(ydim_ - 1);
-        z = (site_[i].getZ()) / (double)(zdim_ - 1);
+        x = (site_[i].getX()) / static_cast<double>(xdim_ - 1);
+        y = (site_[i].getY()) / static_cast<double>(ydim_ - 1);
+        z = (site_[i].getZ()) / static_cast<double>(zdim_ - 1);
         outCFG << x << "\t" << y << "\t" << z << endl;
         outUSR << ord << "\t" << colors[0] << "\t" << colors[1] << "\t"
                << colors[2] << "\t0.7051" << endl;
@@ -4687,7 +4697,7 @@ void Lattice::writeDamageLattice(double curtime, const string &root) {
   string ofileName(root);
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4752,7 +4762,7 @@ void Lattice::writeLatticePNG(double curtime, const int simtype,
 
   ostringstream ostr1, ostr2;
   ostr1 << setfill('0') << setw(6)
-        << (int)((curtime * 24.0 * 60.0) + 0.5); // minutes
+        << static_cast<int>((curtime * 60.0) + 0.5); // minutes
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4806,7 +4816,7 @@ void Lattice::writeLatticePNG(double curtime, const int simtype,
         } while (!done);
         sitenum = getIndex(i, j, izz);
         image[i][j] = site_[sitenum].getMicroPhaseId();
-        dshade[i][j] = 0.1 * (10.0 - ((double)nd));
+        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
       } else {
         sitenum = getIndex(i, j, slice);
         image[i][j] = site_[sitenum].getMicroPhaseId();
@@ -4863,7 +4873,7 @@ void Lattice::writeDamageLatticePNG(double curtime, const string &root) {
   ///
 
   ostringstream ostr1, ostr2;
-  ostr1 << (int)((curtime * 100.0) + 0.5); // hundredths of an hour
+  ostr1 << static_cast<int>((curtime * 100.0) + 0.5); // hundredths of an hour
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4922,7 +4932,7 @@ void Lattice::writeDamageLatticePNG(double curtime, const string &root) {
       }
       dshade[i][j] = 1.0;
       /*
-      dshade[j][k] = 0.1 * (10.0 - ((double)nd));
+      dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       */
     }
   }
@@ -4976,7 +4986,7 @@ void Lattice::makeMovie(const string &root) {
 
   string buff;
   ostringstream ostr1, ostr2, ostr3;
-  ostr1 << (int)(time_ * 100.0); // hundredths of an hour
+  ostr1 << static_cast<int>(time_ * 10.0); // tenths of an hour
   ostr2 << setprecision(3) << temperature_;
   string timestr(ostr1.str());
   string tempstr(ostr2.str());
@@ -4993,7 +5003,7 @@ void Lattice::makeMovie(const string &root) {
     ///
 
     ostr3.clear();
-    ostr3 << (int)(k); // x slice number
+    ostr3 << static_cast<int>(k); // x slice number
     string istr(ostr3.str());
     ofileName =
         ofbasename + "." + timestr + "." + tempstr + "." + istr + ".ppm";
@@ -5035,7 +5045,7 @@ void Lattice::makeMovie(const string &root) {
         } while (!done);
         sitenum = getIndex(i, j, izz);
         image[i][j] = site_[sitenum].getMicroPhaseId();
-        dshade[i][j] = 0.1 * (10.0 - ((double)nd));
+        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
       }
     }
 
@@ -5230,7 +5240,7 @@ vector<int> Lattice::findDomainSizeDistribution(int phaseid, const int numsites,
   int dim = maxsize;
   if (maxsize % 2 == 0)
     dim++;
-  int totSize = (int)pow(dim, 3) + 1;
+  int totSize = static_cast<int>(pow(dim, 3)) + 1;
 
   vector<int> init;
   vector<vector<int>> siteDomainSizeDistribution(totSize, init);
@@ -5283,7 +5293,7 @@ vector<int> Lattice::findDomainSizeDistribution(int phaseid, const int numsites,
       if (diff < sizeCateg) {
         for (int k = 0; k < diff; k++) {
           rng = callRNG();
-          pos = (int)(rng * (sizeCateg - 1));
+          pos = static_cast<int>(rng * (sizeCateg - 1));
           stId = siteDomainSizeDistribution[j - 1][pos];
           selectedSites.push_back(stId);
           siteDomainSizeDistribution[j - 1][pos] =
@@ -5312,7 +5322,7 @@ vector<int> Lattice::findDomainSizeDistribution(int phaseid, const int numsites,
       if (diff < sizeCateg) {
         for (int k = 0; k < diff; k++) {
           rng = callRNG();
-          pos = (int)(rng * (sizeCateg - 1));
+          pos = static_cast<int>(rng * (sizeCateg - 1));
           stId = siteDomainSizeDistribution[j][pos];
           selectedSites.push_back(stId);
           siteDomainSizeDistribution[j][pos] =

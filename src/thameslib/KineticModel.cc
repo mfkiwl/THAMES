@@ -27,7 +27,7 @@ KineticModel::KineticModel() {
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114K years
   ///
 
   sulfateAttackTime_ = 1.0e10;

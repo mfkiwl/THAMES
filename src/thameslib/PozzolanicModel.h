@@ -43,11 +43,11 @@ class PozzolanicModel : public KineticModel {
 
 protected:
   double dissolutionRateConst_;    /**< Rate constand for dissolution
-                                      (mol/m2/s) */
+                                      (mol/m2/h) */
   double diffusionRateConstEarly_; /**< Rate constant for early-age diffusion
-                                      (mol/m2/s) */
+                                      (mol/m2/h) */
   double diffusionRateConstLate_;  /**< Rate constant for later-age diffusion
-                                      (mol/m2/s) */
+                                      (mol/m2/h) */
   /**
   @brief Number of dissolved DC units per unit dissolution reaction
   */
@@ -328,7 +328,7 @@ public:
   @todo Make the methods more general, less hardwiring of parameters
   @todo Make the local variable names more descriptive
 
-  @param timestep is the time interval to simulate [days]
+  @param timestep is the time interval to simulate [hours]
   @param temperature is the absolute temperature during this step [K]
   @param rh is the internal relative humidity
   @param scaledMass is C-style array of the normalized mass of each

@@ -132,14 +132,14 @@ pores in GEM units */
   vector<struct PoreSizeVolume>
       masterporevolume_; /**< Pore size distribution and saturation */
 
-  double time_;         /**< The current simulation time [days] */
+  double time_;         /**< The current simulation time [h] */
   double temperature_;  /**< The current simulation temperature [K] */
   double oldtemp_;      /**< The temperature in the previous
                                 time step [K] */
   double sattack_time_; /**< Simulation time at which to begin
-                                simulation of sulfate attack [days] */
+                                simulation of sulfate attack [h] */
   double leach_time_;   /**< Simulation time at which to begin
-                                simulation of leaching [days] */
+                                simulation of leaching [h] */
   double surfacearea_;  /**< Total surface area [m<sup>2</sup>] */
 
   bool deptheffect_; /**< Whether or not PNG images should have
@@ -419,57 +419,57 @@ public:
   double getResolution() const { return resolution_; }
 
   /**
-  @brief Set the simulation time [days].
+  @brief Set the simulation time [hours].
 
   @note NOT USED.
 
-  @param tval is the simulation time [days]
+  @param tval is the simulation time [hours]
   */
   void setTime(const double tval) { time_ = tval; }
 
   /**
-  @brief Get the simulation time [days].
+  @brief Get the simulation time [hours].
 
   @note NOT USED.
 
-  @return the simulation time [days]
+  @return the simulation time [hours]
   */
   double getTime() const { return time_; }
 
   /**
   @brief Get the simulation time at which to start sulfate attack simulation
-  [days].
+  [hours].
 
   @note NOT USED.
 
-  @return the simulation time at which to start sulfate attack [days]
+  @return the simulation time at which to start sulfate attack [hours]
   */
   double getSattack_time() const { return sattack_time_; }
 
   /**
   @brief Set the simulation time at which to start sulfate attack simulation
-  [days].
+  [hours].
 
   @param sattacktime is the simulation time at which to start sulfate attack
-  [days]
+  [hours]
   */
   void setSattack_time(const double sattacktime) {
     sattack_time_ = sattacktime;
   }
 
   /**
-  @brief Get the simulation time at which to start leaching simulation [days].
+  @brief Get the simulation time at which to start leaching simulation [hours].
 
   @note NOT USED.
 
-  @return the simulation time at which to start leaching [days]
+  @return the simulation time at which to start leaching [hours]
   */
   double getLeach_time() const { return leach_time_; }
 
   /**
-  @brief Set the simulation time at which to start leaching simulation [days].
+  @brief Set the simulation time at which to start leaching simulation [hours].
 
-  @param leachtime is the simulation time at which to start leaching [days]
+  @param leachtime is the simulation time at which to start leaching [hours]
   */
   void setLeach_time(const double leachtime) { leach_time_ = leachtime; }
 
@@ -597,10 +597,13 @@ public:
   /**
   @brief Compute normalized initial microstructure phase masses
 
-  Given the initial masses of all phases in the microstructure,
-  this method scales them to 100 grams of solid.  In the process,
+  Given the initial masses of all phases in 1 cm3 of microstructure,
+  this method scales them to 100 grams of solid instead.  In the process,
   this method also sets the initial moles of water in the
   chemical system definition.
+
+  So when this method is finished, microPhaseMass has units of g per 100 g of
+  solid
 
   @param microPhaseMass is a vector of all the microstructure masses
   @param solidMass is the combined mass of all the solids
@@ -827,7 +830,7 @@ public:
 
   @todo Generalize to allow water in nanopores to be chemically reactive
 
-  @param time is is the simulation time [days]
+  @param time is is the simulation time [hours]
   @param simtype is the type of simulation (hydration, leaching, etc)
   @param capWater is true if there is any capillary pore water in the system.
   @param numDiff is the maximum number of voxels belonging to a given
@@ -892,7 +895,7 @@ public:
   /**
   @brief Write the pore size distribution data to a file
 
-  @param curtime is the current time in days
+  @param curtime is the current time in hours
   @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
@@ -914,7 +917,7 @@ public:
 
   The microstructure output file will indicate the phase id at each site.
 
-  @param curtime is the current time in days
+  @param curtime is the current time in hours
   @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
@@ -933,7 +936,7 @@ public:
 
   The damage output file is binary, each site either being damaged or not.
 
-  @param curtime is the current time in days
+  @param curtime is the current time in hours
   @param root is the root name of the output file to create
   */
   void writeDamageLattice(double curtime, const string &root);
@@ -942,7 +945,7 @@ public:
   @brief Write the 3D microstructure to a png file that can be immediately
   rendered.
 
-  @param curtime is the current time in days
+  @param curtime is the current time in hours
   @param root is the root name of the png output file to create
   */
   void writeLatticePNG(double curtime, const int simtype, const string &root);
@@ -953,7 +956,7 @@ public:
 
   The damage output file is binary, each site either being damaged or not.
 
-  @param curtime is the current time in days
+  @param curtime is the current time in hours
   @param root is the root name of the png output file to create
   */
   void writeDamageLatticePNG(double curtime, const string &root);

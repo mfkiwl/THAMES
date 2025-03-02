@@ -400,17 +400,17 @@ class ChemicalSystem {
                                       in the previous time step */
   double *prevGEMPhaseMass_;  /**< List of mass of each phase in the system
                                 in the previous time step */
-  double *prevGEMPhaseVolume_; /**< List of volume of each phase in the system
-                                 in the previous time step */
-  double *carrier_;            /**< List of moles of carrier (solvent) in
-                                       multicomponent asymmetric phases */
-  double *surfaceArea_;        /**< List of specific surface area of each
-                                       phase, in m<sup>2</sup>/kg */
-  double *DCUpperLimit_;       /**< List of upper bound on moles of each DC */
-  double *DCLowerLimit_;       /**< List of lower bound on moles of each DC,
-                                       generally non-zero for numerical
-                                       stability of the thermodynamic
-                                       calculations */
+  double *prevGEMPhaseVolume_;  /**< List of volume of each phase in the system
+                                  in the previous time step */
+  double *carrier_;             /**< List of moles of carrier (solvent) in
+                                        multicomponent asymmetric phases */
+  double *specificSurfaceArea_; /**< List of specific surface area of each
+                                phase, in m<sup>2</sup>/kg */
+  double *DCUpperLimit_;        /**< List of upper bound on moles of each DC */
+  double *DCLowerLimit_;        /**< List of lower bound on moles of each DC,
+                                        generally non-zero for numerical
+                                        stability of the thermodynamic
+                                        calculations */
 
   double *DCH0_; /**< List of molar enthalpies of DCs */
 
@@ -498,22 +498,22 @@ class ChemicalSystem {
   bool isSaturated_;
 
   /**
-  @brief Time to begin sulfate solution exposure, in days.
+  @brief Time to begin sulfate solution exposure, in hours.
 
   THAMES enables one to turn off the hydration simulation (i.e., kinetic
   dissolution of phases according to empirical rate laws in an otherwise closed
   system) and begin a simulation of sulfate attack on that hydrated system. This
-  variable designates the time (in days) at which this switch should happen.
+  variable designates the time (in hours) at which this switch should happen.
   */
   double sulfateAttackTime_;
 
   /**
-  @brief Time to begin leaching simulation, in days.
+  @brief Time to begin leaching simulation, in hours.
 
   THAMES enables one to turn of the hydration simulation (i.e., kinetic
   dissolution of phases according to empirical rate laws in an otherwise closed
   system) and begin a simulation of leaching by a low-pH solution.  This
-  variable designates the time (in days) at which this switch should happen.
+  variable designates the time (in hours) at which this switch should happen.
   */
   double leachTime_;
 
@@ -3820,40 +3820,40 @@ public:
   @param idx is the GEM CSD phase id
   @param val is the surface area to assign to that GEM phase
   */
-  void setSurfaceArea(const unsigned int idx, const double val) {
+  void setSpecificSurfaceArea(const unsigned int idx, const double val) {
     if (idx < numGEMPhases_) {
-      surfaceArea_[idx] = val;
+      specificSurfaceArea_[idx] = val;
     } else {
-      EOBException ex("ChemicalSystem", "setSurfaceArea", "surfaceArea_",
-                      numGEMPhases_, idx);
+      EOBException ex("ChemicalSystem", "setSpecificSurfaceArea",
+                      "specificSurfaceArea_", numGEMPhases_, idx);
       ex.printException();
       exit(1);
     }
   }
 
   /**
-  @brief Get the surface area of all GEM CSD phases (m<sup>2</sup>/kg).
+  @brief Get the specific surface area of all GEM CSD phases (m<sup>2</sup>/kg).
 
   @note Used only in this class's copy constructor.
 
   @return a pointer to the list of all phase surface areas
   */
-  double *getSurfaceArea(void) const { return surfaceArea_; }
+  double *getSpecificSurfaceArea(void) const { return specificSurfaceArea_; }
 
   /**
-  @brief Get the surface area of a GEM CSD phase (m<sup>2</sup>/kg).
+  @brief Get the specific surface area of a GEM CSD phase (m<sup>2</sup>/kg).
 
   @note NOT USED.
 
   @param idx is the GEM CSD phase id
-  @return the surface area assigned to that GEM phase
+  @return the specific surface area assigned to that GEM phase (m2/kg)
   */
-  double getSurfaceArea(const unsigned int idx) {
+  double getSpecificSurfaceArea(const unsigned int idx) {
     if (idx < numGEMPhases_) {
-      return surfaceArea_[idx];
+      return specificSurfaceArea_[idx];
     } else {
-      EOBException ex("ChemicalSystem", "getSurfaceArea", "surfaceArea_",
-                      numGEMPhases_, idx);
+      EOBException ex("ChemicalSystem", "getSpecificSurfaceArea",
+                      "specificSurfaceArea_", numGEMPhases_, idx);
       ex.printException();
       exit(1);
     }
@@ -5617,37 +5617,37 @@ public:
 
   /**
   @brief Set the simulated time at which to implement the sulfate attack
-  calculations [days].
+  calculations [hours].
 
-  @param sattack_time is the time at which to start sulfate attack [days]
+  @param sattack_time is the time at which to start sulfate attack [hours]
   */
   void setSulfateAttackTime(const double sattack_time) {
     sulfateAttackTime_ = sattack_time;
   }
 
   /**
-  @brief Get the simulated time at which to start sulfate attack [days].
+  @brief Get the simulated time at which to start sulfate attack [hours].
 
   @note NOT USED.
 
-  @return the simulated time at which to begin sulfate attack [days]
+  @return the simulated time at which to begin sulfate attack [hours]
   */
   double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulated time at which to implement the leaching calculations
-  [days].
+  [hours].
 
-  @param leach_time is the time at which to start leaching [days]
+  @param leach_time is the time at which to start leaching [hours]
   */
   void setLeachTime(const double leach_time) { leachTime_ = leach_time; }
 
   /**
-  @brief Get the simulated time at which to start leaching [days].
+  @brief Get the simulated time at which to start leaching [hours].
 
   @note NOT USED.
 
-  @return the simulated time at which to begin leaching [days]
+  @return the simulated time at which to begin leaching [hours]
   */
   double getLeachTime(void) const { return leachTime_; }
 
@@ -5713,7 +5713,7 @@ public:
   could modify chemical potentials to capture lower reactivity when only gel
   water remains.
 
-  @param time is the simulated time associated with this state [days]
+  @param time is the simulated time associated with this state [hours]
   @param isFirst is true if this is the first state calculation, false otherwise
   @return the node status handle
   */

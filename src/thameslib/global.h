@@ -6,15 +6,15 @@
 #ifndef GLOBALH
 #define GLOBALH
 
-//#ifndef DEBUG
-//#define DEBUG
-//#endif
+// #ifndef DEBUG
+// #define DEBUG
+// #endif
 
 #include "Exceptions.h"
-#include <stdexcept>
-#include <string>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 using namespace std;
 
@@ -179,4 +179,6 @@ const double ICTHRESH = 1.0e-9;
 
 const double Pi = 3.14159265359;
 
-#endif
+const double S_PER_H = 3600.0;
+
+#endif // GLOBALH

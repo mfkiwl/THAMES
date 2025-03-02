@@ -486,7 +486,7 @@ public:
   This is a virtual method which does nothing in the base class, but which
   will be customized for each of the derived classes.
 
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   @param kmax is the maximum number of times to call the conjugate gradient
   solver
   */
@@ -502,7 +502,7 @@ public:
   This is a virtual method which does nothing in the base class, but which
   will be customized for each of the derived classes.
 
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   @param fileName is the file name to store the results
   @param exx is the input prescribed xx component of the strain
   @param eyy is the input prescribed yy component of the strain
@@ -532,7 +532,7 @@ public:
   ImageMagick
 
   @param root is the root name of the file to create
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   @param index is the stress component to visualize (values 0 to 5)
   */
   void writeStress(string &root, double time, int index);
@@ -549,7 +549,7 @@ public:
   ImageMagick
 
   @param root is the root name of the file to create
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   @param index is the strain component to visualize (values 0 to 5)
   */
   void writeStrain(string &root, double time, int index);
@@ -558,7 +558,7 @@ public:
   @brief Create data file storing the 3D displacement field
 
   @param root is the root name of the file to create
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   */
   void writeDisp(string &root, double time);
 
@@ -572,7 +572,7 @@ public:
   ImageMagick
 
   @param root is the root name of the file to create
-  @param time is the simulation time [days]
+  @param time is the simulation time [hours]
   */
   void writeStrainEngy(string &root, double time);
 

@@ -37,11 +37,11 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   /// Setting the default times for outputting images, and for initiating the
   /// simulations for leaching or external sulfate attack.
   ///
-  /// All times are given in days, and the leaching and sulfate attack times are
-  /// set to very high values so that they usually won't happen
+  /// All times are given in hours, and the leaching and sulfate attack times
+  /// are set to very high values so that they usually won't happen
   ///
 
-  imgfreq_ = 7.0;
+  imgfreq_ = 168.0; // hours = 7 days
   leach_time_ = 1.0e10;
   sattack_time_ = 1.0e10;
 
@@ -70,7 +70,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
     char cc;
-    out << "Time(d)";
+    out << "Time(h)";
     for (int i = 0; i < chemSys_->getNumDCs(); i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'S' || cc == 'T' || cc == 'W') {
@@ -87,7 +87,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
 
-    out1 << "Time(d)";
+    out1 << "Time(h)";
     for (int i = 0; i < chemSys_->getNumDCs(); i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
@@ -104,7 +104,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
 
-    out2 << "Time(d)";
+    out2 << "Time(h)";
     for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
       out2 << "," << chemSys_->getMicroPhaseName(i);
     }
@@ -118,7 +118,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out3 << "Time(d),pH" << endl;
+    out3 << "Time(h),pH" << endl;
     out3.close();
 
     outfilename = jobroot_ + "_CSH.csv";
@@ -127,7 +127,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out4 << "Time(d)";
+    out4 << "Time(h)";
     for (int i = 0; i < chemSys_->getNumICs(); i++) {
       out4 << "," << chemSys_->getICName(i);
     }
@@ -140,7 +140,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out5 << "Time(d),C/S in solid" << endl;
+    out5 << "Time(h),C/S in solid" << endl;
     out5.close();
 
     outfilename = jobroot_ + "_Enthalpy.csv";
@@ -149,7 +149,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out6 << "Time(d),Enthalpy(J)" << endl;
+    out6 << "Time(h),Enthalpy(J)" << endl;
     out6.close();
 
   } catch (FileException fex) {
@@ -196,9 +196,9 @@ void Controller::doCycle(const string &statfilename, int choice,
   ///
 
   if (choice == LEACHING) {
-    leach_time_ = 100.0;
+    leach_time_ = 2400.0; // 2400 hours = 100 days
   } else if (choice == SULFATE_ATTACK) {
-    sattack_time_ = 100.0;
+    sattack_time_ = 2400.0; // 2400 hours = 100 days
   }
 
   /*
@@ -563,7 +563,8 @@ void Controller::doCycle(const string &statfilename, int choice,
           volMolDiff = chemSys_->getDCMolarVolume(DCId);  // m3/mol
           molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
 
-          vfracDiff = ((double)numSitesNotAvailable) / ((double)dimLatticeSite);
+          vfracDiff = (static_cast<double>(numSitesNotAvailable)) /
+                      (static_cast<double>(dimLatticeSite));
 
           microPhaseMassDiff =
               vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
@@ -826,7 +827,7 @@ void Controller::doCycle(const string &statfilename, int choice,
           lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
         string ofileName(jobroot_);
         ostringstream ostr1, ostr2;
-        ostr1 << (int)(time_[i] * 100);
+        ostr1 << static_cast<int>(time_[i] * 10.0); // tenths of an hour
         ostr2 << setprecision(3) << chemSys_->getTemperature();
         string timestr(ostr1.str());
         string tempstr(ostr2.str());
@@ -1334,7 +1335,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
   string outfilenameDC = jobroot_ + "_dcmoles.csv";
   if (time < 1.e-10) {
     ofstream out0IC(outfilenameIC.c_str());
-    out0IC << "Time(d)";
+    out0IC << "Time(h)";
     for (i = 0; i < numICs; i++) {
       out0IC << "," << chemSys_->getICName(i);
     }
@@ -1342,7 +1343,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
     out0IC.close();
 
     ofstream out0DC(outfilenameDC.c_str());
-    out0DC << "Time(d)";
+    out0DC << "Time(h)";
     for (i = 0; i < numDCs; i++) {
       out0DC << "," << chemSys_->getDCName(i);
     }
@@ -1456,22 +1457,31 @@ void Controller::parseDoc(const string &docName) {
       throw FileException("Controller", "parseDoc", docName, "Empty JSON file");
     }
 
+    // Input times are conventionally in days
+    // Immediately convert to hours within model
     int calctimenum = cdi.value().size();
     for (int i = 0; i < calctimenum; ++i) {
       testtime = cdi.value()[i];
+      testtime *= 24.0;
       time_.push_back(testtime);
     }
 
+    // Input times are conventionally in days
+    // Immediately convert to hours within model
     cdi = it.value().find("outtime");
     int outtimenum = cdi.value().size();
     for (int i = 0; i < outtimenum; ++i) {
       testtime = cdi.value()[i];
+      testtime *= 24.0;
       output_time_.push_back(testtime);
     }
 
+    // Input times are conventionally in days
+    // Immediately convert to hours within model
     cdi = it.value().find("image_frequency");
     if (cdi != it.value().end()) {
       imgfreq_ = cdi.value();
+      imgfreq_ *= 24.0;
     }
   } catch (FileException fex) {
     fex.printException();

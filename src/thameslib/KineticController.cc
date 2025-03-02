@@ -35,7 +35,7 @@ KineticController::KineticController() {
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114K years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -89,7 +89,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114K years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -374,17 +374,26 @@ void KineticController::parseKineticDataForParrotKilloh(
   pp = p.value().find("refSpecificSurfaceArea");
   kineticData.refSpecificSurfaceArea = pp.value();
 
-  // Parrot-Killoh k1 parameter
+  // Parrot-Killoh k1 parameter is like a rate const
+  // Conventionally given in units of g per day
+  // Immediately convert to units of g per h within model
   pp = p.value().find("k1");
   kineticData.k1 = pp.value();
+  kineticData.k1 *= S_PER_H;
 
   // Parrot-Killoh k2 parameter
+  // Conventionally given in units of g per day
+  // Immediately convert to units of g per h within model
   pp = p.value().find("k2");
   kineticData.k2 = pp.value();
+  kineticData.k2 *= S_PER_H;
 
   // Parrot-Killoh k3 parameter
+  // Conventionally given in units of g per day
+  // Immediately convert to units of g per h within model
   pp = p.value().find("k3");
   kineticData.k3 = pp.value();
+  kineticData.k3 *= S_PER_H;
 
   // Parrot-Killoh n1 parameter
   pp = p.value().find("n1");
@@ -432,28 +441,34 @@ void KineticController::parseKineticDataForStandard(
                         "refSpecificSurfaceArea not found");
   }
 
-  // Dissolution rate constant (mol/m2/s)
+  // Dissolution rate constant input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
+    kineticData.dissolutionRateConst *= S_PER_H;
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "dissolutionRateConst not found");
   }
 
-  // Rate constant for early-age diffusion (mol/m2/s)
+  // Rate constant for early-age diffusion input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("diffusionRateConstEarly");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstEarly = pp.value();
+    kineticData.diffusionRateConstEarly *= S_PER_H;
   } else {
     throw DataException("KineticController", "parseKineticDataForStandard",
                         "diffusionRateConstEarly not found");
   }
 
-  // Dissolution rate constant (mol/m2/s)
+  // Dissolution rate constant input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("diffusionRateConstLate");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstLate = pp.value();
+    kineticData.diffusionRateConstLate *= S_PER_H;
   } else {
     kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
     cout << "WARNING: For " << kineticData.name
@@ -538,28 +553,34 @@ void KineticController::parseKineticDataForPozzolanic(
                         "refSpecificSurfaceArea not found");
   }
 
-  // Dissolution rate constant (mol/m2/s)
+  // Dissolution rate constant input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
+    kineticData.dissolutionRateConst *= S_PER_H;
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "dissolutionRateConst not found");
   }
 
-  // Early-age diffusion rate constant (mol/m2/s)
+  // Early-age diffusion rate constant input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("diffusionRateConstEarly");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstEarly = pp.value();
+    kineticData.diffusionRateConstEarly *= S_PER_H;
   } else {
     throw DataException("KineticController", "parseKineticDataForPozzolanic",
                         "diffusionRateConstEarly not found");
   }
 
-  // Later-age diffusion rate constant (mol/m2/s)
+  // Later-age diffusion rate constant input with units (mol/m2/s)
+  // But immediately convert it to mol/m2/h within model
   pp = p.value().find("diffusionRateConstLate");
   if (pp != p.value().end()) {
     kineticData.diffusionRateConstLate = pp.value();
+    kineticData.diffusionRateConstLate *= S_PER_H;
   } else {
     kineticData.diffusionRateConstLate = kineticData.diffusionRateConstEarly;
     cout << "WARNING: For " << kineticData.name

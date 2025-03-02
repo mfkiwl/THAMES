@@ -267,7 +267,7 @@ public:
   @todo Make the methods more general, less hardwiring of parameters
   @todo Make the local variable names more descriptive
 
-  @param timestep is the time interval to simulate [days]
+  @param timestep is the time interval to simulate [h]
   @param temperature is the absolute temperature during this step [K]
   @param rh is the internal relative humidity
   @param scaledMass is C-style array of the normalized mass of each

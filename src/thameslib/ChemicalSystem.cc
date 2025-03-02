@@ -223,8 +223,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
     solutPhaseMass_ = new double[numGEMPhases_];
     exmsg = "prevGEMPhaseMass_";
     prevGEMPhaseMass_ = new double[numGEMPhases_];
-    exmsg = "surfaceArea_";
-    surfaceArea_ = new double[numGEMPhases_];
+    exmsg = "specificSurfaceArea_";
+    specificSurfaceArea_ = new double[numGEMPhases_];
     exmsg = "carrier_";
     carrier_ = new double[numSolutionPhases_];
     exmsg = "DCUpperLimit_";
@@ -364,7 +364,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   node_->GEM_restore_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_,
                         &ICMoles_[0], &DCUpperLimit_[0], &DCLowerLimit_[0],
-                        &surfaceArea_[0]);
+                        &specificSurfaceArea_[0]);
 
   if (verbose_) {
     cout << "Done!" << endl;
@@ -383,7 +383,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
                    ionicStrength_, pH_, pe_, Eh_, &ICResiduals_[0],
                    &ICChemicalPotential_[0], &DCMoles_[0], &DCActivityCoeff_[0],
                    &GEMPhaseMoles_[0], &GEMPhaseVolume_[0], &GEMPhaseMass_[0],
-                   &pGEMPhaseStoich_[0], &carrier_[0], &surfaceArea_[0],
+                   &pGEMPhaseStoich_[0], &carrier_[0], &specificSurfaceArea_[0],
                    &pSolidStoich_[0]);
 
   /// At this point all the IC moles and DC moles have the values that
@@ -400,14 +400,14 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   icmolarmass = (node_->pCSD())->ICmm;
   for (i = 0; i < numICs_; i++) {
     // Convert to g per mole
-    ICMolarMass_[i] = (1000.0 * (double)(*icmolarmass));
+    ICMolarMass_[i] = (1000.0 * static_cast<double>(*icmolarmass));
     icmolarmass++;
   }
   DCMolarMass_.resize(numDCs_, 0.0);
   dcmolarmass = (node_->pCSD())->DCmm;
   for (i = 0; i < numDCs_; i++) {
     // Convert to g per mole
-    DCMolarMass_[i] = (1000.0 * (double)(*dcmolarmass));
+    DCMolarMass_[i] = (1000.0 * static_cast<double>(*dcmolarmass));
     dcmolarmass++;
   }
 
@@ -466,10 +466,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   amat = (node_->pCSD())->A;
   for (i = 0; i < numDCs_; i++) {
     for (j = 0; j < numICs_; j++) {
-      DCStoich_[i][j] = (double)(*amat);
+      DCStoich_[i][j] = static_cast<double>(*amat);
       amat++;
     }
-    DCCharge_[i] = (double)(DCStoich_[i][numICs_ - 1]);
+    DCCharge_[i] = static_cast<double>(DCStoich_[i][numICs_ - 1]);
   }
 
   ///
@@ -488,8 +488,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   for (int i = 0; i < numGEMPhases_; i++) {
-    GEMPhaseMass_[i] = (double)(node_->Ph_Mass(i) * 1000.0);     // in g, not kg
-    prevGEMPhaseMass_[i] = (double)(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+    GEMPhaseMass_[i] =
+        static_cast<double>(node_->Ph_Mass(i) * 1000.0); // in g, not kg
+    prevGEMPhaseMass_[i] =
+        static_cast<double>(node_->Ph_Mass(i) * 1000.0); // in g, not kg
   }
 
   setGEMPhaseVolume();
@@ -593,7 +595,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   initMicroVolume_ = 0.0;
   // microPhaseBelongsToCement_.resize(numMicroPhases_,false);
   for (unsigned int i = 0; i < numMicroPhases_; i++) {
-    microPhaseToGEMPhase_.insert(make_pair((int)i, microPhaseMembers_[i]));
+    microPhaseToGEMPhase_.insert(
+        make_pair(static_cast<int>(i), microPhaseMembers_[i]));
   }
 
   ///
@@ -1591,7 +1594,7 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   GEMPhaseVolume_ = obj.getGEMPhaseVolume();
   prevGEMPhaseVolume_ = obj.getPrevGEMPhaseVolume();
   carrier_ = obj.getCarrier();
-  surfaceArea_ = obj.getSurfaceArea();
+  specificSurfaceArea_ = obj.getSpecificSurfaceArea();
   DCLowerLimit_ = obj.getDCLowerLimit();
   DCUpperLimit_ = obj.getDCUpperLimit();
   /*
@@ -1671,7 +1674,7 @@ ChemicalSystem::~ChemicalSystem(void) {
 
   delete[] DCLowerLimit_;
   delete[] DCUpperLimit_;
-  delete[] surfaceArea_;
+  delete[] specificSurfaceArea_;
   delete[] prevGEMPhaseMass_;
   delete[] prevGEMPhaseVolume_;
   delete[] prevGEMPhaseMoles_;
@@ -2143,7 +2146,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
-                     DCUpperLimit_, DCLowerLimit_, surfaceArea_, DCMoles_);
+                     DCUpperLimit_, DCLowerLimit_, specificSurfaceArea_,
+                     DCMoles_);
 
   if (isFirst) {
     for (int i = 0; i < numICs_; i++) {
@@ -2341,7 +2345,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
                    &ICChemicalPotential_[0], &DCMoles_[0], &DCActivityCoeff_[0],
                    &solutPhaseMoles_[0], &solutPhaseVolume_[0],
                    &solutPhaseMass_[0], &pSolutPhaseStoich_[0], &carrier_[0],
-                   &surfaceArea_[0], &pSolidStoich_[0]);
+                   &specificSurfaceArea_[0], &pSolidStoich_[0]);
 
   cout << "  ChemicalSystem::calculateState - GEM_from_MT OK for cyc = " << cyc
        << endl;

@@ -57,7 +57,7 @@ StandardKineticModel::StandardKineticModel() {
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114,000 years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -128,11 +128,10 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   arrhenius_ =
       exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
-
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
-  /// 10 billion days or 27 million years
+  /// 10 billion hours or 114,000 years
   ///
 
   sulfateAttackTime_ = 1.0e10;
@@ -213,6 +212,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // equation for quartz.  Needs to be calibrated for silica fume, but
       // hopefully the BET area and LOI will help do that.
 
+      // dissolutionRateConst_ has units of mol/m2/h
+      // area has units of m2 of phase per 100 kg of total solid
+      // Therefore dissrate has units of mol of phase per 100 kg of all solid
+      // per h
       if (saturationIndex < 1.0) {
         dissrate = dissolutionRateConst_ * area *
                    pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
@@ -225,22 +228,28 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       dissrate *= (rhFactor_ * arrhenius_);
 
-      massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_); //
+      // dissrate has units of mol of phase per 100 kg of solid per hour
+      // timestep has units of hours
+      // molar mass has units of grams per mole
+      // Therefore, massDissolved has units of grams of phase per 100 kg of all
+      // solid
+      massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
       if (verbose_) {
-        cout << "    StandardKineticModel::calculateKineticStep dissrate/massDissolved : "
+        cout << "    StandardKineticModel::calculateKineticStep "
+                "dissrate/massDissolved : "
              << dissrate << " / " << massDissolved << endl;
       }
 
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+      scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
 
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
 
       scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "  ****************** SKM_hT = " << timestep << "    cyc = " << cyc
-             << "    microPhaseId_ = " << microPhaseId_
+        cout << "  ****************** SKM_hT = " << timestep
+             << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
@@ -288,4 +297,3 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
   return;
 }
-

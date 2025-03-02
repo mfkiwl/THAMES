@@ -51,8 +51,8 @@ private:
   double temperature_;       /**< Temperature [K] */
   double refT_;              /**< Reference temperature for PK model [K] */
   double sulfateAttackTime_; /**< Time at which sulfate attack simulation starts
-                                [days] */
-  double leachTime_; /**< Time at which leaching simulation starts [days] */
+                                [hours] */
+  double leachTime_; /**< Time at which leaching simulation starts [hours] */
 
   vector<string> name_; /**< List of names of phases in the kinetic model */
   vector<string> ICName_;
@@ -335,7 +335,7 @@ public:
   /**
   @brief Set the simulation time at which to begin external sulfate attack.
 
-  @param sattacktime is the simulation time to begin sulfate attack [days]
+  @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
   void setSulfateAttackTime(double sattacktime) {
     sulfateAttackTime_ = sattacktime;
@@ -346,14 +346,14 @@ public:
 
   @note NOT USED.
 
-  @return the simulation time to begin sulfate attack [days]
+  @return the simulation time to begin sulfate attack [hours]
   */
   double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulation time at which to begin leaching.
 
-  @param leachtime is the simulation time to begin leaching [days]
+  @param leachtime is the simulation time to begin leaching [hours]
   */
   void setLeachTime(double leachtime) { leachTime_ = leachtime; }
 
@@ -362,7 +362,7 @@ public:
 
   @note NOT USED.
 
-  @return the simulation time to begin leaching [days]
+  @return the simulation time to begin leaching [hours]
   */
   double getLeachTime(void) const { return leachTime_; }
 
@@ -410,7 +410,7 @@ public:
   /**
   @brief Set the effect of pozzolans on Parrot-Killoh kinetics
 
-  @param timestep is the time interval to simulate [days]
+  @param timestep is the time interval to simulate [hours]
   @param temperature is the absolute temperature during this step [K]
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
@@ -431,7 +431,7 @@ public:
   @todo Make the methods more general, less hardwiring of parameters
   @todo Make the local variable names more descriptive
 
-  @param timestep is the time interval to simulate [days]
+  @param timestep is the time interval to simulate [hours]
   @param temperature is the absolute temperature during this step [K]
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
@@ -480,7 +480,7 @@ public:
 
   vector<bool> getIsKinetic(void) { return isKinetic_; }
 
-  void setHydTimeIni (double val) { hyd_time_ini_ = val; }
+  void setHydTimeIni(double val) { hyd_time_ini_ = val; }
 
 }; // End of KineticController class
 
