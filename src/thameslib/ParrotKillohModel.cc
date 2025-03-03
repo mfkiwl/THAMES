@@ -220,19 +220,25 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
 
+    scaledMass_ = scaledMass;
+
     if (initScaledMass_ > 0.0) { // DOR @ t-1
       DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-      DOR = min(DOR,
-                0.99); // prevents DOR from prematurely stopping PK calculations
+      // DOR = min(DOR,
+      //           0.99); // prevents DOR from prematurely stopping PK calculations
 
       if (verbose_) {
-        cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
+        cout << "~~~~>DOR for " << name_ << " = " << DOR << "   initScaledMass_/scaledMass_ : " << initScaledMass_ << " / " << scaledMass_ << endl;
         cout.flush();
       }
     } else {
       throw FloatException("ParrotKillohModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
+
+    // if (cyc >= 1) {
+    //   cout << endl << "  PKMcks cyc = " << cyc << "  DOR_1 : " << DOR << endl;
+    // }
 
     if (DOR < 1.0) {
       // Normal Parrott and Killoh implementation here
@@ -244,6 +250,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
 
         if (ngrate < 1.0e-10)
           ngrate = 1.0e-10;
+
       } else {
         throw FloatException("ParrotKillohModel", "calculateKineticStep",
                              "n1_ = 0.0");
@@ -263,6 +270,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
       }
 
       rate = (ngrate < hsrate) ? ngrate : hsrate;
+
       if (diffrate < rate)
         rate = diffrate;
 
@@ -271,7 +279,9 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
 
       double prod = rate * timestep;
+
       newDOR = DOR + prod;
+
       wcFactor = 1;
 
       if (totalDOR > critDOR_) {
@@ -280,18 +290,27 @@ void ParrotKillohModel::calculateKineticStep(const double timestep, double &scal
         newDOR = DOR + prod;
       }
 
-      scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+      if (newDOR >= 1.) {
 
-      // massDissolved = (newDOR - DOR) * initScaledMass_;
-      massDissolved = initScaledMass_ * prod;
+        massDissolved = scaledMass_;
+
+        scaledMass_ = 0;
+
+      } else {
+
+        scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+
+        // massDissolved = (newDOR - DOR) * initScaledMass_;
+        massDissolved = initScaledMass_ * prod;
+
+      }
 
       scaledMass = scaledMass_;
 
       if (verbose_) {
+      // if (scaledMass < 0) {
         cout << "    ParrotKillochModel::calculateKineticStep rate/wcFactor/massDissolved : "
              << rate << " / " << wcFactor << " / " << massDissolved << endl;
-
-        // if (verbose_) {
         cout << "  ****************** PKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_

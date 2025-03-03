@@ -145,6 +145,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                                                 double &scaledMass,
                                                 double &massDissolved, int cyc,
                                                 double totalDOR) {
+
   ///
   /// Initialize local variables
   ///
@@ -188,17 +189,31 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
+    scaledMass_ = scaledMass;
 
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
       // prevent DOR from prematurely stopping PK calculations
-      DOR = min(DOR, 0.99);
+      // DOR = min(DOR, 0.99);
     } else {
       throw FloatException("StandardKineticModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
 
-    if (DOR < 1.0) {
+    if (DOR < 0.0) {
+      cout << endl << "    StandardKineticModel::calculateKineticStep - for cyc = " << cyc
+           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
+           << initScaledMass_ << " / " << scaledMass_ << endl;
+      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+    }
+
+    // if (cyc >= 28) {
+    //   cout << endl << "StandardKineticModel::calculateKineticStep_0  microPhaseId_/initScaledMass_/scaledMass_/massDissolved/DOR : "
+    //        << microPhaseId_ << " / " << initScaledMass_ << " / " << scaledMass_ << " / " << massDissolved << " / " << DOR << endl;
+    // }
+
+    // if (DOR < 1.0) { //test!
 
       double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
@@ -232,13 +247,22 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
              << dissrate << " / " << massDissolved << endl;
       }
 
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+      scaledMass = scaledMass_ - massDissolved;
 
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+      if (scaledMass < 0) {
+        massDissolved = scaledMass_;
+        scaledMass = 0;
+      }
+      scaledMass_ = scaledMass;
 
-      scaledMass = scaledMass_;
+      //scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
+
+      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+
+      //scaledMass = scaledMass_;
 
       if (verbose_) {
+        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
         cout << "  ****************** SKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
@@ -262,10 +286,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
              << endl;
         cout.flush();
       }
-    } else {
-      throw DataException("StandardKineticModel", "calculateKineticStep",
-                          "DOR >= 1.0");
-    }
+    // } else {
+    //   throw DataException("StandardKineticModel", "calculateKineticStep",
+    //                       "DOR >= 1.0");
+    // }
 
     //} // End of normal hydration block
   } // End of try block

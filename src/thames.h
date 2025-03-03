@@ -109,13 +109,13 @@ Department of Commerce, April, 2000.
 #ifndef THAMESH
 #define THAMESH
 
-#include "thameslib/RanGen.h"
 #include "thameslib/AppliedStrain.h"
 #include "thameslib/ChemicalSystem.h"
 #include "thameslib/Controller.h"
 #include "thameslib/Interface.h"
 #include "thameslib/KineticController.h"
 #include "thameslib/Lattice.h"
+#include "thameslib/RanGen.h"
 #include "thameslib/Site.h"
 #include "thameslib/StrainEnergy.h"
 #include "thameslib/ThermalStrain.h"
@@ -188,6 +188,12 @@ void writeReport(const string &jobroot, struct tm *itime,
 @param time_ & lt_ are the start time
 */
 void timeCount(clock_t time_, time_t lt_);
+
+void errorDelDynAllocMem (ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                          ThermalStrain *ThermalStrainSolver,
+                          AppliedStrain *AppliedStrainSolver,
+                          KineticController *KController,
+                          Controller *Ctrl, clock_t st_time, time_t lt);
 
 using namespace std;
 

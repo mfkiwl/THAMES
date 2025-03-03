@@ -664,7 +664,10 @@ public:
   @return -1 if all requested numbers of voxels in numSiteDissVect have been switched
   or the ID of the first microphase (in dissPhaseIDVect) for which this was not possible
   */
-  int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
+  // int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
+  //                   vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
+
+  vector<int> dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
                     vector<string> dissPhNameVect, int &numadded_D, int totalTRC);
 
   /**
@@ -844,9 +847,13 @@ public:
   @return zero if okay or nonzero if not all requested voxels
   for a certain microphase ID (phDiff) can be dissolved
   */
-  int changeMicrostructure(double time, const int simtype, bool &capWater,
-                           int &numDiff, int &phDiff, string &nameDiff,
-                           int whileCount, int cyc);
+  // int changeMicrostructure(double time, const int simtype, bool &capWater,
+  //                          int &numDiff, int &phDiff, string &nameDiff,
+  //                          int whileCount, int cyc);
+
+  int changeMicrostructure(double time, const int simtype,
+                           bool &capWater, vector<int> &vectPhNumDiff, vector<int> &vectPhIdDiff,
+                           vector<string> &vectPhNameDiff, int repeat, int cyc);
 
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
@@ -1564,14 +1571,12 @@ public:
     }
     lastRNG_ = lastRNGreset;
 
-    cout << endl << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
-         << whileCount << " / " << latticeRNGseed_ << endl;
-    cout << "  Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
-         << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
-         << " / " << valRNG << endl;
-    if (abs(lastRNGreset - valRNG) <= 1.e-16 ) {
-      cout << "  Lattice::resetRNG OK!" << endl;
-    } else {
+    // cout << endl << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc << " / "
+    //      << whileCount << " / " << latticeRNGseed_ << endl;
+    // cout << "  Lattice::resetRNG numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+    //      << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " << lastRNGreset
+    //     << " / " << valRNG << endl;
+    if (abs(lastRNGreset - valRNG) > 1.e-16 ) {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);
     }
@@ -1580,7 +1585,7 @@ public:
   void increaseLatticeVolume(void);
 
   void checkSite(int stId){
-    int phId = site_[stId].getMicroPhaseId();
+    // int phId = site_[stId].getMicroPhaseId();
     cout << endl << " Lattice::checkSite( " << stId << " ):" << endl;
     cout << "    phaseId : " << site_[stId].getMicroPhaseId() << endl;
     cout << "    inDissInterfacePos_ : " << site_[stId].getInDissInterfacePos() << endl;

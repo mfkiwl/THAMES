@@ -29,10 +29,9 @@ int main(int argc, char **argv) {
   Lattice *Mic = NULL;
   ThermalStrain *ThermalStrainSolver = NULL;
   AppliedStrain *AppliedStrainSolver = NULL;
+  KineticController *KController = NULL;
   Controller *Ctrl = NULL;
   RanGen *RNG = NULL;
-
-  KineticController *KController = NULL;
 
   bool stopProgram = false;
 
@@ -46,7 +45,7 @@ int main(int argc, char **argv) {
   cout << "  " << LEACHING << ") Leaching " << endl;
   cout << "  " << SULFATE_ATTACK << ") Sulfate attack " << endl;
   cin >> choice;
-  cout << choice << endl;
+  cout << endl << "choice = " << choice << endl;
 
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
@@ -61,14 +60,14 @@ int main(int argc, char **argv) {
 
   int seedRNG = -25943; // -142234;
   //cin >> seedRNG;
-  cout << "The seed of the RNG is          : seedRNG = " << seedRNG << endl;
+  cout << endl << "The RNG seed is                 : seedRNG = " << seedRNG << endl;
 
   double elemTimeInterval = 1.e-7;
   //cin >> elemTimeInterval;
-  cout << "The elementary time interval is : elemTimeInterval = " << elemTimeInterval << endl;
+  cout << "The elementary time interval is : elemTimeInterval = "
+       << setprecision(3) << elemTimeInterval << endl;
 
-  cout << scientific << setprecision(15);
-  cout << endl;
+  cout << scientific << setprecision(15) << endl;
 
   time_t lt = time(NULL);
   struct tm *inittime;
@@ -140,16 +139,12 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    timeCount(starttime, lt);
-    cout << "STOP Program";
-    exit(1);
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
   }
 
   //
-  // Create the random number generator for phase placement
+  // Create the random number generator
   //
 
   RNG = new RanGen(seedRNG);
@@ -187,18 +182,8 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    timeCount(starttime, lt);
-    cout << "STOP Program";
-    exit(1);
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
   }
 
   if (choice == SULFATE_ATTACK) {
@@ -215,7 +200,6 @@ int main(int argc, char **argv) {
     getline(cin, buff);
     const string phasemod_fileName(buff);
     cout << "phasemod_fileName : " << phasemod_fileName << endl;
-    //cout << phasemod_fileName << endl;
 
     //
     // Create the ThermalStrain FE solver, which handles phase transformation
@@ -241,21 +225,8 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (ChemSys) {
-        delete ChemSys;
-      }
-      if (Mic) {
-        delete Mic;
-      }
-      if (ThermalStrainSolver) {
-        delete ThermalStrainSolver;
-      }
-      if (RNG) {
-        delete RNG;
-      }
-      timeCount(starttime, lt);
-      cout << "STOP Program";
-      exit(1);
+      errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                          AppliedStrainSolver, KController, Ctrl, starttime, lt);
     }
 
     int nx, ny, nz;
@@ -283,24 +254,8 @@ int main(int argc, char **argv) {
       stopProgram = true;
     }
     if (stopProgram) {
-      if (ChemSys) {
-        delete ChemSys;
-      }
-      if (Mic) {
-        delete Mic;
-      }
-      if (ThermalStrainSolver) {
-        delete ThermalStrainSolver;
-      }
-      if (AppliedStrainSolver) {
-        delete AppliedStrainSolver;
-      }
-      if (RNG) {
-        delete RNG;
-      }
-      timeCount(starttime, lt);
-      cout << "STOP Program";
-      exit(1);
+      errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                          AppliedStrainSolver, KController, Ctrl, starttime, lt);
     }
 
     Mic->setFEsolver(AppliedStrainSolver);
@@ -329,29 +284,16 @@ int main(int argc, char **argv) {
   } catch (GEMException ex) {
     ex.printException();
     stopProgram = true;
+  } catch (FloatException ex) {
+    ex.printException();
+    stopProgram = true;
+  } catch (DataException ex) {
+    ex.printException();
+    stopProgram = true;
   }
   if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (ThermalStrainSolver) {
-      delete ThermalStrainSolver;
-    }
-    if (AppliedStrainSolver) {
-      delete AppliedStrainSolver;
-    }
-    if (KController) {
-      delete KController;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    cout << "STOP Program";
-    timeCount(starttime, lt);
-    exit(1);
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
   }
 
   if (VERBOSE) {
@@ -369,13 +311,17 @@ int main(int argc, char **argv) {
   cout << "files root name   : " << jobroot << endl;
 
   buff = "mkdir -p Result";
-  system(buff.c_str());
+  int resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    // handle the error
+    cout << endl << endl << "    thames.cc - error : resCallSystem = -1" << endl;
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
+  }
   jobroot = "Result/" + jobroot;
   cout << "jobroot           : " << jobroot << endl;
 
   statfilename = jobroot + ".stats";
-  cout << endl << "About to go into Controller constructor" << endl;
-  cout.flush();
 
   //
   // Create the Controller object to direct flow of the program
@@ -396,30 +342,8 @@ int main(int argc, char **argv) {
     stopProgram = true;
   }
   if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (ThermalStrainSolver) {
-      delete ThermalStrainSolver;
-    }
-    if (AppliedStrainSolver) {
-      delete AppliedStrainSolver;
-    }
-    if (KController) {
-      delete KController;
-    }
-    if (Ctrl) {
-      delete Ctrl;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    cout << endl << "STOP Program" << endl;
-    timeCount(starttime, lt);
-    exit(1);
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
   }
 
   //
@@ -434,7 +358,7 @@ int main(int argc, char **argv) {
   //
 
   // if (VERBOSE) {
-  cout << "Going into Controller::doCycle now" << endl;
+  cout << endl << "Going into Controller::doCycle" << endl;
   cout.flush();
   //}
 
@@ -444,12 +368,20 @@ int main(int argc, char **argv) {
 
   } catch (GEMException gex) {
     gex.printException();
+    stopProgram = true;
   } catch (DataException dex) {
     dex.printException();
+    stopProgram = true;
   } catch (EOBException ex) {
     ex.printException();
+    stopProgram = true;
   } catch (MicrostructureException mex) {
     mex.printException();
+    stopProgram = true;
+  }
+  if (stopProgram) {
+    errorDelDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt);
   }
 
   //
@@ -486,6 +418,37 @@ int main(int argc, char **argv) {
   }
 
   return 0;
+}
+
+void errorDelDynAllocMem (ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                          ThermalStrain *ThermalStrainSolver,
+                          AppliedStrain *AppliedStrainSolver,
+                          KineticController *KController,
+                          Controller *Ctrl, clock_t st_time, time_t lt) {
+  if (Ctrl) {
+    delete Ctrl;
+  }
+  if (KController) {
+    delete KController;
+  }
+  if (AppliedStrainSolver) {
+    delete AppliedStrainSolver;
+  }
+  if (ThermalStrainSolver) {
+    delete ThermalStrainSolver;
+  }
+  if (Mic) {
+    delete Mic;
+  }
+  if (ChemSys) {
+    delete ChemSys;
+  }
+  if (RNG) {
+    delete RNG;
+  }
+  cout << endl << "STOP Program" << endl;
+  timeCount(st_time, lt);
+  exit(1);
 }
 
 void timeCount(clock_t time_, time_t lt_) {
