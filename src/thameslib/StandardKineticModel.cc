@@ -200,9 +200,9 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
       // JWB BEWARE: The new definition of area is truly a geometric calculation
-      // made on the microstructure. It does not catch BET surface area
-      // if that ends up being important.
-      // The units of area are m2 per 100 g of intial total solid
+      // made on the microstructure. It does not catch BET or internal surface
+      // area if that ends up being important. The units of area are m2 per 100
+      // g of intial total solid
       double area = lattice_->getSurfaceArea(microPhaseId_);
 
       // Saturation index , but be sure that there is only one GEM Phase

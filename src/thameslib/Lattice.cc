@@ -582,12 +582,12 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
     // calc porosity in
     // normalizePhaseMasses->setMicroPhaseMass->setMicroPhaseVolume->calcMicroPhasePorosity
     try {
-      normalizePhaseMasses(microPhaseMass, cementMass, solidMass);
+      normalizePhaseMasses(microPhaseMass, cementMass);
 
       // Next we also normalize the surface areas to the same 100 g of total
       // solid in the initial microstructure
       // Calculate the surface area per 100 g solid
-      calcSurfaceArea(microPhaseId, solidMass);
+      calcSurfaceArea(microPhaseId);
     } catch (FloatException fex) {
       throw;
     }
@@ -694,7 +694,7 @@ void Lattice::addSite(const unsigned int x, const unsigned int y,
 }
 
 void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
-                                   double cementMass, double solidMass) {
+                                   double cementMass) {
   int microPhaseId, DCId;
   double pscaledMass = 0.0;
   double molarMass;
@@ -718,12 +718,12 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       chemSys_->setMicroPhaseMass(ELECTROLYTEID, pscaledMass);
       chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID, 0.0);
 
-    } else if (microPhaseId != VOIDID && solidMass > 0.0) {
+    } else if (microPhaseId != VOIDID && initSolidMass_ > 0.0) {
       // microPhaseMass has units of grams per cm3 of whole microstructure
-      // solidMass is the sum of all microPhaseMass values
+      // initSolidMass_ is the sum of all microPhaseMass values
       // So pscaledMass (p stands for percent) is mass percent on a total solids
       // basis
-      pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
+      pscaledMass = microPhaseMass[microPhaseId] * 100.0 / initSolidMass_;
       DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId, 0);
       chemSys_->setDC_to_MPhID(DCId, microPhaseId);
       molarMass = chemSys_->getDCMolarMass(DCId);
@@ -732,7 +732,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
                 "mass of "
              << i << "   " << chemSys_->getMicroPhaseName(microPhaseId) << " ("
              << microPhaseId << ") = " << microPhaseMass[microPhaseId]
-             << " g out of " << solidMass << " g total" << endl;
+             << " g out of " << initSolidMass_ << " g total" << endl;
         // Setting the phase mass will also automatically calculate the phase
         // volume
         cout.flush();
@@ -744,14 +744,14 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       chemSys_->setDCMoles(DCId, (pscaledMass / molarMass));
 
       chemSys_->setMicroPhaseMassDissolved(microPhaseId, 0.0);
-    } else if (solidMass <= 0.0) {
+    } else if (initSolidMass_ <= 0.0) {
       string msg = "Total solid mass is zero";
       throw FloatException("Lattice", "normalizePhaseMasses", msg);
     }
   }
 
   // initScaledCementMass is percent of all solid mass that is cement
-  chemSys_->setInitScaledCementMass(cementMass * 100 / solidMass);
+  chemSys_->setInitScaledCementMass(cementMass * 100 / initSolidMass_);
 
   // Up to this point we could not really handle volume of void space, but
   // now we can do so in proportion to electrolyte volume
@@ -5167,7 +5167,7 @@ void Lattice::applyExp(vector<unsigned int> alnb, double exp) {
   return;
 }
 
-void Lattice::calcSurfaceArea(int phaseid, double solidMass) {
+void Lattice::calcSurfaceArea(int phaseid) {
   Site *ste, *stenb;
   double normalizationFactor;
 
@@ -5182,7 +5182,7 @@ void Lattice::calcSurfaceArea(int phaseid, double solidMass) {
   // surfaceArea_ has units of voxel faces per microstructure
   // voxelToVolume_ has units of m3 per voxel
   // numSites_ has units of voxels
-  // solidMass has units of g per cm3 of whole microstructure
+  // initSolidMass_ has units of g per cm3 of whole microstructure
   // 1.0e6 has units of cm3 per m3
   // So new surfaceArea values have units of
   // m2*(m3/cm3)(cm3/g)*(1/voxel)*(voxel/m3)
@@ -5190,11 +5190,12 @@ void Lattice::calcSurfaceArea(int phaseid, double solidMass) {
   // But all our normalizations are on a basis of 100 g
   // So we further divide by 100 to get m2 per 100 g of initial solid
 
-  if (solidMass > 0.0) {
-    normalizationFactor = (solidMass * 1.0e6 * numSites_ * voxelToVolume_) /
-                          (100.0 * faceToArea_);
+  if (initSolidMass_ > 0.0) {
+    normalizationFactor =
+        (initSolidMass_ * 1.0e6 * numSites_ * voxelToVolume_) /
+        (100.0 * faceToArea_);
   } else {
-    string msg = "Divide by zero error:  solidMass = 0";
+    string msg = "Divide by zero error:  initSolidMass_ = 0";
     throw FloatException("Lattice", "calcSurfaceArea", msg);
   }
 

@@ -962,6 +962,14 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       for (int midx = 0; midx < pKMsize_; ++midx) {
 
         DCId = phaseKineticModel_[midx]->getDCId();
+
+        // ONLY HERE IS WHERE WE CALCULATE THE SURFACE AREA EACH CYCLE
+        // THIS WAY WE ONLY CALCULATE THE ONES WE NEED
+        /// @todo Maybe we can do this more efficiently, like just updating the
+        ///         local changes instead of recalculating each time.
+
+        lattice_->calcSurfaceArea(phaseDissolvedId[midx]);
+
         phaseKineticModel_[midx]->calculateKineticStep(
             timestep, scaledMass, massDissolved, cyc, totalDOR);
 

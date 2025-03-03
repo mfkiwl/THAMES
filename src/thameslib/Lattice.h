@@ -637,10 +637,9 @@ public:
   solid
 
   @param microPhaseMass is a vector of all the microstructure masses
-  @param solidMass is the combined mass of all the solids
+  @param cementMass is the combined mass of all the cement components
   */
-  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass,
-                            double solidMass);
+  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass);
 
   /**
   @brief Master method to locate the interfaces for each phase in the
@@ -1472,14 +1471,25 @@ public:
   void applyExp(vector<unsigned int> alnb, double exp);
 
   /**
+  @brief Estimate the surface areas of all solid phases
+  with the aqueous solution, in units of m2 per 100 g of
+  total solids
+
+  @param solidMass is the mass of all solids in g
+  */
+  void calcSurfaceAreas(void) {
+    for (int i = 0; i < numMicroPhases_; ++i) {
+      calcSurfaceArea(i);
+    }
+  }
+
+  /**
   @brief Estimate the surface area of a phase with the aqueous
-  solution, in units of m2 per cm3 of total microstructure
+  solution, in units of m2 per 100 g of total solids
 
   @param phaseid is the id of the microstructure phase
-  @param solidMass is the mass of all solids in g
-  @return the estimated surface area [m2 per 100 g of solid]
   */
-  void calcSurfaceArea(int phaseid, double solidMass);
+  void calcSurfaceArea(int phaseid);
 
   /**
   @brief Return the current surface area of a phase with the aqueous

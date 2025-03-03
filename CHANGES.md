@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 03 13:43 2025 | Added recalculation of surface areas each cycle in KineticController::calculateKineticStep |
 | Mar 03 00:28 2025 | Include surface area scaling in kinetics |
 | Mar 01 22:36 2025 | Converted all model times to hours |
 | Feb 03 21:24 2025 | Created `surfacearea` branch from `json` to account for surface area scaling in kinetics |
