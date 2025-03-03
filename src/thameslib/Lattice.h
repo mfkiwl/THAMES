@@ -74,7 +74,7 @@ class Lattice {
 private:
   string version_; /**< THAMES version for header information */
   string thamesVersion_;
-  string jobroot_; /**< The root name for output files */
+  string jobRoot_; /**< The root name for output files */
 
   RanGen *rg_; /**< Pointer to random number generator object */
   int latticeRNGseed_;
@@ -86,17 +86,24 @@ private:
   unsigned int zdim_;          /**< Number of sites in the z dimension */
   double resolution_;          /**< Voxel edge length [micrometers] */
   vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
-  unsigned int numsites_;      /**< Total number of sites */
-  unsigned int siteneighbors_; /**< Number of neighbor sites to a given site */
+  unsigned int numSites_;      /**< Total number of sites */
+  unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site */
   ChemicalSystem *chemSys_;    /**< Pointer to simulation's ChemicalSystem */
   AppliedStrain *FEsolver_;    /**< Pointer to simulation's FE elastic solver */
-  vector<Interface> interface_;   /**< List of the different interface objects
-                                          in the microstructure */
-  double wsratio_;                /**< Water-to-solids mass ratio */
-  vector<double> volumefraction_; /**< Array of volume fractions of each
-                                          microstructure phase */
-  vector<double> initvolumefraction_; /**< Array of initial volume fractions of
+  vector<Interface> interface_; /**< List of the different interface objects
+                                        in the microstructure */
+
+  double faceToArea_;                 /**< Converts a voxel face to m2 units */
+  double voxelToVolume_;              /**< Converts a voxel to its volume in m3
+                                        units */
+  double wsRatio_;                    /**< Water-to-solids mass ratio */
+  vector<double> volumeFraction_;     /**< Array of volume fractions of each
+                                              microstructure phase */
+  vector<double> initVolumeFraction_; /**< Array of initial volume fractions of
                                          each microstructure phase */
+  vector<double> surfaceArea_;        /**< Array of surface areas of each
+                                                 microstructure phase (currently voxel
+                                                 face units only) */
   vector<int> count_; /**< Number of sites of each different type */
   vector<double> SI_; /**< Current saturation indices */
 
@@ -104,45 +111,44 @@ private:
       expansion_; /**< Map of expansion strain of each voxel */
   map<int, vector<int>> expansion_coordin_; /**< Map of coordinates of sites
                                                with local expansion strain */
-  double waterchange_;          /**< How much water must be added or subtracted
+  double waterChange_;          /**< How much water must be added or subtracted
                                         due to hydration or deterioration */
-  double microstructurevolume_; /**< Microstructure volume in GEM
+  double microstructureVolume_; /**< Microstructure volume in GEM
 volume units */
-  double initialmicrostructurevolume_; /**< Initial microstructure volume in GEM
+  double initialMicrostructureVolume_; /**< Initial microstructure volume in GEM
 volume units */
-  double capillaryporevolume_;         /**< Total volume of capillary pores */
-  double capillaryporevolumefraction_; /**< Total volume fraction of capillary
+  double capillaryPoreVolume_;         /**< Total volume of capillary pores */
+  double capillaryPoreVolumeFraction_; /**< Total volume fraction of capillary
                                           pores */
-  double subvoxelporevolume_;          /**< Total volume of subvoxel pores */
-  double nonsolidvolume_;              /**< Total volume not solid */
-  double solidvolumewithpores_;        /** Total solid volume including their
+  double subvoxelPoreVolume_;          /**< Total volume of subvoxel pores */
+  double nonSolidVolume_;              /**< Total volume not solid */
+  double solidVolumeWithPores_;        /** Total solid volume including their
 internal pore volume */
-  double watervolume_;                 /** volume of electrolyte in GEM
+  double waterVolume_;                 /** volume of electrolyte in GEM
 volume units */
-  double voidvolume_;                  /** volume of void in GEM volume
+  double voidVolume_;                  /** volume of void in GEM volume
 units */
-  double capillarywatervolume_;        /**< Volume of capillary pore water */
-  double capillaryvoidvolume_;         /**< Volume of capillary void space
+  double capillaryWaterVolume_;        /**< Volume of capillary pore water */
+  double capillaryVoidVolume_;         /**< Volume of capillary void space
 (no water) */
-  double subvoxelwatervolume_;         /**< Volume of water in subvoxel
+  double subvoxelWaterVolume_;         /**< Volume of water in subvoxel
 pores in GEM units */
-  double subvoxelporevolumefraction_;  /**< Total volume fraction of subvoxel
+  double subvoxelPoreVolumeFraction_;  /**< Total volume fraction of subvoxel
                                           pores */
 
   vector<struct PoreSizeVolume>
-      masterporevolume_; /**< Pore size distribution and saturation */
+      masterPoreVolume_; /**< Pore size distribution and saturation */
 
-  double time_;         /**< The current simulation time [h] */
-  double temperature_;  /**< The current simulation temperature [K] */
-  double oldtemp_;      /**< The temperature in the previous
-                                time step [K] */
-  double sattack_time_; /**< Simulation time at which to begin
+  double time_;              /**< The current simulation time [h] */
+  double temperature_;       /**< The current simulation temperature [K] */
+  double oldtemp_;           /**< The temperature in the previous
+                                     time step [K] */
+  double sulfateAttackTime_; /**< Simulation time at which to begin
                                 simulation of sulfate attack [h] */
-  double leach_time_;   /**< Simulation time at which to begin
-                                simulation of leaching [h] */
-  double surfacearea_;  /**< Total surface area [m<sup>2</sup>] */
+  double leachTime_;         /**< Simulation time at which to begin
+                                      simulation of leaching [h] */
 
-  bool deptheffect_; /**< Whether or not PNG images should have
+  bool depthEffect_; /**< Whether or not PNG images should have
                              depth effect */
   bool verbose_;     /**< Flag to determine verbose output */
   bool warning_;     /**< Flag to determine warning message output */
@@ -152,7 +158,7 @@ pores in GEM units */
 
   double initSolidMass_;
 
-  double wcratio_; /**< Water-to-cement mass ratio */
+  double wcRatio_; /**< Water-to-cement mass ratio */
 
   int numMicroPhases_; /**< Number of microphases */
 
@@ -215,7 +221,7 @@ public:
   */
   void setXDim(const unsigned int x) {
     xdim_ = x;
-    numsites_ = (xdim_ * ydim_ * zdim_);
+    numSites_ = (xdim_ * ydim_ * zdim_);
   }
 
   /**
@@ -232,7 +238,7 @@ public:
   */
   void setYDim(const unsigned int y) {
     ydim_ = y;
-    numsites_ = (xdim_ * ydim_ * zdim_);
+    numSites_ = (xdim_ * ydim_ * zdim_);
   }
 
   /**
@@ -249,7 +255,7 @@ public:
   */
   void setZDim(const unsigned int z) {
     zdim_ = z;
-    numsites_ = (xdim_ * ydim_ * zdim_);
+    numSites_ = (xdim_ * ydim_ * zdim_);
   }
 
   /**
@@ -268,7 +274,7 @@ public:
 
   @return the total number of lattice sites
   */
-  unsigned int getNumsites() const { return numsites_; }
+  unsigned int getNumSites() const { return numSites_; }
 
   /**
   @brief Set the volume fraction of a given microstructure phase.
@@ -276,8 +282,13 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setVolumefraction(unsigned int i, double vfrac) {
-    volumefraction_[i] = vfrac;
+  void setVolumeFraction(unsigned int i, double vfrac) {
+    if (i > -1 && i < volumeFraction_.size()) {
+      volumeFraction_[i] = vfrac;
+    } else {
+      throw EOBException("Lattice", "setVolumeFraction", "volumeFraction_",
+                         volumeFraction_.size(), i);
+    }
   }
 
   /**
@@ -286,8 +297,14 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setInitvolumefraction(unsigned int i, double vfrac) {
-    initvolumefraction_[i] = vfrac;
+  void setInitVolumeFraction(unsigned int i, double vfrac) {
+    if (i > -1 && i < initVolumeFraction_.size()) {
+      initVolumeFraction_[i] = vfrac;
+    } else {
+      throw EOBException("Lattice", "setInitVolumeFraction",
+                         "initVolumeFraction_", initVolumeFraction_.size(), i);
+    }
+    initVolumeFraction_[i] = vfrac;
   }
 
   /**
@@ -295,10 +312,10 @@ public:
 
   @param ws is the water-solids mass ratio
   */
-  void setWsratio(const double ws) {
-    wsratio_ = 0.0;
+  void setWsRatio(const double ws) {
+    wsRatio_ = 0.0;
     if (ws > 0.0) {
-      wsratio_ = ws;
+      wsRatio_ = ws;
     }
     return;
   }
@@ -308,8 +325,8 @@ public:
 
   @return the water-solids mass ratio
   */
-  double getWsratio(void) const { return wsratio_; }
-  double getWcratio(void) const { return wcratio_; }
+  double getWsRatio(void) const { return wsRatio_; }
+  double getWcRatio(void) const { return wcRatio_; }
 
   /**
   @brief Get the volume fraction of a given microstructure phase.
@@ -320,12 +337,12 @@ public:
   @param i is the index of the microstructure phase
   @return the volume fraction of phase i on a total microstructure basis
   */
-  double getVolumefraction(unsigned int i) {
-    if (numsites_ == 0) {
-      throw FloatException("Lattice", "getVolumefraction",
-                           "Divide by zero (numsites_)");
+  double getVolumeFraction(unsigned int i) {
+    if (numSites_ == 0) {
+      throw FloatException("Lattice", "getVolumeFraction",
+                           "Divide by zero (numSites_)");
     }
-    return (volumefraction_[i]);
+    return (volumeFraction_[i]);
   }
 
   /**
@@ -337,12 +354,12 @@ public:
   @param i is the index of the microstructure phase
   @return the initial volume fraction of phase i on a total microstructure basis
   */
-  double getInitvolumefraction(unsigned int i) {
-    if (numsites_ == 0) {
-      throw FloatException("Lattice", "getInitialvolumefraction",
-                           "Divide by zero (numsites_)");
+  double getInitVolumeFraction(unsigned int i) {
+    if (numSites_ == 0) {
+      throw FloatException("Lattice", "getInitVolumeFraction",
+                           "Divide by zero (numSites_)");
     }
-    return (initvolumefraction_[i]);
+    return (initVolumeFraction_[i]);
   }
 
   /**
@@ -350,7 +367,7 @@ public:
 
   @param vol is the array of all microstructure phase volumes
   */
-  void calcSubvoxelporevolume(vector<double> &vol);
+  void calcSubvoxelPoreVolume(vector<double> &vol);
 
   /**
   @brief Calculate the total volume of solids including
@@ -359,7 +376,7 @@ public:
   @param vol is the array of all microstructure phase volumes
   it
   */
-  void calcSolidvolumewithpores(vector<double> &vol);
+  void calcSolidVolumeWithPores(vector<double> &vol);
 
   /**
   @brief Get the total volume of solids including
@@ -367,7 +384,7 @@ public:
 
   @return the solid volume including subvoxel pore volume
   */
-  double getSolidvolumewithpores(void) const { return solidvolumewithpores_; }
+  double getSolidVolumeWithPores(void) const { return solidVolumeWithPores_; }
 
   /**
   @brief Calculate the non-solid volume
@@ -375,14 +392,14 @@ public:
   @param vol is the array of all microstructure phase volumes
   it
   */
-  void calcNonsolidvolume(vector<double> &vol);
+  void calcNonSolidVolume(vector<double> &vol);
 
   /**
   @brief Get or calculate the non-solid volume
 
   @return the non-solid volume
   */
-  double getNonsolidvolume(void) const { return nonsolidvolume_; }
+  double getNonSolidVolume(void) const { return nonSolidVolume_; }
 
   /**
   @brief Get the number of neighbor sites each site has.
@@ -394,29 +411,43 @@ public:
 
   @return the number of neighbor sites each site has
   */
-  unsigned int getSiteneighbors() const { return siteneighbors_; }
+  unsigned int getSiteNeighbors() const { return siteNeighbors_; }
 
   /**
-  @brief Set the lattice resolution [micrometers].
+  @brief Set the lattice resolution [meters].
 
   The lattice resolution is the physical length associated with the edge
   length of a site.
 
-  @param res is the lattice resolution [micrometers]
+  @param res is the lattice resolution [meters]
   */
   void setResolution(const double res);
 
   /**
-  @brief Get the lattice resolution [micrometers].
+  @brief Get the lattice resolution [meters].
 
   The lattice resolution is the physical length associated with the edge
   length of a site.
 
   @note NOT USED.
 
-  @return the lattice resolution [micrometers]
+  @return the lattice resolution [meters]
   */
   double getResolution() const { return resolution_; }
+
+  /**
+  @brief Get the faceToArea_ value [m2].
+
+  @return the faceToArea_ value [m2]
+  */
+  double getFaceToArea() const { return faceToArea_; }
+
+  /**
+  @brief Get the voxelToVolume_ value [m3].
+
+  @return the voxelToVolume_ value [m3]
+  */
+  double getVoxelToVolume() const { return voxelToVolume_; }
 
   /**
   @brief Set the simulation time [hours].
@@ -444,7 +475,7 @@ public:
 
   @return the simulation time at which to start sulfate attack [hours]
   */
-  double getSattack_time() const { return sattack_time_; }
+  double getSulfateAttackTime() const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulation time at which to start sulfate attack simulation
@@ -453,8 +484,8 @@ public:
   @param sattacktime is the simulation time at which to start sulfate attack
   [hours]
   */
-  void setSattack_time(const double sattacktime) {
-    sattack_time_ = sattacktime;
+  void setSulfateAttackTime(const double sattacktime) {
+    sulfateAttackTime_ = sattacktime;
   }
 
   /**
@@ -464,14 +495,14 @@ public:
 
   @return the simulation time at which to start leaching [hours]
   */
-  double getLeach_time() const { return leach_time_; }
+  double getLeachTime() const { return leachTime_; }
 
   /**
   @brief Set the simulation time at which to start leaching simulation [hours].
 
   @param leachtime is the simulation time at which to start leaching [hours]
   */
-  void setLeach_time(const double leachtime) { leach_time_ = leachtime; }
+  void setLeachTime(const double leachtime) { leachTime_ = leachtime; }
 
   /**
   @brief Set the lattice temperature [K].
@@ -501,7 +532,7 @@ public:
 
   @param jobname is the root name for simulation output files
   */
-  void setJobroot(string jobname) { jobroot_ = jobname; }
+  void setJobRoot(string jobname) { jobRoot_ = jobname; }
 
   /**
   @brief Add a site at location (xp,yp,zp) to the lattice.
@@ -1078,7 +1109,7 @@ public:
 
   @return the microstructure volume (GEMS volume units)
   */
-  double getMicrostructurevolume(void) const {
+  double getMicrostructureVolume(void) const {
     return (chemSys_->getMicroVolume());
   }
 
@@ -1087,7 +1118,7 @@ public:
 
   @return the initial microstructure volume (GEMS volume units)
   */
-  double getInitialmicrostructurevolume(void) const {
+  double getInitialMicrostructureVolume(void) const {
     return (chemSys_->getInitMicroVolume());
   }
 
@@ -1096,15 +1127,15 @@ public:
 
   @return the volume of capillary pores (GEMS volume units)
   */
-  double getCapillaryporevolume(void) const { return capillaryporevolume_; }
+  double getCapillaryPoreVolume(void) const { return capillaryPoreVolume_; }
 
   /**
   @brief Set the capillary pore volume
 
   @param capillaryporevolume is the capillary pore volume (GEMS volume units)
   */
-  void setCapillaryporevolume(double capillaryporevolume) {
-    capillaryporevolume_ = capillaryporevolume;
+  void setCapillaryPoreVolume(double capillaryporevolume) {
+    capillaryPoreVolume_ = capillaryporevolume;
   }
 
   /**
@@ -1113,20 +1144,20 @@ public:
 
   @return the volume fraction of capillary pores (microstructure basis)
   */
-  double getCapillaryporevolumefraction(void) const {
-    return capillaryporevolumefraction_;
+  double getCapillaryPoreVolumeFraction(void) const {
+    return capillaryPoreVolumeFraction_;
   }
 
   /**
   @brief Set the capillary pore volume fraction
   This is calculated on a total system volume basis
 
-  @param capillaryporevolumefraction is the capillary pore volume
+  @param capillaryPoreVolumeFraction is the capillary pore volume
   fraction (microstructure basis)
   */
   void
-  setCapillaryporevolumefraction(const double capillaryporevolumefraction) {
-    capillaryporevolumefraction_ = capillaryporevolumefraction;
+  setCapillaryPoreVolumeFraction(const double capillaryPoreVolumeFraction) {
+    capillaryPoreVolumeFraction_ = capillaryPoreVolumeFraction;
   }
 
   /**
@@ -1134,15 +1165,15 @@ public:
 
   @return the volume of subvoxel pores (GEMS volume units)
   */
-  double getSubvoxelporevolume(void) const { return subvoxelporevolume_; }
+  double getSubvoxelPoreVolume(void) const { return subvoxelPoreVolume_; }
 
   /**
   @brief Set the subvoxel pore volume
 
   @param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
   */
-  void setSubvoxelporevolume(const double subvoxelporevolume) {
-    subvoxelporevolume_ = subvoxelporevolume;
+  void setSubvoxelPoreVolume(const double subvoxelporevolume) {
+    subvoxelPoreVolume_ = subvoxelporevolume;
   }
 
   /**
@@ -1150,8 +1181,8 @@ public:
 
   @param subvoxelporevolume is the subvoxel pore volume (GEMS volume units)
   */
-  void setNonsolidvolume(const double nonsolidvolume) {
-    nonsolidvolume_ = nonsolidvolume;
+  void setNonSolidVolume(const double nonsolidvolume) {
+    nonSolidVolume_ = nonsolidvolume;
   }
 
   /**
@@ -1159,22 +1190,22 @@ public:
 
   @param vol is the volume of each microstructure phase
   */
-  void calcCapillarywatervolume(vector<double> &vol);
+  void calcCapillaryWaterVolume(vector<double> &vol);
 
   /**
   @brief Get the capillary water volume
 
   @return the capillary water volume
   */
-  double getCapillarywatervolume(void) const { return capillarywatervolume_; }
+  double getCapillaryWaterVolume(void) const { return capillaryWaterVolume_; }
 
   /**
   @brief Set the capillary water volume
 
   @param capillarywatervolume is the capillary water volume (GEMS volume units)
   */
-  void setCapillarywatervolume(const double capillarywatervolume) {
-    capillarywatervolume_ = capillarywatervolume;
+  void setCapillaryWaterVolume(const double capillarywatervolume) {
+    capillaryWaterVolume_ = capillarywatervolume;
   }
 
   /**
@@ -1183,22 +1214,22 @@ public:
   @param vol is the volume of each microstructure phase
   @param calc is true only if calculating instead of just returning
   */
-  void calcCapillaryvoidvolume(vector<double> &vol);
+  void calcCapillaryVoidVolume(vector<double> &vol);
 
   /**
   @brief Get the capillary void volume
 
   @return the capillary void volume
   */
-  double getCapillaryvoidvolume(void) const { return capillarywatervolume_; }
+  double getCapillaryVoidVolume(void) const { return capillaryWaterVolume_; }
 
   /**
   @brief Set the capillary void volume
 
   @param capillaryvoidvolume is the capillary void volume (GEMS volume units)
   */
-  void setCapillaryvoidvolume(const double capillaryvoidvolume) {
-    capillaryvoidvolume_ = capillaryvoidvolume;
+  void setCapillaryVoidVolume(const double capillaryvoidvolume) {
+    capillaryVoidVolume_ = capillaryvoidvolume;
   }
 
   /**
@@ -1207,8 +1238,8 @@ public:
 
   @return the volume fraction of subvoxel pores (microstructure basis)
   */
-  double getSubvoxelporevolumefraction(void) const {
-    return subvoxelporevolumefraction_;
+  double getSubvoxelPoreVolumeFraction(void) const {
+    return subvoxelPoreVolumeFraction_;
   }
 
   /**
@@ -1218,8 +1249,8 @@ public:
   @param subvoxelporevolumefraction is the subvoxel pore volume
   fraction (microstructure basis)
   */
-  void setSubvoxelporevolumefraction(const double subvoxelporevolumefraction) {
-    subvoxelporevolumefraction_ = subvoxelporevolumefraction;
+  void setSubvoxelPoreVolumeFraction(const double subvoxelporevolumefraction) {
+    subvoxelPoreVolumeFraction_ = subvoxelporevolumefraction;
   }
 
   /**
@@ -1228,8 +1259,8 @@ public:
   @param masterporevolume is the pore volume distribution
   */
   void
-  setMasterporevolume(const vector<struct PoreSizeVolume> masterporevolume) {
-    masterporevolume_ = masterporevolume;
+  setMasterPoreVolume(const vector<struct PoreSizeVolume> masterporevolume) {
+    masterPoreVolume_ = masterporevolume;
     return;
   }
 
@@ -1241,17 +1272,17 @@ public:
   @param volume is the volume of pores this size, in nm3
   @param volfrac is the volume fraction of this size filled with electrolyte
   */
-  void setMasterporevolume(const int idx, const double diam,
+  void setMasterPoreVolume(const int idx, const double diam,
                            const double volume, const double volfrac) {
     try {
-      if (idx >= masterporevolume_.size()) {
-        throw EOBException("Lattice", "setMasterporevolume",
-                           "masterporevolume_", masterporevolume_.size(),
+      if (idx >= masterPoreVolume_.size()) {
+        throw EOBException("Lattice", "setMasterPoreVolume",
+                           "masterPoreVolume_", masterPoreVolume_.size(),
                            (int)idx);
       }
-      masterporevolume_[idx].diam = diam;
-      masterporevolume_[idx].volume = volume;
-      masterporevolume_[idx].volfrac = volfrac;
+      masterPoreVolume_[idx].diam = diam;
+      masterPoreVolume_[idx].volume = volume;
+      masterPoreVolume_[idx].volfrac = volfrac;
     } catch (EOBException ex) {
       ex.printException();
       exit(1);
@@ -1264,18 +1295,18 @@ public:
   @param idx is the index to get
   @return the structure holding the pore size distribution data for that element
   */
-  struct PoreSizeVolume getMasterporevolume(const int idx) {
+  struct PoreSizeVolume getMasterPoreVolume(const int idx) {
     try {
-      if (idx >= masterporevolume_.size()) {
-        throw EOBException("Lattice", "getMasterporevolume",
-                           "masterporevolume_", masterporevolume_.size(),
+      if (idx >= masterPoreVolume_.size()) {
+        throw EOBException("Lattice", "getMasterPoreVolume",
+                           "masterPoreVolume_", masterPoreVolume_.size(),
                            (int)idx);
       }
     } catch (EOBException ex) {
       ex.printException();
       exit(1);
     }
-    return (masterporevolume_[idx]);
+    return (masterPoreVolume_[idx]);
   }
 
   /**
@@ -1283,18 +1314,18 @@ public:
   @param idx is the index to get
   @return the diameter of that element in the pore size distribution (nm)
   */
-  double getMasterporevolumeDiam(const int idx) {
+  double getMasterPoreVolumeDiam(const int idx) {
     try {
-      if (idx >= masterporevolume_.size()) {
-        throw EOBException("Lattice", "getMasterporevolumeDiam",
-                           "masterporevolume_", masterporevolume_.size(),
+      if (idx >= masterPoreVolume_.size()) {
+        throw EOBException("Lattice", "getMasterPoreVolumeDiam",
+                           "masterPoreVolume_", masterPoreVolume_.size(),
                            (int)idx);
       }
     } catch (EOBException ex) {
       ex.printException();
       exit(1);
     }
-    return (masterporevolume_[idx].diam);
+    return (masterPoreVolume_[idx].diam);
   }
 
   /**
@@ -1302,18 +1333,18 @@ public:
   @param idx is the index to get
   @return the volume of that element in the pore size distribution (nm3)
   */
-  double getMasterporevolumeVolume(const int idx) {
+  double getMasterPoreVolumeVolume(const int idx) {
     try {
-      if (idx >= masterporevolume_.size()) {
-        throw EOBException("Lattice", "getMasterporevolumeVolume",
-                           "masterporevolume_", masterporevolume_.size(),
+      if (idx >= masterPoreVolume_.size()) {
+        throw EOBException("Lattice", "getMasterPoreVolumeVolume",
+                           "masterPoreVolume_", masterPoreVolume_.size(),
                            (int)idx);
       }
     } catch (EOBException ex) {
       ex.printException();
       exit(1);
     }
-    return (masterporevolume_[idx].volume);
+    return (masterPoreVolume_[idx].volume);
   }
 
   /**
@@ -1323,18 +1354,18 @@ public:
   @return the volume fraction saturated of that element in the pore size
   distribution
   */
-  double getMasterporevolumeVolfrac(const int idx) {
+  double getMasterPoreVolumeVolfrac(const int idx) {
     try {
-      if (idx >= masterporevolume_.size()) {
-        throw EOBException("Lattice", "getMasterporevolumeVolfrac",
-                           "masterporevolume_", masterporevolume_.size(),
+      if (idx >= masterPoreVolume_.size()) {
+        throw EOBException("Lattice", "getMasterPoreVolumeVolfrac",
+                           "masterPoreVolume_", masterPoreVolume_.size(),
                            (int)idx);
       }
     } catch (EOBException ex) {
       ex.printException();
       exit(1);
     }
-    return (masterporevolume_[idx].volfrac);
+    return (masterPoreVolume_[idx].volfrac);
   }
 
   /**
@@ -1343,10 +1374,10 @@ public:
   */
   double getLargestSaturatedPore(void) {
     double capsize = 1000.0; // nm of capillary pores
-    int size = masterporevolume_.size();
+    int size = masterPoreVolume_.size();
     for (int i = 0; i < size; i++) {
-      if (masterporevolume_[i].volfrac < 1.0) {
-        return (masterporevolume_[i].diam);
+      if (masterPoreVolume_[i].volfrac < 1.0) {
+        return (masterPoreVolume_[i].diam);
       }
     }
     return (capsize);
@@ -1359,7 +1390,7 @@ public:
 
   @return the amount of water that must be added [site units]
   */
-  double getWaterchange(void) const { return waterchange_; }
+  double getWaterChange(void) const { return waterChange_; }
 
   /**
   @brief Set the number of sites of water that must be added after a time step.
@@ -1368,7 +1399,7 @@ public:
 
   @param the number of sites of water that must be added [site units]
   */
-  void setWaterchange(double waterchangeval) { waterchange_ = waterchangeval; }
+  void setWaterChange(double waterchangeval) { waterChange_ = waterchangeval; }
 
   /**
   @brief Increment the number of sites of water that must be added after a time
@@ -1376,7 +1407,7 @@ public:
 
   @param the extra number of sites of water that must be added [site units]
   */
-  void dWaterchange(double dwaterchangeval) { waterchange_ += dwaterchangeval; }
+  void dWaterChange(double dwaterchangeval) { waterChange_ += dwaterchangeval; }
 
   /**
   @brief Implement conversion of Al-bearing phases to ettringite.
@@ -1441,13 +1472,37 @@ public:
   void applyExp(vector<unsigned int> alnb, double exp);
 
   /**
+  @brief Estimate the surface area of a phase with the aqueous
+  solution, in units of m2 per cm3 of total microstructure
+
+  @param phaseid is the id of the microstructure phase
+  @param solidMass is the mass of all solids in g
+  @return the estimated surface area [m2 per 100 g of solid]
+  */
+  void calcSurfaceArea(int phaseid, double solidMass);
+
+  /**
+  @brief Return the current surface area of a phase with the aqueous
+  solution.
+
+  @param phaseid is the id of the microstructure phase
+  @return the estimated surface area [site face units]
+  */
+  double getSurfaceArea(int phaseid) {
+    if (phaseid > -1 && phaseid < surfaceArea_.size()) {
+      return surfaceArea_[phaseid];
+    }
+    return 0.0;
+  }
+
+  /**
   @brief Estimate the <i>internal</i> surface area of a phase with the aqueous
   solution.
 
   @param phaseid is the id of the microstructure phase
   @return the estimated surface area [site face units]
   */
-  double getSurfaceArea(int phaseid);
+  double updateSurfaceArea(int phaseid);
 
   /**
   @brief Get the sorted distribution of domain sizes

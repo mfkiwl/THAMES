@@ -134,36 +134,27 @@ time step.
 class Controller {
 
 protected:
-  string jobroot_;   /**< Root name for all output files */
+  string jobRoot_;   /**< Root name for all output files */
   Lattice *lattice_; /**< Pointer to microstructure lattice object */
   KineticController
       *kineticController_;    /**< Pointer to kinetic controller object */
   ThermalStrain *thermalstr_; /**< Pointer to the finite element model object */
 
-  /**
-  @brief Stores the moles of independent components dissolved.
-
-  @warning This member appears to not be used and may be obsolete
-  @todo Investigate whether to delete this member
-  */
-  vector<double> molesdissolved_;
-
-  double imgfreq_;          /**< Frequency to output microstructure image */
+  double imgFreq_; /**< Frequency to output microstructure image (hours) */
   ChemicalSystem *chemSys_; /**< Pointer to `ChemicalSystem` object */
   vector<double> time_;     /**< List of simulation times for each iteration */
   vector<double>
       timeInitial_; /**< List of simulation times for each iteration */
-  vector<double> output_time_; /**< List of times to output image */
-  double statfreq_;            /**< Frequency to output statistics */
+  vector<double> outputTime_; /**< List of times to output image */
 
-  int sim_type_; /**< Hydration, leaching, or sulfate attack for now */
+  int simType_; /**< Hydration, leaching, or sulfate attack for now */
 
 private:
-  double sattack_time_; /**< Simulation time at which to begin sulfate attack,
-                                in hours */
-  double leach_time_;   /**< Simulation time at which to begin leaching,
-                                in hours */
-  int damagecount_;     /**< Number of pixels in the lattice that are damaged */
+  double sulfateAttackTime_; /**< Simulation time at which to begin sulfate
+                                attack, in hours */
+  double leachTime_;         /**< Simulation time at which to begin leaching,
+                                      in hours */
+  int damageCount_; /**< Number of pixels in the lattice that are damaged */
 
   bool verbose_; /**< Flag for verbose output */
   bool warning_; /**< Flag for warning output */
@@ -259,8 +250,8 @@ public:
 
   @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
-  void setSattack_time(const double sattacktime) {
-    sattack_time_ = sattacktime;
+  void setSulfateAttackTime(const double sattacktime) {
+    sulfateAttackTime_ = sattacktime;
   }
 
   /**
@@ -268,21 +259,21 @@ public:
 
   @return the simulation time to begin sulfate attack [hours]
   */
-  double getSattack_time(void) const { return sattack_time_; }
+  double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulation type
 
   @param simtype is the simulation type
   */
-  void setSim_type(const double simtype) { sim_type_ = simtype; }
+  void setSimType(const double simtype) { simType_ = simtype; }
 
   /**
   @brief Get the simulation type.
 
   @return the simulation type
   */
-  double getSim_type(void) const { return sim_type_; }
+  double getSimType(void) const { return simType_; }
 
   /**
   @brief Set the verbose flag

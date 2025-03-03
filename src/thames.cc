@@ -168,16 +168,22 @@ int main(int argc, char **argv) {
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
     cout << "Z size of lattice is " << Mic->getZDim() << endl;
-    cout << "Total number of sites is " << Mic->getNumsites() << endl;
+    cout << "Total number of sites is " << Mic->getNumSites() << endl;
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
          << endl;
     stopProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
+  } catch (FileException fex) {
+    fex.printException();
     stopProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
+  } catch (GEMException gex) {
+    gex.printException();
+    stopProgram = true;
+  } catch (EOBException eex) {
+    eex.printException();
+    stopProgram = true;
+  } catch (FloatException flex) {
+    flex.printException();
     stopProgram = true;
   }
 
@@ -220,7 +226,7 @@ int main(int argc, char **argv) {
     try {
       ThermalStrainSolver =
           new ThermalStrain(Mic->getXDim(), Mic->getYDim(), Mic->getZDim(),
-                            (Mic->getNumsites() + 2),
+                            (Mic->getNumSites() + 2),
                             ChemSys->getNumMicroPhases(), 1, VERBOSE, WARNING);
       cout << "ThermalStrain object creation done... " << endl;
       ThermalStrainSolver->setPhasemodfileName(phasemod_fileName);

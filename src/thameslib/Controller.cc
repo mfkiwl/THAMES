@@ -9,8 +9,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
                        const string &parfilename, const string &jobname,
                        const bool verbose, const bool warning, const bool xyz)
-    : lattice_(msh), kineticController_(kc), chemSys_(cs), sim_type_(simtype),
-      thermalstr_(thmstr), jobroot_(jobname) {
+    : lattice_(msh), kineticController_(kc), chemSys_(cs), simType_(simtype),
+      thermalstr_(thmstr), jobRoot_(jobname) {
   unsigned int i;
   double tvalue, pvalue;
   string buff;
@@ -41,18 +41,18 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   /// are set to very high values so that they usually won't happen
   ///
 
-  imgfreq_ = 168.0; // hours = 7 days
-  leach_time_ = 1.0e10;
-  sattack_time_ = 1.0e10;
+  imgFreq_ = 168.0; // hours = 7 days
+  leachTime_ = 1.0e10;
+  sulfateAttackTime_ = 1.0e10;
 
-  damagecount_ = 0;
+  damageCount_ = 0;
 
   ///
   /// Load up the pointers to the `ChemicalSystem` object and `Lattice` object
   ///
 
   chemSys_ = lattice_->getChemSys();
-  lattice_->setJobroot(jobroot_);
+  lattice_->setJobRoot(jobRoot_);
 
   ///
   /// Output the class codes for the solution and for DC components.
@@ -63,7 +63,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   ///
 
   try {
-    string outfilename = jobroot_ + "_Solution.csv";
+    string outfilename = jobRoot_ + "_Solution.csv";
     ofstream out(outfilename.c_str());
     if (!out) {
       throw FileException("Controller", "Controller", outfilename,
@@ -80,7 +80,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out << endl;
     out.close();
 
-    outfilename = jobroot_ + "_DCVolumes.csv";
+    outfilename = jobRoot_ + "_DCVolumes.csv";
     ofstream out1(outfilename.c_str());
     if (!out1) {
       throw FileException("Controller", "Controller", outfilename,
@@ -97,7 +97,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out1 << endl;
     out1.close();
 
-    outfilename = jobroot_ + "_Microstructure.csv";
+    outfilename = jobRoot_ + "_Microstructure.csv";
     ofstream out2(outfilename.c_str());
     if (!out2) {
       throw FileException("Controller", "Controller", outfilename,
@@ -112,7 +112,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out2 << endl;
     out2.close();
 
-    outfilename = jobroot_ + "_pH.csv";
+    outfilename = jobRoot_ + "_pH.csv";
     ofstream out3(outfilename.c_str());
     if (!out3) {
       throw FileException("Controller", "Controller", outfilename,
@@ -121,7 +121,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out3 << "Time(h),pH" << endl;
     out3.close();
 
-    outfilename = jobroot_ + "_CSH.csv";
+    outfilename = jobRoot_ + "_CSH.csv";
     ofstream out4(outfilename.c_str());
     if (!out4) {
       throw FileException("Controller", "Controller", outfilename,
@@ -134,7 +134,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out4 << ",Ca/Si" << endl;
     out4.close();
 
-    outfilename = jobroot_ + "_CSratio_solid.csv";
+    outfilename = jobRoot_ + "_CSratio_solid.csv";
     ofstream out5(outfilename.c_str());
     if (!out5) {
       throw FileException("Controller", "Controller", outfilename,
@@ -143,7 +143,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out5 << "Time(h),C/S in solid" << endl;
     out5.close();
 
-    outfilename = jobroot_ + "_Enthalpy.csv";
+    outfilename = jobRoot_ + "_Enthalpy.csv";
     ofstream out6(outfilename.c_str());
     if (!out6) {
       throw FileException("Controller", "Controller", outfilename,
@@ -183,7 +183,6 @@ void Controller::doCycle(const string &statfilename, int choice,
                          double elemTimeInterval) {
   unsigned int i;
   int time_index;
-  // double next_stat_time = statfreq_;
   RestoreSystem iniLattice;
 
   ///
@@ -196,20 +195,20 @@ void Controller::doCycle(const string &statfilename, int choice,
   ///
 
   if (choice == LEACHING) {
-    leach_time_ = 2400.0; // 2400 hours = 100 days
+    leachTime_ = 2400.0; // 2400 hours = 100 days
   } else if (choice == SULFATE_ATTACK) {
-    sattack_time_ = 2400.0; // 2400 hours = 100 days
+    sulfateAttackTime_ = 2400.0; // 2400 hours = 100 days
   }
 
   /*
-  kineticController_->setSattack_time(sattack_time_);
-  kineticController_->setLeach_time(leach_time_);
+  kineticController_->setSattack_time(sulfateAttackTime_);
+  kineticController_->setLeach_time(leachTime_);
   */
 
-  chemSys_->setSulfateAttackTime(sattack_time_);
-  chemSys_->setLeachTime(leach_time_);
-  lattice_->setSattack_time(sattack_time_);
-  lattice_->setLeach_time(leach_time_);
+  chemSys_->setSulfateAttackTime(sulfateAttackTime_);
+  chemSys_->setLeachTime(leachTime_);
+  lattice_->setSulfateAttackTime(sulfateAttackTime_);
+  lattice_->setLeachTime(leachTime_);
 
   // Initialize the list of all interfaces in the lattice
 
@@ -237,16 +236,16 @@ void Controller::doCycle(const string &statfilename, int choice,
   /// is finished so we don't have to read the json file
   ///
 
-  lattice_->writeMicroColors(jobroot_);
+  lattice_->writeMicroColors(jobRoot_);
 
   ///
   /// Write the initial microstructure image and its png image
   ///
 
-  lattice_->writeLattice(0.0, sim_type_, jobroot_);
-  lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
+  lattice_->writeLattice(0.0, simType_, jobRoot_);
+  lattice_->writeLatticePNG(0.0, simType_, jobRoot_);
   if (xyz_)
-    lattice_->appendXYZ(0.0, sim_type_, jobroot_);
+    lattice_->appendXYZ(0.0, simType_, jobRoot_);
   int timesGEMFailed_loc = 0;
   int timesGEMFailed_loc1 = -10;
 
@@ -371,8 +370,8 @@ void Controller::doCycle(const string &statfilename, int choice,
              << lattice_->getRNGseed() << ") and run again" << endl;
         cout << endl << "                STOP SIMULATION" << endl;
         // exit(0);
-        lattice_->writeLattice(time_[i - 1], sim_type_, jobroot_);
-        lattice_->writeLatticePNG(time_[i - 1], sim_type_, jobroot_);
+        lattice_->writeLattice(time_[i - 1], simType_, jobRoot_);
+        lattice_->writeLatticePNG(time_[i - 1], simType_, jobRoot_);
         bool is_Error = false;
         throw MicrostructureException("Controller", "doCycle",
                                       "GEM cannot solve the problem", is_Error);
@@ -431,8 +430,8 @@ void Controller::doCycle(const string &statfilename, int choice,
         timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
 
       } catch (GEMException gex) {
-        lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-        lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+        lattice_->writeLattice(time_[i], simType_, jobRoot_);
+        lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
         throw gex;
       }
 
@@ -503,7 +502,7 @@ void Controller::doCycle(const string &statfilename, int choice,
           lattice_->getDissolutionInterfaceSize();
       iniLattice.site.clear();
       RestoreSite site_l;                           // only one declaration
-      int dimLatticeSite = lattice_->getNumsites(); // only one declaration
+      int dimLatticeSite = lattice_->getNumSites(); // only one declaration
       for (int i = 0; i < dimLatticeSite; i++) {
         site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
         site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
@@ -537,7 +536,7 @@ void Controller::doCycle(const string &statfilename, int choice,
       int changeLattice = -100;
       int whileCount = 0;
       changeLattice = lattice_->changeMicrostructure(
-          time_[i], sim_type_, capwater, numSitesNotAvailable, phDiff, nameDiff,
+          time_[i], simType_, capwater, numSitesNotAvailable, phDiff, nameDiff,
           whileCount, cyc);
 
       // if not all the voxels requested by KM/GEM for a certain microphase
@@ -650,7 +649,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
           whileCount++;
           changeLattice = lattice_->changeMicrostructure(
-              time_[i], sim_type_, capwater, numSitesNotAvailable, phDiff,
+              time_[i], simType_, capwater, numSitesNotAvailable, phDiff,
               nameDiff, whileCount, cyc);
           cout << endl
                << "Controller::doCycle cyc/whileCount/changeLattice = " << cyc
@@ -686,22 +685,22 @@ void Controller::doCycle(const string &statfilename, int choice,
       }
 
     } catch (DataException dex) {
-      lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-      lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      lattice_->writeLattice(time_[i], simType_, jobRoot_);
+      lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
       if (xyz_)
-        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+        lattice_->appendXYZ(time_[i], simType_, jobRoot_);
       throw dex;
     } catch (EOBException ex) {
-      lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-      lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      lattice_->writeLattice(time_[i], simType_, jobRoot_);
+      lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
       if (xyz_)
-        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+        lattice_->appendXYZ(time_[i], simType_, jobRoot_);
       throw ex;
     } catch (MicrostructureException mex) {
-      lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-      lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      lattice_->writeLattice(time_[i], simType_, jobRoot_);
+      lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
       if (xyz_)
-        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+        lattice_->appendXYZ(time_[i], simType_, jobRoot_);
       throw mex;
     }
 
@@ -729,18 +728,18 @@ void Controller::doCycle(const string &statfilename, int choice,
       cout.flush();
     }
 
-    if ((time_[i] >= output_time_[time_index]) &&
-        (time_index < output_time_.size())) {
+    if ((time_[i] >= outputTime_[time_index]) &&
+        (time_index < outputTime_.size())) {
       if (verbose_) {
         cout << "Controller::doCycle Writing lattice at time_[" << i
-             << "] = " << time_[i] << ", output_time_[" << time_index
-             << "] = " << output_time_[time_index] << endl;
+             << "] = " << time_[i] << ", outputTime_[" << time_index
+             << "] = " << outputTime_[time_index] << endl;
       }
-      lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-      lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      lattice_->writeLattice(time_[i], simType_, jobRoot_);
+      lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
       if (xyz_)
-        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
-      lattice_->writePoreSizeDistribution(time_[i], sim_type_, jobroot_);
+        lattice_->appendXYZ(time_[i], simType_, jobRoot_);
+      lattice_->writePoreSizeDistribution(time_[i], simType_, jobRoot_);
 
       time_index++;
     }
@@ -770,7 +769,7 @@ void Controller::doCycle(const string &statfilename, int choice,
     /// The following block executes only for sulfate attack simulations
     ///
 
-    if (time_[i] >= sattack_time_) {
+    if (time_[i] >= sulfateAttackTime_) {
 
       cout << endl
            << " Controller::doCycle - for sulfate attack, check conditions for "
@@ -809,23 +808,23 @@ void Controller::doCycle(const string &statfilename, int choice,
 
       if (expansion.size() > 1) {
 
-        damagecount_ = 0;
+        damageCount_ = 0;
         double poreintroduce = 0.5;
 
         if (verbose_) {
           cout << "Controller::doCycle Sulfate attack module writing " << endl;
           cout << "Controller::doCycle lattice at time_[" << i
                << "] = " << time_[i] << ", " << endl;
-          cout << "controller::doCycle output_time_[" << time_index
-               << "] = " << output_time_[time_index] << endl;
+          cout << "controller::doCycle outputTime_[" << time_index
+               << "] = " << outputTime_[time_index] << endl;
           cout.flush();
         }
 
-        lattice_->writeLattice(time_[i], sim_type_, jobroot_);
-        lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+        lattice_->writeLattice(time_[i], simType_, jobRoot_);
+        lattice_->writeLatticePNG(time_[i], simType_, jobRoot_);
         if (xyz_)
-          lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
-        string ofileName(jobroot_);
+          lattice_->appendXYZ(time_[i], simType_, jobRoot_);
+        string ofileName(jobRoot_);
         ostringstream ostr1, ostr2;
         ostr1 << static_cast<int>(time_[i] * 10.0); // tenths of an hour
         ostr2 << setprecision(3) << chemSys_->getTemperature();
@@ -857,7 +856,7 @@ void Controller::doCycle(const string &statfilename, int choice,
           Site *ste;
           ste = lattice_->getSite(expindex);
           /*
-          lattice_->dWaterchange(poreintroduce);
+          lattice_->dWaterChange(poreintroduce);
           */
 
           double dwmcval = poreintroduce;
@@ -875,9 +874,9 @@ void Controller::doCycle(const string &statfilename, int choice,
 
         thermalstr_->Calc(time_[i], ofileName, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-        // thermalstr_ -> writeStress(jobroot_,time_[i],0); //write strxx
-        // thermalstr_ -> writeStrainEngy(jobroot_,time_[i]);
-        thermalstr_->writeDisp(jobroot_, time_[i]);
+        // thermalstr_ -> writeStress(jobRoot_,time_[i],0); //write strxx
+        // thermalstr_ -> writeStrainEngy(jobRoot_,time_[i]);
+        thermalstr_->writeDisp(jobRoot_, time_[i]);
 
         ///
         /// Get the true volume of each voxel after FEM calculation
@@ -885,7 +884,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
         double otruevolume = 0.0;
         double truevolume = 0.0;
-        for (int ii = 0; ii < lattice_->getNumsites(); ii++) {
+        for (int ii = 0; ii < lattice_->getNumSites(); ii++) {
           Site *ste;
           ste = lattice_->getSite(i);
           otruevolume = ste->getTrueVolume();
@@ -896,13 +895,13 @@ void Controller::doCycle(const string &statfilename, int choice,
           ste->setTrueVolume(truevolume);
         }
 
-        for (int index = 0; index < lattice_->getNumsites(); index++) {
+        for (int index = 0; index < lattice_->getNumSites(); index++) {
           Site *ste;
           ste = lattice_->getSite(index);
           int pid = ste->getMicroPhaseId();
 
           if (ste->IsDamage()) {
-            damagecount_++;
+            damageCount_++;
           }
 
           if ((ste->IsDamage())) {
@@ -923,7 +922,7 @@ void Controller::doCycle(const string &statfilename, int choice,
                 damageexp[i] += damageexpo[i];
               }
               lattice_->setExpansion(index, damageexp);
-              lattice_->dWaterchange(poreincrease);
+              lattice_->dWaterChange(poreincrease);
               /// JWB: This next line must be from some earlier version
               /// The called method does not exist any longer
               ///
@@ -963,8 +962,8 @@ void Controller::doCycle(const string &statfilename, int choice,
                 // if (verbose_) cout << " it has not been damaged before." <<
                 // endl;
                 ste->setDamage();
-                damagecount_++;
-                // lattice_->dWaterchange(poreintroduce);
+                damageCount_++;
+                // lattice_->dWaterChange(poreintroduce);
 
                 double dwmcval = poreintroduce;
                 lattice_->dWmc(index, dwmcval);
@@ -996,7 +995,7 @@ void Controller::doCycle(const string &statfilename, int choice,
                 coordin[1] = ste->getY();
                 coordin[2] = ste->getZ();
                 lattice_->setExpansionCoordin(index,coordin);
-                lattice_->dWaterchange(poreindamage);
+                lattice_->dWaterChange(poreindamage);
                 ste->setVolume(VOIDID,poreindamage);
                 */
               }
@@ -1007,14 +1006,14 @@ void Controller::doCycle(const string &statfilename, int choice,
 
         if (verbose_) {
           cout << "Controller::doCycle sulfate attack module Time = "
-               << time_[i] << " damagecount_ is: " << damagecount_ << endl;
+               << time_[i] << " damageCount_ is: " << damageCount_ << endl;
           cout.flush();
         }
         ofstream outdamage("damage.dat");
-        outdamage << damagecount_;
+        outdamage << damageCount_;
         outdamage.close();
 
-        string damagejobroot = jobroot_ + ".damage";
+        string damagejobroot = jobRoot_ + ".damage";
         lattice_->writeDamageLattice(time_[i], damagejobroot);
         lattice_->writeDamageLatticePNG(time_[i], damagejobroot);
         // to see whether new damage is generated
@@ -1027,10 +1026,10 @@ void Controller::doCycle(const string &statfilename, int choice,
   /// visualization
   ///
 
-  lattice_->writeLattice(time_[i - 1], sim_type_, jobroot_);
-  lattice_->writeLatticePNG(time_[i - 1], sim_type_, jobroot_);
+  lattice_->writeLattice(time_[i - 1], simType_, jobRoot_);
+  lattice_->writeLatticePNG(time_[i - 1], simType_, jobRoot_);
   if (xyz_)
-    lattice_->appendXYZ(time_[i - 1], sim_type_, jobroot_);
+    lattice_->appendXYZ(time_[i - 1], simType_, jobRoot_);
 
   return;
 }
@@ -1080,7 +1079,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
     kineticController_->calculateKineticStep(dt, cyc);
 
-    // if (time >= sattack_time_) {// for sulfate attack iterations}
+    // if (time >= sulfateAttackTime_) {// for sulfate attack iterations}
 
     ///
     /// Now that the method is done determining the change in moles of each IC,
@@ -1142,7 +1141,7 @@ void Controller::writeTxtOutputFiles(double time) {
   // Output to files the solution composition data, phase data, DC data,
   // microstructure data, pH, and C-S-H composition and Ca/Si ratio
 
-  string outfilename = jobroot_ + "_Solution.csv";
+  string outfilename = jobRoot_ + "_Solution.csv";
   ofstream out3(outfilename.c_str(), ios::app);
   if (!out3) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1160,7 +1159,7 @@ void Controller::writeTxtOutputFiles(double time) {
   out3 << endl;
   out3.close();
 
-  outfilename = jobroot_ + "_DCVolumes.csv";
+  outfilename = jobRoot_ + "_DCVolumes.csv";
   ofstream out4(outfilename.c_str(), ios::app);
   if (!out4) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1193,7 +1192,7 @@ void Controller::writeTxtOutputFiles(double time) {
   out4 << endl;
   out4.close();
 
-  outfilename = jobroot_ + "_Microstructure.csv";
+  outfilename = jobRoot_ + "_Microstructure.csv";
   ofstream out5(outfilename.c_str(), ios::app);
   if (!out5) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1202,15 +1201,15 @@ void Controller::writeTxtOutputFiles(double time) {
 
   out5 << setprecision(5) << time;
   for (i = 0; i < chemSys_->getNumMicroPhases(); i++) {
-    out5 << "," << (lattice_->getVolumefraction(i));
+    out5 << "," << (lattice_->getVolumeFraction(i));
   }
-  double micvol = lattice_->getMicrostructurevolume();
-  double initmicvol = lattice_->getInitialmicrostructurevolume();
+  double micvol = lattice_->getMicrostructureVolume();
+  double initmicvol = lattice_->getInitialMicrostructureVolume();
   out5 << "," << micvol << "," << (initmicvol - micvol);
   out5 << endl;
   out5.close();
 
-  outfilename = jobroot_ + "_pH.csv";
+  outfilename = jobRoot_ + "_pH.csv";
   ofstream out6(outfilename.c_str(), ios::app);
   if (!out6) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1234,7 +1233,7 @@ void Controller::writeTxtOutputFiles(double time) {
     cout.flush();
   }
   // double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
-  outfilename = jobroot_ + "_CSH.csv";
+  outfilename = jobRoot_ + "_CSH.csv";
   ofstream out7(outfilename.c_str(), ios::app);
   if (!out7) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1266,7 +1265,7 @@ void Controller::writeTxtOutputFiles(double time) {
   double *phaseRecord;
   int ICIndex;
   CaMoles = SiMoles = 0.0;
-  outfilename = jobroot_ + "_CSratio_solid.csv";
+  outfilename = jobRoot_ + "_CSratio_solid.csv";
   ofstream out8(outfilename.c_str(), ios::app);
   if (!out8) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1293,7 +1292,7 @@ void Controller::writeTxtOutputFiles(double time) {
   }
   out8.close();
 
-  outfilename = jobroot_ + "_Enthalpy.csv";
+  outfilename = jobRoot_ + "_Enthalpy.csv";
   ofstream out10(outfilename.c_str(), ios::app);
   if (!out10) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1331,8 +1330,8 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
     DCMoles[i] = chemSys_->getDCMoles(i);
   }
 
-  string outfilenameIC = jobroot_ + "_icmoles.csv";
-  string outfilenameDC = jobroot_ + "_dcmoles.csv";
+  string outfilenameIC = jobRoot_ + "_icmoles.csv";
+  string outfilenameDC = jobRoot_ + "_dcmoles.csv";
   if (time < 1.e-10) {
     ofstream out0IC(outfilenameIC.c_str());
     out0IC << "Time(h)";
@@ -1473,15 +1472,15 @@ void Controller::parseDoc(const string &docName) {
     for (int i = 0; i < outtimenum; ++i) {
       testtime = cdi.value()[i];
       testtime *= 24.0;
-      output_time_.push_back(testtime);
+      outputTime_.push_back(testtime);
     }
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
     cdi = it.value().find("image_frequency");
     if (cdi != it.value().end()) {
-      imgfreq_ = cdi.value();
-      imgfreq_ *= 24.0;
+      imgFreq_ = cdi.value();
+      imgFreq_ *= 24.0;
     }
   } catch (FileException fex) {
     fex.printException();

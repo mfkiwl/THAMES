@@ -103,8 +103,8 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   /// Default value for w/c ratio in PK model is 0.45
   ///
 
-  wsRatio_ = lattice_->getWsratio();
-  wcRatio_ = lattice_->getWcratio();
+  wsRatio_ = lattice_->getWsRatio();
+  wcRatio_ = lattice_->getWcRatio();
 
   ///
   /// Default initial solid mass is 100 g

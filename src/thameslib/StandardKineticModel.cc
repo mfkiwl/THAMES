@@ -44,15 +44,14 @@ StandardKineticModel::StandardKineticModel() {
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
 
-  T_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
-  arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
+                   ((1.0 / refT_) - (1.0 / temperature_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -106,7 +105,6 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
 
   initSolidMass_ = 100.0;
 
-  temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
   modelName_ = "StandardKineticModel";
@@ -118,15 +116,15 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
-  T_ = lattice_->getTemperature();
+  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
-  arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
+                   ((1.0 / refT_) - (1.0 / temperature_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -170,8 +168,8 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     // from precipitating.
 
     // RH factor is the same for all clinker phases
-    // double vfvoid = lattice_->getVolumefraction(VOIDID);
-    // double vfh2o = lattice_->getVolumefraction(ELECTROLYTEID);
+    // double vfvoid = lattice_->getVolumeFraction(VOIDID);
+    // double vfh2o = lattice_->getVolumeFraction(ELECTROLYTEID);
 
     /// This is a big kluge for internal relative humidity
     /// @note Using new gel and interhydrate pore size distribution model
@@ -199,7 +197,13 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
     if (DOR < 1.0) {
 
-      double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
+      // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
+
+      // JWB BEWARE: The new definition of area is truly a geometric calculation
+      // made on the microstructure. It does not catch BET surface area
+      // if that ends up being important.
+      // The units of area are m2 per 100 g of intial total solid
+      double area = lattice_->getSurfaceArea(microPhaseId_);
 
       // Saturation index , but be sure that there is only one GEM Phase
       /// @note Assumes there is only one phase in this microstructure
@@ -213,8 +217,8 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // hopefully the BET area and LOI will help do that.
 
       // dissolutionRateConst_ has units of mol/m2/h
-      // area has units of m2 of phase per 100 kg of total solid
-      // Therefore dissrate has units of mol of phase per 100 kg of all solid
+      // area has units of m2 of phase per 100 g of total solid
+      // Therefore dissrate has units of mol of phase per 100 g of all solid
       // per h
       if (saturationIndex < 1.0) {
         dissrate = dissolutionRateConst_ * area *
@@ -228,10 +232,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       dissrate *= (rhFactor_ * arrhenius_);
 
-      // dissrate has units of mol of phase per 100 kg of solid per hour
+      // dissrate has units of mol of phase per 100 g of solid per hour
       // timestep has units of hours
       // molar mass has units of grams per mole
-      // Therefore, massDissolved has units of grams of phase per 100 kg of all
+      // Therefore, massDissolved has units of grams of phase per 100 g of all
       // solid
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
