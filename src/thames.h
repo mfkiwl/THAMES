@@ -189,6 +189,12 @@ void writeReport(const string &jobroot, struct tm *itime,
 */
 void timeCount(clock_t time_, time_t lt_);
 
+void errorDelDynAllocMem (ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                          ThermalStrain *ThermalStrainSolver,
+                          AppliedStrain *AppliedStrainSolver,
+                          KineticController *KController,
+                          Controller *Ctrl, clock_t st_time, time_t lt);
+
 using namespace std;
 
 #endif

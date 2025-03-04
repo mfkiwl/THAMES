@@ -792,7 +792,17 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     ///
 
     string buff = "convert " + ofileName + " " + ofpngname;
-    system(buff.c_str());
+    int resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      // handle the error;
+      cout << endl << endl << "    ElasticModel.cc - error in writeStress() : resCallSystem = -1" << endl;
+      cout << endl <<"    STOP program" << endl;
+      //throw HandleException ("writeStress", "ElasticModel.cc",
+      //                "system(buff.c_str())", "resCallSystem = -1");
+      exit(1);
+
+    }
+
     return;
 
   } else {
@@ -887,7 +897,15 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     ///
 
     string buff = "convert " + ofileName + " " + ofpngname;
-    system(buff.c_str());
+    int resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      // handle the error;
+      cout << endl << endl << "    ElasticModel.cc - error in writeStrain() : resCallSystem = -1" << endl;
+      cout << endl <<"    STOP program" << endl;
+      //throw HandleException ("writeStrain", "ElasticModel.cc",
+      //                "system(buff.c_str())", "resCallSystem = -1");
+      exit(1);
+    }
     return;
 
   } else {
@@ -1005,6 +1023,14 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   ///
 
   string buff = "convert " + ofileName + " " + ofpngname;
-  system(buff.c_str());
+  int resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    // handle the error;
+    cout << endl << endl << "    ElasticModel.cc - error in writeStrainEngy() : resCallSystem = -1" << endl;
+    cout << endl <<"    STOP program" << endl;
+    //throw HandleException ("writeStrainEngy", "ElasticModel.cc",
+    //                "system(buff.c_str())", "resCallSystem = -1");
+    exit(1);
+  }
   return;
 }

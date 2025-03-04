@@ -495,7 +495,7 @@ public:
 
   vector<bool> getIsKinetic(void) { return isKinetic_; }
 
-  void setHydTimeIni (double val) { hyd_time_ini_ = val; }
+  void setHydTimeIni(double val) { hyd_time_ini_ = val; }
 
 }; // End of KineticController class
 

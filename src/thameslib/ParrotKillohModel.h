@@ -278,8 +278,7 @@ public:
   @param totalDOR is the total degree of reaction [dimensionless]
   */
   virtual void calculateKineticStep(const double timestep, double &scaledMass,
-                                    double &massDissolved, int cyc,
-                                    double totalDOR);
+                                    double &massDissolved, int cyc, double totalDOR);
 
 }; // End of ParrotKillohModel class
 

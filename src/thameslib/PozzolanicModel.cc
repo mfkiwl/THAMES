@@ -212,11 +212,11 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
-
+    scaledMass_ = scaledMass;
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
       // prevent DOR from prematurely stopping PK calculations
-      DOR = min(DOR, 0.99);
+      // DOR = min(DOR, 0.99);
     } else {
       throw FloatException("PozzolanicModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
@@ -333,13 +333,22 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
              << rate << " / " << massDissolved << endl;
       }
 
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+      scaledMass = scaledMass_ - massDissolved;
 
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+      if (scaledMass < 0) {
+        massDissolved = scaledMass_;
+        scaledMass = 0;
+      }
+      scaledMass_ = scaledMass;
 
-      scaledMass = scaledMass_;
+      // scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+
+      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+
+      // scaledMass = scaledMass_;
 
       if (verbose_) {
+        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
         cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
              << "\tmicroPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
