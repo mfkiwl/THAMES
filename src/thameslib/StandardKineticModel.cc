@@ -208,11 +208,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
           << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
     }
 
-    // if (cyc >= 28) {
-    //   cout << endl << "StandardKineticModel::calculateKineticStep_0  microPhaseId_/initScaledMass_/scaledMass_/massDissolved/DOR : "
-    //        << microPhaseId_ << " / " << initScaledMass_ << " / " << scaledMass_ << " / " << massDissolved << " / " << DOR << endl;
-    // }
-
     // if (DOR < 1.0) { //test!
 
       double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
