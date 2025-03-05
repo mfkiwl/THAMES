@@ -13,12 +13,16 @@
 @return 0 on successful completion, non-zero otherwise
 */
 int main(int argc, char **argv) {
-  //
+
+  // Check command line arguments
+
+  cout << scientific << setprecision(15);
+  if (checkArgs(argc, argv)) {
+    exit(0);
+  }
+
   // Set up the strainenergy vector.  We allow no more than 156 phases,
   // but this can be changed below.
-  //
-
-  checkargs(argc, argv);
 
   strainenergy.clear();
   strainenergy.resize(156, 0.0);
@@ -34,6 +38,8 @@ int main(int argc, char **argv) {
   RanGen *RNG = NULL;
 
   bool stopProgram = false;
+
+  int resCallSystem;
 
   //
   // Main menu where user decides what kind of simulation this will be.
@@ -59,11 +65,11 @@ int main(int argc, char **argv) {
   }
 
   int seedRNG = -25943; // -142234;
-  //cin >> seedRNG;
+  // cin >> seedRNG;
   cout << endl << "The RNG seed is                 : seedRNG = " << seedRNG << endl;
 
   double elemTimeInterval = 1.e-7;
-  //cin >> elemTimeInterval;
+  // cin >> elemTimeInterval;
   cout << "The elementary time interval is : elemTimeInterval = "
        << setprecision(3) << elemTimeInterval << endl;
 
@@ -90,18 +96,18 @@ int main(int argc, char **argv) {
 
   cout << endl << "What is the name of the GEM input file? " << endl;
   getline(cin, buff);
-  const string geminput_filename(buff);
-  cout << "geminput_filename : " << geminput_filename << endl;
+  const string gemInputName(buff);
+
+  cout << "gemInputName : " << gemInputName << endl;
   cout.flush();
   //
   // User must provide the name of the GEM data bridge (DBR) file
   // for the whole system
-  //
 
-  cout << endl << "What is the name of the GEM DBR file? " << endl;
-  getline(cin, buff);
-  const string geminput_dbrname(buff);
-  cout << "geminput_dbrname  : " << geminput_dbrname << endl;
+  // cout << endl << "What is the name of the GEM DBR file? " << endl;
+  // getline(cin, buff);
+  // const string geminput_dbrname(buff);
+  // cout << "geminput_dbrname  : " << geminput_dbrname << endl;
 
   //
   // User must provide the name of the file specifying the microstructre
@@ -112,18 +118,15 @@ int main(int argc, char **argv) {
        << "What is the name of the microstructure phase definition file? "
        << endl;
   getline(cin, buff);
-  const string pi_filename(buff);
-  const string cement_filename(buff);
-  cout << "pi_filename       : " << pi_filename << endl;
-  cout << "cement_filename   : " << cement_filename << endl;
+  const string micDefName(buff);
+  cout << "micDefName       : " << micDefName << endl;
 
   //
   // Create the ChemicalSystem object
   //
 
   try {
-    ChemSys = new ChemicalSystem(geminput_filename, geminput_dbrname,
-                                 pi_filename, VERBOSE, WARNING);
+    ChemSys = new ChemicalSystem(gemInputName, micDefName, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
@@ -149,23 +152,22 @@ int main(int argc, char **argv) {
 
   RNG = new RanGen(seedRNG);
 
-
   //
   // User must specifiy the file containing the 3D microstructure itself
   //
 
   cout << endl << "What is the name of the MICROSTRUCTURE file? " << endl;
   getline(cin, buff);
-  const string mic_filename(buff);
-  cout << "mic_filename      : " << mic_filename << endl;
+  const string initMicName(buff);
+  cout << "initMicName      : " << initMicName << endl;
 
   //
   // Create the Lattice object to hold the microstructure
   //
 
   try {
-    Mic = new Lattice(ChemSys, RNG, seedRNG, mic_filename, VERBOSE, WARNING);
-    cout << endl <<"Lattice creation done... " << endl;
+    Mic = new Lattice(ChemSys, RNG, seedRNG, initMicName, VERBOSE, WARNING);
+    cout << endl << "Lattice creation done... " << endl;
     cout << "X size of lattice is " << Mic->getXDim() << endl;
     cout << "Y size of lattice is " << Mic->getYDim() << endl;
     cout << "Z size of lattice is " << Mic->getZDim() << endl;
@@ -261,7 +263,7 @@ int main(int argc, char **argv) {
     Mic->setFEsolver(AppliedStrainSolver);
   }
 
-  string jobroot, par_filename, statfilename;
+  string jobRoot, parFileName, statFileName;
   if (VERBOSE) {
     cout << "About to enter KineticController constructor" << endl;
     cout.flush();
@@ -273,7 +275,7 @@ int main(int argc, char **argv) {
 
   try {
     KController =
-        new KineticController(ChemSys, Mic, cement_filename, VERBOSE, WARNING);
+        new KineticController(ChemSys, Mic, micDefName, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
@@ -300,16 +302,21 @@ int main(int argc, char **argv) {
     cout << "Finished constructing KineticController KController" << endl;
     cout.flush();
   }
+
   cout << endl << "What is the name of the simulation parameter file? " << endl;
   getline(cin, buff);
-  par_filename.assign(buff);
-  cout << "par_filename      : " << par_filename << endl;
+  parFileName.assign(buff);
+  cout << "parFileName      : " << parFileName << endl;
 
   cout << endl << "What is the root name of output files?" << endl;
   getline(cin, buff);
-  jobroot.assign(buff);
-  cout << "files root name   : " << jobroot << endl;
+  jobRoot.assign(buff);
+  cout << "files root name   : " << jobRoot << endl;
 
+  prepOutputFolder(outputFolder, jobRoot, gemInputName, statFileName,
+                   initMicName, micDefName, parFileName);
+
+  /*
   buff = "mkdir -p Result";
   int resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
@@ -322,6 +329,7 @@ int main(int argc, char **argv) {
   cout << "jobroot           : " << jobroot << endl;
 
   statfilename = jobroot + ".stats";
+  */
 
   //
   // Create the Controller object to direct flow of the program
@@ -329,7 +337,7 @@ int main(int argc, char **argv) {
 
   try {
     Ctrl = new Controller(Mic, KController, ChemSys, ThermalStrainSolver,
-                          simtype, par_filename, jobroot, VERBOSE, WARNING);
+                          simtype, parFileName, jobRoot, VERBOSE, WARNING, XYZ);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
@@ -350,8 +358,8 @@ int main(int argc, char **argv) {
   // Write a formatted output of the simulation parameters for later reference
   //
 
-  writeReport(jobroot, inittime, mic_filename, par_filename, geminput_filename,
-              ChemSys, Ctrl);
+  writeReport(jobRoot, inittime, initMicName, micDefName, parFileName,
+              gemInputName, ChemSys, Ctrl);
 
   //
   // Launch the main controller to run the simulation
@@ -364,7 +372,7 @@ int main(int argc, char **argv) {
 
   try {
 
-    Ctrl->doCycle(statfilename, choice, elemTimeInterval);
+    Ctrl->doCycle(statFileName, choice, elemTimeInterval);
 
   } catch (GEMException gex) {
     gex.printException();
@@ -385,7 +393,36 @@ int main(int argc, char **argv) {
   }
 
   //
-  // Simulation is finished.  Record and output the timing data.
+  // Simulation is finished.
+  //
+  // Move remaining output files to output folder
+  //
+
+  string name = "ipmlog.txt";
+  ifstream f(name.c_str());
+  if (f.good()) {
+    buff = "mv -f ipmlog.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "main", buff, "FAILED");
+    }
+    cout << buff << endl;
+    f.close();
+  }
+
+  name = "IPM_dump.txt";
+  f.open(name.c_str());
+  if (f.good()) {
+    buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "main", buff, "FAILED");
+    }
+    cout << buff << endl;
+    f.close();
+  }
+
+  // Record and output the timing data.
   //
 
   cout << endl << "THAMES END" << endl;
@@ -420,11 +457,15 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void errorDelDynAllocMem (ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
-                          ThermalStrain *ThermalStrainSolver,
-                          AppliedStrain *AppliedStrainSolver,
-                          KineticController *KController,
-                          Controller *Ctrl, clock_t st_time, time_t lt) {
+void errorDelDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                         ThermalStrain *ThermalStrainSolver,
+                         AppliedStrain *AppliedStrainSolver,
+                         KineticController *KController,
+                         Controller *Ctrl, clock_t st_time, time_t lt) {
+
+  string buff = "";
+  int resCallSystem;
+
   if (Ctrl) {
     delete Ctrl;
   }
@@ -446,6 +487,35 @@ void errorDelDynAllocMem (ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
   if (RNG) {
     delete RNG;
   }
+  
+    // Move remaining output files to output folder
+  //
+
+  string name = "ipmlog.txt";
+  ifstream f(name.c_str());
+  if (f.good()) {
+    buff = "mv -f ipmlog.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "errorDelDynAllocMem", buff, "FAILED");
+    }
+    cout << buff << endl;
+    f.close();
+  }
+
+  name = "IPM_dump.txt";
+  f.open(name.c_str());
+  if (f.good()) {
+    buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "errorDelDynAllocMem", buff, "FAILED");
+    }
+    cout << buff << endl;
+    f.close();
+  }
+
+  
   cout << endl << "STOP Program" << endl;
   timeCount(st_time, lt);
   exit(1);
@@ -471,25 +541,35 @@ void printHelp(void) {
   cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
   cout << "        --verbose [-v]      Produce verbose output" << endl;
   cout << "        --suppress [-s]     Suppress warning messages" << endl;
+  cout << "        --xyz [-x]          Create 3D visualization movie" << endl;
+  cout << "        --outfolder [-o]    Name of folder for output data (default "
+          "is Result)"
+       << endl;
   cout << "        --help [-h]         Print this help message" << endl;
   cout << endl;
 
   return;
 }
 
-void checkargs(int argc, char **argv) {
+int checkArgs(int argc, char **argv) {
 
   // Many of the variables here are defined in the getopts.h system header file
   // Can define more options here if we want
 
-  const char *const short_opts = "vsh";
+  const char *const short_opts = "vsxo:h";
   const option long_opts[] = {{"verbose", no_argument, nullptr, 'v'},
                               {"suppress", no_argument, nullptr, 's'},
+                              {"xyz", no_argument, nullptr, 'x'},
+                              {"outfolder", required_argument, nullptr, 'o'},
                               {"help", no_argument, nullptr, 'h'},
                               {nullptr, no_argument, nullptr, 0}};
 
   VERBOSE = false;
   WARNING = true;
+  XYZ = false;
+
+  // Default value of output folder unless user overrides it
+  outputFolder = "Result";
 
   while (true) {
 
@@ -507,21 +587,134 @@ void checkargs(int argc, char **argv) {
       WARNING = false; // Verbose defined in thameslib global.h
       cout << "**Will suppress warning messages**" << endl;
       break;
+    case 'x':
+      XYZ = true; // Verbose defined in thameslib global.h
+      cout << "**Will create 3D visualization file **" << endl;
+      break;
+    case 'o':
+      outputFolder = optarg; // Verbose defined in thameslib global.h
+      if ((outputFolder[0] == ' ') || (outputFolder[0] == '-') ||
+          (outputFolder[0] == '\\')) {
+        printHelp();
+        return (1);
+      }
+      cout << "Output folder: " << outputFolder << endl;
+      break;
     case 'h': // -h or --help
     case '?': // Unrecognized option
     default:
       printHelp();
+      return (1);
       break;
     }
   }
+  return (0);
 }
 
-void writeReport(const string &jobroot, struct tm *itime,
-                 const string &mfileName, const string &parfilename,
-                 const string &csname, ChemicalSystem *csys, Controller *ctr) {
-  string statname = jobroot + ".stats";
-  string jfilename = jobroot + ".report";
-  ofstream out(jfilename.c_str());
+void prepOutputFolder(const string &outputFolder, string &jobRoot,
+                      const string &gemInputName, string &statFileName,
+                      const string &initMicName, const string &micDefName,
+                      const string &parFileName) {
+
+  int resCallSystem;
+
+  string buff = "mkdir -p " + outputFolder;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  jobRoot = outputFolder + "/" + jobRoot;
+  cout << "jobRoot           : " << jobRoot << endl;
+  cout.flush();
+
+  statFileName = jobRoot + ".stats";
+
+  // Read the gem input master file to get file names
+  // and copy them to the output folder
+
+  ifstream in(gemInputName);
+  string buff1;
+  in >> buff1; // discard flag
+
+  // DCH file
+  buff1.clear();
+  in >> buff1; // This is the dch file with quotes
+  if (buff1[0] == '"' || buff1[0] == '\'') {
+    buff1 = buff1.substr(1, buff1.size() - 2);
+  }
+  buff = "cp -f " + buff1 + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  // IPM file
+  buff1.clear();
+  in >> buff1; // This is the ipm file with quotes
+  if (buff1[0] == '"' || buff1[0] == '\'') {
+    buff1 = buff1.substr(1, buff1.size() - 2);
+  }
+  buff = "cp -f " + buff1 + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  // DBR file
+  buff1.clear();
+  in >> buff1; // This is the dbr file with quotes
+  in.close();
+
+  if (buff1[0] == '"' || buff1[0] == '\'') {
+    buff1 = buff1.substr(1, buff1.size() - 2);
+  }
+  buff = "cp -f " + buff1 + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  buff = "cp -f " + gemInputName + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  buff = "cp -f " + initMicName + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  buff = "cp -f " + micDefName + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  buff = "cp -f " + parFileName + " " + outputFolder + "/.";
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << buff << endl;
+
+  return;
+}
+
+void writeReport(const string &jobRoot, struct tm *itime,
+                 const string &initMicName, const string &micDefName,
+                 const string &parFileName, const string &csdName,
+                 ChemicalSystem *csys, Controller *ctr) {
+  string statName = jobRoot + ".stats";
+  string jFileName = jobRoot + ".report";
+  ofstream out(jFileName.c_str());
   if (!out.is_open()) {
     if (WARNING)
       cout << "WARNING:  Could not open report file" << endl;
@@ -532,17 +725,22 @@ void writeReport(const string &jobroot, struct tm *itime,
   // Write the time the job was executed
   //
 
-  out << "THAMES job " << jobroot;
+  out << "THAMES simulation " << jobRoot;
   out << " initialized on " << asctime(itime) << endl;
   out << endl;
   out << "INPUT FILES USED:" << endl;
-  out << "   Microstructure file name: " << mfileName << endl;
-  out << "        GEM input file name: " << csname << endl;
+  out << "              Microstructure file name: " << initMicName << endl;
+  out << "   Microstructure definition file name: " << micDefName << endl;
+  out << "            Output frequency file name: " << parFileName << endl;
+  out << "                   GEM input file name: " << csdName << endl;
   out << endl;
   out << "OUTPUT FILES GENERATED:" << endl;
-  out << "     Global phase fractions: " << statname << endl;
+  out << "                Global phase fractions: " << statName << endl;
   out << endl;
-  csys->writeChemSys();
+  out << "----------------------------------------------------------" << endl;
+  out << endl;
+
+  csys->writeChemSys(out);
   out << endl;
 
   out.close();

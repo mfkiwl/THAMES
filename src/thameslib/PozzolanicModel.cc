@@ -222,7 +222,15 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
                            "initScaledMass_ = 0.0");
     }
 
-    if (DOR < 1.0) {
+    if (DOR < 0.0) {
+      cout << endl << "    PozzolanicModel::calculateKineticStep - for cyc = " << cyc
+           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
+           << initScaledMass_ << " / " << scaledMass_ << endl;
+      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+    }
+
+    // if (DOR < 1.0) {
 
       /// BULLARD placeholder
       /// @note playing with different base rate constants here
@@ -368,10 +376,10 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
         cout.flush();
       }
 
-    } else {
-      throw DataException("PozzolanicModel", "calculateKineticStep",
-                          "DOR >= 1.0");
-    }
+    // } else {
+    //   throw DataException("PozzolanicModel", "calculateKineticStep",
+    //                      "DOR >= 1.0");
+    // }
 
     //} // End of normal hydration block
   } // End of try block

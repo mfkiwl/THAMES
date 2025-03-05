@@ -8,9 +8,9 @@
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
                        const string &parfilename, const string &jobname,
-                       const bool verbose, const bool warning)
-    : lattice_(msh), kineticController_(kc), chemSys_(cs),
-      sim_type_(simtype), thermalstr_(thmstr), jobroot_(jobname) {
+                       const bool verbose, const bool warning, const bool xyz)
+    : lattice_(msh), kineticController_(kc), chemSys_(cs), sim_type_(simtype),
+      thermalstr_(thmstr), jobroot_(jobname) {
   unsigned int i;
   double tvalue, pvalue;
   string buff;
@@ -18,6 +18,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   const string imgfreqstr = "Image_frequency:";
   const string outtimestr = "OutTime:";
   const string calctimestr = "CalcTime:";
+
+  xyz_ = xyz;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -186,7 +188,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                             "<outtime> value must be present into parameters.xml file!" << endl;
     cout << endl << "check and modify parameters.xml file and run thames again" << endl;
     cout << endl << "end program" << endl;
-    //exit(0);
+    // exit(0);
     throw FileException("Controller", "Controller", "parameters.xml",
                         "at least one <calctime> or "
                         "<outtime> value must be present into parameters.xml file!");
@@ -228,9 +230,14 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   }
 
   out1 << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
-  out1 << "<simulation_parameters xmlns:xs=\"http://www.w3.org/2001/XMLSchema-instance\"" << endl;
-  out1 << "  xs:noNamespaceSchemaLocation=\"https://github.tamu.edu/jwbullard/THAMES/blob/master"
-          "/src/thameslib/xsdfiles/parameters.xsd\">" << endl;
+  out1 << "<simulation_parameters "
+          "xmlns:xs=\"http://www.w3.org/2001/XMLSchema-instance\""
+       << endl;
+  out1 << "  "
+          "xs:noNamespaceSchemaLocation=\"https://github.tamu.edu/jwbullard/"
+          "THAMES/blob/master"
+          "/src/thameslib/xsdfiles/parameters.xsd\">"
+       << endl;
   for (int i = 0; i < time_Size; i++) {
     out1 << " <calctime> " << time_[i] << " </calctime>" << endl;
   }
@@ -240,19 +247,19 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   }
   out1 << "</simulation_parameters>" << endl;
   out1.close();
-  cout << "   => new time (calctime & outtime) parameters have been used and writen as "
-          "parameters_new.xml" << endl;
-
+  cout << "   => new time (calctime & outtime) parameters have been used and "
+          "writen as "
+          "parameters_new.xml"
+       << endl;
 
   // cout << endl << "end Controller::Controller" << endl;
   // exit(0);
-
 }
 
-void Controller::doCycle(const string &statfilename, int choice, double elemTimeInterval) {
+void Controller::doCycle(const string &statfilename, int choice,
+                         double elemTimeInterval) {
   unsigned int i;
   int time_index;
-  //double next_stat_time = statfreq_;
   RestoreSystem iniLattice;
 
   ///
@@ -282,18 +289,15 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
   // Initialize the list of all interfaces in the lattice
 
-  //if (verbose_) {
-  cout << endl << "Controller::doCycle(...) Entering Lattice::findInterfaces()" << endl;
-  //}
+  cout << endl
+       << "Controller::doCycle(...) Entering Lattice::findInterfaces()" << endl;
 
   lattice_->findInterfaces();
 
-  //lattice_->checkSite(8);
-  //cout << endl << " exit controller" << endl;// exit(0);
+  // lattice_->checkSite(8);
+  // cout << endl << " exit controller" << endl;// exit(0);
 
-  //if (verbose_) {
   cout << endl << "Controller::doCycle(...) Entering Main time loop" << endl;
-  //}
 
   static double timestep = 0.0;
   bool capwater = true; // True if some capillary water is available
@@ -313,14 +317,16 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
   lattice_->writeLattice(0.0, sim_type_, jobroot_);
   lattice_->writeLatticePNG(0.0, sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(0.0, sim_type_, jobroot_);
   int timesGEMFailed_loc = 0;
 
   // init to 0 all DC moles corresponding to the kinetic controlled microphases
-  //      these DCmoles will be updated by KineticController::calculateKineticStep and
-  //      passedd to GEM together the other DC moles in the stystem (ChemicalSystem::calculateState)
+  //      these DCmoles will be updated by
+  //      KineticController::calculateKineticStep and passedd to GEM together
+  //      the other DC moles in the stystem (ChemicalSystem::calculateState)
   int numMicPh = chemSys_->getNumMicroPhases();
-  //cout << "numMicPh : " << numMicPh << endl;
-
+  // cout << "numMicPh : " << numMicPh << endl;
 
   int DCId;
   for (int i = FIRST_SOLID; i < numMicPh; i++) {
@@ -331,16 +337,18 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
       chemSys_->setIsDCKinetic(DCId, true);
     }
   }
-  cout << endl << "***   numGEMPhases_  = " <<  chemSys_->getNumGEMPhases() << endl;
-  cout << "***   numDCs_        = " <<  chemSys_->getNumDCs() << endl;
-  cout << "***   numICs_        = " <<  chemSys_->getNumICs() << endl;
+  cout << endl
+       << "***   numGEMPhases_  = " << chemSys_->getNumGEMPhases() << endl;
+  cout << "***   numDCs_        = " << chemSys_->getNumDCs() << endl;
+  cout << "***   numICs_        = " << chemSys_->getNumICs() << endl;
 
   // cout << "Starting with a pore solution without dissolved DCs  => all microPhaseSI_ = 0" << endl;
   // init to 0 all microPhaseSI_
   // chemSys_->setZeroMicroPhaseSI();
 
   bool writeICsDCs = true;
-  if (writeICsDCs) writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
+  if (writeICsDCs)
+    writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
 
   // variables used in DCLowerLimit computation
   double volMolDiff, molarMassDiff, vfracDiff, massDissolved,
@@ -348,7 +356,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
   int numDCs = chemSys_->getNumDCs();
   int timesGEMFailed_recall;
 
-  cout << endl << endl << "     ===== START SIMULATION =====" << endl ;
+  cout << endl << endl << "     ===== START SIMULATION =====" << endl;
 
   int cyc = 0;
   int timeSize = time_.size();
@@ -360,7 +368,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
   double delta2Time;
   int numIntervals = 0, numMaxIntervals = 1;
   int numGenMax = 3000; // 1000000;
-  //int numGenMax_1 = 20;
+  // int numGenMax_1 = 20;
   int numGen = 0;
 
   int numTotGen = 0;
@@ -372,7 +380,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
   int lastGoodI = 0;
   double lastGoodTime = 0; // timeIni;
 
-  for (i = 0; (i < timeSize) && (capwater); ++i) { //main computation cycle loop
+  for (i = 0; (i < timeSize) && (capwater); ++i) { // main computation cycle loop
 
     ///
     /// Do not advance the time step if GEM_run failed the last time
@@ -386,12 +394,16 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
       i--;
       time_[i] = time_[i] + (time_[i + 1] - time_[i]) / 10;
-      timestep = time_[i]- lastGoodTime;
+      timestep = time_[i] - lastGoodTime;
 
-      cout << endl << endl << endl << "##### Controller::doCycle  GEMFailed => add next timestep before to"
-                                      " START NEW CYCLE   i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
-             << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI << " / " << lastGoodTime
-             << " / " << timestep << " #####" << endl;
+      cout << endl
+           << endl
+           << endl
+           << "##### Controller::doCycle  GEMFailed => add next timestep "
+              "before to START NEW CYCLE   "
+              "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
+           << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
+           << " / " << lastGoodTime << " / " << timestep << " #####" << endl;
 
     } else { // if (timesGEMFailed_loc > 0) {
 
@@ -402,17 +414,20 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
         cout << endl
              << endl
              << endl
-             << "##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/timestep: " << i
-             << " / " << cyc << " / " << time_[i] << " / " << timestep << " #####" << endl;
+             << "##### Controller::doCycle  START NEW CYCLE   "
+                "i/cyc/time_[i]/timestep: "
+             << i << " / " << cyc << " / " << time_[i] << " / " << timestep
+             << " #####" << endl;
       } else {
         lastGoodTime = time_[i - 1];
         lastGoodI = i - 1;
         cout << endl
              << endl
              << endl
-             << "##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: "
-             << i << " / " << cyc << " / " << time_[i] << " / " << time_[i - 1] << " / " << timestep
-             << " #####" << endl;
+             << "##### Controller::doCycle  START NEW CYCLE   "
+                "i/cyc/time_[i]/time_[i-1]/timestep: "
+             << i << " / " << cyc << " / " << time_[i] << " / " << time_[i - 1]
+             << " / " << timestep << " #####" << endl;
       }
 
     } // } else { // if (timesGEMFailed_loc > 0) {
@@ -433,6 +448,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
     } catch (GEMException gex) {
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw gex;
     }
 
@@ -450,7 +467,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
       //**********************
 
-      cout << endl << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep        : "
+      cout << endl
+           << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep        : "
            << i << " / " << cyc << " / " << time_[i] << " / " << timestep
            << "   =>   WAIT..." << endl;
       cout.flush();
@@ -535,12 +553,12 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
     ///
 
     try {
-      //set iniLattice i.e. a copy of initial lattice/system configuration
-      //(including RNG state and all DCs values)
-      //from ChemicalSystem:
+      // set iniLattice i.e. a copy of initial lattice/system configuration
+      // (including RNG state and all DCs values)
+      // from ChemicalSystem:
       iniLattice.DCMoles = kineticController_->getDCMoles();
 
-      //from Lattice:
+      // from Lattice:
       iniLattice.count = lattice_->getCount();
       iniLattice.growthInterfaceSize = lattice_->getGrowthInterfaceSize();
       iniLattice.dissolutionInterfaceSize = lattice_->getDissolutionInterfaceSize();
@@ -558,8 +576,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
         iniLattice.site.push_back(site_l);
       }
       iniLattice.interface.clear();
-      RestoreInterface interface_l; //only one declaration
-      int dimLatticeInterface = lattice_->getInterfaceSize();  //only one declaration
+      RestoreInterface interface_l; // only one declaration
+      int dimLatticeInterface = lattice_->getInterfaceSize(); // only one declaration
       for (int i = 0; i < dimLatticeInterface; i++) {
         interface_l.microPhaseId = lattice_->getInterface(i).getMicroPhaseId();
         interface_l.growthSites = lattice_->getInterface(i).getGrowthSites();
@@ -585,16 +603,16 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
                                         numSitesNotAvailable, vectPhIdDiff,
                                         vectPhNameDiff, whileCount, cyc);
 
-      //if not all the voxels requested by KM/GEM for a certain microphase     
-      // phDiff (DCId)can be dissolved because of the system configuration
-      // (lattice):
-      //  - comeback to the initial system configuration : iniLattice
-      //  - re-run GEM with restrictions impossed by the system configuration
-      //      (DC distribution on the lattice sites) i.e. the primal solution
-      //       must contain a number of moles corresponding to 
-      //       numSitesNotAvailable ("numDiff" in 
-      //       lattice_->changeMicrostructure" - sites that cannot be dissolved)
-      //       lattice sites for the microphase phDiff
+      // if not all the voxels requested by KM/GEM for a certain microphase     
+      //  phDiff (DCId)can be dissolved because of the system configuration
+      //  (lattice):
+      //   - comeback to the initial system configuration : iniLattice
+      //   - re-run GEM with restrictions impossed by the system configuration
+      //       (DC distribution on the lattice sites) i.e. the primal solution
+      //        must contain a number of moles corresponding to
+      //        numSitesNotAvailable ("numDiff" in
+      //        lattice_->changeMicrostructure" - sites that cannot be
+      //        dissolved) lattice sites for the microphase phDiff
 
       if (changeLattice == 0) {
         timesGEMFailed_recall = -1;
@@ -603,20 +621,21 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
           whileCount++;
 
-          cout << endl << "  Controller::doCycle - cyc = " << cyc
+          cout << endl
+               << "  Controller::doCycle - cyc = " << cyc
                << " :  changeLattice = " << changeLattice
                << "  =>  whileCount = " << whileCount << endl;
 
           while (timesGEMFailed_recall != 0) {
 
-            //reset for ChemicalSystem:
+            // reset for ChemicalSystem:
             for (int i = 0; i < numDCs; i++) {
               chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
             }
 
-            //reset for Lattice:
+            // reset for Lattice:
             lattice_->setCount(iniLattice.count);
-            for(int i = 0; i < dimLatticeSite; i++){
+            for (int i = 0; i < dimLatticeSite; i++) {
               (lattice_->getSite(i))->setMicroPhaseId(iniLattice.site[i].microPhaseId);
               (lattice_->getSite(i))->setGrowthPhases(iniLattice.site[i].growth);
               (lattice_->getSite(i))->setWmc(iniLattice.site[i].wmc);
@@ -625,15 +644,19 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
               (lattice_->getSite(i))->setInGrowInterfacePosVector(iniLattice.site[i].inGrowInterfacePos);
               (lattice_->getSite(i))->setInDissInterfacePos(iniLattice.site[i].inDissInterfacePos);
             }
-            for(int i = 0; i < dimLatticeInterface; i++){
-              lattice_->setInterfaceMicroPhaseId(i,iniLattice.interface[i].microPhaseId); // same as before!
-              lattice_->setGrowthSites(i,iniLattice.interface[i].growthSites);
-              lattice_->setDissolutionSites(i,iniLattice.interface[i].dissolutionSites);
+            for (int i = 0; i < dimLatticeInterface; i++) {
+              lattice_->setInterfaceMicroPhaseId(
+                  i, iniLattice.interface[i].microPhaseId); // same as before!
+              lattice_->setGrowthSites(i, iniLattice.interface[i].growthSites);
+              lattice_->setDissolutionSites(
+                  i, iniLattice.interface[i].dissolutionSites);
             }
             lattice_->setGrowthInterfaceSize(iniLattice.growthInterfaceSize);
-            lattice_->setDissolutionInterfaceSize(iniLattice.dissolutionInterfaceSize);
-            lattice_->resetRNG(iniLattice.numRNGcall_0, iniLattice.numRNGcallLONGMAX,
-                               iniLattice.lastRNG, cyc, whileCount);
+            lattice_->setDissolutionInterfaceSize(
+                iniLattice.dissolutionInterfaceSize);
+            lattice_->resetRNG(iniLattice.numRNGcall_0,
+                               iniLattice.numRNGcallLONGMAX, iniLattice.lastRNG,
+                               cyc, whileCount);
 
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset system OK & GEM_run recall for "
@@ -647,42 +670,51 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
               phId = vectPhIdDiff[i];
 
-              DCId = chemSys_->getMicroPhaseDCMembers(phId,0);
+              DCId = chemSys_->getMicroPhaseDCMembers(phId, 0);
 
-              volMolDiff = chemSys_->getDCMolarVolume(DCId); // m3/mol
+              volMolDiff = chemSys_->getDCMolarVolume(DCId);  // m3/mol
               molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
 
-              vfracDiff = ((double)numSitesNotAvailable[i]) / ((double)dimLatticeSite);
+              vfracDiff =
+                  ((double)numSitesNotAvailable[i]) / ((double)dimLatticeSite);
 
-              microPhaseMassDiff = vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
+              microPhaseMassDiff =
+                  vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
 
-              scaledMassDiff = microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
+              scaledMassDiff =
+                  microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
 
               if (chemSys_->isKinetic(phId)) {
-                massDissolved = kineticController_->updateKineticStep(cyc, phId, scaledMassDiff);
+                massDissolved = kineticController_->updateKineticStep(
+                    cyc, phId, scaledMassDiff);
               } else {
                 numMolesDiff = scaledMassDiff / molarMassDiff;
-                chemSys_->setDCLowerLimit(DCId,numMolesDiff);
+                chemSys_->setDCLowerLimit(DCId, numMolesDiff);
               }
 
-              cout << "                        cyc = " << cyc << " :  #" << setw(3) << right << i
-                   << "#/ " << setw(15) << left << vectPhNameDiff[i]
-                   << "   " << setw(5) << right << phId << "   " << setw(9) << right << lattice_->getCount(phId)
-                   << "   " << setw(9) << right << lattice_->getDissolutionInterfaceSize(phId)
-                   << "   " << setw(9) << right << numSitesNotAvailable[i] << "   " << setw(5) << right << DCId
-                   << "   " << chemSys_->getDCMoles(DCId)
-                   << "   " << chemSys_->getDCLowerLimit(DCId) << endl;
+              cout << "                        cyc = " << cyc << " :  #"
+                   << setw(3) << right << i << "#/ " << setw(15) << left
+                   << vectPhNameDiff[i] << "   " << setw(5) << right << phId
+                   << "   " << setw(9) << right << lattice_->getCount(phId)
+                   << "   " << setw(9) << right
+                   << lattice_->getDissolutionInterfaceSize(phId) << "   "
+                   << setw(9) << right << numSitesNotAvailable[i] << "   "
+                   << setw(5) << right << DCId << "   "
+                   << chemSys_->getDCMoles(DCId) << "   "
+                   << chemSys_->getDCLowerLimit(DCId) << endl;
             }
             cout << endl;
 
-            timesGEMFailed_recall = chemSys_->calculateState(time_[i], isFirst, cyc);
+            timesGEMFailed_recall =
+                chemSys_->calculateState(time_[i], isFirst, cyc);
 
 
             cout << endl << "  Controller::doCycle - cyc = " << cyc << " :  i/time[i]/getTimesGEMFailed_recall = "
                  << i << " / " << time_[i] << " / " << timesGEMFailed_recall << endl;
 
             if (timesGEMFailed_recall > 0) {
-              cout << "  Controller::doCycle - GEM_run failed for whileCount = " << whileCount << endl;
+              cout << "  Controller::doCycle - GEM_run failed for whileCount = "
+                   << whileCount << endl;
               cout.flush();
               timesGEMFailed_loc = timesGEMFailed_recall;
               testDiff = false;
@@ -699,7 +731,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
                 }
               }
               if (!testDiff) {
-                cout << "Controller::doCycle - do not update the microstructure " << endl;
+                cout << "Controller::doCycle - do not update the microstructure "
+                     << endl;
                 cout.flush();
                 break;
               }
@@ -749,24 +782,33 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
              << cyc << " (i = " << i << ")" << endl;
       }
 
-
     } catch (DataException dex) {
+      dex.printException();
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw dex;
     } catch (EOBException ex) {
+      ex.printException();
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw ex;
     } catch (MicrostructureException mex) {
+      mex.printException();
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
       throw mex;
     }
 
     // write output .dat files
-    if (writeICsDCs) writeTxtOutputFiles_onlyICsDCs(time_[i]);
     writeTxtOutputFiles(time_[i]);
+    if (writeICsDCs)
+      writeTxtOutputFiles_onlyICsDCs(time_[i]);
 
     ///
     /// Calculate the pore size distribution and saturation
@@ -795,6 +837,10 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
       }
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+
+      if (xyz_)
+        lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
+
       lattice_->writePoreSizeDistribution(time_[i], sim_type_, jobroot_);
 
       time_index++;
@@ -803,6 +849,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
     double watervolume = chemSys_->getMicroPhaseVolume(ELECTROLYTEID);
 
     if (watervolume < 2.0e-18) { // Units in m3, so this is about two voxels,
+
       // we will stop hydration
       if (warning_) {
         cout << "Controller::doCycle WARNING: System is out of capillary pore "
@@ -875,6 +922,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
         lattice_->writeLattice(time_[i], sim_type_, jobroot_);
         lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
+        if (xyz_)
+          lattice_->appendXYZ(time_[i], sim_type_, jobroot_);
         string ofileName(jobroot_);
         ostringstream ostr1, ostr2;
         ostr1 << (int)(time_[i] * 100);
@@ -1018,7 +1067,7 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
                 double dwmcval = poreintroduce;
                 lattice_->dWmc(index, dwmcval);
-                for (int j = 0; j < ste->nbSize(1); j++) { //NN_NNN?
+                for (int j = 0; j < ste->nbSize(1); j++) { // NN_NNN?
                   Site *stenb = ste->nb(j);
                   stenb->dWmc(dwmcval);
                   if ((stenb->getWmc() > 0.0) &&
@@ -1079,6 +1128,8 @@ void Controller::doCycle(const string &statfilename, int choice, double elemTime
 
   lattice_->writeLattice(time_[i - 1], sim_type_, jobroot_);
   lattice_->writeLatticePNG(time_[i - 1], sim_type_, jobroot_);
+  if (xyz_)
+    lattice_->appendXYZ(time_[i - 1], sim_type_, jobroot_);
 
   return;
 }
@@ -1102,9 +1153,9 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
     /// still need to be processed afterward.
     ///
 
-    //vector<double> impurityrelease;
-    //impurityrelease.clear();
-    //impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
+    // vector<double> impurityrelease;
+    // impurityrelease.clear();
+    // impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
 
     ///
     /// Get the number of moles of each IC dissolved from kinetically controlled
@@ -1162,7 +1213,8 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
     /// should be calculated.
     ///
 
-    if (timesGEMFailed > 0) return timesGEMFailed;
+    if (timesGEMFailed > 0)
+      return timesGEMFailed;
 
   } catch (FileException fex) {
     fex.printException();
@@ -1174,7 +1226,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
   return timesGEMFailed;
 }
 
-void Controller::writeTxtOutputFiles (double time) {
+void Controller::writeTxtOutputFiles(double time) {
   ///
   /// Set the kinetic DC moles.  This adds the clinker components to the DC
   /// moles.
@@ -1281,7 +1333,7 @@ void Controller::writeTxtOutputFiles (double time) {
     cout << "Done!" << endl;
     cout.flush();
   }
-  //double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
+  // double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
   outfilename = jobroot_ + "_CSH.csv";
   ofstream out7(outfilename.c_str(), ios::app);
   if (!out7) {
@@ -1291,12 +1343,12 @@ void Controller::writeTxtOutputFiles (double time) {
   out7 << setprecision(5) << time;
   for (i = 0; i < numICs; i++) {
     out7 << "," << CSHcomp[i];
-    //if (chemSys_->getICName(i) == "Ca") {
-    //    CaMoles = CSHcomp[i];
-    //}
-    //if (chemSys_->getICName(i) == "Si") {
-    //    SiMoles = CSHcomp[i];
-    //}
+    // if (chemSys_->getICName(i) == "Ca") {
+    //     CaMoles = CSHcomp[i];
+    // }
+    // if (chemSys_->getICName(i) == "Si") {
+    //     SiMoles = CSHcomp[i];
+    // }
   }
   int id_Ca = chemSys_->getICId("Ca");
   int id_Si = chemSys_->getICId("Si");
@@ -1310,7 +1362,7 @@ void Controller::writeTxtOutputFiles (double time) {
   out7 << "," << CaSiRatio << endl;
   out7.close();
 
-  //chemSys_->setGEMPhaseStoich();
+  // chemSys_->setGEMPhaseStoich();
   double *phaseRecord;
   int ICIndex;
   CaMoles = SiMoles = 0.0;
@@ -1325,10 +1377,10 @@ void Controller::writeTxtOutputFiles (double time) {
     cc = chemSys_->getGEMPhaseClassCode(i);
     if (cc == 's') {
       phaseRecord = chemSys_->getPGEMPhaseStoich(i);
-      //ICIndex = chemSys_->getICId("Ca");
-      //CaMoles += phaseRecord[ICIndex];
-      //ICIndex = chemSys_->getICId("Si");
-      //SiMoles += phaseRecord[ICIndex];
+      // ICIndex = chemSys_->getICId("Ca");
+      // CaMoles += phaseRecord[ICIndex];
+      // ICIndex = chemSys_->getICId("Si");
+      // SiMoles += phaseRecord[ICIndex];
       CaMoles += phaseRecord[id_Ca];
       SiMoles += phaseRecord[id_Si];
     }
@@ -1410,10 +1462,10 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
   int mPhId;
   double massImpurity, totMassImpurity;
 
-  //cout << endl << "getIsDCKinetic: " << endl;
+  // cout << endl << "getIsDCKinetic: " << endl;
   for (j = 0; j < numDCs; j++) {
     if (chemSys_->getIsDCKinetic(j)) {
-      //molMass = chemSys_->getDCMolarMass(j);
+      // molMass = chemSys_->getDCMolarMass(j);
       mPhId = chemSys_->getDC_to_MPhID(j);
       scMass = chemSys_->getMicroPhaseMass(mPhId);
 
@@ -1421,22 +1473,25 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
       massImpurity = scMass * chemSys_->getK2o(mPhId);
       totMassImpurity += massImpurity;
-      DCMoles[impurityDCID[0]] += massImpurity / chemSys_->getDCMolarMass("K2O");
+      DCMoles[impurityDCID[0]] +=
+          massImpurity / chemSys_->getDCMolarMass("K2O");
 
       massImpurity = scMass * chemSys_->getNa2o(mPhId);
       totMassImpurity += massImpurity;
-      DCMoles[impurityDCID[1]] += massImpurity / chemSys_->getDCMolarMass("Na2O");
+      DCMoles[impurityDCID[1]] +=
+          massImpurity / chemSys_->getDCMolarMass("Na2O");
 
       massImpurity = scMass * chemSys_->getMgo(mPhId);
       totMassImpurity += massImpurity;
-      DCMoles[impurityDCID[2]] += massImpurity / chemSys_->getDCMolarMass("Per"); //MgO
+      DCMoles[impurityDCID[2]] +=
+          massImpurity / chemSys_->getDCMolarMass("Per"); // MgO
 
       massImpurity = scMass * chemSys_->getSo3(mPhId);
       totMassImpurity += massImpurity;
-      DCMoles[impurityDCID[3]] += massImpurity / chemSys_->getDCMolarMass("SO3");
+      DCMoles[impurityDCID[3]] +=
+          massImpurity / chemSys_->getDCMolarMass("SO3");
 
       DCMoles[j] = (scMass - totMassImpurity) / chemSys_->getDCMolarMass(j);
-
     }
   }
 
@@ -1448,8 +1503,8 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
   ofstream out1(outfilenameIC.c_str(), ios::app);
   if (!out1) {
-    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs", outfilenameIC,
-                        "Could not append");
+    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                        outfilenameIC, "Could not append");
   }
 
   out1 << setprecision(5) << time;
@@ -1461,8 +1516,8 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
   ofstream out2(outfilenameDC.c_str(), ios::app);
   if (!out2) {
-    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs", outfilenameDC,
-                        "Could not append");
+    throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                        outfilenameDC, "Could not append");
   }
 
   out2 << setprecision(5) << time;
@@ -1471,7 +1526,6 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
   }
   out2 << endl;
   out2.close();
-
 }
 
 void Controller::parseDoc(const string &docName) {
