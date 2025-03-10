@@ -722,9 +722,10 @@ public:
   @param cur is a libxml pointer to the current node being parsed
   @param phaseData holds the structure of collected phase data from the document
   */
+  // void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
   void parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
                                  PhaseData &phaseData);
-  // void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
+
 
   /**
   @brief Parse a row of data from pore size distribution

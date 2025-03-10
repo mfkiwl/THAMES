@@ -222,7 +222,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   time_Size = time_.size();
   cout << "   final time_.size()          = " << time_Size << endl;
 
-  string outfilename = "parameters_new.xml";
+  string outfilename = jobroot_ + "-parameters_used.xml";
   ofstream out1(outfilename.c_str());
   if (!out1) {
     throw FileException("Controller", "Controller", outfilename,
@@ -247,10 +247,9 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   }
   out1 << "</simulation_parameters>" << endl;
   out1.close();
-  cout << "   => new time (calctime & outtime) parameters have been used and "
-          "writen as "
-          "parameters_new.xml"
-       << endl;
+  cout << "   => new time values (calctime & outtime) have been used and "
+          "writen as :" << endl;
+  cout <<  "         " << outfilename << endl;
 
   // cout << endl << "end Controller::Controller" << endl;
   // exit(0);
@@ -442,6 +441,7 @@ void Controller::doCycle(const string &statfilename, int choice,
     ///
 
     try {
+
       chemSys_->initDCLowerLimit(0.0);
       timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
 
@@ -835,6 +835,7 @@ void Controller::doCycle(const string &statfilename, int choice,
              << "] = " << time_[i] << ", output_time_[" << time_index
              << "] = " << output_time_[time_index] << endl;
       }
+
       lattice_->writeLattice(time_[i], sim_type_, jobroot_);
       lattice_->writeLatticePNG(time_[i], sim_type_, jobroot_);
 

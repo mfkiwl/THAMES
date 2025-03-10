@@ -70,7 +70,7 @@ struct RestoreSystem {
 //  double *prevGEMPhaseVolume_; /**< List of volume of each phase in the system in the previous time step */
 //
 // from Lattice:
-//  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
+//   vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
 //   for each site in site_:
 //     unsigned int microPhaseId_;   // The microstructure phase assignment
 //     vector<unsigned int> growth_; // Vector of phases that can grow at this site

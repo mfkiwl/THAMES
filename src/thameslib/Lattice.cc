@@ -1409,7 +1409,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
 
           /*
           cout << "    Lattice::growPhase GROW_END for i = " << i << "
-          totalTRC/trc_g/bcl "
+                  " totalTRC/trc_g/bcl "
                << totalTRC << "/" << trc_g << "/" << bcl << endl;
           cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                << "   growthVectorSize = " << growthVectorSize << "   numLeftTot
@@ -2537,7 +2537,7 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
           if (ste->getInGrowInterfacePos(nbpid) == -1) {
             // if (chemSys_->getAffinity(nbpid, nbpid) > 10) {//itself affinity!
             addGrowthSite(ste, nbpid);
-            //}
+            // }
           }
           if (i < NUM_NEAREST_NEIGHBORS) {
 
@@ -2781,7 +2781,7 @@ void Lattice::removeGrowthSite_nucleation(Site *ste0, unsigned int pid) {
   ste0->clearGrowth();
   // } catch (out_of_range &oor) {
   //   cout << endl << "EOB Lattice::removeGrowthSite_nucleation pid = " << pid << " => exit" << endl;
-  //  exit(1);
+  //   exit(1);
   // }
 }
 

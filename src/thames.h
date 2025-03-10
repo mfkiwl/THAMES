@@ -218,11 +218,12 @@ void writeReport(const string &jobroot, struct tm *itime,
 */
 void timeCount(clock_t time_, time_t lt_);
 
-void errorDelDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
-                         ThermalStrain *ThermalStrainSolver,
-                         AppliedStrain *AppliedStrainSolver,
-                         KineticController *KController,
-                         Controller *Ctrl, clock_t st_time, time_t lt);
+void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                       ThermalStrain *ThermalStrainSolver,
+                       AppliedStrain *AppliedStrainSolver,
+                       KineticController *KController,
+                       Controller *Ctrl, clock_t st_time,
+                       time_t lt, bool errorProgram);
 
 using namespace std;
 

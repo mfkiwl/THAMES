@@ -1572,10 +1572,11 @@ public:
     // cyc << " / "
     //      << whileCount << " / " << latticeRNGseed_ << endl;
     // cout << "  Lattice::resetRNG
-    // numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+    //         "numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
     //      << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / " <<
     //      lastRNGreset
     //     << " / " << valRNG << endl;
+
     if (abs(lastRNGreset - valRNG) > 1.e-16) {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);

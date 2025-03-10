@@ -602,7 +602,14 @@ int getFileNamesAndTimes(vector<string> &names, vector<string> &times) {
   }
 
   cout << "\t" << cmd << endl;
-  system(cmd.c_str());
+  int resCallSystem = system(cmd.c_str());
+  if (resCallSystem == -1) {
+    cout << endl
+         << "viz.cc - getFileNamesAndTimes(...) error: resCallSystem = -1"
+         << endl;
+    cout << endl << "stop program" << endl;
+    exit(0);
+  }
 
   ifstream in("scratchfilelist.txt");
 
