@@ -128,8 +128,8 @@ struct PhaseData {
   vector<double> affinity;
   vector<double> contactAngle;
 
-  // vector<int> RdId; /**< Vector of IC ids of the partitioned components in the phase */
-  // vector<double> RdVal; /**< Vector of Rd values for each IC */
+  // vector<int> RdId; /**< Vector of IC ids of the partitioned components in
+  // the phase */ vector<double> RdVal; /**< Vector of Rd values for each IC */
 };
 #endif
 
@@ -311,18 +311,18 @@ class ChemicalSystem {
   */
   vector<vector<struct PoreSizeVolume>> poreSizeDistribution_;
 
-  vector<double> k2o_;       /**< Mass fraction of K<sub>2</sub>O dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> na2o_;      /**< Mass fraction of Na<sub>2</sub>O dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> mgo_;       /**< Mass fraction of MgO dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
-  vector<double> so3_;       /**< Mass fraction of SO<sub>3</sub> dissolved in
-                                   each phase, in units of
-                                   g per 100 g of the phase */
+  vector<double> k2o_;        /**< Mass fraction of K<sub>2</sub>O dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> na2o_;       /**< Mass fraction of Na<sub>2</sub>O dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> mgo_;        /**< Mass fraction of MgO dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
+  vector<double> so3_;        /**< Mass fraction of SO<sub>3</sub> dissolved in
+                                    each phase, in units of
+                                    g per 100 g of the phase */
   vector<int> grayscale_;     /**< A number on [0,255] giving the relative
                                    grayscale brightness of the THAMES
                                    phases in a backscattered electron image */
@@ -722,9 +722,10 @@ public:
   @param cur is a libxml pointer to the current node being parsed
   @param phaseData holds the structure of collected phase data from the document
   */
+  // void parsePoreSizeDistribution(string poreSizeFilename, PhaseData
+  // &phaseData);
   void parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
                                  PhaseData &phaseData);
-  // void parsePoreSizeDistribution(string poreSizeFilename, PhaseData &phaseData);
 
   /**
   @brief Parse a row of data from pore size distribution
@@ -6335,13 +6336,15 @@ public:
       microPhaseVolume_[idx] = val * v0 / dcmm;
       if (verbose_) {
         if (called == 0) {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
+          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = "
+               << setw(3) << right << idx << " : " << setw(15) << left
+               << microPhaseName_[idx]
                << " (called = 0) => updated scaledMass = " << val
                << " and volume = " << microPhaseVolume_[idx] << endl;
         } else {
-          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = " << setw(3) << right
-               << idx << " : " << setw(15) << left << microPhaseName_[idx]
+          cout << "    ChemicalSystem::updateMicroPhaseMassess for idx = "
+               << setw(3) << right << idx << " : " << setw(15) << left
+               << microPhaseName_[idx]
                << " (called = 1) => updated scaledMass = " << val
                << " and volume = " << microPhaseVolume_[idx] << endl;
         }

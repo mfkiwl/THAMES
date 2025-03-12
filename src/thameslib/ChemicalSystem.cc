@@ -562,6 +562,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
   /// Begin parsing the chemistry input XML file
   ///
+
   string msg;
   string xmlext = ".xml";
   size_t foundxml = interfaceFileName.find(xmlext);
@@ -1152,6 +1153,7 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       from_string(phaseData.id, st);
       xmlFree(key);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"thamesname")) ||
         (!xmlStrcmp(cur->name, (const xmlChar *)"microphasename"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -1159,9 +1161,11 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       phaseData.thamesName = st;
       xmlFree(key);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"gemphase_data"))) {
       parseGEMPhaseData(doc, cur, phaseData);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"poresizedistribution"))) {
       parsePoreSizeDistribution(doc, cur, phaseData);
     }
@@ -1180,12 +1184,14 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       }
     }
     */
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"stresscalc"))) {
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
       string st((char *)key);
       from_string(phaseData.stressCalc, st);
       xmlFree(key);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"weak"))) {
       // Weak means the phase can be damaged by stress
       key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
@@ -1193,12 +1199,15 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
       from_string(phaseData.weak, st);
       xmlFree(key);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"display_data"))) {
       parseDisplayData(doc, cur, phaseData);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"impurity_data"))) {
       parseImpurityData(doc, cur, phaseData);
     }
+
     if ((!xmlStrcmp(cur->name, (const xmlChar *)"interface_data"))) {
       parseInterfaceData(doc, cur, phaseids, phaseData);
     }
@@ -1213,6 +1222,7 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
     //
     //      parseRdData(doc, cur, phaseData);
     //    }
+
     cur = cur->next;
   }
 
@@ -1298,6 +1308,68 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   }
 
   return;
+}
+
+void ChemicalSystem::parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
+                                               PhaseData &phaseData) {
+  // xmlChar *key;
+  cur = cur->xmlChildrenNode;
+
+  phaseData.poreSizeDist.clear();
+  double sum = 0.0;
+
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"datarow"))) {
+      parsePSDDataRow(doc, cur, phaseData);
+    }
+    cur = cur->next;
+  }
+
+  for (int i = 0; i < phaseData.poreSizeDist.size() - 1; ++i) {
+    sum += phaseData.poreSizeDist[i].volfrac;
+  }
+
+  if (verbose_) {
+    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
+         << phaseData.poreSizeDist.size() << endl;
+    cout.flush();
+  }
+
+  // Normalize the pore size distribution in case it is not already
+  if (sum > 0.0) {
+    double normfactor = 1.0 / sum;
+    for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
+      phaseData.poreSizeDist[i].volfrac *= normfactor;
+    }
+  }
+}
+
+void ChemicalSystem::parsePSDDataRow(xmlDocPtr doc, xmlNodePtr cur,
+                                     PhaseData &phaseData) {
+  xmlChar *key;
+  cur = cur->xmlChildrenNode;
+
+  struct PoreSizeVolume datarow;
+  datarow.diam = 0.0;
+  datarow.volfrac = 0.0;
+  datarow.volume = 0.0;
+
+  while (cur != NULL) {
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"diameter"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(datarow.diam, st);
+      xmlFree(key);
+    }
+    if ((!xmlStrcmp(cur->name, (const xmlChar *)"volumefraction"))) {
+      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+      string st((char *)key);
+      from_string(datarow.volfrac, st);
+      xmlFree(key);
+    }
+    cur = cur->next;
+  }
+  phaseData.poreSizeDist.push_back(datarow);
 }
 
 void ChemicalSystem::parseGEMPhaseData(xmlDocPtr doc, xmlNodePtr cur,
@@ -1521,6 +1593,8 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
   phaseData.colors.push_back(blue);
   phaseData.gray = gray;
 
+  float rgbfColor;
+
   if (rgbBool) {
     map<string, elemColor>::iterator it = colorN_.find(phaseData.thamesName);
     if (it != colorN_.end()) {
@@ -1528,6 +1602,16 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
       colorN_[phaseData.thamesName].rgb[1] = green;
       colorN_[phaseData.thamesName].rgb[2] = blue;
       colorN_[phaseData.thamesName].gray = gray;
+
+      colorN_[phaseData.thamesName].rgbf[0] =
+          (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+      colorN_[phaseData.thamesName].rgbf[1] =
+          (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+      colorN_[phaseData.thamesName].rgbf[2] =
+          (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+      colorN_[phaseData.thamesName].grayf =
+          (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+
     } else {
       colorN_[phaseData.thamesName].colorId = colorN_.size();
       colorN_[phaseData.thamesName].altName = phaseData.thamesName;
@@ -1535,15 +1619,27 @@ void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,
       colorN_[phaseData.thamesName].rgb.push_back(green);
       colorN_[phaseData.thamesName].rgb.push_back(blue);
       colorN_[phaseData.thamesName].gray = gray;
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[0] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[1] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[2] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].gray / 255.0;
+      colorN_[phaseData.thamesName].grayf = rgbfColor;
     }
-    colorN_[phaseData.thamesName].rgbf[0] =
-        (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
-    colorN_[phaseData.thamesName].rgbf[1] =
-        (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
-    colorN_[phaseData.thamesName].rgbf[2] =
-        (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
-    colorN_[phaseData.thamesName].grayf =
-        (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[0] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[1] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[2] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+    // colorN_[phaseData.thamesName].grayf =
+    //     (float)(colorN_[phaseData.thamesName].gray) / 255.0;
   }
 
   return;
@@ -1929,7 +2025,7 @@ void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
 }
 
 void ChemicalSystem::writeChemSys(ofstream &out) {
-// void ChemicalSystem::writeChemSys(void) {
+  // void ChemicalSystem::writeChemSys(void) {
   unsigned int j;
 
   ///
@@ -2429,20 +2525,26 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     // } else if (iniNodeStatus == 6) {
     //   finStrNodeStatus = "OK_GEM_SIA";
     // }
-    // cout << endl <<"  ChemicalSystem::calculateState - for cyc = " << cyc << " : OK" << endl;
-    // cout << "    ChemicalSystem::calculateState - initial nodeStatus_ = " << iniNodeStatus << " [" << iniStrNodeStatus << "]" << endl;
-    // cout << "    ChemicalSystem::calculateState - final nodeStatus_   = " << nodeStatus_ << " [" << finStrNodeStatus << "]" << endl;
+    // cout << endl <<"  ChemicalSystem::calculateState - for cyc = " << cyc <<
+    // " : OK" << endl; cout << "    ChemicalSystem::calculateState - initial
+    // nodeStatus_ = " << iniNodeStatus << " [" << iniStrNodeStatus << "]" <<
+    // endl; cout << "    ChemicalSystem::calculateState - final nodeStatus_   =
+    // " << nodeStatus_ << " [" << finStrNodeStatus << "]" << endl;
 
-    cout << "  ChemicalSystem::calculateState - cyc = " << cyc << " : OK & GEM_run has failed " << timesGEMFailed_
+    cout << "  ChemicalSystem::calculateState - cyc = " << cyc
+         << " : OK & GEM_run has failed " << timesGEMFailed_
          << " consecutive times before to find this solution" << endl;
 
-    // cout << "    ChemicalSystem::calculateState - solution for kinetic controlled phases:" << endl;
-    // for (int i = 0; i < numMicroPhases_; i++) {
+    // cout << "    ChemicalSystem::calculateState - solution for kinetic
+    // controlled phases:" << endl; for (int i = 0; i < numMicroPhases_; i++) {
     //   if (isKinetic_[i]) {
-    //     cout << "      i = " << setw(3) << right << i << " : " << setw(15) << left
+    //     cout << "      i = " << setw(3) << right << i << " : " << setw(15) <<
+    //     left
     //          << microPhaseName_[i]
-    //          << " => updated scaledMass (microPhaseMass_[i]) = " << microPhaseMass_[i]
-    //          << " , microPhaseMassDissolved_[i] = " << microPhaseMassDissolved_[i]
+    //          << " => updated scaledMass (microPhaseMass_[i]) = " <<
+    //          microPhaseMass_[i]
+    //          << " , microPhaseMassDissolved_[i] = " <<
+    //          microPhaseMassDissolved_[i]
     //          << " and volume = " << microPhaseVolume_[i] << endl;
     //   }
     // }
@@ -2454,7 +2556,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     // cout << "  ChemicalSystem::calculateState - GEM_run has failed "
     //      << timesGEMFailed_ << " consecutive times  cyc = " << cyc << endl;
     // if (timesGEMFailed_ % 10000  == 0) {
-    //   cout << endl << "  ChemicalSystem::calculateState - test : GEM_run has failed "
+    //   cout << endl << "  ChemicalSystem::calculateState - test : GEM_run has
+    //   failed "
     //        << timesGEMFailed_ << " consecutive times  cyc = " << cyc << endl;
     // }
     return timesGEMFailed_;
@@ -2523,7 +2626,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     //      << "Volumes in this Step %%%%%%%" << endl;
     // for (int myid = 0; myid < numGEMPhases_; myid++) {
     //   cout << "Mass and volume of GEM phase " << node_->pCSD()->PHNL[myid]
-    //        << " = " << GEMPhaseMass_[myid] << " g and " << GEMPhaseVolume_[myid]
+    //        << " = " << GEMPhaseMass_[myid] << " g and " <<
+    //        GEMPhaseVolume_[myid]
     //        << " m3" << endl;
     // }
     // cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
@@ -2587,10 +2691,14 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       }
       microVolume_ += microPhaseVolume_[i];
       if (microPhaseVolume_[i] < 0) {
-        cout << endl << "ChemicalSystem::calculateState error1 - microPhaseVolume_ < 0 for cyc = " << cyc << " :" << endl;
+        cout << endl
+             << "ChemicalSystem::calculateState error1 - microPhaseVolume_ < 0 "
+                "for cyc = "
+             << cyc << " :" << endl;
         for (int i = 1; i < numMicroPhases_; i++) {
-          cout << "   " << i << " : phName/microPhaseVolume_ : "
-               << microPhaseName_[i] << " / " << microPhaseVolume_[i] << endl;
+          cout << "   " << i
+               << " : phName/microPhaseVolume_ : " << microPhaseName_[i]
+               << " / " << microPhaseVolume_[i] << endl;
         }
         cout << endl << "end program" << endl;
 
@@ -2617,10 +2725,14 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
       microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
       if (microPhaseVolume_[i] < 0) {
-        cout << endl << "ChemicalSystem::calculateState error2 - microPhaseVolume_ < 0 for cyc = " << cyc << " :" << endl;
+        cout << endl
+             << "ChemicalSystem::calculateState error2 - microPhaseVolume_ < 0 "
+                "for cyc = "
+             << cyc << " :" << endl;
         for (int i = 1; i < numMicroPhases_; i++) {
-          cout << "   " << i << " : phName/microPhaseVolume_ : "
-               << microPhaseName_[i] << " / " << microPhaseVolume_[i] << endl;
+          cout << "   " << i
+               << " : phName/microPhaseVolume_ : " << microPhaseName_[i]
+               << " / " << microPhaseVolume_[i] << endl;
         }
         cout << endl << "end program" << endl;
 
@@ -2637,7 +2749,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   for (int i = 0; i < isParrotKillohSize_; i++) {
     scaledCementMass_ += microPhaseMass_[isParrotKilloh_[i]];
     // cout << "  ChemicalSystem::calculateState for cyc = " << cyc
-    //      << "  i = " << i << "  isParrotKilloh_[i] = " << isParrotKilloh_[i] << "   "
+    //      << "  i = " << i << "  isParrotKilloh_[i] = " << isParrotKilloh_[i]
+    //      << "   "
     //      << microPhaseMass_[isParrotKilloh_[i]] << endl;
   }
 
@@ -2682,7 +2795,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (initMicroVolume_ < microVolume_) {
-    cout << "  ChemicalSystem::calculateState - cyc = " << cyc
+    cout << "  ChemicalSystem::calculateState - cyc = "
+         << cyc
          // << "  &  update = " << update
          << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_
          << " < " << microVolume_ << endl;
@@ -3036,12 +3150,12 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].gray = 83;
 
   map<string, elemColor>::iterator it = colorN_.begin();
-  cout << "Created iterator" << endl;
-  cout.flush();
+  // cout << "Created iterator" << endl;
+  // cout.flush();
 
   while (it != colorN_.end()) {
-    cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
-    cout.flush();
+    // cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
+    // cout.flush();
     (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
