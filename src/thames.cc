@@ -507,15 +507,17 @@ void timeCount(clock_t time_, time_t lt_) {
 
 void printHelp(void) {
   cout << endl;
-  cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
+  cout << "Usage: \"thames [--verbose|-v] [--suppress|-s] [--xyz|-x] "
+          "[--outfolder|-o] folder [--help|-h]\""
+       << endl;
   cout << "        --verbose [-v]      Produce verbose output" << endl;
   cout << "        --suppress [-s]     Suppress warning messages" << endl;
   cout << "        --xyz [-x]          Create 3D visualization movie" << endl;
   cout << "        --outfolder [-o]    Name of folder for output data (default "
           "is Result)"
        << endl;
-  cout << "        --help [-h]         Print this help message" << endl;
   cout << endl;
+  cout << "Note: thames --help [-h] will print this help message" << endl;
 
   return;
 }
