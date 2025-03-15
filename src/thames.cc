@@ -41,8 +41,6 @@ int main(int argc, char **argv) {
 
   int resCallSystem;
 
-  int resCallSystem;
-
   //
   // Main menu where user decides what kind of simulation this will be.
   //

@@ -1310,40 +1310,6 @@ void ChemicalSystem::parseMicroPhase(xmlDocPtr doc, xmlNodePtr cur,
   return;
 }
 
-void ChemicalSystem::parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
-                                               PhaseData &phaseData) {
-  // xmlChar *key;
-  cur = cur->xmlChildrenNode;
-
-  phaseData.poreSizeDist.clear();
-  double sum = 0.0;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"datarow"))) {
-      parsePSDDataRow(doc, cur, phaseData);
-    }
-    cur = cur->next;
-  }
-
-  for (int i = 0; i < phaseData.poreSizeDist.size() - 1; ++i) {
-    sum += phaseData.poreSizeDist[i].volfrac;
-  }
-
-  if (verbose_) {
-    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
-         << phaseData.poreSizeDist.size() << endl;
-    cout.flush();
-  }
-
-  // Normalize the pore size distribution in case it is not already
-  if (sum > 0.0) {
-    double normfactor = 1.0 / sum;
-    for (int i = 0; i < phaseData.poreSizeDist.size(); ++i) {
-      phaseData.poreSizeDist[i].volfrac *= normfactor;
-    }
-  }
-}
-
 void ChemicalSystem::parsePSDDataRow(xmlDocPtr doc, xmlNodePtr cur,
                                      PhaseData &phaseData) {
   xmlChar *key;
@@ -1511,34 +1477,6 @@ void ChemicalSystem::parsePoreSizeDistribution(xmlDocPtr doc, xmlNodePtr cur,
       phaseData.poreSizeDist[i].volfrac *= normfactor;
     }
   }
-}
-
-void ChemicalSystem::parsePSDDataRow(xmlDocPtr doc, xmlNodePtr cur,
-                                     PhaseData &phaseData) {
-  xmlChar *key;
-  cur = cur->xmlChildrenNode;
-
-  struct PoreSizeVolume datarow;
-  datarow.diam = 0.0;
-  datarow.volfrac = 0.0;
-  datarow.volume = 0.0;
-
-  while (cur != NULL) {
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"diameter"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(datarow.diam, st);
-      xmlFree(key);
-    }
-    if ((!xmlStrcmp(cur->name, (const xmlChar *)"volumefraction"))) {
-      key = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-      string st((char *)key);
-      from_string(datarow.volfrac, st);
-      xmlFree(key);
-    }
-    cur = cur->next;
-  }
-  phaseData.poreSizeDist.push_back(datarow);
 }
 
 void ChemicalSystem::parseDisplayData(xmlDocPtr doc, xmlNodePtr cur,

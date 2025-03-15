@@ -4,6 +4,10 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 14 19:39 2025 | Fixed compile-time errors due to code repetition |
+| Mar 12 15:11 2025 | Improved the help/usage message |
+| Mar 12 12:49 2025 | Merge branch florinnita_THAMES_avoidGEMfailure-xyzfile |
+| Mar 10 15:01 2025 |Fixed segmentation fault given by ChemicalSystem::parseDisplayData(…) |
 | Mar 07 15:36 2025 | Fixed a few inconsistencies in the test input files |
 | Mar 04 10:02 2025 | Merged changes from branch `florinnita_THAMES_avoidGEMfailure` from past month |
 | Feb 01 11:41 2025 | Merged branch `florinnita_THAMES_avoidGEMfailure` to take small time steps to get past a GEM_run failure |
@@ -136,4 +140,3 @@
 | Apr 13 14:37 2017 | Initial committing of THAMES for GitHub remote repository |
 | Apr 13 13:12 2017 | Update README.md and corrected name spelling |
 | Apr 27 11:22 2015 | Initial commit |
-q
