@@ -791,7 +791,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     /// command via a system call (not recommended).
     ///
 
-    string buff = "convert " + ofileName + " " + ofpngname;
+    string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
     system(buff.c_str());
     return;
 
@@ -886,7 +886,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     /// command via a system call (not recommended).
     ///
 
-    string buff = "convert " + ofileName + " " + ofpngname;
+    string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
     system(buff.c_str());
     return;
 
@@ -1004,7 +1004,7 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   /// command via a system call (not recommended).
   ///
 
-  string buff = "convert " + ofileName + " " + ofpngname;
+  string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   system(buff.c_str());
   return;
 }

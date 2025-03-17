@@ -4872,7 +4872,7 @@ void Lattice::writeLatticePNG(double curtime, const int simtype,
   /// @warning This relies on installation of ImageMagick
   ///
 
-  buff = "convert " + ofileName + " " + ofpngname;
+  buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   system(buff.c_str());
   return;
 }
@@ -4984,7 +4984,7 @@ void Lattice::writeDamageLatticePNG(double curtime, const string &root) {
   /// @warning This relies on installation of ImageMagick
   ///
 
-  buff = "convert " + ofileName + " " + ofpngname;
+  buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   system(buff.c_str());
   return;
 }
@@ -5095,7 +5095,7 @@ void Lattice::makeMovie(const string &root) {
     /// @warning This relies on installation of ImageMagick
     ///
 
-    buff = "convert " + ofileName + " " + ofgifileName;
+    buff = ConvertCommand + " " + ofileName + " " + ofgifileName;
     system(buff.c_str());
   }
 
@@ -5169,7 +5169,6 @@ void Lattice::applyExp(vector<unsigned int> alnb, double exp) {
 
 void Lattice::calcSurfaceArea(int phaseid) {
   Site *ste, *stenb;
-  double normalizationFactor;
 
   // Explanation of the normalization factor
   //
@@ -5188,12 +5187,21 @@ void Lattice::calcSurfaceArea(int phaseid) {
   // m2*(m3/cm3)(cm3/g)*(1/voxel)*(voxel/m3)
   // So the normalization below would be m2 / g of initial solid
   // But all our normalizations are on a basis of 100 g
-  // So we further divide by 100 to get m2 per 100 g of initial solid
+  // So we further multiply by 100 to get m2 per 100 g of initial solid
+
+  double oneFaceAreaPerHundredGramSolid;
 
   if (initSolidMass_ > 0.0) {
-    normalizationFactor =
-        (initSolidMass_ * 1.0e6 * numSites_ * voxelToVolume_) /
-        (100.0 * faceToArea_);
+    double oneFaceAreaPerMicrostructure =
+        faceToArea_ / (static_cast<double>(numSites_)); // m2/face
+    double oneFaceAreaPerMeterCubed =
+        oneFaceAreaPerMicrostructure / voxelToVolume_; // m2/face/m3
+    double oneFaceAreaPerCmCubed =
+        1.0e-6 * oneFaceAreaPerMeterCubed; // m2/face/cm3
+    double oneFaceAreaPerGramSolid =
+        oneFaceAreaPerCmCubed / initSolidMass_; // m2/face/g-solid
+    oneFaceAreaPerHundredGramSolid =
+        100.0 * oneFaceAreaPerGramSolid; // m2/face/100g-solid
   } else {
     string msg = "Divide by zero error:  initSolidMass_ = 0";
     throw FloatException("Lattice", "calcSurfaceArea", msg);
@@ -5215,7 +5223,7 @@ void Lattice::calcSurfaceArea(int phaseid) {
                        surfaceArea_.size(), phaseid);
   }
 
-  surfaceArea_[phaseid] *= (1 / normalizationFactor);
+  surfaceArea_[phaseid] *= oneFaceAreaPerHundredGramSolid;
   if (verbose_) {
     cout << "### Surface area of " << chemSys_->getMicroPhaseName(phaseid)
          << " = " << surfaceArea_[phaseid] << " m2/ 100 g of solid" << endl;

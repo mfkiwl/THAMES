@@ -212,10 +212,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
       double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
 
-      // This equation basically implements the Dove and Crerar rate
-      // equation for quartz.  Needs to be calibrated for silica fume, but
-      // hopefully the BET area and LOI will help do that.
-
       // dissolutionRateConst_ has units of mol/m2/h
       // area has units of m2 of phase per 100 g of total solid
       // Therefore dissrate has units of mol of phase per 100 g of all solid
@@ -239,15 +235,42 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // solid
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
+      // GODZILLA
+      cout << "^^^ " << name_ << ":" << endl;
+      cout.flush();
+      cout << "      dissrate_ini = " << dissrate_ini << endl;
+      cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
+           << endl;
+      cout << "         area = " << area << endl;
+      cout << "      saturationIndex = " << saturationIndex << endl;
+      cout << "      siexp_ = " << siexp_ << endl;
+      cout << "      dfexp_ = " << dfexp_ << endl;
+      cout << "      rhFactor_ = " << rhFactor_ << endl;
+      cout << "      arrhenius_ = " << arrhenius_ << endl;
+      cout << "      timestep = " << timestep << endl;
+      cout << "      dissrate = " << dissrate << endl;
+      cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
+      cout << "      scaledMass_ = " << scaledMass_ << endl;
+      cout << "      massDissolved = " << massDissolved << endl;
+      cout << "^^^" << endl;
+      cout.flush();
+      // GODZILLA
+
+      scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
+
+      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+
+      // GODZILLA
+      cout << "      new scaledMass_ = " << scaledMass_ << endl;
+      cout << "      new DOR = " << newDOR << endl;
+      cout << "^^^" << endl;
+      // GODZILLA
+
       if (verbose_) {
         cout << "    StandardKineticModel::calculateKineticStep "
                 "dissrate/massDissolved : "
              << dissrate << " / " << massDissolved << endl;
       }
-
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
-
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
 
       scaledMass = scaledMass_;
 

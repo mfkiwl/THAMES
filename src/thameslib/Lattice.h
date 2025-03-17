@@ -282,7 +282,7 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setVolumeFraction(unsigned int i, double vfrac) {
+  void setVolumeFraction(const int i, const double vfrac) {
     if (i > -1 && i < volumeFraction_.size()) {
       volumeFraction_[i] = vfrac;
     } else {
@@ -297,7 +297,7 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setInitVolumeFraction(unsigned int i, double vfrac) {
+  void setInitVolumeFraction(const int i, const double vfrac) {
     if (i > -1 && i < initVolumeFraction_.size()) {
       initVolumeFraction_[i] = vfrac;
     } else {

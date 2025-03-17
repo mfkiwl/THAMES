@@ -4,6 +4,7 @@
 */
 
 #include "Controller.h"
+#include "global.h"
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
@@ -310,6 +311,9 @@ void Controller::doCycle(const string &statfilename, int choice,
     ///
 
     bool isFirst = (i == 0) ? true : false;
+    if (isFirst) {
+      writeTxtOutputFiles(0.0);
+    }
 
     cyc++;
 
@@ -704,7 +708,7 @@ void Controller::doCycle(const string &statfilename, int choice,
       throw mex;
     }
 
-    // write output .dat files
+    // write output .txt files
     if (writeICsDCs)
       writeTxtOutputFiles_onlyICsDCs(time_[i]);
     writeTxtOutputFiles(time_[i]);
@@ -1461,7 +1465,7 @@ void Controller::parseDoc(const string &docName) {
     int calctimenum = cdi.value().size();
     for (int i = 0; i < calctimenum; ++i) {
       testtime = cdi.value()[i];
-      testtime *= 24.0;
+      testtime *= (1.0 / DAY_PER_H);
       time_.push_back(testtime);
     }
 

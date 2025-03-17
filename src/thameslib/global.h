@@ -79,6 +79,9 @@ const string StandardType("Standard");
 // String indicating the Pozzolanic Reaction Model
 const string PozzolanicType("Pozzolanic");
 
+// String for the command to convert between image files (Imagemagick)
+const string ConvertCommand("magick");
+
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
 
@@ -180,5 +183,6 @@ const double ICTHRESH = 1.0e-9;
 const double Pi = 3.14159265359;
 
 const double S_PER_H = 3600.0;
+const double DAY_PER_H = 0.0416666667;
 
 #endif // GLOBALH
