@@ -269,20 +269,20 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
       double rate_ini = rate;
 
       // GODZILLA
-      cout << "^^^ " << name_ << ":" << endl;
-      cout.flush();
-      cout << "      ngrate = " << ngrate << endl;
-      cout << "         k1_ = " << k1_ << endl;
-      cout << "         n1_ = " << n1_ << endl;
-      cout << "      DOR = " << DOR << endl;
-      cout << "      ssaFactor_ = " << ssaFactor_ << endl;
-      cout << "      hsrate = " << hsrate << endl;
-      cout << "      diffrate = " << diffrate << endl;
-      cout << "      pfk_ = " << pfk_ << endl;
-      cout << "      rhFactor_ = " << rhFactor_ << endl;
-      cout << "      arrhenius_ = " << arrhenius_ << endl;
-      cout << "^^^" << endl;
-      cout.flush();
+      /*cout << "^^^ " << name_ << ":" << endl;*/
+      /*cout.flush();*/
+      /*cout << "      ngrate = " << ngrate << endl;*/
+      /*cout << "         k1_ = " << k1_ << endl;*/
+      /*cout << "         n1_ = " << n1_ << endl;*/
+      /*cout << "      DOR = " << DOR << endl;*/
+      /*cout << "      ssaFactor_ = " << ssaFactor_ << endl;*/
+      /*cout << "      hsrate = " << hsrate << endl;*/
+      /*cout << "      diffrate = " << diffrate << endl;*/
+      /*cout << "      pfk_ = " << pfk_ << endl;*/
+      /*cout << "      rhFactor_ = " << rhFactor_ << endl;*/
+      /*cout << "      arrhenius_ = " << arrhenius_ << endl;*/
+      /*cout << "^^^" << endl;*/
+      /*cout.flush();*/
       // GODZILLA
 
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1

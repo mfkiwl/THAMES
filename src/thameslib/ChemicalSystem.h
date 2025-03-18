@@ -552,6 +552,8 @@ class ChemicalSystem {
   // vector<bool> GEMPhaseBelongsToCement_;
   double initScaledCementMass_;
   double scaledCementMass_;
+  vector<int> isParrotKilloh_;
+  int isParrotKillohSize_;
 
 public:
   /**
@@ -4138,6 +4140,17 @@ public:
   }
 
   /**
+  @brief Initialize the lower bound on a DC to a prescribed value
+
+  @param val is the lower bound to set for this DC (in scaled moles)
+  */
+  void initDCLowerLimit(double val) {
+    for (int i = 0; i < numDCs_; i++) {
+      DCLowerLimit_[i] = val;
+    }
+  }
+
+  /**
   @brief Get the lower bound on the moles of a dependent component (DC).
 
   @note Used only in this class's copy constructor.
@@ -5715,9 +5728,11 @@ public:
 
   @param time is the simulated time associated with this state [hours]
   @param isFirst is true if this is the first state calculation, false otherwise
+  @param cyc is the cycle number for the main controller loop (iteration over
+  time)
   @return the node status handle
   */
-  int calculateState(double time, bool isFirst, int cyc, bool update);
+  int calculateState(double time, bool isFirst, int cyc);
 
   /**
   @brief Check for chemical composition requirements on
@@ -6297,5 +6312,31 @@ public:
     }
   }
 
+  /**
+  @brief add a component to the isParrotKilloh_ vector
+  @param val is the microstructure phase ID of this PK component
+  */
+  void setIsParrotKilloh(int val) {
+    isParrotKilloh_.push_back(val);
+    isParrotKillohSize_++;
+  }
+
+  /**
+  @note NOT USED.
+
+  @return the isParrotKilloh_ vector idx component i.e. a microPhaseId of a
+  microphase controlled by Parrot-Killoh model
+  */
+  int getIsParrotKilloh(int idx) { return isParrotKilloh_[idx]; }
+
+  /**
+  @note NOT USED.
+
+  @return the isParrotKilloh_ vector : all microPhaseIds for microphases
+  controlled by Parrot-Killoh model
+  */
+  vector<int> getIsParrotKilloh(void) { return isParrotKilloh_; }
+
+  void writeSatElectrolyteGasConditions(void);
 }; // End of ChemicalSystem class
 #endif

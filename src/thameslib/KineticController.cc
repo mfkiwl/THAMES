@@ -424,26 +424,26 @@ void KineticController::parseKineticDataForStandard(
   }
 
   // Specific surface area (m2/kg)
-  json::iterator pp = p.value().find("specificSurfaceArea");
-  if (pp != p.value().end()) {
-    kineticData.specificSurfaceArea = pp.value();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForStandard",
-                        "specificSurfaceArea not found");
-  }
+  // json::iterator pp = p.value().find("specificSurfaceArea");
+  // if (pp != p.value().end()) {
+  //   kineticData.specificSurfaceArea = pp.value();
+  // } else {
+  //   throw DataException("KineticController", "parseKineticDataForStandard",
+  //                       "specificSurfaceArea not found");
+  // }
 
   // Reference specific surface area (m2/kg)
-  pp = p.value().find("refSpecificSurfaceArea");
-  if (pp != p.value().end()) {
-    kineticData.refSpecificSurfaceArea = pp.value();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForStandard",
-                        "refSpecificSurfaceArea not found");
-  }
+  // pp = p.value().find("refSpecificSurfaceArea");
+  // if (pp != p.value().end()) {
+  //   kineticData.refSpecificSurfaceArea = pp.value();
+  // } else {
+  //   throw DataException("KineticController", "parseKineticDataForStandard",
+  //                       "refSpecificSurfaceArea not found");
+  // }
 
   // Dissolution rate constant input with units (mol/m2/s)
   // But immediately convert it to mol/m2/h within model
-  pp = p.value().find("dissolutionRateConst");
+  json::iterator pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
     kineticData.dissolutionRateConst *= S_PER_H;
@@ -537,25 +537,25 @@ void KineticController::parseKineticDataForPozzolanic(
     cout.flush();
   }
 
-  json::iterator pp = p.value().find("specificSurfaceArea");
-  if (pp != p.value().end()) {
-    kineticData.specificSurfaceArea = pp.value();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "specificSurfaceArea not found");
-  }
+  // json::iterator pp = p.value().find("specificSurfaceArea");
+  // if (pp != p.value().end()) {
+  //   kineticData.specificSurfaceArea = pp.value();
+  // } else {
+  //   throw DataException("KineticController", "parseKineticDataForPozzolanic",
+  //                       "specificSurfaceArea not found");
+  // }
 
-  pp = p.value().find("refSpecificSurfaceArea");
-  if (pp != p.value().end()) {
-    kineticData.refSpecificSurfaceArea = pp.value();
-  } else {
-    throw DataException("KineticController", "parseKineticDataForPozzolanic",
-                        "refSpecificSurfaceArea not found");
-  }
+  // pp = p.value().find("refSpecificSurfaceArea");
+  // if (pp != p.value().end()) {
+  //   kineticData.refSpecificSurfaceArea = pp.value();
+  // } else {
+  //   throw DataException("KineticController", "parseKineticDataForPozzolanic",
+  //                       "refSpecificSurfaceArea not found");
+  // }
 
   // Dissolution rate constant input with units (mol/m2/s)
   // But immediately convert it to mol/m2/h within model
-  pp = p.value().find("dissolutionRateConst");
+  json::iterator pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
     kineticData.dissolutionRateConst *= S_PER_H;

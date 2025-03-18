@@ -261,9 +261,9 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
 
       // GODZILLA
-      cout << "      new scaledMass_ = " << scaledMass_ << endl;
-      cout << "      new DOR = " << newDOR << endl;
-      cout << "^^^" << endl;
+      /*cout << "      new scaledMass_ = " << scaledMass_ << endl;*/
+      /*cout << "      new DOR = " << newDOR << endl;*/
+      /*cout << "^^^" << endl;*/
       // GODZILLA
 
       if (verbose_) {
