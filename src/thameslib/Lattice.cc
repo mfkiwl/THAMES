@@ -581,6 +581,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
 
     // calc porosity in
     // normalizePhaseMasses->setMicroPhaseMass->setMicroPhaseVolume->calcMicroPhasePorosity
+
     try {
       normalizePhaseMasses(microPhaseMass, cementMass);
 
@@ -5238,15 +5239,20 @@ void Lattice::calcSurfaceArea(int phaseid) {
 
   if (initSolidMass_ > 0.0) {
     double oneFaceAreaPerMicrostructure =
-        faceToArea_ / (static_cast<double>(numSites_)); // m2/face
+        faceToArea_ /
+        (static_cast<double>(numSites_)); // m2/face/microstructure
     double oneFaceAreaPerMeterCubed =
-        oneFaceAreaPerMicrostructure / voxelToVolume_; // m2/face/m3
+        oneFaceAreaPerMicrostructure / voxelToVolume_; // m2/face/
+                                                       // (m3 of microstructure)
     double oneFaceAreaPerCmCubed =
-        1.0e-6 * oneFaceAreaPerMeterCubed; // m2/face/cm3
+        1.0e-6 * oneFaceAreaPerMeterCubed; // m2/face/
+                                           // (cm3 of microstructure)
     double oneFaceAreaPerGramSolid =
-        oneFaceAreaPerCmCubed / initSolidMass_; // m2/face/g-solid
+        oneFaceAreaPerCmCubed / initSolidMass_; // m2/face/
+                                                // (g of solid)
     oneFaceAreaPerHundredGramSolid =
-        100.0 * oneFaceAreaPerGramSolid; // m2/face/100g-solid
+        100.0 * oneFaceAreaPerGramSolid; // m2/face/
+                                         // (100 g of solid)
   } else {
     string msg = "Divide by zero error:  initSolidMass_ = 0";
     throw FloatException("Lattice", "calcSurfaceArea", msg);

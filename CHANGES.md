@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 18 19:02 2025 | Very minor changes to comments |
 | Mar 18 18:08 2025 | Area scaling is working for standard phases |
 | Mar 16 21:34 2025 | Fixed time conversion error in PK model |
 | Mar 03 13:43 2025 | Added recalculation of surface areas each cycle in KineticController::calculateKineticStep |
