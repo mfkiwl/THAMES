@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 20 16:59 2025 | Minor changes to verbose output |
 | Mar 20 16:36 2025 | Debugged surface scaling for Parrot-Killoh kinetics |
 | Mar 18 19:02 2025 | Very minor changes to comments |
 | Mar 18 18:08 2025 | Area scaling is working for standard phases |

@@ -888,10 +888,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
   // static double hyd_time_ini = 0.0;
   double hyd_time = 0.0;
 
-  // GODZILLA
-  cout << "dbdb Entering 1 scaled mass = " << chemSys_->getScaledCementMass();
-  // GODZILLA
-
   for (i = 0; i < ICNum_; i++) {
     ICMoles_[i] = 0.0;
   }
@@ -1081,13 +1077,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           phaseKineticModel_[midx]->calculateKineticStep(
               timestep, scaledMass, massDissolved, cyc, totalDOR);
 
-          // GODZILLA
-          cout << endl
-               << "kmkmkm Out of kinetic model, scaledMass = " << scaledMass
-               << endl;
-          cout.flush();
-          // GODZILLA
-
           // chemSys_->setMicroPhaseMass(phaseDissolvedId[midx], scaledMass);
           // chemSys_->setMicroPhaseMassDissolved(phaseDissolvedId[midx],
           //                                      massDissolved);
@@ -1208,12 +1197,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     // cout << "          " << DCName_[i] << ": " << chemSys_->getDCMoles(i) <<
     // " mol" << endl;
   }
-
-  // GODZILLA
-  cout << "dbdb Exiting cement scaled mass = "
-       << chemSys_->getScaledCementMass();
-  cout.flush();
-  // GODZILLA
 
   // if (!doTweak) {
   //   cout << "  KineticController::calculateKineticStep end - cyc = " << cyc
