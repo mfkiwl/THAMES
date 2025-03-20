@@ -227,6 +227,8 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       if (verbose_) {
         cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
+        cout << "(initScaledMass_ = " << initScaledMass_
+             << ", scaledMass_ = " << scaledMass_ << ")" << endl;
         cout.flush();
       }
     } else {
@@ -242,22 +244,22 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
             (k1_ / n1_) * (1.0 - DOR) * pow((-log(1.0 - DOR)), (1.0 - n1_));
         ngrate *= (ssaFactor_); // only used for the N+G rate
 
-        if (ngrate < 1.0e-10)
-          ngrate = 1.0e-10;
+        if (ngrate < (1.0e-10 * DAY_PER_H))
+          ngrate = 1.0e-10 * DAY_PER_H;
       } else {
         throw FloatException("ParrotKillohModel", "calculateKineticStep",
                              "n1_ = 0.0");
       }
 
       hsrate = k3_ * pow((1.0 - DOR), n3_);
-      if (hsrate < 1.0e-10)
-        hsrate = 1.0e-10;
+      if (hsrate < (1.0e-10 * DAY_PER_H))
+        hsrate = 1.0e-10 * DAY_PER_H;
 
       if (DOR > 0.0) {
         diffrate = (k2_ * pow((1.0 - DOR), (2.0 / 3.0))) /
                    (1.0 - pow((1.0 - DOR), (1.0 / 3.0)));
-        if (diffrate < 1.0e-10)
-          diffrate = 1.0e-10;
+        if (diffrate < (1.0e-10 * DAY_PER_H))
+          diffrate = 1.0e-10 * DAY_PER_H;
       } else {
         diffrate = 1.0e9;
       }
@@ -268,23 +270,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       double rate_ini = rate;
 
-      // GODZILLA
-      /*cout << "^^^ " << name_ << ":" << endl;*/
-      /*cout.flush();*/
-      /*cout << "      ngrate = " << ngrate << endl;*/
-      /*cout << "         k1_ = " << k1_ << endl;*/
-      /*cout << "         n1_ = " << n1_ << endl;*/
-      /*cout << "      DOR = " << DOR << endl;*/
-      /*cout << "      ssaFactor_ = " << ssaFactor_ << endl;*/
-      /*cout << "      hsrate = " << hsrate << endl;*/
-      /*cout << "      diffrate = " << diffrate << endl;*/
-      /*cout << "      pfk_ = " << pfk_ << endl;*/
-      /*cout << "      rhFactor_ = " << rhFactor_ << endl;*/
-      /*cout << "      arrhenius_ = " << arrhenius_ << endl;*/
-      /*cout << "^^^" << endl;*/
-      /*cout.flush();*/
-      // GODZILLA
-
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
 
       wcFactor = 1.0;
@@ -294,6 +279,33 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       double prod = rate * timestep * wcFactor;
       newDOR = min(DOR + prod, 1.0);
+
+      // GODZILLA
+      cout << "^^^ " << name_ << ":" << endl;
+      cout.flush();
+      cout << "      ngrate = " << ngrate << endl;
+      cout << "         k1_ = " << k1_ << endl;
+      cout << "         n1_ = " << n1_ << endl;
+      cout << "      DOR = " << DOR << endl;
+      cout << "      newDOR = " << newDOR << endl;
+      cout << "      totalDOR = " << totalDOR << endl;
+      cout << "      critDOR_ = " << critDOR_ << endl;
+      cout << "      ssaFactor_ = " << ssaFactor_ << endl;
+      cout << "      hsrate = " << hsrate << endl;
+      cout << "         k3_ = " << k3_ << endl;
+      cout << "         n3_ = " << n3_ << endl;
+      cout << "      diffrate = " << diffrate << endl;
+      cout << "         k2_ = " << k2_ << endl;
+      cout << "      pfk_ = " << pfk_ << endl;
+      cout << "      rhFactor_ = " << rhFactor_ << endl;
+      cout << "      arrhenius_ = " << arrhenius_ << endl;
+      cout << "      wcFactor = " << wcFactor << endl;
+      cout << "      timestep = " << timestep << endl;
+      cout << "      rate = " << rate << endl;
+      cout << "      prod = " << prod << endl;
+      cout << "^^^" << endl;
+      cout.flush();
+      // GODZILLA
 
       scaledMass_ = initScaledMass_ * (1.0 - newDOR);
 

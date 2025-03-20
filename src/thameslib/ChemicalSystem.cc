@@ -54,6 +54,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   jsonFormat_ = false;
   warning_ = warning;
   numMicroPhases_ = numGEMPhases_ = numSolutionPhases_ = 0;
+  initScaledCementMass_ = scaledCementMass_ = 0;
   numMicroImpurities_ = 4;
   microPhaseName_.clear();
   stressPhaseName_.clear();
@@ -2455,7 +2456,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   scaledCementMass_ = 0;
-  for (int i = 1; i < isParrotKillohSize_; i++) {
+  for (int i = 0; i < isParrotKillohSize_; i++) {
     scaledCementMass_ += microPhaseMass_[isParrotKilloh_[i]];
   }
 
@@ -2463,7 +2464,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     double water_molarv, water_molesincr;
 
     if (initMicroVolume_ > microVolume_) {
-      double water_molarv, water_molesincr;
       int wDCId = getDCId("H2O@");
       water_molarv = node_->DC_V0(wDCId, P_, T_);
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;

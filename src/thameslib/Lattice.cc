@@ -699,6 +699,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
   int microPhaseId, DCId;
   double pscaledMass = 0.0;
   double molarMass;
+  double totalSolidMass = 0.0, totalCementMass = 0.0;
 
   for (int i = 0; i < numMicroPhases_; i++) {
     microPhaseId = chemSys_->getMicroPhaseId(i);
@@ -719,7 +720,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       chemSys_->setMicroPhaseMass(ELECTROLYTEID, pscaledMass);
       chemSys_->setMicroPhaseMassDissolved(ELECTROLYTEID, 0.0);
 
-    } else if (microPhaseId != VOIDID && initSolidMass_ > 0.0) {
+    } else if (microPhaseId != VOIDID) {
       // microPhaseMass has units of grams per cm3 of whole microstructure
       // initSolidMass_ is the sum of all microPhaseMass values
       // So pscaledMass (p stands for percent) is mass percent on a total solids
@@ -739,20 +740,54 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
         cout.flush();
       }
 
+      totalSolidMass += pscaledMass;
+      if (chemSys_->getCementComponent(microPhaseId))
+        totalCementMass += pscaledMass;
+
       chemSys_->setMicroPhaseMass(microPhaseId, pscaledMass);
 
       // ChemicalSystem DC moles is in units of moles per 100 g of total solid
       chemSys_->setDCMoles(DCId, (pscaledMass / molarMass));
 
       chemSys_->setMicroPhaseMassDissolved(microPhaseId, 0.0);
-    } else if (initSolidMass_ <= 0.0) {
-      string msg = "Total solid mass is zero";
-      throw FloatException("Lattice", "normalizePhaseMasses", msg);
     }
   }
 
   // initScaledCementMass is percent of all solid mass that is cement
-  chemSys_->setInitScaledCementMass(cementMass * 100 / initSolidMass_);
+  // chemSys_->setInitScaledCementMass(cementMass * 100 / initSolidMass_);
+
+  // Up to this point we could not really handle volume of void space, but
+  // now we can do so in proportion to electrolyte volume
+
+  double totalMass = 0;
+  cout << endl << "Lattice::normalizePhaseMasses - normalized masses:" << endl;
+  for (int i = 1; i < numMicroPhases_; i++) {
+    if (chemSys_->getCementComponent(i)) {
+      cout << setw(5) << right << i << " : " << setw(15) << left
+           << chemSys_->getMicroPhaseName(i) << chemSys_->getMicroPhaseMass(i)
+           << " g (*)" << endl;
+    } else {
+      cout << setw(5) << right << i << " : " << setw(15) << left
+           << chemSys_->getMicroPhaseName(i) << chemSys_->getMicroPhaseMass(i)
+           << " g" << endl;
+    }
+    totalMass += chemSys_->getMicroPhaseMass(i);
+  }
+  cout << endl
+       << "   totalMass       = " << totalMass
+       << " g <all phases including water>" << endl;
+  cout << "   totalSolidMass  = " << totalSolidMass << " g <all solid phases>"
+       << endl;
+  cout << "   totalCementMass = " << totalCementMass
+       << " g <only cement phases (*)>" << endl;
+  cout << "   wsRatio_        = " << wsRatio_
+       << "   <waterMass/totalSolidMass>>" << endl;
+  cout << "   wcRatio_        = " << wcRatio_
+       << "   <waterMass/totalCementMass>" << endl;
+
+  // chemSys_->setInitScaledCementMass(cementMass * 100 / solidMass);
+  // cout << "normalizePhaseMasses totalSolidMass/totalCementMass = "
+  //      << totalSolidMass << " / " << totalCementMass << endl;
 
   // Up to this point we could not really handle volume of void space, but
   // now we can do so in proportion to electrolyte volume
