@@ -33,12 +33,13 @@ int main(int argc, char **argv) {
   Lattice *Mic = NULL;
   ThermalStrain *ThermalStrainSolver = NULL;
   AppliedStrain *AppliedStrainSolver = NULL;
+  KineticController *KController = NULL;
   Controller *Ctrl = NULL;
   RanGen *RNG = NULL;
 
-  KineticController *KController = NULL;
+  bool errorProgram = false;
 
-  bool stopProgram = false;
+  int resCallSystem;
 
   //
   // Main menu where user decides what kind of simulation this will be.
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
   cout << "  " << LEACHING << ") Leaching " << endl;
   cout << "  " << SULFATE_ATTACK << ") Sulfate attack " << endl;
   cin >> choice;
-  cout << choice << endl;
+  cout << endl << "choice = " << choice << endl;
 
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
@@ -65,15 +66,15 @@ int main(int argc, char **argv) {
 
   int seedRNG = -25943; // -142234;
   // cin >> seedRNG;
-  cout << "The seed of the RNG is          : seedRNG = " << seedRNG << endl;
+  cout << endl
+       << "The RNG seed is                 : seedRNG = " << seedRNG << endl;
 
   double elemTimeInterval = 1.e-7;
   // cin >> elemTimeInterval;
   cout << "The elementary time interval is : elemTimeInterval = "
-       << elemTimeInterval << endl;
+       << setprecision(3) << elemTimeInterval << endl;
 
-  cout << scientific << setprecision(15);
-  cout << endl;
+  cout << scientific << setprecision(15) << endl;
 
   time_t lt = time(NULL);
   struct tm *inittime;
@@ -97,8 +98,7 @@ int main(int argc, char **argv) {
   cout << endl << "What is the name of the GEM input file? " << endl;
   getline(cin, buff);
   const string gemInputName(buff);
-
-  cout << "gemInputName : " << gemInputName << endl;
+  cout << "   - gemInputName      :  " << gemInputName << endl;
   cout.flush();
 
   //
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
        << endl;
   getline(cin, buff);
   const string micDefName(buff);
-  cout << "micDefName       : " << micDefName << endl;
+  cout << "   - micDefName        :  " << micDefName << endl;
 
   //
   // Create the ChemicalSystem object
@@ -122,29 +122,25 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
-    stopProgram = true;
+    errorProgram = true;
   } catch (FileException fex) {
     fex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (GEMException gex) {
     gex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (DataException dex) {
     dex.printException();
-    stopProgram = true;
+    errorProgram = true;
   }
-
-  if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    timeCount(starttime, lt);
-    cout << "STOP Program";
-    exit(1);
+  if (errorProgram) {
+    deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                      AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                      errorProgram);
   }
 
   //
-  // Create the random number generator for phase placement
+  // Create the random number generator
   //
 
   RNG = new RanGen(seedRNG);
@@ -156,7 +152,7 @@ int main(int argc, char **argv) {
   cout << endl << "What is the name of the MICROSTRUCTURE file? " << endl;
   getline(cin, buff);
   const string initMicName(buff);
-  cout << "initMicName      : " << initMicName << endl;
+  cout << "   - initMicName       :  " << initMicName << endl;
 
   //
   // Create the Lattice object to hold the microstructure
@@ -172,34 +168,24 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Lattice constructor: " << ba.what()
          << endl;
-    stopProgram = true;
+    errorProgram = true;
   } catch (FileException fex) {
     fex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (GEMException gex) {
     gex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (EOBException eex) {
     eex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (FloatException flex) {
     flex.printException();
-    stopProgram = true;
+    errorProgram = true;
   }
-
-  if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    timeCount(starttime, lt);
-    cout << "STOP Program";
-    exit(1);
+  if (errorProgram) {
+    deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                      AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                      errorProgram);
   }
 
   if (choice == SULFATE_ATTACK) {
@@ -215,8 +201,7 @@ int main(int argc, char **argv) {
     // cin >> buff;  // C++ >> operator does not allow spaces
     getline(cin, buff);
     const string phasemod_fileName(buff);
-    cout << "phasemod_fileName : " << phasemod_fileName << endl;
-    // cout << phasemod_fileName << endl;
+    cout << "   - phasemod_fileName :  " << phasemod_fileName << endl;
 
     //
     // Create the ThermalStrain FE solver, which handles phase transformation
@@ -233,31 +218,18 @@ int main(int argc, char **argv) {
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in ThermalStrain constructor: "
            << ba.what() << endl;
-      stopProgram = true;
+      errorProgram = true;
     } catch (FileException ex) {
       ex.printException();
-      stopProgram = true;
+      errorProgram = true;
     } catch (GEMException ex) {
       ex.printException();
-      stopProgram = true;
+      errorProgram = true;
     }
-
-    if (stopProgram) {
-      if (ChemSys) {
-        delete ChemSys;
-      }
-      if (Mic) {
-        delete Mic;
-      }
-      if (ThermalStrainSolver) {
-        delete ThermalStrainSolver;
-      }
-      if (RNG) {
-        delete RNG;
-      }
-      timeCount(starttime, lt);
-      cout << "STOP Program";
-      exit(1);
+    if (errorProgram) {
+      deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                        errorProgram);
     }
 
     int nx, ny, nz;
@@ -276,34 +248,18 @@ int main(int argc, char **argv) {
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in AppliedStrain constructor: "
            << ba.what() << endl;
-      stopProgram = true;
+      errorProgram = true;
     } catch (FileException ex) {
       ex.printException();
-      stopProgram = true;
+      errorProgram = true;
     } catch (GEMException ex) {
       ex.printException();
-      stopProgram = true;
+      errorProgram = true;
     }
-
-    if (stopProgram) {
-      if (ChemSys) {
-        delete ChemSys;
-      }
-      if (Mic) {
-        delete Mic;
-      }
-      if (ThermalStrainSolver) {
-        delete ThermalStrainSolver;
-      }
-      if (AppliedStrainSolver) {
-        delete AppliedStrainSolver;
-      }
-      if (RNG) {
-        delete RNG;
-      }
-      timeCount(starttime, lt);
-      cout << "STOP Program";
-      exit(1);
+    if (errorProgram) {
+      deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                        AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                        errorProgram);
     }
 
     Mic->setFEsolver(AppliedStrainSolver);
@@ -325,37 +281,24 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
-    stopProgram = true;
+    errorProgram = true;
   } catch (FileException ex) {
     ex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (GEMException ex) {
     ex.printException();
-    stopProgram = true;
+    errorProgram = true;
+  } catch (FloatException ex) {
+    ex.printException();
+    errorProgram = true;
+  } catch (DataException ex) {
+    ex.printException();
+    errorProgram = true;
   }
-
-  if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (ThermalStrainSolver) {
-      delete ThermalStrainSolver;
-    }
-    if (AppliedStrainSolver) {
-      delete AppliedStrainSolver;
-    }
-    if (KController) {
-      delete KController;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    cout << "STOP Program";
-    timeCount(starttime, lt);
-    exit(1);
+  if (errorProgram) {
+    deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                      AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                      errorProgram);
   }
 
   if (VERBOSE) {
@@ -366,12 +309,12 @@ int main(int argc, char **argv) {
   cout << endl << "What is the name of the simulation parameter file? " << endl;
   getline(cin, buff);
   parFileName.assign(buff);
-  cout << "parFileName      : " << parFileName << endl;
+  cout << "   - parFileName       :  " << parFileName << endl;
 
   cout << endl << "What is the root name of output files?" << endl;
   getline(cin, buff);
   jobRoot.assign(buff);
-  cout << "files root name   : " << jobRoot << endl;
+  cout << "   - files root name   :  " << jobRoot << endl;
 
   prepOutputFolder(outputFolder, jobRoot, gemInputName, statFileName,
                    initMicName, micDefName, parFileName);
@@ -386,40 +329,18 @@ int main(int argc, char **argv) {
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
-    stopProgram = true;
+    errorProgram = true;
   } catch (FileException ex) {
     ex.printException();
-    stopProgram = true;
+    errorProgram = true;
   } catch (GEMException ex) {
     ex.printException();
-    stopProgram = true;
+    errorProgram = true;
   }
-
-  if (stopProgram) {
-    if (ChemSys) {
-      delete ChemSys;
-    }
-    if (Mic) {
-      delete Mic;
-    }
-    if (ThermalStrainSolver) {
-      delete ThermalStrainSolver;
-    }
-    if (AppliedStrainSolver) {
-      delete AppliedStrainSolver;
-    }
-    if (KController) {
-      delete KController;
-    }
-    if (Ctrl) {
-      delete Ctrl;
-    }
-    if (RNG) {
-      delete RNG;
-    }
-    cout << endl << "STOP Program" << endl;
-    timeCount(starttime, lt);
-    exit(1);
+  if (errorProgram) {
+    deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                      AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                      errorProgram);
   }
 
   //
@@ -434,20 +355,31 @@ int main(int argc, char **argv) {
   //
 
   // if (VERBOSE) {
-  cout << "Going into Controller::doCycle now" << endl;
+  cout << endl << "Going into Controller::doCycle" << endl;
   cout.flush();
   //}
 
   try {
+
     Ctrl->doCycle(statFileName, choice, elemTimeInterval);
+
   } catch (GEMException gex) {
     gex.printException();
+    errorProgram = true;
   } catch (DataException dex) {
     dex.printException();
+    errorProgram = true;
   } catch (EOBException ex) {
     ex.printException();
+    errorProgram = true;
   } catch (MicrostructureException mex) {
     mex.printException();
+    errorProgram = true;
+  }
+  if (errorProgram) {
+    deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
+                      AppliedStrainSolver, KController, Ctrl, starttime, lt,
+                      errorProgram);
   }
 
   //
@@ -460,7 +392,10 @@ int main(int argc, char **argv) {
   ifstream f(name.c_str());
   if (f.good()) {
     buff = "mv -f ipmlog.txt " + outputFolder + "/.";
-    system(buff.c_str());
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "main", buff, "FAILED");
+    }
     cout << buff << endl;
     f.close();
   }
@@ -469,7 +404,10 @@ int main(int argc, char **argv) {
   f.open(name.c_str());
   if (f.good()) {
     buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
-    system(buff.c_str());
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "main", buff, "FAILED");
+    }
     cout << buff << endl;
     f.close();
   }
@@ -477,12 +415,20 @@ int main(int argc, char **argv) {
   // Record and output the timing data.
   //
 
-  cout << endl << "THAMES END" << endl;
-  timeCount(starttime, lt);
+  deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver, AppliedStrainSolver,
+                    KController, Ctrl, starttime, lt, errorProgram);
 
-  //
-  // Delete the dynamically allocated memory
-  //
+  return 0;
+}
+
+void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                       ThermalStrain *ThermalStrainSolver,
+                       AppliedStrain *AppliedStrainSolver,
+                       KineticController *KController, Controller *Ctrl,
+                       clock_t st_time, time_t lt, bool errorProgram) {
+
+  string buff = "";
+  int resCallSystem;
 
   if (Ctrl) {
     delete Ctrl;
@@ -506,7 +452,46 @@ int main(int argc, char **argv) {
     delete RNG;
   }
 
-  return 0;
+  //
+  // Move remaining output files to output folder
+  //
+
+  string name = "ipmlog.txt";
+  ifstream f(name.c_str());
+  if (f.good()) {
+    buff = "mv -f ipmlog.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "deleteDynAllocMem", buff, "FAILED");
+    }
+    // cout << buff << endl;
+    f.close();
+  }
+
+  name = "IPM_dump.txt";
+  f.open(name.c_str());
+  if (f.good()) {
+    buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
+    resCallSystem = system(buff.c_str());
+    if (resCallSystem == -1) {
+      throw FileException("thames", "deleteDynAllocMem", buff, "FAILED");
+    }
+    // cout << buff << endl;
+    f.close();
+  }
+
+  cout << endl
+       << "=> IPM_dump.txt & ipmlog.txt are into " << outputFolder << " folder"
+       << endl;
+
+  cout << endl << "STOP Program" << endl;
+  timeCount(st_time, lt);
+
+  if (errorProgram) {
+    exit(1);
+  } else {
+    exit(0);
+  }
 }
 
 void timeCount(clock_t time_, time_t lt_) {
@@ -526,15 +511,17 @@ void timeCount(clock_t time_, time_t lt_) {
 
 void printHelp(void) {
   cout << endl;
-  cout << "Usage: \"thames [--verbose|-v] [--help|-h]\"" << endl;
+  cout << "Usage: \"thames [--verbose|-v] [--suppress|-s] [--xyz|-x] "
+          "[--outfolder|-o] folder [--help|-h]\""
+       << endl;
   cout << "        --verbose [-v]      Produce verbose output" << endl;
   cout << "        --suppress [-s]     Suppress warning messages" << endl;
   cout << "        --xyz [-x]          Create 3D visualization movie" << endl;
   cout << "        --outfolder [-o]    Name of folder for output data (default "
           "is Result)"
        << endl;
-  cout << "        --help [-h]         Print this help message" << endl;
   cout << endl;
+  cout << "Note: thames --help [-h] will print this help message" << endl;
 
   return;
 }
@@ -604,10 +591,15 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
                       const string &initMicName, const string &micDefName,
                       const string &parFileName) {
 
+  int resCallSystem;
+
   string buff = "mkdir -p " + outputFolder;
-  system(buff.c_str());
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
   jobRoot = outputFolder + "/" + jobRoot;
-  cout << "jobRoot           : " << jobRoot << endl;
+  cout << "   - jobRoot           :  " << jobRoot << endl;
   cout.flush();
 
   statFileName = jobRoot + ".stats";
@@ -626,8 +618,10 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     buff1 = buff1.substr(1, buff1.size() - 2);
   }
   buff = "cp -f " + buff1 + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   // IPM file
   buff1.clear();
@@ -636,8 +630,10 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     buff1 = buff1.substr(1, buff1.size() - 2);
   }
   buff = "cp -f " + buff1 + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   // DBR file
   buff1.clear();
@@ -648,24 +644,36 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     buff1 = buff1.substr(1, buff1.size() - 2);
   }
   buff = "cp -f " + buff1 + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   buff = "cp -f " + gemInputName + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   buff = "cp -f " + initMicName + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   buff = "cp -f " + micDefName + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
 
   buff = "cp -f " + parFileName + " " + outputFolder + "/.";
-  system(buff.c_str());
-  cout << buff << endl;
+  resCallSystem = system(buff.c_str());
+  if (resCallSystem == -1) {
+    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
+  }
+  cout << "     => All input files have been copied into " << outputFolder
+       << " folder" << endl;
 
   return;
 }
