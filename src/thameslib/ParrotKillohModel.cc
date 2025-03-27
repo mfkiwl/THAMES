@@ -282,9 +282,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
         newDOR = min(DOR + prod, 1.0);
       }
 
-      double prod = rate * timestep * wcFactor;
-      newDOR = min(DOR + prod, 1.0);
-
       if (verbose_) {
         cout << "^^^ " << name_ << ":" << endl;
         cout.flush();
