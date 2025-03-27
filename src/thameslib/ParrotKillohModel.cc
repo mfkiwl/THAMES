@@ -287,13 +287,15 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
 
+      double prod = rate * timestep * wcFactor;
+      newDOR = min(DOR + prod, 1.0);
+
       wcFactor = 1.0;
       if (totalDOR > critDOR_) {
         wcFactor = pow((1 + 3.333 * (critDOR_ - newDOR)), 4);
+        prod = rate * timestep * wcFactor;
+        newDOR = min(DOR + prod, 1.0);
       }
-
-      double prod = rate * timestep * wcFactor;
-      newDOR = min(DOR + prod, 1.0);
 
       scaledMass_ = initScaledMass_ * (1.0 - newDOR);
 

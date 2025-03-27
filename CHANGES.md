@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 26 22:25 2025 | Corrected recent bug introduction in Parrot-Killoh model |
 | Mar 16 21:34 2025 | Fixed time conversion error in PK model |
 | Mar 03 13:43 2025 | Added recalculation of surface areas each cycle in KineticController::calculateKineticStep |
 | Mar 03 00:28 2025 | Include surface area scaling in kinetics |
