@@ -235,36 +235,30 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // solid
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
-      // GODZILLA
-      cout << "^^^ " << name_ << ":" << endl;
-      cout.flush();
-      cout << "      dissrate_ini = " << dissrate_ini << endl;
-      cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
-           << endl;
-      cout << "         area = " << area << endl;
-      cout << "      saturationIndex = " << saturationIndex << endl;
-      cout << "      siexp_ = " << siexp_ << endl;
-      cout << "      dfexp_ = " << dfexp_ << endl;
-      cout << "      rhFactor_ = " << rhFactor_ << endl;
-      cout << "      arrhenius_ = " << arrhenius_ << endl;
-      cout << "      timestep = " << timestep << endl;
-      cout << "      dissrate = " << dissrate << endl;
-      cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
-      cout << "      scaledMass_ = " << scaledMass_ << endl;
-      cout << "      massDissolved = " << massDissolved << endl;
-      cout << "^^^" << endl;
-      cout.flush();
-      // GODZILLA
+      if (verbose_) {
+        cout << "^^^ " << name_ << ":" << endl;
+        cout.flush();
+        cout << "      dissrate_ini = " << dissrate_ini << endl;
+        cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
+             << endl;
+        cout << "         area = " << area << endl;
+        cout << "      saturationIndex = " << saturationIndex << endl;
+        cout << "      siexp_ = " << siexp_ << endl;
+        cout << "      dfexp_ = " << dfexp_ << endl;
+        cout << "      rhFactor_ = " << rhFactor_ << endl;
+        cout << "      arrhenius_ = " << arrhenius_ << endl;
+        cout << "      timestep = " << timestep << endl;
+        cout << "      dissrate = " << dissrate << endl;
+        cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
+        cout << "      scaledMass_ = " << scaledMass_ << endl;
+        cout << "      massDissolved = " << massDissolved << endl;
+        cout << "^^^" << endl;
+        cout.flush();
+      }
 
       scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
 
       newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-
-      // GODZILLA
-      cout << "      new scaledMass_ = " << scaledMass_ << endl;
-      cout << "      new DOR = " << newDOR << endl;
-      cout << "^^^" << endl;
-      // GODZILLA
 
       if (verbose_) {
         cout << "    StandardKineticModel::calculateKineticStep "

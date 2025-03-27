@@ -5,7 +5,17 @@
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
 | Mar 26 22:25 2025 | Corrected recent bug introduction in Parrot-Killoh model |
+| Mar 20 16:59 2025 | Minor changes to verbose output |
+| Mar 20 16:36 2025 | Debugged surface scaling for Parrot-Killoh kinetics |
+| Mar 18 19:02 2025 | Very minor changes to comments |
+| Mar 18 18:08 2025 | Area scaling is working for standard phases |
 | Mar 16 21:34 2025 | Fixed time conversion error in PK model |
+| Mar 14 19:39 2025 | Fixed compile-time errors due to code repetition |
+| Mar 12 15:11 2025 | Improved the help/usage message |
+| Mar 12 12:49 2025 | Merge branch florinnita_THAMES_avoidGEMfailure-xyzfile |
+| Mar 10 15:01 2025 |Fixed segmentation fault given by ChemicalSystem::parseDisplayData(…) |
+| Mar 07 15:36 2025 | Fixed a few inconsistencies in the test input files |
+| Mar 04 10:02 2025 | Merged changes from branch `florinnita_THAMES_avoidGEMfailure` from past month |
 | Mar 03 13:43 2025 | Added recalculation of surface areas each cycle in KineticController::calculateKineticStep |
 | Mar 03 00:28 2025 | Include surface area scaling in kinetics |
 | Mar 01 22:36 2025 | Converted all model times to hours |

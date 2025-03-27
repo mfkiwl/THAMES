@@ -145,7 +145,6 @@ bool XYZ;
 /**
 @brief Name of output folder for simulation results
 */
-
 string outputFolder;
 
 /**
@@ -197,8 +196,6 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
 Almost all the actual formatted output is done by the ChemicalSystem object
 through its `writeChemSys` method.
 
-If a file is not present, the file name should be given as an empty string.
-
 @param jobRoot is the root name of the THAMES simulation
 @param itime is the start time of the job
 @param initMicName is name of the initial microstructure image file
@@ -208,6 +205,7 @@ If a file is not present, the file name should be given as an empty string.
 @param csys is a pointer to the ChemicalSystem object for the simulation
 @param ctr is a pointer to the Controller object for the simulation
 
+If a file is not present, the file name should be given as an empty string.
 */
 void writeReport(const string &jobroot, struct tm *itime,
                  const string &initMicName, const string &micDefName,
@@ -219,6 +217,12 @@ void writeReport(const string &jobroot, struct tm *itime,
 @param time_ & lt_ are the start time
 */
 void timeCount(clock_t time_, time_t lt_);
+
+void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
+                       ThermalStrain *ThermalStrainSolver,
+                       AppliedStrain *AppliedStrainSolver,
+                       KineticController *KController, Controller *Ctrl,
+                       clock_t st_time, time_t lt, bool errorProgram);
 
 using namespace std;
 

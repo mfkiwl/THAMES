@@ -6,7 +6,7 @@ This file describes how to install THAMES.  The instructions in this file
 are for the most common use cases, and cover the command line tools.
 
 For further information, or in case of problems, please contact the author,
-Jeff Bullard (jwbullard@tamu.edu).
+Jeff Bullard (jeffrey.bullard@nist.gov).
 
 The API documentation of THAMES is available in PDF and HTML formats.  It
 is not bundled with the software but can be created during the installation

@@ -691,13 +691,12 @@ public:
   dissPhaseIDVect
   @param numtoadd_D is the number of sites switched by this call
   @param totalTRC is the total call number of the changeMicrostructure method
-  @return -1 if all requested numbers of voxels in numSiteDissVect have been
-  switched or the ID of the first microphase (in dissPhaseIDVect) for which this
-  was not possible
+  @return vector of the number of voxels of each phase that could not dissolve
   */
-  int dissolvePhase(vector<int> dissPhaseIDVect, vector<int> numSiteDissVect,
-                    vector<string> dissPhNameVect, int &numadded_D,
-                    int totalTRC);
+  vector<int> dissolvePhase(vector<int> dissPhaseIDVect,
+                            vector<int> numSiteDissVect,
+                            vector<string> dissPhNameVect, int &numadded_D,
+                            int totalTRC);
 
   /**
   @brief Remove the water from a prescribed number of solution-filled sites.
@@ -863,14 +862,14 @@ public:
   @param time is is the simulation time [hours]
   @param simtype is the type of simulation (hydration, leaching, etc)
   @param capWater is true if there is any capillary pore water in the system.
-  @param numDiff is the maximum number of voxels belonging to a given
-  microphase, voxels that can be dissolved according to the system configuration
-  (lattice)
-  @param phDiff is the microphase ID for which a the number of voxels that can
-  be dissolved is smaller than the number requested by the corresponding kinetic
-  model
-  @param nameDiff is the name of this microphase
-  @param whileCount counts the number of changeMicrostructure calls for a given
+  @param vectPhNumDiff is the vector of maximum number of voxels belonging to
+  each microphase, voxels that can be dissolved according to the system
+  configuration (lattice)
+  @param vectPhIdDiff is the microphase ID for which a the number of voxels that
+  can be dissolved is smaller than the number requested by the corresponding
+  kinetic model
+  @param vectPhNameDiff is the vector of names of microphases
+  @param repeat counts the number of changeMicrostructure calls for a given
   cycle (cyc)
   @param cyc (cycle) is the iteration number in main iteration loop in
   Controller::doCycle - each cycle corresponds to a time step
@@ -879,8 +878,9 @@ public:
   for a certain microphase ID (phDiff) can be dissolved
   */
   int changeMicrostructure(double time, const int simtype, bool &capWater,
-                           int &numDiff, int &phDiff, string &nameDiff,
-                           int whileCount, int cyc);
+                           vector<int> &vectPhNumDiff,
+                           vector<int> &vectPhIdDiff,
+                           vector<string> &vectPhNameDiff, int repeat, int cyc);
 
   /**
   @brief Adjust GEMS calculated volumes of microstructure phases
