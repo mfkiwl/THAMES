@@ -133,12 +133,12 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
 
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
+  rh_ = exp(-6.23527e-7 / critporediam / T_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
-  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
-                   ((1.0 / refT_) - (1.0 / temperature_)));
+  arrhenius_ =
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -223,22 +223,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
                            "initScaledMass_ = 0.0");
     }
 
-    // if (DOR < 0.0) {
-    //   cout << endl << "    PozzolanicModel::calculateKineticStep - for cyc = " << cyc
-    //        << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
-    //        << initScaledMass_ << " / " << scaledMass_ << endl;
-    //   cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
-    //       << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
-    // }
-
-    // if (DOR < 1.0) {
-
-    /// BULLARD placeholder
-    /// @note playing with different base rate constants here
-
-    // double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
-    //
-
     double baserateconst = dissolutionRateConst_;
 
     /// @note The following influence alkali and alkali earth cations
@@ -296,12 +280,12 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // per h
     if (saturationIndex < 1.0) {
       dissrate = baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
-          pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
-          (sio2_)*pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
+                 pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
+                 (sio2_)*pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
     } else {
       dissrate = -baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
-          pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
-          (sio2_)*pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
+                 pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
+                 (sio2_)*pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
     }
 
     /// Assume steady-state diffusion, with the surface being
@@ -327,8 +311,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
         if (abs(diffrate) < 1.0e-10)
           diffrate = 1.0e-10;
       } else {
-        average_cdiff =
-            -(pow(saturationIndex, (1.0 / dissolvedUnits_)) - 1.0);
+        average_cdiff = -(pow(saturationIndex, (1.0 / dissolvedUnits_)) - 1.0);
         diffrate *= (average_cdiff) / boundaryLayer;
         if (abs(diffrate) < 1.0e-10)
           diffrate = -1.0e-10;
@@ -352,9 +335,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
     if (verbose_) {
-      cout
-          << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
-          << rate << " / " << massDissolved << endl;
+      cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
+           << rate << " / " << massDissolved << endl;
     }
 
     scaledMass = scaledMass_ - massDissolved;

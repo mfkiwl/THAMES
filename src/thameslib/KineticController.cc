@@ -898,8 +898,8 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     hyd_time = hyd_time_ini_ + timestep;
     if (verbose_) {
       cout << endl
-           << "  KineticController::calculateKineticStep - tweak cyc = "
-           << cyc << " :  hyd_time = " << hyd_time
+           << "  KineticController::calculateKineticStep - tweak cyc = " << cyc
+           << " :  hyd_time = " << hyd_time
            << "   hyd_time_ini_ = " << hyd_time_ini_
            << "   timestep = " << timestep << endl;
     }
@@ -1221,9 +1221,8 @@ double KineticController::updateKineticStep(int cyc, int pId,
       phaseKineticModel_[midx]
           ->getModelName(); // updateKineticStep(scaledMass , massDissolved);
   cout << "    KineticController::updateKineticStep - for cyc = " << cyc
-       << " & phaseId = " << pId
-       << " [" << phaseKineticModel_[midx]->getName() << " / DCId:"
-       << chemSys_->getMicroPhaseDCMembers(pId, 0) << "]" << endl;
+       << " & phaseId = " << pId << " [" << phaseKineticModel_[midx]->getName()
+       << " / DCId:" << chemSys_->getMicroPhaseDCMembers(pId, 0) << "]" << endl;
   cout << "      midx = " << midx << "   modelName : " << modelName
        << "   scaledMassIni[midx] = " << scaledMassIni_[midx]
        << "   scaledMass = " << scaledMass << endl;
@@ -1283,7 +1282,8 @@ double KineticController::updateKineticStep(int cyc, int pId,
       (massDissolved - totMassImpurity) / chemSys_->getDCMolarMass(DCId);
   keepNumDCMoles = DCMoles_[DCId] - numDCMolesDissolved;
   chemSys_->setDCLowerLimit(DCId, keepNumDCMoles);
-  cout << "      massDissolved/totMassImpurity/massDissolved - totMassImpurity : "
+  cout << "      massDissolved/totMassImpurity/massDissolved - totMassImpurity "
+          ": "
        << massDissolved << " / " << totMassImpurity << " / "
        << massDissolved - totMassImpurity << endl;
   cout << "      DCMoles_/numDCMolesDissolved/keepNumDCMoles : "

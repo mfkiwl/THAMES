@@ -284,11 +284,11 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
         newDOR = DOR + prod;
       }
 
-      if (newDOR >= 1.) {
+      if (newDOR >= 1.0) {
 
         massDissolved = scaledMass_;
 
-        scaledMass_ = 0;
+        scaledMass_ = 0.0;
 
       } else {
 
@@ -301,7 +301,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
       scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "    ParrotKillochModel::calculateKineticStep "
+        cout << "    ParrotKillohModel::calculateKineticStep "
                 "rate/wcFactor/massDissolved : "
              << rate << " / " << wcFactor << " / " << massDissolved << endl;
         cout << "  ****************** PKM_hT = " << timestep
