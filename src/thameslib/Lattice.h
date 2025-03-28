@@ -81,15 +81,16 @@ private:
   long int numRNGcall_0_, numRNGcallLONGMAX_;
   double lastRNG_;
 
-  unsigned int xdim_;          /**< Number of sites in the x dimension */
-  unsigned int ydim_;          /**< Number of sites in the y dimension */
-  unsigned int zdim_;          /**< Number of sites in the z dimension */
-  double resolution_;          /**< Voxel edge length [micrometers] */
-  vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
-  unsigned int numSites_;      /**< Total number of sites */
-  // unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site */
-  ChemicalSystem *chemSys_;    /**< Pointer to simulation's ChemicalSystem */
-  AppliedStrain *FEsolver_;    /**< Pointer to simulation's FE elastic solver */
+  unsigned int xdim_;     /**< Number of sites in the x dimension */
+  unsigned int ydim_;     /**< Number of sites in the y dimension */
+  unsigned int zdim_;     /**< Number of sites in the z dimension */
+  double resolution_;     /**< Voxel edge length [micrometers] */
+  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
+  unsigned int numSites_; /**< Total number of sites */
+  // unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site
+  // */
+  ChemicalSystem *chemSys_; /**< Pointer to simulation's ChemicalSystem */
+  AppliedStrain *FEsolver_; /**< Pointer to simulation's FE elastic solver */
   vector<Interface> interface_; /**< List of the different interface objects
                                         in the microstructure */
 

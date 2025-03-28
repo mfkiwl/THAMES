@@ -907,7 +907,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       phaseDissolvedId[midx] = phaseKineticModel_[midx]->getMicroPhaseId();
       chemSys_->setMicroPhaseMass(phaseDissolvedId[midx], scaledMassIni_[midx]);
       if (verbose_) {
-        cout << "    midx = " << midx
+        cout << "    Line 911 midx = " << midx
              << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
              << "     microPhaseName = " << phaseKineticModel_[midx]->getName()
              << endl;
@@ -932,7 +932,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       scaledMassIni_[midx] =
           chemSys_->getMicroPhaseMass(phaseDissolvedId[midx]);
       if (verbose_) {
-        cout << "    midx = " << midx
+        cout << "    Line 936 midx = " << midx
              << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
              << "     microPhaseName = " << phaseKineticModel_[midx]->getName()
              << endl;
@@ -1007,7 +1007,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
                 phaseKineticModel_[midx]->getMicroPhaseId();
             scaledMassIni_[midx] =
                 chemSys_->getMicroPhaseMass(phaseDissolvedId[midx]);
-            cout << "    midx = " << midx
+            cout << "    Line 1019 midx = " << midx
                  << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
                  << "     microPhaseName = "
                  << phaseKineticModel_[midx]->getName() << endl;

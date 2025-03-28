@@ -517,8 +517,8 @@ void Controller::doCycle(const string &statfilename, int choice,
           if (numGen % numGenMax == 0) {
             if (numGen > 0) {
               numIntervals++;
-              delta2Time = delta2Time * 10;
-              minTime = timeZero - delta2Time / 2;
+              delta2Time = delta2Time * 10.0;
+              minTime = timeZero - (0.5 * delta2Time);
             }
             if (numIntervals == numMaxIntervals) {
               // cout << "      for
@@ -742,22 +742,23 @@ void Controller::doCycle(const string &statfilename, int choice,
                     cyc, phId, scaledMassDiff);
               } else {
 
-                cout << "    Controller::doCycle - not a KM phase - for cyc = " << cyc
-                     << " & phaseId = " << phId
-                     << " [" << chemSys_->getMicroPhaseName(phId) << " / DCId:"
-                     << DCId << "]" << endl;
+                cout << "    Controller::doCycle - not a KM phase - for cyc = "
+                     << cyc << " & phaseId = " << phId << " ["
+                     << chemSys_->getMicroPhaseName(phId) << " / DCId:" << DCId
+                     << "]" << endl;
 
                 numMolesDiff = scaledMassDiff / molarMassDiff;
 
                 cout << "      DCMoles_/keepNumDCMoles : "
-                     << chemSys_->getDCMoles(DCId) << " / " << numMolesDiff << endl;
+                     << chemSys_->getDCMoles(DCId) << " / " << numMolesDiff
+                     << endl;
 
                 chemSys_->setDCLowerLimit(DCId, numMolesDiff);
-
               }
             }
 
-            cout << endl << "  Controller::doCycle - cyc = " << cyc
+            cout << endl
+                 << "  Controller::doCycle - cyc = " << cyc
                  << " :  #  i#/ "
                     "phName/phId/count/dissInterfaceSize/numSitesNotAvailable"
                     "/DCId/DCMoles/DCLowerLimit :"

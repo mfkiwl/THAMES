@@ -55,8 +55,8 @@ ParrotKillohModel::ParrotKillohModel() {
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
-  arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / temperature_)));
+  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
+                   ((1.0 / refT_) - (1.0 / temperature_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -152,8 +152,8 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = pow(((rh_ - 0.55) / 0.45), 4.0);
 
-  arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / temperature_)));
+  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
+                   ((1.0 / refT_) - (1.0 / temperature_)));
 
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -226,8 +226,8 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       if (verbose_) {
         cout << "~~~~>DOR for " << name_ << " = " << DOR
-             << "   initScaledMass_/scaledMass_ : " << initScaledMass_
-             << " / " << scaledMass_ << endl;
+             << "   initScaledMass_/scaledMass_ : " << initScaledMass_ << " / "
+             << scaledMass_ << endl;
         cout.flush();
       }
     } else {
@@ -296,7 +296,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
         // massDissolved = (newDOR - DOR) * initScaledMass_;
         massDissolved = initScaledMass_ * prod;
-
       }
 
       scaledMass = scaledMass_;

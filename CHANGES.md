@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Mar 28 16:49 2025 | Fixed most or all of bug with recovering from GEM convergence error |
 | Mar 28 11:47 2025 | Debugging problem with recovery from GEM convergence error |
 | Mar 26 22:25 2025 | Corrected recent bug introduction in Parrot-Killoh model |
 | Mar 20 16:59 2025 | Minor changes to verbose output |

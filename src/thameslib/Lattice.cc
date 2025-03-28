@@ -721,7 +721,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
 
     } else if (microPhaseId != VOIDID) {
       // microPhaseMass has units of grams per cm3 of whole microstructure
-      // initSolidMass_ is the sum of all microPhaseMass values
+      // olidMass is the sum of all microPhaseMass values
       // So pscaledMass (p stands for percent) is mass percent on a total solids
       // basis
       pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
