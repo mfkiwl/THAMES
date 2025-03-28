@@ -69,7 +69,8 @@ int main(int argc, char **argv) {
   cout << endl
        << "The RNG seed is                 : seedRNG = " << seedRNG << endl;
 
-  double elemTimeInterval = 1.e-7;
+  double elemTimeInterval = (24.0 * 1.e-7); // 24 factor to convert from days to
+                                            // hours
   // cin >> elemTimeInterval;
   cout << "The elementary time interval is : elemTimeInterval = "
        << setprecision(3) << elemTimeInterval << endl;

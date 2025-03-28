@@ -628,6 +628,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   // cout << " exit chemsys" << endl; exit(0);
 
   // checkChemSys();
+
+  writeSatElectrolyteGasConditions();
 }
 
 bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
@@ -769,10 +771,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
   map<string, int> phaseids;
   phaseids.clear();
 
-  cout << "Finding all phase names" << endl;
   parseMicroPhaseNames(cdi, phaseids);
-  cout << "Done finding all " << phaseids.size() << " phase names" << endl;
-  cout.flush();
 
   ///
   /// Now start the iterator at the beginning and scan properly
@@ -2467,13 +2466,15 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       int wDCId = getDCId("H2O@");
       water_molarv = node_->DC_V0(wDCId, P_, T_);
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
-      if (verbose_) {
-        cout << "System is saturated: wDCId = " << wDCId << endl;
-        cout << "    water_molarv = " << water_molarv << endl;
-        cout << "    volume increase of water is: "
-             << (initMicroVolume_ - microVolume_) << endl;
-        cout << "    water_molesincr = " << water_molesincr << endl;
-      }
+      // if (verbose_) {
+      cout << "System is saturated: wDCId = " << wDCId << endl;
+      cout << "    initMicroVolume_ = " << initMicroVolume_ << endl;
+      cout << "    microVolume_ = " << microVolume_ << endl;
+      cout << "    water_molarv = " << water_molarv << endl;
+      cout << "    volume increase of water is: "
+           << (initMicroVolume_ - microVolume_) << endl;
+      cout << "    water_molesincr = " << water_molesincr << endl;
+      // }
       DCMoles_[wDCId] += water_molesincr;
 
       double waterMolarMass = getDCMolarMass(wDCId);
@@ -2847,30 +2848,14 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].gray = 83;
 
   map<string, elemColor>::iterator it = colorN_.begin();
-  cout << "Created iterator" << endl;
-  cout.flush();
 
   while (it != colorN_.end()) {
-    cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
-    cout.flush();
     (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
     (it->second).grayf = (float)((it->second).gray) / 255.0;
     ++it;
   }
-
-  cout << "Made it past iterator" << endl;
-  cout.flush();
-
-  /*
-  colorN_[""].colorId = ;
-  colorN_[""].altName = "";
-  colorN_[""].rgb.push_back(255);
-  colorN_[""].rgb.push_back();
-  colorN_[""].rgb.push_back();
-  colorN_[""].gray = ;
-  */
 }
 
 //*@******************************************
@@ -3029,6 +3014,72 @@ void ChemicalSystem::checkChemSys(void) {
   }
 }
 
+void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
+  int DCId;
+  double DCconc;  // mol/kgw units
+  double DCmoles; // mol units
+  cout << endl << "ChemicalSystem::writeSatElectrolyteGasConditions" << endl;
+  if (isSaturated_) {
+    cout << "   - saturated : 1 " << endl;
+  } else {
+    cout << "   - saturated : 0 " << endl;
+  }
+  if (initialSolutionComposition_.size() > 0) {
+    cout << "   - simulation with given solution composition :" << endl;
+    cout << "      electrolyte - initial" << endl;
+    map<int, double>::iterator it = initialSolutionComposition_.begin();
+    while (it != initialSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != getDCId("H2O@")) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
+  } else if (fixedSolutionComposition_.size() > 0) {
+    cout << "   - simulation with given solution composition :" << endl;
+    cout << "      electrolyte - fixed" << endl;
+    map<int, double>::iterator it = fixedSolutionComposition_.begin();
+    while (it != fixedSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != getDCId("H2O@")) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
+  } else {
+    cout << "   - simulation without given solution composition." << endl;
+  }
+
+  if (initialGasComposition_.size() > 0) {
+    cout << "   - simulation with given gas composition :" << endl;
+    cout << "      gas - initial" << endl;
+    map<int, double>::iterator it = initialGasComposition_.begin();
+    while (it != initialGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+           << "   DCmoles = " << DCmoles << " mol" << endl;
+      it++;
+    }
+  } else if (fixedGasComposition_.size() > 0) {
+    cout << "   - simulation with given gas composition :" << endl;
+    cout << "      gas - fixed" << endl;
+    map<int, double>::iterator it = fixedGasComposition_.begin();
+    while (it != fixedGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+           << "   DCmoles = " << DCmoles << " mol" << endl;
+      it++;
+    }
+  } else {
+    cout << "   - simulation without given gas composition." << endl;
+  }
+}
 void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
   if (isFirst && initialSolutionComposition_.size() > 0) {
     double waterMoles = getDCMoles("H2O@");

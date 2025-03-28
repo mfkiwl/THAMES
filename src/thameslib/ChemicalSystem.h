@@ -6338,6 +6338,10 @@ public:
   */
   vector<int> getIsParrotKilloh(void) { return isParrotKilloh_; }
 
+  /**
+  @brief Write out the boundary conditions on the electrolyte
+  */
   void writeSatElectrolyteGasConditions(void);
+
 }; // End of ChemicalSystem class
 #endif

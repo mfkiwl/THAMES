@@ -4,7 +4,6 @@
 */
 
 #include "Controller.h"
-#include "global.h"
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
@@ -178,6 +177,110 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   } catch (FileException fex) {
     throw fex;
   }
+
+  int time_Size = time_.size();
+  int outputTime_Size = outputTime_.size();
+
+  cout << endl << "Controller::Controller(...) :" << endl;
+
+  if (time_.size() == 0) {
+    cout << endl
+         << endl
+         << "Controller::Controller error : at least one <calctime> or "
+            "<outtime> value must be present into parameters.xml file!"
+         << endl;
+    cout << endl
+         << "check and modify parameters.xml file and run thames again" << endl;
+    cout << endl << "end program" << endl;
+    // exit(0);
+    throw FileException(
+        "Controller", "Controller", "parameters.xml",
+        "at least one <calctime> or "
+        "<outtime> value must be present into parameters.xml file!");
+  }
+
+  cout << "   initial time_.size()        = " << time_Size << endl;
+  cout << "   outputTime_.size()         = " << outputTime_Size << endl;
+  for (int i = 0; i < outputTime_Size; i++) {
+    time_.push_back(outputTime_[i]);
+  }
+
+  time_Size = time_.size();
+  cout << "   intermediar time_.size()    = " << time_Size << endl;
+
+  double timeTp;
+  for (int i = 0; i < time_Size - 1; i++) {
+    for (int j = i + 1; j < time_Size; j++) {
+      if (time_[i] > time_[j]) {
+        timeTp = time_[i];
+        time_[i] = time_[j];
+        time_[j] = timeTp;
+      }
+    }
+  }
+
+  for (int i = 0; i < time_.size() - 1; i++) {
+    if (abs(time_[i] - time_[i + 1]) <= 1.0e-6) {
+      time_.erase(time_.begin() + i);
+    }
+  }
+  time_Size = time_.size();
+  cout << "   final time_.size()          = " << time_Size << endl;
+
+  string outfilename = jobRoot_ + "-parameters_used.json";
+  ofstream out1(outfilename.c_str());
+  if (!out1) {
+    throw FileException("Controller", "Controller", outfilename,
+                        "Could not append");
+  }
+
+  out1 << "{" << endl;
+  out1 << "  \"simulation_parameters\": {" << endl;
+  out1 << "    \"calctime\": [" << endl;
+  out1 << "        ";
+  int j = 0;
+  for (int i = 0; i < time_Size; i++) {
+    j++;
+    if (i < (time_Size - 1)) {
+      if (j == 1) {
+        out1 << "        " << time_[i] << ", ";
+      } else if (j < 7) {
+        out1 << time_[i] << ", ";
+      } else {
+        j = 0;
+        out1 << time_[i] << "," << endl;
+      }
+    } else {
+      out1 << time_[i] << endl;
+    }
+  }
+  out1 << "    ]," << endl;
+  out1 << "    \"outtime\": [" << endl;
+  j = 0;
+  for (int i = 0; i < outputTime_Size; i++) {
+    j++;
+    if (i < (outputTime_Size - 1)) {
+      if (j == 1) {
+        out1 << "        " << outputTime_[i] << ", ";
+      } else if (j < 7) {
+        out1 << outputTime_[i] << ", ";
+      } else {
+        j = 0;
+        out1 << outputTime_[i] << "," << endl;
+      }
+    } else {
+      out1 << outputTime_[i] << endl;
+    }
+  }
+  out1 << "    ]" << endl;
+  out1 << "  }" << endl;
+  out1 << "}" << endl;
+  out1.close();
+
+  cout << "   => new time values (calctime & outtime) have been used and "
+          "writen as :"
+       << endl;
+  cout << "         " << outfilename << endl;
 }
 
 void Controller::doCycle(const string &statfilename, int choice,
@@ -213,19 +316,15 @@ void Controller::doCycle(const string &statfilename, int choice,
 
   // Initialize the list of all interfaces in the lattice
 
-  // if (verbose_) {
   cout << endl
-       << "Controller::doCycle Entering Lattice::findInterfaces" << endl;
-  //}
+       << "Controller::doCycle(...) Entering Lattice::findInterfaces()" << endl;
 
   lattice_->findInterfaces();
 
   // lattice_->checkSite(8);
   // cout << endl << " exit controller" << endl;// exit(0);
 
-  // if (verbose_) {
-  cout << endl << "Controller::doCycle Entering Main time loop" << endl;
-  //}
+  cout << endl << "Controller::doCycle(...) Entering Main time loop" << endl;
 
   static double timestep = 0.0;
   bool capwater = true; // True if some capillary water is available
@@ -299,7 +398,7 @@ void Controller::doCycle(const string &statfilename, int choice,
   // JWB 2024-03-18: Florin had this set to 1.e-7
   // JWB 2024-03-18: I increased it due to going from days to hours for time
   // units
-  double deltaTime = 1.e-6; // 1.e-7; // 1.e-6; // 1.e-5;
+  double deltaTime = elemTimeInterval; // 1.e-6; // 1.e-5;
   double delta2Time_0 = 2.0 * deltaTime;
   double delta2Time;
   int numIntervals = 0, numMaxIntervals = 1;
@@ -332,6 +431,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
     cyc++;
 
+    // new
     if (timesGEMFailed_loc > 0) {
       i--;
       time_[i] += (0.1 * (time_[i + 1] - time_[i]));
@@ -340,12 +440,15 @@ void Controller::doCycle(const string &statfilename, int choice,
       cout << endl
            << endl
            << endl
-           << "##### Controller::doCycle  GEMFailed => add next timestep "
+           << "##### GODZILLA Controller::doCycle  GEMFailed => add next "
+              "timestep "
               "before to START NEW CYCLE   "
               "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
            << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
            << " / " << lastGoodTime << " / " << timestep << " #####" << endl;
+
     } else {
+
       timestep = (i > 0) ? (time_[i] - time_[i - 1]) : time_[i];
       if (i == 0) {
         lastGoodTime = 0;
@@ -393,13 +496,13 @@ void Controller::doCycle(const string &statfilename, int choice,
     ///
     /// Once the change in state is determined, propagate the consequences
     /// to the 3D microstructure only if the GEM_run calculation succeeded.
-    /// Otherwise just return from function without doing anything else
+    /// Otherwise we adjust the time step and try again
     ///
 
     if (timesGEMFailed_loc > 0) {
       // Skip the remainder of this iteration and go to the next iteration
       cout << endl
-           << "Controller::doCycle first GEM_run failed "
+           << "  GODZILLA Controller::doCycle first GEM_run failed "
               "i/cyc/time[i]/getTimesGEMFailed_loc: "
            << i << " / " << cyc << " / " << time_[i] << " / "
            << timesGEMFailed_loc << endl;
@@ -416,18 +519,16 @@ void Controller::doCycle(const string &statfilename, int choice,
       fracNextTimeStep = nextTimeStep / fracNum;
 
       for (int indFracNum = 0; indFracNum < fracNum; indFracNum++) {
-        timeZero = time_[i] + indFracNum * fracNextTimeStep;
+        timeZero = time_[i] + (((double)indFracNum) * fracNextTimeStep);
         minTime = timeZero - deltaTime;
         numGen = 0;
         numIntervals = 0;
         delta2Time = delta2Time_0;
         while (timesGEMFailed_loc > 0) {
-          if (numGen % numGenMax == 0) {
-            if (numGen > 0) {
-              numIntervals++;
-              delta2Time = delta2Time * 10;
-              minTime = timeZero - delta2Time / 2;
-            }
+          if ((numGen % numGenMax == 0) && (numGen > 0)) {
+            numIntervals++;
+            delta2Time = delta2Time * 10.0;
+            minTime = 0.5 * (timeZero - delta2Time);
             if (numIntervals == numMaxIntervals) {
               // cout << "      for
               // cyc/indFracNum/delta2Time/numGen/timeZero/minTime : " << cyc
@@ -446,7 +547,7 @@ void Controller::doCycle(const string &statfilename, int choice,
           rNum = lattice_->callRNG();
           numGen++;
           numTotGen++;
-          timeTemp = minTime + rNum * delta2Time;
+          timeTemp = minTime + (rNum * delta2Time);
           timestep = timeTemp - lastGoodTime;
           chemSys_->initDCLowerLimit(0.0);
           timesGEMFailed_loc = calculateState(timeTemp, timestep, isFirst, cyc);
@@ -456,11 +557,11 @@ void Controller::doCycle(const string &statfilename, int choice,
                     "i/cyc/time_[i]/timestep/numTotGen : "
                  << i << " / " << cyc << " / " << time_[i] << " / " << timestep
                  << " / " << numTotGen << endl;
-            // cout << "   Controller::doCycle - PRBL_s_01
-            // i/cyc/indFracNum/numIntervals/delta2Time/numGen : "
-            //      << i << " / " << cyc << " / " << indFracNum << " / " <<
-            //      numIntervals << " / " << delta2Time
-            //      << " / " << numGen << endl;
+            cout << "   Controller::doCycle - PRBL_s_01 // "
+                    "i/cyc/indFracNum/numIntervals/delta2Time/numGen : "
+                 << i << " / " << cyc << " / " << indFracNum << " / "
+                 << numIntervals << " / " << delta2Time << " / " << numGen
+                 << endl;
             cout.flush();
             break;
           }

@@ -1637,16 +1637,14 @@ public:
     }
     lastRNG_ = lastRNGreset;
 
-    cout << endl
-         << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc
-         << " / " << whileCount << " / " << latticeRNGseed_ << endl;
-    cout << "  Lattice::resetRNG "
-            "numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
-         << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / "
-         << lastRNGreset << " / " << valRNG << endl;
-    if (abs(lastRNGreset - valRNG) <= 1.e-16) {
-      cout << "  Lattice::resetRNG OK!" << endl;
-    } else {
+    // cout << endl
+    //      << "  Lattice::resetRNG cyc/whileCount/latticeRNGseed_: " << cyc
+    //      << " / " << whileCount << " / " << latticeRNGseed_ << endl;
+    // cout << "  Lattice::resetRNG "
+    //         "numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
+    //      << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / "
+    //      << lastRNGreset << " / " << valRNG << endl;
+    if (abs(lastRNGreset - valRNG) > 1.e-16) {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);
     }
@@ -1655,7 +1653,7 @@ public:
   void increaseLatticeVolume(void);
 
   void checkSite(int stId) {
-    int phId = site_[stId].getMicroPhaseId();
+    // int phId = site_[stId].getMicroPhaseId();
     cout << endl << " Lattice::checkSite( " << stId << " ):" << endl;
     cout << "    phaseId : " << site_[stId].getMicroPhaseId() << endl;
     cout << "    inDissInterfacePos_ : " << site_[stId].getInDissInterfacePos()

@@ -11,6 +11,7 @@
 #include "Site.h"
 #include "ThermalStrain.h"
 #include "global.h"
+#include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iomanip>

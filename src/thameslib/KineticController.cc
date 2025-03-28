@@ -1081,6 +1081,13 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           // chemSys_->setMicroPhaseMassDissolved(phaseDissolvedId[midx],
           //                                      massDissolved);
 
+          // GODZILLA
+          cout << endl
+               << "kmkmkm Out of kinetic model, scaledMass = " << scaledMass
+               << endl;
+          cout.flush();
+          // GODZILLA
+
           if (scaledMass < 0.0) {
             cout << endl
                  << "KineticController::calculateKineticStep error for cyc = "
@@ -1197,6 +1204,12 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     // cout << "          " << DCName_[i] << ": " << chemSys_->getDCMoles(i) <<
     // " mol" << endl;
   }
+
+  // GODZILLA
+  cout << "dbdb Exiting cement scaled mass = "
+       << chemSys_->getScaledCementMass() << endl;
+  cout.flush();
+  // GODZILLA
 
   // if (!doTweak) {
   //   cout << "  KineticController::calculateKineticStep end - cyc = " << cyc
