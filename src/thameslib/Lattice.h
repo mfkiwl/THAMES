@@ -13,7 +13,7 @@ exists, hydrates, and possibly deteriorates.
 
 #include <algorithm>
 #include <climits>
-#include <cmath>
+// #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -87,7 +87,7 @@ private:
   double resolution_;          /**< Voxel edge length [micrometers] */
   vector<Site> site_;          /**< 1D list of Site objects (site = voxel) */
   unsigned int numSites_;      /**< Total number of sites */
-  unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site */
+  // unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site */
   ChemicalSystem *chemSys_;    /**< Pointer to simulation's ChemicalSystem */
   AppliedStrain *FEsolver_;    /**< Pointer to simulation's FE elastic solver */
   vector<Interface> interface_; /**< List of the different interface objects
@@ -193,8 +193,6 @@ public:
   the voxel phase assignments can be made at each site.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
-  @param rg is a pointer to the random number generator object
-  @param seedRNG is the random number seed
   @param fileName is the name of the file containing the microstructure data
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
@@ -411,7 +409,7 @@ public:
 
   @return the number of neighbor sites each site has
   */
-  unsigned int getSiteNeighbors() const { return siteNeighbors_; }
+  // unsigned int getSiteNeighbors() const { return siteNeighbors_; }
 
   /**
   @brief Set the lattice resolution [meters].
@@ -638,8 +636,10 @@ public:
 
   @param microPhaseMass is a vector of all the microstructure masses
   @param cementMass is the combined mass of all the cement components
+  @param solidMass is the combined mass of all the solids
   */
-  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass);
+  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass,
+                            double solidMass);
 
   /**
   @brief Master method to locate the interfaces for each phase in the

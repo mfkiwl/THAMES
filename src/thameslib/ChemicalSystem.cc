@@ -63,7 +63,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   isKinetic_.clear();
   isParrotKilloh_.clear();
   isParrotKillohSize_ = 0;
-  isKinetic_.clear();
   ICName_.clear();
   DCName_.clear();
   GEMPhaseName_.clear();
@@ -1418,6 +1417,8 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
   phaseData.colors.push_back(blue);
   phaseData.gray = gray;
 
+  float rgbfColor;
+
   if (rgbBool) {
     map<string, elemColor>::iterator it = colorN_.find(phaseData.thamesName);
     if (it != colorN_.end()) {
@@ -1425,6 +1426,16 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
       colorN_[phaseData.thamesName].rgb[1] = green;
       colorN_[phaseData.thamesName].rgb[2] = blue;
       colorN_[phaseData.thamesName].gray = gray;
+
+      colorN_[phaseData.thamesName].rgbf[0] =
+          (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+      colorN_[phaseData.thamesName].rgbf[1] =
+          (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+      colorN_[phaseData.thamesName].rgbf[2] =
+          (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+      colorN_[phaseData.thamesName].grayf =
+          (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+
     } else {
       colorN_[phaseData.thamesName].colorId = colorN_.size();
       colorN_[phaseData.thamesName].altName = phaseData.thamesName;
@@ -1432,15 +1443,27 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
       colorN_[phaseData.thamesName].rgb.push_back(green);
       colorN_[phaseData.thamesName].rgb.push_back(blue);
       colorN_[phaseData.thamesName].gray = gray;
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[0] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[1] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].rgb[2] / 255.0;
+      colorN_[phaseData.thamesName].rgbf.push_back(rgbfColor);
+
+      rgbfColor = colorN_[phaseData.thamesName].gray / 255.0;
+      colorN_[phaseData.thamesName].grayf = rgbfColor;
     }
-    colorN_[phaseData.thamesName].rgbf[0] =
-        (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
-    colorN_[phaseData.thamesName].rgbf[1] =
-        (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
-    colorN_[phaseData.thamesName].rgbf[2] =
-        (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
-    colorN_[phaseData.thamesName].grayf =
-        (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[0] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[1] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+    // colorN_[phaseData.thamesName].rgbf[2] =
+    //     (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+    // colorN_[phaseData.thamesName].grayf =
+    //     (float)(colorN_[phaseData.thamesName].gray) / 255.0;
   }
 
   return;
@@ -2046,8 +2069,8 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
 
 int ChemicalSystem::calculateState(double time, bool isFirst = false,
                                    int cyc = 0) {
-
-  string msg;
+  // int status = 0;
+  string msg; // , iniStrNodeStatus, endStrNodeStatus;
 
   // isFirst = true;
 
@@ -2181,8 +2204,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   ///    0 (NO_GEM_SOLVER): No GEM recalculation needed for node
   ///    1 (NEED_GEM_AIA) : Need GEM calc with LPP (auto initial approx, AIA)
   ///    2 (OK_GEM_AIA)   : OK after GEM calc with LPP AIA
-  ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP
-  ///    AIA 4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
+  ///    3 (BAD_GEM_AIA)  : Not fully trusworthy result after calc with LPP AIA
+  ///    4 (ERR_GEM_AIA)  : Failure (no result) in GEM calc with LPP AIA
   ///    5 (NEED_GEM_SIA) : Need GEM calc with no-LPP (smart initial approx,
   ///    SIA) 6 (OK_GEM_SIA)   : OK after GEM calc with SIA 7 (BAD_GEM_SIA)  :
   ///    Not fully trusworthy result after calc with SIA 8 (ERR_GEM_SIA)  :
@@ -2260,15 +2283,47 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       throw GEMException("ChemicalSystem", "calculateState", msg);
     }
   } else {
+    // string finStrNodeStatus;
+    // if (nodeStatus_ == 2) {
+    //   finStrNodeStatus = "OK_GEM_AIA";
+    // } else if (iniNodeStatus == 6) {
+    //   finStrNodeStatus = "OK_GEM_SIA";
+    // }
+    // cout << endl <<"  ChemicalSystem::calculateState - for cyc = " << cyc <<
+    // " : OK" << endl; cout << "    ChemicalSystem::calculateState - initial
+    // nodeStatus_ = " << iniNodeStatus << " [" << iniStrNodeStatus << "]" <<
+    // endl; cout << "    ChemicalSystem::calculateState - final nodeStatus_   =
+    // " << nodeStatus_ << " [" << finStrNodeStatus << "]" << endl;
 
     cout << "  ChemicalSystem::calculateState - cyc = " << cyc
          << " : OK & GEM_run has failed " << timesGEMFailed_
          << " consecutive times before to find this solution" << endl;
 
+    // cout << "    ChemicalSystem::calculateState - solution for kinetic
+    // controlled phases:" << endl; for (int i = 0; i < numMicroPhases_; i++) {
+    //   if (isKinetic_[i]) {
+    //     cout << "      i = " << setw(3) << right << i << " : " << setw(15) <<
+    //     left
+    //          << microPhaseName_[i]
+    //          << " => updated scaledMass (microPhaseMass_[i]) = " <<
+    //          microPhaseMass_[i]
+    //          << " , microPhaseMassDissolved_[i] = " <<
+    //          microPhaseMassDissolved_[i]
+    //          << " and volume = " << microPhaseVolume_[i] << endl;
+    //   }
+    // }
+
     timesGEMFailed_ = 0;
   }
 
   if (timesGEMFailed_ > 0) {
+    // cout << "  ChemicalSystem::calculateState - GEM_run has failed "
+    //      << timesGEMFailed_ << " consecutive times  cyc = " << cyc << endl;
+    // if (timesGEMFailed_ % 10000  == 0) {
+    //   cout << endl << "  ChemicalSystem::calculateState - test : GEM_run has
+    //   failed "
+    //        << timesGEMFailed_ << " consecutive times  cyc = " << cyc << endl;
+    // }
     return timesGEMFailed_;
   }
 
@@ -2295,8 +2350,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
                    &specificSurfaceArea_[0], &pSolidStoich_[0]);
 
   if (verbose_) {
-    cout << "  ChemicalSystem::calculateState - GEM_from_MT OK for cyc = "
-         << cyc << endl;
     cout << endl << "Done!" << endl;
     cout << "ChemicalSystem::calculateState Exiting GEM_from_MT cyc = " << cyc
          << endl;
@@ -2366,7 +2419,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       cout.flush();
     }
 
-    if (!isKinetic(i)) {
+    if (!isKinetic_[i]) {
       calcMicroPhasePorosity(i);
       // phi = getMicroPhasePorosity(i);
       phi = microPhasePorosity_[i];
@@ -2437,7 +2490,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       microVolume_ += (microPhaseVolume_[i] / (1.0 - phi));
       if (microPhaseVolume_[i] < 0) {
         cout << endl
-             << "ChemicalSystem::calculateState error1 - microPhaseVolume_ < 0 "
+             << "ChemicalSystem::calculateState error2 - microPhaseVolume_ < 0 "
                 "for cyc = "
              << cyc << " :" << endl;
         for (int i = 1; i < numMicroPhases_; i++) {
@@ -2448,7 +2501,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
         cout << endl << "end program" << endl;
 
         throw GEMException("ChemicalSystem", "calculateState",
-                           "error1 : microPhaseVolume_ < 0");
+                           "error2 : microPhaseVolume_ < 0");
         // exit(0);
       }
     }
@@ -2457,32 +2510,34 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   scaledCementMass_ = 0;
   for (int i = 0; i < isParrotKillohSize_; i++) {
     scaledCementMass_ += microPhaseMass_[isParrotKilloh_[i]];
+    // cout << "  ChemicalSystem::calculateState for cyc = " << cyc
+    //      << "  i = " << i << "  isParrotKilloh_[i] = " << isParrotKilloh_[i]
+    //      << "   "
+    //      << microPhaseMass_[isParrotKilloh_[i]] << endl;
   }
 
   if (isSaturated_) { // System is saturated
-    double water_molarv, water_molesincr;
 
     if (initMicroVolume_ > microVolume_) {
+      double water_molarv, water_molesincr;
       int wDCId = getDCId("H2O@");
       water_molarv = node_->DC_V0(wDCId, P_, T_);
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
-      // if (verbose_) {
-      cout << "System is saturated: wDCId = " << wDCId << endl;
-      cout << "    initMicroVolume_ = " << initMicroVolume_ << endl;
-      cout << "    microVolume_ = " << microVolume_ << endl;
-      cout << "    water_molarv = " << water_molarv << endl;
-      cout << "    volume increase of water is: "
-           << (initMicroVolume_ - microVolume_) << endl;
-      cout << "    water_molesincr = " << water_molesincr << endl;
-      // }
+      if (verbose_) {
+        cout << "System is saturated: wDCId = " << wDCId << endl;
+        cout << "    water_molarv = " << water_molarv << endl;
+        cout << "    volume increase of water is: "
+             << (initMicroVolume_ - microVolume_) << endl;
+        cout << "    water_molesincr = " << water_molesincr << endl;
+      }
       DCMoles_[wDCId] += water_molesincr;
 
       double waterMolarMass = getDCMolarMass(wDCId);
       addWaterMassAndVolume(water_molesincr * waterMolarMass,
                             initMicroVolume_ - microVolume_); // necessary
 
-      cout << "  ChemicalSystem::calculateState - for cyc = " << cyc
-           << " => water_molesincr = " << water_molesincr << endl;
+      cout << "  ChemicalSystem::calculateState - cyc = " << cyc
+           << " : water_molesincr = " << water_molesincr << endl;
       // newMicroVolume_ = initMicroVolume_;
     }
   }
@@ -2495,7 +2550,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (initMicroVolume_ < microVolume_) {
-    cout << "  ChemicalSystem::calculateState - for cyc = " << cyc
+    cout << "  ChemicalSystem::calculateState - cyc = " << cyc
          << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_
          << " < " << microVolume_ << endl;
     // initMicroVolume_ = microVolume_;
@@ -2850,12 +2905,26 @@ void ChemicalSystem::initColorMap(void) {
   map<string, elemColor>::iterator it = colorN_.begin();
 
   while (it != colorN_.end()) {
+    // cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
+    // cout.flush();
     (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
     (it->second).grayf = (float)((it->second).gray) / 255.0;
     ++it;
   }
+
+  // cout << "Made it past iterator" << endl;
+  // cout.flush();
+
+  /*
+  colorN_[""].colorId = ;
+  colorN_[""].altName = "";
+  colorN_[""].rgb.push_back(255);
+  colorN_[""].rgb.push_back();
+  colorN_[""].rgb.push_back();
+  colorN_[""].gray = ;
+  */
 }
 
 //*@******************************************
@@ -3080,6 +3149,7 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
     cout << "   - simulation without given gas composition." << endl;
   }
 }
+
 void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
   if (isFirst && initialSolutionComposition_.size() > 0) {
     double waterMoles = getDCMoles("H2O@");

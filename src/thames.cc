@@ -386,35 +386,6 @@ int main(int argc, char **argv) {
   //
   // Simulation is finished.
   //
-  // Move remaining output files to output folder
-  //
-
-  string name = "ipmlog.txt";
-  ifstream f(name.c_str());
-  if (f.good()) {
-    buff = "mv -f ipmlog.txt " + outputFolder + "/.";
-    resCallSystem = system(buff.c_str());
-    if (resCallSystem == -1) {
-      throw FileException("thames", "main", buff, "FAILED");
-    }
-    cout << buff << endl;
-    f.close();
-  }
-
-  name = "IPM_dump.txt";
-  f.open(name.c_str());
-  if (f.good()) {
-    buff = "mv -f IPM_dump.txt " + outputFolder + "/.";
-    resCallSystem = system(buff.c_str());
-    if (resCallSystem == -1) {
-      throw FileException("thames", "main", buff, "FAILED");
-    }
-    cout << buff << endl;
-    f.close();
-  }
-
-  // Record and output the timing data.
-  //
 
   deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver, AppliedStrainSolver,
                     KController, Ctrl, starttime, lt, errorProgram);

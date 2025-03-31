@@ -12,7 +12,7 @@ implemented in the AppliedStrain class.
 #define THERMALSTRAIN_H
 
 #include "ElasticModel.h"
-#include <cmath>
+// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>

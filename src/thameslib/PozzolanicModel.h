@@ -62,7 +62,7 @@ protected:
 
   double rh_;
   double rhFactor_;
-  double T_;
+  // double T_;
   double arrhenius_;
 
 public:
@@ -101,8 +101,6 @@ public:
 
   /**
   @brief Set the dissolution rate constant
-
-  @note NOT USED.
 
   @param rc is the rate constant value to use
   */

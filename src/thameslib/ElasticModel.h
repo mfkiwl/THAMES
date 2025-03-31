@@ -61,7 +61,7 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 #ifndef ELASTICMODEL_H
 #define ELASTICMODEL_H
 
-#include <cmath>
+// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>

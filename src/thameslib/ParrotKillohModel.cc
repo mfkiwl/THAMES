@@ -48,15 +48,15 @@ ParrotKillohModel::ParrotKillohModel() {
   critDOR_ = 100.0;
   degreeOfReaction_ = 0.0;
 
-  T_ = lattice_->getTemperature();
+  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
   arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / temperature_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -144,22 +144,16 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   initScaledMass_ = kineticData.scaledMass;
 
   critDOR_ = dorHcoeff_ * wcRatio_;
-  // GODZILLA
-  cout << "OSTARA: dorHcoeff_ = " << dorHcoeff_ << ", wcRatio_ = " << wcRatio_
-       << ", critDOR_ = " << critDOR_ << endl;
-  cout.flush();
-  // GODZILLA
   degreeOfReaction_ = 0.0;
 
-  T_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = pow(((rh_ - 0.55) / 0.45), 4.0);
 
   arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / temperature_)));
 
   /// The default is to not have sulfate attack or leaching, so we set the
   /// default time for initiating these simulations to an absurdly large value:
@@ -225,15 +219,15 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
 
+    scaledMass_ = scaledMass;
+
     if (initScaledMass_ > 0.0) { // DOR @ t-1
       DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-      DOR = min(DOR,
-                0.99); // prevents DOR from prematurely stopping PK calculations
 
       if (verbose_) {
-        cout << "~~~~>DOR for " << name_ << " = " << DOR << endl;
-        cout << "(initScaledMass_ = " << initScaledMass_
-             << ", scaledMass_ = " << scaledMass_ << ")" << endl;
+        cout << "~~~~>DOR for " << name_ << " = " << DOR
+             << "   initScaledMass_/scaledMass_ : " << initScaledMass_
+             << " / " << scaledMass_ << endl;
         cout.flush();
       }
     } else {
@@ -270,6 +264,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
       }
 
       rate = (ngrate < hsrate) ? ngrate : hsrate;
+
       if (diffrate < rate)
         rate = diffrate;
 
@@ -277,45 +272,32 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
 
-      double prod = rate * timestep * wcFactor;
-      newDOR = min(DOR + prod, 1.0);
+      double prod = rate * timestep;
+
+      newDOR = DOR + prod;
 
       wcFactor = 1.0;
+
       if (totalDOR > critDOR_) {
         wcFactor = pow((1 + 3.333 * (critDOR_ - newDOR)), 4);
-        prod = rate * timestep * wcFactor;
-        newDOR = min(DOR + prod, 1.0);
+        prod = timestep * rate * wcFactor;
+        newDOR = DOR + prod;
       }
 
-      cout << "^^^ " << name_ << ":" << endl;
-      cout.flush();
-      cout << "      ngrate = " << ngrate << endl;
-      cout << "         k1_ = " << k1_ << endl;
-      cout << "         n1_ = " << n1_ << endl;
-      cout << "      DOR = " << DOR << endl;
-      cout << "      newDOR = " << newDOR << endl;
-      cout << "      totalDOR = " << totalDOR << endl;
-      cout << "      critDOR_ = " << critDOR_ << endl;
-      cout << "      ssaFactor_ = " << ssaFactor_ << endl;
-      cout << "      hsrate = " << hsrate << endl;
-      cout << "         k3_ = " << k3_ << endl;
-      cout << "         n3_ = " << n3_ << endl;
-      cout << "      diffrate = " << diffrate << endl;
-      cout << "         k2_ = " << k2_ << endl;
-      cout << "      pfk_ = " << pfk_ << endl;
-      cout << "      rhFactor_ = " << rhFactor_ << endl;
-      cout << "      arrhenius_ = " << arrhenius_ << endl;
-      cout << "      wcFactor = " << wcFactor << endl;
-      cout << "      timestep = " << timestep << endl;
-      cout << "      rate = " << rate << endl;
-      cout << "      prod = " << prod << endl;
-      cout << "^^^" << endl;
-      cout.flush();
+      if (newDOR >= 1.) {
 
-      scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+        massDissolved = scaledMass_;
 
-      // massDissolved = (newDOR - DOR) * initScaledMass_;
-      massDissolved = initScaledMass_ * prod;
+        scaledMass_ = 0;
+
+      } else {
+
+        scaledMass_ = initScaledMass_ * (1.0 - newDOR);
+
+        // massDissolved = (newDOR - DOR) * initScaledMass_;
+        massDissolved = initScaledMass_ * prod;
+
+      }
 
       scaledMass = scaledMass_;
 
@@ -323,8 +305,6 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
         cout << "    ParrotKillochModel::calculateKineticStep "
                 "rate/wcFactor/massDissolved : "
              << rate << " / " << wcFactor << " / " << massDissolved << endl;
-
-        // if (verbose_) {
         cout << "  ****************** PKM_hT = " << timestep
              << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_

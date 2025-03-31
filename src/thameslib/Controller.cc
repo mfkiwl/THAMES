@@ -347,7 +347,6 @@ void Controller::doCycle(const string &statfilename, int choice,
   if (xyz_)
     lattice_->appendXYZ(0.0, simType_, jobRoot_);
   int timesGEMFailed_loc = 0;
-  int timesGEMFailed_loc1 = -10;
 
   // init to 0 all DC moles corresponding to the kinetic controlled microphases
   //      these DCmoles will be updated by
@@ -379,21 +378,18 @@ void Controller::doCycle(const string &statfilename, int choice,
     writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
 
   // variables used in DCLowerLimit computation
-  vector<int> vectDCId;
   double volMolDiff, molarMassDiff, vfracDiff, massDissolved;
   double microPhaseMassDiff, scaledMassDiff, numMolesDiff;
   int numDCs = chemSys_->getNumDCs();
   int timesGEMFailed_recall;
 
-  cout << endl << "     ===== START SIMULATION =====" << endl;
+  cout << endl << endl << "     ===== START SIMULATION =====" << endl;
 
   int cyc = 0;
-  // int ii = 0;
   int timeSize = time_.size();
-  int iReal;
 
   double minTime, rNum;
-  double timeTemp, timestep1, timeIni;
+  double timeTemp;
 
   // JWB 2024-03-18: Florin had this set to 1.e-7
   // JWB 2024-03-18: I increased it due to going from days to hours for time
@@ -414,9 +410,6 @@ void Controller::doCycle(const string &statfilename, int choice,
   int lastGoodI = 0;
   double lastGoodTime = 0.0;
 
-  int dcId;
-  bool no_dcId;
-
   // Main computation cycle
   for (i = 0; (i < timeSize) && (capwater); ++i) {
 
@@ -425,10 +418,6 @@ void Controller::doCycle(const string &statfilename, int choice,
     ///
 
     bool isFirst = (i == 0) ? true : false;
-    if (isFirst) {
-      writeTxtOutputFiles(0.0);
-    }
-
     cyc++;
 
     // new
@@ -440,8 +429,7 @@ void Controller::doCycle(const string &statfilename, int choice,
       cout << endl
            << endl
            << endl
-           << "##### GODZILLA Controller::doCycle  GEMFailed => add next "
-              "timestep "
+           << "##### Controller::doCycle  GEMFailed => add next timestep "
               "before to START NEW CYCLE   "
               "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
            << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
@@ -500,12 +488,13 @@ void Controller::doCycle(const string &statfilename, int choice,
     ///
 
     if (timesGEMFailed_loc > 0) {
-      // Skip the remainder of this iteration and go to the next iteration
       cout << endl
-           << "  GODZILLA Controller::doCycle first GEM_run failed "
-              "i/cyc/time[i]/getTimesGEMFailed_loc: "
+           << "  Controller::doCycle first GEM_run failed "
+              "i/cyc/time[i]/getTimesGEMFailed_loc : "
            << i << " / " << cyc << " / " << time_[i] << " / "
            << timesGEMFailed_loc << endl;
+
+      //**********************
 
       cout << endl
            << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep     "
@@ -525,10 +514,12 @@ void Controller::doCycle(const string &statfilename, int choice,
         numIntervals = 0;
         delta2Time = delta2Time_0;
         while (timesGEMFailed_loc > 0) {
-          if ((numGen % numGenMax == 0) && (numGen > 0)) {
-            numIntervals++;
-            delta2Time = delta2Time * 10.0;
-            minTime = 0.5 * (timeZero - delta2Time);
+          if (numGen % numGenMax == 0) {
+            if (numGen > 0) {
+              numIntervals++;
+              delta2Time = delta2Time * 10;
+              minTime = timeZero - delta2Time / 2;
+            }
             if (numIntervals == numMaxIntervals) {
               // cout << "      for
               // cyc/indFracNum/delta2Time/numGen/timeZero/minTime : " << cyc
@@ -557,11 +548,11 @@ void Controller::doCycle(const string &statfilename, int choice,
                     "i/cyc/time_[i]/timestep/numTotGen : "
                  << i << " / " << cyc << " / " << time_[i] << " / " << timestep
                  << " / " << numTotGen << endl;
-            cout << "   Controller::doCycle - PRBL_s_01 // "
-                    "i/cyc/indFracNum/numIntervals/delta2Time/numGen : "
-                 << i << " / " << cyc << " / " << indFracNum << " / "
-                 << numIntervals << " / " << delta2Time << " / " << numGen
-                 << endl;
+            // cout << "   Controller::doCycle - PRBL_s_01
+            // i/cyc/indFracNum/numIntervals/delta2Time/numGen : "
+            //      << i << " / " << cyc << " / " << indFracNum << " / " <<
+            //      numIntervals << " / " << delta2Time
+            //      << " / " << numGen << endl;
             cout.flush();
             break;
           }
@@ -605,7 +596,7 @@ void Controller::doCycle(const string &statfilename, int choice,
 
     try {
       // set iniLattice i.e. a copy of initial lattice/system configuration
-      //(including RNG state and all DCs values)
+      // (including RNG state and all DCs values)
       // from ChemicalSystem:
       iniLattice.DCMoles = kineticController_->getDCMoles();
 
@@ -669,8 +660,6 @@ void Controller::doCycle(const string &statfilename, int choice,
       //        numSitesNotAvailable ("numDiff" in
       //        lattice_->changeMicrostructure" - sites that cannot be
       //        dissolved) lattice sites for the microphase phDiff
-
-      // restore initial system:
 
       if (changeLattice == 0) {
         timesGEMFailed_recall = -1;
@@ -879,9 +868,9 @@ void Controller::doCycle(const string &statfilename, int choice,
     }
 
     // write output .txt files
+    writeTxtOutputFiles(time_[i]);
     if (writeICsDCs)
       writeTxtOutputFiles_onlyICsDCs(time_[i]);
-    writeTxtOutputFiles(time_[i]);
 
     ///
     /// Calculate the pore size distribution and saturation

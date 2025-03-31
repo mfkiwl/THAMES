@@ -49,6 +49,7 @@ PozzolanicModel::PozzolanicModel() {
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
 
+  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
   rh_ = exp(-6.23527e-7 / critporediam / temperature_);
@@ -118,6 +119,7 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
 
   initSolidMass_ = 100.0;
 
+  temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
   modelName_ = "PozzolanicModel";
@@ -129,7 +131,6 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
-  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
   rh_ = exp(-6.23527e-7 / critporediam / temperature_);
@@ -211,16 +212,26 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
 
+    scaledMass_ = scaledMass;
+
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / (initScaledMass_);
       // prevent DOR from prematurely stopping PK calculations
-      DOR = min(DOR, 0.99);
+      // DOR = min(DOR, 0.99);
     } else {
       throw FloatException("PozzolanicModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
 
-    if (DOR < 1.0) {
+    if (DOR < 0.0) {
+      cout << endl << "    PozzolanicModel::calculateKineticStep - for cyc = " << cyc
+           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
+           << initScaledMass_ << " / " << scaledMass_ << endl;
+      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+    }
+
+    // if (DOR < 1.0) {
 
       /// BULLARD placeholder
       /// @note playing with different base rate constants here
@@ -346,15 +357,24 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
             << rate << " / " << massDissolved << endl;
       }
 
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+      scaledMass = scaledMass_ - massDissolved;
 
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+      if (scaledMass < 0) {
+        massDissolved = scaledMass_;
+        scaledMass = 0;
+      }
+      scaledMass_ = scaledMass;
 
-      scaledMass = scaledMass_;
+      // scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
+
+      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+
+      // scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "  ****************** PZM_hT = " << timestep
-             << "\tcyc = " << cyc << "\tmicroPhaseId_ = " << microPhaseId_
+        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+        cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
+             << "\tmicroPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
@@ -372,10 +392,10 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
         cout.flush();
       }
 
-    } else {
-      throw DataException("PozzolanicModel", "calculateKineticStep",
-                          "DOR >= 1.0");
-    }
+    // } else {
+    //   throw DataException("PozzolanicModel", "calculateKineticStep",
+    //                      "DOR >= 1.0");
+    // }
 
     //} // End of normal hydration block
   } // End of try block

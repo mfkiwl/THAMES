@@ -53,7 +53,7 @@ protected:
 
   double rh_;
   double rhFactor_;
-  double T_;
+  // double T_;
   double arrhenius_;
 
 public:

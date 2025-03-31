@@ -7,7 +7,7 @@
 #include "Interface.h"
 #include "RanGen.h"
 
-Lattice::Lattice(ChemicalSystem *cs) : siteNeighbors_(NN_NNN), chemSys_(cs) {
+Lattice::Lattice(ChemicalSystem *cs) : chemSys_(cs) {
   xdim_ = ydim_ = zdim_ = 0;
   time_ = 0.0;
   temperature_ = REFTEMP; // in Kelvin (see global.h)
@@ -28,7 +28,7 @@ Lattice::Lattice(ChemicalSystem *cs) : siteNeighbors_(NN_NNN), chemSys_(cs) {
 
 Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
                  const string &fileName, const bool verbose, const bool warning)
-    : siteNeighbors_(NN_NNN), chemSys_(cs), rg_(rg) {
+    : chemSys_(cs), rg_(rg) {
 
   unsigned int i, j, k;
   unsigned int ii;
@@ -498,7 +498,6 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
             DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId, 0);
           }
           if (microPhaseId != VOIDID) {
-            string myName = chemSys_->getDCName(DCId);
             molarMass = chemSys_->getDCMolarMass(DCId);     // g/mol
             molarVolume = chemSys_->getDCMolarVolume(DCId); // m3/mol
             density = 0.0;
@@ -516,8 +515,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
             if (verbose_) {
               cout << ii << "\tLattice::Lattice Phase "
                    << chemSys_->getMicroPhaseName(microPhaseId)
-                   << "\tmicroPhaseId: " << microPhaseId << ", DC = " << myName
-                   << endl;
+                   << "\tmicroPhaseId: " << microPhaseId << ", DCName = "
+                   << chemSys_->getDCName(DCId) << endl;
               cout << "Lattice::Lattice     Molar mass = " << molarMass
                    << " g/mol" << endl;
               cout << "Lattice::Lattice     Molar volume = " << molarVolume
@@ -583,7 +582,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
     // normalizePhaseMasses->setMicroPhaseMass->setMicroPhaseVolume->calcMicroPhasePorosity
 
     try {
-      normalizePhaseMasses(microPhaseMass, cementMass);
+      normalizePhaseMasses(microPhaseMass, cementMass, solidMass);
 
       // Next we also normalize the surface areas to the same 100 g of total
       // solid in the initial microstructure
@@ -673,7 +672,7 @@ Lattice::~Lattice() {
 
 void Lattice::addSite(const unsigned int x, const unsigned int y,
                       const unsigned int z) {
-  string msg;
+  // string msg;
 
   try {
     if (x >= xdim_ || x < 0) {
@@ -691,11 +690,11 @@ void Lattice::addSite(const unsigned int x, const unsigned int y,
   // Assume that the site is WATER by default.  This will break if
   // there is ever a sytem without water.
 
-  site_.push_back(Site(x, y, z, xdim_, ydim_, zdim_, siteNeighbors_, chemSys_));
+  site_.push_back(Site(x, y, z, xdim_, ydim_, zdim_, NN_NNN, chemSys_));
 }
 
 void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
-                                   double cementMass) {
+                                   double cementMass, double solidMass) {
   int microPhaseId, DCId;
   double pscaledMass = 0.0;
   double molarMass;
@@ -725,7 +724,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       // initSolidMass_ is the sum of all microPhaseMass values
       // So pscaledMass (p stands for percent) is mass percent on a total solids
       // basis
-      pscaledMass = microPhaseMass[microPhaseId] * 100.0 / initSolidMass_;
+      pscaledMass = microPhaseMass[microPhaseId] * 100.0 / solidMass;
       DCId = chemSys_->getMicroPhaseDCMembers(microPhaseId, 0);
       chemSys_->setDC_to_MPhID(DCId, microPhaseId);
       molarMass = chemSys_->getDCMolarMass(DCId);
@@ -734,7 +733,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
                 "mass of "
              << i << "   " << chemSys_->getMicroPhaseName(microPhaseId) << " ("
              << microPhaseId << ") = " << microPhaseMass[microPhaseId]
-             << " g out of " << initSolidMass_ << " g total" << endl;
+             << " g out of " << solidMass << " g total" << endl;
         // Setting the phase mass will also automatically calculate the phase
         // volume
         cout.flush();
@@ -814,7 +813,6 @@ void Lattice::findInterfaces(void) {
   unsigned int k;
   vector<Site *> gsite, dsite;
   vector<Site *>::iterator beginLocation, endLocation;
-  vector<Isite>::iterator start, end;
   int stId;
   int gvsize = gsite.size();
   int dvsize = dsite.size();
@@ -938,7 +936,7 @@ void Lattice::findInterfaces(void) {
           int intSiteId, intPhId, posSite;
           cout << endl
                << endl
-               << "   Lattice::findInterfaces PhId/sizeIntLatt/sizeIntInte : "
+               << "   Lattice::findInterfaces() PhId/sizeIntLatt/sizeIntInte : "
     << i << " / "
                << sizeIntLatt << " / " << sizeIntInte << endl
                << endl;
@@ -1058,9 +1056,8 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
   //      << "   numLeftTot = " << numLeftTot
   //      << "   numChangeTot = " << numChangeTot << endl;
   cout << endl
-       << "    Lattice::growPhase GROW_INI totalTRC/trc_g/bcl/affSum "
-       << totalTRC << "/" << trc_g << "/" << bcl << "/" << affSum << endl;
-  cout << "      GROW_INI growPhaseIDVectSize = " << growPhaseIDVectSize
+       << "    Lattice::growPhase GROW_INI totalTRC/trc_g " << totalTRC << "/"
+       << trc_g << " : growPhaseIDVectSize = " << growPhaseIDVectSize
        << "   growthVectorSize = " << growthVectorSize
        << "   numLeftTot = " << numLeftTot
        << "   numChangeTot = " << numChangeTot << endl;
@@ -2991,7 +2988,7 @@ int Lattice::fillPorosity(int numsites, int cyc) {
     cout.flush();
   }
 
-  // cout << "  Lattice::fillPorosity - check for cyc = " << cyc
+  // cout << "    Lattice::fillPorosity - check for cyc = " << cyc
   //      << " :      numsites = " << numsites;
   // cout.flush();
 
@@ -4393,7 +4390,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
   // Write the header
 
   if (verbose_) {
-    cout << "Time = " << (curtime) << " h" << endl;
+    cout << "Time = " << curtime << " h" << endl;
     cout << "Capillary pore volume fraction (> 100 nm) = "
          << capillaryPoreVolumeFraction_ << endl;
     cout << "Capillary void volume fraction = " << volumeFraction_[VOIDID]
@@ -4410,7 +4407,7 @@ void Lattice::writePoreSizeDistribution(double curtime, const int simtype,
     cout.flush();
   }
 
-  out << "Time = " << (curtime) << " h" << endl;
+  out << "Time = " << curtime << " h" << endl;
   out << "Capillary pore volume fraction (> 100 nm) = "
       << capillaryPoreVolumeFraction_ << endl;
   out << "Capillary void volume fraction = " << volumeFraction_[VOIDID] << endl;
@@ -4962,6 +4959,7 @@ void Lattice::writeLatticePNG(double curtime, const int simtype,
   /// @warning This relies on installation of ImageMagick
   ///
 
+  // buff = "convert " + ofileName + " " + ofpngname;
   buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
@@ -5086,6 +5084,7 @@ void Lattice::writeDamageLatticePNG(double curtime, const string &root) {
   /// @warning This relies on installation of ImageMagick
   ///
 
+  // buff = "convert " + ofileName + " " + ofpngname;
   buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
@@ -5210,6 +5209,7 @@ void Lattice::makeMovie(const string &root) {
     /// @warning This relies on installation of ImageMagick
     ///
 
+    // buff = "convert " + ofileName + " " + ofgifileName;
     buff = ConvertCommand + " " + ofileName + " " + ofgifileName;
     resCallSystem = system(buff.c_str());
     if (resCallSystem == -1) {

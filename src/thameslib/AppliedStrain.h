@@ -9,7 +9,7 @@ Solves the linear elastic state of the finite element mesh.
 #define APPLIEDSTRAIN_H
 
 #include "ElasticModel.h"
-#include <cmath>
+// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>

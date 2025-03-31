@@ -16,7 +16,6 @@ used.
 #define KINETICSH
 
 #include "ChemicalSystem.h"
-#include <algorithm>
 #include <ctime>
 #include <fstream>
 #include <iomanip>

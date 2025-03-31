@@ -44,6 +44,7 @@ StandardKineticModel::StandardKineticModel() {
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
 
+  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
   rh_ = exp(-6.23527e-7 / critporediam / temperature_);
@@ -105,6 +106,7 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
 
   initSolidMass_ = 100.0;
 
+  temperature_ = kineticData.temperature;
   refT_ = kineticData.reftemperature;
 
   modelName_ = "StandardKineticModel";
@@ -116,7 +118,6 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   scaledMass_ = kineticData.scaledMass;
   initScaledMass_ = kineticData.scaledMass;
 
-  temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
   rh_ = exp(-6.23527e-7 / critporediam / temperature_);
@@ -185,17 +186,26 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
+    scaledMass_ = scaledMass;
 
     if (initScaledMass_ > 0.0) {
       DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
       // prevent DOR from prematurely stopping PK calculations
-      DOR = min(DOR, 0.99);
+      // DOR = min(DOR, 0.99);
     } else {
       throw FloatException("StandardKineticModel", "calculateKineticStep",
                            "initScaledMass_ = 0.0");
     }
 
-    if (DOR < 1.0) {
+    if (DOR < 0.0) {
+      cout << endl << "    StandardKineticModel::calculateKineticStep - for cyc = " << cyc
+           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
+           << initScaledMass_ << " / " << scaledMass_ << endl;
+      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+    }
+
+    // if (DOR < 1.0) { //test!
 
       // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
@@ -216,6 +226,11 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       // area has units of m2 of phase per 100 g of total solid
       // Therefore dissrate has units of mol of phase per 100 g of all solid
       // per h
+      
+      // This equation basically implements the Dove and Crerar rate
+      // equation for quartz.  Needs to be calibrated for silica fume, but
+      // hopefully the BET area and LOI will help do that.
+
       if (saturationIndex < 1.0) {
         dissrate = dissolutionRateConst_ * area *
                    pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
@@ -236,41 +251,28 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
       if (verbose_) {
-        cout << "^^^ " << name_ << ":" << endl;
-        cout.flush();
-        cout << "      dissrate_ini = " << dissrate_ini << endl;
-        cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
-             << endl;
-        cout << "         area = " << area << endl;
-        cout << "      saturationIndex = " << saturationIndex << endl;
-        cout << "      siexp_ = " << siexp_ << endl;
-        cout << "      dfexp_ = " << dfexp_ << endl;
-        cout << "      rhFactor_ = " << rhFactor_ << endl;
-        cout << "      arrhenius_ = " << arrhenius_ << endl;
-        cout << "      timestep = " << timestep << endl;
-        cout << "      dissrate = " << dissrate << endl;
-        cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
-        cout << "      scaledMass_ = " << scaledMass_ << endl;
-        cout << "      massDissolved = " << massDissolved << endl;
-        cout << "^^^" << endl;
-        cout.flush();
-      }
-
-      scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
-
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-
-      if (verbose_) {
-        cout << "    StandardKineticModel::calculateKineticStep "
-                "dissrate/massDissolved : "
+        cout << "    StandardKineticModel::calculateKineticStep dissrate/massDissolved : "
              << dissrate << " / " << massDissolved << endl;
       }
 
-      scaledMass = scaledMass_;
+      scaledMass = scaledMass_ - massDissolved;
+
+      if (scaledMass < 0) {
+        massDissolved = scaledMass_;
+        scaledMass = 0;
+      }
+      scaledMass_ = scaledMass;
+
+      //scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
+
+      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+
+      //scaledMass = scaledMass_;
 
       if (verbose_) {
-        cout << "  ****************** SKM_hT = " << timestep
-             << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+        cout << "  ****************** SKM_hT = " << timestep << "    cyc = " << cyc
+             << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
              << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
              << endl;
@@ -292,10 +294,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
              << endl;
         cout.flush();
       }
-    } else {
-      throw DataException("StandardKineticModel", "calculateKineticStep",
-                          "DOR >= 1.0");
-    }
+    // } else {
+    //   throw DataException("StandardKineticModel", "calculateKineticStep",
+    //                       "DOR >= 1.0");
+    // }
 
     //} // End of normal hydration block
   } // End of try block
