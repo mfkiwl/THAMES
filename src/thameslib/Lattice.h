@@ -103,10 +103,14 @@ private:
   vector<double> initVolumeFraction_; /**< Array of initial volume fractions of
                                          each microstructure phase */
   vector<double> surfaceArea_;        /**< Array of surface areas of each
-                                                 microstructure phase (currently voxel
-                                                 face units only) */
-  vector<int> count_; /**< Number of sites of each different type */
-  vector<double> SI_; /**< Current saturation indices */
+                                                 microstructure phase
+                                                 (m2 per 100 g of all solid) */
+  vector<double>
+      specificSurfaceArea_; /**< Array of specific surface areas of each
+                               microstructure phase
+                               (m2 per kg of that phase) */
+  vector<int> count_;       /**< Number of sites of each different type */
+  vector<double> SI_;       /**< Current saturation indices */
 
   map<int, vector<double>>
       expansion_; /**< Map of expansion strain of each voxel */
@@ -1497,7 +1501,7 @@ public:
   solution.
 
   @param phaseid is the id of the microstructure phase
-  @return the estimated surface area [site face units]
+  @return the estimated surface area [m2 per 100 g of all solid]
   */
   double getSurfaceArea(int phaseid) {
     if (phaseid > -1 && phaseid < surfaceArea_.size()) {
@@ -1507,13 +1511,18 @@ public:
   }
 
   /**
-  @brief Estimate the <i>internal</i> surface area of a phase with the aqueous
+  @brief Return the current specific surface area of a phase with the aqueous
   solution.
 
   @param phaseid is the id of the microstructure phase
-  @return the estimated surface area [site face units]
+  @return the estimated specific surface area [m2 per g of this phase]
   */
-  double updateSurfaceArea(int phaseid);
+  double getSpecificSurfaceArea(int phaseid) {
+    if (phaseid > -1 && phaseid < specificSurfaceArea_.size()) {
+      return specificSurfaceArea_[phaseid];
+    }
+    return 0.0;
+  }
 
   /**
   @brief Get the sorted distribution of domain sizes

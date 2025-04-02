@@ -8,14 +8,6 @@
 PozzolanicModel::PozzolanicModel() {
 
   ///
-  /// Default value for specific surface area is 385 m<sup>2</sup>/kg
-  ///
-
-  specificSurfaceArea_ = 385.0;
-  refSpecificSurfaceArea_ = 385.0; // reference specific surface area (m2/kg)
-  ssaFactor_ = 1.0;
-
-  ///
   /// Default temperature in the PK model is 20 C (or 293 K)
   ///
 
@@ -29,6 +21,7 @@ PozzolanicModel::PozzolanicModel() {
   dissolutionRateConst_ = 0.0;
   diffusionRateConstEarly_ = 0.0;
   diffusionRateConstLate_ = 0.0;
+  surfaceAreaMultiplier_ = 1.0;
 
   ///
   /// Default value for the exponents in the rate equation
@@ -48,6 +41,10 @@ PozzolanicModel::PozzolanicModel() {
   activationEnergy_ = 0.0;
   scaledMass_ = 0.0;
   initScaledMass_ = 0.0;
+
+  // Units of specific surface area should be m2 per kg of solid
+  // Reference is for an undensified silica fume
+  refSpecificSurfaceArea_ = 1437.0392203;
 
   temperature_ = lattice_->getTemperature();
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
@@ -93,17 +90,10 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
   chemSys_ = cs;
   lattice_ = lattice;
 
-  ///
-  /// Default value for specific surface area in PK model is 385
-  /// m<sup>2</sup>/kg
-  ///
-
-  specificSurfaceArea_ = kineticData.specificSurfaceArea;
-  refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
-  ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
   setSio2(kineticData.sio2);
   setAl2o3(kineticData.al2o3);
   setCao(kineticData.cao);
+  setSurfaceAreaMultiplier(kineticData.surfaceAreaMultiplier);
   setDissolutionRateConst(kineticData.dissolutionRateConst);
   setDiffusionRateConstEarly(kineticData.diffusionRateConstEarly);
   setDiffusionRateConstLate(kineticData.diffusionRateConstLate);
@@ -245,21 +235,13 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     double Kk = 46.6;   // adsorption equilibrium constant
                         // from Dove and Crerar
 
-    cout << "GODZILLA:" << endl;
-    cout << "  ca = " << ca << endl;
-    cout << "  na = " << na << endl;
-    cout << "   k = " << k << endl;
-
     // Langmuir adsorption isotherms assumed to be additive
 
     baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
     baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
     baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
 
-    cout << "GODZILLA: baserateconst 02 = " << baserateconst << endl;
-
     double ohActivity = chemSys_->getDCActivity("OH-");
-    cout << "GODZILLA: ohActivity = " << ohActivity << endl;
 
     // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
@@ -268,9 +250,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // if that ends up being important.
     // This area value has units of m2 per 100 g of initial solid
     double area = lattice_->getSurfaceArea(microPhaseId_);
-    cout << "GODZILLA: specificSurfaceArea_ = NOT NEEDED" << endl;
-    cout << "GODZILLA:          scaledMass_ = " << scaledMass_ << endl;
-    cout << "GODZILLA:                 area = " << area << endl;
+    area *= surfaceAreaMultiplier_;
 
     // Saturation index , but be sure that there is only one GEM Phase
     /// @note Assumes there is only one phase in this microstructure
@@ -312,7 +292,8 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
     double average_cdiff = 1.0e9;
     if (DOR > 0.0) {
-      diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - DOR));
+      // diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - DOR));
+      diffrate = diffusionRateConstEarly_;
       /// Below is very rough approximation to chemical potential gradient
       /// Would be better if we knew the equilibrium constant of
       /// the dissociation reaction.  We would need to raise
@@ -360,12 +341,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     }
     scaledMass_ = scaledMass;
 
-    // scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
-
-    // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
-
-    // scaledMass = scaledMass_;
-
     // GODZILLA
     cout << "^^^ " << name_ << ":" << endl;
     cout.flush();
@@ -374,12 +349,13 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     cout << "        baserateconst = " << baserateconst << endl;
     cout << "            rhFactor_ = " << rhFactor_ << endl;
     cout << "           ohActivity = " << ohActivity << endl;
+    cout << "     micro-based area = "
+         << lattice_->getSurfaceArea(microPhaseId_) << endl;
+    cout << "      area multiplier = " << surfaceAreaMultiplier_ << endl;
     cout << "                 area = " << area << endl;
     cout << "        waterActivity = " << waterActivity << endl;
     cout << "      lossOnIgnition_ = " << lossOnIgnition_ << endl;
     cout << "             diffrate = " << diffrate << endl;
-    cout << "           ssaFactor_ = " << ssaFactor_ << endl;
-    cout << "                  DOR = " << DOR << endl;
     cout << "      dissolvedUnits_ = " << dissolvedUnits_ << endl;
     cout << "           arrhenius_ = " << arrhenius_ << endl;
     cout << "                 rate = " << rate << endl;
@@ -391,7 +367,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // GODZILLA
 
     if (verbose_) {
-      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
       cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
            << "\tmicroPhaseId_ = " << microPhaseId_
            << "    microPhase = " << name_
@@ -404,20 +379,15 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       cout << "   PZM_hT   " << "dissrate: " << dissrate
            << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
            << "\trate: " << rate << endl;
-      cout << "   PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-           << "\tinitScaledMass_: " << initScaledMass_
+      cout << "   PZM_hT   " << "initScaledMass_: " << initScaledMass_
            << "\tscaledMass_: " << scaledMass_
            << "\tmassDissolved: " << massDissolved << endl;
       cout.flush();
     }
 
-    // } else {
-    //   throw DataException("PozzolanicModel", "calculateKineticStep",
-    //                      "DOR >= 1.0");
-    // }
+  } // End of try block
 
-    //} // End of normal hydration block
-  } catch (EOBException eex) {
+  catch (EOBException eex) {
     eex.printException();
     exit(1);
   } catch (DataException dex) {

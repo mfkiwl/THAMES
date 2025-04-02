@@ -8,14 +8,6 @@
 StandardKineticModel::StandardKineticModel() {
 
   ///
-  /// Default value for specific surface area is 385 m<sup>2</sup>/kg
-  ///
-
-  specificSurfaceArea_ = 385.0;
-  refSpecificSurfaceArea_ = 385.0; // reference specific surface area (m2/kg)
-  ssaFactor_ = 1.0;
-
-  ///
   /// Default temperature in the PK model is 20 C (or 293 K)
   ///
 
@@ -86,15 +78,8 @@ StandardKineticModel::StandardKineticModel(ChemicalSystem *cs, Lattice *lattice,
   chemSys_ = cs;
   lattice_ = lattice;
 
-  ///
-  /// Default value for specific surface area in PK model is 385
-  /// m<sup>2</sup>/kg
-  ///
-
-  specificSurfaceArea_ = kineticData.specificSurfaceArea;
-  refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
-  ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
   setDissolutionRateConst(kineticData.dissolutionRateConst);
+  setSurfaceAreaMultiplier(kineticData.surfaceAreaMultiplier);
   setDissolvedUnits(kineticData.dissolvedUnits);
   setSiexp(kineticData.siexp);
   setDfexp(kineticData.dfexp);
@@ -149,8 +134,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
   double dissrate = 1.0e9; // Nucleation and growth rate
 
-  // double DOR, newDOR;
-
   ///
   /// Determine if this is a normal step or a necessary
   /// tweak from a failed GEM_run call
@@ -158,12 +141,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
   try {
 
-    // if (timestep < leachTime_ && timestep < sulfateAttackTime_) {
-
-    // @todo BULLARD PLACEHOLDER
-    // Still need to implement constant gas phase composition
-    // Will involve equilibrating gas with aqueous solution
-    //
     // First step each iteration is to equilibrate gas phase
     // with the electrolyte, while forbidding anything new
     // from precipitating.
@@ -188,15 +165,12 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     /// @todo revisit the contact angle issue
     scaledMass_ = scaledMass;
 
-    // if (DOR < 1.0) { //test!
-
-    // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
-
     // JWB BEWARE: The new definition of area is truly a geometric calculation
     // made on the microstructure. It does not catch BET or internal surface
     // area if that ends up being important. The units of area are m2 per 100
     // g of intial total solid
     double area = lattice_->getSurfaceArea(microPhaseId_);
+    area *= surfaceAreaMultiplier_;
 
     // Saturation index , but be sure that there is only one GEM Phase
     /// @note Assumes there is only one phase in this microstructure
@@ -239,26 +213,31 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
            << dissrate << " / " << massDissolved << endl;
     }
 
+    // GODZILLA
     if (verbose_) {
       cout << "^^^ " << name_ << ":" << endl;
       cout.flush();
-      cout << "      dissrate_ini = " << dissrate_ini << endl;
-      cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
+      cout << "           dissrate_ini = " << dissrate_ini << endl;
+      cout << "  dissolutionRateConst_ = " << dissolutionRateConst_ << endl;
+      cout << "       micro-based area = "
+           << lattice_->getSurfaceArea(microPhaseId_) << endl;
+      cout << "        area multiplier = " << surfaceAreaMultiplier_ << endl;
+      cout << "                   area = " << area << endl;
+      cout << "        saturationIndex = " << saturationIndex << endl;
+      cout << "                 siexp_ = " << siexp_ << endl;
+      cout << "                 dfexp_ = " << dfexp_ << endl;
+      cout << "              rhFactor_ = " << rhFactor_ << endl;
+      cout << "             arrhenius_ = " << arrhenius_ << endl;
+      cout << "               timestep = " << timestep << endl;
+      cout << "               dissrate = " << dissrate << endl;
+      cout << "              molarMass = " << chemSys_->getDCMolarMass(DCId_)
            << endl;
-      cout << "         area = " << area << endl;
-      cout << "      saturationIndex = " << saturationIndex << endl;
-      cout << "      siexp_ = " << siexp_ << endl;
-      cout << "      dfexp_ = " << dfexp_ << endl;
-      cout << "      rhFactor_ = " << rhFactor_ << endl;
-      cout << "      arrhenius_ = " << arrhenius_ << endl;
-      cout << "      timestep = " << timestep << endl;
-      cout << "      dissrate = " << dissrate << endl;
-      cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
-      cout << "      scaledMass_ = " << scaledMass_ << endl;
-      cout << "      massDissolved = " << massDissolved << endl;
+      cout << "            scaledMass_ = " << scaledMass_ << endl;
+      cout << "          massDissolved = " << massDissolved << endl;
       cout << "^^^" << endl;
       cout.flush();
     }
+    // GODZILLA
 
     scaledMass = scaledMass_ - massDissolved;
 
@@ -269,7 +248,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     scaledMass_ = scaledMass;
 
     if (verbose_) {
-      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
       cout << "  ****************** SKM_hT = " << timestep
            << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
            << "    microPhase = " << name_

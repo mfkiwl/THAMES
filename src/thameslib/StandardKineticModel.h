@@ -42,6 +42,10 @@ using namespace std;
 class StandardKineticModel : public KineticModel {
 
 protected:
+  double
+      surfaceAreaMultiplier_;   /**< Dimensionless factor to multiply the
+                                  calculated surface area to account for
+                                  unresolved internal porosity, roughness, etc. */
   double dissolutionRateConst_; /**< Rate constant for dissolution
                                    (mol/m2/h) */
   /**
@@ -89,6 +93,18 @@ public:
   @return a string indicating the model type
   */
   string getType() const { return (StandardType); }
+
+  /**
+  @brief Set the surface area multiplier
+
+  This is a dimensionless multiplication factor to the surface
+  area to account for unresolved internal porosity, roughness, etc.
+
+  @param sam is the rate constant value to use
+  */
+  void setSurfaceAreaMultiplier(const double sam) {
+    surfaceAreaMultiplier_ = max(sam, 0.0);
+  }
 
   /**
   @brief Set the dissolution rate constant

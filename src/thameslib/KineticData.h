@@ -20,6 +20,8 @@ System Definition (CSD)
 phase
     - `type` is a string specifying whether the phase is under kinetic control
         or thermodynamic control
+    - `surfaceAreaMultiplier` is a dimensionless multiplication factor for
+surface area to account for unresolved internal structure, roughness, etc.
     - `specificSurfaceArea` is the specific surface area in m2 per kg
     - `refSpecificSurfaceArea` is the reference specific surface area in m2 per
 kg
@@ -55,22 +57,25 @@ component
 #ifndef KINETICDATASTRUCT
 #define KINETICDATASTRUCT
 struct KineticData {
-  string name;                /**< Name of the microstructure phase */
-  int microPhaseId;           /**< Integer id of the microstructure phase */
-  int GEMPhaseId;             /**< Integer id of the phase in the GEM CSD */
-  int DCId;                   /**< Integer id of the DC making up the phase */
-  string type;                /**< Specifies kinetic or thermodynamic control */
-  double scaledMass;          /**< Mass percent on a total solids basis */
-  double specificSurfaceArea; /**< Specific surface area [m2/kg] */
+  string name;       /**< Name of the microstructure phase */
+  int microPhaseId;  /**< Integer id of the microstructure phase */
+  int GEMPhaseId;    /**< Integer id of the phase in the GEM CSD */
+  int DCId;          /**< Integer id of the DC making up the phase */
+  string type;       /**< Specifies kinetic or thermodynamic control */
+  double scaledMass; /**< Mass percent on a total solids basis */
+  double surfaceAreaMultiplier;  /**< How much to multiply the surface area to
+                                    account  for internal structure, roughness,
+                                    etc. */
+  double specificSurfaceArea;    /**< Specific surface area [m2/kg] */
   double refSpecificSurfaceArea; /**< Reference specific surface area [m2/kg] */
   double temperature;            /**< Temperature [K] */
   double reftemperature;         /**< Reference temperature [K] */
   double activationEnergy;       /**< Activation energy [J/mol/ */
-  double k1;      /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
-  double k2;      /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
-  double k3;      /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
-  double n1;      /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
-  double n3;      /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
+  double k1;        /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
+  double k2;        /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
+  double k3;        /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */
+  double n1;        /**< Parrot and Killoh <i>N</i><sub>1</sub> parameter */
+  double n3;        /**< Parrot and Killoh <i>N</i><sub>3</sub> parameter */
   double dorHcoeff; /**< Lothenbach-Kulik H coefficient to compute critDOR */
   double critDOR; /**< Critical degree of reaction (hydration) for w/c effect */
   double dissolutionRateConst;    /**< Generic rate constant [mol/m2/s] */

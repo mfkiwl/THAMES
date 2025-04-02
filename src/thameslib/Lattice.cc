@@ -450,6 +450,8 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
 
   surfaceArea_.clear();
   surfaceArea_.resize(numMicroPhases_, 0.0);
+  specificSurfaceArea_.clear();
+  specificSurfaceArea_.resize(numMicroPhases_, 0.0);
   volumeFraction_.clear();
   volumeFraction_.resize(numMicroPhases_, 0.0);
   initVolumeFraction_.clear();
@@ -5366,6 +5368,21 @@ void Lattice::calcSurfaceArea(int phaseid) {
   }
 
   surfaceArea_[phaseid] *= oneFaceAreaPerHundredGramSolid;
+
+  // Calculate specific surface area of this phase by dividing
+  // this surface area by the phase mass (g per 100 g of all solid)
+  // Units of specific surface are will be m2 per kg of this phase,
+  // to make it consistent with legacy Parrot-Killoh model which
+  // uses traditional Blaine fineness units
+
+  double scaledMass = chemSys_->getMicroPhaseMass(phaseid);
+  if (scaledMass > 0.0) {
+    // The factor of 1000.0 converts units from m2/g to m2/kg
+    specificSurfaceArea_[phaseid] = 1000.0 * surfaceArea_[phaseid] / scaledMass;
+  } else {
+    specificSurfaceArea_[phaseid] = 0.0;
+  }
+
   // if (verbose_) {
   //   cout << "### Surface area of " << chemSys_->getMicroPhaseName(phaseid)
   //        << " = " << surfaceArea_[phaseid] << " m2/ 100 g of solid" << endl;

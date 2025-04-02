@@ -452,14 +452,15 @@ void KineticController::parseKineticDataForStandard(
     cout.flush();
   }
 
-  // Specific surface area (m2/kg)
-  // json::iterator pp = p.value().find("specificSurfaceArea");
-  // if (pp != p.value().end()) {
-  //   kineticData.specificSurfaceArea = pp.value();
-  // } else {
-  //   throw DataException("KineticController", "parseKineticDataForStandard",
-  //                       "specificSurfaceArea not found");
-  // }
+  // How much to multiply the microstructure phase's surface
+  // area to account for unresolved structure, roughness, etc.
+  // This is an optional input, default value is 1.0
+  json::iterator pp = p.value().find("specificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.surfaceAreaMultiplier = pp.value();
+  } else {
+    kineticData.surfaceAreaMultiplier = 1.0;
+  }
 
   // Reference specific surface area (m2/kg)
   // pp = p.value().find("refSpecificSurfaceArea");
@@ -472,7 +473,7 @@ void KineticController::parseKineticDataForStandard(
 
   // Dissolution rate constant input with units (mol/m2/s)
   // But immediately convert it to mol/m2/h within model
-  json::iterator pp = p.value().find("dissolutionRateConst");
+  pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
     kineticData.dissolutionRateConst *= S_PER_H;
@@ -566,25 +567,19 @@ void KineticController::parseKineticDataForPozzolanic(
     cout.flush();
   }
 
-  // json::iterator pp = p.value().find("specificSurfaceArea");
-  // if (pp != p.value().end()) {
-  //   kineticData.specificSurfaceArea = pp.value();
-  // } else {
-  //   throw DataException("KineticController", "parseKineticDataForPozzolanic",
-  //                       "specificSurfaceArea not found");
-  // }
-
-  // pp = p.value().find("refSpecificSurfaceArea");
-  // if (pp != p.value().end()) {
-  //   kineticData.refSpecificSurfaceArea = pp.value();
-  // } else {
-  //   throw DataException("KineticController", "parseKineticDataForPozzolanic",
-  //                       "refSpecificSurfaceArea not found");
-  // }
+  // How much to multiply the microstructure phase's surface
+  // area to account for unresolved structure, roughness, etc.
+  // This is an optional input, default value is 1.0
+  json::iterator pp = p.value().find("specificSurfaceArea");
+  if (pp != p.value().end()) {
+    kineticData.surfaceAreaMultiplier = pp.value();
+  } else {
+    kineticData.surfaceAreaMultiplier = 1.0;
+  }
 
   // Dissolution rate constant input with units (mol/m2/s)
   // But immediately convert it to mol/m2/h within model
-  json::iterator pp = p.value().find("dissolutionRateConst");
+  pp = p.value().find("dissolutionRateConst");
   if (pp != p.value().end()) {
     kineticData.dissolutionRateConst = pp.value();
     kineticData.dissolutionRateConst *= S_PER_H;
@@ -990,15 +985,11 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       } else {
         int numPKMphases = 0;
         for (int midx = 0; midx < pKMsize_; ++midx) {
-          if (phaseKineticModel_[midx]->getName() == "Alite")
-            numPKMphases++;
-          if (phaseKineticModel_[midx]->getName() == "Belite")
-            numPKMphases++;
-          if (phaseKineticModel_[midx]->getName() == "Ferrite")
-            numPKMphases++;
-          if (phaseKineticModel_[midx]->getName() == "Aluminate")
+          if (phaseKineticModel_[midx]->getModelName() == "ParrotKillohModel")
             numPKMphases++;
         }
+
+        // This next block only if there are ParrotKilloh model phases
         if (numPKMphases > 0) {
 
           cout << endl
@@ -1011,7 +1002,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
                 phaseKineticModel_[midx]->getMicroPhaseId();
             scaledMassIni_[midx] =
                 chemSys_->getMicroPhaseMass(phaseDissolvedId[midx]);
-            cout << "    Line 1019 midx = " << midx
+            cout << "     midx = " << midx
                  << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
                  << "     microPhaseName = "
                  << phaseKineticModel_[midx]->getName() << endl;
@@ -1067,6 +1058,11 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           /// the
           ///         local changes instead of recalculating each time.
 
+          // We calculate surface area even for PK model phases although
+          // they currently don't use this information but instead rely
+          // on the user-prescribed Blaine fineness of the starting powder only.
+          // We do this in anticipation of eventually discarding the PK model
+
           lattice_->calcSurfaceArea(phaseDissolvedId[midx]);
           massDissolved = 0.0;
 
@@ -1077,6 +1073,10 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           phaseKineticModel_[midx]->calculateKineticStep(
               timestep, scaledMass, massDissolved, cyc, totalDOR);
 
+          /// @note may want to change the condition of next block
+          /// because it is possible for the scaled mass of a kinetic phase to
+          /// be zero but not negative. We could allow a threshold number
+          /// like -1.0e-9 or something like that to handle "nearly zero"
           if (scaledMass < 0.0) {
             cout << endl
                  << "KineticController::calculateKineticStep error for cyc = "
@@ -1101,6 +1101,8 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
             cout.flush();
           }
 
+          /// @todo Allow any other component to be an impurity, not just the
+          /// ones prescribed here
           totMassImpurity = 0;
           keepNumDCMoles = 0;
           numDCMolesDissolved = 0;
@@ -1111,8 +1113,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           dcmoles = massImpurity / chemSys_->getDCMolarMass("K2O");
           DCMoles_[impurityDCID_[0]] += dcmoles;
           impurity_K2O_[midx] = dcmoles;
-          // DCMoles_[impurityDCID[0]] +=
-          //     massImpurity / chemSys_->getDCMolarMass("K2O");
 
           massImpurity =
               massDissolved * chemSys_->getNa2o(phaseDissolvedId[midx]);
@@ -1120,8 +1120,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           dcmoles = massImpurity / chemSys_->getDCMolarMass("Na2O");
           DCMoles_[impurityDCID_[1]] += dcmoles;
           impurity_Na2O_[midx] = dcmoles;
-          // DCMoles_[impurityDCID[1]] +=
-          //     massImpurity / chemSys_->getDCMolarMass("Na2O");
 
           massImpurity =
               massDissolved * chemSys_->getMgo(phaseDissolvedId[midx]);
@@ -1129,8 +1127,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           dcmoles = massImpurity / chemSys_->getDCMolarMass("Per");
           DCMoles_[impurityDCID_[2]] += dcmoles;
           impurity_Per_[midx] = dcmoles;
-          // DCMoles_[impurityDCID[2]] +=
-          //     massImpurity / chemSys_->getDCMolarMass("Per"); // MgO
 
           massImpurity =
               massDissolved * chemSys_->getSo3(phaseDissolvedId[midx]);
@@ -1138,8 +1134,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           dcmoles = massImpurity / chemSys_->getDCMolarMass("SO3");
           DCMoles_[impurityDCID_[3]] += dcmoles;
           impurity_SO3_[midx] = dcmoles;
-          // DCMoles_[impurityDCID[3]] +=
-          //     massImpurity / chemSys_->getDCMolarMass("SO3");
 
           numDCMolesDissolved = (massDissolved - totMassImpurity) /
                                 chemSys_->getDCMolarMass(DCId);
