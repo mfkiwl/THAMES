@@ -717,10 +717,7 @@ void Controller::doCycle(const string &statfilename, int choice,
                  << i << " / " << whileCount << " / "
                  << numSitesNotAvailable.size() << endl;
             cout << "  Controller::doCycle - cyc = " << cyc
-                 << " :  #  i#/ "
-                    "phName/phId/count/dissInterfaceSize/numSitesNotAvailable"
-                    "/DCId/DCMoles/DCLowerLimit :"
-                 << endl;
+                 << " :  reset DCLowerLimits :" << endl;
 
             for (int i = 0; i < numSitesNotAvailable.size(); i++) {
 
@@ -744,10 +741,30 @@ void Controller::doCycle(const string &statfilename, int choice,
                 massDissolved = kineticController_->updateKineticStep(
                     cyc, phId, scaledMassDiff);
               } else {
-                numMolesDiff = scaledMassDiff / molarMassDiff;
-                chemSys_->setDCLowerLimit(DCId, numMolesDiff);
-              }
 
+                cout << "    Controller::doCycle - not a KM phase - for cyc = " << cyc
+                     << " & phaseId = " << phId
+                     << " [" << chemSys_->getMicroPhaseName(phId) << " / DCId:"
+                     << DCId << "]" << endl;
+
+                numMolesDiff = scaledMassDiff / molarMassDiff;
+
+                cout << "      DCMoles_/keepNumDCMoles : "
+                     << chemSys_->getDCMoles(DCId) << " / " << numMolesDiff << endl;
+
+                chemSys_->setDCLowerLimit(DCId, numMolesDiff);
+
+              }
+            }
+
+            cout << endl << "  Controller::doCycle - cyc = " << cyc
+                 << " :  #  i#/ "
+                    "phName/phId/count/dissInterfaceSize/numSitesNotAvailable"
+                    "/DCId/DCMoles/DCLowerLimit :"
+                 << endl;
+            for (int i = 0; i < numSitesNotAvailable.size(); i++) {
+              phId = vectPhIdDiff[i];
+              DCId = chemSys_->getMicroPhaseDCMembers(phId, 0);
               cout << "                        cyc = " << cyc << " :  #"
                    << setw(3) << right << i << "#/ " << setw(15) << left
                    << vectPhNameDiff[i] << "   " << setw(5) << right << phId

@@ -149,7 +149,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
   double dissrate = 1.0e9; // Nucleation and growth rate
 
-  double DOR, newDOR;
+  // double DOR, newDOR;
 
   ///
   /// Determine if this is a normal step or a necessary
@@ -188,22 +188,22 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     /// @todo revisit the contact angle issue
     scaledMass_ = scaledMass;
 
-    if (initScaledMass_ > 0.0) {
-      DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-      // prevent DOR from prematurely stopping PK calculations
-      // DOR = min(DOR, 0.99);
-    } else {
-      throw FloatException("StandardKineticModel", "calculateKineticStep",
-                           "initScaledMass_ = 0.0");
-    }
+    // if (initScaledMass_ > 0.0) {
+    //   DOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+    //   // prevent DOR from prematurely stopping PK calculations
+    //   // DOR = min(DOR, 0.99);
+    // } else {
+    //   throw FloatException("StandardKineticModel", "calculateKineticStep",
+    //                        "initScaledMass_ = 0.0");
+    // }
 
-    if (DOR < 0.0) {
-      cout << endl << "    StandardKineticModel::calculateKineticStep - for cyc = " << cyc
-           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
-           << initScaledMass_ << " / " << scaledMass_ << endl;
-      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
-          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
-    }
+    // if (DOR < 0.0) {
+    //   cout << endl << "    StandardKineticModel::calculateKineticStep - for cyc = " << cyc
+    //        << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
+    //        << initScaledMass_ << " / " << scaledMass_ << endl;
+    //   cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
+    //       << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+    // }
 
     // if (DOR < 1.0) { //test!
 
@@ -239,7 +239,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                    pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
       }
 
-      double dissrate_ini = dissrate;
+      // double dissrate_ini = dissrate;
 
       dissrate *= (rhFactor_ * arrhenius_);
 
@@ -270,7 +270,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       //scaledMass = scaledMass_;
 
       if (verbose_) {
-        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
+        // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
         cout << "  ****************** SKM_hT = " << timestep << "    cyc = " << cyc
              << "    microPhaseId_ = " << microPhaseId_
              << "    microPhase = " << name_
@@ -280,17 +280,16 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
              << "\tarrhenius_: " << arrhenius_
              << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
              << endl;
-        cout << "   SKM_hT   " << "dissrate_ini: " << dissrate_ini
-             << "\tdissrate: " << dissrate << endl;
-        cout << "   SKM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-             << "\tinitScaledMass_: " << initScaledMass_
+        // cout << "   SKM_hT   " << "dissrate_ini: " << dissrate_ini
+        //      << "\tdissrate: " << dissrate << endl;
+        cout << "   SKM_hT   " << "tdissrate: " << dissrate << endl;
+        cout << "   SKM_hT   " << "\tinitScaledMass_: " << initScaledMass_
              << "\tscaledMass_: " << scaledMass_
              << "\tmassDissolved: " << massDissolved << endl;
         cout << "   cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
              << "    microPhaseName = " << name_
              << "    saturationIndex = " << saturationIndex << "   Dc_a = "
              << chemSys_->getNode()->DC_a(DCId_)
-             // << "   SI_["
              << endl;
         cout.flush();
       }

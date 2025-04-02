@@ -1220,12 +1220,11 @@ double KineticController::updateKineticStep(int cyc, int pId,
   modelName =
       phaseKineticModel_[midx]
           ->getModelName(); // updateKineticStep(scaledMass , massDissolved);
-  cout << endl
-       << "  KineticController::updateKineticStep - for cyc = " << cyc
+  cout << "    KineticController::updateKineticStep - for cyc = " << cyc
        << " & phaseId = " << pId
        << " [" << phaseKineticModel_[midx]->getName() << " / DCId:"
        << chemSys_->getMicroPhaseDCMembers(pId, 0) << "]" << endl;
-  cout << "    midx = " << midx << "   modelName : " << modelName
+  cout << "      midx = " << midx << "   modelName : " << modelName
        << "   scaledMassIni[midx] = " << scaledMassIni_[midx]
        << "   scaledMass = " << scaledMass << endl;
 
@@ -1284,12 +1283,12 @@ double KineticController::updateKineticStep(int cyc, int pId,
       (massDissolved - totMassImpurity) / chemSys_->getDCMolarMass(DCId);
   keepNumDCMoles = DCMoles_[DCId] - numDCMolesDissolved;
   chemSys_->setDCLowerLimit(DCId, keepNumDCMoles);
-  cout << "    DCId/DCMoles_/numDCMolesDissolved/keepNumDCMoles : "
-       << DCId << " / " << DCMoles_[DCId] << " / " << numDCMolesDissolved << " / "
-       << keepNumDCMoles << endl;
-  cout << "    massDissolved/totMassImpurity/massDissolved - totMassImpurity : "
+  cout << "      massDissolved/totMassImpurity/massDissolved - totMassImpurity : "
        << massDissolved << " / " << totMassImpurity << " / "
        << massDissolved - totMassImpurity << endl;
+  cout << "      DCMoles_/numDCMolesDissolved/keepNumDCMoles : "
+       << DCMoles_[DCId] << " / " << numDCMolesDissolved << " / "
+       << keepNumDCMoles << endl;
 
   for (i = 0; i < DCNum_; i++) {
     // cout << " " << i << "\t" << DCName_[i] << ": " << DCMoles_[i] << " mol"
@@ -1298,9 +1297,6 @@ double KineticController::updateKineticStep(int cyc, int pId,
     // cout << "          " << DCName_[i] << ": " << chemSys_->getDCMoles(i) <<
     // " mol" << endl;
   }
-
-  cout << "  KineticController::updateKineticStep end - cyc = " << cyc << endl;
-  cout.flush();
 
   return massDissolved;
 }
