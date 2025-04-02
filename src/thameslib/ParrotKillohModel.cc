@@ -281,8 +281,35 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
       if (totalDOR > critDOR_) {
         wcFactor = pow((1 + 3.333 * (critDOR_ - newDOR)), 4);
         prod = timestep * rate * wcFactor;
-        newDOR = DOR + prod;
+        newDOR = DOR + prod; // Could exceed 1.0 but we address that below
       }
+
+      // GODZILLA
+      cout << "^^^ " << name_ << ":" << endl;
+      cout.flush();
+      cout << "      ngrate = " << ngrate << endl;
+      cout << "         k1_ = " << k1_ << endl;
+      cout << "         n1_ = " << n1_ << endl;
+      cout << "      DOR = " << DOR << endl;
+      cout << "      newDOR = " << newDOR << endl;
+      cout << "      totalDOR = " << totalDOR << endl;
+      cout << "      critDOR_ = " << critDOR_ << endl;
+      cout << "      ssaFactor_ = " << ssaFactor_ << endl;
+      cout << "      hsrate = " << hsrate << endl;
+      cout << "         k3_ = " << k3_ << endl;
+      cout << "         n3_ = " << n3_ << endl;
+      cout << "      diffrate = " << diffrate << endl;
+      cout << "         k2_ = " << k2_ << endl;
+      cout << "      pfk_ = " << pfk_ << endl;
+      cout << "      rhFactor_ = " << rhFactor_ << endl;
+      cout << "      arrhenius_ = " << arrhenius_ << endl;
+      cout << "      wcFactor = " << wcFactor << endl;
+      cout << "      timestep = " << timestep << endl;
+      cout << "      rate = " << rate << endl;
+      cout << "      prod = " << prod << endl;
+      cout << "^^^" << endl;
+      cout.flush();
+      // GODZILLA
 
       if (newDOR >= 1.0) {
 

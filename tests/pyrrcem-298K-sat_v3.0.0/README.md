@@ -1,7 +1,8 @@
-## portcem-298K-sat-wc45_v3.0.0
+## pyrrcem-298K-sat_v3.0.0
 
 The input files in this directory will simulate the hydration of a w/c = 0.45 paste
-of cement CCRL 140 at 298 K under saturated conditions.
+of cement CCRL 140 at 298 K under saturated conditions with 1.2 % by volume fine-grained
+pyrrhotite replacing the cement.
 
 The system is 100 x 100 x 100 voxels, with each voxel being 1 micrometer in
 dimension.

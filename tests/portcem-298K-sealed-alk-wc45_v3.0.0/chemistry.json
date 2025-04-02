@@ -236,21 +236,7 @@
             "gemphasename": "Gypsum",
             "gemdc": [{ "gemdcname": "Gp" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 1.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
         "thamesname": "Bassanite",
@@ -271,21 +257,7 @@
             "gemphasename": "Anhydrite",
             "gemdc": [{ "gemdcname": "Anh" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 2.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
         "thamesname": "Dolomite",

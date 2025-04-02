@@ -143,7 +143,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                                                 double &scaledMass,
                                                 double &massDissolved, int cyc,
                                                 double totalDOR) {
-
   ///
   /// Initialize local variables
   ///
@@ -240,6 +239,27 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
            << dissrate << " / " << massDissolved << endl;
     }
 
+    if (verbose_) {
+      cout << "^^^ " << name_ << ":" << endl;
+      cout.flush();
+      cout << "      dissrate_ini = " << dissrate_ini << endl;
+      cout << "         dissolutionRateConst_ = " << dissolutionRateConst_
+           << endl;
+      cout << "         area = " << area << endl;
+      cout << "      saturationIndex = " << saturationIndex << endl;
+      cout << "      siexp_ = " << siexp_ << endl;
+      cout << "      dfexp_ = " << dfexp_ << endl;
+      cout << "      rhFactor_ = " << rhFactor_ << endl;
+      cout << "      arrhenius_ = " << arrhenius_ << endl;
+      cout << "      timestep = " << timestep << endl;
+      cout << "      dissrate = " << dissrate << endl;
+      cout << "      molarMass = " << chemSys_->getDCMolarMass(DCId_) << endl;
+      cout << "      scaledMass_ = " << scaledMass_ << endl;
+      cout << "      massDissolved = " << massDissolved << endl;
+      cout << "^^^" << endl;
+      cout.flush();
+    }
+
     scaledMass = scaledMass_ - massDissolved;
 
     if (scaledMass < 0) {
@@ -247,12 +267,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       scaledMass = 0;
     }
     scaledMass_ = scaledMass;
-
-    // scaledMass_ = max(scaledMass_ - massDissolved, 0.0);
-
-    // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
-
-    // scaledMass = scaledMass_;
 
     if (verbose_) {
       // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_;
@@ -277,12 +291,7 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
            << "   Dc_a = " << chemSys_->getNode()->DC_a(DCId_) << endl;
       cout.flush();
     }
-    // } else {
-    //   throw DataException("StandardKineticModel", "calculateKineticStep",
-    //                       "DOR >= 1.0");
-    // }
 
-    //} // End of normal hydration block
   } // End of try block
 
   catch (EOBException eex) {

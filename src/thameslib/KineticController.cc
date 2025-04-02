@@ -907,7 +907,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       phaseDissolvedId[midx] = phaseKineticModel_[midx]->getMicroPhaseId();
       chemSys_->setMicroPhaseMass(phaseDissolvedId[midx], scaledMassIni_[midx]);
       if (verbose_) {
-        cout << "    Line 911 midx = " << midx
+        cout << "     midx = " << midx
              << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
              << "     microPhaseName = " << phaseKineticModel_[midx]->getName()
              << endl;
@@ -980,6 +980,10 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       //*******
       double totalDOR = 0;
 
+      /// @note The totalDOR is defined only as the combined degree of hydration
+      /// of "cement" components, which the user defines. This is intended to
+      /// be only portland cement clinker components
+
       if (initScaledCementMass_ > 0) {
         totalDOR = (initScaledCementMass_ - chemSys_->getScaledCementMass()) /
                    initScaledCementMass_;
@@ -1019,6 +1023,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
                                "initScaledCementMass_ = 0");
         }
       }
+
       if (totalDOR < 0) {
         cout << endl
              << "     KineticController::calculateKineticStep error : totalDOR "
@@ -1065,6 +1070,10 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
           lattice_->calcSurfaceArea(phaseDissolvedId[midx]);
           massDissolved = 0.0;
 
+          /// @note The totalDOR that is passed to the kinetic model is
+          /// based SOLELY on the combined degree of reaction of
+          /// "cement" components. It is intended for the Parrot-Killoh
+          /// model usage.
           phaseKineticModel_[midx]->calculateKineticStep(
               timestep, scaledMass, massDissolved, cyc, totalDOR);
 

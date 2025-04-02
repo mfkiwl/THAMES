@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 02 10:41 2025 | Validated test cases against HEAD of main branch |
 | Mar 28 16:49 2025 | Fixed more bugs with recovering from GEM convergence error |
 | Mar 28 16:49 2025 | Fixed most or all of bug with recovering from GEM convergence error |
 | Mar 28 11:47 2025 | Debugging problem with recovery from GEM convergence error |

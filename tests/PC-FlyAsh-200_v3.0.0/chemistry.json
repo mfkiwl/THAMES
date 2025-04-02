@@ -244,21 +244,7 @@
             "gemphasename": "Gypsum",
             "gemdc": [{ "gemdcname": "Gp" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 1.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
         "thamesname": "Bassanite",
@@ -269,21 +255,7 @@
             "gemphasename": "hemihydrate",
             "gemdc": [{ "gemdcname": "hemihydrate" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 2.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
         "thamesname": "Quartz",
@@ -309,8 +281,6 @@
         },
         "kinetic_data": {
           "type": "Pozzolanic",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 240.0,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 1.4e-11,
           "diffusionRateConstEarly": 2.8e-12,
@@ -354,8 +324,6 @@
         },
         "kinetic_data": {
           "type": "Pozzolanic",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 240.0,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 1.4e-11,
           "diffusionRateConstEarly": 2.8e-12,
@@ -393,12 +361,10 @@
         },
         "kinetic_data": {
           "type": "Pozzolanic",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 240.0,
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 1.39e-4,
-          "diffusionRateConstEarly": 8.33e-5,
-          "diffusionRateConstLate": 8.33e-5,
+          "dissolutionRateConst": 1.39e-6,
+          "diffusionRateConstEarly": 8.33e-7,
+          "diffusionRateConstLate": 8.33e-7,
           "dissolvedUnits": 7,
           "siexp": 1.0,
           "dfexp": 1.0,
@@ -432,12 +398,10 @@
         },
         "kinetic_data": {
           "type": "Pozzolanic",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 240.0,
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 2.8e-5,
-          "diffusionRateConstEarly": 8.33e-5,
-          "diffusionRateConstLate": 8.33e-5,
+          "dissolutionRateConst": 2.8e-7,
+          "diffusionRateConstEarly": 8.33e-7,
+          "diffusionRateConstLate": 8.33e-7,
           "dissolvedUnits": 4,
           "siexp": 1.0,
           "dfexp": 1.0,
@@ -471,12 +435,10 @@
         },
         "kinetic_data": {
           "type": "Pozzolanic",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 240.0,
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 8.3e-5,
-          "diffusionRateConstEarly": 8.3e-5,
-          "diffusionRateConstLate": 8.3e-5,
+          "dissolutionRateConst": 8.3e-7,
+          "diffusionRateConstEarly": 8.3e-7,
+          "diffusionRateConstLate": 8.3e-7,
           "dissolvedUnits": 9,
           "siexp": 1.0,
           "dfexp": 1.0,

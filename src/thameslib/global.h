@@ -11,6 +11,7 @@
 // #endif
 
 #include "Exceptions.h"
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>

@@ -1,6 +1,6 @@
 {
   "chemistry_data": {
-    "numentries": 18,
+    "numentries": 17,
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 0,
@@ -233,21 +233,7 @@
             "gemphasename": "Gypsum",
             "gemdc": [{ "gemdcname": "Gp" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 1.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
         "thamesname": "Bassanite",
@@ -263,39 +249,17 @@
           {
             "gemphasename": "hemihydrate",
             "gemdc": [{ "gemdcname": "hemihydrate" }]
-          },
-          {
-            "gemphasename": "Anhydrite",
-            "gemdc": [{ "gemdcname": "Anh" }]
           }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 2.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.1,
-          "dorexp": 0.5,
-          "loi": 0.0
-        }
+        ]
       },
       {
-        "thamesname": "Dolomite",
+        "thamesname": "Calcite",
         "id": 9,
         "cement_component": 0,
         "gemphase_data": [
           {
-            "gemphasename": "Dolomite-dis",
-            "gemdc": [{ "gemdcname": "Dis-Dol" }]
-          },
-          {
-            "gemphasename": "Dolomite-ord",
-            "gemdc": [{ "gemdcname": "Ord-Dol" }]
+            "gemphasename": "Calcite",
+            "gemdc": [{ "gemdcname": "Cal" }]
           }
         ]
       },
@@ -325,6 +289,7 @@
           "affinity": [
             { "affinityphase": "Alite", "contactanglevalue": 30 },
             { "affinityphase": "Belite", "contactanglevalue": 30 },
+            { "affinityphase": "Calcite", "contactanglevalue": 30 },
             { "affinityphase": "Portlandite", "contactanglevalue": 0 }
           ]
         },
@@ -418,17 +383,11 @@
         "thamesname": "AFm",
         "id": 12,
         "cement_component": 0,
-        "interface_data": {
-          "affinity": [{ "affinityphase": "AFmc", "contactanglevalue": 0 }]
-        },
+        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "C3AH6",
             "gemdc": [{ "gemdcname": "C3AH6" }]
-          },
-          {
-            "gemphasename": "C3FH6",
-            "gemdc": [{ "gemdcname": "C3FH6" }]
           },
           {
             "gemphasename": "C4AH11",
@@ -488,52 +447,14 @@
         ]
       },
       {
-        "thamesname": "Monosulfate",
+        "thamesname": "AFt",
         "id": 14,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "AFt", "contactanglevalue": 0 },
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 },
-            { "affinityphase": "Aluminate", "contactanglevalue": 0 },
-            { "affinityphase": "Gypsum", "contactanglevalue": 0 },
-            { "affinityphase": "Bassanite", "contactanglevalue": 0 },
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 }
-          ]
-        },
-        "gemphase_data": [
-          {
-            "gemphasename": "C4AsH105",
-            "gemdc": [{ "gemdcname": "monosulf10.5" }]
-          },
-          {
-            "gemphasename": "C4AsH14",
-            "gemdc": [{ "gemdcname": "monosulf14" }]
-          },
-          {
-            "gemphasename": "C4AsH9",
-            "gemdc": [{ "gemdcname": "monosulf9" }]
-          },
-          {
-            "gemphasename": "monosulf-AlFe",
-            "gemdc": [
-              { "gemdcname": "monosulf1205" },
-              { "gemdcname": "Fe-monosulf05" }
-            ]
-          }
-        ]
-      },
-      {
-        "thamesname": "AFt",
-        "id": 15,
-        "cement_component": 0,
-        "interface_data": {
-          "affinity": [
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 },
             { "affinityphase": "Monosulfate", "contactanglevalue": 0 },
-            { "affinityphase": "Aluminate", "contactanglevalue": 0 }
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
           ]
         },
         "gemphase_data": [
@@ -563,29 +484,41 @@
         ]
       },
       {
-        "thamesname": "Brucite",
-        "id": 16,
+        "thamesname": "Monosulfate",
+        "id": 15,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
             { "affinityphase": "AFt", "contactanglevalue": 0 },
-            { "affinityphase": "Aluminate", "contactanglevalue": 0 },
-            { "affinityphase": "Gypsum", "contactanglevalue": 0 },
-            { "affinityphase": "Bassanite", "contactanglevalue": 0 },
-            { "affinityphase": "Monosulfate", "contactanglevalue": 0 },
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 }
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
           ]
         },
         "gemphase_data": [
           {
-            "gemphasename": "Brucite",
-            "gemdc": [{ "gemdcname": "Brc" }]
+            "gemphasename": "C4AsH105",
+            "gemdc": [{ "gemdcname": "monosulf10.5" }]
+          },
+          {
+            "gemphasename": "C4AsH14",
+            "gemdc": [{ "gemdcname": "monosulf14" }]
+          },
+          {
+            "gemphasename": "C4AsH9",
+            "gemdc": [{ "gemdcname": "monosulf9" }]
+          },
+          {
+            "gemphasename": "monosulf-AlFe",
+            "gemdc": [
+              { "gemdcname": "monosulf1205" },
+              { "gemdcname": "Fe-monosulf05" }
+            ]
           }
         ]
       },
       {
         "thamesname": "Hydrotalcite",
-        "id": 17,
+        "id": 16,
         "cement_component": 0,
         "gemphase_data": [
           {

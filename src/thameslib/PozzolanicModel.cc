@@ -133,12 +133,12 @@ PozzolanicModel::PozzolanicModel(ChemicalSystem *cs, Lattice *lattice,
 
   double critporediam = lattice_->getLargestSaturatedPore(); // in nm
   critporediam *= 1.0e-9;                                    // in m
-  rh_ = exp(-6.23527e-7 / critporediam / T_);
+  rh_ = exp(-6.23527e-7 / critporediam / temperature_);
   rh_ = rh_ > 0.55 ? rh_ : 0.551;
   rhFactor_ = rh_;
 
-  arrhenius_ =
-      exp((activationEnergy_ / GASCONSTANT) * ((1.0 / refT_) - (1.0 / T_)));
+  arrhenius_ = exp((activationEnergy_ / GASCONSTANT) *
+                   ((1.0 / refT_) - (1.0 / temperature_)));
 
   ///
   /// The default is to not have sulfate attack or leaching, so we set the
@@ -224,6 +224,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     }
 
     double baserateconst = dissolutionRateConst_;
+    cout << "GODZILLA: baserateconst 01 = " << baserateconst << endl;
 
     /// @note The following influence alkali and alkali earth cations
     /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
@@ -244,13 +245,22 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     double Kk = 46.6;   // adsorption equilibrium constant
                         // from Dove and Crerar
 
+    cout << "GODZILLA:" << endl;
+    cout << "  ca = " << ca << endl;
+    cout << "  na = " << na << endl;
+    cout << "   k = " << k << endl;
+
     // Langmuir adsorption isotherms assumed to be additive
 
     baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
     baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
     baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
 
+    cout << "GODZILLA: baserateconst 02 = " << baserateconst << endl;
+
     double ohActivity = chemSys_->getDCActivity("OH-");
+    cout << "GODZILLA: ohActivity = " << ohActivity << endl;
+
     // double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
 
     // JWB BEWARE: The new definition of area is truly a geometric calculation
@@ -258,6 +268,9 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // if that ends up being important.
     // This area value has units of m2 per 100 g of initial solid
     double area = lattice_->getSurfaceArea(microPhaseId_);
+    cout << "GODZILLA: specificSurfaceArea_ = NOT NEEDED" << endl;
+    cout << "GODZILLA:          scaledMass_ = " << scaledMass_ << endl;
+    cout << "GODZILLA:                 area = " << area << endl;
 
     // Saturation index , but be sure that there is only one GEM Phase
     /// @note Assumes there is only one phase in this microstructure
@@ -329,7 +342,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     if (abs(diffrate) < abs(rate))
       rate = diffrate;
     int rate_ini = rate;
-    rate *= (rhFactor_ * arrhenius_);
+    rate *= arrhenius_;
 
     // Mass dissolved has units of g of phase per 100 g of all initial solid
     massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
@@ -352,6 +365,30 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
 
     // scaledMass = scaledMass_;
+
+    // GODZILLA
+    cout << "^^^ " << name_ << ":" << endl;
+    cout.flush();
+    cout << "             dissrate = " << dissrate << endl;
+    cout << "      saturationIndex = " << saturationIndex << endl;
+    cout << "        baserateconst = " << baserateconst << endl;
+    cout << "            rhFactor_ = " << rhFactor_ << endl;
+    cout << "           ohActivity = " << ohActivity << endl;
+    cout << "                 area = " << area << endl;
+    cout << "        waterActivity = " << waterActivity << endl;
+    cout << "      lossOnIgnition_ = " << lossOnIgnition_ << endl;
+    cout << "             diffrate = " << diffrate << endl;
+    cout << "           ssaFactor_ = " << ssaFactor_ << endl;
+    cout << "                  DOR = " << DOR << endl;
+    cout << "      dissolvedUnits_ = " << dissolvedUnits_ << endl;
+    cout << "           arrhenius_ = " << arrhenius_ << endl;
+    cout << "                 rate = " << rate << endl;
+    cout << "             timestep = " << timestep << endl;
+    cout << "           scaledMass_ = " << scaledMass_ << endl;
+    cout << "        massDissolved = " << massDissolved << endl;
+    cout << "^^^" << endl << endl;
+    cout.flush();
+    // GODZILLA
 
     if (verbose_) {
       newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //

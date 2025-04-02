@@ -113,7 +113,7 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
+          "specificSurfaceArea": 505.0,
           "refSpecificSurfaceArea": 385.0,
           "k1": 1.5,
           "k2": 0.05,
@@ -143,7 +143,7 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
+          "specificSurfaceArea": 505.0,
           "refSpecificSurfaceArea": 385.0,
           "k1": 0.5,
           "k2": 0.02,
@@ -173,7 +173,7 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
+          "specificSurfaceArea": 505.0,
           "refSpecificSurfaceArea": 385.0,
           "k1": 1,
           "k2": 0.04,
@@ -227,8 +227,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 5.0e-6,
           "diffusionRateConstEarly": 5.0e-6,
@@ -258,8 +256,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 5.0e-6,
           "diffusionRateConstEarly": 5.0e-6,
@@ -289,8 +285,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 1.0e-6,
           "diffusionRateConstEarly": 5.0e-6,
@@ -306,12 +300,7 @@
         "thamesname": "Bassanite",
         "id": 9,
         "cement_component": 1,
-        "interface_data": {
-          "affinity": [
-            { "affinityphase": "Gypsum", "contactanglevalue": 0 },
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 }
-          ]
-        },
+        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "hemihydrate",
@@ -320,8 +309,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 2.0e-6,
           "diffusionRateConstEarly": 5.0e-6,
@@ -337,12 +324,7 @@
         "thamesname": "Anhydrite",
         "id": 10,
         "cement_component": 1,
-        "interface_data": {
-          "affinity": [
-            { "affinityphase": "Gypsum", "contactanglevalue": 0 },
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 }
-          ]
-        },
+        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "Anhydrite",
@@ -351,8 +333,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 5.0e-7,
           "diffusionRateConstEarly": 5.0e-6,
@@ -382,8 +362,6 @@
         ],
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 505,
-          "refSpecificSurfaceArea": 240,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 1.0e-9,
           "diffusionRateConstEarly": 5.0e-8,
@@ -407,9 +385,8 @@
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Alite", "contactanglevalue": 30 },
-            { "affinityphase": "Belite", "contactanglevalue": 30 },
-            { "affinityphase": "Portlandite", "contactanglevalue": 0 }
+            { "affinityphase": "Alite", "contactanglevalue": 10.0 },
+            { "affinityphase": "Belite", "contactanglevalue": 10.0 }
           ]
         },
         "gemphase_data": [
@@ -504,9 +481,8 @@
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 },
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 }
+            { "affinityphase": "Alite", "contactanglevalue": 180.0 },
+            { "affinityphase": "Belite", "contactanglevalue": 180.0 }
           ]
         },
         "gemphase_data": [
@@ -520,9 +496,7 @@
         "thamesname": "AFm",
         "id": 14,
         "cement_component": 0,
-        "interface_data": {
-          "affinity": [{ "affinityphase": "AFmc", "contactanglevalue": 0 }]
-        },
+        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "C3AH6",
@@ -552,10 +526,8 @@
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "AFm", "contactanglevalue": 0 },
-            { "affinityphase": "AFt", "contactanglevalue": 0 },
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 }
+            { "affinityphase": "Aluminate", "contactanglevalue": 90.0 },
+            { "affinityphase": "AFm", "contactanglevalue": 90.0 }
           ]
         },
         "gemphase_data": [
@@ -595,10 +567,7 @@
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 },
-            { "affinityphase": "Monosulfate", "contactanglevalue": 0 },
-            { "affinityphase": "Aluminate", "contactanglevalue": 0 }
+            { "affinityphase": "Aluminate", "contactanglevalue": 90.0 }
           ]
         },
         "gemphase_data": [
@@ -632,15 +601,7 @@
         "id": 17,
         "cement_component": 0,
         "interface_data": {
-          "affinity": [
-            { "affinityphase": "AFt", "contactanglevalue": 0 },
-            { "affinityphase": "Alite", "contactanglevalue": 180 },
-            { "affinityphase": "Belite", "contactanglevalue": 180 },
-            { "affinityphase": "Aluminate", "contactanglevalue": 0 },
-            { "affinityphase": "Gypsum", "contactanglevalue": 0 },
-            { "affinityphase": "Bassanite", "contactanglevalue": 0 },
-            { "affinityphase": "CSHQ", "contactanglevalue": 0 }
-          ]
+          "affinity": [{ "affinityphase": "AFt", "contactanglevalue": 90.0 }]
         },
         "gemphase_data": [
           {

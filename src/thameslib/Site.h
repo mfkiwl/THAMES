@@ -10,7 +10,6 @@
 #include "RanGen.h"
 #include "global.h"
 #include <algorithm>
-// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -71,16 +70,19 @@ protected:
 
   This provides a ranking of dissolution potential only.
   */
-  double wmc_;  //total porosity ("surface curvature") at this site
-  double wmc0_; //this site internal porosity (its own contribution at wmc_ value)
+  double wmc_; // total porosity ("surface curvature") at this site
+  double
+      wmc0_; // this site internal porosity (its own contribution at wmc_ value)
   double expstrain_; /**< Assigned expansion strain by phase
                              constrained transformation or an
                              applied load */
 
   bool verbose_; /**< Flag to determine verbose output */
 
-  vector<int> inGrowInterfacePos_; // vector of the site position in each growth interface
-  int inDissInterfacePos_; // site position in the corresponding dissolution interface
+  vector<int> inGrowInterfacePos_; // vector of the site position in each growth
+                                   // interface
+  int inDissInterfacePos_; // site position in the corresponding dissolution
+                           // interface
 
   vector<int> inGrowthVectorPos_;
   int inDissolutionVectorPos_;
@@ -119,43 +121,25 @@ public:
        unsigned int ys, unsigned int zs, unsigned int neigh,
        ChemicalSystem *csys, const bool verbose = false);
 
-  void setVisit(int sv){visit_ = sv;}
-  int getVisit (void){return visit_;}
+  void setVisit(int sv) { visit_ = sv; }
+  int getVisit(void) { return visit_; }
 
-  void setInGrowInterfacePos(int i, int val){
-    inGrowInterfacePos_[i] = val;
-  }  
-  int getInGrowInterfacePos(int i){
-    return inGrowInterfacePos_[i];
-  }
+  void setInGrowInterfacePos(int i, int val) { inGrowInterfacePos_[i] = val; }
+  int getInGrowInterfacePos(int i) { return inGrowInterfacePos_[i]; }
 
-  vector<int> getInGrowInterfacePosVector(){
-    return inGrowInterfacePos_;
-  }
+  vector<int> getInGrowInterfacePosVector() { return inGrowInterfacePos_; }
   void setInGrowInterfacePosVector(vector<int> vect) {
     inGrowInterfacePos_ = vect;
   }
 
-  void setInDissInterfacePos(int val){
-    inDissInterfacePos_ = val;
-  }
-  int getInDissInterfacePos(void){
-    return inDissInterfacePos_;
-  }
+  void setInDissInterfacePos(int val) { inDissInterfacePos_ = val; }
+  int getInDissInterfacePos(void) { return inDissInterfacePos_; }
 
-  void setInGrowthVectorPos(int i, int val){
-    inGrowthVectorPos_[i] = val;
-  }
-  int getInGrowthVectorPos(int i){
-    return inGrowthVectorPos_[i];
-  }
+  void setInGrowthVectorPos(int i, int val) { inGrowthVectorPos_[i] = val; }
+  int getInGrowthVectorPos(int i) { return inGrowthVectorPos_[i]; }
 
-  void setInDissolutionVectorPos(int val) {
-    inDissolutionVectorPos_ = val;
-  }
-  int getInDissolutionVectorPos(void) {
-    return inDissolutionVectorPos_;
-  }
+  void setInDissolutionVectorPos(int val) { inDissolutionVectorPos_ = val; }
+  int getInDissolutionVectorPos(void) { return inDissolutionVectorPos_; }
 
   /**
   @brief Get a pointer to a given site in the site's neighborhood.
@@ -214,9 +198,7 @@ public:
     return;
   }
 
-  vector<Site *> getNb(){
-    return nb_;
-  }
+  vector<Site *> getNb() { return nb_; }
 
   /**
   @brief Get the index number of the site (position in the 1D Lattice vector).
@@ -343,9 +325,7 @@ public:
   @param pid is the microstructure phase id of the phase that can dissolve at
   the site
   */
-  void clearGrowth(void) {
-    growth_.clear();
-  }
+  void clearGrowth(void) { growth_.clear(); }
 
   /**
   @brief Designate the site as a potential growth site for a particular phase.
@@ -361,9 +341,7 @@ public:
       growth_.push_back(pid);
   }
 
-  void addGrowthPhaseId(unsigned int pid) {
-    growth_.push_back(pid);
-  }
+  void addGrowthPhaseId(unsigned int pid) { growth_.push_back(pid); }
 
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
@@ -388,7 +366,8 @@ public:
       }
     }
     if (found == false) {
-      cout <<endl <<" stop - void removeGrowthSite(unsigned int pid) " << endl;
+      cout << endl
+           << " stop - void removeGrowthSite(unsigned int pid) " << endl;
       cout.flush();
       cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
       exit(1);

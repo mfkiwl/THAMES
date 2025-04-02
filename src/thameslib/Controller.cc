@@ -548,11 +548,6 @@ void Controller::doCycle(const string &statfilename, int choice,
                     "i/cyc/time_[i]/timestep/numTotGen : "
                  << i << " / " << cyc << " / " << time_[i] << " / " << timestep
                  << " / " << numTotGen << endl;
-            // cout << "   Controller::doCycle - PRBL_s_01
-            // i/cyc/indFracNum/numIntervals/delta2Time/numGen : "
-            //      << i << " / " << cyc << " / " << indFracNum << " / " <<
-            //      numIntervals << " / " << delta2Time
-            //      << " / " << numGen << endl;
             cout.flush();
             break;
           }
@@ -1356,13 +1351,14 @@ void Controller::writeTxtOutputFiles(double time) {
         double V0 =
             chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
         out4 << "," << V0;
-        if (verbose_) {
-          cout << "Controller::calculateState    DC = "
-               << chemSys_->getDCName(i)
-               << ", moles = " << chemSys_->getDCMoles(i)
-               << ", molar mass = " << chemSys_->getDCMolarMass(i) << endl;
-          cout.flush();
-        }
+        //        if (verbose_) {
+        //          cout << "Controller::calculateState    DC = "
+        //               << chemSys_->getDCName(i)
+        //               << ", moles = " << chemSys_->getDCMoles(i)
+        //               << ", molar mass = " << chemSys_->getDCMolarMass(i) <<
+        //               endl;
+        //          cout.flush();
+        //        }
       }
     } else {
       string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
@@ -1479,10 +1475,10 @@ void Controller::writeTxtOutputFiles(double time) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
-  if (verbose_) {
-    cout << "Writing Enthalpy values...";
-    cout.flush();
-  }
+  // if (verbose_) {
+  //   cout << "Writing Enthalpy values...";
+  //   cout.flush();
+  // }
 
   double enth = 0.0;
   for (i = 0; i < numDCs; i++) {
@@ -1491,10 +1487,10 @@ void Controller::writeTxtOutputFiles(double time) {
 
   out10 << setprecision(5) << time;
   out10 << "," << enth << endl;
-  if (verbose_) {
-    cout << "Done!" << endl;
-    cout.flush();
-  }
+  // if (verbose_) {
+  //   cout << "Done!" << endl;
+  //   cout.flush();
+  // }
   out10.close();
 }
 

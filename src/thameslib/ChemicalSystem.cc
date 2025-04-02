@@ -2525,6 +2525,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
       if (verbose_) {
         cout << "System is saturated: wDCId = " << wDCId << endl;
+        cout << "    initMicroVolume_ = " << initMicroVolume_ << endl;
+        cout << "    microVolume_ = " << microVolume_ << endl;
         cout << "    water_molarv = " << water_molarv << endl;
         cout << "    volume increase of water is: "
              << (initMicroVolume_ - microVolume_) << endl;

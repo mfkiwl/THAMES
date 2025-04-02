@@ -114,10 +114,8 @@
         },
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 1.0,
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 6.94e-9,
+          "dissolutionRateConst": 6.94e-11,
           "diffusionRateConstEarly": 1.4e-13,
           "diffusionRateConstLate": 1.4e-13,
           "dissolvedUnits": 2,
@@ -145,8 +143,6 @@
         },
         "kinetic_data": {
           "type": "Standard",
-          "specificSurfaceArea": 298.0,
-          "refSpecificSurfaceArea": 0.001,
           "activationEnergy": 40000.0,
           "dissolutionRateConst": 1.4e-15,
           "diffusionRateConstEarly": 2.8e-19,

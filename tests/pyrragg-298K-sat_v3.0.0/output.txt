@@ -1,0 +1,62 @@
+**Will create 3D visualization file **
+Output folder: Results
+Enter choice: 
+  1) Exit program 
+  2) Hydration 
+  3) Leaching 
+  4) Sulfate attack 
+
+choice = 2
+
+The RNG seed is                 : seedRNG = -25943
+The elementary time interval is : elemTimeInterval = 1.000e-07
+
+Mon Mar 24 21:46:34 2025
+
+What is the name of the GEM input file? 
+   - gemInputName      :  thames-dat.lst
+
+What is the name of the microstructure phase definition file? 
+   - micDefName        :  chemistry.json
+Created iterator
+   AFm red = 244
+   AFmc red = 250
+   AFt red = 127
+   Alite red = 42
+   Aluminate red = 178
+   Anhydrite red = 255
+   Arcanite red = 255
+   Bassanite red = 255
+   Belite red = 139
+   Brucite red = 26
+   C2AS red = 255
+   CA2S red = 255
+   CSHQ red = 245
+   CaO red = 0
+   Calcite red = 0
+   Diopside red = 150
+   Dolomite red = 255
+   Electrolyte red = 0
+   Ferrite red = 253
+   Forsterite red = 127
+   Goethite red = 210
+   Gypsum red = 255
+   Hydrotalcite red = 0
+   K6A2S red = 255
+   Monosulfate red = 152
+   Mullite red = 178
+   Portlandite red = 7
+   Pyrite red = 212
+   Pyrrhotite red = 49
+   Quartz red = 32
+   SilicaAm red = 40
+   Sodalite red = 100
+   Syngenite red = 255
+   Thenardite red = 255
+   Troilite red = 255
+   Void red = 0
+   Zeolite red = 130
+Made it past iterator
+Finding all phase names
+Done finding all 13 phase names
+JSON iterator okay so far
