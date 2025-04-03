@@ -221,6 +221,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 
   for (int i = 0; i < time_.size() - 1; i++) {
     if (abs(time_[i] - time_[i + 1]) <= 1.e-9) {
+      cout << "=====> time_[" << i << "] = " << time_[i] << " and time["
+           << i + 1 << "] = " << time_[i + 1] << endl;
       time_.erase(time_.begin() + i);
     }
   }
@@ -244,11 +246,11 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
           "/src/thameslib/xsdfiles/parameters.xsd\">"
        << endl;
   for (int i = 0; i < time_Size; i++) {
-    out1 << " <calctime> " << time_[i] << " </calctime>" << endl;
+    out1 << " <calctime> " << 24.0 * time_[i] << " </calctime>" << endl;
   }
   out1 << endl;
   for (int i = 0; i < output_time_Size; i++) {
-    out1 << " <outtime> " << output_time_[i] << " </outtime>" << endl;
+    out1 << " <outtime> " << 24.0 * output_time_[i] << " </outtime>" << endl;
   }
   out1 << "</simulation_parameters>" << endl;
   out1.close();

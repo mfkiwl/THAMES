@@ -2693,19 +2693,21 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (isSaturated_) { // System is saturated
+    double water_molarv, water_molesincr;
 
     if (initMicroVolume_ > microVolume_) {
-      double water_molarv, water_molesincr;
       int wDCId = getDCId("H2O@");
       water_molarv = node_->DC_V0(wDCId, P_, T_);
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
-      if (verbose_) {
-        cout << "System is saturated: wDCId = " << wDCId << endl;
-        cout << "    water_molarv = " << water_molarv << endl;
-        cout << "    volume increase of water is: "
-             << (initMicroVolume_ - microVolume_) << endl;
-        cout << "    water_molesincr = " << water_molesincr << endl;
-      }
+      // if (verbose_) {
+      cout << "System is saturated: wDCId = " << wDCId << endl;
+      cout << "    initMicroVolume_ = " << initMicroVolume_ << endl;
+      cout << "    microVolume_ = " << microVolume_ << endl;
+      cout << "    water_molarv = " << water_molarv << endl;
+      cout << "    volume increase of water is: "
+           << (initMicroVolume_ - microVolume_) << endl;
+      cout << "    water_molesincr = " << water_molesincr << endl;
+      // }
       DCMoles_[wDCId] += water_molesincr;
 
       // for (int i = 0; i < numICs_; i++) { // included in H2O@

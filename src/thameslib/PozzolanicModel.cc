@@ -162,7 +162,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
   /// Initialize local variables
   ///
 
-  //double arrhenius; // = 1.0;
+  // double arrhenius; // = 1.0;
 
   double dissrate = 1.0e9; // Nucleation and growth rate
   double diffrate = 1.0e9; // Diffusion rate
@@ -223,158 +223,197 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     }
 
     if (DOR < 0.0) {
-      cout << endl << "    PozzolanicModel::calculateKineticStep - for cyc = " << cyc
-           << "  => negative DOR : DOR = " << DOR << "  &  initScaledMass_/scaledMass_ : "
-           << initScaledMass_ << " / " << scaledMass_ << endl;
-      cout<< "        microPhaseId_ = " << microPhaseId_ << "    microPhase = " << name_
-          << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_ << endl;
+      cout << endl
+           << "    PozzolanicModel::calculateKineticStep - for cyc = " << cyc
+           << "  => negative DOR : DOR = " << DOR
+           << "  &  initScaledMass_/scaledMass_ : " << initScaledMass_ << " / "
+           << scaledMass_ << endl;
+      cout << "        microPhaseId_ = " << microPhaseId_
+           << "    microPhase = " << name_
+           << "    GEMPhaseIndex = " << GEMPhaseId_ << "    DCId_ = " << DCId_
+           << endl;
     }
 
     // if (DOR < 1.0) {
 
-      /// BULLARD placeholder
-      /// @note playing with different base rate constants here
+    /// BULLARD placeholder
+    /// @note playing with different base rate constants here
 
-      // double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
-      //
+    // double baserateconst = 5.6e-3 * arrhenius;  // mol m-2 s-1
+    //
 
-      double baserateconst = dissolutionRateConst_;
+    double baserateconst = dissolutionRateConst_;
+    cout << "GODZILLA: baserateconst 01 = " << baserateconst << endl;
 
-      /// @note The following influence alkali and alkali earth cations
-      /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
+    /// @note The following influence alkali and alkali earth cations
+    /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
 
-      double ca = chemSys_->getDCConcentration("Ca+2");
-      double kca = 4.0e-7; // mol m-2 s-1 ads.
-                           // rate const for Ca (guess)
-      double Kca = 10.0;   // adsorption equilibrium
-                           // constant is a guess
-      double na = chemSys_->getDCConcentration("Na+");
-      double kna = 6.35e-7; // mol m-2 s-1 ads. rate
-                            // const from Dove and Crerar
-      double Kna = 58.3;    // adsorption equilibrium
-                            // constant from Dove and Crerar
-      double k = chemSys_->getDCConcentration("K+");
-      double kk = 5.6e-7; // mol m-2 s-1 ads. rate
+    double ca = chemSys_->getDCConcentration("Ca+2");
+    double kca = 4.0e-7; // mol m-2 s-1 ads.
+                         // rate const for Ca (guess)
+    double Kca = 10.0;   // adsorption equilibrium
+                         // constant is a guess
+    double na = chemSys_->getDCConcentration("Na+");
+    double kna = 6.35e-7; // mol m-2 s-1 ads. rate
                           // const from Dove and Crerar
-      double Kk = 46.6;   // adsorption equilibrium constant
-                          // from Dove and Crerar
+    double Kna = 58.3;    // adsorption equilibrium
+                          // constant from Dove and Crerar
+    double k = chemSys_->getDCConcentration("K+");
+    double kk = 5.6e-7; // mol m-2 s-1 ads. rate
+                        // const from Dove and Crerar
+    double Kk = 46.6;   // adsorption equilibrium constant
+                        // from Dove and Crerar
 
-      // Langmuir adsorption isotherms assumed to be additive
+    cout << "GODZILLA:" << endl;
+    cout << "  ca = " << ca << endl;
+    cout << "  na = " << na << endl;
+    cout << "   k = " << k << endl;
 
-      baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
-      baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
-      baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
+    // Langmuir adsorption isotherms assumed to be additive
 
-      double ohActivity = chemSys_->getDCActivity("OH-");
-      double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
+    baserateconst += (kca * Kca * ca / (1.0 + (Kca * ca)));
+    baserateconst += (kna * Kna * na / (1.0 + (Kna * na)));
+    baserateconst += (kk * Kk * k / (1.0 + (Kk * k)));
 
-      // Saturation index , but be sure that there is only one GEM Phase
-      /// @note Assumes there is only one phase in this microstructure
-      /// component
-      /// @todo Generalize to multiple phases in a component (how?)
+    cout << "GODZILLA: baserateconst 02 = " << baserateconst << endl;
 
-      // double saturationIndex = solut_->getSI(GEMPhaseId_);
-      double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
+    double ohActivity = chemSys_->getDCActivity("OH-");
+    cout << "GODZILLA: ohActivity = " << ohActivity << endl;
 
-      // activity of water
-      double waterActivity = chemSys_->getDCActivity(chemSys_->getDCId("H2O@"));
+    double area = (specificSurfaceArea_ / 1000.0) * scaledMass_; // m2
+    cout << "GODZILLA: specificSurfaceArea_ = " << specificSurfaceArea_ << endl;
+    cout << "GODZILLA:          scaledMass_ = " << scaledMass_ << endl;
+    cout << "GODZILLA:                 area = " << area << endl;
 
-      // This equation basically implements the Dove and Crerar rate
-      // equation for quartz.  Needs to be calibrated for silica fume, but
-      // hopefully the BET area and LOI will help do that.
+    // Saturation index , but be sure that there is only one GEM Phase
+    /// @note Assumes there is only one phase in this microstructure
+    /// component
+    /// @todo Generalize to multiple phases in a component (how?)
 
+    // double saturationIndex = solut_->getSI(GEMPhaseId_);
+    double saturationIndex = chemSys_->getMicroPhaseSI(microPhaseId_);
+
+    // activity of water
+    double waterActivity = chemSys_->getDCActivity(chemSys_->getDCId("H2O@"));
+
+    // This equation basically implements the Dove and Crerar rate
+    // equation for quartz.  Needs to be calibrated for silica fume, but
+    // hopefully the BET area and LOI will help do that.
+
+    if (saturationIndex < 1.0) {
+      dissrate = baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
+                 pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
+                 (sio2_)*pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
+    } else {
+      dissrate = -baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
+                 pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
+                 (sio2_)*pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
+    }
+
+    /// Assume steady-state diffusion, with the surface being
+    /// at equilibrium and the bulk being at the current
+    /// saturation index.
+    ///
+    /// Also assume a particular, fixed boundary layer thickness
+    /// through which diffusion occurs, like one micrometer
+
+    double boundaryLayer = 1.0;
+
+    double average_cdiff = 1.0e9;
+    if (DOR > 0.0) {
+      diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - DOR));
+      /// Below is very rough approximation to chemical potential gradient
+      /// Would be better if we knew the equilibrium constant of
+      /// the dissociation reaction.  We would need to raise
+      /// it to the power 1/dissolvedUnits and then multiply
+      /// it by average_cdiff.
       if (saturationIndex < 1.0) {
-        dissrate = baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
-                   pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
-                   (sio2_)*pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
+        average_cdiff = (1.0 - pow(saturationIndex, (1.0 / dissolvedUnits_)));
+        diffrate *= (average_cdiff) / boundaryLayer;
+        if (abs(diffrate) < 1.0e-10)
+          diffrate = 1.0e-10;
       } else {
-        dissrate = -baserateconst * rhFactor_ * pow(ohActivity, ohexp_) * area *
-                   pow(waterActivity, 2.0) * (1.0 - (lossOnIgnition_ / 100.0)) *
-                   (sio2_)*pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
+        average_cdiff = -(pow(saturationIndex, (1.0 / dissolvedUnits_)) - 1.0);
+        diffrate *= (average_cdiff) / boundaryLayer;
+        if (abs(diffrate) < 1.0e-10)
+          diffrate = -1.0e-10;
       }
+    } else if (saturationIndex < 1.0) {
+      diffrate = 1.0e9;
+    } else {
+      diffrate = -1.0e9;
+    }
 
-      /// Assume steady-state diffusion, with the surface being
-      /// at equilibrium and the bulk being at the current
-      /// saturation index.
-      ///
-      /// Also assume a particular, fixed boundary layer thickness
-      /// through which diffusion occurs, like one micrometer
+    rate = dissrate;
+    if (abs(diffrate) < abs(rate))
+      rate = diffrate;
+    int rate_ini = rate;
+    rate *= arrhenius_;
 
-      double boundaryLayer = 1.0;
+    massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
 
-      double average_cdiff = 1.0e9;
-      if (DOR > 0.0) {
-        diffrate = (diffusionRateConstEarly_ * ssaFactor_ * (1.0 - DOR));
-        /// Below is very rough approximation to chemical potential gradient
-        /// Would be better if we knew the equilibrium constant of
-        /// the dissociation reaction.  We would need to raise
-        /// it to the power 1/dissolvedUnits and then multiply
-        /// it by average_cdiff.
-        if (saturationIndex < 1.0) {
-          average_cdiff = (1.0 - pow(saturationIndex, (1.0 / dissolvedUnits_)));
-          diffrate *= (average_cdiff) / boundaryLayer;
-          if (abs(diffrate) < 1.0e-10)
-            diffrate = 1.0e-10;
-        } else {
-          average_cdiff =
-              -(pow(saturationIndex, (1.0 / dissolvedUnits_)) - 1.0);
-          diffrate *= (average_cdiff) / boundaryLayer;
-          if (abs(diffrate) < 1.0e-10)
-            diffrate = -1.0e-10;
-        }
-      } else if (saturationIndex < 1.0) {
-        diffrate = 1.0e9;
-      } else {
-        diffrate = -1.0e9;
-      }
+    if (verbose_) {
+      cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
+           << rate << " / " << massDissolved << endl;
+    }
 
-      rate = dissrate;
-      if (abs(diffrate) < abs(rate))
-        rate = diffrate;
-      int rate_ini = rate;
-      rate *= (rhFactor_ * arrhenius_);
+    scaledMass = scaledMass_ - massDissolved;
 
-      massDissolved = rate * timestep * chemSys_->getDCMolarMass(DCId_); //
+    if (scaledMass < 0) {
+      massDissolved = scaledMass_;
+      scaledMass = 0;
+    }
+    scaledMass_ = scaledMass;
 
-      if (verbose_) {
-        cout << "    PozzolanicModel::calculateKineticStep rate/massDissolved : "
-             << rate << " / " << massDissolved << endl;
-      }
+    // scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
 
-      scaledMass = scaledMass_ - massDissolved;
+    // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
 
-      if (scaledMass < 0) {
-        massDissolved = scaledMass_;
-        scaledMass = 0;
-      }
-      scaledMass_ = scaledMass;
+    // scaledMass = scaledMass_;
 
-      // scaledMass_ = max(scaledMass_ - massDissolved, 0.0); //
-
-      // newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
-
-      // scaledMass = scaledMass_;
-
-      if (verbose_) {
-        newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
-        cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
-             << "\tmicroPhaseId_ = " << microPhaseId_
-             << "    microPhase = " << name_
-             << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
-             << endl;
-        cout << "   PZM_hT   " << "rhFacto_r: " << rhFactor_
-             << "\tarrhenius_: " << arrhenius_
-             << "\tsaturationIndex: " << saturationIndex
-             << "\twaterActivity: " << waterActivity << endl;
-        cout << "   PZM_hT   " << "dissrate: " << dissrate
-             << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
-             << "\trate: " << rate << endl;
-        cout << "   PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
-             << "\tinitScaledMass_: " << initScaledMass_
-             << "\tscaledMass_: " << scaledMass_
-             << "\tmassDissolved: " << massDissolved << endl;
-        cout.flush();
-      }
+    // GODZILLA
+    cout << "^^^ " << name_ << ":" << endl;
+    cout.flush();
+    cout << "             dissrate = " << dissrate << endl;
+    cout << "      saturationIndex = " << saturationIndex << endl;
+    cout << "        baserateconst = " << baserateconst << endl;
+    cout << "            rhFactor_ = " << rhFactor_ << endl;
+    cout << "           ohActivity = " << ohActivity << endl;
+    cout << "                 area = " << area << endl;
+    cout << "        waterActivity = " << waterActivity << endl;
+    cout << "      lossOnIgnition_ = " << lossOnIgnition_ << endl;
+    cout << "             diffrate = " << diffrate << endl;
+    cout << "           ssaFactor_ = " << ssaFactor_ << endl;
+    cout << "                  DOR = " << DOR << endl;
+    cout << "      dissolvedUnits_ = " << dissolvedUnits_ << endl;
+    cout << "           arrhenius_ = " << arrhenius_ << endl;
+    cout << "                 rate = " << rate << endl;
+    cout << "             timestep = " << timestep << endl;
+    cout << "           scaledMass_ = " << scaledMass_ << endl;
+    cout << "        massDissolved = " << massDissolved << endl;
+    cout << "^^^" << endl << endl;
+    cout.flush();
+    // GODZILLA
+    if (verbose_) {
+      newDOR = (initScaledMass_ - scaledMass_) / initScaledMass_; //
+      cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
+           << "\tmicroPhaseId_ = " << microPhaseId_
+           << "    microPhase = " << name_
+           << "\tGEMPhaseIndex = " << GEMPhaseId_ << " ******************"
+           << endl;
+      cout << "   PZM_hT   " << "rhFacto_r: " << rhFactor_
+           << "\tarrhenius_: " << arrhenius_
+           << "\tsaturationIndex: " << saturationIndex
+           << "\twaterActivity: " << waterActivity << endl;
+      cout << "   PZM_hT   " << "dissrate: " << dissrate
+           << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
+           << "\trate: " << rate << endl;
+      cout << "   PZM_hT   " << "DOR: " << DOR << "\tnewDOR: " << newDOR
+           << "\tinitScaledMass_: " << initScaledMass_
+           << "\tscaledMass_: " << scaledMass_
+           << "\tmassDissolved: " << massDissolved << endl;
+      cout.flush();
+    }
 
     // } else {
     //   throw DataException("PozzolanicModel", "calculateKineticStep",
@@ -402,4 +441,3 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
   return;
 }
-
