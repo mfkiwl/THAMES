@@ -186,17 +186,18 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   if (time_.size() == 0) {
     cout << endl
          << endl
-         << "Controller::Controller error : at least one <calctime> or "
-            "<outtime> value must be present into parameters.xml file!"
+         << "Controller::Controller error : at least one calctime or "
+            "outtime value must be present into parameters.json file!"
          << endl;
     cout << endl
-         << "check and modify parameters.xml file and run thames again" << endl;
+         << "check and modify parameters.json file and run thames again"
+         << endl;
     cout << endl << "end program" << endl;
     // exit(0);
     throw FileException(
-        "Controller", "Controller", "parameters.xml",
-        "at least one <calctime> or "
-        "<outtime> value must be present into parameters.xml file!");
+        "Controller", "Controller", "parameters.json",
+        "at least one calctime or "
+        "outtime value must be present into parameters.json file!");
   }
 
   cout << "   initial time_.size()        = " << time_Size << endl;

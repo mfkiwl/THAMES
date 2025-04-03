@@ -6264,7 +6264,7 @@ public:
         i++;
       }
       cout << endl
-           << "After modiffing and saving the chemistry.xml file, please "
+           << "After modifying and saving the chemistry.json file, please "
               "restart the program."
            << endl
            << endl;
