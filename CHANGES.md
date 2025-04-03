@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 03 15:06 2025 | Read surface area multiplier from JSON input file |
 | Apr 02 16:52 2025 | Removed dependence on DOR for all but Parrot Killoh model |
 | Apr 02 10:41 2025 | Validated test cases against HEAD of main branch |
 | Mar 28 16:49 2025 | Fixed more bugs with recovering from GEM convergence error |

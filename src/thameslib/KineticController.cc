@@ -328,6 +328,8 @@ void KineticController::parseMicroPhases(const json::iterator cdi,
           chemSys_->getMicroPhaseMass(kineticData.microPhaseId);
       kineticData.temperature = temperature_;
       kineticData.reftemperature = refT_;
+      cout << "HEY! Surface area multiplier for " << kineticData.name << " is "
+           << kineticData.surfaceAreaMultiplier << endl;
       makeModel(kineticData);
     }
 
@@ -455,7 +457,7 @@ void KineticController::parseKineticDataForStandard(
   // How much to multiply the microstructure phase's surface
   // area to account for unresolved structure, roughness, etc.
   // This is an optional input, default value is 1.0
-  json::iterator pp = p.value().find("specificSurfaceArea");
+  json::iterator pp = p.value().find("surfaceAreaMultiplier");
   if (pp != p.value().end()) {
     kineticData.surfaceAreaMultiplier = pp.value();
   } else {
@@ -570,7 +572,7 @@ void KineticController::parseKineticDataForPozzolanic(
   // How much to multiply the microstructure phase's surface
   // area to account for unresolved structure, roughness, etc.
   // This is an optional input, default value is 1.0
-  json::iterator pp = p.value().find("specificSurfaceArea");
+  json::iterator pp = p.value().find("surfaceAreaMultiplier");
   if (pp != p.value().end()) {
     kineticData.surfaceAreaMultiplier = pp.value();
   } else {
