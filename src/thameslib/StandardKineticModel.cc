@@ -189,16 +189,16 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     // hopefully the BET area and LOI will help do that.
 
     if (saturationIndex < 1.0) {
-      dissrate = dissolutionRateConst_ * area *
+      dissrate = dissolutionRateConst_ * rhFactor_ * area *
                  pow((1.0 - pow(saturationIndex, siexp_)), dfexp_);
     } else {
-      dissrate = -dissolutionRateConst_ * area *
+      dissrate = -dissolutionRateConst_ * rhFactor_ * area *
                  pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
     }
 
     // double dissrate_ini = dissrate;
 
-    dissrate *= (rhFactor_ * arrhenius_);
+    dissrate *= arrhenius_;
 
     // dissrate has units of mol of phase per 100 g of solid per hour
     // timestep has units of hours
@@ -212,32 +212,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
               "dissrate/massDissolved : "
            << dissrate << " / " << massDissolved << endl;
     }
-
-    // GODZILLA
-    if (verbose_) {
-      cout << "^^^ " << name_ << ":" << endl;
-      cout.flush();
-      cout << "           dissrate_ini = " << dissrate_ini << endl;
-      cout << "  dissolutionRateConst_ = " << dissolutionRateConst_ << endl;
-      cout << "       micro-based area = "
-           << lattice_->getSurfaceArea(microPhaseId_) << endl;
-      cout << "        area multiplier = " << surfaceAreaMultiplier_ << endl;
-      cout << "                   area = " << area << endl;
-      cout << "        saturationIndex = " << saturationIndex << endl;
-      cout << "                 siexp_ = " << siexp_ << endl;
-      cout << "                 dfexp_ = " << dfexp_ << endl;
-      cout << "              rhFactor_ = " << rhFactor_ << endl;
-      cout << "             arrhenius_ = " << arrhenius_ << endl;
-      cout << "               timestep = " << timestep << endl;
-      cout << "               dissrate = " << dissrate << endl;
-      cout << "              molarMass = " << chemSys_->getDCMolarMass(DCId_)
-           << endl;
-      cout << "            scaledMass_ = " << scaledMass_ << endl;
-      cout << "          massDissolved = " << massDissolved << endl;
-      cout << "^^^" << endl;
-      cout.flush();
-    }
-    // GODZILLA
 
     scaledMass = scaledMass_ - massDissolved;
 

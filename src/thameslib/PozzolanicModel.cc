@@ -214,7 +214,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     }
 
     double baserateconst = dissolutionRateConst_;
-    cout << "GODZILLA: baserateconst 01 = " << baserateconst << endl;
 
     /// @note The following influence alkali and alkali earth cations
     /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
@@ -340,31 +339,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       scaledMass = 0;
     }
     scaledMass_ = scaledMass;
-
-    // GODZILLA
-    cout << "^^^ " << name_ << ":" << endl;
-    cout.flush();
-    cout << "             dissrate = " << dissrate << endl;
-    cout << "      saturationIndex = " << saturationIndex << endl;
-    cout << "        baserateconst = " << baserateconst << endl;
-    cout << "            rhFactor_ = " << rhFactor_ << endl;
-    cout << "           ohActivity = " << ohActivity << endl;
-    cout << "     micro-based area = "
-         << lattice_->getSurfaceArea(microPhaseId_) << endl;
-    cout << "      area multiplier = " << surfaceAreaMultiplier_ << endl;
-    cout << "                 area = " << area << endl;
-    cout << "        waterActivity = " << waterActivity << endl;
-    cout << "      lossOnIgnition_ = " << lossOnIgnition_ << endl;
-    cout << "             diffrate = " << diffrate << endl;
-    cout << "      dissolvedUnits_ = " << dissolvedUnits_ << endl;
-    cout << "           arrhenius_ = " << arrhenius_ << endl;
-    cout << "                 rate = " << rate << endl;
-    cout << "             timestep = " << timestep << endl;
-    cout << "           scaledMass_ = " << scaledMass_ << endl;
-    cout << "        massDissolved = " << massDissolved << endl;
-    cout << "^^^" << endl << endl;
-    cout.flush();
-    // GODZILLA
 
     if (verbose_) {
       cout << "  ****************** PZM_hT = " << timestep << "\tcyc = " << cyc
