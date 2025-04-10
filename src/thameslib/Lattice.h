@@ -13,7 +13,6 @@ exists, hydrates, and possibly deteriorates.
 
 #include <algorithm>
 #include <climits>
-// #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -75,6 +74,7 @@ private:
   string version_; /**< THAMES version for header information */
   string thamesVersion_;
   string jobRoot_; /**< The root name for output files */
+  string damageJobRoot_;
 
   RanGen *rg_; /**< Pointer to random number generator object */
   int latticeRNGseed_;
@@ -100,8 +100,6 @@ private:
   double wsRatio_;                    /**< Water-to-solids mass ratio */
   vector<double> volumeFraction_;     /**< Array of volume fractions of each
                                               microstructure phase */
-  vector<double> initVolumeFraction_; /**< Array of initial volume fractions of
-                                         each microstructure phase */
   vector<double> surfaceArea_;        /**< Array of surface areas of each
                                                  microstructure phase
                                                  (m2 per 100 g of all solid) */
@@ -110,7 +108,6 @@ private:
                                microstructure phase
                                (m2 per kg of that phase) */
   vector<int> count_;       /**< Number of sites of each different type */
-  vector<double> SI_;       /**< Current saturation indices */
 
   map<int, vector<double>>
       expansion_; /**< Map of expansion strain of each voxel */
@@ -198,6 +195,8 @@ public:
   the voxel phase assignments can be made at each site.
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
+  @param rg is a pointer to the random number generator object
+  @param seedRNG is the random number seed
   @param fileName is the name of the file containing the microstructure data
   @param verbose is true if extra messages are to be printed
   @param warning is true if warning messages are to be printed
@@ -300,15 +299,15 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setInitVolumeFraction(const int i, const double vfrac) {
-    if (i > -1 && i < initVolumeFraction_.size()) {
-      initVolumeFraction_[i] = vfrac;
-    } else {
-      throw EOBException("Lattice", "setInitVolumeFraction",
-                         "initVolumeFraction_", initVolumeFraction_.size(), i);
-    }
-    initVolumeFraction_[i] = vfrac;
-  }
+  // void setInitVolumeFraction(const int i, const double vfrac) {
+  //   if (i > -1 && i < initVolumeFraction_.size()) {
+  //     initVolumeFraction_[i] = vfrac;
+  //   } else {
+  //     throw EOBException("Lattice", "setInitVolumeFraction",
+  //                        "initVolumeFraction_", initVolumeFraction_.size(), i);
+  //   }
+  //   initVolumeFraction_[i] = vfrac;
+  // }
 
   /**
   @brief Set the water-solids mass ratio
@@ -340,13 +339,7 @@ public:
   @param i is the index of the microstructure phase
   @return the volume fraction of phase i on a total microstructure basis
   */
-  double getVolumeFraction(unsigned int i) {
-    if (numSites_ == 0) {
-      throw FloatException("Lattice", "getVolumeFraction",
-                           "Divide by zero (numSites_)");
-    }
-    return (volumeFraction_[i]);
-  }
+  double getVolumeFraction(unsigned int i) { return (volumeFraction_[i]); }
 
   /**
   @brief Get the initial volume fraction of a given microstructure phase.
@@ -357,13 +350,7 @@ public:
   @param i is the index of the microstructure phase
   @return the initial volume fraction of phase i on a total microstructure basis
   */
-  double getInitVolumeFraction(unsigned int i) {
-    if (numSites_ == 0) {
-      throw FloatException("Lattice", "getInitVolumeFraction",
-                           "Divide by zero (numSites_)");
-    }
-    return (initVolumeFraction_[i]);
-  }
+  // double getInitVolumeFraction(unsigned int i) { return (initVolumeFraction_[i]); }
 
   /**
   @brief Calculate the subvoxel pore volume
@@ -535,7 +522,10 @@ public:
 
   @param jobname is the root name for simulation output files
   */
-  void setJobRoot(string jobname) { jobRoot_ = jobname; }
+  void setJobRoot(string jobname) {
+    jobRoot_ = jobname;
+    damageJobRoot_ = jobRoot_ + ".damage";
+  }
 
   /**
   @brief Add a site at location (xp,yp,zp) to the lattice.
@@ -643,8 +633,7 @@ public:
   @param cementMass is the combined mass of all the cement components
   @param solidMass is the combined mass of all the solids
   */
-  void normalizePhaseMasses(vector<double> microPhaseMass, double cementMass,
-                            double solidMass);
+  void normalizePhaseMasses(vector<double> microPhaseMass, double solidMass);
 
   /**
   @brief Master method to locate the interfaces for each phase in the
@@ -844,7 +833,7 @@ public:
 
   void removeGrowthSite_grow(Site *ste0, int pid);
 
-  void removeGrowthSite_nucleation(Site *loc, unsigned int pid);
+  void removeGrowthSite_nucleation(Site *loc);
 
   /**
   @brief Master method to update a microstructure during after a given time
@@ -934,8 +923,7 @@ public:
   @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
-  void writePoreSizeDistribution(double curtime, const int simtype,
-                                 const string &root);
+  void writePoreSizeDistribution(double curtime);
 
   /**
   @brief Write the microstructure colors to a file
@@ -945,7 +933,7 @@ public:
 
   @param root is the root name of the output file to create
   */
-  void writeMicroColors(const string &root);
+  void writeMicroColors();
 
   /**
   @brief Write the 3D microstructure to a file.
@@ -953,18 +941,15 @@ public:
   The microstructure output file will indicate the phase id at each site.
 
   @param curtime is the current time in hours
-  @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
-  void writeLattice(double curtime, const int simtype, const string &root);
+  void writeLattice(double curtime);
 
-  void writeLatticeIni(double curtime);
+  void writeLatticeXYZ(double curtime);
 
-  void writeLatticeXYZ(double curtime, const int simtype, const string &root);
+  void appendXYZ(double curtime);
 
-  void appendXYZ(double curtime, const int simtype, const string &root);
-
-  void writeLatticeCFG(double curtime, const int simtype, const string &root);
+  void writeLatticeCFG(double curtime);
 
   /**
   @brief Write the 3D microstructure to a file.
@@ -974,7 +959,7 @@ public:
   @param curtime is the current time in hours
   @param root is the root name of the output file to create
   */
-  void writeDamageLattice(double curtime, const string &root);
+  void writeDamageLattice(double curtime);
 
   /**
   @brief Write the 3D microstructure to a png file that can be immediately
@@ -983,7 +968,7 @@ public:
   @param curtime is the current time in hours
   @param root is the root name of the png output file to create
   */
-  void writeLatticePNG(double curtime, const int simtype, const string &root);
+  void writeLatticePNG(double curtime);
 
   /**
   @brief Write the 3D microstructure to a png file that can be immediately
@@ -994,7 +979,7 @@ public:
   @param curtime is the current time in hours
   @param root is the root name of the png output file to create
   */
-  void writeDamageLatticePNG(double curtime, const string &root);
+  void writeDamageLatticePNG(double curtime);
 
   /**
   @brief Create files of sequential slices of the microstructure in the x
@@ -1015,7 +1000,7 @@ public:
 
   @param root is the root name of the png output file to create
   */
-  void makeMovie(const string &root);
+  void makeMovie();
 
   /**
   @brief Set the expansion strain components of a site specified by its index.
@@ -1043,12 +1028,11 @@ public:
   @return the vector of expansion strain components to set
   */
   vector<double> getExpansion(int index) {
-    string msg;
     map<int, vector<double>>::iterator p = expansion_.find(index);
     if (p != expansion_.end()) {
       return p->second;
     } else {
-      msg = "Could not find expansion_ match to index provided";
+      string msg = "Could not find expansion_ match to index provided";
       throw EOBException("Lattice", "getExpansion", msg, expansion_.size(), 0);
     }
   }
@@ -1074,12 +1058,11 @@ public:
   @return the (x,y,z) coordinates of the site
   */
   vector<int> getExpansionCoordin(int index) {
-    string msg;
     map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
     if (p != expansion_coordin_.end()) {
       return p->second;
     } else {
-      msg = "Could not find expansion_coordin_ match to index provided";
+      string msg = "Could not find expansion_coordin_ match to index provided";
       throw EOBException("Lattice", "getExpansionCoordin", msg,
                          expansion_coordin_.size(), 0);
     }
@@ -1101,7 +1084,6 @@ public:
   @return the (x,y,z) coordinates of the site
   */
   void setExpansionCoordin(int index, vector<int> coordin) {
-    string msg;
     map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
     if (p == expansion_coordin_.end()) {
       expansion_coordin_.insert(make_pair(index, coordin));
@@ -1534,7 +1516,7 @@ public:
   @return an STL list of the site ids according to the distribution
   */
   vector<int> findDomainSizeDistribution(int phaseid, const int numsites,
-                                         int maxsize, int cyc, int sortorder);
+                                         int maxsize, int sortorder);
 
   /**
   @brief Estimate the <i>linear size</i> of a domain
@@ -1634,7 +1616,7 @@ public:
     rg_->setSeed(latticeRNGseed_);
     numRNGcall_0_ = val_0;
     numRNGcallLONGMAX_ = valLONGMAX;
-    long int count_0 = 0, count_1 = 0;
+    // long int count_0 = 0, count_1 = 0;
     long int j0, j1, j11;
     double lastRNGreset = 1.e-16;
     for (j1 = 1; j1 <= numRNGcallLONGMAX_; j1++) {
@@ -1654,6 +1636,7 @@ public:
     //         "numRNGcall_0_/numRNGcallLONGMAX_/lastRNGreset/valRNG: "
     //      << numRNGcall_0_ << " / " << numRNGcallLONGMAX_ << " / "
     //      << lastRNGreset << " / " << valRNG << endl;
+
     if (abs(lastRNGreset - valRNG) > 1.e-16) {
       cout << endl << "Lattice::resetRNG FAILED => exit" << endl;
       exit(0);

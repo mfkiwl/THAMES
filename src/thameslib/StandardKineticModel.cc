@@ -163,12 +163,14 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
     /// Assume a zero contact angle for now.
     /// @todo revisit the contact angle issue
+
     scaledMass_ = scaledMass;
 
     // JWB BEWARE: The new definition of area is truly a geometric calculation
     // made on the microstructure. It does not catch BET or internal surface
     // area if that ends up being important. The units of area are m2 per 100
     // g of intial total solid
+
     double area = lattice_->getSurfaceArea(microPhaseId_);
     area *= surfaceAreaMultiplier_;
 
@@ -196,8 +198,6 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                  pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
     }
 
-    // double dissrate_ini = dissrate;
-
     dissrate *= arrhenius_;
 
     // dissrate has units of mol of phase per 100 g of solid per hour
@@ -215,9 +215,9 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
 
     scaledMass = scaledMass_ - massDissolved;
 
-    if (scaledMass < 0) {
+    if (scaledMass < 0.0) {
       massDissolved = scaledMass_;
-      scaledMass = 0;
+      scaledMass = 0.0;
     }
     scaledMass_ = scaledMass;
 
@@ -231,10 +231,8 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
            << "\tarrhenius_: " << arrhenius_
            << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
            << endl;
-      // cout << "   SKM_hT   " << "dissrate_ini: " << dissrate_ini
-      //      << "\tdissrate: " << dissrate << endl;
-      cout << "   SKM_hT   " << "tdissrate: " << dissrate << endl;
-      cout << "   SKM_hT   " << "\tinitScaledMass_: " << initScaledMass_
+      cout << "   SKM_hT   " << "dissrate: " << dissrate << endl;
+      cout << "   SKM_hT   " << "initScaledMass_: " << initScaledMass_
            << "\tscaledMass_: " << scaledMass_
            << "\tmassDissolved: " << massDissolved << endl;
       cout << "   cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
@@ -244,16 +242,14 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
       cout.flush();
     }
 
-  } // End of try block
-
-  catch (EOBException eex) {
+  } catch (EOBException eex) {
     eex.printException();
     exit(1);
   } catch (DataException dex) {
     dex.printException();
     exit(1);
-  } catch (FloatException fex) {
-    fex.printException();
+  } catch (FloatException flex) {
+    flex.printException();
     exit(1);
   } catch (out_of_range &oor) {
     EOBException ex("StandardKineticModel", "calculateKineticStep", oor.what(),

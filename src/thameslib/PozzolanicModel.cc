@@ -151,8 +151,6 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
   /// Initialize local variables
   ///
 
-  // double arrhenius; // = 1.0;
-
   double dissrate = 1.0e9; // Nucleation and growth rate
   double diffrate = 1.0e9; // Diffusion rate
 
@@ -160,7 +158,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
 
   // double massDissolved = 0.0;
 
-  double DOR, newDOR;
+  double DOR;
 
   ///
   /// Determine if this is a normal step or a necessary
@@ -318,6 +316,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     // dissrate has units of mol of phase per 100 g of all solid
     // per h
     /// @todo JWB Check to make sure that diffrate has same units as dissrate
+
     rate = dissrate;
     if (abs(diffrate) < abs(rate))
       rate = diffrate;
@@ -359,21 +358,19 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
       cout.flush();
     }
 
-  } // End of try block
-
-  catch (EOBException eex) {
+  } catch (EOBException eex) {
     eex.printException();
     exit(1);
   } catch (DataException dex) {
     dex.printException();
     exit(1);
-  } catch (FloatException fex) {
-    fex.printException();
+  } catch (FloatException flex) {
+    flex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("PozzolanicModel", "calculateKineticStep", oor.what(), 0,
+    EOBException eex("PozzolanicModel", "calculateKineticStep", oor.what(), 0,
                     0);
-    ex.printException();
+    eex.printException();
     exit(1);
   }
 

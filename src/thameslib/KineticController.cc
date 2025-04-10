@@ -202,7 +202,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
        << " g (same value for scaledCementMass_)" << endl;
   chemSys_->setInitScaledCementMass(initScaledCementMass_);
 
-  hyd_time_ini_ = 0;
+  hydTimeIni_ = 0;
 
   return;
 }
@@ -215,7 +215,6 @@ KineticController::~KineticController() {
 
 void KineticController::parseDoc(const string &docName) {
   int numEntry = -1; // Tracks number of solid phases
-  int testgemid;
 
   ///
   /// The kineticData structure is used to temporarily hold parsed data
@@ -282,14 +281,10 @@ void KineticController::parseDoc(const string &docName) {
 void KineticController::parseMicroPhases(const json::iterator cdi,
                                          int &numEntry,
                                          struct KineticData &kineticData) {
-  int proposedgemphaseid, proposedDCid;
-  int testgemid, testdcid;
   string testname;
   bool kineticfound = false;
   bool ispozz = false;
   bool isParrotKilloh = false;
-  bool istherm = false;
-  bool issol = false;
 
   json::iterator p = cdi.value().begin();
 
@@ -410,21 +405,21 @@ void KineticController::parseKineticDataForParrotKilloh(
   // Immediately convert to units of g per h within model
   pp = p.value().find("k1");
   kineticData.k1 = pp.value();
-  kineticData.k1 *= DAY_PER_H;
+  // kineticData.k1 *= DAY_PER_H;
 
   // Parrot-Killoh k2 parameter
   // Conventionally given in units of g per day
   // Immediately convert to units of g per h within model
   pp = p.value().find("k2");
   kineticData.k2 = pp.value();
-  kineticData.k2 *= DAY_PER_H;
+  // kineticData.k2 *= DAY_PER_H;
 
   // Parrot-Killoh k3 parameter
   // Conventionally given in units of g per day
   // Immediately convert to units of g per h within model
   pp = p.value().find("k3");
   kineticData.k3 = pp.value();
-  kineticData.k3 *= DAY_PER_H;
+  // kineticData.k3 *= DAY_PER_H;
 
   // Parrot-Killoh n1 parameter
   pp = p.value().find("n1");
@@ -790,7 +785,6 @@ void KineticController::setPozzEffectOnPK(void) {
   double refloi = 0.8;
   double loi = refloi;
   double maxloi = refloi;
-  double fillareaeff = 1.0;
   double sio2val = 0.94;
   double refsio2val = 0.94;
   double betval = 29.0;
@@ -882,7 +876,6 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
   phaseDissolvedId.resize(pKMsize_, 0);
   double numDCMolesDissolved, scaledMass, massDissolved;
 
-  // static double hyd_time_ini = 0.0;
   double hyd_time = 0.0;
 
   for (i = 0; i < ICNum_; i++) {
@@ -892,12 +885,12 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
   bool doTweak = (chemSys_->getTimesGEMFailed() > 0) ? true : false;
 
   if (doTweak) {
-    hyd_time = hyd_time_ini_ + timestep;
+    hyd_time = hydTimeIni_ + timestep;
     if (verbose_) {
       cout << endl
            << "  KineticController::calculateKineticStep - tweak cyc = " << cyc
            << " :  hyd_time = " << hyd_time
-           << "   hyd_time_ini_ = " << hyd_time_ini_
+           << "   hydTimeIni_ = " << hydTimeIni_
            << "   timestep = " << timestep << endl;
     }
     for (int midx = 0; midx < pKMsize_; ++midx) {
@@ -917,11 +910,11 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
 
   } else {
 
-    hyd_time = hyd_time_ini_ + timestep;
+    hyd_time = hydTimeIni_ + timestep;
     cout << endl
          << "  KineticController::calculateKineticStep - cyc = " << cyc
          << " :  hyd_time = " << hyd_time
-         << "   hyd_time_ini_ = " << hyd_time_ini_
+         << "   hydTimeIni_ = " << hydTimeIni_
          << "   timestep = " << timestep << endl;
 
     for (int midx = 0; midx < pKMsize_; ++midx) {
@@ -929,7 +922,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       scaledMassIni_[midx] =
           chemSys_->getMicroPhaseMass(phaseDissolvedId[midx]);
       if (verbose_) {
-        cout << "    Line 936 midx = " << midx
+        cout << "    midx = " << midx
              << "     scaledMassIni[midx] = " << scaledMassIni_[midx]
              << "     microPhaseName = " << phaseKineticModel_[midx]->getName()
              << endl;
@@ -1256,32 +1249,24 @@ double KineticController::updateKineticStep(int cyc, int pId,
   dcmoles = massImpurity / chemSys_->getDCMolarMass("K2O");
   DCMoles_[impurityDCID_[0]] += dcmoles;
   impurity_K2O_[midx] = dcmoles;
-  // DCMoles_[impurityDCID[0]] +=
-  //     massImpurity / chemSys_->getDCMolarMass("K2O");
 
   massImpurity = massDissolved * chemSys_->getNa2o(phaseDissolvedId);
   totMassImpurity += massImpurity;
   dcmoles = massImpurity / chemSys_->getDCMolarMass("Na2O");
   DCMoles_[impurityDCID_[1]] += dcmoles;
   impurity_Na2O_[midx] = dcmoles;
-  // DCMoles_[impurityDCID[1]] +=
-  //     massImpurity / chemSys_->getDCMolarMass("Na2O");
 
   massImpurity = massDissolved * chemSys_->getMgo(phaseDissolvedId);
   totMassImpurity += massImpurity;
   dcmoles = massImpurity / chemSys_->getDCMolarMass("Per");
   DCMoles_[impurityDCID_[2]] += dcmoles;
   impurity_Per_[midx] = dcmoles;
-  // DCMoles_[impurityDCID[2]] +=
-  //     massImpurity / chemSys_->getDCMolarMass("Per"); // MgO
 
   massImpurity = massDissolved * chemSys_->getSo3(phaseDissolvedId);
   totMassImpurity += massImpurity;
   dcmoles = massImpurity / chemSys_->getDCMolarMass("SO3");
   DCMoles_[impurityDCID_[3]] += dcmoles;
   impurity_SO3_[midx] = dcmoles;
-  // DCMoles_[impurityDCID[3]] +=
-  //     massImpurity / chemSys_->getDCMolarMass("SO3");
 
   numDCMolesDissolved =
       (massDissolved - totMassImpurity) / chemSys_->getDCMolarMass(DCId);

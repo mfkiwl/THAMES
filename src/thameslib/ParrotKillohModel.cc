@@ -243,22 +243,22 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
             (k1_ / n1_) * (1.0 - DOR) * pow((-log(1.0 - DOR)), (1.0 - n1_));
         ngrate *= (ssaFactor_); // only used for the N+G rate
 
-        if (ngrate < (1.0e-10 * DAY_PER_H))
-          ngrate = 1.0e-10 * DAY_PER_H;
+        if (ngrate < 1.0e-10)
+          ngrate = 1.0e-10;
       } else {
         throw FloatException("ParrotKillohModel", "calculateKineticStep",
                              "n1_ = 0.0");
       }
 
       hsrate = k3_ * pow((1.0 - DOR), n3_);
-      if (hsrate < (1.0e-10 * DAY_PER_H))
-        hsrate = 1.0e-10 * DAY_PER_H;
+      if (hsrate < 1.0e-10)
+        hsrate = 1.0e-10;
 
       if (DOR > 0.0) {
         diffrate = (k2_ * pow((1.0 - DOR), (2.0 / 3.0))) /
                    (1.0 - pow((1.0 - DOR), (1.0 / 3.0)));
-        if (diffrate < (1.0e-10 * DAY_PER_H))
-          diffrate = 1.0e-10 * DAY_PER_H;
+        if (diffrate < 1.0e-10)
+          diffrate = 1.0e-10;
       } else {
         diffrate = 1.0e9;
       }
@@ -268,9 +268,9 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
       if (diffrate < rate)
         rate = diffrate;
 
-      double rate_ini = rate;
+      // double rate_ini = rate;
 
-      rate *= (pfk_ * rhFactor_ * arrhenius_); // rate is R @ t-1
+      rate *= (pfk_ * rhFactor_ * arrhenius_ * DAY_PER_H); // rate is R @ t-1
 
       double prod = rate * timestep;
 
@@ -321,8 +321,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
         cout << "   PKM_hT   " << "wcRatio_: " << wcRatio_
              << "\twsRatio_: " << wsRatio_ << endl;
         cout << "   PKM_hT   " << "ngrate: " << ngrate << "\thsrate: " << hsrate
-             << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
-             << "\trate: " << rate << endl;
+             << "\tdiffrate: " << diffrate << "\trate: " << rate << endl;
         cout << "   PKM_hT   " << "wcFactor: " << wcFactor
              << "\trhFactor_: " << rhFactor_ << "\tarrhenius_: " << arrhenius_
              << endl;
@@ -347,13 +346,13 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
   } catch (DataException dex) {
     dex.printException();
     exit(1);
-  } catch (FloatException fex) {
-    fex.printException();
+  } catch (FloatException flex) {
+    flex.printException();
     exit(1);
   } catch (out_of_range &oor) {
-    EOBException ex("ParrotKillohModel", "calculateKineticStep", oor.what(), 0,
+    EOBException eex("ParrotKillohModel", "calculateKineticStep", oor.what(), 0,
                     0);
-    ex.printException();
+    eex.printException();
     exit(1);
   }
 

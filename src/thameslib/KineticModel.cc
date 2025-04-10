@@ -44,10 +44,6 @@ void KineticModel::setKineticDCMoles() {
 #endif
 
   try {
-    int waterId = chemSys_->getDCId("H2O@");
-    double waterMoles = chemSys_->getDCMoles(waterId);
-    double waterMolarMass = chemSys_->getDCMolarMass(waterId);
-    double waterMass = waterMoles * waterMolarMass;
     if (chemSys_->getDCMolarMass(DCId_) <= 0.0) {
       throw FloatException("KineticModel", "setKineticDCmoles",
                            "Divide by zero error");

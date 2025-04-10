@@ -88,7 +88,8 @@ private:
   int pKMsize_;
 
   double initScaledCementMass_;
-  double hyd_time_ini_;
+  double hydTimeIni_;
+  // double hyd_time_ini_;
 
 public:
   /**
@@ -374,7 +375,7 @@ public:
 
   @return the vector of names of phases in the kinetic model
   */
-  vector<string> getName() const { return name_; }
+  // vector<string> getName() const { return name_; }
 
   /**
   @brief Get the name of phase with a given index in the kinetic model.
@@ -382,7 +383,7 @@ public:
   @param i is the index of the phase in the kinetic model
   @return the name of the phase with index i
   */
-  string getName(const unsigned int i) const { return name_[i]; }
+  // string getName(const unsigned int i) const { return name_[i]; }
 
   /**
   @brief Set kinetic model DC moles
@@ -481,7 +482,7 @@ public:
 
   vector<bool> getIsKinetic(void) { return isKinetic_; }
 
-  void setHydTimeIni(double val) { hyd_time_ini_ = val; }
+  void setHydTimeIni(double val) { hydTimeIni_ = val; }
 
 }; // End of KineticController class
 

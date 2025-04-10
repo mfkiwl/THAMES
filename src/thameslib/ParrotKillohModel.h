@@ -124,7 +124,6 @@ protected:
                         effects of pozzolanic additions */
   double rh_;
   double rhFactor_;
-  // double T_;
   double arrhenius_;
 
 public:

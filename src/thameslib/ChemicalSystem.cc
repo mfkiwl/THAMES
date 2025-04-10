@@ -21,9 +21,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   double *icmolarmass, *dcmolarmass;
   char *cc;
-  unsigned int ii, jj;
-  int k;
-  bool found = false;
 
   nodeStatus_ = NEED_GEM_AIA;
   nodeHandle_ = 0;
@@ -132,9 +129,6 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// Find out if the input data are in json format or in key-value format
 
   try {
-    string json_dch = "";
-    string json_ipm = "";
-    string json_dbr = "";
     jsonFormat_ = isInputFormatJSON(cGEMfilename);
 
     ///
@@ -749,7 +743,6 @@ void ChemicalSystem::parseDoc(const string &docName) {
   // Need to open the docName and scan it somehow for
   // phase names and id numbers
 
-  string msg;
   PhaseData phaseData;
 
   /// Test for JSON existence and non-emptiness
@@ -999,8 +992,6 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
                                       map<string, int> phaseids,
                                       PhaseData &phaseData) {
 
-  string poreSizeFileName;
-
   json::iterator p;
   for (int i = 0; i < cdi.value().size(); ++i) {
 
@@ -1175,7 +1166,7 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
 
     /// Growth template is based on positive affinities only
 
-    growthTemplate_.push_back(calcGrowthtemplate(phaseData.affinity));
+    growthTemplate_.push_back(calcGrowthTemplate(phaseData.affinity));
 
     poreSizeDistribution_.push_back(phaseData.poreSizeDist);
     if (verbose_) {
@@ -1217,7 +1208,7 @@ void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
     cout.flush();
   }
 
-  double diam, volfrac, sum;
+  double sum;
   struct PoreSizeVolume datarow;
   json::iterator pp;
 
@@ -1265,7 +1256,6 @@ void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
 void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
                                        PhaseData &phaseData) {
   int GEMPhaseId = 0;
-  int dcid = 0;
   string mypstr;
   phaseData.GEMPhaseDCMembers.clear();
   phaseData.microPhaseDCPorosities.clear();
@@ -1511,7 +1501,7 @@ void ChemicalSystem::parseAffinityData(const json::iterator pp,
                                        PhaseData &phaseData) {
   int testaftyid;
   double testangleval = 90.0;
-  map<string, int>::iterator it = phaseids.begin();
+  // map<string, int>::iterator it = phaseids.begin();
   string mystr("Null");
 
   json::iterator ppp;
@@ -2525,8 +2515,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
       if (verbose_) {
         cout << "System is saturated: wDCId = " << wDCId << endl;
-        cout << "    initMicroVolume_ = " << initMicroVolume_ << endl;
-        cout << "    microVolume_ = " << microVolume_ << endl;
         cout << "    water_molarv = " << water_molarv << endl;
         cout << "    volume increase of water is: "
              << (initMicroVolume_ - microVolume_) << endl;
@@ -2567,10 +2555,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   return timesGEMFailed_;
 }
 
-void ChemicalSystem::setMicroPhaseSI(int cyc) {
+void ChemicalSystem::setMicroPhaseSI() {
 
   microPhaseSI_.clear();
-  microPhaseSI_.resize(getNumMicroPhases(), 0.0);
+  microPhaseSI_.resize(numMicroPhases_, 0.0);
 
   try {
     double aveSI = 0.0;
@@ -2579,17 +2567,15 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
     vector<int> microPhaseDCMembers;
     int sizeMicroPhaseDCMembers;
     string pname;
+    int newDCId;
 
     // Query CSD node to set the SI of every microPhase
     // if (isFirst) {
     //} else {
 
     // setSI();
-    // cout << endl << "ChemicalSystem::setMicroPhaseSI" << endl;cout.flush();
-    microPhaseSI_.at(0) = 0;
-    microPhaseSI_.at(1) = 0;
     for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
-      pname = getMicroPhaseName(i);
+      pname = microPhaseName_[i];
       aveSI = moles = 0.0;
       microPhaseDCMembers = getMicroPhaseDCMembers(i);
       sizeMicroPhaseDCMembers = microPhaseDCMembers.size();
@@ -2597,7 +2583,7 @@ void ChemicalSystem::setMicroPhaseSI(int cyc) {
       //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
       //      : " << endl;
       for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
-        int newDCId = microPhaseDCMembers.at(ii);
+        newDCId = microPhaseDCMembers.at(ii);
         tmoles = DCMoles_[newDCId];
         // if ( microPhaseDCMembers.size() == 1) {
         //   vector<int> microPhaseMembers = getMicroPhaseMembers(i);
@@ -2643,7 +2629,7 @@ void ChemicalSystem::initColorMap(void) {
   //   string altName;
   //   vector<int> rgb;
   //   int gray;
-  // };'
+  // };
 
   colorN_["Void"].colorId = 0;
   colorN_["Void"].altName = "Empty";
@@ -3214,52 +3200,3 @@ void ChemicalSystem::setGasComposition(const bool isFirst) {
   return;
 }
 
-void ChemicalSystem::setMicroPhaseSI(void) {
-
-  microPhaseSI_.clear();
-  microPhaseSI_.resize(getNumMicroPhases(), 0.0);
-
-  try {
-    double aveSI = 0.0;
-    double moles = 0.0;
-    double tmoles = 0.0;
-    vector<int> microPhaseMembers;
-
-    // Query CSD node to set the SI of every phase
-    setSI();
-
-    for (int i = 0; i < getNumMicroPhases(); ++i) {
-      string pname = getMicroPhaseName(i);
-      if (verbose_ && (pname == "Portlandite")) {
-        cout << "SI(Alite) Calculation:" << endl;
-        cout << "    [Ca2+] = " << getDCConcentration("Ca+2") << endl;
-        cout << "    [CaOH+] = " << getDCConcentration("CaOH+") << endl;
-        cout << "    [OH-] = " << getDCConcentration("OH-") << endl;
-      }
-      int newMicroPhaseId = getMicroPhaseId(pname);
-      aveSI = moles = 0.0;
-      microPhaseMembers = getMicroPhaseMembers(newMicroPhaseId);
-      for (int ii = 0; ii < microPhaseMembers.size(); ++ii) {
-        int newGEMPhaseId = microPhaseMembers.at(ii);
-        tmoles = getGEMPhaseMoles(newGEMPhaseId);
-        aveSI += (getSI(newGEMPhaseId) * tmoles);
-        moles += tmoles;
-      }
-      if (moles > 0.0) {
-        aveSI = aveSI / moles;
-      } else {
-        aveSI = aveSI / (static_cast<double>(microPhaseMembers.size()));
-      }
-      microPhaseSI_.at(i) = aveSI;
-      if (verbose_ && (pname == "Portlandite")) {
-        cout << "    SI(" << pname << ") = " << aveSI << endl;
-        cout.flush();
-      }
-    }
-  } catch (EOBException eex) {
-    eex.printException();
-    exit(1);
-  }
-
-  return;
-}

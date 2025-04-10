@@ -23,7 +23,6 @@ used.
 #include <map>
 #include <string>
 #include <vector>
-// #include "KineticController.h"
 #include "KineticData.h"
 #include "Lattice.h"
 #include "global.h"
@@ -245,7 +244,7 @@ public:
   chemical system definition.
   */
 
-  void getPhaseMasses(void);
+  // void getPhaseMasses(void);
 
   /**
   @brief Get the microstructure id in the KineticModel.
@@ -328,14 +327,14 @@ public:
 
   @param icname is the list of IC names
   */
-  void setICName(vector<string> icname) { ICName_ = icname; }
+  // void setICName(vector<string> icname) { ICName_ = icname; }
 
   /**
   @brief Get the IC names
 
   @return the list of IC names
   */
-  vector<string> getICName() const { return ICName_; }
+  // vector<string> getICName() const { return ICName_; }
 
   /**
   @brief Set the DC names
@@ -344,14 +343,14 @@ public:
 
   @param dcname is the list of DC names
   */
-  void setDCName(vector<string> dcname) { DCName_ = dcname; }
+  // void setDCName(vector<string> dcname) { DCName_ = dcname; }
 
   /**
   @brief Get the DC names
 
   @return the list of DC names
   */
-  vector<string> getDCName() const { return DCName_; }
+  // vector<string> getDCName() const { return DCName_; }
 
   /**
   @brief Set the total number of phases in the kinetic model.
@@ -360,7 +359,7 @@ public:
 
   @param numphases is the total number of phases in the kinetic model
   */
-  void setNumPhases(const unsigned int numphases) { numPhases_ = numphases; }
+  // void setNumPhases(const unsigned int numphases) { numPhases_ = numphases; }
 
   /**
   @brief Get the total number of phases in the kinetic model.
@@ -369,16 +368,14 @@ public:
 
   @return the total number of phases in the kinetic model
   */
-  int getNumPhases() const { return numPhases_; }
+  // int getNumPhases() const { return numPhases_; }
 
   /**
   @brief Set the simulation time at which to begin external sulfate attack.
 
   @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
-  void setSulfateAttackTime(double sattacktime) {
-    sulfateAttackTime_ = sattacktime;
-  }
+  // void setSulfateAttackTime(double sattacktime) { sulfateAttackTime_ = sattacktime; }
 
   /**
   @brief Get the simulation time at which to begin external sulfate attack.
@@ -387,14 +384,14 @@ public:
 
   @return the simulation time to begin sulfate attack [hours]
   */
-  double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
+  // double getSulfateAttackTime(void) const { return sulfateAttackTime_; }
 
   /**
   @brief Set the simulation time at which to begin leaching.
 
   @param leachtime is the simulation time to begin leaching [hours]
   */
-  void setLeachTime(double leachtime) { leachTime_ = leachtime; }
+  // void setLeachTime(double leachtime) { leachTime_ = leachtime; }
 
   /**
   @brief Get the simulation time at which to begin leaching.
@@ -403,7 +400,7 @@ public:
 
   @return the simulation time to begin leaching [hours]
   */
-  double getLeachTime(void) const { return leachTime_; }
+  // double getLeachTime(void) const { return leachTime_; }
 
   /**
   @brief Get the list of phase names used by the kinetic model.
@@ -422,7 +419,7 @@ public:
 
   @return the vector of activation energies [J/mol/K]
   */
-  double getActivationEnergy() const { return activationEnergy_; }
+  // double getActivationEnergy() const { return activationEnergy_; }
 
   /**
   @brief Set the absolute temperature.
@@ -431,7 +428,7 @@ public:
 
   @param tval is the absolute temperature [K]
   */
-  void setTemperature(double tval) { temperature_ = tval; }
+  // void setTemperature(double tval) { temperature_ = tval; }
 
   /**
   @brief Get the absolute temperature.
@@ -440,7 +437,7 @@ public:
 
   @return the absolute temperature [K]
   */
-  double getTemperature() const { return temperature_; }
+  // double getTemperature() const { return temperature_; }
 
   /**
   @brief Set the model reference temperature.
@@ -449,7 +446,7 @@ public:
 
   @param rtval is the reference temperature [K]
   */
-  void setRefT(double rtval) { refT_ = rtval; }
+  // void setRefT(double rtval) { refT_ = rtval; }
 
   /**
   @brief Get the model reference temperature.
@@ -458,7 +455,7 @@ public:
 
   @return the reference temperature [K]
   */
-  double getRefT() const { return refT_; }
+  // double getRefT() const { return refT_; }
 
   /**
   @brief Get the scaled mass of the phase in the kinetic model.
@@ -469,7 +466,7 @@ public:
 
   @return the vector of scaled masses [percent solids]
   */
-  double getScaledMass() const { return scaledMass_; }
+  // double getScaledMass() const { return scaledMass_; }
 
   /**
   @brief Set the <i>initial</i> mass of the phase in the kinetic model.
@@ -478,14 +475,14 @@ public:
 
   @param initscaledmass is the value to set
   */
-  void setInitScaledMass(const double initscaledmass) {
-    if (initscaledmass < 0.0) {
-      initScaledMass_ = 0.0;
-    } else {
-      initScaledMass_ = initscaledmass;
-    }
-    return;
-  }
+  // void setInitScaledMass(const double initscaledmass) {
+  //   if (initscaledmass < 0.0) {
+  //     initScaledMass_ = 0.0;
+  //   } else {
+  //     initScaledMass_ = initscaledmass;
+  //   }
+  //   return;
+  // }
 
   /**
   @brief Get the <i>initial</i> mass of the phase in the kinetic model.
@@ -494,7 +491,7 @@ public:
 
   @return the initial scaled mass
   */
-  double getInitScaledMass() const { return initScaledMass_; }
+  // double getInitScaledMass() const { return initScaledMass_; }
 
   /**
   @brief Set the <i>initial</i> scaled moles of the phase in the kinetic model.
@@ -577,34 +574,28 @@ public:
 
   @param isverbose is true if verbose output should be produced
   */
-  void setVerbose(const bool isverbose) {
-    verbose_ = isverbose;
-    return;
-  }
+  // void setVerbose(const bool isverbose) { verbose_ = isverbose; }
 
   /**
   @brief Get the verbose flag
 
   @return the verbose flag
   */
-  bool getVerbose() const { return verbose_; }
+  // bool getVerbose() const { return verbose_; }
 
   /**
   @brief Set the warning flag
 
   @param iswarning is true if verbose output should be produced
   */
-  void setWarning(const bool iswarning) {
-    warning_ = iswarning;
-    return;
-  }
+  // void setWarning(const bool iswarning) { warning_ = iswarning; }
 
   /**
   @brief Get the warning flag
 
   @return the warning flag
   */
-  bool getWarning() const { return warning_; }
+  // bool getWarning() const { return warning_; }
 
   string getModelName(void) { return modelName_; }
 }; // End of KineticModel class

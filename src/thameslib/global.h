@@ -11,12 +11,10 @@
 // #endif
 
 #include "Exceptions.h"
-#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-#include <cmath>
 
 using namespace std;
 
@@ -45,7 +43,7 @@ const string ZSIZESTRING("#THAMES:Z_Size:");
 // @todo Make this general somehow
 const string WaterGEMName("aq_gen");
 
-// String indicating the liquid solution GEM Phase name
+// String indicating the liquid water DC name
 // @todo Make this general somehow
 const string WaterDCName("H2O@");
 

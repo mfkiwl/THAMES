@@ -12,14 +12,12 @@ Isite::Isite() {
   id_ = 0;
   verbose_ = false;
   prob_ = 0.;
-  probIni_ = 0;
 }
 
 Isite::Isite(unsigned int idval, double aftyval, const bool verbose, double prbval, double prbIval) {
   id_ = idval;
   affinity_ = aftyval;
   prob_ = prbval;
-  probIni_ = prbval;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -33,7 +31,6 @@ Isite::Isite(const Isite &obj) {
   affinity_ = obj.affinity_;
   verbose_ = obj.verbose_;
   prob_ = obj.prob_;
-  probIni_ = obj.probIni_;
 }
 
 Isite& Isite::operator=(const Isite &obj){     // copy assignment operator
@@ -42,7 +39,6 @@ Isite& Isite::operator=(const Isite &obj){     // copy assignment operator
     affinity_ = obj.affinity_;
     verbose_ = obj.verbose_;
     prob_ = obj.prob_;
-    probIni_ = obj.probIni_;
 
     return *this;
 }

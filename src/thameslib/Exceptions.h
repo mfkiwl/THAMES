@@ -514,7 +514,7 @@ public:
     @param cname is the class name where the exception was thrown
     @param fileName is the method name where the exception was thrown
     @param strd is the description of the exception
-    */
+  */
   MicrostructureException(const string &cname, const string &fileName,
                           const string &strd) {
     classname_ = cname;
@@ -522,6 +522,14 @@ public:
     description_ = strd;
   }
 
+  /**
+    @brief Overloaded constructor that is typically invoked by THAMES.
+
+    @param cname is the class name where the exception was thrown
+    @param fileName is the method name where the exception was thrown
+    @param strd is the description of the exception
+    @param excp is true <-> for exception / false <-> for normal exit
+  */
   MicrostructureException(const string &cname, const string &fileName,
                           const string &strd, bool excp) {
     classname_ = cname;

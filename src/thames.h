@@ -203,14 +203,13 @@ through its `writeChemSys` method.
 @param parFileName is the name of the input parameter file
 @param csdName is the name of the GEM chemical system definition (CSD) file
 @param csys is a pointer to the ChemicalSystem object for the simulation
-@param ctr is a pointer to the Controller object for the simulation
 
 If a file is not present, the file name should be given as an empty string.
 */
 void writeReport(const string &jobroot, struct tm *itime,
                  const string &initMicName, const string &micDefName,
                  const string &parFileName, const string &csdName,
-                 ChemicalSystem *csys, Controller *ctr);
+                 ChemicalSystem *csys);
 
 /**
 @brief write the timing data

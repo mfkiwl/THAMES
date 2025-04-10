@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   strainenergy.clear();
   strainenergy.resize(156, 0.0);
 
-  int choice, simtype;
+  int simtype;
   string buff = "";
   ChemicalSystem *ChemSys = NULL;
   Lattice *Mic = NULL;
@@ -39,26 +39,24 @@ int main(int argc, char **argv) {
 
   bool errorProgram = false;
 
-  int resCallSystem;
-
   //
   // Main menu where user decides what kind of simulation this will be.
   //
 
-  cout << "Enter choice: " << endl;
+  cout << "Enter simulation type: " << endl;
   cout << "  " << QUIT_PROGRAM << ") Exit program " << endl;
   cout << "  " << HYDRATION << ") Hydration " << endl;
   cout << "  " << LEACHING << ") Leaching " << endl;
   cout << "  " << SULFATE_ATTACK << ") Sulfate attack " << endl;
-  cin >> choice;
-  cout << endl << "choice = " << choice << endl;
+  cin >> simtype;
+  cout << endl << "simtype = " << simtype << endl;
 
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
   // endl; cout << "epsilon for float : \t" << numeric_limits<float>::epsilon()
   // << endl;
 
-  if (choice <= QUIT_PROGRAM || choice > SULFATE_ATTACK) {
+  if (simtype <= QUIT_PROGRAM || simtype > SULFATE_ATTACK) {
 
     cout << "Exiting program now." << endl << endl;
     exit(1);
@@ -82,7 +80,6 @@ int main(int argc, char **argv) {
   inittime = localtime(&lt);
   cout << asctime(inittime);
   clock_t starttime = clock();
-  simtype = choice;
 
   //
   // User must provide the name of the GEM chemical system definition (CSD) file
@@ -189,7 +186,7 @@ int main(int argc, char **argv) {
                       errorProgram);
   }
 
-  if (choice == SULFATE_ATTACK) {
+  if (simtype == SULFATE_ATTACK) {
 
     //
     // This block is executed only if simulating external sulfate attack,
@@ -220,11 +217,11 @@ int main(int argc, char **argv) {
       cout << "Bad memory allocation in ThermalStrain constructor: "
            << ba.what() << endl;
       errorProgram = true;
-    } catch (FileException ex) {
-      ex.printException();
+    } catch (FileException fex) {
+      fex.printException();
       errorProgram = true;
-    } catch (GEMException ex) {
-      ex.printException();
+    } catch (GEMException gex) {
+      gex.printException();
       errorProgram = true;
     }
     if (errorProgram) {
@@ -245,16 +242,17 @@ int main(int argc, char **argv) {
     try {
       AppliedStrainSolver = new AppliedStrain(
           nx, ny, nz, ns, ChemSys->getNumMicroPhases(), 1, VERBOSE, WARNING);
+      cout << "AppliedStrain object creation done... " << endl;
       AppliedStrainSolver->setPhasemodfileName(phasemod_fileName);
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in AppliedStrain constructor: "
            << ba.what() << endl;
       errorProgram = true;
-    } catch (FileException ex) {
-      ex.printException();
+    } catch (FileException fex) {
+      fex.printException();
       errorProgram = true;
-    } catch (GEMException ex) {
-      ex.printException();
+    } catch (GEMException gex) {
+      gex.printException();
       errorProgram = true;
     }
     if (errorProgram) {
@@ -283,17 +281,17 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
     errorProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
+  } catch (FileException fex) {
+    fex.printException();
     errorProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
+  } catch (GEMException gex) {
+    gex.printException();
     errorProgram = true;
-  } catch (FloatException ex) {
-    ex.printException();
+  } catch (FloatException flex) {
+    flex.printException();
     errorProgram = true;
-  } catch (DataException ex) {
-    ex.printException();
+  } catch (DataException dex) {
+    dex.printException();
     errorProgram = true;
   }
   if (errorProgram) {
@@ -331,11 +329,14 @@ int main(int argc, char **argv) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
     errorProgram = true;
-  } catch (FileException ex) {
-    ex.printException();
+  } catch (FileException fex) {
+    fex.printException();
     errorProgram = true;
-  } catch (GEMException ex) {
-    ex.printException();
+  } catch (GEMException gex) {
+    gex.printException();
+    errorProgram = true;
+  } catch (DataException dex) {
+    dex.printException();
     errorProgram = true;
   }
   if (errorProgram) {
@@ -349,7 +350,7 @@ int main(int argc, char **argv) {
   //
 
   writeReport(jobRoot, inittime, initMicName, micDefName, parFileName,
-              gemInputName, ChemSys, Ctrl);
+              gemInputName, ChemSys);
 
   //
   // Launch the main controller to run the simulation
@@ -362,7 +363,7 @@ int main(int argc, char **argv) {
 
   try {
 
-    Ctrl->doCycle(statFileName, choice, elemTimeInterval);
+    Ctrl->doCycle(elemTimeInterval);
 
   } catch (GEMException gex) {
     gex.printException();
@@ -370,8 +371,8 @@ int main(int argc, char **argv) {
   } catch (DataException dex) {
     dex.printException();
     errorProgram = true;
-  } catch (EOBException ex) {
-    ex.printException();
+  } catch (EOBException eex) {
+    eex.printException();
     errorProgram = true;
   } catch (MicrostructureException mex) {
     mex.printException();
@@ -653,7 +654,7 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
 void writeReport(const string &jobRoot, struct tm *itime,
                  const string &initMicName, const string &micDefName,
                  const string &parFileName, const string &csdName,
-                 ChemicalSystem *csys, Controller *ctr) {
+                 ChemicalSystem *csys) {
   string statName = jobRoot + ".stats";
   string jFileName = jobRoot + ".report";
   ofstream out(jFileName.c_str());

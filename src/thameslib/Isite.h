@@ -27,7 +27,6 @@ private:
   double affinity_;    /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
   double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
-  double probIni_;
 
 public:
   /**
@@ -87,12 +86,8 @@ public:
   @param num is the growth affinity of the corresponding Site object
   */
   void setAffinity(double num) { affinity_ = num; }
-  void updateAffinity(double afty) { affinity_ += afty; }
 
-  void setProb(double num) {prob_ = num; };
-  void setProbIni(double num) {probIni_ = num; };
-  double getProb(void) {return prob_; };
-  double getProbIni(void) {return probIni_; };
+  void updateAffinity(double afty) { affinity_ += afty; }
 
   /**
   @brief Set the verbose flag

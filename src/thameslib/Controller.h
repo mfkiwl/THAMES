@@ -11,7 +11,6 @@
 #include "Site.h"
 #include "ThermalStrain.h"
 #include "global.h"
-// #include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -44,7 +43,7 @@ struct RestoreInterface {
       growthSites; /**< The list of all sites eligible foradjacent growth */
   vector<Isite>
       dissolutionSites; /**< The list of sites eligible for self-dissolution */
-                        //    for each Isite:
+  //    for each Isite:
   //      unsigned int id_; /**< The id of the corresponding Site */
   //      int affinity_;    /**< The affinity for growth of a phase at the site
   //      */ bool verbose_;    /**< Flag for whether to produce verbose output
@@ -164,6 +163,17 @@ private:
   bool warning_; /**< Flag for warning output */
   bool xyz_;     /**< Flag for 3D movie data output */
 
+  int numMicroPhases_;
+  int numGEMPhases_;
+  int numICs_;
+  int numDCs_;
+  double temperature_; /**< Temperature */
+  double presure_;
+  int waterDCId_; /**< coresp to DCName = "H2O@" */
+  double waterMollarMass_;
+  int numSites_;
+  double initMicroVolume_; /**< Initial absolute volume of the microstructure */
+
 public:
   /**
   @brief The constructor.
@@ -208,7 +218,8 @@ public:
   @param choice is an int flag to specify whether simulating hydration,
   leaching, or sulfate attack
   */
-  void doCycle(const string &statfilename, int choice, double elemTimeInterval);
+  // void doCycle(const string &statfilename, int choice, double elemTimeInterval);
+  void doCycle(double elemTimeInterval);
 
   /**
   @brief Calculate the state of the system (called by doCycle).
