@@ -219,20 +219,20 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     /// was asserted by Dove and Crerar (1990) but only at near-neutral pH
 
     double ca = chemSys_->getDCConcentration("Ca+2");
-    double kca = 4.0e-7; // mol m-2 s-1 ads.
-                         // rate const for Ca (guess)
-    double Kca = 10.0;   // adsorption equilibrium
-                         // constant is a guess
+    double kca = 0.00144; // mol m-2 h-1 ads.
+                          // rate const for Ca (guess)
+    double Kca = 10.0;    // adsorption equilibrium
+                          // constant is a guess
     double na = chemSys_->getDCConcentration("Na+");
-    double kna = 6.35e-7; // mol m-2 s-1 ads. rate
-                          // const from Dove and Crerar
-    double Kna = 58.3;    // adsorption equilibrium
-                          // constant from Dove and Crerar
+    double kna = 0.002286; // mol m-2 h-1 ads. rate
+                           // const from Dove and Crerar
+    double Kna = 58.3;     // adsorption equilibrium
+                           // constant from Dove and Crerar
     double k = chemSys_->getDCConcentration("K+");
-    double kk = 5.6e-7; // mol m-2 s-1 ads. rate
-                        // const from Dove and Crerar
-    double Kk = 46.6;   // adsorption equilibrium constant
-                        // from Dove and Crerar
+    double kk = 0.002016; // mol m-2 h-1 ads. rate
+                          // const from Dove and Crerar
+    double Kk = 46.6;     // adsorption equilibrium constant
+                          // from Dove and Crerar
 
     // Langmuir adsorption isotherms assumed to be additive
 
