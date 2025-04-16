@@ -184,7 +184,7 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
           "initScaledCementMass_ & scaledCementMass_ :"
        << endl;
 
-  for (int i; i < pKMsize_; i++) {
+  for (int i = 0; i < pKMsize_; i++) {
     modelName = phaseKineticModel_[i]->getModelName();
     // cout << endl << "    modelName = " << modelName << endl;
     if (modelName == "ParrotKillohModel") {
