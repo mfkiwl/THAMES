@@ -320,7 +320,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
     rate = dissrate;
     if (abs(diffrate) < abs(rate))
       rate = diffrate;
-    int rate_ini = rate;
+
     rate *= arrhenius_;
 
     // Mass dissolved has units of g of phase per 100 g of all initial solid
@@ -350,8 +350,7 @@ void PozzolanicModel::calculateKineticStep(const double timestep,
            << "\tsaturationIndex: " << saturationIndex
            << "\twaterActivity: " << waterActivity << endl;
       cout << "   PZM_hT   " << "dissrate: " << dissrate
-           << "\tdiffrate: " << diffrate << "\trate_ini: " << rate_ini
-           << "\trate: " << rate << endl;
+           << "\tdiffrate: " << diffrate << "\trate: " << rate << endl;
       cout << "   PZM_hT   " << "initScaledMass_: " << initScaledMass_
            << "\tscaledMass_: " << scaledMass_
            << "\tmassDissolved: " << massDissolved << endl;
