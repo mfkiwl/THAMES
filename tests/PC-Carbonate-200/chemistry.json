@@ -5,7 +5,7 @@
     "reftemperature": 298.15,
     "saturated": 1,
     "electrolyte_conditions": [
-      { "DCname": "CO2@", "condition": "fixed", "concentration": 0.1 }
+      { "DCname": "CO2@", "condition": "fixed", "concentration": 0.01 }
     ],
     "phases": [
       {
