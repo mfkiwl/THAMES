@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| Apr 22 10:58 2025 | Updated to reflect v4.0 |
 | Apr 18 10:58 2025 | Merged update branch onto main |
 | Apr 03 16:47 2025 | Removed a few obsolete references to xml file input |
 | Apr 03 15:06 2025 | Read surface area multiplier from JSON input file |

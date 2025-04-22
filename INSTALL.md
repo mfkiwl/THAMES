@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-This file describes how to install THAMES.  The instructions in this file
+This file describes how to install THAMES v4.0.  The instructions in this file
 are for the most common use cases, and cover the command line tools.
 
 For further information, or in case of problems, please contact the author,
