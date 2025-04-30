@@ -2125,15 +2125,15 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
          << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
-      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << ", ["
-           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
+      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << " mol, ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "] mol" << endl;
     }
     cout.flush();
-    cout << "ICMoles:" << endl;
-    for (int i = 0; i < numICs_; ++i) {
-      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
-    }
-    cout.flush();
+    // cout << "ICMoles:" << endl;
+    // for (int i = 0; i < numICs_; ++i) {
+    //   cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    // }
+    // cout.flush();
   }
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
@@ -3199,4 +3199,3 @@ void ChemicalSystem::setGasComposition(const bool isFirst) {
   }
   return;
 }
-

@@ -90,6 +90,18 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     out1 << endl;
     out1.close();
 
+    outfilename = jobRoot_ + "_Kinetics.csv";
+    ofstream outofit(outfilename.c_str());
+    if (!outofit) {
+      throw FileException("Controller", "Controller", outfilename,
+                          "Could not append");
+    }
+
+    outofit << "Time(h)";
+    outofit << ",Mass(g/100g),Area(m2/100g)";
+    outofit << endl;
+    outofit.close();
+
     outfilename = jobRoot_ + "_Microstructure.csv";
     ofstream out2(outfilename.c_str());
     if (!out2) {
@@ -154,11 +166,10 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   numMicroPhases_ = chemSys_->getNumMicroPhases();
   numGEMPhases_ = chemSys_->getNumGEMPhases();
 
-  cout << endl << "***   numGEMPhases_   = " <<  numGEMPhases_ << endl;
+  cout << endl << "***   numGEMPhases_   = " << numGEMPhases_ << endl;
   cout << "***   numMicroPhases_ = " << numMicroPhases_ << endl;
-  cout << "***   numDCs_         = " <<  numDCs_ << endl;
-  cout << "***   numICs_         = " <<  numICs_ << endl;
-
+  cout << "***   numDCs_         = " << numDCs_ << endl;
+  cout << "***   numICs_         = " << numICs_ << endl;
 
   temperature_ = chemSys_->getTemperature();
   lattice_->setTemperature(temperature_);
@@ -618,7 +629,7 @@ void Controller::doCycle(double elemTimeInterval) {
       iniLattice.dissolutionInterfaceSize =
           lattice_->getDissolutionInterfaceSize();
       iniLattice.site.clear();
-      RestoreSite site_l;                           // only one declaration
+      RestoreSite site_l; // only one declaration
       for (int i = 0; i < numSites_; i++) {
         site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
         site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
@@ -1054,7 +1065,7 @@ void Controller::doCycle(double elemTimeInterval) {
 
           double dwmcval = poreintroduce;
           lattice_->dWmc(expindex, dwmcval);
-          for (int j = 0; j < NN_NNN; j++) { //ste->nbSize(2)
+          for (int j = 0; j < NN_NNN; j++) { // ste->nbSize(2)
             Site *stenb = ste->nb(j);
             stenb->dWmc(dwmcval);
           }
@@ -1337,6 +1348,28 @@ void Controller::writeTxtOutputFiles(double time) {
   }
   out3 << endl;
   out3.close();
+
+  // BEGIN GODZILLA CODE
+  string godzillaname = jobRoot_ + "_Kinetics.csv";
+  ofstream outofit(godzillaname.c_str(), ios::app);
+  if (!out3) {
+    throw FileException("Controller", "calculateState", outfilename,
+                        "Could not append");
+  }
+  int jj = chemSys_->getMicroPhaseId("Arcanite");
+  outofit << setprecision(5) << time << ",";
+  outofit << chemSys_->getMicroPhaseMass(jj) << ",";
+  outofit << lattice_->getSurfaceArea(jj) << endl;
+  outofit.close();
+  // END GODZILLA CODE
+
+  // out5 << setprecision(5) << time;
+  // for (i = 0; i < numMicroPhases_; i++) {
+  //   out5 << "," << (lattice_->getVolumeFraction(i));
+  // }
+  // double micvol = lattice_->getMicrostructureVolume();
+  // double initmicvol = lattice_->getInitialMicrostructureVolume();
+  // out5 << "," << micvol << "," << (initmicvol - micvol);
 
   outfilename = jobRoot_ + "_DCVolumes.csv";
   ofstream out4(outfilename.c_str(), ios::app);

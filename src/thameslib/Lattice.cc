@@ -1083,7 +1083,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
     while ((numLeftTot > 0) && (growthVectorSize == 0)) {
       nucPhaseId = -1;
       rng = callRNG();
-      for (int i = 0; i < growPhaseIDVectSize; i++ ) {
+      for (int i = 0; i < growPhaseIDVectSize; i++) {
         if (rng <= (i / static_cast<double>(growPhaseIDVectSize))) {
           if (numLeft[i] > 0) {
             nucPhaseId = i;
@@ -1104,11 +1104,11 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
                << "    *** Lattice::growPhase - need nucleation for phaseID = "
                << phaseID << endl;
           cout << "      interface dimension dim_site[" << nucPhaseId
-               << "] = " << dim_isite[nucPhaseId] << " while numLeft[" << nucPhaseId
-               << "] = " << numLeft[nucPhaseId] << endl;
+               << "] = " << dim_isite[nucPhaseId] << " while numLeft["
+               << nucPhaseId << "] = " << numLeft[nucPhaseId] << endl;
           cout << "      => for this microPhase (" << growPhNameVect[nucPhaseId]
-                  << ") a number of " << numLeft[nucPhaseId]
-                     << " seed(s)/site(s) will be nucleated" << endl;
+               << ") a number of " << numLeft[nucPhaseId]
+               << " seed(s)/site(s) will be nucleated" << endl;
 
           // nucleatePhaseAff(phaseID, numLeft[i]);
           nucleatePhaseRnd(phaseID, numLeft[nucPhaseId]);
@@ -1123,18 +1123,19 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
           writeFirst[i] = true;
           cout << endl
                << "    Lattice::growPhase GROW_END BY NUCLEATION for i = "
-               << nucPhaseId << "   totalTRC/trc_g/bcl " << totalTRC << "/" << trc_g
-               << "/" << bcl << endl;
+               << nucPhaseId << "   totalTRC/trc_g/bcl " << totalTRC << "/"
+               << trc_g << "/" << bcl << endl;
           cout << "      GROW_END growPhaseIDVectSize = " << growPhaseIDVectSize
                << "   growthVectorSize = " << growthVectorSize
                << "   numLeftTot = " << numLeftTot
                << "   numChangeTot = " << numChangeTot << endl;
-          cout << "        GROW_END phaseid count_ dim_isite numleft numchange  :  "
+          cout << "        GROW_END phaseid count_ dim_isite numleft numchange "
+                  " :  "
                << setw(3) << growPhaseIDVect[nucPhaseId] << "   " << setw(8)
                << right << count_[phaseID] << "   " << setw(8)
-               << interface_[phaseID].getGrowthSites().size() << "   " << setw(8)
-               << numLeft[nucPhaseId] << "   " << setw(8) << numChange[nucPhaseId]
-                  << endl;
+               << interface_[phaseID].getGrowthSites().size() << "   "
+               << setw(8) << numLeft[nucPhaseId] << "   " << setw(8)
+               << numChange[nucPhaseId] << endl;
           cout.flush();
 
           posProbVect = 0;
@@ -1152,7 +1153,8 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
                 growStruct.posVect = j;
                 growStruct.affinity = afty;
                 growthVector.push_back(growStruct);
-                site_[isite[jj].getId()].setInGrowthVectorPos(phaseID, posProbVect);
+                site_[isite[jj].getId()].setInGrowthVectorPos(phaseID,
+                                                              posProbVect);
                 posProbVect++;
               }
             }
@@ -2908,8 +2910,8 @@ int Lattice::emptyPorosity(int numsites, int cyc) {
   //      << " :      numsites = " << numsites;
   // cout.flush();
 
-  vector<int> distVect = findDomainSizeDistribution(ELECTROLYTEID, numsites,
-                                                    maxsearchsize, 0);
+  vector<int> distVect =
+      findDomainSizeDistribution(ELECTROLYTEID, numsites, maxsearchsize, 0);
   int distVectSize = distVect.size();
 
   // cout << "      distVect.size() = " << distVectSize << endl;
@@ -3539,8 +3541,8 @@ int Lattice::changeMicrostructure(double time, const int simtype,
     }
   } catch (out_of_range &oor) {
     throw EOBException("Lattice", "changeMicrostructure",
-                       "dissPhaseIDVect.size() or dissPhaseIDVect.size()",
-                       0, i);
+                       "dissPhaseIDVect.size() or dissPhaseIDVect.size()", 0,
+                       i);
   }
 
   cursites = count_[VOIDID];
@@ -3620,8 +3622,8 @@ int Lattice::changeMicrostructure(double time, const int simtype,
 
   int totcount = 0;
   for (i = 0; i < volNextSize; i++) {
-    volumeFraction_[i] = static_cast<double>(count_[i]) /
-                         static_cast<double>(numSites_);
+    volumeFraction_[i] =
+        static_cast<double>(count_[i]) / static_cast<double>(numSites_);
     totcount += count_[i];
     if (volumeFraction_[i] < 0) {
       cout << endl
@@ -5333,7 +5335,19 @@ void Lattice::calcSurfaceArea(int phaseid) {
                        surfaceArea_.size(), phaseid);
   }
 
+  // MOTHRA Output
+  cout << "    MOTHRA: Phase " << chemSys_->getMicroPhaseName(phaseid) << ":"
+       << endl;
+  cout << "      MOTHRA: Microstructure surface area = "
+       << surfaceArea_[phaseid] << " voxel faces" << endl;
+  cout << "      MOTHRA: Multiplier = " << oneFaceAreaPerHundredGramSolid
+       << endl;
   surfaceArea_[phaseid] *= oneFaceAreaPerHundredGramSolid;
+  cout << "      MOTHRA: Actual surface area = " << surfaceArea_[phaseid]
+       << " m2/100g solid" << endl
+       << endl;
+  cout.flush();
+  // END MOTHRA Output
 
   // Calculate specific surface area of this phase by dividing
   // this surface area by the phase mass (g per 100 g of all solid)
@@ -5396,7 +5410,8 @@ int Lattice::findDomainSize(int siteid, int maxsize) {
 }
 
 vector<int> Lattice::findDomainSizeDistribution(int phaseid, const int numsites,
-                                                int maxsize, int sortorder = 0) {
+                                                int maxsize,
+                                                int sortorder = 0) {
   // if sortorder is 0 => sorting in descending order
 
   int domainsize = 0;

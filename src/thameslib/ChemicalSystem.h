@@ -31,9 +31,9 @@ as possible.
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <vector>
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 using namespace std;
 using json = nlohmann::json;
@@ -1731,7 +1731,8 @@ public:
         exit(1);
       }
     } else {
-      string msg = "Could not find microPhaseToGEMPhase_ match to index provided";
+      string msg =
+          "Could not find microPhaseToGEMPhase_ match to index provided";
       EOBException ex("ChemicalSystem", "getMicroPhaseToGEMPhase(1)", msg,
                       microPhaseToGEMPhase_.size(), 0);
       ex.printException();
@@ -1752,7 +1753,8 @@ public:
     if (p != microPhaseToGEMPhase_.end()) {
       return p->second;
     } else {
-      string msg = "Could not find microPhaseToGEMPhase_ match to index provided";
+      string msg =
+          "Could not find microPhaseToGEMPhase_ match to index provided";
       EOBException ex("ChemicalSystem", "getMicroPhaseToGEMPhase(2)", msg,
                       microPhaseToGEMPhase_.size(), 0);
       ex.printException();
@@ -2773,7 +2775,8 @@ public:
     if (p != microPhaseDCMembers_.end()) {
       return p->second;
     } else {
-      string msg = "Could not find microPhaseDCMembers_ match to index provided";
+      string msg =
+          "Could not find microPhaseDCMembers_ match to index provided";
       EOBException ex("ChemicalSystem", "getMicroPhaseDCMembers", msg,
                       microPhaseDCMembers_.size(), 0);
       ex.printException();
@@ -5824,7 +5827,8 @@ public:
   //
   //   for (int i = 0; i < numGEMPhases_; i++) {
   //     if (verbose_) {
-  //       cout << "logSI for " << GEMPhaseName_[i] << " is: " << Falp[i] << endl;
+  //       cout << "logSI for " << GEMPhaseName_[i] << " is: " << Falp[i] <<
+  //       endl;
   //     }
   //     double si = pow(10, Falp[i]);
   //     SI_.push_back(si);
@@ -6294,6 +6298,7 @@ public:
     if (idx > ELECTROLYTEID) {
       microPhaseMassDissolved_[idx] = microPhaseMass_[idx] - val;
       microPhaseMass_[idx] = val;
+
       DCId = getMicroPhaseDCMembers(idx, 0);
       double v0 = node_->DC_V0(DCId, P_, T_);
       double dcmm = getDCMolarMass(DCId);

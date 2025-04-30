@@ -198,6 +198,15 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
                  pow((pow(saturationIndex, siexp_) - 1.0), dfexp_);
     }
 
+    // GODZILLA Output
+    cout << "    GODZILLA: Phase " << chemSys_->getMicroPhaseName(microPhaseId_)
+         << ":" << endl;
+    cout << "      GODZILLA: dissolutionRateConst_ = " << dissolutionRateConst_
+         << "mol/m2/h" << endl
+         << endl;
+    cout.flush();
+    // END GODZILLA Output
+
     dissrate *= arrhenius_;
 
     // dissrate has units of mol of phase per 100 g of solid per hour
