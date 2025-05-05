@@ -98,7 +98,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
 
     outofit << "Time(h)";
-    outofit << ",Mass(g/100g),Area(m2/100g)";
+    outofit << ",Moles(mol),Area(m2),Conc(mol/kgw),SI";
     outofit << endl;
     outofit.close();
 
@@ -1331,12 +1331,18 @@ void Controller::writeTxtOutputFiles(double time) {
   // Output to files the solution composition data, phase data, DC data,
   // microstructure data, pH, and C-S-H composition and Ca/Si ratio
 
+  cout << "MOTHRA made it 01" << endl;
+  cout.flush();
+
   string outfilename = jobRoot_ + "_Solution.csv";
   ofstream out3(outfilename.c_str(), ios::app);
   if (!out3) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
+
+  cout << "MOTHRA made it 02" << endl;
+  cout.flush();
 
   out3 << setprecision(5) << time;
   char cc;
@@ -1349,6 +1355,9 @@ void Controller::writeTxtOutputFiles(double time) {
   out3 << endl;
   out3.close();
 
+  cout << "MOTHRA made it 03" << endl;
+  cout.flush();
+
   // BEGIN GODZILLA CODE
   string godzillaname = jobRoot_ + "_Kinetics.csv";
   ofstream outofit(godzillaname.c_str(), ios::app);
@@ -1356,12 +1365,31 @@ void Controller::writeTxtOutputFiles(double time) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
-  int jj = chemSys_->getMicroPhaseId("Arcanite");
+
+  cout << "MOTHRA made it 04" << endl;
+  cout.flush();
+
+  int jj = chemSys_->getDCId("K2SO4");
+  cout << "MOTHRA made it 05" << endl;
+  cout.flush();
+
+  int kk = chemSys_->getMicroPhaseId("Arcanite");
+  cout << "MOTHRA made it 06" << endl;
+  cout.flush();
+
   outofit << setprecision(5) << time << ",";
-  outofit << chemSys_->getMicroPhaseMass(jj) << ",";
-  outofit << lattice_->getSurfaceArea(jj) << endl;
+  outofit << chemSys_->getDCMoles(jj) << ",";
+  outofit << lattice_->getSurfaceArea(kk) << ",";
+  double conc = chemSys_->getDCMoles("SO4-2");
+  conc /= ((chemSys_->getDCMoles("H2O@")) * 0.018);
+  outofit << conc << ",";
+  outofit << chemSys_->getMicroPhaseSI("Arcanite") << endl;
+
   outofit.close();
   // END GODZILLA CODE
+
+  cout << "MOTHRA made it 08" << endl;
+  cout.flush();
 
   // out5 << setprecision(5) << time;
   // for (i = 0; i < numMicroPhases_; i++) {
@@ -1404,6 +1432,9 @@ void Controller::writeTxtOutputFiles(double time) {
   }
   out4 << endl;
   out4.close();
+
+  cout << "MOTHRA made it 09" << endl;
+  cout.flush();
 
   outfilename = jobRoot_ + "_Microstructure.csv";
   ofstream out5(outfilename.c_str(), ios::app);

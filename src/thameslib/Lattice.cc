@@ -13,9 +13,9 @@ Lattice::Lattice(ChemicalSystem *cs) : chemSys_(cs) {
   temperature_ = REFTEMP; // in Kelvin (see global.h)
   oldtemp_ = REFTEMP;     // in Kelvin (see global.h)
   numSites_ = 0;
-  resolution_ = REFRES * 1.0e-6;              // in meters (see global.h)
-  faceToArea_ = resolution_ * resolution_;    // in m2 units
-  voxelToVolume_ = faceToArea_ * resolution_; // in m3 units
+  resolution_ = REFRES * 1.0e-6;                // in meters (see global.h)
+  areaPerFace_ = resolution_ * resolution_;     // in m2 units
+  volumePerVoxel_ = areaPerFace_ * resolution_; // in m3 units
   site_.clear();
   depthEffect_ = false;
   masterPoreVolume_.clear();
@@ -51,9 +51,9 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
   temperature_ = REFTEMP; // in Kelvin (see global.h)
   oldtemp_ = REFTEMP;     // in Kelvin (see global.h)
   numSites_ = 0;
-  resolution_ = REFRES * 1.0e-6;              // in meters (see global.h)
-  faceToArea_ = resolution_ * resolution_;    // in m2 units
-  voxelToVolume_ = faceToArea_ * resolution_; // in m3 units
+  resolution_ = REFRES * 1.0e-6;                // in meters (see global.h)
+  areaPerFace_ = resolution_ * resolution_;     // in m2 units
+  volumePerVoxel_ = areaPerFace_ * resolution_; // in m3 units
   site_.clear();
   depthEffect_ = true;
   masterPoreVolume_.clear();
@@ -3123,8 +3123,8 @@ void Lattice::setResolution(const double res) {
   // This will now be used in kinetic models to scale surface to volume ratio
   resolution_ = res; // in meters
 
-  faceToArea_ = res * res;            // in m2 units
-  voxelToVolume_ = faceToArea_ * res; // in m3 units
+  areaPerFace_ = res * res;             // in m2 units
+  volumePerVoxel_ = areaPerFace_ * res; // in m3 units
   return;
 }
 
@@ -5284,9 +5284,9 @@ void Lattice::calcSurfaceArea(int phaseid) {
   // So we must divide surface area by a factor with units of 100 g per m2 per
   // voxel
   //
-  // faceToArea_ has units of m2 per voxel face
+  // areaPerFace_ has units of m2 per voxel face
   // surfaceArea_ has units of voxel faces per microstructure
-  // voxelToVolume_ has units of m3 per voxel
+  // volumePerVoxel_ has units of m3 per voxel
   // numSites_ has units of voxels
   // initSolidMass_ has units of g per cm3 of whole microstructure
   // 1.0e6 has units of cm3 per m3
@@ -5300,20 +5300,31 @@ void Lattice::calcSurfaceArea(int phaseid) {
 
   if (initSolidMass_ > 0.0) {
     double oneFaceAreaPerMicrostructure =
-        faceToArea_ /
+        areaPerFace_ /
         (static_cast<double>(numSites_)); // m2/face/microstructure
-    double oneFaceAreaPerMeterCubed =
-        oneFaceAreaPerMicrostructure / voxelToVolume_; // m2/face/
+    double oneFaceAreaPerMeterCubed = oneFaceAreaPerMicrostructure /
+                                      volumePerVoxel_; // m2/face/
                                                        // (m3 of microstructure)
+    //    cout << "    MOTHRA: areaPerFace_ = " << areaPerFace_ << endl;
+    //    cout << "    MOTHRA: oneFaceAreaPerMicrostructure = " <<
+    //    oneFaceAreaPerMicrostructure << endl; cout << "    MOTHRA:
+    //    oneFaceAreaPerMeterCubed = " << oneFaceAreaPerMeterCubed << endl;
+
     double oneFaceAreaPerCmCubed =
         1.0e-6 * oneFaceAreaPerMeterCubed; // m2/face/
                                            // (cm3 of microstructure)
+    //    cout << "    MOTHRA: oneFaceAreaPerCmCubed = " <<
+    //    oneFaceAreaPerCmCubed << endl;
     double oneFaceAreaPerGramSolid =
         oneFaceAreaPerCmCubed / initSolidMass_; // m2/face/
                                                 // (g of solid)
+    //    cout << "    MOTHRA: oneFaceAreaPerGramSolid = " <<
+    //    oneFaceAreaPerGramSolid << endl;
     oneFaceAreaPerHundredGramSolid =
         100.0 * oneFaceAreaPerGramSolid; // m2/face/
                                          // (100 g of solid)
+    //    cout << "    MOTHRA: oneFaceAreaPerHundredGramSolid = " <<
+    //    oneFaceAreaPerHundredGramSolid << endl;
   } else {
     string msg = "Divide by zero error:  initSolidMass_ = 0";
     throw FloatException("Lattice", "calcSurfaceArea", msg);
@@ -5336,17 +5347,17 @@ void Lattice::calcSurfaceArea(int phaseid) {
   }
 
   // MOTHRA Output
-  cout << "    MOTHRA: Phase " << chemSys_->getMicroPhaseName(phaseid) << ":"
-       << endl;
-  cout << "      MOTHRA: Microstructure surface area = "
-       << surfaceArea_[phaseid] << " voxel faces" << endl;
-  cout << "      MOTHRA: Multiplier = " << oneFaceAreaPerHundredGramSolid
-       << endl;
+  // cout << "    MOTHRA: Phase " << chemSys_->getMicroPhaseName(phaseid) << ":"
+  //      << endl;
+  // cout << "      MOTHRA: Microstructure surface area = "
+  //      << surfaceArea_[phaseid] << " voxel faces" << endl;
+  // cout << "      MOTHRA: Multiplier = " << oneFaceAreaPerHundredGramSolid
+  //      << endl;
   surfaceArea_[phaseid] *= oneFaceAreaPerHundredGramSolid;
-  cout << "      MOTHRA: Actual surface area = " << surfaceArea_[phaseid]
-       << " m2/100g solid" << endl
-       << endl;
-  cout.flush();
+  // cout << "      MOTHRA: Actual surface area = " << surfaceArea_[phaseid]
+  //      << " m2/100g solid" << endl
+  //      << endl;
+  // cout.flush();
   // END MOTHRA Output
 
   // Calculate specific surface area of this phase by dividing

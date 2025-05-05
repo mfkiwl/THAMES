@@ -5861,13 +5861,13 @@ public:
   @return the saturation index of the GEM phase
   */
   double getSI(int phaseid) {
-    // try {
-    return SI_[phaseid];
-    //} catch (out_of_range &oor) {
-    //  EOBException ex("ChemicalSystem", "getSI", "SI_", SI_.size(), phaseid);
-    //  ex.printException();
-    //  exit(1);
-    //}
+    try {
+      return SI_.at(phaseid);
+    } catch (out_of_range &oor) {
+      EOBException ex("ChemicalSystem", "getSI", "SI_", SI_.size(), phaseid);
+      ex.printException();
+      exit(1);
+    }
   }
 
   void initSI(int phaseid, double val) {

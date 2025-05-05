@@ -94,15 +94,15 @@ private:
   vector<Interface> interface_; /**< List of the different interface objects
                                         in the microstructure */
 
-  double faceToArea_;                 /**< Converts a voxel face to m2 units */
-  double voxelToVolume_;              /**< Converts a voxel to its volume in m3
-                                        units */
-  double wsRatio_;                    /**< Water-to-solids mass ratio */
-  vector<double> volumeFraction_;     /**< Array of volume fractions of each
-                                              microstructure phase */
-  vector<double> surfaceArea_;        /**< Array of surface areas of each
-                                                 microstructure phase
-                                                 (m2 per 100 g of all solid) */
+  double areaPerFace_;            /**< Converts a voxel face to m2 units */
+  double volumePerVoxel_;         /**< Converts a voxel to its volume in m3
+                                   units */
+  double wsRatio_;                /**< Water-to-solids mass ratio */
+  vector<double> volumeFraction_; /**< Array of volume fractions of each
+                                          microstructure phase */
+  vector<double> surfaceArea_;    /**< Array of surface areas of each
+                                             microstructure phase
+                                             (m2 per 100 g of all solid) */
   vector<double>
       specificSurfaceArea_; /**< Array of specific surface areas of each
                                microstructure phase
@@ -304,7 +304,8 @@ public:
   //     initVolumeFraction_[i] = vfrac;
   //   } else {
   //     throw EOBException("Lattice", "setInitVolumeFraction",
-  //                        "initVolumeFraction_", initVolumeFraction_.size(), i);
+  //                        "initVolumeFraction_", initVolumeFraction_.size(),
+  //                        i);
   //   }
   //   initVolumeFraction_[i] = vfrac;
   // }
@@ -350,7 +351,8 @@ public:
   @param i is the index of the microstructure phase
   @return the initial volume fraction of phase i on a total microstructure basis
   */
-  // double getInitVolumeFraction(unsigned int i) { return (initVolumeFraction_[i]); }
+  // double getInitVolumeFraction(unsigned int i) { return
+  // (initVolumeFraction_[i]); }
 
   /**
   @brief Calculate the subvoxel pore volume
@@ -426,18 +428,18 @@ public:
   double getResolution() const { return resolution_; }
 
   /**
-  @brief Get the faceToArea_ value [m2].
+  @brief Get the areaPerFace_ value [m2].
 
-  @return the faceToArea_ value [m2]
+  @return the areaPerFace_ value [m2]
   */
-  double getFaceToArea() const { return faceToArea_; }
+  double getAreaPerFace() const { return areaPerFace_; }
 
   /**
-  @brief Get the voxelToVolume_ value [m3].
+  @brief Get the volumePerVoxel_ value [m3].
 
-  @return the voxelToVolume_ value [m3]
+  @return the volumePerVoxel_ value [m3]
   */
-  double getVoxelToVolume() const { return voxelToVolume_; }
+  double getVolumePerVoxel() const { return volumePerVoxel_; }
 
   /**
   @brief Set the simulation time [hours].

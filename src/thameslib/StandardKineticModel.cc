@@ -172,6 +172,10 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     // g of intial total solid
 
     double area = lattice_->getSurfaceArea(microPhaseId_);
+
+    // surfaceAreaMultiplier_ is a way to account for the influence
+    // of subvoxel porosity that increases the total surface area in a voxel.
+
     area *= surfaceAreaMultiplier_;
 
     // Saturation index , but be sure that there is only one GEM Phase
@@ -199,12 +203,19 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     }
 
     // GODZILLA Output
-    cout << "    GODZILLA: Phase " << chemSys_->getMicroPhaseName(microPhaseId_)
-         << ":" << endl;
-    cout << "      GODZILLA: dissolutionRateConst_ = " << dissolutionRateConst_
-         << "mol/m2/h" << endl
-         << endl;
-    cout.flush();
+    // cout << "  GODZILLA: Phase " <<
+    // chemSys_->getMicroPhaseName(microPhaseId_)
+    //      << ":" << endl;
+    // cout << "      GODZILLA: dissolutionRateConst_ = " <<
+    // dissolutionRateConst_
+    //      << " mol/m2/h" << endl;
+    // cout << "      GODZILLA: surface area = " << area << " m2/(100 g solid)"
+    //      << endl;
+    // cout << "      GODZILLA: resolution = " << lattice_->getResolution()
+    //      << " m2" << endl;
+    // cout << "      GODZILLA: saturation index = " << saturationIndex << endl
+    //      << endl;
+    // cout.flush();
     // END GODZILLA Output
 
     dissrate *= arrhenius_;

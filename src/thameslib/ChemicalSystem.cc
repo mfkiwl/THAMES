@@ -2117,8 +2117,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   setElectrolyteComposition(isFirst);
   setGasComposition(isFirst);
 
-  // setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
-
   if (verbose_) {
     cout << endl
          << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc
@@ -3153,8 +3151,9 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
       }
       it++;
     }
-    return;
-  } else if (fixedSolutionComposition_.size() > 0) {
+  }
+
+  if (fixedSolutionComposition_.size() > 0) {
     double waterMoles = getDCMoles("H2O@");
     double waterMass = 0.001 * waterMoles * getDCMolarMass("H2O@"); // in kg
     map<int, double>::iterator it = fixedSolutionComposition_.begin();
@@ -3164,11 +3163,17 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
       DCId = it->first;
       if (DCId != getDCId("H2O@")) {
         DCconc = it->second;
+        cout << "GODZILLA: Concentration of " << getDCName(DCId) << " = "
+             << DCconc << "mol/kgw" << endl;
+        cout << "GODZILLA: Mass of water = " << waterMass << " kg" << endl;
+        cout << "GODZILLA: Setting moles of " << getDCName(DCId) << " to "
+             << DCconc * waterMass << " mol" << endl;
         setDCMoles(DCId, (DCconc * waterMass));
+        cout << "GODZILLA: Getting moles of " << getDCName(DCId) << " = "
+             << getDCMoles(DCId) << " mol" << endl;
       }
       it++;
     }
-    return;
   }
   return;
 }
