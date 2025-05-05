@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 05 18:15 2025 | Implemented automatic time steps |
 | May 05 08:05 2025 | Debug fixed boundary conditions |
 | Apr 22 10:58 2025 | Updated to reflect v4.0 |
 | Apr 18 10:58 2025 | Merged update branch onto main |

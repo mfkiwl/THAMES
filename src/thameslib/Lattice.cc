@@ -4823,7 +4823,7 @@ void Lattice::writeDamageLattice(double curtime) {
 }
 
 void Lattice::writeLatticePNG(double curtime) {
-  unsigned int i, j;
+  unsigned int i, j, k;
   string ofileName(jobRoot_);
   string ofpngname(jobRoot_);
 
@@ -4875,47 +4875,47 @@ void Lattice::writeLatticePNG(double curtime) {
   out << xdim_ << " " << ydim_ << endl;
   out << COLORSATVAL << endl;
 
-  unsigned int slice = zdim_ / 2;
-  unsigned int nd, izz;
+  unsigned int slice = xdim_ / 2;
+  unsigned int nd, ixx;
   unsigned int sitenum;
-  for (j = 0; j < ydim_; j++) {
-    for (i = 0; i < xdim_; i++) {
+  for (k = 0; k < zdim_; k++) {
+    for (j = 0; j < ydim_; j++) {
       if (depthEffect_) {
         done = false;
         nd = 0;
         // sitenum = getIndex(i, j, slice);
-        izz = slice;
+        ixx = slice;
         do {
-          sitenum = getIndex(i, j, izz);
+          sitenum = getIndex(ixx, j, k);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
-            izz++;
-            if (izz >= zdim_)
-              izz -= zdim_;
+            ixx++;
+            if (ixx >= xdim_)
+              ixx -= xdim_;
           }
         } while (!done);
-        sitenum = getIndex(i, j, izz);
-        image[i][j] = site_[sitenum].getMicroPhaseId();
-        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
+        sitenum = getIndex(ixx, j, k);
+        image[j][k] = site_[sitenum].getMicroPhaseId();
+        dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       } else {
-        sitenum = getIndex(i, j, slice);
-        image[i][j] = site_[sitenum].getMicroPhaseId();
-        dshade[i][j] = 1.0;
+        sitenum = getIndex(slice, j, k);
+        image[j][k] = site_[sitenum].getMicroPhaseId();
+        dshade[j][k] = 1.0;
       }
     }
   }
 
   int red, green, blue;
   vector<int> colors;
-  for (j = 0; j < ydim_; j++) {
-    for (i = 0; i < xdim_; i++) {
+  for (k = 0; k < zdim_; k++) {
+    for (j = 0; j < ydim_; j++) {
       // colors = chemSys_->getColor(image[i][j]);
-      colors = chemSys_->getRGB(image[i][j]);
-      red = dshade[i][j] * colors[0] + 0.5;
-      green = dshade[i][j] * colors[1] + 0.5;
-      blue = dshade[i][j] * colors[2] + 0.5;
+      colors = chemSys_->getRGB(image[j][k]);
+      red = dshade[j][k] * colors[0] + 0.5;
+      green = dshade[j][k] * colors[1] + 0.5;
+      blue = dshade[j][k] * colors[2] + 0.5;
       out << red << " " << green << " " << blue << endl;
     }
   }
@@ -4946,7 +4946,7 @@ void Lattice::writeLatticePNG(double curtime) {
 }
 
 void Lattice::writeDamageLatticePNG(double curtime) {
-  unsigned int i, j;
+  unsigned int i, j, k;
   string ofileName(damageJobRoot_);
   string ofpngname(damageJobRoot_);
 
@@ -4997,33 +4997,33 @@ void Lattice::writeDamageLatticePNG(double curtime) {
   out << ydim_ << " " << zdim_ << endl;
   out << COLORSATVAL << endl;
 
-  unsigned int slice = zdim_ / 2;
-  unsigned int nd, izz;
+  unsigned int slice = xdim_ / 2;
+  unsigned int nd, ixx;
   unsigned int sitenum;
-  for (j = 0; j < ydim_; j++) {
-    for (i = 0; i < xdim_; i++) {
+  for (k = 0; k < zdim_; k++) {
+    for (j = 0; j < ydim_; j++) {
       done = false;
       nd = 0;
       // sitenum = getIndex(i, j, slice);
-      izz = slice;
+      ixx = slice;
       do {
-        sitenum = getIndex(i, j, izz);
+        sitenum = getIndex(ixx, j, k);
         if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
           done = true;
         } else {
           nd++;
-          izz++;
-          if (izz >= zdim_)
-            izz -= zdim_;
+          ixx++;
+          if (ixx >= xdim_)
+            ixx -= xdim_;
         }
       } while (!done);
-      sitenum = getIndex(i, j, izz);
+      sitenum = getIndex(ixx, j, k);
       if (site_[sitenum].IsDamage()) {
-        image[i][j] = 1;
+        image[j][k] = 1;
       } else {
-        image[i][j] = 5;
+        image[j][k] = 5;
       }
-      dshade[i][j] = 1.0;
+      dshade[j][k] = 1.0;
       /*
       dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       */
@@ -5032,13 +5032,13 @@ void Lattice::writeDamageLatticePNG(double curtime) {
 
   int red, green, blue;
   vector<int> colors;
-  for (j = 0; j < ydim_; j++) {
-    for (i = 0; i < xdim_; i++) {
+  for (k = 0; k < zdim_; k++) {
+    for (j = 0; j < ydim_; j++) {
       // colors = chemSys_->getColor(image[i][j]);
-      colors = chemSys_->getRGB(image[i][j]);
-      red = dshade[i][j] * colors[0] + 0.5;
-      green = dshade[i][j] * colors[1] + 0.5;
-      blue = dshade[i][j] * colors[2] + 0.5;
+      colors = chemSys_->getRGB(image[j][k]);
+      red = dshade[j][k] * colors[0] + 0.5;
+      green = dshade[j][k] * colors[1] + 0.5;
+      blue = dshade[j][k] * colors[2] + 0.5;
       out << red << " " << green << " " << blue << endl;
     }
   }
@@ -5088,7 +5088,7 @@ void Lattice::makeMovie() {
   int resCallSystem;
 
   unsigned int slice;
-  unsigned int nd, izz;
+  unsigned int nd, ixx;
   unsigned int sitenum;
 
   ///
@@ -5107,14 +5107,14 @@ void Lattice::makeMovie() {
   /// slice and appending it to the end of the master file.
   ///
 
-  for (k = 10; k < zdim_; k++) {
+  for (i = 10; i < zdim_; i++) {
 
     ///
     /// Open the output file.
     ///
 
     ostr3.clear();
-    ostr3 << static_cast<int>(k); // x slice number
+    ostr3 << static_cast<int>(i); // x slice number
     string istr(ostr3.str());
     ofileName =
         ofbasename + "." + timestr + "." + tempstr + "." + istr + ".ppm";
@@ -5134,39 +5134,39 @@ void Lattice::makeMovie() {
     out << xdim_ << " " << ydim_ << endl;
     out << COLORSATVAL << endl;
 
-    slice = k;
-    for (j = 0; j < ydim_; j++) {
-      for (i = 0; i < xdim_; i++) {
+    slice = i;
+    for (k = 0; k < zdim_; k++) {
+      for (j = 0; j < ydim_; j++) {
         done = false;
         nd = 0;
         // sitenum = getIndex(i, j, slice);
-        izz = slice;
+        ixx = slice;
         do {
-          sitenum = getIndex(i, j, izz);
+          sitenum = getIndex(ixx, j, k);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
-            izz++;
-            if (izz >= zdim_)
-              izz -= zdim_;
+            ixx++;
+            if (ixx >= xdim_)
+              ixx -= xdim_;
           }
         } while (!done);
-        sitenum = getIndex(i, j, izz);
-        image[i][j] = site_[sitenum].getMicroPhaseId();
-        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
+        sitenum = getIndex(ixx, j, k);
+        image[j][k] = site_[sitenum].getMicroPhaseId();
+        dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       }
     }
 
     int red, green, blue;
     vector<int> colors;
-    for (j = 0; j < ydim_; j++) {
-      for (i = 0; i < xdim_; i++) {
+    for (k = 0; k < zdim_; k++) {
+      for (j = 0; j < ydim_; j++) {
         // colors = chemSys_->getColor(image[i][j]);
-        colors = chemSys_->getRGB(image[i][j]);
-        red = dshade[i][j] * colors[0] + 0.5;
-        green = dshade[i][j] * colors[1] + 0.5;
-        blue = dshade[i][j] * colors[2] + 0.5;
+        colors = chemSys_->getRGB(image[j][k]);
+        red = dshade[j][k] * colors[0] + 0.5;
+        green = dshade[j][k] * colors[1] + 0.5;
+        blue = dshade[j][k] * colors[2] + 0.5;
         out << red << " " << green << " " << blue << endl;
       }
     }

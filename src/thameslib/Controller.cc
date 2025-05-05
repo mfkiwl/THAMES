@@ -7,7 +7,7 @@
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
-                       const string &parfilename, const string &jobname,
+                       const string &timefilename, const string &jobname,
                        const bool verbose, const bool warning, const bool xyz)
     : lattice_(msh), kineticController_(kc), chemSys_(cs), simType_(simtype),
       thermalstr_(thmstr), jobRoot_(jobname) {
@@ -55,107 +55,138 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   /// Output header for the file tracking the IC moles in the system
   ///
 
+  ofstream outfs;
+  string outfilename;
+
   try {
-    string outfilename = jobRoot_ + "_Solution.csv";
-    ofstream out(outfilename.c_str());
-    if (!out) {
+    outfilename = jobRoot_ + "_Solution.csv";
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
     char cc;
-    out << "Time(h)";
+    outfs << "Time(h)";
     for (int i = 0; i < chemSys_->getNumDCs(); i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'S' || cc == 'T' || cc == 'W') {
-        out << "," << chemSys_->getDCName(i);
+        outfs << "," << chemSys_->getDCName(i);
       }
     }
-    out << endl;
-    out.close();
+    outfs << endl;
+    outfs.close();
 
     outfilename = jobRoot_ + "_DCVolumes.csv";
-    ofstream out1(outfilename.c_str());
-    if (!out1) {
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
 
-    out1 << "Time(h)";
+    outfs << "Time(h)";
     for (int i = 0; i < chemSys_->getNumDCs(); i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-        out1 << "," << chemSys_->getDCName(i);
+        outfs << "," << chemSys_->getDCName(i) << "(m3/100g)";
       }
     }
-    out1 << endl;
-    out1.close();
+    outfs << endl;
+    outfs.close();
 
-    outfilename = jobRoot_ + "_Kinetics.csv";
-    ofstream outofit(outfilename.c_str());
-    if (!outofit) {
+    outfilename = jobRoot_ + "_SurfaceAreas.csv";
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
 
-    outofit << "Time(h)";
-    outofit << ",Moles(mol),Area(m2),Conc(mol/kgw),SI";
-    outofit << endl;
-    outofit.close();
+    outfs << "Time(h)";
+    // JWB: Start with micro phase id 1 to avoid the Void phase
+    for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
+      int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
+      cc = chemSys_->getDCClassCode(dcid);
+      if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
+        outfs << ",A_" << chemSys_->getMicroPhaseName(i) << "(m2/100g)";
+      }
+    }
+    outfs << endl;
+    outfs.close();
 
-    outfilename = jobRoot_ + "_Microstructure.csv";
-    ofstream out2(outfilename.c_str());
-    if (!out2) {
+    outfilename = jobRoot_ + "_SI.csv";
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
 
-    out2 << "Time(h)";
-    for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
-      out2 << "," << chemSys_->getMicroPhaseName(i);
+    outfs << "Time(h)";
+    // JWB: Start with micro phase id 1 to avoid the Void phase
+    for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
+      int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
+      cc = chemSys_->getDCClassCode(dcid);
+      if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
+        outfs << ",SI_" << chemSys_->getMicroPhaseName(i);
+      }
     }
-    out2 << ",Total Volume (m3),Chemical Shrinkage (m3)";
-    out2 << endl;
-    out2.close();
-
-    outfilename = jobRoot_ + "_pH.csv";
-    ofstream out3(outfilename.c_str());
-    if (!out3) {
-      throw FileException("Controller", "Controller", outfilename,
-                          "Could not append");
-    }
-    out3 << "Time(h),pH" << endl;
-    out3.close();
+    outfs << endl;
+    outfs.close();
 
     outfilename = jobRoot_ + "_CSH.csv";
-    ofstream out4(outfilename.c_str());
-    if (!out4) {
-      throw FileException("Controller", "Controller", outfilename,
+    outfs.open(outfilename.c_str(), ios::app);
+    if (!outfs) {
+      throw FileException("Controller", "calculateState", outfilename,
                           "Could not append");
     }
-    out4 << "Time(h)";
-    for (int i = 0; i < chemSys_->getNumICs(); i++) {
-      out4 << "," << chemSys_->getICName(i);
+    outfs << "Time(h)";
+    for (int i = 0; i < numICs_; i++) {
+      outfs << "," << chemSys_->getICName(i);
     }
-    out4 << ",Ca/Si" << endl;
-    out4.close();
+    outfs << ",Ca/Si" << endl;
+    outfs.close();
 
     outfilename = jobRoot_ + "_CSratio_solid.csv";
-    ofstream out5(outfilename.c_str());
-    if (!out5) {
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
+      throw FileException("Controller", "calculateState", outfilename,
+                          "Could not append");
+    }
+
+    outfs << "Time(h),Ca/Si Ratio" << endl;
+
+    outfs.close();
+
+    outfilename = jobRoot_ + "_Microstructure.csv";
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out5 << "Time(h),C/S in solid" << endl;
-    out5.close();
+
+    outfs << "Time(h)";
+    for (int i = 0; i < chemSys_->getNumMicroPhases(); i++) {
+      outfs << "," << chemSys_->getMicroPhaseName(i);
+    }
+    outfs << ",Total Volume (m3/100g),Chemical Shrinkage (m3/100g)";
+    outfs << endl;
+    outfs.close();
+
+    outfilename = jobRoot_ + "_pH.csv";
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
+      throw FileException("Controller", "Controller", outfilename,
+                          "Could not append");
+    }
+    outfs << "Time(h),pH" << endl;
+    outfs.close();
 
     outfilename = jobRoot_ + "_Enthalpy.csv";
-    ofstream out6(outfilename.c_str());
-    if (!out6) {
+    outfs.open(outfilename.c_str());
+    if (!outfs) {
       throw FileException("Controller", "Controller", outfilename,
                           "Could not append");
     }
-    out6 << "Time(h),Enthalpy(J)" << endl;
-    out6.close();
+    outfs << "Time(h),Enthalpy(J/100g)" << endl;
+    outfs.close();
 
   } catch (FileException fex) {
     throw fex;
@@ -175,7 +206,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   lattice_->setTemperature(temperature_);
   presure_ = chemSys_->getP();
   waterDCId_ = chemSys_->getDCId("H2O@");
-  waterMollarMass_ = chemSys_->getDCMolarMass("H2O@");
+  waterMolarMass_ = chemSys_->getDCMolarMass("H2O@");
   numSites_ = lattice_->getNumSites();
   initMicroVolume_ = chemSys_->getInitMicroVolume();
 
@@ -187,18 +218,23 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   size_t foundjson;
 
   try {
-    foundjson = parfilename.find(jsonext);
+    foundjson = timefilename.find(jsonext);
 
-    time_.clear();
     if (foundjson != string::npos) {
-      parseDoc(parfilename);
+      parseDoc(timefilename);
     } else {
       cout << "Parameter file must be JSON" << endl;
-      throw FileException("Controller", "Controller", parfilename,
+      throw FileException("Controller", "Controller", timefilename,
                           "NOT JSON FORMAT");
     }
   } catch (FileException fex) {
     throw fex;
+  }
+
+  for (int i = 0; i < time_.size() - 1; i++) {
+    if (abs(time_[i] - time_[i + 1]) <= 1.0e-6) {
+      time_.erase(time_.begin() + i);
+    }
   }
 
   int time_Size = time_.size();
@@ -229,81 +265,61 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     time_.push_back(outputTime_[i]);
   }
 
-  time_Size = time_.size();
-  cout << "   intermediar time_.size()    = " << time_Size << endl;
-
-  double timeTp;
-  for (int i = 0; i < time_Size - 1; i++) {
-    for (int j = i + 1; j < time_Size; j++) {
-      if (time_[i] > time_[j]) {
-        timeTp = time_[i];
-        time_[i] = time_[j];
-        time_[j] = timeTp;
-      }
-    }
-  }
-
-  for (int i = 0; i < time_.size() - 1; i++) {
-    if (abs(time_[i] - time_[i + 1]) <= 1.0e-6) {
-      time_.erase(time_.begin() + i);
-    }
-  }
-  time_Size = time_.size();
   cout << "   final time_.size()          = " << time_Size << endl;
 
-  string outfilename = jobRoot_ + "-parameters_used.json";
-  ofstream out1(outfilename.c_str());
-  if (!out1) {
+  outfilename = jobRoot_ + "-parameters_used.json";
+  outfs.open(outfilename.c_str());
+  if (!outfs) {
     throw FileException("Controller", "Controller", outfilename,
                         "Could not append");
   }
 
-  out1 << "{" << endl;
-  out1 << "  \"simulation_parameters\": {" << endl;
-  out1 << "    \"calctime\": [" << endl;
-  // out1 << "        ";
+  outfs << "{" << endl;
+  outfs << "  \"time_parameters\": {" << endl;
+  outfs << "    \"calctime\": [" << endl;
+  // outfs << "        ";
   int j = 0;
   for (int i = 0; i < time_Size; i++) {
     j++;
     if (i < (time_Size - 1)) {
       if (j == 1) {
-        out1 << "        " << fixed << time_[i] << ", ";
+        outfs << "        " << fixed << time_[i] << ", ";
       } else if (j < 7) {
-        out1 << time_[i] << ", ";
+        outfs << time_[i] << ", ";
       } else {
         j = 0;
-        out1 << time_[i] << "," << endl;
+        outfs << time_[i] << "," << endl;
       }
     } else {
       if (j == 1) {
-        out1 << "        " << time_[i] << endl;
+        outfs << "        " << time_[i] << endl;
       } else {
-        out1 << time_[i] << endl;
+        outfs << time_[i] << endl;
       }
     }
   }
-  out1 << "    ]," << endl;
-  out1 << "    \"outtime\": [" << endl;
+  outfs << "    ]," << endl;
+  outfs << "    \"outtime\": [" << endl;
   j = 0;
   for (int i = 0; i < outputTime_Size; i++) {
     j++;
     if (i < (outputTime_Size - 1)) {
       if (j == 1) {
-        out1 << "        " << outputTime_[i] << ", ";
+        outfs << "        " << outputTime_[i] << ", ";
       } else if (j < 7) {
-        out1 << outputTime_[i] << ", ";
+        outfs << outputTime_[i] << ", ";
       } else {
         j = 0;
-        out1 << outputTime_[i] << "," << endl;
+        outfs << outputTime_[i] << "," << endl;
       }
     } else {
-      out1 << outputTime_[i] << endl;
+      outfs << outputTime_[i] << endl;
     }
   }
-  out1 << "    ]" << endl;
-  out1 << "  }" << endl;
-  out1 << "}" << endl;
-  out1.close();
+  outfs << "    ]" << endl;
+  outfs << "  }" << endl;
+  outfs << "}" << endl;
+  outfs.close();
 
   cout << "   => new time values (calctime & outtime) have been used and "
           "writen as :"
@@ -1331,82 +1347,32 @@ void Controller::writeTxtOutputFiles(double time) {
   // Output to files the solution composition data, phase data, DC data,
   // microstructure data, pH, and C-S-H composition and Ca/Si ratio
 
-  cout << "MOTHRA made it 01" << endl;
-  cout.flush();
-
   string outfilename = jobRoot_ + "_Solution.csv";
-  ofstream out3(outfilename.c_str(), ios::app);
-  if (!out3) {
+  ofstream outfs(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
 
-  cout << "MOTHRA made it 02" << endl;
-  cout.flush();
-
-  out3 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   char cc;
   for (i = 0; i < numDCs_; i++) {
     cc = chemSys_->getDCClassCode(i);
     if (cc == 'S' || cc == 'T' || cc == 'W') {
-      out3 << "," << (chemSys_->getNode())->Get_cDC((long int)i); // molality
+      outfs << "," << (chemSys_->getNode())->Get_cDC((long int)i); // molality
     }
   }
-  out3 << endl;
-  out3.close();
-
-  cout << "MOTHRA made it 03" << endl;
-  cout.flush();
-
-  // BEGIN GODZILLA CODE
-  string godzillaname = jobRoot_ + "_Kinetics.csv";
-  ofstream outofit(godzillaname.c_str(), ios::app);
-  if (!out3) {
-    throw FileException("Controller", "calculateState", outfilename,
-                        "Could not append");
-  }
-
-  cout << "MOTHRA made it 04" << endl;
-  cout.flush();
-
-  int jj = chemSys_->getDCId("K2SO4");
-  cout << "MOTHRA made it 05" << endl;
-  cout.flush();
-
-  int kk = chemSys_->getMicroPhaseId("Arcanite");
-  cout << "MOTHRA made it 06" << endl;
-  cout.flush();
-
-  outofit << setprecision(5) << time << ",";
-  outofit << chemSys_->getDCMoles(jj) << ",";
-  outofit << lattice_->getSurfaceArea(kk) << ",";
-  double conc = chemSys_->getDCMoles("SO4-2");
-  conc /= ((chemSys_->getDCMoles("H2O@")) * 0.018);
-  outofit << conc << ",";
-  outofit << chemSys_->getMicroPhaseSI("Arcanite") << endl;
-
-  outofit.close();
-  // END GODZILLA CODE
-
-  cout << "MOTHRA made it 08" << endl;
-  cout.flush();
-
-  // out5 << setprecision(5) << time;
-  // for (i = 0; i < numMicroPhases_; i++) {
-  //   out5 << "," << (lattice_->getVolumeFraction(i));
-  // }
-  // double micvol = lattice_->getMicrostructureVolume();
-  // double initmicvol = lattice_->getInitialMicrostructureVolume();
-  // out5 << "," << micvol << "," << (initmicvol - micvol);
+  outfs << endl;
+  outfs.close();
 
   outfilename = jobRoot_ + "_DCVolumes.csv";
-  ofstream out4(outfilename.c_str(), ios::app);
-  if (!out4) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
 
-  out4 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numDCs_; i++) {
     if (chemSys_->getDCMolarMass(i) > 0.0) {
       cc = chemSys_->getDCClassCode(i);
@@ -1414,54 +1380,74 @@ void Controller::writeTxtOutputFiles(double time) {
         string dcname = chemSys_->getDCName(i);
         double V0 =
             chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
-        out4 << "," << V0;
-        // if (verbose_) {
-        //   cout << "Controller::calculateState    DC = "
-        //        << chemSys_->getDCName(i)
-        //        << ", moles = " << chemSys_->getDCMoles(i)
-        //        << ", molar mass = " << chemSys_->getDCMolarMass(i)
-        //        << endl;
-        //   cout.flush();
-        // }
+        outfs << "," << V0;
       }
     } else {
       string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
-      out4.close();
+      outfs.close();
       throw FloatException("Controller", "calculateState", msg);
     }
   }
-  out4 << endl;
-  out4.close();
+  outfs << endl;
+  outfs.close();
 
-  cout << "MOTHRA made it 09" << endl;
-  cout.flush();
+  outfilename = jobRoot_ + "_SurfaceAreas.csv";
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
+    throw FileException("Controller", "Controller", outfilename,
+                        "Could not append");
+  }
+  outfilename = jobRoot_ + "_SI.csv";
+  ofstream outfs01;
+  outfs01.open(outfilename.c_str(), ios::app);
+  if (!outfs01) {
+    throw FileException("Controller", "Controller", outfilename,
+                        "Could not append");
+  }
+
+  outfs << setprecision(5) << time;
+  outfs01 << setprecision(5) << time;
+  // JWB: Start with micro phase id 1 to avoid the Void phase
+  for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
+    int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
+    cc = chemSys_->getDCClassCode(dcid);
+    if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
+      outfs << "," << lattice_->getSurfaceArea(i);
+      ;
+      outfs01 << "," << chemSys_->getMicroPhaseSI(i);
+    }
+  }
+  outfs << endl;
+  outfs01 << endl;
+  outfs.close();
+  outfs01.close();
 
   outfilename = jobRoot_ + "_Microstructure.csv";
-  ofstream out5(outfilename.c_str(), ios::app);
-  if (!out5) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
 
-  out5 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numMicroPhases_; i++) {
-    out5 << "," << (lattice_->getVolumeFraction(i));
+    outfs << "," << (lattice_->getVolumeFraction(i));
   }
   double micvol = lattice_->getMicrostructureVolume();
   double initmicvol = lattice_->getInitialMicrostructureVolume();
-  out5 << "," << micvol << "," << (initmicvol - micvol);
-  out5 << endl;
-  out5.close();
+  outfs << "," << micvol << "," << (initmicvol - micvol);
+  outfs << endl;
+  outfs.close();
 
   outfilename = jobRoot_ + "_pH.csv";
-  ofstream out6(outfilename.c_str(), ios::app);
-  if (!out6) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
-  out6 << setprecision(5) << time;
-  out6 << "," << (chemSys_->getPH()) << endl;
-  out6.close();
+  outfs << setprecision(5) << time;
+  outfs << "," << (chemSys_->getPH()) << endl;
+  outfs.close();
 
   chemSys_->setGEMPhaseStoich();
 
@@ -1476,22 +1462,16 @@ void Controller::writeTxtOutputFiles(double time) {
     cout << "Done!" << endl;
     cout.flush();
   }
-  // double CaMoles = 0.0, SiMoles = 0.0, CaSiRatio = 0.0;
+
   outfilename = jobRoot_ + "_CSH.csv";
-  ofstream out7(outfilename.c_str(), ios::app);
-  if (!out7) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
-  out7 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numICs_; i++) {
-    out7 << "," << CSHcomp[i];
-    // if (chemSys_->getICName(i) == "Ca") {
-    //     CaMoles = CSHcomp[i];
-    // }
-    // if (chemSys_->getICName(i) == "Si") {
-    //     SiMoles = CSHcomp[i];
-    // }
+    outfs << "," << CSHcomp[i];
   }
   int id_Ca = chemSys_->getICId("Ca");
   int id_Si = chemSys_->getICId("Si");
@@ -1502,19 +1482,18 @@ void Controller::writeTxtOutputFiles(double time) {
   if (SiMoles < 1.0e-16)
     SiMoles = 1.0e-16;
   double CaSiRatio = CaMoles / SiMoles;
-  out7 << "," << CaSiRatio << endl;
-  out7.close();
+  outfs << "," << CaSiRatio << endl;
+  outfs.close();
 
-  // chemSys_->setGEMPhaseStoich();
   double *phaseRecord;
   CaMoles = SiMoles = 0.0;
   outfilename = jobRoot_ + "_CSratio_solid.csv";
-  ofstream out8(outfilename.c_str(), ios::app);
-  if (!out8) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
-  out8 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numGEMPhases_; i++) {
     cc = chemSys_->getGEMPhaseClassCode(i);
     if (cc == 's') {
@@ -1529,15 +1508,15 @@ void Controller::writeTxtOutputFiles(double time) {
   }
   if (SiMoles != 0) {
     CaSiRatio = CaMoles / SiMoles;
-    out8 << "," << CaSiRatio << endl;
+    outfs << "," << CaSiRatio << endl;
   } else {
-    out8 << ",Si_moles is ZERO" << endl;
+    outfs << ",Si_moles is ZERO" << endl;
   }
-  out8.close();
+  outfs.close();
 
   outfilename = jobRoot_ + "_Enthalpy.csv";
-  ofstream out10(outfilename.c_str(), ios::app);
-  if (!out10) {
+  outfs.open(outfilename.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
                         "Could not append");
   }
@@ -1547,9 +1526,9 @@ void Controller::writeTxtOutputFiles(double time) {
     enth += (chemSys_->getDCEnthalpy(i));
   }
 
-  out10 << setprecision(5) << time;
-  out10 << "," << enth << endl;
-  out10.close();
+  outfs << setprecision(5) << time;
+  outfs << "," << enth << endl;
+  outfs.close();
 }
 
 void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
@@ -1565,22 +1544,31 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
   string outfilenameIC = jobRoot_ + "_icmoles.csv";
   string outfilenameDC = jobRoot_ + "_dcmoles.csv";
+  ofstream outfs;
   if (time < 1.e-10) {
-    ofstream out0IC(outfilenameIC.c_str());
-    out0IC << "Time(h)";
+    outfs.open(outfilenameIC.c_str());
+    if (!outfs) {
+      throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                          outfilenameIC, "Could not append");
+    }
+    outfs << "Time(h)";
     for (i = 0; i < numICs_; i++) {
-      out0IC << "," << chemSys_->getICName(i);
+      outfs << "," << chemSys_->getICName(i);
     }
-    out0IC << endl;
-    out0IC.close();
+    outfs << endl;
+    outfs.close();
 
-    ofstream out0DC(outfilenameDC.c_str());
-    out0DC << "Time(h)";
-    for (i = 0; i < numDCs_; i++) {
-      out0DC << "," << chemSys_->getDCName(i);
+    outfs.open(outfilenameDC.c_str());
+    if (!outfs) {
+      throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
+                          outfilenameDC, "Could not append");
     }
-    out0DC << endl;
-    out0DC.close();
+    outfs << "Time(h)";
+    for (i = 0; i < numDCs_; i++) {
+      outfs << "," << chemSys_->getDCName(i);
+    }
+    outfs << endl;
+    outfs.close();
   }
 
   vector<int> impurityDCID;
@@ -1633,42 +1621,40 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
     }
   }
 
-  ofstream out1(outfilenameIC.c_str(), ios::app);
-  if (!out1) {
+  outfs.open(outfilenameIC.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
                         outfilenameIC, "Could not append");
   }
 
-  out1 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numICs_; i++) {
-    out1 << "," << ICMoles[i];
+    outfs << "," << ICMoles[i];
   }
-  out1 << endl;
-  out1.close();
+  outfs << endl;
+  outfs.close();
 
-  ofstream out2(outfilenameDC.c_str(), ios::app);
-  if (!out2) {
+  outfs.open(outfilenameDC.c_str(), ios::app);
+  if (!outfs) {
     throw FileException("Controller", "writeTxtOutputFiles_onlyICsDCs",
                         outfilenameDC, "Could not append");
   }
 
-  out2 << setprecision(5) << time;
+  outfs << setprecision(5) << time;
   for (i = 0; i < numDCs_; i++) {
-    out2 << "," << DCMoles[i];
+    outfs << "," << DCMoles[i];
   }
-  out2 << endl;
-  out2.close();
+  outfs << endl;
+  outfs.close();
 }
 
 void Controller::parseDoc(const string &docName) {
-
-  double testtime;
 
   /// check if the JSON file exists
 
   ifstream f(docName.c_str());
   if (!f.is_open()) {
-    cout << "JSON parameter file not found" << endl;
+    cout << "JSON output times file not found" << endl;
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }
 
@@ -1682,8 +1668,8 @@ void Controller::parseDoc(const string &docName) {
     /// Get an iterator to the root node of the JSON file
     /// @todo Add a better JSON validity check.
 
-    json::iterator it = data.find("simulation_parameters");
-    json::iterator cdi = it.value().find("calctime");
+    json::iterator it = data.find("time_parameters");
+    json::iterator cdi = it.value().find("finaltime");
 
     if (cdi == it.value().end() || it == data.end()) {
       throw FileException("Controller", "parseDoc", docName, "Empty JSON file");
@@ -1691,33 +1677,48 @@ void Controller::parseDoc(const string &docName) {
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
-    int calctimenum = cdi.value().size();
-    for (int i = 0; i < calctimenum; ++i) {
-      testtime = cdi.value()[i];
-      testtime *= (1.0 / DAY_PER_H);
-      time_.push_back(testtime);
-    }
+    double finalTime = cdi.value();
+    finalTime *= (1.0 / DAY_PER_H);
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
     cdi = it.value().find("outtime");
+    double testTime = 0.0;
     int outtimenum = cdi.value().size();
     for (int i = 0; i < outtimenum; ++i) {
-      testtime = cdi.value()[i];
-      testtime *= 24.0;
-      outputTime_.push_back(testtime);
+      testTime = cdi.value()[i];
+      testTime *= (1.0 / DAY_PER_H);
+      outputTime_.push_back(testTime);
     }
 
-    // Input times are conventionally in days
-    // Immediately convert to hours within model
-    cdi = it.value().find("image_frequency");
-    if (cdi != it.value().end()) {
-      imgFreq_ = cdi.value();
-      imgFreq_ *= 24.0;
+    // Now populate the calculation times on a natural log scale
+    time_.clear();
+    testTime = 0.0;
+    int j = 0;
+    bool done = false;
+    while (testTime < finalTime) {
+      testTime += (0.1 * (testTime + 0.024));
+      done = false;
+      if (j < outputTime_.size()) {
+        while (j < outputTime_.size() && !done) {
+          if (testTime >= outputTime_[j]) {
+            time_.push_back(outputTime_[j]);
+            j++;
+          } else if (testTime < finalTime) {
+            time_.push_back(testTime);
+            done = true;
+          }
+        }
+      } else if (testTime < finalTime) {
+        time_.push_back(testTime);
+      }
     }
+    time_.push_back(finalTime);
+
   } catch (FileException fex) {
     fex.printException();
     exit(1);
   }
+
   return;
 }

@@ -203,22 +203,23 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     }
 
     // GODZILLA Output
-    // cout << "  GODZILLA: Phase " <<
-    // chemSys_->getMicroPhaseName(microPhaseId_)
-    //      << ":" << endl;
-    // cout << "      GODZILLA: dissolutionRateConst_ = " <<
-    // dissolutionRateConst_
-    //      << " mol/m2/h" << endl;
-    // cout << "      GODZILLA: surface area = " << area << " m2/(100 g solid)"
-    //      << endl;
-    // cout << "      GODZILLA: resolution = " << lattice_->getResolution()
-    //      << " m2" << endl;
-    // cout << "      GODZILLA: saturation index = " << saturationIndex << endl
-    //      << endl;
-    // cout.flush();
+    cout << "  GODZILLA: Phase " << chemSys_->getMicroPhaseName(microPhaseId_)
+         << ":" << endl;
+    cout << "      GODZILLA: dissolutionRateConst_ = " << dissolutionRateConst_
+         << " mol/m2/h" << endl;
+    cout << "      GODZILLA: surface area = " << area << " m2/(100 g solid)"
+         << endl;
+    cout << "      GODZILLA: resolution = " << lattice_->getResolution()
+         << " m2" << endl;
+    cout << "      GODZILLA: saturation index = " << saturationIndex << endl
+         << endl;
+    cout.flush();
     // END GODZILLA Output
 
     dissrate *= arrhenius_;
+    cout << "GODZILLA arrhenius factor = " << arrhenius_ << endl;
+    cout << "GODZILLA dissrate = " << dissrate << endl;
+    cout.flush();
 
     // dissrate has units of mol of phase per 100 g of solid per hour
     // timestep has units of hours

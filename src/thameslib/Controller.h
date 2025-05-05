@@ -170,7 +170,7 @@ private:
   double temperature_; /**< Temperature */
   double presure_;
   int waterDCId_; /**< coresp to DCName = "H2O@" */
-  double waterMollarMass_;
+  double waterMolarMass_;
   int numSites_;
   double initMicroVolume_; /**< Initial absolute volume of the microstructure */
 
@@ -218,7 +218,8 @@ public:
   @param choice is an int flag to specify whether simulating hydration,
   leaching, or sulfate attack
   */
-  // void doCycle(const string &statfilename, int choice, double elemTimeInterval);
+  // void doCycle(const string &statfilename, int choice, double
+  // elemTimeInterval);
   void doCycle(double elemTimeInterval);
 
   /**

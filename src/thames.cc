@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
     Mic->setFEsolver(AppliedStrainSolver);
   }
 
-  string jobRoot, parFileName, statFileName;
+  string jobRoot, timeFileName, statFileName;
   if (VERBOSE) {
     cout << "About to enter KineticController constructor" << endl;
     cout.flush();
@@ -305,26 +305,27 @@ int main(int argc, char **argv) {
     cout.flush();
   }
 
-  cout << endl << "What is the name of the simulation parameter file? " << endl;
+  cout << endl << "What is the name of the file with output times? " << endl;
   getline(cin, buff);
-  parFileName.assign(buff);
-  cout << "   - parFileName       :  " << parFileName << endl;
+  timeFileName.assign(buff);
+  cout << "   - timeFileName       :  " << timeFileName << endl;
 
-  cout << endl << "What is the root name of output files?" << endl;
+  cout << endl << "What shall be the root name of all output files?" << endl;
   getline(cin, buff);
   jobRoot.assign(buff);
   cout << "   - files root name   :  " << jobRoot << endl;
 
   prepOutputFolder(outputFolder, jobRoot, gemInputName, statFileName,
-                   initMicName, micDefName, parFileName);
+                   initMicName, micDefName, timeFileName);
 
   //
   // Create the Controller object to direct flow of the program
   //
 
   try {
-    Ctrl = new Controller(Mic, KController, ChemSys, ThermalStrainSolver,
-                          simtype, parFileName, jobRoot, VERBOSE, WARNING, XYZ);
+    Ctrl =
+        new Controller(Mic, KController, ChemSys, ThermalStrainSolver, simtype,
+                       timeFileName, jobRoot, VERBOSE, WARNING, XYZ);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
@@ -349,7 +350,7 @@ int main(int argc, char **argv) {
   // Write a formatted output of the simulation parameters for later reference
   //
 
-  writeReport(jobRoot, inittime, initMicName, micDefName, parFileName,
+  writeReport(jobRoot, inittime, initMicName, micDefName, timeFileName,
               gemInputName, ChemSys);
 
   //
@@ -562,7 +563,7 @@ int checkArgs(int argc, char **argv) {
 void prepOutputFolder(const string &outputFolder, string &jobRoot,
                       const string &gemInputName, string &statFileName,
                       const string &initMicName, const string &micDefName,
-                      const string &parFileName) {
+                      const string &timeFileName) {
 
   int resCallSystem;
 
@@ -640,7 +641,7 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
   }
 
-  buff = "cp -f " + parFileName + " " + outputFolder + "/.";
+  buff = "cp -f " + timeFileName + " " + outputFolder + "/.";
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
@@ -653,7 +654,7 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
 
 void writeReport(const string &jobRoot, struct tm *itime,
                  const string &initMicName, const string &micDefName,
-                 const string &parFileName, const string &csdName,
+                 const string &timeFileName, const string &csdName,
                  ChemicalSystem *csys) {
   string statName = jobRoot + ".stats";
   string jFileName = jobRoot + ".report";
@@ -674,7 +675,7 @@ void writeReport(const string &jobRoot, struct tm *itime,
   out << "INPUT FILES USED:" << endl;
   out << "              Microstructure file name: " << initMicName << endl;
   out << "   Microstructure definition file name: " << micDefName << endl;
-  out << "            Output frequency file name: " << parFileName << endl;
+  out << "            Output frequency file name: " << timeFileName << endl;
   out << "                   GEM input file name: " << csdName << endl;
   out << endl;
   out << "OUTPUT FILES GENERATED:" << endl;
