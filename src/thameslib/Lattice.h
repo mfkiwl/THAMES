@@ -1509,6 +1509,22 @@ public:
   }
 
   /**
+  @brief Return the combined specific surface area of cementitious
+  components
+
+  @return the estimated specific surface area [m2 per kg of this phase]
+  */
+  double getCementSpecificSurfaceArea(void) {
+    double ssa = 0.0;
+    for (int i = 0; i < numMicroPhases_; ++i) {
+      if (chemSys_->isCementComponent(i)) {
+        ssa += getSpecificSurfaceArea(i);
+      }
+    }
+    return ssa;
+  }
+
+  /**
   @brief Get the sorted distribution of domain sizes
 
   @param phaseid is the id of the phase to query

@@ -95,9 +95,22 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   /// m<sup>2</sup>/kg
   ///
 
-  specificSurfaceArea_ = kineticData.specificSurfaceArea;
+  // GODZILLA Old way was to input the Blaine fineness in file
+  // specificSurfaceArea_ = kineticData.specificSurfaceArea;
+  //
+  // GODZILLA New way is to calculate it based on microstructure
+  // GODZILLA This was already done in the Lattice constructor
+
+  specificSurfaceArea_ = lattice_->getCementSpecificSurfaceArea();
   refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
   ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
+
+  cout << "GODZILLA: PK phase = " << kineticData.name << endl;
+  cout << "GODZILLA: PK specific surface srea = " << specificSurfaceArea_
+       << endl;
+  cout << "GODZILLA: PK Reference specific surface area = "
+       << refSpecificSurfaceArea_ << endl;
+  cout << "GODZILLA: PK ssaFactor_ = " << ssaFactor_ << endl;
 
   ///
   /// Default value for w/c ratio in PK model is 0.45
@@ -121,8 +134,8 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   refT_ = kineticData.reftemperature;
 
   modelName_ = "ParrotKillohModel";
-  name_ = kineticData.name;
   microPhaseId_ = kineticData.microPhaseId;
+  name_ = kineticData.name;
   DCId_ = kineticData.DCId;
   GEMPhaseId_ = kineticData.GEMPhaseId;
 
@@ -351,7 +364,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
     exit(1);
   } catch (out_of_range &oor) {
     EOBException eex("ParrotKillohModel", "calculateKineticStep", oor.what(), 0,
-                    0);
+                     0);
     eex.printException();
     exit(1);
   }

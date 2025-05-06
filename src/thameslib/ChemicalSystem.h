@@ -6189,7 +6189,7 @@ public:
     return;
   }
 
-  bool getCementComponent(int i) { return cementComponent_[i]; }
+  bool isCementComponent(int i) { return cementComponent_[i]; }
 
   void setInitScaledCementMass(double val) {
     initScaledCementMass_ = scaledCementMass_ = val;

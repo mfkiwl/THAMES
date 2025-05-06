@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 05 22:58 2025 | Calculate and use PK SSA instead of using user input (untested) |
 | May 05 18:15 2025 | Implemented automatic time steps |
 | May 05 08:05 2025 | Debug fixed boundary conditions |
 | Apr 22 10:58 2025 | Updated to reflect v4.0 |

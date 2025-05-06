@@ -508,7 +508,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
             microPhaseMass[microPhaseId] = vfrac * density;
             if (microPhaseId != ELECTROLYTEID) {
               solidMass += microPhaseMass[microPhaseId];
-              if (chemSys_->getCementComponent(microPhaseId))
+              if (chemSys_->isCementComponent(microPhaseId))
                 cementMass += microPhaseMass[microPhaseId];
             }
             if (verbose_) {
@@ -538,7 +538,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
 
     // for (ii = 0; ii < numMicroPhases_; ii++) {
     //   cout << "  ii : " << ii << "\tcementComponent : "
-    //        << chemSys_->getCementComponent(ii) << endl;
+    //        << chemSys_->isCementComponent(ii) << endl;
     // }
 
     // Set the water-solids mass ratio based on the initial microstructure
@@ -739,7 +739,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
       }
 
       totalSolidMass += pscaledMass;
-      if (chemSys_->getCementComponent(microPhaseId))
+      if (chemSys_->isCementComponent(microPhaseId))
         totalCementMass += pscaledMass;
 
       chemSys_->setMicroPhaseMass(microPhaseId, pscaledMass);
@@ -760,7 +760,7 @@ void Lattice::normalizePhaseMasses(vector<double> microPhaseMass,
   double totalMass = 0;
   cout << endl << "Lattice::normalizePhaseMasses - normalized masses:" << endl;
   for (int i = 1; i < numMicroPhases_; i++) {
-    if (chemSys_->getCementComponent(i)) {
+    if (chemSys_->isCementComponent(i)) {
       cout << setw(5) << right << i << " : " << setw(15) << left
            << chemSys_->getMicroPhaseName(i) << chemSys_->getMicroPhaseMass(i)
            << " g (*)" << endl;
