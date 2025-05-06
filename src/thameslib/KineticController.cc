@@ -890,8 +890,8 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
       cout << endl
            << "  KineticController::calculateKineticStep - tweak cyc = " << cyc
            << " :  hyd_time = " << hyd_time
-           << "   hydTimeIni_ = " << hydTimeIni_
-           << "   timestep = " << timestep << endl;
+           << "   hydTimeIni_ = " << hydTimeIni_ << "   timestep = " << timestep
+           << endl;
     }
     for (int midx = 0; midx < pKMsize_; ++midx) {
       phaseDissolvedId[midx] = phaseKineticModel_[midx]->getMicroPhaseId();
@@ -913,8 +913,7 @@ void KineticController::calculateKineticStep(const double timestep, int cyc) {
     hyd_time = hydTimeIni_ + timestep;
     cout << endl
          << "  KineticController::calculateKineticStep - cyc = " << cyc
-         << " :  hyd_time = " << hyd_time
-         << "   hydTimeIni_ = " << hydTimeIni_
+         << " :  hyd_time = " << hyd_time << "   hydTimeIni_ = " << hydTimeIni_
          << "   timestep = " << timestep << endl;
 
     for (int midx = 0; midx < pKMsize_; ++midx) {
