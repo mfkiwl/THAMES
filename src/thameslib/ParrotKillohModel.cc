@@ -17,8 +17,7 @@ ParrotKillohModel::ParrotKillohModel() {
   /// m<sup>2</sup>/kg
   ///
 
-  specificSurfaceArea_ = 385.0;
-  refSpecificSurfaceArea_ = 385.0; // reference SSA (m2/kg)
+  refSpecificSurfaceArea_ = RefSpecificSurfaceArea; // reference SSA (m2/kg)
 
   ///
   /// Default temperature in the PK model is 20 C (or 293 K)
@@ -102,7 +101,8 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   // GODZILLA This was already done in the Lattice constructor
 
   specificSurfaceArea_ = lattice_->getCementSpecificSurfaceArea();
-  refSpecificSurfaceArea_ = kineticData.refSpecificSurfaceArea;
+
+  refSpecificSurfaceArea_ = RefSpecificSurfaceArea;
   ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
 
   cout << "GODZILLA: PK phase = " << kineticData.name << endl;

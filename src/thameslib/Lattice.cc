@@ -586,7 +586,7 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
       // Next we also normalize the surface areas to the same 100 g of total
       // solid in the initial microstructure
       // Calculate the surface area per 100 g solid
-      calcSurfaceArea(microPhaseId);
+      calcSurfaceAreas();
     } catch (FloatException flex) {
       throw flex;
     }
@@ -5305,26 +5305,16 @@ void Lattice::calcSurfaceArea(int phaseid) {
     double oneFaceAreaPerMeterCubed = oneFaceAreaPerMicrostructure /
                                       volumePerVoxel_; // m2/face/
                                                        // (m3 of microstructure)
-    //    cout << "    MOTHRA: areaPerFace_ = " << areaPerFace_ << endl;
-    //    cout << "    MOTHRA: oneFaceAreaPerMicrostructure = " <<
-    //    oneFaceAreaPerMicrostructure << endl; cout << "    MOTHRA:
-    //    oneFaceAreaPerMeterCubed = " << oneFaceAreaPerMeterCubed << endl;
 
     double oneFaceAreaPerCmCubed =
         1.0e-6 * oneFaceAreaPerMeterCubed; // m2/face/
                                            // (cm3 of microstructure)
-    //    cout << "    MOTHRA: oneFaceAreaPerCmCubed = " <<
-    //    oneFaceAreaPerCmCubed << endl;
     double oneFaceAreaPerGramSolid =
         oneFaceAreaPerCmCubed / initSolidMass_; // m2/face/
                                                 // (g of solid)
-    //    cout << "    MOTHRA: oneFaceAreaPerGramSolid = " <<
-    //    oneFaceAreaPerGramSolid << endl;
     oneFaceAreaPerHundredGramSolid =
         100.0 * oneFaceAreaPerGramSolid; // m2/face/
                                          // (100 g of solid)
-    //    cout << "    MOTHRA: oneFaceAreaPerHundredGramSolid = " <<
-    //    oneFaceAreaPerHundredGramSolid << endl;
   } else {
     string msg = "Divide by zero error:  initSolidMass_ = 0";
     throw FloatException("Lattice", "calcSurfaceArea", msg);
@@ -5346,19 +5336,7 @@ void Lattice::calcSurfaceArea(int phaseid) {
                        surfaceArea_.size(), phaseid);
   }
 
-  // MOTHRA Output
-  // cout << "    MOTHRA: Phase " << chemSys_->getMicroPhaseName(phaseid) << ":"
-  //      << endl;
-  // cout << "      MOTHRA: Microstructure surface area = "
-  //      << surfaceArea_[phaseid] << " voxel faces" << endl;
-  // cout << "      MOTHRA: Multiplier = " << oneFaceAreaPerHundredGramSolid
-  //      << endl;
   surfaceArea_[phaseid] *= oneFaceAreaPerHundredGramSolid;
-  // cout << "      MOTHRA: Actual surface area = " << surfaceArea_[phaseid]
-  //      << " m2/100g solid" << endl
-  //      << endl;
-  // cout.flush();
-  // END MOTHRA Output
 
   // Calculate specific surface area of this phase by dividing
   // this surface area by the phase mass (g per 100 g of all solid)
@@ -5374,11 +5352,6 @@ void Lattice::calcSurfaceArea(int phaseid) {
     specificSurfaceArea_[phaseid] = 0.0;
   }
 
-  // if (verbose_) {
-  //   cout << "### Surface area of " << chemSys_->getMicroPhaseName(phaseid)
-  //        << " = " << surfaceArea_[phaseid] << " m2/ 100 g of solid" << endl;
-  //   cout.flush();
-  // }
   return;
 }
 

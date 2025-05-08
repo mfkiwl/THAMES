@@ -1467,6 +1467,8 @@ public:
   @param solidMass is the mass of all solids in g
   */
   void calcSurfaceAreas(void) {
+    surfaceArea_.resize(numMicroPhases_, 0.0);
+    specificSurfaceArea_.resize(numMicroPhases_, 0.0);
     for (int i = 0; i < numMicroPhases_; ++i) {
       calcSurfaceArea(i);
     }
@@ -1512,16 +1514,49 @@ public:
   @brief Return the combined specific surface area of cementitious
   components
 
-  @return the estimated specific surface area [m2 per kg of this phase]
+  @return the estimated specific surface area [m2 per kg of all cement]
   */
   double getCementSpecificSurfaceArea(void) {
     double ssa = 0.0;
+    double cemmass = 0.0;
+    double allsurf = 0.0;
+    double cemsurf = 0.0;
+    double cemssa = 0.0;
+    double allsolidmass = 0.0;
+    double thismass, thisssa;
     for (int i = 0; i < numMicroPhases_; ++i) {
-      if (chemSys_->isCementComponent(i)) {
-        ssa += getSpecificSurfaceArea(i);
+      if (i != VOIDID && i != ELECTROLYTEID) {
+        allsolidmass += chemSys_->getMicroPhaseMass(i);
+        allsurf += getSurfaceArea(i);
+        if (chemSys_->isCementComponent(i)) {
+          thisssa = getSurfaceArea(i); // m2 component /(100g solid)
+          thismass =
+              chemSys_->getMicroPhaseMass(i); // g component/(100 g solid)
+          cemsurf += thisssa;
+          cemmass += thismass; // g all cement / (100g solid)
+        }
       }
     }
-    return ssa;
+    // At this point ssa is the total surface area of cement per 100 g of all
+    // solids, and cemmass is the total g of cement per 100 g of all solids.
+    // So ssa/cemmass has units of m2 per g of cement
+    // Multiply that by 1000.0 to get units of m2/(kg of cement)
+    // if (verbose_) {
+    //    cout << "URANIUM all solid mass = " << allsolidmass << " g / (100 g solid)"
+    //          << endl;
+    //    cout << "URANIUM all surface = " << allsurf << " m2 / (100 g solid)"
+    //            << endl;
+    //    cout << "URANIUM cement mass = " << cemmass << " g / (100 g solid)" << endl;
+    //    cout << "URANIUM cement surface = " << cemsurf << " m2 / (100 g solid)"
+    //            << endl;
+    //    cout.flush();
+    // }
+    if (cemmass > 0.0) {
+      cemsurf *= (1000.0 / cemmass);
+    } else {
+      cemsurf = 0.0;
+    }
+    return cemsurf;
   }
 
   /**
@@ -1732,8 +1767,8 @@ public:
 #endif
 
 ///
-/// The functions below are used to aid in comparison of one site to another, by
-/// which means lists of the sites can be sorted.
+/// The functions below are used to aid in comparison of one site to another,
+/// by which means lists of the sites can be sorted.
 ///
 
 #ifndef CMPFUNCS
@@ -1746,8 +1781,8 @@ second.
 The comparison is made on the basis of what THAMES loosely calls the
 <i>weighted mean curvature</i>, (wmc).  A site with high wmc is a site where
 dissolution of a phase is likely to occur, and growth of another phase is
-unlikely to occur. Conversely, a site with a low wmc is a site where growth of a
-phase is likely to occur but dissolution of a phase is unlikely to occur.
+unlikely to occur. Conversely, a site with a low wmc is a site where growth of
+a phase is likely to occur but dissolution of a phase is unlikely to occur.
 
 @param s1 is a pointer to the first site in the comparison
 @param s2 is a pointer to the second site in the comparison

@@ -22,8 +22,6 @@ phase
         or thermodynamic control
     - `surfaceAreaMultiplier` is a dimensionless multiplication factor for
 surface area to account for unresolved internal structure, roughness, etc.
-    - `specificSurfaceArea` is the specific surface area in m2 per kg
-    - `refSpecificSurfaceArea` is the reference specific surface area in m2 per
 kg
     - `scaledMass` is the number of grams of the phase per 100 grams of solid
     - `k1` is the Parrot and Killoh <i>K</i><sub>1</sub> parameter for the phase
@@ -63,14 +61,12 @@ struct KineticData {
   int DCId;          /**< Integer id of the DC making up the phase */
   string type;       /**< Specifies kinetic or thermodynamic control */
   double scaledMass; /**< Mass percent on a total solids basis */
-  double surfaceAreaMultiplier;  /**< How much to multiply the surface area to
-                                    account  for internal structure, roughness,
-                                    etc. */
-  double specificSurfaceArea;    /**< Specific surface area [m2/kg] */
-  double refSpecificSurfaceArea; /**< Reference specific surface area [m2/kg] */
-  double temperature;            /**< Temperature [K] */
-  double reftemperature;         /**< Reference temperature [K] */
-  double activationEnergy;       /**< Activation energy [J/mol/ */
+  double surfaceAreaMultiplier; /**< How much to multiply the surface area to
+                                   account  for internal structure, roughness,
+                                   etc. */
+  double temperature;           /**< Temperature [K] */
+  double reftemperature;        /**< Reference temperature [K] */
+  double activationEnergy;      /**< Activation energy [J/mol/ */
   double k1;        /**< Parrot and Killoh <i>K</i><sub>1</sub> parameter */
   double k2;        /**< Parrot and Killoh <i>K</i><sub>2</sub> parameter */
   double k3;        /**< Parrot and Killoh <i>K</i><sub>3</sub> parameter */

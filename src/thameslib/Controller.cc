@@ -259,12 +259,6 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
         "outtime value must be present into parameters.json file!");
   }
 
-  cout << "   initial time_.size()        = " << time_Size << endl;
-  cout << "   initial outputTime_.size()  = " << outputTime_Size << endl;
-  for (int i = 0; i < outputTime_Size; i++) {
-    time_.push_back(outputTime_[i]);
-  }
-
   cout << "   final time_.size()          = " << time_Size << endl;
 
   outfilename = jobRoot_ + "-parameters_used.json";
@@ -1711,9 +1705,10 @@ void Controller::parseDoc(const string &docName) {
         }
       } else if (testTime < finalTime) {
         time_.push_back(testTime);
+      } else {
+        time_.push_back(finalTime);
       }
     }
-    time_.push_back(finalTime);
 
   } catch (FileException fex) {
     fex.printException();

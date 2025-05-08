@@ -4,6 +4,18 @@
     "temperature": 298.15,
     "reftemperature": 298.15,
     "saturated": 1,
+    "electrolyte_conditions": [
+      { "DCname": "Ca(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "AlO2H@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "CaSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Fe(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "KOH@", "condition": "fixed", "concentration": 1.0e-6 },
+      { "DCname": "Ca(SO4)@", "condition": "fixed", "concentration": 1.0e-6 },
+      { "DCname": "K+", "condition": "fixed", "concentration": 1.0e-6 },
+      { "DCname": "Na+", "condition": "fixed", "concentration": 1.0e-6 },
+      { "DCname": "SO4-2", "condition": "fixed", "concentration": 1.0e-6 }
+    ],
     "phases": [
       {
         "thamesname": "Void",
@@ -33,7 +45,6 @@
               { "gemdcname": "Ca(SO4)@", "gemdcporosity": 1.0 },
               { "gemdcname": "Ca+2", "gemdcporosity": 1.0 },
               { "gemdcname": "CaOH+", "gemdcporosity": 1.0 },
-              { "gemdcname": "Ca(HSiO3)+", "gemdcporosity": 1.0 },
               { "gemdcname": "CaSiO3@", "gemdcporosity": 1.0 },
               { "gemdcname": "Fe(CO3)@", "gemdcporosity": 1.0 },
               { "gemdcname": "Fe(HCO3)+", "gemdcporosity": 1.0 },
@@ -111,8 +122,6 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
-          "refSpecificSurfaceArea": 385.0,
           "k1": 1.5,
           "k2": 0.05,
           "k3": 1.1,
@@ -132,7 +141,19 @@
             "gemphasename": "Anhydrite",
             "gemdc": [{ "gemdcname": "Anh" }]
           }
-        ]
+        ],
+        "kinetic_data": {
+          "type": "Standard",
+          "activationEnergy": 40000.0,
+          "dissolutionRateConst": 5.0e-7,
+          "diffusionRateConstEarly": 5.0e-6,
+          "diffusionRateConstLate": 5.0e-6,
+          "dissolvedUnits": 2,
+          "siexp": 1.0,
+          "dfexp": 1.1,
+          "dorexp": 0.5,
+          "loi": 0.0
+        }
       },
       {
         "thamesname": "Belite",
@@ -152,8 +173,6 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
-          "refSpecificSurfaceArea": 385.0,
           "k1": 0.5,
           "k2": 0.02,
           "k3": 0.7,
@@ -182,8 +201,6 @@
         },
         "kinetic_data": {
           "type": "ParrotKilloh",
-          "specificSurfaceArea": 402.0,
-          "refSpecificSurfaceArea": 385.0,
           "k1": 0.37,
           "k2": 0.02,
           "k3": 0.4,
@@ -203,16 +220,34 @@
             "gemphasename": "Gypsum",
             "gemdc": [{ "gemdcname": "Gp" }]
           }
-        ]
+        ],
+        "kinetic_data": {
+          "type": "Standard",
+          "activationEnergy": 40000.0,
+          "dissolutionRateConst": 1.0e-6,
+          "diffusionRateConstEarly": 5.0e-6,
+          "diffusionRateConstLate": 5.0e-6,
+          "dissolvedUnits": 2,
+          "siexp": 1.0,
+          "dfexp": 1.1,
+          "dorexp": 0.5,
+          "loi": 0.0
+        }
       },
       {
-        "thamesname": "SilicaAm",
+        "thamesname": "Sfume",
         "id": 7,
         "cement_component": 0,
+        "display_data": {
+          "red": 40.0,
+          "green": 173.0,
+          "blue": 175.0,
+          "gray": 100.0
+        },
         "gemphase_data": [
           {
-            "gemphasename": "Silica-amorph",
-            "gemdc": [{ "gemdcname": "Amor-Sl" }]
+            "gemphasename": "Silica-fume",
+            "gemdc": [{ "gemdcname": "Sil-Fume" }]
           }
         ],
         "kinetic_data": {
@@ -238,7 +273,19 @@
             "gemphasename": "hemihydrate",
             "gemdc": [{ "gemdcname": "hemihydrate" }]
           }
-        ]
+        ],
+        "kinetic_data": {
+          "type": "Standard",
+          "activationEnergy": 40000.0,
+          "dissolutionRateConst": 1.5e-6,
+          "diffusionRateConstEarly": 5.0e-6,
+          "diffusionRateConstLate": 5.0e-6,
+          "dissolvedUnits": 2,
+          "siexp": 1.0,
+          "dfexp": 1.1,
+          "dorexp": 0.5,
+          "loi": 0.0
+        }
       },
       {
         "thamesname": "CSHQ",

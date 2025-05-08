@@ -323,8 +323,6 @@ void KineticController::parseMicroPhases(const json::iterator cdi,
           chemSys_->getMicroPhaseMass(kineticData.microPhaseId);
       kineticData.temperature = temperature_;
       kineticData.reftemperature = refT_;
-      cout << "HEY! Surface area multiplier for " << kineticData.name << " is "
-           << kineticData.surfaceAreaMultiplier << endl;
       makeModel(kineticData);
     }
 
@@ -393,17 +391,10 @@ void KineticController::parseKineticDataForParrotKilloh(
     cout.flush();
   }
 
-  json::iterator pp = p.value().find("specificSurfaceArea");
-  kineticData.specificSurfaceArea = pp.value();
-
-  // Reference specific surface area (m2/kg)
-  pp = p.value().find("refSpecificSurfaceArea");
-  kineticData.refSpecificSurfaceArea = pp.value();
-
   // Parrot-Killoh k1 parameter is like a rate const
   // Conventionally given in units of g per day
   // Immediately convert to units of g per h within model
-  pp = p.value().find("k1");
+  json::iterator pp = p.value().find("k1");
   kineticData.k1 = pp.value();
   // kineticData.k1 *= DAY_PER_H;
 
@@ -458,15 +449,6 @@ void KineticController::parseKineticDataForStandard(
   } else {
     kineticData.surfaceAreaMultiplier = 1.0;
   }
-
-  // Reference specific surface area (m2/kg)
-  // pp = p.value().find("refSpecificSurfaceArea");
-  // if (pp != p.value().end()) {
-  //   kineticData.refSpecificSurfaceArea = pp.value();
-  // } else {
-  //   throw DataException("KineticController", "parseKineticDataForStandard",
-  //                       "refSpecificSurfaceArea not found");
-  // }
 
   // Dissolution rate constant input with units (mol/m2/s)
   // But immediately convert it to mol/m2/h within model

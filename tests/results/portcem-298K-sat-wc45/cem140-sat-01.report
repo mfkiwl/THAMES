@@ -1,14 +1,14 @@
-THAMES simulation portcem-298K-sat-wc45/cem140-sat-01 initialized on Thu Apr 17 15:49:08 2025
+THAMES simulation pcmatic/cem140-sat-01 initialized on Wed May  7 13:40:40 2025
 
 
 INPUT FILES USED:
               Microstructure file name: ccr140-w45-thames.img
    Microstructure definition file name: chemistry.json
-            Output frequency file name: parameters.json
+            Output frequency file name: time.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: portcem-298K-sat-wc45/cem140-sat-01.stats
+                Global phase fractions: pcmatic/cem140-sat-01.stats
 
 ----------------------------------------------------------
 

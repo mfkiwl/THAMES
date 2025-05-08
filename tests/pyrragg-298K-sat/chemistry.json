@@ -5,6 +5,13 @@
     "reftemperature": 298.15,
     "saturated": 1,
     "electrolyte_conditions": [
+      { "DCname": "Ca(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "AlO2H@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "CaSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Fe(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "KOH@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Ca(SO4)@", "condition": "initial", "concentration": 1.0e-6 },
       { "DCname": "Ca+2", "condition": "initial", "concentration": 0.05 },
       { "DCname": "K+", "condition": "initial", "concentration": 0.1 },
       { "DCname": "OH-", "condition": "initial", "concentration": 0.2 }
@@ -115,7 +122,7 @@
         "kinetic_data": {
           "type": "Standard",
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 6.94e-11,
+          "dissolutionRateConst": 4.0e-9,
           "diffusionRateConstEarly": 1.4e-13,
           "diffusionRateConstLate": 1.4e-13,
           "dissolvedUnits": 2,

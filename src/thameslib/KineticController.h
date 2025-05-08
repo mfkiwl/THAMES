@@ -131,8 +131,6 @@ public:
     kineticData.microPhaseId = kineticData.GEMPhaseId = kineticData.DCId = 0;
     kineticData.type = "thermo";
     kineticData.scaledMass = 0.0;
-    kineticData.specificSurfaceArea = kineticData.refSpecificSurfaceArea =
-        385.0;
     kineticData.surfaceAreaMultiplier = 1.0;
     kineticData.temperature = kineticData.reftemperature = 293.15;
     kineticData.k1 = kineticData.k2 = kineticData.k3 = 1.0;
