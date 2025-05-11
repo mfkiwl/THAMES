@@ -1,10 +1,9 @@
-THAMES simulation portcem-298K-sealed-alk-wc45/cem140-sealed-alk-01 initialized on Thu May  8 13:20:09 2025
+THAMES simulation portcem-298K-sealed-alk-wc45/cem140-sealed-alk-01 initialized on Sun May 11 15:33:16 2025
 
 
 INPUT FILES USED:
               Microstructure file name: ccr140-w45-thames.img
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:

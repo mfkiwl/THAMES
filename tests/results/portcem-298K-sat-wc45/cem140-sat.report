@@ -1,10 +1,9 @@
-THAMES simulation portcem-298K-sat-wc45/cem140-sat initialized on Thu May  8 13:47:47 2025
+THAMES simulation portcem-298K-sat-wc45/cem140-sat initialized on Sat May 10 15:35:30 2025
 
 
 INPUT FILES USED:
               Microstructure file name: ccr140-w45-thames.img
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:

@@ -191,7 +191,7 @@ public:
   @param cs is a pointer to the already-instantiated `ChemicalSystem` object
   @param thmstr is a pointer to the already-instantiated `ThermalStrain` object
   @param simtype is the type of simulation to run
-  @param parfilename is the name of the input parameter file
+  @param jsonFileName is the name of the input parameter file
   @param jobname is the root name to give to all output files
   @param verbose is true if verbose output should be produced
   @param warning is true if warning output should be produced
@@ -199,7 +199,7 @@ public:
   */
   Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
              ThermalStrain *thmstr, const int simtype,
-             const string &parfilename, const string &jobname,
+             const string &jsonFileName, const string &jobname,
              const bool verbose, const bool warning, const bool xyz);
 
   /**

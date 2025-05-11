@@ -1,10 +1,9 @@
-THAMES simulation PC-Carbonate-200/PCcarb initialized on Wed May  7 17:15:50 2025
+THAMES simulation PC-Carbonate-200/PCcarb initialized on Sat May 10 16:04:12 2025
 
 
 INPUT FILES USED:
               Microstructure file name: PC-Forsterite.img.thames
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: PC-Carb-dat.lst
 
 OUTPUT FILES GENERATED:

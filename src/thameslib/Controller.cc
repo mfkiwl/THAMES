@@ -7,7 +7,7 @@
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
-                       const string &timefilename, const string &jobname,
+                       const string &jsonFileName, const string &jobname,
                        const bool verbose, const bool warning, const bool xyz)
     : lattice_(msh), kineticController_(kc), chemSys_(cs), simType_(simtype),
       thermalstr_(thmstr), jobRoot_(jobname) {
@@ -218,13 +218,13 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   size_t foundjson;
 
   try {
-    foundjson = timefilename.find(jsonext);
+    foundjson = jsonFileName.find(jsonext);
 
     if (foundjson != string::npos) {
-      parseDoc(timefilename);
+      parseDoc(jsonFileName);
     } else {
       cout << "Parameter file must be JSON" << endl;
-      throw FileException("Controller", "Controller", timefilename,
+      throw FileException("Controller", "Controller", jsonFileName,
                           "NOT JSON FORMAT");
     }
   } catch (FileException fex) {
@@ -245,23 +245,24 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   if (time_.size() == 0) {
     cout << endl
          << endl
-         << "Controller::Controller error : at least one calctime or "
-            "outtime value must be present into parameters.json file!"
-         << endl;
+         << "Controller::Controller error : a final time and "
+         << "at least one output time value must be present in "
+         << "the simulation parameters file!" << endl;
     cout << endl
-         << "check and modify parameters.json file and run thames again"
+         << "check and modify the simulation parameters file and run thames "
+            "again"
          << endl;
     cout << endl << "end program" << endl;
     // exit(0);
     throw FileException(
-        "Controller", "Controller", "parameters.json",
-        "at least one calctime or "
-        "outtime value must be present into parameters.json file!");
+        "Controller", "Controller", "simparams.json",
+        "a final time and at least one "
+        "outtime value must be present into simparams.json file!");
   }
 
   cout << "   final time_.size()          = " << time_Size << endl;
 
-  outfilename = jobRoot_ + "-parameters_used.json";
+  outfilename = jobRoot_ + "-times_used.json";
   outfs.open(outfilename.c_str());
   if (!outfs) {
     throw FileException("Controller", "Controller", outfilename,
@@ -270,7 +271,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 
   outfs << "{" << endl;
   outfs << "  \"time_parameters\": {" << endl;
-  outfs << "    \"calctime\": [" << endl;
+  outfs << "    \"calctimes\": [" << endl;
   // outfs << "        ";
   int j = 0;
   for (int i = 0; i < time_Size; i++) {
@@ -293,7 +294,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
   }
   outfs << "    ]," << endl;
-  outfs << "    \"outtime\": [" << endl;
+  outfs << "    \"outtimes\": [" << endl;
   j = 0;
   for (int i = 0; i < outputTime_Size; i++) {
     j++;
@@ -315,8 +316,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   outfs << "}" << endl;
   outfs.close();
 
-  cout << "   => new time values (calctime & outtime) have been used and "
-          "writen as :"
+  cout << "   => new time values (calctimes & outtimes) have been used and "
+          "saved in the file :"
        << endl;
   cout << "         " << outfilename << endl;
 }
@@ -1676,7 +1677,7 @@ void Controller::parseDoc(const string &docName) {
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
-    cdi = it.value().find("outtime");
+    cdi = it.value().find("outtimes");
     double testTime = 0.0;
     int outtimenum = cdi.value().size();
     for (int i = 0; i < outtimenum; ++i) {

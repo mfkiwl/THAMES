@@ -12,8 +12,8 @@ string AFTMicroName("");
 string MonosulfMicroName("");
 
 ChemicalSystem::ChemicalSystem(const string &GEMfilename,
-                               const string &interfaceFileName,
-                               const bool verbose, const bool warning) {
+                               const string &jsonFileName, const bool verbose,
+                               const bool warning) {
   unsigned int i, j;
   double *amat;
   string exmsg;
@@ -561,10 +561,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   string msg;
   string jsonext = ".json";
-  size_t foundjson = interfaceFileName.find(jsonext);
+  size_t foundjson = jsonFileName.find(jsonext);
   try {
     if (foundjson != string::npos) {
-      parseDoc(interfaceFileName);
+      parseDoc(jsonFileName);
       microPhaseVolume_.resize(numMicroPhases_, 0.0);
       microPhaseMass_.resize(numMicroPhases_, 0.0);
       microPhasePorosity_.resize(numMicroPhases_, 0.0);
@@ -575,7 +575,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
       microPhaseMassDissolved_.resize(numMicroPhases_, 0.0);
     } else {
       msg = "Not a JSON file";
-      throw FileException("ChemicalSystem", "ChemicalSystem", interfaceFileName,
+      throw FileException("ChemicalSystem", "ChemicalSystem", jsonFileName,
                           msg);
     }
   } catch (FileException fex) {
@@ -753,12 +753,14 @@ void ChemicalSystem::parseDoc(const string &docName) {
     cout << "JSON parameter file not found" << endl;
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }
+
   json data = json::parse(f);
   f.close();
 
   // Get an iterator to the root node of the JSON file
-  json::iterator it = data.find("chemistry_data");
-  json::iterator cdi = it.value().find("phases");
+  json::iterator it = data.find("microstructure");
+  json::iterator cdi = it.value().find("numentries");
+  cdi = it.value().find("phases");
 
   map<string, int> phaseids;
   phaseids.clear();
@@ -768,7 +770,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
   ///
   /// Now start the iterator at the beginning and scan properly
   ///
-  /// The interface file contains information about each microstructure
+  /// The file contains information about each microstructure
   /// phase that is defined, including the list of GEM CSD phases that
   /// are to be associated with that phase, the phase's internal porosity,
   /// dissolved impurities, and visualization properties.
@@ -779,11 +781,9 @@ void ChemicalSystem::parseDoc(const string &docName) {
     cout.flush();
   }
 
-  // Remember cdi is a json interator over the main data object chemistry_data
-
-  // Find number of phase entries
-  cdi = it.value().find("numentries");
-  int testnumEntries = cdi.value();
+  // Make "it" a json interator over the environment data object
+  // to mine out the environmental (curing) input data
+  it = data.find("environment");
 
   // Find saturation state
   cdi = it.value().find("saturated");
@@ -812,7 +812,14 @@ void ChemicalSystem::parseDoc(const string &docName) {
   } else {
   }
 
-  // Parse all the phases
+  // Now make "it" a json interator over the "microstructure" object
+  // to mine out the microstructure phase input data
+  it = data.find("microstructure");
+
+  // Find number of phase entries
+  cdi = it.value().find("numentries");
+  int testnumEntries = cdi.value();
+
   cdi = it.value().find("phases");
 
   try {
@@ -3163,14 +3170,7 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
       DCId = it->first;
       if (DCId != getDCId("H2O@")) {
         DCconc = it->second;
-        cout << "GODZILLA: Concentration of " << getDCName(DCId) << " = "
-             << DCconc << "mol/kgw" << endl;
-        cout << "GODZILLA: Mass of water = " << waterMass << " kg" << endl;
-        cout << "GODZILLA: Setting moles of " << getDCName(DCId) << " to "
-             << DCconc * waterMass << " mol" << endl;
         setDCMoles(DCId, (DCconc * waterMass));
-        cout << "GODZILLA: Getting moles of " << getDCName(DCId) << " = "
-             << getDCMoles(DCId) << " mol" << endl;
       }
       it++;
     }

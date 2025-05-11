@@ -561,12 +561,12 @@ public:
   all the information read from the GEM input files.
 
   @param GEMfilename is the name of the file holding GEM input data
-  @param Interfacefilename is the name of the file containing information about
+  @param jsonFileName is the name of the file containing information about
   how to relate GEM phases to microstructure phases
   @param verbose is true if producing verbose output
   @param warning is true if producing verbose output
   */
-  ChemicalSystem(const string &GEMfilename, const string &Interfacefilename,
+  ChemicalSystem(const string &GEMfilename, const string &jsonFileName,
                  const bool verbose, const bool warning = false);
 
   /**

@@ -1,10 +1,9 @@
-THAMES simulation highvolume-silicafume/hvsf initialized on Thu May  8 13:27:14 2025
+THAMES simulation highvolume-silicafume/hvsf initialized on Sat May 10 15:59:35 2025
 
 
 INPUT FILES USED:
               Microstructure file name: thames-microstructure.img
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:

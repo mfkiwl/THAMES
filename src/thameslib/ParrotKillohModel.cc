@@ -94,23 +94,10 @@ ParrotKillohModel::ParrotKillohModel(ChemicalSystem *cs, Lattice *lattice,
   /// m<sup>2</sup>/kg
   ///
 
-  // GODZILLA Old way was to input the Blaine fineness in file
-  // specificSurfaceArea_ = kineticData.specificSurfaceArea;
-  //
-  // GODZILLA New way is to calculate it based on microstructure
-  // GODZILLA This was already done in the Lattice constructor
-
   specificSurfaceArea_ = lattice_->getCementSpecificSurfaceArea();
 
   refSpecificSurfaceArea_ = RefSpecificSurfaceArea;
   ssaFactor_ = specificSurfaceArea_ / refSpecificSurfaceArea_;
-
-  cout << "GODZILLA: PK phase = " << kineticData.name << endl;
-  cout << "GODZILLA: PK specific surface srea = " << specificSurfaceArea_
-       << endl;
-  cout << "GODZILLA: PK Reference specific surface area = "
-       << refSpecificSurfaceArea_ << endl;
-  cout << "GODZILLA: PK ssaFactor_ = " << ssaFactor_ << endl;
 
   ///
   /// Default value for w/c ratio in PK model is 0.45

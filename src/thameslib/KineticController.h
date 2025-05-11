@@ -109,13 +109,13 @@ public:
 
   @param cs is a pointer to the ChemicalSystem object for the simulation
   @param lattice is a pointer to the Lattice object holding the microstructure
-  @param fileName is the name of the JSON file with the input for the kinetic
-  model
+  @param jsonFileName is the name of the JSON file with the input for the
+  kinetic model
   @param verbose is true if verbose output should be produced
   @param warning is false if suppressing warning output
   */
   KineticController(ChemicalSystem *cs, Lattice *lattice,
-                    const string &fileName, const bool verbose,
+                    const string &jsonFileName, const bool verbose,
                     const bool warning);
 
   /**

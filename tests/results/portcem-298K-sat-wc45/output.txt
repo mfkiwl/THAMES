@@ -10,13 +10,13 @@ simtype = 2
 The RNG seed is                 : seedRNG = -25943
 The elementary time interval is : elemTimeInterval = 2.400e-06
 
-Thu May  8 13:47:47 2025
+Sat May 10 15:35:30 2025
 
 What is the name of the GEM input file? 
    - gemInputName      :  thames-dat.lst
 
-What is the name of the microstructure phase definition file? 
-   - micDefName        :  chemistry.json
+What is the name of the simulation parameter file? 
+   - simParamName        :  simparams.json
 JSON iterator okay so far
 
 ChemicalSystem::writeSatElectrolyteGasConditions
@@ -71,22 +71,6 @@ X size of lattice is 100
 Y size of lattice is 100
 Z size of lattice is 100
 Total number of sites is 1000000
-GODZILLA: PK phase = Alite
-GODZILLA: PK specific surface srea = 3.870886968939555e+02
-GODZILLA: PK Reference specific surface area = 3.720000000000000e+02
-GODZILLA: PK ssaFactor_ = 1.040561013155794e+00
-GODZILLA: PK phase = Belite
-GODZILLA: PK specific surface srea = 3.870886968939555e+02
-GODZILLA: PK Reference specific surface area = 3.720000000000000e+02
-GODZILLA: PK ssaFactor_ = 1.040561013155794e+00
-GODZILLA: PK phase = Aluminate
-GODZILLA: PK specific surface srea = 3.870886968939555e+02
-GODZILLA: PK Reference specific surface area = 3.720000000000000e+02
-GODZILLA: PK ssaFactor_ = 1.040561013155794e+00
-GODZILLA: PK phase = Ferrite
-GODZILLA: PK specific surface srea = 3.870886968939555e+02
-GODZILLA: PK Reference specific surface area = 3.720000000000000e+02
-GODZILLA: PK ssaFactor_ = 1.040561013155794e+00
 
 KineticController::KineticController - only these phases (controlled by the Parrot-Killoh model)
                                        contribute to initScaledCementMass_ & scaledCementMass_ :
@@ -96,9 +80,6 @@ KineticController::KineticController - only these phases (controlled by the Parr
       microPhaseID/microPhaseName/microPhaseMass :   5 / Ferrite         / 7.950459676390988e+00 g
 
       initScaledCementMass_ = 9.616989136439629e+01 g (same value for scaledCementMass_)
-
-What is the name of the file with output times? 
-   - timeFileName       :  time.json
 
 What shall be the root name of all output files?
    - files root name   :  cem140-sat
@@ -112,8 +93,8 @@ What shall be the root name of all output files?
 
 Controller::Controller(...) :
    final time_.size()          = 122
-   => new time values (calctime & outtime) have been used and writen as :
-         portcem-298K-sat-wc45/cem140-sat-parameters_used.json
+   => new time values (calctimes & outtimes) have been used and saved in the file :
+         portcem-298K-sat-wc45/cem140-sat-times_used.json
 
 Going into Controller::doCycle
 
@@ -157,22 +138,6 @@ Controller::doCycle(...) Entering Main time loop
 
   KineticController::calculateKineticStep - cyc = 1 :  hyd_time = 2.400000000000000e-03   hydTimeIni_ = 0.000000000000000e+00   timestep = 2.400000000000000e-03
   KineticController::calculateKineticStep - cyc = 1 :  scaledCementMass = 9.616989136439629e+01   totalDOR = 0.000000000000000e+00
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.640402216138322e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.338995286712020e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.485032741374801e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.075937659039466e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.076509197303835e-06
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.118658156048500e-02
   ChemicalSystem::calculateState - cyc = 1 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 1 : water_molesincr = 1.254898795482047e-04
 
@@ -201,22 +166,6 @@ Controller::doCycle => normal end - cyc = 1 (i = 0)
 
   KineticController::calculateKineticStep - cyc = 2 :  hyd_time = 5.040000000000000e-03   hydTimeIni_ = 2.400000000000000e-03   timestep = 2.640000000000000e-03
   KineticController::calculateKineticStep - cyc = 2 :  scaledCementMass = 9.616906271261109e+01   totalDOR = 8.616540722279652e-06
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.641973776938079e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.081354771530616e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.378399535870983e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.074759013482444e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.024463041582134e-03
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.116769410846268e-02
   ChemicalSystem::calculateState - cyc = 2 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 2 : water_molesincr = 1.364013865335581e-04
 
@@ -245,22 +194,6 @@ Controller::doCycle => normal end - cyc = 2 (i = 1)
 
   KineticController::calculateKineticStep - cyc = 3 :  hyd_time = 7.944000000000000e-03   hydTimeIni_ = 5.040000000000000e-03   timestep = 2.903999999999999e-03
   KineticController::calculateKineticStep - cyc = 3 :  scaledCementMass = 9.616814245461381e+01   totalDOR = 1.818562709872579e-05
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633330405686914e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.589412940365679e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.087340598394745e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.073501685269194e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.400726244094336e-03
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.113172648486614e-02
   ChemicalSystem::calculateState - cyc = 3 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 3 : water_molesincr = 1.571061309960877e-04
 
@@ -289,22 +222,6 @@ Controller::doCycle => normal end - cyc = 3 (i = 2)
 
   KineticController::calculateKineticStep - cyc = 4 :  hyd_time = 1.113840000000000e-02   hydTimeIni_ = 7.944000000000000e-03   timestep = 3.194400000000000e-03
   KineticController::calculateKineticStep - cyc = 4 :  scaledCementMass = 9.616692427830607e+01   totalDOR = 3.085254696795215e-05
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633329726514788e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 7.222096631200521e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.711410983065454e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.073580163696742e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 6.842799065960546e-03
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.108986185504153e-02
   ChemicalSystem::calculateState - cyc = 4 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 4 : water_molesincr = 1.530711369418706e-04
 
@@ -342,22 +259,6 @@ Controller::doCycle => normal end - cyc = 4 (i = 3)
 
   KineticController::calculateKineticStep - cyc = 5 :  hyd_time = 1.465224000000000e-02   hydTimeIni_ = 1.113840000000000e-02   timestep = 3.513840000000001e-03
   KineticController::calculateKineticStep - cyc = 5 :  scaledCementMass = 9.616526673121022e+01   totalDOR = 4.808816065462216e-05
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.636472815457803e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.173491181905379e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.256298862027207e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.074523096562273e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.111916147692231e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.104236614324547e-02
   ChemicalSystem::calculateState - cyc = 5 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 5 : water_molesincr = 1.205759985410546e-04
 
@@ -397,22 +298,6 @@ Controller::doCycle => normal end - cyc = 5 (i = 4)
 
   KineticController::calculateKineticStep - cyc = 6 :  hyd_time = 1.851746400000000e-02   hydTimeIni_ = 1.465224000000000e-02   timestep = 3.865224000000000e-03
   KineticController::calculateKineticStep - cyc = 6 :  scaledCementMass = 9.616318322334662e+01   totalDOR = 6.975302721569548e-05
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.635687290183913e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.607279429085720e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.808743809912397e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.076173292378422e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.522999936065298e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.100062606406768e-02
   ChemicalSystem::calculateState - cyc = 6 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 6 : water_molesincr = 1.574688558121482e-04
 
@@ -452,22 +337,6 @@ Controller::doCycle => normal end - cyc = 6 (i = 5)
 
   KineticController::calculateKineticStep - cyc = 7 :  hyd_time = 2.276921040000000e-02   hydTimeIni_ = 1.851746400000000e-02   timestep = 4.251746399999999e-03
   KineticController::calculateKineticStep - cyc = 7 :  scaledCementMass = 9.616066908442620e+01   totalDOR = 9.589570955368073e-05
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633539692551440e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 2.173277624066642e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.225568831608064e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.075544804246953e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 2.059424329581355e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.093141901291890e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 7 : water_molesincr = 1.742345692083376e-04
 
@@ -507,22 +376,6 @@ Controller::doCycle => normal end - cyc = 7 (i = 6)
 
   KineticController::calculateKineticStep - cyc = 8 :  hyd_time = 2.744613144000000e-02   hydTimeIni_ = 2.276921040000000e-02   timestep = 4.676921040000000e-03
   KineticController::calculateKineticStep - cyc = 8 :  scaledCementMass = 9.615769513152705e+01   totalDOR = 1.268196594195028e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633552077329606e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 2.830818190845346e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.560738327661620e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.076880567685563e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 2.682669611536033e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.086191099040260e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 8 : water_molesincr = 1.898747115877315e-04
 
@@ -562,22 +415,6 @@ Controller::doCycle => normal end - cyc = 8 (i = 7)
 
   KineticController::calculateKineticStep - cyc = 9 :  hyd_time = 3.259074458400000e-02   hydTimeIni_ = 2.744613144000000e-02   timestep = 5.144613143999999e-03
   KineticController::calculateKineticStep - cyc = 9 :  scaledCementMass = 9.615421712703288e+01   totalDOR = 1.629848712631070e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.637493002159762e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.579546095460738e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.819797500915631e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.076487786521599e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.392424708809674e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.077276515776799e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 9 : water_molesincr = 2.054013881206141e-04
 
@@ -617,22 +454,6 @@ Controller::doCycle => normal end - cyc = 9 (i = 8)
 
   KineticController::calculateKineticStep - cyc = 10 :  hyd_time = 3.824981904240000e-02   hydTimeIni_ = 3.259074458400000e-02   timestep = 5.659074458399999e-03
   KineticController::calculateKineticStep - cyc = 10 :  scaledCementMass = 9.615017918888010e+01   totalDOR = 2.049724215815011e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.635932981498119e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 4.421221248975901e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.983353186330922e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.074523325035206e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 4.190386684463904e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.066482735793749e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 10 : water_molesincr = 2.211329458032644e-04
 
@@ -672,22 +493,6 @@ Controller::doCycle => normal end - cyc = 10 (i = 9)
 
   KineticController::calculateKineticStep - cyc = 11 :  hyd_time = 4.447480094664000e-02   hydTimeIni_ = 3.824981904240000e-02   timestep = 6.224981904240000e-03
   KineticController::calculateKineticStep - cyc = 11 :  scaledCementMass = 9.614551464764406e+01   totalDOR = 2.534755567089469e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.635157318853464e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.358095137797760e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.069739941715283e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.070751463877615e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.078723541337828e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.053691350335429e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 11 : water_molesincr = 2.370883218470809e-04
 
@@ -727,22 +532,6 @@ Controller::doCycle => normal end - cyc = 11 (i = 10)
 
   KineticController::calculateKineticStep - cyc = 12 :  hyd_time = 5.132228104130400e-02   hydTimeIni_ = 4.447480094664000e-02   timestep = 6.847480094664002e-03
   KineticController::calculateKineticStep - cyc = 12 :  scaledCementMass = 9.614014581363915e+01   totalDOR = 3.093021145717303e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.636738055903112e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 6.392320506968608e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.086114123228462e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.067346788966847e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 6.059515347351828e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.040008577377114e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 12 : water_molesincr = 2.532984232048233e-04
 
@@ -782,22 +571,6 @@ Controller::doCycle => normal end - cyc = 12 (i = 11)
 
   KineticController::calculateKineticStep - cyc = 13 :  hyd_time = 5.885450914543440e-02   hydTimeIni_ = 5.132228104130400e-02   timestep = 7.532228104130401e-03
   KineticController::calculateKineticStep - cyc = 13 :  scaledCementMass = 9.613398316720934e+01   totalDOR = 3.733829442615916e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.635960763882991e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 7.526792565032304e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.036665896932453e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.066012379817287e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 7.135552554507070e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.026249261446950e-02
     Untrustworthy result with auto initial approx (AIA)
   ChemicalSystem::calculateState - cyc = 13 : water_molesincr = 2.696215181329356e-04
 
@@ -837,22 +610,6 @@ Controller::doCycle => normal end - cyc = 13 (i = 12)
 
   KineticController::calculateKineticStep - cyc = 14 :  hyd_time = 6.713996005997784e-02   hydTimeIni_ = 5.885450914543440e-02   timestep = 8.285450914543441e-03
   KineticController::calculateKineticStep - cyc = 14 :  scaledCementMass = 9.612692416441377e+01   totalDOR = 4.467843248332355e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.631534678735506e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 8.765088819682235e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.471148466171225e-05
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.062663073062828e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 8.310279990090622e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.010337600830369e-02
   ChemicalSystem::calculateState - cyc = 14 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 14 : water_molesincr = 2.990140073995089e-04
 
@@ -894,22 +651,6 @@ Controller::doCycle => normal end - cyc = 14 (i = 13)
 
   KineticController::calculateKineticStep - cyc = 15 :  hyd_time = 7.625395606597563e-02   hydTimeIni_ = 6.713996005997784e-02   timestep = 9.113996005997785e-03
   KineticController::calculateKineticStep - cyc = 15 :  scaledCementMass = 9.611885172939691e+01   totalDOR = 5.307236420387571e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.632333875973805e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.992009567980933e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.703075033320159e-07
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.064529735479367e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.474478035846202e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.971369158869193e-03
   ChemicalSystem::calculateState - cyc = 15 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 15 : water_molesincr = 4.724189531594844e-04
 
@@ -947,22 +688,6 @@ Controller::doCycle => normal end - cyc = 15 (i = 14)
 
   KineticController::calculateKineticStep - cyc = 16 :  hyd_time = 8.627935167257318e-02   hydTimeIni_ = 7.625395606597563e-02   timestep = 1.002539560659756e-02
   KineticController::calculateKineticStep - cyc = 16 :  scaledCementMass = 9.610963245252665e+01   totalDOR = 6.265881245650182e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633131685238021e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000008489264792e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -2.498181105027814e-09
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.064149583752697e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.482645139858226e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.968543704226916e-03
   ChemicalSystem::calculateState - cyc = 16 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 16 : water_molesincr = 5.111140320802305e-04
 
@@ -1000,22 +725,6 @@ Controller::doCycle => normal end - cyc = 16 (i = 15)
 
   KineticController::calculateKineticStep - cyc = 17 :  hyd_time = 9.730728683983050e-02   hydTimeIni_ = 8.627935167257318e-02   timestep = 1.102793516725732e-02
   KineticController::calculateKineticStep - cyc = 17 :  scaledCementMass = 9.609911448733574e+01   totalDOR = 7.359567121935563e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633143057434323e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.998133470600616e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.481816030459675e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.059783709028336e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.481370523706172e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.947613358653861e-03
   ChemicalSystem::calculateState - cyc = 17 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 17 : water_molesincr = 5.479845163698317e-04
 
@@ -1055,22 +764,6 @@ Controller::doCycle => normal end - cyc = 17 (i = 16)
 
   KineticController::calculateKineticStep - cyc = 18 :  hyd_time = 1.094380155238135e-01   hydTimeIni_ = 9.730728683983050e-02   timestep = 1.213072868398304e-02
   KineticController::calculateKineticStep - cyc = 18 :  scaledCementMass = 9.608712512404018e+01   totalDOR = 8.606252869986006e-04
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633153848450555e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999606617637780e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.349481263103189e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.054318311226842e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.483401404546984e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.920973665303687e-03
   ChemicalSystem::calculateState - cyc = 18 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 18 : water_molesincr = 5.852848780045355e-04
 
@@ -1108,22 +801,6 @@ Controller::doCycle => normal end - cyc = 18 (i = 17)
 
   KineticController::calculateKineticStep - cyc = 19 :  hyd_time = 1.227818170761949e-01   hydTimeIni_ = 1.094380155238135e-01   timestep = 1.334380155238135e-02
   KineticController::calculateKineticStep - cyc = 19 :  scaledCementMass = 9.607346800677874e+01   totalDOR = 1.002635609228218e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633164226114728e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000001096899299e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -2.630604951283165e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.055609237044630e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.484498668450572e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.927075593529235e-03
   ChemicalSystem::calculateState - cyc = 19 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 19 : water_molesincr = 6.243813769774160e-04
 
@@ -1163,22 +840,6 @@ Controller::doCycle => normal end - cyc = 19 (i = 18)
 
   KineticController::calculateKineticStep - cyc = 20 :  hyd_time = 1.374599987838144e-01   hydTimeIni_ = 1.227818170761949e-01   timestep = 1.467818170761950e-02
   KineticController::calculateKineticStep - cyc = 20 :  scaledCementMass = 9.605791995301644e+01   totalDOR = 1.164308389988562e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633960026754437e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999159617723474e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.111200536408861e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.053495775469572e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.484482719016230e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.916871055997881e-03
   ChemicalSystem::calculateState - cyc = 20 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 20 : water_molesincr = 6.609950125632976e-04
 
@@ -1216,22 +877,6 @@ Controller::doCycle => normal end - cyc = 20 (i = 19)
 
   KineticController::calculateKineticStep - cyc = 21 :  hyd_time = 1.536059986621958e-01   hydTimeIni_ = 1.374599987838144e-01   timestep = 1.614599987838145e-02
   KineticController::calculateKineticStep - cyc = 21 :  scaledCementMass = 9.604022732549024e+01   totalDOR = 1.348281016713936e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633969820473503e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000138438880603e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -5.387520473914070e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.046134564655753e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.487470727875599e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.880963022296451e-03
   ChemicalSystem::calculateState - cyc = 21 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 21 : water_molesincr = 6.950643983096060e-04
 
@@ -1271,22 +916,6 @@ Controller::doCycle => normal end - cyc = 21 (i = 20)
 
   KineticController::calculateKineticStep - cyc = 22 :  hyd_time = 1.713665985284154e-01   hydTimeIni_ = 1.536059986621958e-01   timestep = 1.776059986621958e-02
   KineticController::calculateKineticStep - cyc = 22 :  scaledCementMass = 9.602010189896453e+01   totalDOR = 1.557550531737637e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.633193498980432e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000136005027050e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -5.281867271657142e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.041479651894150e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.488413360132647e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.858371103886749e-03
   ChemicalSystem::calculateState - cyc = 22 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 22 : water_molesincr = 7.280435080595758e-04
 
@@ -1326,22 +955,6 @@ Controller::doCycle => normal end - cyc = 22 (i = 21)
 
   KineticController::calculateKineticStep - cyc = 23 :  hyd_time = 1.909032583812570e-01   hydTimeIni_ = 1.713665985284154e-01   timestep = 1.953665985284153e-02
   KineticController::calculateKineticStep - cyc = 23 :  scaledCementMass = 9.599721615552181e+01   totalDOR = 1.795522553105509e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.632416829301193e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999677622787e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.431873913129452e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.041360401323116e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.488182746235520e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.857822867310640e-03
   ChemicalSystem::calculateState - cyc = 23 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 23 : water_molesincr = 7.599678894957336e-04
 
@@ -1381,22 +994,6 @@ Controller::doCycle => normal end - cyc = 23 (i = 22)
 
   KineticController::calculateKineticStep - cyc = 24 :  hyd_time = 2.123935842193826e-01   hydTimeIni_ = 1.909032583812570e-01   timestep = 2.149032583812568e-02
   KineticController::calculateKineticStep - cyc = 24 :  scaledCementMass = 9.597119793289015e+01   totalDOR = 2.066066922684524e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.631639878776400e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999631513682e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.290486213824843e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.035412021875509e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.489345323333555e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.828958996025310e-03
   ChemicalSystem::calculateState - cyc = 24 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 24 : water_molesincr = 7.193185353977070e-04
 
@@ -1438,22 +1035,6 @@ Controller::doCycle => normal end - cyc = 24 (i = 23)
 
   KineticController::calculateKineticStep - cyc = 25 :  hyd_time = 2.360329426413209e-01   hydTimeIni_ = 2.123935842193826e-01   timestep = 2.363935842193826e-02
   KineticController::calculateKineticStep - cyc = 25 :  scaledCementMass = 9.594162434023239e+01   totalDOR = 2.373580971397525e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.631195306105809e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999980318574526e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.000455225031909e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.028022959808066e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490054622221875e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.793192960118147e-03
   ChemicalSystem::calculateState - cyc = 25 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 25 : water_molesincr = 6.672940633139684e-04
 
@@ -1495,22 +1076,6 @@ Controller::doCycle => normal end - cyc = 25 (i = 24)
 
   KineticController::calculateKineticStep - cyc = 26 :  hyd_time = 2.399999998080000e-01   hydTimeIni_ = 2.360329426413209e-01   timestep = 3.967057166679083e-03
   KineticController::calculateKineticStep - cyc = 26 :  scaledCementMass = 9.590801484477318e+01   totalDOR = 2.723061406306904e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.627376178134327e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999379149379e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.114813814711289e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.018649029762690e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490089913404388e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.747922671463325e-03
   ChemicalSystem::calculateState - cyc = 26 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 26 : water_molesincr = 1.099293455445152e-04
 
@@ -1550,22 +1115,6 @@ Controller::doCycle => normal end - cyc = 26 (i = 25)
 
   KineticController::calculateKineticStep - cyc = 27 :  hyd_time = 2.620362369054530e-01   hydTimeIni_ = 2.399999998080000e-01   timestep = 2.203623709745303e-02
   KineticController::calculateKineticStep - cyc = 27 :  scaledCementMass = 9.590218836903017e+01   totalDOR = 2.783646644164038e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.626926398294683e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.995102251246463e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.156941219549243e-07
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.019041192488358e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.485443832326297e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.750366929202855e-03
   ChemicalSystem::calculateState - cyc = 27 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 27 : water_molesincr = 6.026841685538571e-04
 
@@ -1607,22 +1156,6 @@ Controller::doCycle => normal end - cyc = 27 (i = 26)
 
   KineticController::calculateKineticStep - cyc = 28 :  hyd_time = 2.906398605959983e-01   hydTimeIni_ = 2.620362369054530e-01   timestep = 2.860362369054531e-02
   KineticController::calculateKineticStep - cyc = 28 :  scaledCementMass = 9.586965299948258e+01   totalDOR = 3.121958033373254e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.627712106140183e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000151290021e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -2.970047160183140e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.009679195587393e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490110811714633e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.704605470583088e-03
   ChemicalSystem::calculateState - cyc = 28 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 28 : water_molesincr = 7.639413625444908e-04
 
@@ -1664,22 +1197,6 @@ Controller::doCycle => normal end - cyc = 28 (i = 27)
 
   KineticController::calculateKineticStep - cyc = 29 :  hyd_time = 3.221038466555982e-01   hydTimeIni_ = 2.906398605959983e-01   timestep = 3.146398605959982e-02
   KineticController::calculateKineticStep - cyc = 29 :  scaledCementMass = 9.582625110180747e+01   totalDOR = 3.573262459939120e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.628497924215931e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999304972646533e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.519439750710683e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.001618624243423e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.489470296430429e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.665756756226744e-03
   ChemicalSystem::calculateState - cyc = 29 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 29 : water_molesincr = 8.167626973471088e-04
 
@@ -1721,22 +1238,6 @@ Controller::doCycle => normal end - cyc = 29 (i = 28)
 
   KineticController::calculateKineticStep - cyc = 30 :  hyd_time = 3.567142313211580e-01   hydTimeIni_ = 3.221038466555982e-01   timestep = 3.461038466555982e-02
   KineticController::calculateKineticStep - cyc = 30 :  scaledCementMass = 9.577694162401545e+01   totalDOR = 4.085995469121630e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.627262643388417e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999998093475329e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.829697007522516e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.996667246255415e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490152170868063e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.641766797232535e-03
   ChemicalSystem::calculateState - cyc = 30 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 30 : water_molesincr = 8.743443136151050e-04
 
@@ -1778,22 +1279,6 @@ Controller::doCycle => normal end - cyc = 30 (i = 29)
 
   KineticController::calculateKineticStep - cyc = 31 :  hyd_time = 3.947856544532738e-01   hydTimeIni_ = 3.567142313211580e-01   timestep = 3.807142313211581e-02
   KineticController::calculateKineticStep - cyc = 31 :  scaledCementMass = 9.572092364440851e+01   totalDOR = 4.668485256852363e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.624791934513032e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999038524313e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.801860945334667e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.987517904067364e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490179017107038e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.597582130854999e-03
   ChemicalSystem::calculateState - cyc = 31 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 31 : water_molesincr = 9.307867448290644e-04
 
@@ -1835,22 +1320,6 @@ Controller::doCycle => normal end - cyc = 31 (i = 30)
 
   KineticController::calculateKineticStep - cyc = 32 :  hyd_time = 4.366642198986012e-01   hydTimeIni_ = 3.947856544532738e-01   timestep = 4.187856544532736e-02
   KineticController::calculateKineticStep - cyc = 32 :  scaledCementMass = 9.565728730328071e+01   totalDOR = 5.330192785320710e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.623892683990223e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999997720578e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.333176390643109e-14
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.970858450488098e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490208516943643e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.517131406219393e-03
   ChemicalSystem::calculateState - cyc = 32 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 32 : water_molesincr = 9.817534890154958e-04
 
@@ -1892,22 +1361,6 @@ Controller::doCycle => normal end - cyc = 32 (i = 31)
 
   KineticController::calculateKineticStep - cyc = 33 :  hyd_time = 4.827306418884613e-01   hydTimeIni_ = 4.366642198986012e-01   timestep = 4.606642198986011e-02
   KineticController::calculateKineticStep - cyc = 33 :  scaledCementMass = 9.558499913020056e+01   totalDOR = 6.081864353777067e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.625464137362695e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000210380698e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -4.264880076382472e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.959743761906836e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490242206669378e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.463455512682163e-03
   ChemicalSystem::calculateState - cyc = 33 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 33 : water_molesincr = 1.039235751220391e-03
 
@@ -1949,22 +1402,6 @@ Controller::doCycle => normal end - cyc = 33 (i = 32)
 
   KineticController::calculateKineticStep - cyc = 34 :  hyd_time = 5.334037060773074e-01   hydTimeIni_ = 4.827306418884613e-01   timestep = 5.067306418884610e-02
   KineticController::calculateKineticStep - cyc = 34 :  scaledCementMass = 9.550288546710743e+01   totalDOR = 6.935703969566887e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.624565136637127e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000175339111e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -3.489139140250394e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.941804229336394e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490277415655003e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.376822844157199e-03
   ChemicalSystem::calculateState - cyc = 34 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 34 : water_molesincr = 1.088603065226282e-03
 
@@ -2006,22 +1443,6 @@ Controller::doCycle => normal end - cyc = 34 (i = 33)
 
   KineticController::calculateKineticStep - cyc = 35 :  hyd_time = 5.891440766850381e-01   hydTimeIni_ = 5.334037060773074e-01   timestep = 5.574037060773074e-02
   KineticController::calculateKineticStep - cyc = 35 :  scaledCementMass = 9.540961376710320e+01   totalDOR = 7.905567808248191e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.621981133549516e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000046892752e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -8.170339609808758e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.924144856183325e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490315281631850e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.291542817370858e-03
   ChemicalSystem::calculateState - cyc = 35 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 35 : water_molesincr = 1.137275876624955e-03
 
@@ -2063,22 +1484,6 @@ Controller::doCycle => normal end - cyc = 35 (i = 34)
 
   KineticController::calculateKineticStep - cyc = 36 :  hyd_time = 6.504584843535419e-01   hydTimeIni_ = 5.891440766850381e-01   timestep = 6.131440766850382e-02
   KineticController::calculateKineticStep - cyc = 36 :  scaledCementMass = 9.530367153251649e+01   totalDOR = 9.007183221176981e-03
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.620296009596743e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999770601565e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.718725336665656e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.907551942513076e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490358143864527e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.211412155583942e-03
   ChemicalSystem::calculateState - cyc = 36 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 36 : water_molesincr = 1.184939842734664e-03
 
@@ -2120,22 +1525,6 @@ Controller::doCycle => normal end - cyc = 36 (i = 35)
 
   KineticController::calculateKineticStep - cyc = 37 :  hyd_time = 7.179043327888961e-01   hydTimeIni_ = 6.504584843535419e-01   timestep = 6.744584843535417e-02
   KineticController::calculateKineticStep - cyc = 37 :  scaledCementMass = 9.518334264169748e+01   totalDOR = 1.025839489576517e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.618833884342467e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000104225142e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -1.964590089964312e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.880441092455840e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490407548624259e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.080490628017641e-03
   ChemicalSystem::calculateState - cyc = 37 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 37 : water_molesincr = 1.212880704096850e-03
 
@@ -2177,22 +1566,6 @@ Controller::doCycle => normal end - cyc = 37 (i = 36)
 
   KineticController::calculateKineticStep - cyc = 38 :  hyd_time = 7.920947660677857e-01   hydTimeIni_ = 7.179043327888961e-01   timestep = 7.419043327888963e-02
   KineticController::calculateKineticStep - cyc = 38 :  scaledCementMass = 9.504668080369588e+01   totalDOR = 1.167944088076870e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.617821249040392e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000087500670e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -1.620118406047583e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.856596019361098e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490460960890061e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.965338971647967e-03
   ChemicalSystem::calculateState - cyc = 38 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 38 : water_molesincr = 1.238937634914379e-03
 
@@ -2234,22 +1607,6 @@ Controller::doCycle => normal end - cyc = 38 (i = 37)
 
   KineticController::calculateKineticStep - cyc = 39 :  hyd_time = 8.737042426745643e-01   hydTimeIni_ = 7.920947660677857e-01   timestep = 8.160947660677853e-02
   KineticController::calculateKineticStep - cyc = 39 :  scaledCementMass = 9.489147987572115e+01   totalDOR = 1.329326123319753e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.614337928792622e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999997136080045e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.962287843447862e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.820751157212608e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490516925889413e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.792241303123432e-03
   ChemicalSystem::calculateState - cyc = 39 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 39 : water_molesincr = 1.232710740973761e-03
 
@@ -2291,22 +1648,6 @@ Controller::doCycle => normal end - cyc = 39 (i = 38)
 
   KineticController::calculateKineticStep - cyc = 40 :  hyd_time = 9.634746669420207e-01   hydTimeIni_ = 8.737042426745643e-01   timestep = 8.977042426745641e-02
   KineticController::calculateKineticStep - cyc = 40 :  scaledCementMass = 9.471524078310698e+01   totalDOR = 1.512584199328575e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.613661286073310e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999994874480269e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.130720478756329e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.785354538650288e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490580535638860e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.621307594986010e-03
   ChemicalSystem::calculateState - cyc = 40 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 40 : water_molesincr = 1.212454394541983e-03
 
@@ -2348,22 +1689,6 @@ Controller::doCycle => normal end - cyc = 40 (i = 39)
 
   KineticController::calculateKineticStep - cyc = 41 :  hyd_time = 1.062222133636223e+00   hydTimeIni_ = 9.634746669420207e-01   timestep = 9.874746669420209e-02
   KineticController::calculateKineticStep - cyc = 41 :  scaledCementMass = 9.451513479944737e+01   totalDOR = 1.720659700736175e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.612984822893681e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000035566814e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -6.007317716070499e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.748532606774172e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490658720853973e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.443489958055281e-03
   ChemicalSystem::calculateState - cyc = 41 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 41 : water_molesincr = 1.170867735991122e-03
 
@@ -2405,22 +1730,6 @@ Controller::doCycle => normal end - cyc = 41 (i = 40)
 
   KineticController::calculateKineticStep - cyc = 42 :  hyd_time = 1.170844346999845e+00   hydTimeIni_ = 1.062222133636223e+00   timestep = 1.086222133636223e-01
   KineticController::calculateKineticStep - cyc = 42 :  scaledCementMass = 9.428796298098661e+01   totalDOR = 1.956878973980424e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.613656952343552e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999852334441e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.284809370269443e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.701888012767427e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490739208418335e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.218239816198446e-03
   ChemicalSystem::calculateState - cyc = 42 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 42 : water_molesincr = 1.081705273764626e-03
 
@@ -2462,22 +1771,6 @@ Controller::doCycle => normal end - cyc = 42 (i = 41)
 
   KineticController::calculateKineticStep - cyc = 43 :  hyd_time = 1.290328781699830e+00   hydTimeIni_ = 1.170844346999845e+00   timestep = 1.194844346999846e-01
   KineticController::calculateKineticStep - cyc = 43 :  scaledCementMass = 9.403011161124086e+01   totalDOR = 2.224999657166733e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.611295502072485e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999998997489054e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.876931005271807e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.648024854083528e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490828445462754e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.958131606470418e-03
   ChemicalSystem::calculateState - cyc = 43 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 43 : water_molesincr = 9.398050977541641e-04
 
@@ -2519,22 +1812,6 @@ Controller::doCycle => normal end - cyc = 43 (i = 42)
 
   KineticController::calculateKineticStep - cyc = 44 :  hyd_time = 1.421761659869813e+00   hydTimeIni_ = 1.290328781699830e+00   timestep = 1.314328781699829e-01
   KineticController::calculateKineticStep - cyc = 44 :  scaledCementMass = 9.373750360828781e+01   totalDOR = 2.529261208055179e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.607921283321534e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000004050321e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -5.494486555122115e-13
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.583261578535075e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490929109903300e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.645387485120309e-03
   ChemicalSystem::calculateState - cyc = 44 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 44 : water_molesincr = 7.235547231075814e-04
 
@@ -2576,22 +1853,6 @@ Controller::doCycle => normal end - cyc = 44 (i = 43)
 
   KineticController::calculateKineticStep - cyc = 45 :  hyd_time = 1.566337825856794e+00   hydTimeIni_ = 1.421761659869813e+00   timestep = 1.445761659869813e-01
   KineticController::calculateKineticStep - cyc = 45 :  scaledCementMass = 9.340554598985398e+01   totalDOR = 2.874439531254085e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.600731285523275e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999229122554e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.400146914772007e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.516892259241180e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491039181352348e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.324887901091944e-03
   ChemicalSystem::calculateState - cyc = 45 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 45 : water_molesincr = 4.463680542049868e-04
 
@@ -2633,22 +1894,6 @@ Controller::doCycle => normal end - cyc = 45 (i = 44)
 
   KineticController::calculateKineticStep - cyc = 46 :  hyd_time = 1.725371608442473e+00   hydTimeIni_ = 1.566337825856794e+00   timestep = 1.590337825856794e-01
   KineticController::calculateKineticStep - cyc = 46 :  scaledCementMass = 9.302907369507092e+01   totalDOR = 3.265905393845703e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.592078781568968e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000065509314e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -1.166744612204863e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.440431319514563e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491163457878050e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.955656833388319e-03
   ChemicalSystem::calculateState - cyc = 46 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 46 : water_molesincr = 6.734600693939299e-05
 
@@ -2690,22 +1935,6 @@ Controller::doCycle => normal end - cyc = 46 (i = 45)
 
   KineticController::calculateKineticStep - cyc = 47 :  hyd_time = 1.900308769286721e+00   hydTimeIni_ = 1.725371608442473e+00   timestep = 1.749371608442474e-01
   KineticController::calculateKineticStep - cyc = 47 :  scaledCementMass = 9.260229034515842e+01   totalDOR = 3.709686023996753e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.586123438126730e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000091935594e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -1.689956619062102e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.331348681656209e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491300310560204e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.428900168616073e-03
   ChemicalSystem::calculateState - cyc = 47 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 47 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.858678070286479e-05
 
@@ -2747,22 +1976,6 @@ Controller::doCycle => normal end - cyc = 47 (i = 46)
 
   KineticController::calculateKineticStep - cyc = 48 :  hyd_time = 2.092739646215393e+00   hydTimeIni_ = 1.900308769286721e+00   timestep = 1.924308769286720e-01
   KineticController::calculateKineticStep - cyc = 48 :  scaledCementMass = 9.211870691132910e+01   totalDOR = 4.212528885695518e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.575335986891620e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999897771660e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.502299730651951e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.217931611386747e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491451210246338e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.881213907242771e-03
   ChemicalSystem::calculateState - cyc = 48 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 48 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.860964883253445e-05
 
@@ -2804,22 +2017,6 @@ Controller::doCycle => normal end - cyc = 48 (i = 47)
 
   KineticController::calculateKineticStep - cyc = 49 :  hyd_time = 2.304413610836932e+00   hydTimeIni_ = 2.092739646215393e+00   timestep = 2.116739646215393e-01
   KineticController::calculateKineticStep - cyc = 49 :  scaledCementMass = 9.157107977489285e+01   totalDOR = 4.781966085495651e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.570271027581094e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000013469730e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -2.030803766418720e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.100124828367489e+00 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491619886610643e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.312331263973413e-03
   ChemicalSystem::calculateState - cyc = 49 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 49 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.864879021032347e-05
 
@@ -2861,22 +2058,6 @@ Controller::doCycle => normal end - cyc = 49 (i = 48)
 
   KineticController::calculateKineticStep - cyc = 50 :  hyd_time = 2.399999998080000e+00   hydTimeIni_ = 2.304413610836932e+00   timestep = 9.558638724306778e-02
   KineticController::calculateKineticStep - cyc = 50 :  scaledCementMass = 9.095135034522667e+01   totalDOR = 5.426377159350325e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.552520332641041e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000000171940670e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -3.321084596529556e-11
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.714400189906178e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491808329137118e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.690921640710922e-03
   ChemicalSystem::calculateState - cyc = 50 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 50 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.867244012387138e-05
 
@@ -2918,22 +2099,6 @@ Controller::doCycle => normal end - cyc = 50 (i = 49)
 
   KineticController::calculateKineticStep - cyc = 51 :  hyd_time = 2.537254971920625e+00   hydTimeIni_ = 2.399999998080000e+00   timestep = 1.372549738406255e-01
   KineticController::calculateKineticStep - cyc = 51 :  scaledCementMass = 9.066789618141645e+01   totalDOR = 5.721120305868174e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.548585277234647e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000001893749952e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -4.642461601999556e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.163140395648435e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.491909528223819e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.424722048879266e-03
   ChemicalSystem::calculateState - cyc = 51 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 51 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.870895719578880e-05
 
@@ -2975,22 +2140,6 @@ Controller::doCycle => normal end - cyc = 51 (i = 50)
 
   KineticController::calculateKineticStep - cyc = 52 :  hyd_time = 2.793380469112688e+00   hydTimeIni_ = 2.537254971920625e+00   timestep = 2.561254971920626e-01
   KineticController::calculateKineticStep - cyc = 52 :  scaledCementMass = 9.026470786666687e+01   totalDOR = 6.140366193566922e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.542852583691647e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.000036122986908e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = -1.186526534405158e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.419092269917665e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.492356480923635e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.065411991182715e-03
   ChemicalSystem::calculateState - cyc = 52 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 52 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.878343358274116e-05
 
@@ -3032,22 +2181,6 @@ Controller::doCycle => normal end - cyc = 52 (i = 51)
 
   KineticController::calculateKineticStep - cyc = 53 :  hyd_time = 3.075118516023957e+00   hydTimeIni_ = 2.793380469112688e+00   timestep = 2.817380469112689e-01
   KineticController::calculateKineticStep - cyc = 53 :  scaledCementMass = 8.952240067346020e+01   totalDOR = 6.912236872295259e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.523529417557069e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999999585269289e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.869821291692894e-12
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.939432515279691e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.492240128261810e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.350918501613046e-03
   ChemicalSystem::calculateState - cyc = 53 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 53 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.887949925760654e-05
 
@@ -3089,22 +2222,6 @@ Controller::doCycle => normal end - cyc = 53 (i = 52)
 
   KineticController::calculateKineticStep - cyc = 54 :  hyd_time = 3.385030367626352e+00   hydTimeIni_ = 3.075118516023957e+00   timestep = 3.099118516023958e-01
   KineticController::calculateKineticStep - cyc = 54 :  scaledCementMass = 8.872608590448573e+01   totalDOR = 7.740266058641286e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.509482603680920e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.999992132428288e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.739415047008556e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.382600420018976e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.492482376411233e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.599146571567706e-03
   ChemicalSystem::calculateState - cyc = 54 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 54 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.900019407595650e-05
 
@@ -3146,22 +2263,6 @@ Controller::doCycle => normal end - cyc = 54 (i = 53)
 
   KineticController::calculateKineticStep - cyc = 55 :  hyd_time = 3.725933404388988e+00   hydTimeIni_ = 3.385030367626352e+00   timestep = 3.409030367626351e-01
   KineticController::calculateKineticStep - cyc = 55 :  scaledCementMass = 8.787597356588388e+01   totalDOR = 8.624235382658400e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.504192722460026e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.997945269324329e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.908468631577480e-08
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.866173074465281e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 9.490809076834696e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.866933093047601e-03
   ChemicalSystem::calculateState - cyc = 55 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 55 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.914025095590327e-05
 
@@ -3203,22 +2304,6 @@ Controller::doCycle => normal end - cyc = 55 (i = 54)
 
   KineticController::calculateKineticStep - cyc = 56 :  hyd_time = 4.100926744827887e+00   hydTimeIni_ = 3.725933404388988e+00   timestep = 3.749933404388992e-01
   KineticController::calculateKineticStep - cyc = 56 :  scaledCementMass = 8.697034425562832e+01   totalDOR = 9.565932724110157e-02
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.484417169881006e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 6.568157490124942e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.752319572742957e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.482540068115675e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 6.234450775925175e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.246319556849840e-03
   ChemicalSystem::calculateState - cyc = 56 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 56 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.929393168418687e-05
 
@@ -3262,22 +2347,6 @@ Controller::doCycle => normal end - cyc = 56 (i = 55)
 
   KineticController::calculateKineticStep - cyc = 57 :  hyd_time = 4.513419419310676e+00   hydTimeIni_ = 4.100926744827887e+00   timestep = 4.124926744827890e-01
   KineticController::calculateKineticStep - cyc = 57 :  scaledCementMass = 8.601016649740454e+01   totalDOR = 1.056435098641803e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.482384139519902e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.310368571498075e-01
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.641255681712907e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.227675492504170e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 1.243607234558729e-02
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.525155076688281e-04
   ChemicalSystem::calculateState - cyc = 57 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 57 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.945314372112926e-05
 
@@ -3325,22 +2394,6 @@ Controller::doCycle => normal end - cyc = 57 (i = 56)
 
   KineticController::calculateKineticStep - cyc = 58 :  hyd_time = 4.967161361241743e+00   hydTimeIni_ = 4.513419419310676e+00   timestep = 4.537419419310673e-01
   KineticController::calculateKineticStep - cyc = 58 :  scaledCementMass = 8.499582147299824e+01   totalDOR = 1.161909380666606e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.460279268940911e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.704241605699598e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.834900565131069e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.722116223957726e-02 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.515484253391799e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.005666157503613e-04
   ChemicalSystem::calculateState - cyc = 58 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 58 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.962204490552195e-05
 
@@ -3386,22 +2439,6 @@ Controller::doCycle => normal end - cyc = 58 (i = 57)
 
   KineticController::calculateKineticStep - cyc = 59 :  hyd_time = 5.466277497365917e+00   hydTimeIni_ = 4.967161361241743e+00   timestep = 4.991161361241740e-01
   KineticController::calculateKineticStep - cyc = 59 :  scaledCementMass = 8.392710829107796e+01   totalDOR = 1.273037007698110e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.322695001036221e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.704879479306465e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.340832764777618e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.075611630617575e-03 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.516220822948996e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.273849552707730e-05
   ChemicalSystem::calculateState - cyc = 59 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 59 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.980026998476141e-05
 
@@ -3447,22 +2484,6 @@ Controller::doCycle => normal end - cyc = 59 (i = 58)
 
   KineticController::calculateKineticStep - cyc = 60 :  hyd_time = 6.015305247102509e+00   hydTimeIni_ = 5.466277497365917e+00   timestep = 5.490277497365916e-01
   KineticController::calculateKineticStep - cyc = 60 :  scaledCementMass = 8.280419217459914e+01   totalDOR = 1.389800799415831e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.123140714480398e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.705532961450185e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.624229765096040e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.012916446593761e-04 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.516979849682355e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.458110606035954e-07
   ChemicalSystem::calculateState - cyc = 60 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 60 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 7.998621903259724e-05
 
@@ -3506,22 +2527,6 @@ Controller::doCycle => normal end - cyc = 60 (i = 59)
 
   KineticController::calculateKineticStep - cyc = 61 :  hyd_time = 6.619235771812760e+00   hydTimeIni_ = 6.015305247102509e+00   timestep = 6.039305247102513e-01
   KineticController::calculateKineticStep - cyc = 61 :  scaledCementMass = 8.162761831303669e+01   totalDOR = 1.512144065574290e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.539774938103091e-01 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.706231987275386e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.529354192843460e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.008185585994095e-04 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.517790091213198e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.432618267010620e-07
   ChemicalSystem::calculateState - cyc = 61 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 61 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.017993110536208e-05
 
@@ -3567,22 +2572,6 @@ Controller::doCycle => normal end - cyc = 61 (i = 60)
 
   KineticController::calculateKineticStep - cyc = 62 :  hyd_time = 7.283559348994036e+00   hydTimeIni_ = 6.619235771812760e+00   timestep = 6.643235771812757e-01
   KineticController::calculateKineticStep - cyc = 62 :  scaledCementMass = 8.039831671992792e+01   totalDOR = 1.639970100902836e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.948520381638428e-02 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.706972003200339e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.213426419558364e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.008148103344681e-04 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.518647062290153e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.432416240162205e-07
   ChemicalSystem::calculateState - cyc = 62 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 62 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.038124566555217e-05
 
@@ -3628,22 +2617,6 @@ Controller::doCycle => normal end - cyc = 62 (i = 61)
 
   KineticController::calculateKineticStep - cyc = 63 :  hyd_time = 8.014315283893440e+00   hydTimeIni_ = 7.283559348994036e+00   timestep = 7.307559348994044e-01
   KineticController::calculateKineticStep - cyc = 63 :  scaledCementMass = 7.911759710206928e+01   totalDOR = 1.773142718620150e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.830463434992245e-02 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.707746235874020e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.016423365962423e-04
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.921748025865786e-09 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.268807151448015e-11
   ChemicalSystem::calculateState - cyc = 63 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 63 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.058983079692645e-05
 
@@ -3687,22 +2660,6 @@ Controller::doCycle => normal end - cyc = 63 (i = 62)
 
   KineticController::calculateKineticStep - cyc = 64 :  hyd_time = 8.818146812282784e+00   hydTimeIni_ = 8.014315283893440e+00   timestep = 8.038315283893436e-01
   KineticController::calculateKineticStep - cyc = 64 :  scaledCementMass = 7.778763571446797e+01   totalDOR = 1.911435625967000e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.988158646182444e-03 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.708556789984586e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.073051840462181e-05
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.224689763052912e-13 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.354310196348540e-15
   ChemicalSystem::calculateState - cyc = 64 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 64 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.080488804626555e-05
 
@@ -3746,22 +2703,6 @@ Controller::doCycle => normal end - cyc = 64 (i = 63)
 
   KineticController::calculateKineticStep - cyc = 65 :  hyd_time = 9.702361493511063e+00   hydTimeIni_ = 8.818146812282784e+00   timestep = 8.842146812282792e-01
   KineticController::calculateKineticStep - cyc = 65 :  scaledCementMass = 7.641361661425819e+01   totalDOR = 2.054309770953137e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.348012140065138e-07 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.709391570788978e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.431742806221447e-10
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.891188475036228e-17 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.635723867148979e-19
   ChemicalSystem::calculateState - cyc = 65 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 65 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.102489724650523e-05
 
@@ -3803,22 +2744,6 @@ Controller::doCycle => normal end - cyc = 65 (i = 64)
 
   KineticController::calculateKineticStep - cyc = 66 :  hyd_time = 1.067499764286217e+01   hydTimeIni_ = 9.702361493511063e+00   timestep = 9.726361493511071e-01
   KineticController::calculateKineticStep - cyc = 66 :  scaledCementMass = 7.499708623105870e+01   totalDOR = 2.201604351731244e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.845002780202675e-11 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.710257017061971e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.625428877671070e-14
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.843360168779524e-21 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.071078671084514e-23
   ChemicalSystem::calculateState - cyc = 66 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 66 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.124876511757138e-05
 
@@ -3860,22 +2785,6 @@ Controller::doCycle => normal end - cyc = 66 (i = 65)
 
   KineticController::calculateKineticStep - cyc = 67 :  hyd_time = 1.174489740714839e+01   hydTimeIni_ = 1.067499764286217e+01   timestep = 1.069899764286218e+00
   KineticController::calculateKineticStep - cyc = 67 :  scaledCementMass = 7.353991126868259e+01   totalDOR = 2.353125263495068e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.449751984187427e-15 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.711153661013348e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.206077636759887e-18
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.020005763906198e-25 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.627396145431933e-27
   ChemicalSystem::calculateState - cyc = 67 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 67 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.147540514710514e-05
 
@@ -3917,22 +2826,6 @@ Controller::doCycle => normal end - cyc = 67 (i = 66)
 
   KineticController::calculateKineticStep - cyc = 68 :  hyd_time = 1.199999999040000e+01   hydTimeIni_ = 1.174489740714839e+01   timestep = 2.551025832516114e-01
   KineticController::calculateKineticStep - cyc = 68 :  scaledCementMass = 7.204420079676947e+01   totalDOR = 2.508653199597827e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.139174877245712e-19 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.712082818679498e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.090790915338805e-22
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.373036721386143e-29 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.278762729365503e-31
   ChemicalSystem::calculateState - cyc = 68 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 68 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.152489150234908e-05
 
@@ -3974,22 +2867,6 @@ Controller::doCycle => normal end - cyc = 68 (i = 67)
 
   KineticController::calculateKineticStep - cyc = 69 :  hyd_time = 1.292178714786323e+01   hydTimeIni_ = 1.199999999040000e+01   timestep = 9.217871574632266e-01
   KineticController::calculateKineticStep - cyc = 69 :  scaledCementMass = 7.171213178446919e+01   totalDOR = 2.543182614946966e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.951320054065278e-24 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.712290503219515e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.214429904663593e-26
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.864666401749956e-33 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.004816265913115e-35
   ChemicalSystem::calculateState - cyc = 69 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 69 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.170014940910993e-05
 
@@ -4031,22 +2908,6 @@ Controller::doCycle => normal end - cyc = 69 (i = 68)
 
   KineticController::calculateKineticStep - cyc = 70 :  hyd_time = 1.421636586264955e+01   hydTimeIni_ = 1.292178714786323e+01   timestep = 1.294578714786322e+00
   KineticController::calculateKineticStep - cyc = 70 :  scaledCementMass = 7.053108013926841e+01   totalDOR = 2.665991492907083e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.033698891257109e-28 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.713033920181192e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.525809609120565e-30
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.465203112315998e-37 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.895567371943560e-40
   ChemicalSystem::calculateState - cyc = 70 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 70 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.192911051212085e-05
 
@@ -4088,22 +2949,6 @@ Controller::doCycle => normal end - cyc = 70 (i = 69)
 
   KineticController::calculateKineticStep - cyc = 71 :  hyd_time = 1.564040244891450e+01   hydTimeIni_ = 1.421636586264955e+01   timestep = 1.424036586264954e+00
   KineticController::calculateKineticStep - cyc = 71 :  scaledCementMass = 6.896363191897096e+01   totalDOR = 2.828978910076792e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.526885397244082e-32 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.714030504455872e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.984710879692537e-34
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.151315944946363e-41 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.204117731737651e-44
   ChemicalSystem::calculateState - cyc = 71 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 71 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.215723426448473e-05
 
@@ -4145,22 +2990,6 @@ Controller::doCycle => normal end - cyc = 71 (i = 70)
 
   KineticController::calculateKineticStep - cyc = 72 :  hyd_time = 1.720684269380595e+01   hydTimeIni_ = 1.564040244891450e+01   timestep = 1.566440244891451e+00
   KineticController::calculateKineticStep - cyc = 72 :  scaledCementMass = 6.736481906146857e+01   totalDOR = 2.995227705289043e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.342873169085918e-36 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.715063777576815e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.559530554418255e-38
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.046721194800899e-46 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.875023543721171e-48
   ChemicalSystem::calculateState - cyc = 72 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 72 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.238560918615092e-05
 
@@ -4202,22 +3031,6 @@ Controller::doCycle => normal end - cyc = 72 (i = 71)
 
   KineticController::calculateKineticStep - cyc = 73 :  hyd_time = 1.892992696318655e+01   hydTimeIni_ = 1.720684269380595e+01   timestep = 1.723084269380596e+00
   KineticController::calculateKineticStep - cyc = 73 :  scaledCementMass = 6.574561672433857e+01   totalDOR = 3.163596652592383e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.412509217609427e-40 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.716123666302303e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.225435688354571e-42
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.108662460179221e-50 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.830658214343616e-52
   ChemicalSystem::calculateState - cyc = 73 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 73 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.261418076679039e-05
 
@@ -4259,22 +3072,6 @@ Controller::doCycle => normal end - cyc = 73 (i = 72)
 
   KineticController::calculateKineticStep - cyc = 74 :  hyd_time = 2.082531965950520e+01   hydTimeIni_ = 1.892992696318655e+01   timestep = 1.895392696318655e+00
   KineticController::calculateKineticStep - cyc = 74 :  scaledCementMass = 6.411284021114028e+01   totalDOR = 3.333377078673094e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.681455042980307e-44 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.717204344958127e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.629132424518008e-47
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.585789689396240e-54 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.010024920601185e-56
   ChemicalSystem::calculateState - cyc = 74 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 74 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.284219701193966e-05
 
@@ -4316,22 +3113,6 @@ Controller::doCycle => normal end - cyc = 74 (i = 73)
 
   KineticController::calculateKineticStep - cyc = 75 :  hyd_time = 2.291025162545573e+01   hydTimeIni_ = 2.082531965950520e+01   timestep = 2.084931965950521e+00
   KineticController::calculateKineticStep - cyc = 75 :  scaledCementMass = 6.247066870448108e+01   totalDOR = 3.504134421055531e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.107012959971281e-48 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.718313788979013e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.566304118326078e-51
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.389158527211702e-58 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.365194051694493e-60
   ChemicalSystem::calculateState - cyc = 75 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 75 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.306894333371974e-05
 
@@ -4373,22 +3154,6 @@ Controller::doCycle => normal end - cyc = 75 (i = 74)
 
   KineticController::calculateKineticStep - cyc = 76 :  hyd_time = 2.399999998080000e+01   hydTimeIni_ = 2.291025162545573e+01   timestep = 1.089748355344273e+00
   KineticController::calculateKineticStep - cyc = 76 :  scaledCementMass = 6.082321516051239e+01   totalDOR = 3.675441003666334e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.655632312430138e-52 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.719445365681325e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.945391064079497e-55
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.448878967564117e-62 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.858503849547434e-64
   ChemicalSystem::calculateState - cyc = 76 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 76 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.317577339198816e-05
 
@@ -4430,22 +3195,6 @@ Controller::doCycle => normal end - cyc = 76 (i = 75)
 
   KineticController::calculateKineticStep - cyc = 77 :  hyd_time = 2.520367678800130e+01   hydTimeIni_ = 2.399999998080000e+01   timestep = 1.203676807201301e+00
   KineticController::calculateKineticStep - cyc = 77 :  scaledCementMass = 6.003979763531419e+01   totalDOR = 3.756902832736074e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.300949925813521e-56 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.719989492415998e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.671723028449330e-59
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.710033383201247e-66 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.460360749811653e-68
   ChemicalSystem::calculateState - cyc = 77 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 77 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.328798458559582e-05
 
@@ -4487,22 +3236,6 @@ Controller::doCycle => normal end - cyc = 77 (i = 76)
 
   KineticController::calculateKineticStep - cyc = 78 :  hyd_time = 2.772644446680143e+01   hydTimeIni_ = 2.520367678800130e+01   timestep = 2.522767678800129e+00
   KineticController::calculateKineticStep - cyc = 78 :  scaledCementMass = 5.921315309043863e+01   totalDOR = 3.842859521794122e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.022250349167199e-60 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.720581186409304e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.670910072201148e-63
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.129469026642108e-70 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.147510950870389e-72
   ChemicalSystem::calculateState - cyc = 78 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 78 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.351083772475398e-05
 
@@ -4546,22 +3279,6 @@ Controller::doCycle => normal end - cyc = 78 (i = 77)
 
   KineticController::calculateKineticStep - cyc = 79 :  hyd_time = 3.050148891348157e+01   hydTimeIni_ = 2.772644446680143e+01   timestep = 2.775044446680145e+00
   KineticController::calculateKineticStep - cyc = 79 :  scaledCementMass = 5.756314532537335e+01   totalDOR = 4.014431699079137e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.032559560038367e-65 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 3.721695929620408e-04
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.884498909827058e-67
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.673277666443913e-74 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.016822607272159e-77
   ChemicalSystem::calculateState - cyc = 79 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 79 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.373021175715051e-05
 
@@ -4605,22 +3322,6 @@ Controller::doCycle => normal end - cyc = 79 (i = 78)
 
   KineticController::calculateKineticStep - cyc = 80 :  hyd_time = 3.355403780482973e+01   hydTimeIni_ = 3.050148891348157e+01   timestep = 3.052548891348160e+00
   KineticController::calculateKineticStep - cyc = 80 :  scaledCementMass = 5.591964626848669e+01   totalDOR = 4.185327083650104e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.311762391485432e-69 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.322169348484577e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.267354710363805e-71
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.314815155323012e-78 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.085168979811983e-81
   ChemicalSystem::calculateState - cyc = 80 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 80 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.394037922960634e-05
 
@@ -4662,22 +3363,6 @@ Controller::doCycle => normal end - cyc = 80 (i = 79)
 
   KineticController::calculateKineticStep - cyc = 81 :  hyd_time = 3.691184158531271e+01   hydTimeIni_ = 3.355403780482973e+01   timestep = 3.357803780482975e+00
   KineticController::calculateKineticStep - cyc = 81 :  scaledCementMass = 5.428607176623239e+01   totalDOR = 4.355190486746249e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.959607730114311e-73 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.323835485855098e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.781624377605512e-75
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.033145261743098e-82 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.567329164488993e-85
   ChemicalSystem::calculateState - cyc = 81 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 81 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.414716649416782e-05
 
@@ -4719,22 +3404,6 @@ Controller::doCycle => normal end - cyc = 81 (i = 80)
 
   KineticController::calculateKineticStep - cyc = 82 :  hyd_time = 4.060542574384398e+01   hydTimeIni_ = 3.691184158531271e+01   timestep = 3.693584158531273e+00
   KineticController::calculateKineticStep - cyc = 82 :  scaledCementMass = 5.266941675275462e+01   totalDOR = 4.523294556589910e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.897122120723673e-77 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.325370516132344e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.399950970594673e-79
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.118168759623007e-87 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.374652759035850e-89
   ChemicalSystem::calculateState - cyc = 82 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 82 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.435057677551692e-05
 
@@ -4776,22 +3445,6 @@ Controller::doCycle => normal end - cyc = 82 (i = 81)
 
   KineticController::calculateKineticStep - cyc = 83 :  hyd_time = 4.466836831822838e+01   hydTimeIni_ = 4.060542574384398e+01   timestep = 4.062942574384401e+00
   KineticController::calculateKineticStep - cyc = 83 :  scaledCementMass = 5.107428040630972e+01   totalDOR = 4.689161058445547e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.062250413801119e-81 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.326870621646495e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.100042604634749e-83
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.379031724786325e-91 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.437480737479719e-93
   ChemicalSystem::calculateState - cyc = 83 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 83 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.455032191985226e-05
 
@@ -4833,22 +3486,6 @@ Controller::doCycle => normal end - cyc = 83 (i = 82)
 
   KineticController::calculateKineticStep - cyc = 84 :  hyd_time = 4.913760515005122e+01   hydTimeIni_ = 4.466836831822838e+01   timestep = 4.469236831822840e+00
   KineticController::calculateKineticStep - cyc = 84 :  scaledCementMass = 4.950342905628430e+01   totalDOR = 4.852502342057204e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.406231394946331e-85 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.328359732735142e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.643829373852510e-88
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.012466105437313e-95 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.701076970312121e-97
   ChemicalSystem::calculateState - cyc = 84 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 84 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.474614553123862e-05
 
@@ -4890,22 +3527,6 @@ Controller::doCycle => normal end - cyc = 84 (i = 83)
 
   KineticController::calculateKineticStep - cyc = 85 :  hyd_time = 5.405376566505635e+01   hydTimeIni_ = 4.913760515005122e+01   timestep = 4.916160515005124e+00
   KineticController::calculateKineticStep - cyc = 85 :  scaledCementMass = 4.795930540299577e+01   totalDOR = 5.013064408976643e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.890749855051337e-89 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.329827438864785e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.792081138227984e-92
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.938656765184766e-99 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.122431325942391e-101
   ChemicalSystem::calculateState - cyc = 85 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 85 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.493784202018287e-05
 
@@ -4947,22 +3568,6 @@ Controller::doCycle => normal end - cyc = 85 (i = 84)
 
   KineticController::calculateKineticStep - cyc = 86 :  hyd_time = 5.946154223156198e+01   hydTimeIni_ = 5.405376566505635e+01   timestep = 5.407776566505632e+00
   KineticController::calculateKineticStep - cyc = 86 :  scaledCementMass = 4.644403355228408e+01   totalDOR = 5.170626389053150e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.485698766080803e-93 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.331274536890496e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.337028787065197e-96
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.094887184794697e-103 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.667747636536635e-105
   ChemicalSystem::calculateState - cyc = 86 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 86 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.512524792195835e-05
 
@@ -5004,22 +3609,6 @@ Controller::doCycle => normal end - cyc = 86 (i = 85)
 
   KineticController::calculateKineticStep - cyc = 87 :  hyd_time = 6.541009645471817e+01   hydTimeIni_ = 5.946154223156198e+01   timestep = 5.948554223156194e+00
   KineticController::calculateKineticStep - cyc = 87 :  scaledCementMass = 4.495942864017272e+01   totalDOR = 5.324999539635805e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.167420860901819e-97 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.332705327084989e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.193689047493295e-100
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.431876463893171e-107 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.310469811285205e-109
   ChemicalSystem::calculateState - cyc = 87 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 87 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.530822852304196e-05
 
@@ -5061,22 +3650,6 @@ Controller::doCycle => normal end - cyc = 87 (i = 86)
 
   KineticController::calculateKineticStep - cyc = 88 :  hyd_time = 7.195350610018998e+01   hydTimeIni_ = 6.541009645471817e+01   timestep = 6.543409645471812e+00
   KineticController::calculateKineticStep - cyc = 88 :  scaledCementMass = 4.350701015941146e+01   totalDOR = 5.476025859844271e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.173269155119030e-102 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.334111881366273e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.295284423868565e-104
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.910901038555907e-111 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.029730810985416e-113
   ChemicalSystem::calculateState - cyc = 88 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 88 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.548669208846096e-05
 
@@ -5118,22 +3691,6 @@ Controller::doCycle => normal end - cyc = 88 (i = 87)
 
   KineticController::calculateKineticStep - cyc = 89 :  hyd_time = 7.199999994240000e+01   hydTimeIni_ = 7.195350610018998e+01   timestep = 4.649384221001185e-02
   KineticController::calculateKineticStep - cyc = 89 :  scaledCementMass = 4.208801813469547e+01   totalDOR = 5.623576408626665e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.208100335576855e-106 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.335496906716429e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.589343013701318e-108
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.501533006865126e-115 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.091338953110106e-118
   ChemicalSystem::calculateState - cyc = 89 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 89 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.548781285380971e-05
 
@@ -5175,22 +3732,6 @@ Controller::doCycle => normal end - cyc = 89 (i = 88)
 
   KineticController::calculateKineticStep - cyc = 90 :  hyd_time = 7.915125671020898e+01   hydTimeIni_ = 7.199999994240000e+01   timestep = 7.151256767808988e+00
   KineticController::calculateKineticStep - cyc = 90 :  scaledCementMass = 4.207907440175218e+01   totalDOR = 5.624506401664653e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.663925212392724e-110 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.335504246765664e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.034633883391687e-112
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.179862967895637e-119 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.357949607379885e-122
   ChemicalSystem::calculateState - cyc = 90 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 90 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.566043199485946e-05
 
@@ -5232,22 +3773,6 @@ Controller::doCycle => normal end - cyc = 90 (i = 89)
 
   KineticController::calculateKineticStep - cyc = 91 :  hyd_time = 8.706878238122988e+01   hydTimeIni_ = 7.915125671020898e+01   timestep = 7.917525671020897e+00
   KineticController::calculateKineticStep - cyc = 91 :  scaledCementMass = 4.070448797552075e+01   totalDOR = 5.767439538713025e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.450555252850908e-114 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.336851104126494e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.598758818951165e-116
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.271035779079232e-124 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.995900362627157e-126
   ChemicalSystem::calculateState - cyc = 91 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 91 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.582970210581302e-05
 
@@ -5289,22 +3814,6 @@ Controller::doCycle => normal end - cyc = 91 (i = 90)
 
   KineticController::calculateKineticStep - cyc = 92 :  hyd_time = 9.577806061935287e+01   hydTimeIni_ = 8.706878238122988e+01   timestep = 8.709278238122991e+00
   KineticController::calculateKineticStep - cyc = 92 :  scaledCementMass = 3.935491640668246e+01   totalDOR = 5.907771564640416e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.497122810756740e-118 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.338181761346966e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.256260294539475e-120
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.284922635572544e-128 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.925639864198891e-130
   ChemicalSystem::calculateState - cyc = 92 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 92 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.599433174607305e-05
 
@@ -5346,22 +3855,6 @@ Controller::doCycle => normal end - cyc = 92 (i = 91)
 
   KineticController::calculateKineticStep - cyc = 93 :  hyd_time = 1.053582666812882e+02   hydTimeIni_ = 9.577806061935287e+01   timestep = 9.580206061935286e+00
   KineticController::calculateKineticStep - cyc = 93 :  scaledCementMass = 3.804101742091193e+01   totalDOR = 6.044394260905305e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.747942056371728e-122 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.339484409562041e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.871344629442065e-125
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.724290043841030e-132 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.084658865230772e-134
   ChemicalSystem::calculateState - cyc = 93 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 93 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.615432908677704e-05
 
@@ -5403,22 +3896,6 @@ Controller::doCycle => normal end - cyc = 93 (i = 92)
 
   KineticController::calculateKineticStep - cyc = 94 :  hyd_time = 1.158964933494170e+02   hydTimeIni_ = 1.053582666812882e+02   timestep = 1.053822666812881e+01
   KineticController::calculateKineticStep - cyc = 94 :  scaledCementMass = 3.676310449211144e+01   totalDOR = 6.177275031661130e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.159256610019505e-126 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.340757499617609e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.756628562444564e-129
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.497988262224318e-136 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.423839334224957e-138
   ChemicalSystem::calculateState - cyc = 94 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 94 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.630971785446724e-05
 
@@ -5460,22 +3937,6 @@ Controller::doCycle => normal end - cyc = 94 (i = 93)
 
   KineticController::calculateKineticStep - cyc = 95 :  hyd_time = 1.274885426843587e+02   hydTimeIni_ = 1.158964933494170e+02   timestep = 1.159204933494169e+01
   KineticController::calculateKineticStep - cyc = 95 :  scaledCementMass = 3.552131062675463e+01   totalDOR = 6.306400046542507e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.696683922829492e-130 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.342000444184682e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.094943387574070e-133
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.534394353213455e-140 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.904585685100242e-142
   ChemicalSystem::calculateState - cyc = 95 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 95 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.646054681501033e-05
 
@@ -5517,22 +3978,6 @@ Controller::doCycle => normal end - cyc = 95 (i = 94)
 
   KineticController::calculateKineticStep - cyc = 96 :  hyd_time = 1.402397969527945e+02   hydTimeIni_ = 1.274885426843587e+02   timestep = 1.275125426843587e+01
   KineticController::calculateKineticStep - cyc = 96 :  scaledCementMass = 3.431560805520220e+01   totalDOR = 6.431772193110077e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.333207142046017e-134 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.343214548187381e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.789237309799849e-137
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.777229000115202e-144 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.496570577376435e-146
   ChemicalSystem::calculateState - cyc = 96 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 96 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.660686699683385e-05
 
@@ -5574,22 +4019,6 @@ Controller::doCycle => normal end - cyc = 96 (i = 95)
 
   KineticController::calculateKineticStep - cyc = 97 :  hyd_time = 1.542661766480740e+02   hydTimeIni_ = 1.402397969527945e+02   timestep = 1.402637969527945e+01
   KineticController::calculateKineticStep - cyc = 97 :  scaledCementMass = 3.314582707973290e+01   totalDOR = 6.553409116982319e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.047597174515769e-138 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.344398215159418e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.763249723372423e-141
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.182269477673950e-148 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.175963628515330e-150
   ChemicalSystem::calculateState - cyc = 97 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 97 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.674875002872992e-05
 
@@ -5631,22 +4060,6 @@ Controller::doCycle => normal end - cyc = 97 (i = 96)
 
   KineticController::calculateKineticStep - cyc = 98 :  hyd_time = 1.679999998656000e+02   hydTimeIni_ = 1.542661766480740e+02   timestep = 1.373382321752601e+01
   KineticController::calculateKineticStep - cyc = 98 :  scaledCementMass = 3.201167388834703e+01   totalDOR = 6.671341369509096e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.231727879654152e-143 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.345552909574844e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.957057161481133e-145
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.714766795604464e-152 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.240395852330726e-155
   ChemicalSystem::calculateState - cyc = 98 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 98 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.687115889747678e-05
 
@@ -5688,22 +4101,6 @@ Controller::doCycle => normal end - cyc = 98 (i = 97)
 
   KineticController::calculateKineticStep - cyc = 99 :  hyd_time = 1.696951943128814e+02   hydTimeIni_ = 1.679999998656000e+02   timestep = 1.695194447281381e+00
   KineticController::calculateKineticStep - cyc = 99 :  scaledCementMass = 3.103348686971329e+01   totalDOR = 6.773055846332962e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.468263329938510e-147 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.346552847400530e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.323573430922093e-149
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.347416161656515e-156 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.260846631419247e-159
   ChemicalSystem::calculateState - cyc = 99 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 99 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.688466058995323e-05
 
@@ -5745,22 +4142,6 @@ Controller::doCycle => normal end - cyc = 99 (i = 98)
 
   KineticController::calculateKineticStep - cyc = 100 :  hyd_time = 1.866671137441695e+02   hydTimeIni_ = 1.696951943128814e+02   timestep = 1.697191943128814e+01
   KineticController::calculateKineticStep - cyc = 100 :  scaledCementMass = 3.092566946602260e+01   totalDOR = 6.784266985511871e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.082581824508153e-151 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.346664501082323e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.825799518511803e-153
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.058762227812553e-160 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.705371787908259e-163
   ChemicalSystem::calculateState - cyc = 100 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 100 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.701810109832328e-05
 
@@ -5802,22 +4183,6 @@ Controller::doCycle => normal end - cyc = 100 (i = 99)
 
   KineticController::calculateKineticStep - cyc = 101 :  hyd_time = 2.053362251185865e+02   hydTimeIni_ = 1.866671137441695e+02   timestep = 1.866911137441696e+01
   KineticController::calculateKineticStep - cyc = 101 :  scaledCementMass = 2.985984725066067e+01   totalDOR = 6.895094002184212e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.993751751456013e-155 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.347759603565304e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.434662576775567e-157
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.319459770057012e-165 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.483122821711058e-167
   ChemicalSystem::calculateState - cyc = 101 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 101 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.714733379843160e-05
 
@@ -5859,22 +4224,6 @@ Controller::doCycle => normal end - cyc = 101 (i = 100)
 
   KineticController::calculateKineticStep - cyc = 102 :  hyd_time = 2.258722476304451e+02   hydTimeIni_ = 2.053362251185865e+02   timestep = 2.053602251185865e+01
   KineticController::calculateKineticStep - cyc = 102 :  scaledCementMass = 2.882838728551304e+01   totalDOR = 7.002347941074435e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.138179296070944e-159 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.348825735627691e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.127318026424900e-161
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.537200614777771e-169 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.522713502587555e-171
   ChemicalSystem::calculateState - cyc = 102 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 102 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.727244822387533e-05
 
@@ -5916,22 +4265,6 @@ Controller::doCycle => normal end - cyc = 102 (i = 101)
 
   KineticController::calculateKineticStep - cyc = 103 :  hyd_time = 2.484618723934896e+02   hydTimeIni_ = 2.258722476304451e+02   timestep = 2.258962476304453e+01
   KineticController::calculateKineticStep - cyc = 103 :  scaledCementMass = 2.783062972049331e+01   totalDOR = 7.106097415142066e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.465894203538803e-163 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.349861676634275e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.858152109751521e-166
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.136750829862840e-173 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.768050511847539e-175
   ChemicalSystem::calculateState - cyc = 103 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 103 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.739355294808067e-05
 
@@ -5973,22 +4306,6 @@ Controller::doCycle => normal end - cyc = 103 (i = 102)
 
   KineticController::calculateKineticStep - cyc = 104 :  hyd_time = 2.733104596328386e+02   hydTimeIni_ = 2.484618723934896e+02   timestep = 2.484858723934897e+01
   KineticController::calculateKineticStep - cyc = 104 :  scaledCementMass = 2.686586382855703e+01   totalDOR = 7.206416327667474e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.937631234346403e-167 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.350868683543469e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.960490029004076e-170
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.036316252624835e-177 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.175057276304571e-179
   ChemicalSystem::calculateState - cyc = 104 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 104 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.751075542306568e-05
 
@@ -6030,22 +4347,6 @@ Controller::doCycle => normal end - cyc = 104 (i = 103)
 
   KineticController::calculateKineticStep - cyc = 105 :  hyd_time = 3.006439055961225e+02   hydTimeIni_ = 2.733104596328386e+02   timestep = 2.733344596328385e+01
   KineticController::calculateKineticStep - cyc = 105 :  scaledCementMass = 2.593333820699027e+01   totalDOR = 7.303382811494864e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.522536852930189e-171 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.351848063693708e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.469359845972227e-174
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.171625299886000e-181 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.709099647913517e-183
   ChemicalSystem::calculateState - cyc = 105 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 105 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.777873791789500e-05
 
@@ -6087,22 +4388,6 @@ Controller::doCycle => normal end - cyc = 105 (i = 104)
 
   KineticController::calculateKineticStep - cyc = 106 :  hyd_time = 3.307106961557347e+02   hydTimeIni_ = 3.006439055961225e+02   timestep = 3.006679055961223e+01
   KineticController::calculateKineticStep - cyc = 106 :  scaledCementMass = 2.454447021438670e+01   totalDOR = 7.447800983637851e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.196367207257838e-175 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.354519042410956e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.297671061006941e-178
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.492175145179819e-185 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.342963074269443e-187
   ChemicalSystem::calculateState - cyc = 106 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 106 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.793534433752364e-05
 
@@ -6144,22 +4429,6 @@ Controller::doCycle => normal end - cyc = 106 (i = 105)
 
   KineticController::calculateKineticStep - cyc = 107 :  hyd_time = 3.359999997312000e+02   hydTimeIni_ = 3.307106961557347e+02   timestep = 5.289303575465283e+00
   KineticController::calculateKineticStep - cyc = 107 :  scaledCementMass = 2.352594644616959e+01   totalDOR = 7.553709782511068e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.400721511911717e-180 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.355959686684065e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.376990601962018e-182
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.958282068968013e-189 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.055263115320994e-191
   ChemicalSystem::calculateState - cyc = 107 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 107 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.795612644709158e-05
 
@@ -6201,22 +4470,6 @@ Controller::doCycle => normal end - cyc = 107 (i = 106)
 
   KineticController::calculateKineticStep - cyc = 108 :  hyd_time = 3.637841657713082e+02   hydTimeIni_ = 3.359999997312000e+02   timestep = 2.778416604010818e+01
   KineticController::calculateKineticStep - cyc = 108 :  scaledCementMass = 2.337946549254718e+01   totalDOR = 7.568941260008260e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.386826085535932e-184 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.356144404173356e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.653545495086273e-186
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.538763705696512e-193 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 8.291964715133706e-196
   ChemicalSystem::calculateState - cyc = 108 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 108 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.805899082060104e-05
 
@@ -6258,22 +4511,6 @@ Controller::doCycle => normal end - cyc = 108 (i = 107)
 
   KineticController::calculateKineticStep - cyc = 109 :  hyd_time = 4.001649823484390e+02   hydTimeIni_ = 3.637841657713082e+02   timestep = 3.638081657713082e+01
   KineticController::calculateKineticStep - cyc = 109 :  scaledCementMass = 2.263865757029009e+01   totalDOR = 7.645972429717094e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.804362946909359e-188 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.357052174614542e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.085082390929693e-190
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.209117817851775e-197 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.515595763631679e-200
   ChemicalSystem::calculateState - cyc = 109 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 109 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.816987038135687e-05
 
@@ -6315,22 +4552,6 @@ Controller::doCycle => normal end - cyc = 109 (i = 108)
 
   KineticController::calculateKineticStep - cyc = 110 :  hyd_time = 4.401838805832829e+02   hydTimeIni_ = 4.001649823484390e+02   timestep = 4.001889823484390e+01
   KineticController::calculateKineticStep - cyc = 110 :  scaledCementMass = 2.179981579663411e+01   totalDOR = 7.733197418926816e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.560907327359930e-192 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.358008027985889e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.638399862642690e-194
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 9.500912271549108e-202 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.119774337386401e-204
   ChemicalSystem::calculateState - cyc = 110 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 110 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.821904558079073e-05
 
@@ -6372,22 +4593,6 @@ Controller::doCycle => normal end - cyc = 110 (i = 109)
 
   KineticController::calculateKineticStep - cyc = 111 :  hyd_time = 4.842046686416111e+02   hydTimeIni_ = 4.401838805832829e+02   timestep = 4.402078805832826e+01
   KineticController::calculateKineticStep - cyc = 111 :  scaledCementMass = 2.084177400392326e+01   totalDOR = 7.832817141806688e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.583834408536055e-196 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.359141841571909e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.287409128929249e-198
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 7.465553204074798e-206 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.022976595949870e-208
   ChemicalSystem::calculateState - cyc = 111 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 111 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.829422407440926e-05
 
@@ -6429,22 +4634,6 @@ Controller::doCycle => normal end - cyc = 111 (i = 110)
 
   KineticController::calculateKineticStep - cyc = 112 :  hyd_time = 5.326275355057722e+02   hydTimeIni_ = 4.842046686416111e+02   timestep = 4.842286686416111e+01
   KineticController::calculateKineticStep - cyc = 112 :  scaledCementMass = 2.004288800037424e+01   totalDOR = 7.915887424221999e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.816077623581451e-200 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.360002572516024e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.011610357166418e-202
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.866224531908457e-210 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.161143367858350e-212
   ChemicalSystem::calculateState - cyc = 112 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 112 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.837368703877834e-05
 
@@ -6486,22 +4675,6 @@ Controller::doCycle => normal end - cyc = 112 (i = 111)
 
   KineticController::calculateKineticStep - cyc = 113 :  hyd_time = 5.858926890563495e+02   hydTimeIni_ = 5.326275355057722e+02   timestep = 5.326515355057722e+01
   KineticController::calculateKineticStep - cyc = 113 :  scaledCementMass = 1.931757488146884e+01   totalDOR = 7.991307403241953e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.212795647909291e-204 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.360742754502932e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.948953390866378e-207
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.609516444137288e-214 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.483938733875585e-216
   ChemicalSystem::calculateState - cyc = 113 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 113 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.845312118603378e-05
 
@@ -6543,22 +4716,6 @@ Controller::doCycle => normal end - cyc = 113 (i = 112)
 
   KineticController::calculateKineticStep - cyc = 114 :  hyd_time = 6.444843579619844e+02   hydTimeIni_ = 5.858926890563495e+02   timestep = 5.859166890563495e+01
   KineticController::calculateKineticStep - cyc = 114 :  scaledCementMass = 1.864334585275409e+01   totalDOR = 8.061415523272998e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.738753413046562e-208 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.361403653731178e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 6.246066938486229e-211
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.622030103552749e-218 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.951810125533009e-220
   ChemicalSystem::calculateState - cyc = 114 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 114 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.853104786321323e-05
 
@@ -6600,22 +4757,6 @@ Controller::doCycle => normal end - cyc = 114 (i = 113)
 
   KineticController::calculateKineticStep - cyc = 115 :  hyd_time = 6.719999994624000e+02   hydTimeIni_ = 6.444843579619844e+02   timestep = 2.751564150041554e+01
   KineticController::calculateKineticStep - cyc = 115 :  scaledCementMass = 1.800952540779265e+01   totalDOR = 8.127321851747450e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.366264179992187e-212 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.362007515525351e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.907986033652829e-215
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.846090740760486e-222 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.533678232147570e-224
   ChemicalSystem::calculateState - cyc = 115 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 115 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.856342552268973e-05
 
@@ -6657,22 +4798,6 @@ Controller::doCycle => normal end - cyc = 115 (i = 114)
 
   KineticController::calculateKineticStep - cyc = 116 :  hyd_time = 7.798311131340012e+02   hydTimeIni_ = 6.719999994624000e+02   timestep = 1.078311136716012e+02
   KineticController::calculateKineticStep - cyc = 116 :  scaledCementMass = 1.775112010826087e+01   totalDOR = 8.154191519152257e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.073572477571169e-216 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.362251285878547e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.856559213851189e-219
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.236379122497430e-226 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.205121793863506e-228
   ChemicalSystem::calculateState - cyc = 116 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 116 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.868356723414350e-05
 
@@ -6714,22 +4839,6 @@ Controller::doCycle => normal end - cyc = 116 (i = 115)
 
   KineticController::calculateKineticStep - cyc = 117 :  hyd_time = 8.578166244474013e+02   hydTimeIni_ = 7.798311131340012e+02   timestep = 7.798551131340014e+01
   KineticController::calculateKineticStep - cyc = 117 :  scaledCementMass = 1.681747276301201e+01   totalDOR = 8.251274642778880e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.435834602681957e-221 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.363097305270593e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.030377179035225e-223
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.757284652915172e-230 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.469512623982096e-233
   ChemicalSystem::calculateState - cyc = 117 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 117 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.875414651998528e-05
 
@@ -6771,22 +4880,6 @@ Controller::doCycle => normal end - cyc = 117 (i = 116)
 
   KineticController::calculateKineticStep - cyc = 118 :  hyd_time = 9.436006868921414e+02   hydTimeIni_ = 8.578166244474013e+02   timestep = 8.578406244474013e+01
   KineticController::calculateKineticStep - cyc = 118 :  scaledCementMass = 1.627743276750292e+01   totalDOR = 8.307429431751537e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.628644728747595e-225 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.363585477297251e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.381186278790983e-227
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.380825514022275e-234 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 7.440880232385258e-237
   ChemicalSystem::calculateState - cyc = 118 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 118 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.882233707351665e-05
 
@@ -6828,22 +4921,6 @@ Controller::doCycle => normal end - cyc = 118 (i = 117)
 
   KineticController::calculateKineticStep - cyc = 119 :  hyd_time = 1.037963155581356e+03   hydTimeIni_ = 9.436006868921414e+02   timestep = 9.436246868921410e+01
   KineticController::calculateKineticStep - cyc = 119 :  scaledCementMass = 1.576141918198764e+01   totalDOR = 8.361085890981595e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.208605076963460e-229 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.364048327969845e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.871070088274292e-231
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 1.085014369761823e-238 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 5.846837195452096e-241
   ChemicalSystem::calculateState - cyc = 119 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 119 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.888815450045168e-05
 
@@ -6885,22 +4962,6 @@ Controller::doCycle => normal end - cyc = 119 (i = 118)
 
   KineticController::calculateKineticStep - cyc = 120 :  hyd_time = 1.141761871139491e+03   hydTimeIni_ = 1.037963155581356e+03   timestep = 1.037987155581357e+02
   KineticController::calculateKineticStep - cyc = 120 :  scaledCementMass = 1.526758722626269e+01   totalDOR = 8.412435845600320e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 4.092777325976158e-233 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.364486981110233e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.470234944384193e-235
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 8.525741816287545e-243 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 4.594282413166000e-245
   ChemicalSystem::calculateState - cyc = 120 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 120 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.895573222679553e-05
 
@@ -6942,22 +5003,6 @@ Controller::doCycle => normal end - cyc = 120 (i = 119)
 
   KineticController::calculateKineticStep - cyc = 121 :  hyd_time = 1.255940458253440e+03   hydTimeIni_ = 1.141761871139491e+03   timestep = 1.141785871139491e+02
   KineticController::calculateKineticStep - cyc = 121 :  scaledCementMass = 1.481189846392866e+01   totalDOR = 8.459819569951985e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 3.215990844479619e-237 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.364828461286341e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 1.155269814607909e-239
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 6.699291322192374e-247 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 3.610059624773649e-249
   ChemicalSystem::calculateState - cyc = 121 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 121 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.902081473839146e-05
 
@@ -6999,22 +5044,6 @@ Controller::doCycle => normal end - cyc = 121 (i = 120)
 
   KineticController::calculateKineticStep - cyc = 122 :  hyd_time = 1.343999998924800e+03   hydTimeIni_ = 1.255940458253440e+03   timestep = 8.805954067135963e+01
   KineticController::calculateKineticStep - cyc = 122 :  scaledCementMass = 1.437446701242363e+01   totalDOR = 8.505304850771070e-01
-  GODZILLA: Phase Gypsum:
-      GODZILLA: dissolutionRateConst_ = 3.600000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 2.527036358937496e-241 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 5.365157338322331e-05
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 9.077789572524726e-244
-  GODZILLA: Phase Bassanite:
-      GODZILLA: dissolutionRateConst_ = 5.400000000000000e-03 mol/m2/h
-      GODZILLA: surface area = 5.264117209585504e-251 m2/(100 g solid)
-      GODZILLA: resolution = 1.000000000000000e-06 m2
-      GODZILLA: saturation index = 0.000000000000000e+00
-
-GODZILLA arrhenius factor = 1.000000000000000e+00
-GODZILLA dissrate = 2.836684670727482e-253
   ChemicalSystem::calculateState - cyc = 122 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 122 => initMicroVolume_ < microVolume_ : 7.857722490955650e-05 < 8.906473400588666e-05
 
@@ -7054,8 +5083,8 @@ Controller::doCycle => normal end - cyc = 122 (i = 121)
 
 STOP Program
 
-Thu May  8 13:52:13 2025
+Sat May 10 15:39:56 2025
 
 Total time = 2.660000000000000e+02 seconds
 
-Total time with clock = 2.651932960000000e+02 seconds
+Total time with clock = 2.658632400000000e+02 seconds

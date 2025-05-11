@@ -1,10 +1,9 @@
-THAMES simulation pyrrcem-296K-sat/pyrrcem-bleach initialized on Thu May  8 16:47:48 2025
+THAMES simulation pyrrcem-296K-sat/pyrrcem-bleach initialized on Sun May 11 15:46:27 2025
 
 
 INPUT FILES USED:
               Microstructure file name: CemPyrr.thames.img
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: pyrrox-dat.lst
 
 OUTPUT FILES GENERATED:

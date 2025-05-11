@@ -10,13 +10,13 @@ simtype = 2
 The RNG seed is                 : seedRNG = -25943
 The elementary time interval is : elemTimeInterval = 2.400e-06
 
-Thu May  8 13:33:16 2025
+Sat May 10 15:56:57 2025
 
 What is the name of the GEM input file? 
    - gemInputName      :  thames-dat.lst
 
-What is the name of the microstructure phase definition file? 
-   - micDefName        :  chemistry.json
+What is the name of the simulation parameter file? 
+   - simParamName        :  simparams.json
 JSON iterator okay so far
 
 ChemicalSystem::writeSatElectrolyteGasConditions
@@ -58,19 +58,12 @@ X size of lattice is 100
 Y size of lattice is 100
 Z size of lattice is 100
 Total number of sites is 1000000
-GODZILLA: PK phase = Alite
-GODZILLA: PK specific surface srea = 2.171195273841501e+02
-GODZILLA: PK Reference specific surface area = 3.720000000000000e+02
-GODZILLA: PK ssaFactor_ = 5.836546435057799e-01
 
 KineticController::KineticController - only these phases (controlled by the Parrot-Killoh model)
                                        contribute to initScaledCementMass_ & scaledCementMass_ :
       microPhaseID/microPhaseName/microPhaseMass :   2 / Alite           / 1.000000000000000e+02 g
 
       initScaledCementMass_ = 1.000000000000000e+02 g (same value for scaledCementMass_)
-
-What is the name of the file with output times? 
-   - timeFileName       :  time.json
 
 What shall be the root name of all output files?
    - files root name   :  alite
@@ -84,8 +77,8 @@ What shall be the root name of all output files?
 
 Controller::Controller(...) :
    final time_.size()          = 122
-   => new time values (calctime & outtime) have been used and writen as :
-         alite-298K-sealed-wc35/alite-parameters_used.json
+   => new time values (calctimes & outtimes) have been used and saved in the file :
+         alite-298K-sealed-wc35/alite-times_used.json
 
 Going into Controller::doCycle
 
@@ -2916,8 +2909,8 @@ Microstructure Exception Thrown:
 
 STOP Program
 
-Thu May  8 13:36:11 2025
+Sat May 10 15:59:55 2025
 
-Total time = 1.750000000000000e+02 seconds
+Total time = 1.780000000000000e+02 seconds
 
-Total time with clock = 1.749801390000000e+02 seconds
+Total time with clock = 1.771875390000000e+02 seconds

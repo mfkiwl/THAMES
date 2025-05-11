@@ -22,9 +22,9 @@ build/*
 doc/html/*
 doc/latex/*
 
-doc/BuildGuide/*.fdb_latexmk
-doc/BuildGuide/*.fls
-doc/BuildGuide/*.synctex.gz
+doc/InputGuide/*.fdb_latexmk
+doc/InputGuide/*.fls
+doc/InputGuide/*.synctex.gz
 
 #ignore LaTeX intermediate files
 *.aux
@@ -52,5 +52,3 @@ src/Resources/bin/*
 src/Resources/include/GEMS3K
 src/Resources/lib/*.*
 src/Resources/share/*
-
-run_work_Jeff/

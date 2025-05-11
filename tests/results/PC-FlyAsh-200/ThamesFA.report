@@ -1,10 +1,9 @@
-THAMES simulation PC-FlyAsh-200/ThamesFA initialized on Thu May  8 10:13:50 2025
+THAMES simulation PC-FlyAsh-200/ThamesFA initialized on Sat May 10 16:49:05 2025
 
 
 INPUT FILES USED:
               Microstructure file name: ThamesFA-200.img.thames
-   Microstructure definition file name: chemistry.json
-            Output frequency file name: time.json
+   Microstructure definition file name: simparams.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:

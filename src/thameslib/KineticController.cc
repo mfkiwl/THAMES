@@ -47,8 +47,8 @@ KineticController::KineticController() {
 }
 
 KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
-                                     const string &fileName, const bool verbose,
-                                     const bool warning)
+                                     const string &jsonFileName,
+                                     const bool verbose, const bool warning)
     : chemSys_(cs), lattice_(lattice) {
   ///
   /// Clear out the vectors so they can be populated with values from the
@@ -101,15 +101,15 @@ KineticController::KineticController(ChemicalSystem *cs, Lattice *lattice,
 
   string jsonext = ".json";
   size_t foundjson;
-  foundjson = fileName.find(jsonext);
+  foundjson = jsonFileName.find(jsonext);
   try {
     if (foundjson != string::npos) {
       if (verbose_) {
         cout << "KineticModel data file is a JSON file" << endl;
       }
-      parseDoc(fileName);
+      parseDoc(jsonFileName);
     } else {
-      throw FileException("KineticModel", "KineticModel", fileName,
+      throw FileException("KineticModel", "KineticModel", jsonFileName,
                           "NOT in JSON format");
     }
   } catch (FileException fex) {
@@ -237,7 +237,7 @@ void KineticController::parseDoc(const string &docName) {
     /// Get an iterator to the root node of the JSON file
     /// @todo Add a better JSON validity check.
 
-    json::iterator it = data.find("chemistry_data");
+    json::iterator it = data.find("environment");
     json::iterator cdi = it.value().begin();
 
     // Test for non-emptiness
@@ -249,13 +249,14 @@ void KineticController::parseDoc(const string &docName) {
     temperature_ = cdi.value();
     cdi = it.value().find("reftemperature");
     refT_ = cdi.value();
-    cdi = it.value().find("phases");
+
+    it = data.find("microstructure");
 
     /// Each phase is a more complicated grouping of data that
     /// has a separate method for parsing.
 
     try {
-      parseMicroPhases(cdi, numEntry, kineticData);
+      parseMicroPhases(it, numEntry, kineticData);
     } catch (DataException dex) {
       throw dex;
     }
@@ -278,14 +279,14 @@ void KineticController::parseDoc(const string &docName) {
   return;
 }
 
-void KineticController::parseMicroPhases(const json::iterator cdi,
-                                         int &numEntry,
+void KineticController::parseMicroPhases(const json::iterator it, int &numEntry,
                                          struct KineticData &kineticData) {
   string testname;
   bool kineticfound = false;
   bool ispozz = false;
   bool isParrotKilloh = false;
 
+  json::iterator cdi = it.value().find("phases");
   json::iterator p = cdi.value().begin();
 
   for (int i = 0; i < cdi.value().size(); ++i) {

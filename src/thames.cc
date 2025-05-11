@@ -104,19 +104,17 @@ int main(int argc, char **argv) {
   // phase data
   //
 
-  cout << endl
-       << "What is the name of the microstructure phase definition file? "
-       << endl;
+  cout << endl << "What is the name of the simulation parameter file? " << endl;
   getline(cin, buff);
-  const string micDefName(buff);
-  cout << "   - micDefName        :  " << micDefName << endl;
+  const string simParamName(buff);
+  cout << "   - simParamName        :  " << simParamName << endl;
 
   //
   // Create the ChemicalSystem object
   //
 
   try {
-    ChemSys = new ChemicalSystem(gemInputName, micDefName, VERBOSE, WARNING);
+    ChemSys = new ChemicalSystem(gemInputName, simParamName, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in ChemicalSystem constructor: " << ba.what()
          << endl;
@@ -264,7 +262,7 @@ int main(int argc, char **argv) {
     Mic->setFEsolver(AppliedStrainSolver);
   }
 
-  string jobRoot, timeFileName, statFileName;
+  string jobRoot, statFileName;
   if (VERBOSE) {
     cout << "About to enter KineticController constructor" << endl;
     cout.flush();
@@ -276,7 +274,7 @@ int main(int argc, char **argv) {
 
   try {
     KController =
-        new KineticController(ChemSys, Mic, micDefName, VERBOSE, WARNING);
+        new KineticController(ChemSys, Mic, simParamName, VERBOSE, WARNING);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in KineticController constructor: "
          << ba.what() << endl;
@@ -305,18 +303,13 @@ int main(int argc, char **argv) {
     cout.flush();
   }
 
-  cout << endl << "What is the name of the file with output times? " << endl;
-  getline(cin, buff);
-  timeFileName.assign(buff);
-  cout << "   - timeFileName       :  " << timeFileName << endl;
-
   cout << endl << "What shall be the root name of all output files?" << endl;
   getline(cin, buff);
   jobRoot.assign(buff);
   cout << "   - files root name   :  " << jobRoot << endl;
 
   prepOutputFolder(outputFolder, jobRoot, gemInputName, statFileName,
-                   initMicName, micDefName, timeFileName);
+                   initMicName, simParamName);
 
   //
   // Create the Controller object to direct flow of the program
@@ -325,7 +318,7 @@ int main(int argc, char **argv) {
   try {
     Ctrl =
         new Controller(Mic, KController, ChemSys, ThermalStrainSolver, simtype,
-                       timeFileName, jobRoot, VERBOSE, WARNING, XYZ);
+                       simParamName, jobRoot, VERBOSE, WARNING, XYZ);
   } catch (bad_alloc &ba) {
     cout << "Bad memory allocation in Controller constructor: " << ba.what()
          << endl;
@@ -350,8 +343,8 @@ int main(int argc, char **argv) {
   // Write a formatted output of the simulation parameters for later reference
   //
 
-  writeReport(jobRoot, inittime, initMicName, micDefName, timeFileName,
-              gemInputName, ChemSys);
+  writeReport(jobRoot, inittime, initMicName, simParamName, gemInputName,
+              ChemSys);
 
   //
   // Launch the main controller to run the simulation
@@ -562,8 +555,7 @@ int checkArgs(int argc, char **argv) {
 
 void prepOutputFolder(const string &outputFolder, string &jobRoot,
                       const string &gemInputName, string &statFileName,
-                      const string &initMicName, const string &micDefName,
-                      const string &timeFileName) {
+                      const string &initMicName, const string &simParamName) {
 
   int resCallSystem;
 
@@ -635,17 +627,12 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
   }
 
-  buff = "cp -f " + micDefName + " " + outputFolder + "/.";
+  buff = "cp -f " + simParamName + " " + outputFolder + "/.";
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
   }
 
-  buff = "cp -f " + timeFileName + " " + outputFolder + "/.";
-  resCallSystem = system(buff.c_str());
-  if (resCallSystem == -1) {
-    throw FileException("thames", "prepOutputFolder", buff, "FAILED");
-  }
   cout << "     => All input files have been copied into " << outputFolder
        << " folder" << endl;
 
@@ -653,9 +640,8 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
 }
 
 void writeReport(const string &jobRoot, struct tm *itime,
-                 const string &initMicName, const string &micDefName,
-                 const string &timeFileName, const string &csdName,
-                 ChemicalSystem *csys) {
+                 const string &initMicName, const string &simParamName,
+                 const string &csdName, ChemicalSystem *csys) {
   string statName = jobRoot + ".stats";
   string jFileName = jobRoot + ".report";
   ofstream out(jFileName.c_str());
@@ -674,8 +660,7 @@ void writeReport(const string &jobRoot, struct tm *itime,
   out << endl;
   out << "INPUT FILES USED:" << endl;
   out << "              Microstructure file name: " << initMicName << endl;
-  out << "   Microstructure definition file name: " << micDefName << endl;
-  out << "            Output frequency file name: " << timeFileName << endl;
+  out << "   Microstructure definition file name: " << simParamName << endl;
   out << "                   GEM input file name: " << csdName << endl;
   out << endl;
   out << "OUTPUT FILES GENERATED:" << endl;

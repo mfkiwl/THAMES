@@ -182,13 +182,11 @@ int checkArgs(int argc, char **argv);
 @param gemInputName is the name of the master GEM input file
 @param statFileName is the name of the master GEM input file
 @param initMicName is name of the initial microstructure image file
-@param micDefName is name of the initial microstructure image file
-@param parFileName is the name of the input parameter file
+@param simParamName is name of the simulation parameter file
 */
 void prepOutputFolder(const string &outputFolder, string &jobRoot,
                       const string &gemInputName, string &statFileName,
-                      const string &initMicName, const string &micDefName,
-                      const string &parFileName);
+                      const string &initMicName, const string &simParamName);
 
 /**
 @brief Write the formatted report file listing job properties and input.
@@ -199,17 +197,15 @@ through its `writeChemSys` method.
 @param jobRoot is the root name of the THAMES simulation
 @param itime is the start time of the job
 @param initMicName is name of the initial microstructure image file
-@param micDefName is name of the initial microstructure image file
-@param parFileName is the name of the input parameter file
+@param simParamName is the name of the simulation parameter file
 @param csdName is the name of the GEM chemical system definition (CSD) file
 @param csys is a pointer to the ChemicalSystem object for the simulation
 
 If a file is not present, the file name should be given as an empty string.
 */
 void writeReport(const string &jobroot, struct tm *itime,
-                 const string &initMicName, const string &micDefName,
-                 const string &parFileName, const string &csdName,
-                 ChemicalSystem *csys);
+                 const string &initMicName, const string &simParamName,
+                 const string &csdName, ChemicalSystem *csys);
 
 /**
 @brief write the timing data
