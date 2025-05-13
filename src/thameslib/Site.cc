@@ -16,8 +16,8 @@ Site::Site() {
   expstrain_ = 0.0;
 }
 
-Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
-           unsigned int ys, unsigned int zs, unsigned int neigh,
+Site::Site(int xp, int yp, int zp, int xs,
+           int ys, int zs, int neigh,
            ChemicalSystem *csys, const bool verbose) {
   x_ = y_ = z_ = 0;
   id_ = 0;
@@ -37,7 +37,7 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
 
   growth_.clear();
 
-  id_ = (unsigned int)(x_ + (xs * y_) + ((xs * ys) * z_));
+  id_ = x_ + (xs * y_) + ((xs * ys) * z_);
 
   if (neigh > 0)
     nb_.resize(neigh, 0);
@@ -58,7 +58,7 @@ Site::Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
 
 void Site::calcWmc(void) {
   wmc_ = chemSys_->getMicroPhasePorosity(getMicroPhaseId());
-  for (unsigned int i = 0; i < NN_NNN; i++) {
+  for (int i = 0; i < NN_NNN; i++) {
     wmc_ += chemSys_->getMicroPhasePorosity(nb_[i]->getMicroPhaseId());
   }
 }

@@ -61,7 +61,6 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 #ifndef ELASTICMODEL_H
 #define ELASTICMODEL_H
 
-// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -70,6 +69,7 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 
 #include "StrainEnergy.h"
 #include "global.h"
+#include "ChemicalSystem.h"
 
 using namespace std;
 
@@ -79,9 +79,11 @@ using namespace std;
 class ElasticModel {
 
 protected:
+  ChemicalSystem *chemSys_;
   int nx_;                    /**< Number of voxels in x dimension */
   int ny_;                    /**< Number of voxels in y dimension */
   int nz_;                    /**< Number of voxels in z dimension */
+  int nxy_;                   /**< nxy_ = nx_ * ny_ */
   int ns_;                    /**< Number of total voxels */
   int nphase_;                /**< Maximimum allowed number of phases */
   int npoints_;               /**< Number of microstructures to process */
@@ -208,8 +210,12 @@ public:
   @param verbose is true if one wants verbose output
   @param warning is false if suppressing warning messages
   */
-  ElasticModel(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  // ElasticModel(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  //              const bool verbose, const bool warning);
+  ElasticModel(int nx, int ny, int nz, int dim, ChemicalSystem *cs, int npoints,
                const bool verbose, const bool warning);
+
+  virtual ~ElasticModel() {}
 
   /**
   @brief Set up the elastic modulus variables.
@@ -219,7 +225,10 @@ public:
   @param phasemod_fileName is the file name for saving the phase moduli data
   @param nphase is the maximum allowed number of phases in the microstructure
   */
-  void ElasModul(string phasemod_fileName, int nphase);
+  // void ElasModul(string phasemod_fileName, int nphase);
+  void ElasModul(void);
+
+  void initStiffness(void);
 
   /**
   @brief Construct the neighbor table for each element.
@@ -278,7 +287,12 @@ public:
   @param fileName is the input file containing the microstructure data
   @param nphase is the maximum allowed number of phases in the microstructure
   */
-  void ppixel(string fileName, int nphase);
+  // void ppixel(string fileName, int nphase);
+  void ppixel(string fileName);
+
+  void ppixel(vector<int> vectPhId);
+
+  void ppixel(vector<int> *p_vectPhId);
 
   /**
   @brief Determine the volume fractions of the different phases.
@@ -288,17 +302,19 @@ public:
   @param ns is the total number of elements in the mesh
   @param nphase is the maximum allowed number of phases in the microstructure
   */
-  void assig(int ns, int nphase) {
-    for (int i = 0; i < nphase; i++) {
+  // void assig(int ns, int nphase) {
+  void assig(void) {
+    for (int i = 0; i < nphase_; i++) {
       prob_[i] = 0.0;
     }
 
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       prob_[pix_[m]] += 1;
     }
 
-    for (int i = 0; i < nphase; i++) {
-      prob_[i] = prob_[i] / (float)ns;
+    double ns_dbl = ns_;
+    for (int i = 0; i < nphase_; i++) {
+      prob_[i] = prob_[i] / ns_dbl; // check!
     }
 
     return;
@@ -419,11 +435,11 @@ public:
   @param ns is the total number of finite elements
   @param nphase is the maximum allowed number of phases in the microstructure
   */
-  virtual void femat(int nx, int ny, int nz, int ns, int nphase) {
-    if (verbose_)
-      cout << "virtual function 'femat' in base class." << endl;
-    return;
-  }
+  // virtual void femat(int nx, int ny, int nz, int ns, int nphase) {
+  //   if (verbose_)
+  //     cout << "virtual function 'femat' in base class." << endl;
+  //   return;
+  // }
 
   /**
   @brief Perform the congugate gradient energy minimization.
@@ -437,11 +453,11 @@ public:
   @param kkk is the number of times this function has already been called
   @return the number of iterations performed during this call
   */
-  virtual int dembx(int ns, double gg, int ldemb, int kkk) {
-    if (verbose_)
-      cout << "virtual function 'dembx' in base class." << endl;
-    return 0;
-  }
+  // virtual int dembx(int ns, double gg, int ldemb, int kkk) {
+  //   if (verbose_)
+  //     cout << "virtual function 'dembx' in base class." << endl;
+  //   return 0;
+  // }
 
   /**
   @brief Compute the total mesh elastic strain energy
@@ -457,11 +473,11 @@ public:
   @param ns is the total number of finite elements
   @return the energy [units?]
   */
-  virtual double energy(int nx, int ny, int nz, int ns) {
-    if (verbose_)
-      cout << "virtual function 'energy' in base class." << endl;
-    return 0.0;
-  }
+  // virtual double energy(int nx, int ny, int nz, int ns) {
+  //   if (verbose_)
+  //     cout << "virtual function 'energy' in base class." << endl;
+  //   return 0.0;
+  // }
 
   /**
   @brief Calculate the stress and strain fields.
@@ -474,11 +490,11 @@ public:
   @param nz is the number of voxels in the z direction
   @param ns is the total number of finite elements
   */
-  virtual void stress(int nx, int ny, int nz, int ns) {
-    if (verbose_)
-      cout << "virtual function 'stress' in base class." << endl;
-    return;
-  }
+  // virtual void stress(int nx, int ny, int nz, int ns) {
+  //   if (verbose_)
+  //     cout << "virtual function 'stress' in base class." << endl;
+  //   return;
+  // }
 
   /**
   @brief Controlling method for energy minimization.
@@ -490,11 +506,11 @@ public:
   @param kmax is the maximum number of times to call the conjugate gradient
   solver
   */
-  virtual void relax(double time, int kmax) {
-    if (verbose_)
-      cout << "virtual function 'relax' in base class." << endl;
-    return;
-  }
+  // virtual void relax(double time, int kmax) {
+  //  if (verbose_)
+  //     cout << "virtual function 'relax' in base class." << endl;
+  //   return;
+  // }
 
   /**
   @brief The master controlling function for the finite element method
@@ -511,12 +527,12 @@ public:
   @param eyz is the input prescribed yz component of the strain
   @param exy is the input prescribed xy component of the strain
   */
-  virtual void Calc(double time, string fileName, double exx, double eyy,
-                    double ezz, double exz, double eyz, double exy) {
-    if (verbose_)
-      cout << "virtual function 'thrMic' in base class." << endl;
-    return;
-  }
+  // virtual void Calc(double time, string fileName, double exx, double eyy,
+  //                   double ezz, double exz, double eyz, double exy) {
+  //   if (verbose_)
+  //     cout << "virtual function 'thrMic' in base class." << endl;
+  //   return;
+  // }
 
   /**
   @brief Create visualization of the stress field in a 2D microstructure slice.
@@ -560,7 +576,8 @@ public:
   @param root is the root name of the file to create
   @param time is the simulation time [hours]
   */
-  void writeDisp(string &root, double time);
+  // void writeDisp(string &root, double time);
+  void writeDisp(string &root, string timeString);
 
   /**
   @brief Create visualization of the strain energy in a 2D microstructure slice.

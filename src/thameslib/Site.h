@@ -31,14 +31,14 @@ number.
 class Site {
 
 protected:
-  unsigned int x_;            /**< x-coordinate in mesh coordinate frame */
-  unsigned int y_;            /**< y-coordinate in mesh coordinate frame */
-  unsigned int z_;            /**< y-coordinate in mesh coordinate frame */
-  unsigned int id_;           /**< Unique id in the 1D array of all sites */
-  unsigned int microPhaseId_; /**< The microstructure phase assignment */
+  int x_;            /**< x-coordinate in mesh coordinate frame */
+  int y_;            /**< y-coordinate in mesh coordinate frame */
+  int z_;            /**< y-coordinate in mesh coordinate frame */
+  int id_;           /**< Unique id in the 1D array of all sites */
+  uint microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
-  vector<unsigned int>
+  vector<int>
       growth_;              /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
   double trueVolume_;       /**< Actual volume of site, accounting for stress */
@@ -117,8 +117,8 @@ public:
   @param csys is a pointer to the simulation's ChemicalSystem object
   @param verbose is true if verbose output should be produced
   */
-  Site(unsigned int xp, unsigned int yp, unsigned int zp, unsigned int xs,
-       unsigned int ys, unsigned int zs, unsigned int neigh,
+  Site(int xp, int yp, int zp, int xs,
+       int ys, int zs, int neigh,
        ChemicalSystem *csys, const bool verbose = false);
 
   void setVisit(int sv) { visit_ = sv; }
@@ -150,8 +150,8 @@ public:
   @param pos is the index of the neighbor in the neighbor table
   @return a pointer to the neighboring site
   */
-  Site *nb(const unsigned int pos) const {
-    if (pos >= nb_.size()) {
+  Site *nb(const int pos) const {
+    if (pos >= (int)(nb_.size())) {
       throw EOBException("Site", "nb", "nb_", nb_.size(), pos);
     }
     return nb_[pos];
@@ -163,7 +163,7 @@ public:
   @param dist is the distance (site dimensions) away from the site to consider
   @return the number of neighbors within this distance
   */
-  unsigned int nbSize(int dist = 3) const {
+  int nbSize(int dist = 3) const {
     switch (dist) {
     case 0:
       return 1;
@@ -191,8 +191,8 @@ public:
   @param neigh is a pointer to the site that is to be assigned to index i of the
   neighbor table
   */
-  void setNb(unsigned int i, Site *neigh) {
-    if (i >= nb_.size())
+  void setNb(int i, Site *neigh) {
+    if (i >= (int)(nb_.size()))
       throw EOBException("Site", "setNb", "nb_", nb_.size(), i);
     nb_[i] = neigh;
     return;
@@ -205,21 +205,21 @@ public:
 
   @return the index number of the site
   */
-  unsigned int getId() const { return id_; }
+  int getId() const { return id_; }
 
   /**
   @brief Get the microstructure phase id number assigned to the site.
 
   @return the microstructure phase id number
   */
-  unsigned int getMicroPhaseId() const { return microPhaseId_; }
+  int getMicroPhaseId() const { return microPhaseId_; }
 
   /**
   @brief Set the microstructure phase id number assigned to the site.
 
   @param pid is the microstructure phase id number to assign
   */
-  void setMicroPhaseId(const unsigned int pid) {
+  void setMicroPhaseId(const int pid) {
     microPhaseId_ = pid;
     stressFreeVolume_ = 1.0;
     return;
@@ -230,21 +230,27 @@ public:
 
   @return the x-coordinate of the site in the mesh coordinate frame
   */
-  unsigned int getX() const { return ((unsigned int)x_); }
+  int getX() const { return x_; }
 
   /**
   @brief Get the y-coordinate of the site in the mesh coordinate frame.
 
   @return the y-coordinate of the site in the mesh coordinate frame
   */
-  unsigned int getY() const { return ((unsigned int)y_); }
+  int getY() const { return y_; }
 
   /**
   @brief Get the z-coordinate of the site in the mesh coordinate frame.
 
   @return the z-coordinate of the site in the mesh coordinate frame
   */
-  unsigned int getZ() const { return ((unsigned int)z_); }
+  int getZ() const { return z_; }
+
+  vector<int> getXYZ() {
+    vector<int> v(3, 0);
+    v[0] = x_; v[1] = y_; v[2] = z_;
+    return v;
+  }
 
   /**
   @brief Get the "weighted mean curvature" of the site.
@@ -282,6 +288,7 @@ public:
   @param wmcval is the value of wmc_ to assign to the site
   */
   void setWmc(double wmcval) { wmc_ = wmcval; }
+
   void setWmc0(double wmcval) { wmc0_ = wmcval; }
 
   /**
@@ -333,15 +340,15 @@ public:
   @param pid is the microstructure phase id of the phase that can grow at the
   site
   */
-  void setGrowthSite(unsigned int pid) {
-    vector<unsigned int>::iterator start = growth_.begin();
-    vector<unsigned int>::iterator end = growth_.end();
-    vector<unsigned int>::iterator p = find(start, end, pid);
+  void setGrowthSite(int pid) {
+    vector<int>::iterator start = growth_.begin();
+    vector<int>::iterator end = growth_.end();
+    vector<int>::iterator p = find(start, end, pid);
     if (p == growth_.end())
       growth_.push_back(pid);
   }
 
-  void addGrowthPhaseId(unsigned int pid) { growth_.push_back(pid); }
+  void addGrowthPhaseId(int pid) { growth_.push_back(pid); }
 
   /**
   @brief Remove a phase from the list of phases that can grow at the site.
@@ -352,7 +359,7 @@ public:
 
   @param pid is the id of the microstructure phase to remove
   */
-  void removeGrowthSite(unsigned int pid) {
+  void removeGrowthSite(int pid) {
     bool found = false;
     int size = growth_.size();
     int i = -1;
@@ -367,7 +374,7 @@ public:
     }
     if (found == false) {
       cout << endl
-           << " stop - void removeGrowthSite(unsigned int pid) " << endl;
+           << " stop - void removeGrowthSite(int pid) " << endl;
       cout.flush();
       cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
       exit(1);
@@ -379,9 +386,9 @@ public:
 
   @return the list of ids of all microstructure phases that can grow at the site
   */
-  vector<unsigned int> getGrowthPhases() const { return growth_; }
+  vector<int> getGrowthPhases() const { return growth_; }
 
-  void setGrowthPhases(vector<unsigned int> vect) {
+  void setGrowthPhases(vector<int> vect) {
     growth_.clear();
     growth_ = vect;
   }

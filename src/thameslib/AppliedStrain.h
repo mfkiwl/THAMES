@@ -9,11 +9,11 @@ Solves the linear elastic state of the finite element mesh.
 #define APPLIEDSTRAIN_H
 
 #include "ElasticModel.h"
-// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -85,6 +85,8 @@ protected:
   double eyz_; /**< yz off-diagonal component of applied strain */
   double exy_; /**< xy off-diagonal component of applied strain */
 
+  int kmax_; /**< the number of relaxation steps for a given elastic computation */
+
 public:
   /**
   @brief Default constructor.
@@ -101,7 +103,9 @@ public:
   @param verbose is true if we want verbose output
   @param warning is false if we want to suppress warning output
   */
-  AppliedStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  // AppliedStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  //               const bool verbose, const bool warning);  
+  AppliedStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs, int npoints,
                 const bool verbose, const bool warning);
 
   /**
@@ -119,7 +123,8 @@ public:
   @param ns is the total number of elements
   @param nphase is the number of phases
   */
-  void femat(int nx, int ny, int nz, int ns, int nphase);
+  // void femat(int nx, int ny, int nz, int ns, int nphase);
+  void femat();
 
   /**
   @brief Conjugate gradient minimization of elastic energy.
@@ -131,7 +136,8 @@ public:
   @param kkk is the number of times the function has been called
   @return number of conjugate gradient steps used in this call
   */
-  int dembx(int ns, double gg, int ldemb, int kkk);
+  // int dembx(int ns, double gg, int ldemb, int kkk);
+  int dembx(int ldemb, int kkk);
 
   /**
   @brief Computes the total elastic energy of the finite element mesh.
@@ -142,7 +148,8 @@ public:
   @param ns is the total number of elements
   @return the energy of the finite element mesh
   */
-  double energy(int nx, int ny, int nz, int ns);
+  // double energy(int nx, int ny, int nz, int ns);
+  double energy();
 
   /**
   @brief Computes the stress and strain components.
@@ -152,7 +159,8 @@ public:
   @param nz is the z dimension of the mesh
   @param ns is the total number of elements
   */
-  void stress(int nx, int ny, int nz, int ns);
+  // void stress(int nx, int ny, int nz, int ns);
+  void stress();
 
   /**
   @brief Controls the relaxation process, including calls to dembx, energy, and
@@ -175,7 +183,7 @@ public:
   @param exy is the xy component of the applied strain
   */
   void calc(string fileName, double exx, double eyy, double ezz, double exz,
-            double eyz, double exy);
+             double eyz, double exy);
 
   /**
   @brief Calculates the effective bulk modulus of the relaxed mesh.

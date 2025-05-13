@@ -7,10 +7,14 @@
 
 using namespace std;
 
-AppliedStrain::AppliedStrain(int nx, int ny, int nz, int dim, int nphase,
+// AppliedStrain::AppliedStrain(int nx, int ny, int nz, int dim, int nphase,
+//                              int npoints, const bool verbose,
+//                              const bool warning)
+//     : ElasticModel(nx, ny, nz, dim, nphase, npoints, verbose, warning) {
+AppliedStrain::AppliedStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
                              int npoints, const bool verbose,
                              const bool warning)
-    : ElasticModel(nx, ny, nz, dim, nphase, npoints, verbose, warning) {
+    : ElasticModel(nx, ny, nz, dim, cs, npoints, verbose, warning) {
 #ifdef DEBUG
   verbose_ = true;
   warning_ = true;
@@ -26,15 +30,32 @@ AppliedStrain::AppliedStrain(int nx, int ny, int nz, int dim, int nphase,
 
   exx_ = eyy_ = ezz_ = 0.0;
   exz_ = eyz_ = exy_ = 0.0;
+
+  kmax_ = 3; // 60;
+  cout << endl
+       << "AppliedStrain::AppliedStrain - "
+          "the number of relaxation steps for elastic computation :  kmax_ = "
+       << kmax_ << endl;
 }
 
-void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
-  double dndx[8], dndy[8], dndz[8];
-  double g[3][3][3];
-  double es[6][8][3], delta[8][3];
+//void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
+void AppliedStrain::femat() {
+   double dndx[8], dndy[8], dndz[8];
+   double g[3][3][3];
+   double es[6][8][3]; //, delta[8][3];
+  // int is[8];
+   double x, y, z;
+  // int nxy = nx * ny;
   int is[8];
-  double x, y, z;
-  int nxy = nx * ny;
+  double delta[8][3];
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int m;
+  double sum = 0;
 
   ///
   /// (User) NOTE: complete elastic modulus matrix is used, so an anisotropic
@@ -47,7 +68,7 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
   /// Initialize stiffness matrices
   ///
 
-  for (int m = 0; m < nphase; m++) {
+  for (int m = 0; m < nphase_; m++) {
     for (int l = 0; l < 3; l++) {
       for (int k = 0; k < 3; k++) {
         for (int j = 0; j < 8; j++) {
@@ -63,7 +84,8 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
   /// Set up elastic moduli matrices for each kind of element
   ///
 
-  ElasModul(phasemod_fileName_, nphase_);
+  // ElasModul(phasemod_fileName_, nphase_);
+  ElasModul();
 
   ///
   /// Set up Simpson's integration rule weight vector
@@ -91,13 +113,13 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
   /// rule quadrature gives exact results.
   ///
 
-  for (int ijk = 0; ijk < nphase; ijk++) {
+  for (int ijk = 0; ijk < nphase_; ijk++) {
     for (int k = 0; k < 3; k++) {
       for (int j = 0; j < 3; j++) {
         for (int i = 0; i < 3; i++) {
-          x = ((float)(i)) / 2.0;
-          y = ((float)(j)) / 2.0;
-          z = ((float)(k)) / 2.0;
+          x = i / 2.0;
+          y = j / 2.0;
+          z = k / 2.0;
 
           ///
           /// dndx means the negative derivative, with respect to x,
@@ -194,7 +216,7 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
   ///
 
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       b_[m][m3] = 0.0;
     }
   }
@@ -226,19 +248,20 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2) || (i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exx_ * (double)nx;
-        delta[i8][1] = exy_ * (double)nx;
-        delta[i8][2] = exz_ * (double)nx;
+        delta[i8][0] = exx_ * nx_dbl;
+        delta[i8][1] = exy_ * nx_dbl;
+        delta[i8][2] = exz_ * nx_dbl;
       }
     }
   }
 
-  for (int j = 0; j < (ny - 1); j++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * j + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int j = 0; j < ny1; j++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * j + nx1;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -260,19 +283,20 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 2) || (i8 == 3) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy_ * (double)ny;
-        delta[i8][1] = eyy_ * (double)ny;
-        delta[i8][2] = eyz_ * (double)ny;
+        delta[i8][0] = exy_ * ny_dbl;
+        delta[i8][1] = eyy_ * ny_dbl;
+        delta[i8][2] = eyz_ * ny_dbl;
       }
     }
   }
 
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * (ny - 1) + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * ny1 + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -294,19 +318,20 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exz_ * (double)nz;
-        delta[i8][1] = eyz_ * (double)nz;
-        delta[i8][2] = ezz_ * (double)nz;
+        delta[i8][0] = exz_ * nz_dbl;
+        delta[i8][1] = eyz_ * nz_dbl;
+        delta[i8][2] = ezz_ * nz_dbl;
       }
     }
   }
 
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int j = 0; j < (ny - 1); j++) {
-      int m = nxy * (nz - 1) + nx * j + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int j = 0; j < ny1; j++) {
+      m = nxy_ * nz1 + nx_ * j + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -328,28 +353,29 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 5)) {
-        delta[i8][0] = exx_ * (double)nx;
-        delta[i8][1] = exy_ * (double)nx;
-        delta[i8][2] = exz_ * (double)nx;
+        delta[i8][0] = exx_ * nx_dbl;
+        delta[i8][1] = exy_ * nx_dbl;
+        delta[i8][2] = exz_ * nx_dbl;
       }
       if ((i8 == 3) || (i8 == 7)) {
-        delta[i8][0] = exy_ * (double)ny;
-        delta[i8][1] = eyy_ * (double)ny;
-        delta[i8][2] = eyz_ * (double)ny;
+        delta[i8][0] = exy_ * ny_dbl;
+        delta[i8][1] = eyy_ * ny_dbl;
+        delta[i8][2] = eyz_ * ny_dbl;
       }
       if ((i8 == 2) || (i8 == 6)) {
-        delta[i8][0] = exy_ * (double)ny + exx_ * (double)nx;
-        delta[i8][1] = eyy_ * (double)ny + exy_ * (double)nx;
-        delta[i8][2] = eyz_ * (double)ny + exz_ * (double)nx;
+        delta[i8][0] = exy_ * ny_dbl + exx_ * nx_dbl;
+        delta[i8][1] = eyy_ * ny_dbl + exy_ * nx_dbl;
+        delta[i8][2] = eyz_ * ny_dbl + exz_ * nx_dbl;
       }
     }
   }
 
-  for (int k = 0; k < (nz - 1); k++) {
-    int m = nxy * k + nx * (ny - 1) + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int k = 0; k < nz1; k++) {
+    m = nxy_ * k + nx_ * ny1 + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -370,28 +396,29 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2)) {
-        delta[i8][0] = exx_ * (double)nx;
-        delta[i8][1] = exy_ * (double)nx;
-        delta[i8][2] = exz_ * (double)nx;
+        delta[i8][0] = exx_ * nx_dbl;
+        delta[i8][1] = exy_ * nx_dbl;
+        delta[i8][2] = exz_ * nx_dbl;
       }
       if ((i8 == 4) || (i8 == 7)) {
-        delta[i8][0] = exz_ * (double)nz;
-        delta[i8][1] = eyz_ * (double)nz;
-        delta[i8][2] = ezz_ * (double)nz;
+        delta[i8][0] = exz_ * nz_dbl;
+        delta[i8][1] = eyz_ * nz_dbl;
+        delta[i8][2] = ezz_ * nz_dbl;
       }
       if ((i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exz_ * (double)nz + exx_ * (double)nx;
-        delta[i8][1] = eyz_ * (double)nz + exy_ * (double)nx;
-        delta[i8][2] = ezz_ * (double)nz + exz_ * (double)nx;
+        delta[i8][0] = exz_ * nz_dbl + exx_ * nx_dbl;
+        delta[i8][1] = eyz_ * nz_dbl + exy_ * nx_dbl;
+        delta[i8][2] = ezz_ * nz_dbl + exz_ * nx_dbl;
       }
     }
   }
 
-  for (int j = 0; j < (ny - 1); j++) {
-    int m = nxy * (nz - 1) + nx * j + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int j = 0; j < ny1; j++) {
+    m = nxy_ * nz1 + nx_ * j + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -412,28 +439,29 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5)) {
-        delta[i8][0] = exz_ * (double)nz;
-        delta[i8][1] = eyz_ * (double)nz;
-        delta[i8][2] = ezz_ * (double)nz;
+        delta[i8][0] = exz_ * nz_dbl;
+        delta[i8][1] = eyz_ * nz_dbl;
+        delta[i8][2] = ezz_ * nz_dbl;
       }
       if ((i8 == 2) || (i8 == 3)) {
-        delta[i8][0] = exy_ * (double)ny;
-        delta[i8][1] = eyy_ * (double)ny;
-        delta[i8][2] = eyz_ * (double)ny;
+        delta[i8][0] = exy_ * ny_dbl;
+        delta[i8][1] = eyy_ * ny_dbl;
+        delta[i8][2] = eyz_ * ny_dbl;
       }
       if ((i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy_ * (double)ny + exz_ * (double)nz;
-        delta[i8][1] = eyy_ * (double)ny + eyz_ * (double)nz;
-        delta[i8][2] = eyz_ * (double)ny + ezz_ * (double)nz;
+        delta[i8][0] = exy_ * ny_dbl + exz_ * nz_dbl;
+        delta[i8][1] = eyy_ * ny_dbl + eyz_ * nz_dbl;
+        delta[i8][2] = eyz_ * ny_dbl + ezz_ * nz_dbl;
       }
     }
   }
 
-  for (int i = 0; i < (nx - 1); i++) {
-    int m = nxy * (nz - 1) + nx * (ny - 1) + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    m = nxy_ * nz1 + nx_ * ny1 + i;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -454,50 +482,51 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if (i8 == 1) {
-        delta[i8][0] = exx_ * (double)nx;
-        delta[i8][1] = exy_ * (double)nx;
-        delta[i8][2] = exz_ * (double)nx;
+        delta[i8][0] = exx_ * nx_dbl;
+        delta[i8][1] = exy_ * nx_dbl;
+        delta[i8][2] = exz_ * nx_dbl;
       }
       if (i8 == 3) {
-        delta[i8][0] = exy_ * (double)ny;
-        delta[i8][1] = eyy_ * (double)ny;
-        delta[i8][2] = eyz_ * (double)ny;
+        delta[i8][0] = exy_ * ny_dbl;
+        delta[i8][1] = eyy_ * ny_dbl;
+        delta[i8][2] = eyz_ * ny_dbl;
       }
       if (i8 == 4) {
-        delta[i8][0] = exz_ * (double)nz;
-        delta[i8][1] = eyz_ * (double)nz;
-        delta[i8][2] = ezz_ * (double)nz;
+        delta[i8][0] = exz_ * nz_dbl;
+        delta[i8][1] = eyz_ * nz_dbl;
+        delta[i8][2] = ezz_ * nz_dbl;
       }
       if (i8 == 7) {
-        delta[i8][0] = exy_ * (double)ny + exz_ * (double)nz;
-        delta[i8][1] = eyy_ * (double)ny + eyz_ * (double)nz;
-        delta[i8][2] = eyz_ * (double)ny + ezz_ * (double)nz;
+        delta[i8][0] = exy_ * ny_dbl + exz_ * nz_dbl;
+        delta[i8][1] = eyy_ * ny_dbl + eyz_ * nz_dbl;
+        delta[i8][2] = eyz_ * ny_dbl + ezz_ * nz_dbl;
       }
       if (i8 == 5) {
-        delta[i8][0] = exx_ * (double)nx + exz_ * (double)nz;
-        delta[i8][1] = exy_ * (double)nx + eyz_ * (double)nz;
-        delta[i8][2] = exz_ * (double)nx + ezz_ * (double)nz;
+        delta[i8][0] = exx_ * nx_dbl + exz_ * nz_dbl;
+        delta[i8][1] = exy_ * nx_dbl + eyz_ * nz_dbl;
+        delta[i8][2] = exz_ * nx_dbl + ezz_ * nz_dbl;
       }
       if (i8 == 2) {
-        delta[i8][0] = exx_ * (double)nx + exy_ * (double)ny;
-        delta[i8][1] = exy_ * (double)nx + eyy_ * (double)ny;
-        delta[i8][2] = exz_ * (double)nx + eyz_ * (double)ny;
+        delta[i8][0] = exx_ * nx_dbl + exy_ * ny_dbl;
+        delta[i8][1] = exy_ * nx_dbl + eyy_ * ny_dbl;
+        delta[i8][2] = exz_ * nx_dbl + eyz_ * ny_dbl;
       }
       if (i8 == 6) {
         delta[i8][0] =
-            exx_ * (double)nx + exy_ * (double)ny + exz_ * (double)nz;
+            exx_ * nx_dbl + exy_ * ny_dbl + exz_ * nz_dbl;
         delta[i8][1] =
-            exy_ * (double)nx + eyy_ * (double)ny + eyz_ * (double)nz;
+            exy_ * nx_dbl + eyy_ * ny_dbl + eyz_ * nz_dbl;
         delta[i8][2] =
-            exz_ * (double)nx + eyz_ * (double)ny + ezz_ * (double)nz;
+            exz_ * nx_dbl + eyz_ * ny_dbl + ezz_ * nz_dbl;
       }
     }
   }
 
-  int m = nxy * (nz - 1) + nx * (ny - 1) + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  m = nxy_ * nz1 + nx_ * ny1 + nx1;
   for (int nn = 0; nn < 3; nn++) {
     for (int mm = 0; mm < 8; mm++) {
-      double sum = 0.0;
+      sum = 0.0;
       for (int m3 = 0; m3 < 3; m3++) {
         for (int m8 = 0; m8 < 8; m8++) {
           sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -512,10 +541,11 @@ void AppliedStrain::femat(int nx, int ny, int nz, int ns, int nphase) {
   return;
 }
 
-double AppliedStrain::energy(int nx, int ny, int nz, int ns) {
+// double AppliedStrain::energy(int nx, int ny, int nz, int ns) {
+double AppliedStrain::energy() {
   double utot = 0.0;
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       gb_[m][m3] = 0.0;
     }
   }
@@ -528,7 +558,7 @@ double AppliedStrain::energy(int nx, int ny, int nz, int ns) {
 
   for (int j = 0; j < 3; j++) {
     for (int n = 0; n < 3; n++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         gb_[m][j] += u_[ib_[m][0]][n] * (dk_[pix_[ib_[m][26]]][0][j][3][n] +
                                          dk_[pix_[ib_[m][6]]][1][j][2][n] +
                                          dk_[pix_[ib_[m][24]]][4][j][7][n] +
@@ -599,7 +629,7 @@ double AppliedStrain::energy(int nx, int ny, int nz, int ns) {
 
   utot = C_;
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       utot += 0.5 * u_[m][m3] * gb_[m][m3] + b_[m][m3] * u_[m][m3];
       gb_[m][m3] += b_[m][m3];
     }
@@ -608,14 +638,15 @@ double AppliedStrain::energy(int nx, int ny, int nz, int ns) {
   return utot;
 }
 
-int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
+// int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
+int AppliedStrain::dembx(int ldemb, int kkk) {
   double lambda, gamma;
   double hAh, gglast;
   int Lstep;
 
   if (kkk == 0) {
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         h_[m][m3] = gb_[m][m3];
       }
     }
@@ -631,7 +662,7 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
     Lstep += 1;
 
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         Ah_[m][m3] = 0.0;
       }
     }
@@ -643,7 +674,7 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
 
     for (int j = 0; j < 3; j++) {
       for (int n = 0; n < 3; n++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           Ah_[m][j] +=
               h_[ib_[m][0]][n] * (dk_[pix_[ib_[m][26]]][0][j][3][n] +
                                   dk_[pix_[ib_[m][6]]][1][j][2][n] +
@@ -715,13 +746,13 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
 
     hAh = 0.0;
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         hAh += h_[m][m3] * Ah_[m][m3];
       }
     }
     lambda = gg_ / hAh;
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         u_[m][m3] = u_[m][m3] - lambda * h_[m][m3];
         gb_[m][m3] = gb_[m][m3] - lambda * Ah_[m][m3];
       }
@@ -730,7 +761,7 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
     gglast = gg_;
     gg_ = 0.0;
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         gg_ += gb_[m][m3] * gb_[m][m3];
       }
     }
@@ -739,7 +770,7 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
 
     gamma = gg_ / gglast;
     for (int m3 = 0; m3 < 3; m3++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         h_[m][m3] = gb_[m][m3] + gamma * h_[m][m3];
       }
     }
@@ -747,14 +778,20 @@ int AppliedStrain::dembx(int ns, double gg, int ldemb, int kkk) {
   return Lstep;
 }
 
-void AppliedStrain::stress(int nx, int ny, int nz, int ns) {
-  int nxy = nx * ny;
+// void AppliedStrain::stress(int nx, int ny, int nz, int ns) {
+void AppliedStrain::stress() {
   double dndx[8], dndy[8], dndz[8];
   double es[6][8][3];
   double uu[8][3];
   double str11, str22, str33, str13, str23, str12;
   double s11, s22, s33, s13, s23, s12;
   int m = 0;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
 
   ///
   /// Set up single element strain matrix
@@ -819,10 +856,10 @@ void AppliedStrain::stress(int nx, int ny, int nz, int ns) {
   strxx_ = stryy_ = strzz_ = strxz_ = stryz_ = strxy_ = 0.0;
   sxx_ = syy_ = szz_ = sxz_ = syz_ = sxy_ = 0.0;
 
-  for (int k = 0; k < nz; k++) {
-    for (int j = 0; j < ny; j++) {
-      for (int i = 0; i < nx; i++) {
-        m = k * nxy + j * nx + i;
+  for (int k = 0; k < nz_; k++) {
+    for (int j = 0; j < ny_; j++) {
+      for (int i = 0; i < nx_; i++) {
+        m = k * nxy_ + j * nx_ + i;
 
         ///
         /// Load in elements of 8-vector using periodic boundary condition.
@@ -845,47 +882,50 @@ void AppliedStrain::stress(int nx, int ny, int nz, int ns) {
         /// opposite face, need to put in applied strain to correct them.
         ///
 
-        if (i == (nx - 1)) {
-          uu[1][0] = uu[1][0] + exx_ * (double)nx;
-          uu[1][1] = uu[1][1] + exy_ * (double)nx;
-          uu[1][2] = uu[1][2] + exz_ * (double)nx;
-          uu[2][0] = uu[2][0] + exx_ * (double)nx;
-          uu[2][1] = uu[2][1] + exy_ * (double)nx;
-          uu[2][2] = uu[2][2] + exz_ * (double)nx;
-          uu[5][0] = uu[5][0] + exx_ * (double)nx;
-          uu[5][1] = uu[5][1] + exy_ * (double)nx;
-          uu[5][2] = uu[5][2] + exz_ * (double)nx;
-          uu[6][0] = uu[6][0] + exx_ * (double)nx;
-          uu[6][1] = uu[6][1] + exy_ * (double)nx;
-          uu[6][2] = uu[6][2] + exz_ * (double)nx;
+        // if (i == (nx - 1)) {
+        if (i == nx1) {
+          uu[1][0] = uu[1][0] + exx_ * nx_dbl;
+          uu[1][1] = uu[1][1] + exy_ * nx_dbl;
+          uu[1][2] = uu[1][2] + exz_ * nx_dbl;
+          uu[2][0] = uu[2][0] + exx_ * nx_dbl;
+          uu[2][1] = uu[2][1] + exy_ * nx_dbl;
+          uu[2][2] = uu[2][2] + exz_ * nx_dbl;
+          uu[5][0] = uu[5][0] + exx_ * nx_dbl;
+          uu[5][1] = uu[5][1] + exy_ * nx_dbl;
+          uu[5][2] = uu[5][2] + exz_ * nx_dbl;
+          uu[6][0] = uu[6][0] + exx_ * nx_dbl;
+          uu[6][1] = uu[6][1] + exy_ * nx_dbl;
+          uu[6][2] = uu[6][2] + exz_ * nx_dbl;
         }
-        if (j == (ny - 1)) {
-          uu[2][0] = uu[2][0] + exy_ * (double)ny;
-          uu[2][1] = uu[2][1] + eyy_ * (double)ny;
-          uu[2][2] = uu[2][2] + eyz_ * (double)ny;
-          uu[3][0] = uu[3][0] + exy_ * (double)ny;
-          uu[3][1] = uu[3][1] + eyy_ * (double)ny;
-          uu[3][2] = uu[3][2] + eyz_ * (double)ny;
-          uu[6][0] = uu[6][0] + exy_ * (double)ny;
-          uu[6][1] = uu[6][1] + eyy_ * (double)ny;
-          uu[6][2] = uu[6][2] + eyz_ * (double)ny;
-          uu[7][0] = uu[7][0] + exy_ * (double)ny;
-          uu[7][1] = uu[7][1] + eyy_ * (double)ny;
-          uu[7][2] = uu[7][2] + eyz_ * (double)ny;
+        // if (j == (ny - 1)) {
+        if (j == ny1) {
+          uu[2][0] = uu[2][0] + exy_ * ny_dbl;
+          uu[2][1] = uu[2][1] + eyy_ * ny_dbl;
+          uu[2][2] = uu[2][2] + eyz_ * ny_dbl;
+          uu[3][0] = uu[3][0] + exy_ * ny_dbl;
+          uu[3][1] = uu[3][1] + eyy_ * ny_dbl;
+          uu[3][2] = uu[3][2] + eyz_ * ny_dbl;
+          uu[6][0] = uu[6][0] + exy_ * ny_dbl;
+          uu[6][1] = uu[6][1] + eyy_ * ny_dbl;
+          uu[6][2] = uu[6][2] + eyz_ * ny_dbl;
+          uu[7][0] = uu[7][0] + exy_ * ny_dbl;
+          uu[7][1] = uu[7][1] + eyy_ * ny_dbl;
+          uu[7][2] = uu[7][2] + eyz_ * ny_dbl;
         }
-        if (k == (nz - 1)) {
-          uu[4][0] = uu[4][0] + exz_ * (double)nz;
-          uu[4][1] = uu[4][1] + eyz_ * (double)nz;
-          uu[4][2] = uu[4][2] + ezz_ * (double)nz;
-          uu[5][0] = uu[5][0] + exz_ * (double)nz;
-          uu[5][1] = uu[5][1] + eyz_ * (double)nz;
-          uu[5][2] = uu[5][2] + ezz_ * (double)nz;
-          uu[6][0] = uu[6][0] + exz_ * (double)nz;
-          uu[6][1] = uu[6][1] + eyz_ * (double)nz;
-          uu[6][2] = uu[6][2] + ezz_ * (double)nz;
-          uu[7][0] = uu[7][0] + exz_ * (double)nz;
-          uu[7][1] = uu[7][1] + eyz_ * (double)nz;
-          uu[7][2] = uu[7][2] + ezz_ * (double)nz;
+        // if (k == (nz - 1)) {
+        if (k == nz1) {
+          uu[4][0] = uu[4][0] + exz_ * nz_dbl;
+          uu[4][1] = uu[4][1] + eyz_ * nz_dbl;
+          uu[4][2] = uu[4][2] + ezz_ * nz_dbl;
+          uu[5][0] = uu[5][0] + exz_ * nz_dbl;
+          uu[5][1] = uu[5][1] + eyz_ * nz_dbl;
+          uu[5][2] = uu[5][2] + ezz_ * nz_dbl;
+          uu[6][0] = uu[6][0] + exz_ * nz_dbl;
+          uu[6][1] = uu[6][1] + eyz_ * nz_dbl;
+          uu[6][2] = uu[6][2] + ezz_ * nz_dbl;
+          uu[7][0] = uu[7][0] + exz_ * nz_dbl;
+          uu[7][1] = uu[7][1] + eyz_ * nz_dbl;
+          uu[7][2] = uu[7][2] + ezz_ * nz_dbl;
         }
 
         ///
@@ -968,18 +1008,19 @@ void AppliedStrain::stress(int nx, int ny, int nz, int ns) {
   /// Volume average of global stresses and strains
   ///
 
-  strxx_ = strxx_ / (double)ns;
-  stryy_ = stryy_ / (double)ns;
-  strzz_ = strzz_ / (double)ns;
-  strxz_ = strxz_ / (double)ns;
-  stryz_ = stryz_ / (double)ns;
-  strxy_ = strxy_ / (double)ns;
-  sxx_ = sxx_ / (double)ns;
-  syy_ = syy_ / (double)ns;
-  szz_ = szz_ / (double)ns;
-  sxz_ = sxz_ / (double)ns;
-  syz_ = syz_ / (double)ns;
-  sxy_ = sxy_ / (double)ns;
+  double ns_dbl = ns_;
+  strxx_ = strxx_ / ns_dbl;
+  stryy_ = stryy_ / ns_dbl;
+  strzz_ = strzz_ / ns_dbl;
+  strxz_ = strxz_ / ns_dbl;
+  stryz_ = stryz_ / ns_dbl;
+  strxy_ = strxy_ / ns_dbl;
+  sxx_ = sxx_ / ns_dbl;
+  syy_ = syy_ / ns_dbl;
+  szz_ = szz_ / ns_dbl;
+  sxz_ = sxz_ / ns_dbl;
+  syz_ = syz_ / ns_dbl;
+  sxy_ = sxy_ / ns_dbl;
 
   return;
 }
@@ -1007,7 +1048,8 @@ void AppliedStrain::relax(int kmax) {
   /// Call energy to get initial energy and initial gradient.
   ///
 
-  utot = energy(nx_, ny_, nz_, ns_);
+  // utot = energy(nx_, ny_, nz_, ns_);
+  utot = energy();
 
   ///
   /// gg_ is the norm squared of the gradient (gg_ = gb_ * gb_)
@@ -1027,7 +1069,8 @@ void AppliedStrain::relax(int kmax) {
     /// Call dembx to go into the conjugate gradient solver
     ///
 
-    Lstep = dembx(ns_, gg_, ldemb, kkk);
+    // Lstep = dembx(ns_, gg_, ldemb, kkk);
+    Lstep = dembx(ldemb, kkk);
     ltot += Lstep;
 
     ///
@@ -1037,7 +1080,8 @@ void AppliedStrain::relax(int kmax) {
     /// process is coming along.
     ///
 
-    utot = energy(nx_, ny_, nz_, ns_);
+    // utot = energy(nx_, ny_, nz_, ns_);
+    utot = energy();
 
     if (verbose_) {
       cout << "AppliedStrain::relax Energy = " << utot << ", gg_ = " << gg_
@@ -1059,7 +1103,8 @@ void AppliedStrain::relax(int kmax) {
       /// progressing.
       ///
 
-      stress(nx_, ny_, nz_, ns_);
+      // stress(nx_, ny_, nz_, ns_);
+      stress();
 
 #ifdef DEBUG
       cout << "AppliedStrain::relax stresses: xx,    yy,    zz,    xz,    yz,  "
@@ -1081,7 +1126,8 @@ void AppliedStrain::relax(int kmax) {
     }
   }
 
-  stress(nx_, ny_, nz_, ns_);
+  // stress(nx_, ny_, nz_, ns_);
+  stress();
 
   if (verbose_) {
     cout << "AppliedStrain::relax stresses: xx,    yy,    zz,    xz,    yz,    "
@@ -1102,20 +1148,23 @@ void AppliedStrain::relax(int kmax) {
 
 void AppliedStrain::calc(string fileName, double exx, double eyy, double ezz,
                          double exz, double eyz, double exy) {
-  int kmax = 40;
+  int kmax = kmax_; // 40;
+  int m;
 
   ///
   /// Read in a microstructure in subroutine ppixel, and set up pix_[m] with
   /// the appropriate phase assignments.
   ///
 
-  ppixel(fileName, nphase_);
+  // ppixel(fileName, nphase_);
+  ppixel(fileName);
 
   ///
   /// Count and output the volume fractions of the different phases.
   ///
 
-  assig(ns_, nphase_);
+  // assig(ns_, nphase_);
+  assig();
 
 #ifdef DEBUG
   for (int i = 0; i < nphase_; i++) {
@@ -1160,7 +1209,8 @@ void AppliedStrain::calc(string fileName, double exx, double eyy, double ezz,
   /// input in subroutine femat.
   ///
 
-  femat(nx_, ny_, nz_, ns_, nphase_);
+  // femat(nx_, ny_, nz_, ns_, nphase_);
+  femat();
 
   ///
   /// Apply chosen strains as a homogeneous macroscopic strain
@@ -1170,13 +1220,16 @@ void AppliedStrain::calc(string fileName, double exx, double eyy, double ezz,
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < ny_; j++) {
       for (int i = 0; i < nx_; i++) {
-        int m = nx_ * ny_ * k + nx_ * j + i;
-        double x = (double)i;
-        double y = (double)j;
-        double z = (double)k;
-        u_[m][0] = x * exx + y * exy + z * exz;
-        u_[m][1] = x * exy + y * eyy + z * eyz;
-        u_[m][2] = x * exz + y * eyz + z * ezz;
+        m = nxy_ * k + nx_ * j + i;
+        // double x = (double)i;
+        // double y = (double)j;
+        // double z = (double)k;
+        // u_[m][0] = x * exx + y * exy + z * exz;
+        // u_[m][1] = x * exy + y * eyy + z * eyz;
+        // u_[m][2] = x * exz + y * eyz + z * ezz;
+        u_[m][0] = i * exx + j * exy + k * exz;
+        u_[m][1] = i * exy + j * eyy + k * eyz;
+        u_[m][2] = i * exz + j * eyz + k * ezz;
       }
     }
   }
@@ -1197,14 +1250,20 @@ void AppliedStrain::calc(string fileName, double exx, double eyy, double ezz,
 double AppliedStrain::getBulkModulus(string fileName) {
   double bulk;
   double Stress, Strain;
-  Stress = Strain = 0.0;
+  // Stress = Strain = 0.0;
+  
+  // cout << "AppliedStrain::getBulkModulus - bf-calc" << endl;
 
   calc(fileName, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05);
 
-  for (int i = 0; i < 3; i++) {
-    Stress += getStress(i);
-    Strain += getStrain(i);
-  }
+  // cout << "AppliedStrain::getBulkModulus - af-calc" << endl;
+
+  // for (int i = 0; i < 3; i++) {
+  //   Stress += getStress(i);
+  //   Strain += getStrain(i);
+  // }
+  Stress = getStress(0) + getStress(1) + getStress(2);
+  Strain = getStrain(0) + getStrain(1) + getStrain(2);
   bulk = Stress / 3.0 / Strain;
 
   return bulk;

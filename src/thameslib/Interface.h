@@ -50,8 +50,7 @@ potential for dissolution.
 class Interface {
 
 private:
-  unsigned int
-      microPhaseId_; /**< The phase id of the voxels at this interface */
+  int microPhaseId_; /**< The phase id of the voxels at this interface */
 
   ChemicalSystem
       *chemSys_; /**< The `ChemicalSystem` object for the simulation */
@@ -108,11 +107,11 @@ public:
 
   @return the integer id for the phase associated with this interface
   */
-  unsigned int getMicroPhaseId(void) const {
-    return (unsigned int)(microPhaseId_);
+  int getMicroPhaseId(void) const {
+    return microPhaseId_;
   }
 
-  void setMicroPhaseId(unsigned int mPhId) { microPhaseId_ = mPhId; }
+  void setMicroPhaseId(int mPhId) { microPhaseId_ = mPhId; }
 
   /**
   @brief Gets the list of sites where growth of this phase can occur adjacent to

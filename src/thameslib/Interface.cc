@@ -34,8 +34,8 @@ Interface::Interface(const bool verbose) {
 
 Interface::Interface(ChemicalSystem *csys, vector<Site *> gv,
                      vector<Site *> dv, unsigned int pid, const bool verbose) {
-  unsigned int j;
-  unsigned int i;
+  int j;
+  int i;
   double afty;
 
 #ifdef DEBUG

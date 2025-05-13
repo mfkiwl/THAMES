@@ -5,9 +5,9 @@
 */
 #include "ElasticModel.h"
 
-ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, int nphase,
+ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
                            int npoints, const bool verbose,
-                           const bool warning) {
+                           const bool warning) : chemSys_(cs) {
   ///
   /// Assign the dimensions of the finite element (FE) mesh
   ///
@@ -23,11 +23,13 @@ ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, int nphase,
   nx_ = nx;
   ny_ = ny;
   nz_ = nz;
+  nxy_ = nx_ * ny_;
   ns_ = nx_ * ny_ * nz_;
 
   if (verbose_) {
     cout << "ElasticModel::ElasticModel Constructor nx_ = " << nx_
-         << " ny_ = " << ny_ << " nz_ = " << nz_ << " ns_ = " << ns_ << endl;
+         << " ny_ = " << ny_ << " nz_ = " << nz_ << " nxy_ = " << nxy_
+         << " ns_ = " << ns_ << endl;
     cout.flush();
   }
 
@@ -66,7 +68,8 @@ ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, int nphase,
   /// The values of `pix(m)` will run from 1 to `nphase_`.
   ///
 
-  nphase_ = nphase;
+  // nphase_ = nphase;
+  nphase_ = chemSys_->getNumMicroPhases();
 
   ///
   /// Establish the stopping criterion for convergence (proportional to
@@ -247,13 +250,12 @@ void ElasticModel::BuildNeighbor() {
   /// periodic boundary conditions in all three directions
   ///
 
-  int nxy = nx_ * ny_;
   int m, m1;
   int i1, j1, k1;
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < ny_; j++) {
       for (int i = 0; i < nx_; i++) {
-        m = nxy * k + nx_ * j + i;
+        m = nxy_ * k + nx_ * j + i;
         for (int n = 0; n < 27; n++) {
           i1 = i + in[n];
           j1 = j + jn[n];
@@ -270,7 +272,7 @@ void ElasticModel::BuildNeighbor() {
             k1 += nz_;
           else if (k1 >= nz_)
             k1 -= nz_;
-          m1 = nxy * k1 + nx_ * j1 + i1;
+          m1 = nxy_ * k1 + nx_ * j1 + i1;
           ib_[m][n] = m1;
         }
       }
@@ -280,43 +282,51 @@ void ElasticModel::BuildNeighbor() {
   return;
 }
 
-void ElasticModel::ElasModul(string phasemod_fileName, int nphase) {
+// void ElasticModel::ElasModul(string phasemod_fileName, int nphase) {
+void ElasticModel::ElasModul(void) {
+
   ///
   /// Open the file input stream with the specified name.
   /// This file holds the values of the Young's modulus [GPa] and
   /// Poisson's ratio of each phase
   ///
 
-  ifstream in(phasemod_fileName.c_str());
-  if (!in) {
-    cout << "ElasticModel::ElasModul can't open the file: " << phasemod_fileName
-         << endl;
-    cout.flush();
-    exit(1);
-  } else {
-    string buff;
-    int phaseid;
-    double elsmodul = 0.0;
-    for (int i = 0; i < nphase; i++) {
-      in >> phaseid;
-      in >> buff;
-      in >> elsmodul;
-      phasemod_[phaseid][0] = elsmodul;
-      in >> elsmodul;
-      phasemod_[phaseid][1] = elsmodul;
+  // ifstream in(phasemod_fileName.c_str());
+  // if (!in) {
+  //   cout << "ElasticModel::ElasModul can't open the file: " << phasemod_fileName
+  //        << endl;
+  //  cout.flush();
+  //  exit(1);
+  // } else {
+    string mPhName;
+    double elModComp = 0.0;
+    for (int i = 0; i < nphase_; i++) {
+      // in >> phaseid;
+      // in >> buff;
+      // in >> elsmodul;
+      // phasemod_[phaseid][0] = elsmodul;
+      // in >> elsmodul;
+      // phasemod_[phaseid][1] = elsmodul;
+      mPhName = chemSys_->getMicroPhaseName(i);
+      elModComp = chemSys_->getElasticModuliComp(mPhName).K; // bulk modulus
+      phasemod_[i][0] = elModComp;
+      elModComp = chemSys_->getElasticModuliComp(mPhName).G; // shear modulus
+      phasemod_[i][0] = elModComp;
     }
-  }
+  // }
 
   ///
   /// The program uses bulk modulus (0) and shear modulus (1), so transform
-  /// Young's modulus (0) and Poisoon's ratio (1) to them.
+  /// Young's modulus (E) and Poisoon's ratio (n) to them.
+  /// (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K + G))
+  /// (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
   ///
 
-  for (int i = 0; i < nphase_; i++) {
-    double save = phasemod_[i][0];
-    phasemod_[i][0] = (phasemod_[i][0] / 3.0) / (1 - 2 * phasemod_[i][1]);
-    phasemod_[i][1] = (save / 2.0) / (1.0 + phasemod_[i][1]);
-  }
+  // for (int i = 0; i < nphase_; i++) {
+  //   double save = phasemod_[i][0];
+  //   phasemod_[i][0] = (phasemod_[i][0] / 3.0) / (1 - 2 * phasemod_[i][1]);
+  //   phasemod_[i][1] = (save / 2.0) / (1.0 + phasemod_[i][1]);
+  // }
 
   ///
   /// Set up the elastic modulus tensor for each phase, which uses
@@ -411,7 +421,7 @@ void ElasticModel::ElasModul(string phasemod_fileName, int nphase) {
   /// \f}
   ///
 
-  for (int ijk = 0; ijk < nphase; ijk++) {
+  for (int ijk = 0; ijk < nphase_; ijk++) {
     for (int j = 0; j < 6; j++) {
       for (int i = 0; i < 6; i++) {
         cmod_[ijk][i][j] =
@@ -422,7 +432,147 @@ void ElasticModel::ElasModul(string phasemod_fileName, int nphase) {
   return;
 }
 
-void ElasticModel::ppixel(string fileName, int nphase) {
+void ElasticModel::initStiffness(void) {
+  double dndx[8], dndy[8], dndz[8];
+  double g[3][3][3];
+  double es[6][8][3];
+  double x, y, z;
+
+  ///
+  /// (User) NOTE: complete elastic modulus matrix is used, so an anisotropic
+  /// matrix could be directly input at any point, since program is written to
+  /// use a general elastic moduli tensor, but is only explicitly implemented
+  /// for isotropic materials.
+  ///
+
+  ///
+  /// Initialize stiffness matrices dk_
+  ///
+
+
+  ///
+  /// Set up elastic moduli matrices for each kind of element
+  ///
+
+
+  ///
+  /// Set up Simpson's integration rule weight vector
+  ///
+
+  for (int k = 0; k < 3; k++) {
+    for (int j = 0; j < 3; j++) {
+      for (int i = 0; i < 3; i++) {
+        int nm = 0;
+        if (i == 1)
+          nm += 1;
+        if (j == 1)
+          nm += 1;
+        if (k == 1)
+          nm += 1;
+        g[i][j][k] = pow((double)4, (double)nm);
+      }
+    }
+  }
+
+  ///
+  /// Loop over the nphase kinds of pixels and Simpson's rule quadrature points
+  /// in order to compute the stiffness matrices. Stiffness matrices of
+  /// trilinear finite elements are quadratic in x, y, and z, so that Simpson's
+  /// rule quadrature gives exact results.
+  ///
+
+  for (int ijk = 0; ijk < nphase_; ijk++) {
+    for (int k = 0; k < 3; k++) {
+      for (int j = 0; j < 3; j++) {
+        for (int i = 0; i < 3; i++) {
+          x = ((float)(i)) / 2.0;
+          y = ((float)(j)) / 2.0;
+          z = ((float)(k)) / 2.0;
+
+          ///
+          /// dndx means the negative derivative, with respect to x,
+          /// of the shape matrix
+          /// N (see Manual, Sec. 2.2), dndy, and dndz are similar.
+          ///
+
+          dndx[0] = (-(1.0 - y)) * (1.0 - z);
+          dndx[1] = (1.0 - y) * (1.0 - z);
+          dndx[2] = y * (1.0 - z);
+          dndx[3] = (-y) * (1.0 - z);
+          dndx[4] = (-(1.0 - y)) * z;
+          dndx[5] = (1.0 - y) * z;
+          dndx[6] = y * z;
+          dndx[7] = (-y) * z;
+          dndy[0] = (-(1.0 - x)) * (1.0 - z);
+          dndy[1] = (-x) * (1.0 - z);
+          dndy[2] = x * (1.0 - z);
+          dndy[3] = (1.0 - x) * (1.0 - z);
+          dndy[4] = (-(1.0 - x)) * z;
+          dndy[5] = (-x) * z;
+          dndy[6] = x * z;
+          dndy[7] = (1.0 - x) * z;
+          dndz[0] = (-(1.0 - x)) * (1.0 - y);
+          dndz[1] = (-x) * (1.0 - y);
+          dndz[2] = (-x) * y;
+          dndz[3] = (-(1.0 - x)) * y;
+          dndz[4] = (1.0 - x) * (1.0 - y);
+          dndz[5] = x * (1.0 - y);
+          dndz[6] = x * y;
+          dndz[7] = (1.0 - x) * y;
+
+          ///
+          /// Now build strain matrix
+          ///
+
+          for (int n1 = 0; n1 < 6; n1++) {
+            for (int n2 = 0; n2 < 8; n2++) {
+              for (int n3 = 0; n3 < 3; n3++) {
+                es[n1][n2][n3] = 0.0;
+              }
+            }
+          }
+
+          for (int n = 0; n < 8; n++) {
+            es[0][n][0] = dndx[n];
+            es[1][n][1] = dndy[n];
+            es[2][n][2] = dndz[n];
+            es[3][n][0] = dndz[n];
+            es[3][n][2] = dndx[n];
+            es[4][n][1] = dndz[n];
+            es[4][n][2] = dndy[n];
+            es[5][n][0] = dndy[n];
+            es[5][n][1] = dndx[n];
+          }
+
+          ///
+          /// Matrix multiply to determine value at (x,y,z), multiply by proper
+          /// weight, and sum into dk, the stiffness matrix.
+          ///
+
+          for (int mm = 0; mm < 3; mm++) {
+            for (int nn = 0; nn < 3; nn++) {
+              for (int ii = 0; ii < 8; ii++) {
+                for (int jj = 0; jj < 8; jj++) {
+                  double sum = 0.0;
+                  for (int kk = 0; kk < 6; kk++) {
+                    for (int ll = 0; ll < 6; ll++) {
+                      sum +=
+                          es[kk][ii][mm] * cmod_[ijk][kk][ll] * es[ll][jj][nn];
+                    }
+                  }
+                  dk_[ijk][ii][mm][jj][nn] += g[i][j][k] * sum / 216.0;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// void ElasticModel::ppixel(string fileName, int nphase) {
+void ElasticModel::ppixel(string fileName) {
   ///
   /// If you want to set up a test image inside the program, instead of
   /// reading it in from a file, this should be done inside this method
@@ -446,6 +596,7 @@ void ElasticModel::ppixel(string fileName, int nphase) {
 
   } else {
 
+    /*
     in >> buff;
     if (buff == VERSIONSTRING) {
       in >> version;
@@ -473,6 +624,17 @@ void ElasticModel::ppixel(string fileName, int nphase) {
       resolution = 1.0;
       nx_ = ny_ = nz_ = 100;
     }
+    */
+    in >> buff; // VERSIONSTRING
+    in >> version;
+    in >> buff; // XSIZESTRING
+    in >> nx_;
+    in >> buff; // YSIZESTRING
+    in >> ny_;
+    in >> buff; // ZSIZESTRING
+    in >> nz_;
+    in >> buff; // IMGRESSTRING
+    in >> resolution;
 
     ///
     /// Each line of the microstructure file contains the phase id
@@ -480,18 +642,25 @@ void ElasticModel::ppixel(string fileName, int nphase) {
     /// the same order as the finite elements are populated
     ///
 
-    ns_ = nx_ * ny_ * nz_;
-    int nxy = nx_ * ny_;
+    // ns_ = nx_ * ny_ * nz_;
+    // nxy_ = nx_ * ny_;
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < ny_; j++) {
         for (int i = 0; i < nx_; i++) {
-          m = nxy * k + nx_ * j + i;
+          m = nxy_ * k + nx_ * j + i;
           in >> pix_[m];
         }
       }
     }
 
     in.close();
+
+    // cout << endl << "ini ppixel vector (6):" << endl;
+    // for (int i = 0; i < ns_; i++) {
+    //   cout << pix_[i] << endl;
+    // }
+    // cout << "end ppixel vector (6):" << endl;
+    // exit(0);
 
     ///
     /// Check for wrong phase labels--less than 1 or greater than nphase_.
@@ -501,14 +670,78 @@ void ElasticModel::ppixel(string fileName, int nphase) {
     /// @todo See if it makes sense to do value checking as exception handling
     ///
 
-    for (int m = 0; m < ns_; m++) {
-      if (pix_[m] < 0) {
-        cout << "Phase label in pix < 0 --- error at " << m << endl;
-      } else if (pix_[m] >= nphase_) {
-        cout << "Phase label in pix >= nphase_ --- error at " << m << endl;
+    // for (int m = 0; m < ns_; m++) {
+    //   if (pix_[m] < 0) {
+    //     cout << "Phase label in pix < 0 --- error at " << m << endl;
+    //   } else if (pix_[m] >= nphase_) {
+    //     cout << "Phase label in pix >= nphase_ --- error at " << m << endl;
+    //   }
+    // }
+  }
+
+  return;
+}
+
+// void ElasticModel::ppixel(string fileName, int nphase) {
+void ElasticModel::ppixel(vector<int> vectPhId) {
+
+    ///
+    /// Each line of the microstructure file contains the phase id
+    /// to assign, and the microstructure file must be written in
+    /// the same order as the finite elements are populated
+    ///
+
+  int m;
+  int kji = -1;
+  // ns_ = nx_ * ny_ * nz_;
+  // nxy_ = nx_ * ny_;
+  for (int k = 0; k < nz_; k++) {
+    for (int j = 0; j < ny_; j++) {
+      for (int i = 0; i < nx_; i++) {
+        m = nxy_ * k + nx_ * j + i;
+        kji++;
+        pix_[m] = vectPhId[kji];
       }
     }
   }
+
+  return;
+}
+
+void ElasticModel::ppixel(vector<int> *p_vectPhId) {
+
+    ///
+    /// Each line of the microstructure file contains the phase id
+    /// to assign, and the microstructure file must be written in
+    /// the same order as the finite elements are populated
+    ///
+
+  /*
+  int m;
+  int kji = -1;
+  // ns_ = nx_ * ny_ * nz_;
+  int nxy = nx_ * ny_;
+  for (int k = 0; k < nz_; k++) {
+    for (int j = 0; j < ny_; j++) {
+      for (int i = 0; i < nx_; i++) {
+        m = nxy * k + nx_ * j + i;
+        kji++;
+        pix_[m] = (*p_vectPhId)[kji];
+      }
+    }
+  }
+  */
+
+  for (int i = 0; i < ns_; i++) {
+    pix_[i] = (*p_vectPhId)[i];
+  }
+
+  // cout << endl << "ini ppixel vector:" << endl;
+  // for (int i = 0; i < ns_; i++) {
+  //   cout << pix_[i] << endl;
+  // }
+  // cout << "end ppixel vector:" << endl;
+  // exit(0);
 
   return;
 }
@@ -535,7 +768,7 @@ void ElasticModel::getAvgStrainengy() {
   ///
 
   for (int i = 0; i < nphase_; i++) {
-    avgStrainengy_[i] = avgStrainengy_[i] / (float)(prob_[i] * ns_);
+    avgStrainengy_[i] = avgStrainengy_[i] / (prob_[i] * ns_); // check!
   }
 
   ///
@@ -568,133 +801,53 @@ void ElasticModel::getAvgStrainengy() {
   /// @todo Generalize the indices and molar volumes
   ///
 
+  // strainenergy.clear();
+  // strainenergy.resize(156, 0.0);
+  int numDCs = chemSys_->getNumDCs();
   strainenergy.clear();
-  strainenergy.resize(156, 0.0);
+  strainenergy.resize(numDCs, 0.0);
 
+  double molarVolume;
+  vector<double> convFactDCs;
+  for (int i = 0; i < numDCs; i++) {
+    molarVolume = chemSys_->getDCMolarVolume(i);
+    convFactDCs.push_back(molarVolume * 1.e9);
+  }
+
+  int waterDCId = chemSys_->getDCId(WaterDCName); // "H2O@"
+  strainenergy[waterDCId] =
+      avgStrainengy_[ELECTROLYTEID] * convFactDCs[waterDCId];
+
+  vector<int> mPhDCcomp;
+  int size;
+  int DCId;
+  for (int mPhId = FIRST_SOLID; mPhId < nphase_; mPhId++) {
+    mPhDCcomp = chemSys_->getMicroPhaseDCMembers(mPhId);
+    size = mPhDCcomp.size();
+    for (int j = 0; j < size; j++) {
+      DCId = mPhDCcomp[j];
+      strainenergy[DCId] =
+          avgStrainengy_[mPhId] * convFactDCs[DCId];
+    }
+  }
+
+  /*
   ///
   /// DC component making up the H2O microstructure phase
   ///
 
-  strainenergy[70] = avgStrainengy_[1] * (1.8068E4); /* Water */
+  strainenergy[70] = avgStrainengy_[1] * (1.8068E4); // Water
 
-  ///
-  /// DC component making up the C3S microstructure phase
-  ///
+    ...
 
-  strainenergy[115] = avgStrainengy_[2] * (7.318E4); /* C3S */
-
-  ///
-  /// DC component making up the C2S microstructure phase
-  ///
-
-  strainenergy[113] = avgStrainengy_[3] * (5.179E4); /* Beta-C2S */
-
-  ///
-  /// DC component making up the C3A microstructure phase
-  ///
-
-  strainenergy[114] = avgStrainengy_[4] * (8.9217E4); /* C3A */
-
-  ///
-  /// DC component making up the C4AF microstructure phase
-  ///
-
-  strainenergy[116] = avgStrainengy_[5] * (1.30202E5); /* C4AF */
-
-  ///
-  /// DC components making up the GYPSUM microstructure phase
-  ///
-
-  strainenergy[134] = avgStrainengy_[8] * (7.469E4); /* Gypsum */
-
-  ///
-  /// DC components making up the HEMIANH microstructure phase
-  ///
-
-  strainenergy[135] = avgStrainengy_[9] * (6.173E4); /* Hemihydrate */
-  strainenergy[133] = avgStrainengy_[9] * (4.594E4); /* Anhydrite */
-
-  ///
-  /// DC components making up the CACO3 microstructure phase
-  ///
-
-  strainenergy[128] = avgStrainengy_[10] * (3.6934E4); /* Calcite */
-  strainenergy[127] = avgStrainengy_[10] * (3.415E4);  /* Aragonite */
-
-  strainenergy[132] = avgStrainengy_[11] * (3.306E4); /* Portlandite */
-
-  ///
-  /// DC components making up the CSH microstructure phase
-  ///
-
-  strainenergy[80] = avgStrainengy_[12] * (5.87E4); /* Tob-II */
-  strainenergy[79] = avgStrainengy_[12] * (7.84E4); /* Jennite */
-
-  ///
-  /// DC components making up the AFMC microstructure phase
-  ///
-
-  strainenergy[95] = avgStrainengy_[13] * (2.84515E5); /* Hemicarbonate */
-  strainenergy[96] = avgStrainengy_[13] * (2.96472E5); /* Fe-hemicarbonate */
-  strainenergy[97] = avgStrainengy_[13] * (2.61958E5); /* Monocarbonate */
-  strainenergy[98] = avgStrainengy_[13] * (2.90190E5); /* Fe-monocarbonate */
-
-  ///
-  /// DC components making up the MONOSULPH microstructure phase
-  ///
-
-  strainenergy[91] = avgStrainengy_[14] * (3.0903E5);  /* Monosulfate */
-  strainenergy[92] = avgStrainengy_[14] * (3.2114E5);  /* Fe-monosulfate */
-  strainenergy[99] = avgStrainengy_[14] * (2.7398E5);  /* 1-C4AH13 */
-  strainenergy[100] = avgStrainengy_[14] * (3.0903E5); /* 1-Monosulfate */
-  strainenergy[101] = avgStrainengy_[14] * (2.7398E5); /* 2-C4AH13 */
-  strainenergy[102] = avgStrainengy_[14] * (3.0903E5); /* 2-Monosulfate */
-
-  ///
-  /// DC components making up the ETTR microstructure phase
-  ///
-
-  strainenergy[87] = avgStrainengy_[15] * (7.0703E5);  /* Ettringite */
-  strainenergy[88] = avgStrainengy_[15] * (7.1756E5);  /* Fe-ettringite */
-  strainenergy[89] = avgStrainengy_[15] * (7.0703E5);  /* 1-Ettringite */
-  strainenergy[90] = avgStrainengy_[15] * (7.1756E5);  /* 1-Fe-ettringite */
-  strainenergy[103] = avgStrainengy_[15] * (6.504E5);  /* Tricarboaluminate */
-  strainenergy[104] = avgStrainengy_[15] * (7.0703E5); /* 2-Ettringite */
-  strainenergy[105] = avgStrainengy_[15] * (6.504E5);  /* 1-Tricarboaluminate */
-  strainenergy[106] = avgStrainengy_[15] * (7.0703E5); /* 3-Ettringite */
-  strainenergy[126] = avgStrainengy_[15] * (7.0703E5); /* 4-Ettringite */
-
-  ///
-  /// DC component making up the BRUCITE microstructure phase
-  ///
-
-  strainenergy[152] = avgStrainengy_[16] * (2.463E4); /* Brucite */
-
-  ///
-  /// DC components making up the HYDROTALC microstructure phase
-  ///
-
-  strainenergy[107] = avgStrainengy_[17] * (2.202E5); /* Hydrotalcite */
-  strainenergy[108] = avgStrainengy_[17] * (2.324E5); /* Fe-hydrotalcite */
-  strainenergy[150] = avgStrainengy_[17] * (2.204E5); /* CO3-hydrotalcite */
-
-  ///
-  /// DC components making up the AFM microstructure phase
-  ///
-
-  strainenergy[81] = avgStrainengy_[18] * (1.8386E5);   /* C2AH8 */
-  strainenergy[82] = avgStrainengy_[18] * (1.9359E5);   /* C2FH8 */
-  strainenergy[83] = avgStrainengy_[18] * (1.49702E5);  /* C3AH6 */
-  strainenergy[84] = avgStrainengy_[18] * (1.55287E5);  /* C3FH6 */
-  strainenergy[85] = avgStrainengy_[18] * (2.7398E5);   /* C4AH13 */
-  strainenergy[86] = avgStrainengy_[18] * (2.8594E5);   /* C4FH13 */
-  strainenergy[120] = avgStrainengy_[18] * (1.93985E5); /* CAH10 */
+  strainenergy[120] = avgStrainengy_[18] * (1.93985E5); // CAH10
 
   ///
   /// DC component making up the LIME microstructure phase
   ///
 
-  strainenergy[131] = avgStrainengy_[19] * (1.6764E4); /* Free lime */
+  strainenergy[131] = avgStrainengy_[19] * (1.6764E4); // Free lime
+  */
 
   return;
 }
@@ -717,7 +870,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     ///
 
     ostringstream ostr;
-    ostr << (int)(time * 100.0);
+    ostr << (int)(time * 60.0);
     string timestr(ostr.str());
     string ofileName(root);
     string ofpngname(root);
@@ -755,11 +908,11 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     out << nx_ << " " << nz_ << endl;
     out << "255" << endl;
 
-    unsigned int slice = nx_ / 2;
-
+    int slice = nx_ / 2;
+    int m;
     for (int j = 0; j < ny_; j++) {
       for (int k = 0; k < nz_; k++) {
-        int m = nx_ * ny_ * k + nx_ * j + slice;
+        m = nxy_ * k + nx_ * j + slice;
         if (min > elestress_[m][index])
           min = elestress_[m][index];
         if (max < elestress_[m][index])
@@ -777,7 +930,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
 
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
-        int m = nx_ * ny_ * k + nx_ * j + slice;
+        m = nxy_ * k + nx_ * j + slice;
         color[1] = (int)(((elestress_[m][index] - min) / (max - min)) * 255);
         color[2] = (int)(((elestress_[m][index] - min) / (max - min)) * 255);
         out << color[0] << " " << color[1] << " " << color[2] << endl;
@@ -798,7 +951,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
       // handle the error;
       cout << endl << endl << "    ElasticModel.cc - error in writeStress() : resCallSystem = -1" << endl;
       cout << endl <<"    STOP program" << endl;
-      //throw HandleException ("writeStress", "ElasticModel.cc",
+      // throw HandleException ("writeStress", "ElasticModel.cc",
       //                "system(buff.c_str())", "resCallSystem = -1");
       exit(1);
 
@@ -832,7 +985,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     ///
 
     ostringstream ostr;
-    ostr << (int)(time * 100.0);
+    ostr << (int)(time * 60.0);
     string timestr(ostr.str());
     string ofileName(root);
     string ofpngname(root);
@@ -870,11 +1023,11 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     out << nx_ << " " << nz_ << endl;
     out << "255" << endl;
 
-    unsigned int slice = nx_ / 2;
-
+    int slice = nx_ / 2;
+    int m;
     for (int j = 0; j < ny_; j++) {
       for (int k = 0; k < nz_; k++) {
-        int m = nx_ * ny_ * k + nx_ * j + slice;
+        m = nxy_ * k + nx_ * j + slice;
         if (min > elestrain_[m][index])
           min = elestrain_[m][index];
         if (max < elestrain_[m][index])
@@ -883,7 +1036,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     }
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < nz_; j++) {
-        int m = nx_ * ny_ * k + nx_ * j + slice;
+        m = nxy_ * k + nx_ * j + slice;
         color[1] = (int)(((elestrain_[m][index] - min) / (max - min)) * 255);
         color[2] = (int)(((elestrain_[m][index] - min) / (max - min)) * 255);
         out << color[0] << " " << color[1] << " " << color[2] << endl;
@@ -904,7 +1057,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
       // handle the error;
       cout << endl << endl << "    ElasticModel.cc - error in writeStrain() : resCallSystem = -1" << endl;
       cout << endl <<"    STOP program" << endl;
-      //throw HandleException ("writeStrain", "ElasticModel.cc",
+      // throw HandleException ("writeStrain", "ElasticModel.cc",
       //                "system(buff.c_str())", "resCallSystem = -1");
       exit(1);
     }
@@ -917,7 +1070,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
   }
 }
 
-void ElasticModel::writeDisp(string &root, double time) {
+void ElasticModel::writeDisp(string &root, string timeString) {
 
 #ifdef DEBUG
   cout << "ElasticModel::writeDisp" << endl;
@@ -928,11 +1081,12 @@ void ElasticModel::writeDisp(string &root, double time) {
   /// Specify the file name and open the output stream
   ///
 
-  ostringstream ostr;
-  ostr << (int)(time * 100.0);
-  string timestr(ostr.str());
+  // ostringstream ostr;
+  // ostr << (int)(time * 60.0);
+  // string timestr(ostr.str());
   string ofileName(root);
-  ofileName = ofileName + "." + "disp." + timestr + ".dat";
+  // ofileName = ofileName + "." + "disp." + timestr + ".dat";
+  ofileName = ofileName + "." + timeString + ".disp.dat";
   ofstream out(ofileName.c_str());
 
   if (!out.is_open()) {
@@ -940,13 +1094,18 @@ void ElasticModel::writeDisp(string &root, double time) {
     exit(1);
   }
 
-  for (int k = 0; k < nz_; k++) {
-    for (int j = 0; j < ny_; j++) {
-      for (int i = 0; i < nx_; i++) {
-        int m = nx_ * ny_ * k + nx_ * j + i;
-        out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << endl;
-      }
-    }
+  // int m;
+  // for (int k = 0; k < nz_; k++) {
+  //   for (int j = 0; j < ny_; j++) {
+  //     for (int i = 0; i < nx_; i++) {
+  //       m = nxy_ * k + nx_ * j + i;
+  //       out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << endl;
+  //     }
+  //   }
+  // }
+
+  for (int m = 0; m < ns_; m++) {
+    out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << endl;
   }
 
   out.close();
@@ -976,7 +1135,7 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   ///
 
   ostringstream ostr;
-  ostr << (int)(time * 100.0);
+  ostr << (int)(time * 60.0);
   string timestr(ostr.str());
   string ofileName(root);
   string ofpngname(root);
@@ -997,10 +1156,11 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   out << nx_ << " " << nz_ << endl;
   out << "255" << endl;
 
-  unsigned int slice = nx_ / 2;
+  int m;
+  int slice = nx_ / 2;
   for (int j = 0; j < ny_; j++) {
     for (int k = 0; k < nz_; k++) {
-      int m = nx_ * ny_ * k + nx_ * j + slice;
+      m = nxy_ * k + nx_ * j + slice;
       if (min > strainengy_[m])
         min = strainengy_[m];
       if (max < strainengy_[m])
@@ -1010,7 +1170,7 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
 
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < nz_; j++) {
-      int m = nx_ * ny_ * k + nx_ * j + slice;
+      m = nxy_ * k + nx_ * j + slice;
       color[1] = (int)(((strainengy_[m] - min) / (max - min)) * 255);
       color[2] = (int)(((strainengy_[m] - min) / (max - min)) * 255);
       out << color[0] << " " << color[1] << " " << color[2] << endl;

@@ -23,7 +23,7 @@ using namespace std;
 class Isite {
 
 private:
-  unsigned int id_; /**< The id of the corresponding Site */
+  int id_; /**< The id of the corresponding Site */
   double affinity_;    /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
   double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
@@ -44,7 +44,7 @@ public:
   @param aftyval is the prescribed value of the affinity to set
   @param verbose is the flag for verbose output
   */
-  Isite(unsigned int idval, double aftyval, const bool verbose = false, double prb = 0, double prbIni = 0);
+  Isite(int idval, double aftyval, const bool verbose = false, double prb = 0);
 
   /**
   @brief Copy constructor.
@@ -60,7 +60,7 @@ public:
 
   @return the id number of the corresponding Site object
   */
-  unsigned int getId(void) const { return id_; }
+  int getId(void) const { return id_; }
 
   /**
   @brief Set the id number of the corresponding Site object.
@@ -69,7 +69,7 @@ public:
 
   @param idval is the id number of the corresponding Site object
   */
-  void setId(unsigned int idval) { id_ = idval; }
+  void setId(int idval) { id_ = idval; }
 
   /**
   @brief Get the growth affinity of the corresponding Site object.
