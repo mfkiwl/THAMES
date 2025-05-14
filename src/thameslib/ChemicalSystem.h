@@ -23,7 +23,7 @@ as possible.
 #ifndef CHEMSYSH
 #define CHEMSYSH
 
-#include "../Resources/include/GEMS3K/node.h"
+#include "../GEMS3K-standalone/GEMS3K/node.h"
 #include "../Resources/include/nlohmann/json.hpp"
 #include "global.h"
 #include "utils.h"

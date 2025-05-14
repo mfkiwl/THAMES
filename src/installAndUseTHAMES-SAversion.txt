@@ -20,13 +20,13 @@ to:
 
     # Recursively collect all header files from the current directory
 file(GLOB HEADER_FILES *.h
-  PathToTHAMES/THAMES/src/GEMS3K-standalone-2/thames.h
-  PathToTHAMES/THAMES/src/GEMS3K-standalone-2/thameslib/*.h)
+  PathToTHAMES/THAMES/src/thames.h
+  PathToTHAMES/THAMES/src/thameslib/*.h)
 
 # Recursively collect all source files from the current directory
 file(GLOB SOURCE_FILES *.cpp
-  PathToTHAMES/THAMES/src/GEMS3K-standalone-2/thames.cc
-  PathToTHAMES/THAMES/src/GEMS3K-standalone-2/thameslib/*.cc)
+  PathToTHAMES/THAMES/src/thames.cc
+  PathToTHAMES/THAMES/src/thameslib/*.cc)
 
 >>>>>
 
@@ -54,55 +54,50 @@ Go = dCH->G0[ jj+xTP] + strainenergy[jj+xTP];
 
 >>>>>
 
-6. create a folder called “build”:
-`mkdir build`
-
->>>>>
-
-7. move into “build” folder:
-`cd build`
-
->>>>>
-
-8. run cmake command:
-`cmake ..`
-
->>>>>
-
-9. run make command:
-`make`
-
-running make command will create a new folder called “lib” into “build” folder; this new folder must contains two files – our libraries (libGEMS3K.so & libGEMS3K-static.a)
-
+	6. create a folder called “build”:
+	`mkdir build`
+	
 	>>>>>
-
-	9.1. check the two files creation:
+	
+	7. move into “build” folder:
+	`cd build`
+	
+	>>>>>
+	
+	8. run cmake command:
+	`cmake ..`
+	
+	>>>>>
+	
+	9. run make command:
+	`make`
+	
+	running make command will create a new folder called “lib” into “build” folder; this new folder must contains two files – our libraries (libGEMS3K.so & libGEMS3K-static.a)
+	
+	>>>>>
+	
+	10. check the two files creation:
 	`ls lib`
-
+	
 	these two new files must be copied manually into a new folder called also “lib” that we will 	create into the “PathToTHAMES/THAMES/src/Resources” folder
-
+	
 	>>>>>
-
-	9.2 . create the new lib folder:
+	
+	11. create the new lib folder:
 	`mkdir  PathToTHAMES/THAMES/src/Resources/lib`
-
+	
 	>>>>>
-
-	9.3. copy the two libraries into this new create folder (we are into 	PathToTHAMES/THAMES/src/GEMS3K-standalone/build):
+	
+	12. copy the two libraries into this new create folder (we are into 	PathToTHAMES/THAMES/src/GEMS3K-standalone/build):
 	`cp lib/* PathToTHAMES/THAMES/src/Resources/lib`
 
-
 >>>>>
 
-Before to install THAMES we need one more step: we have to copy of all  GEMS3K header files into a new folder, called  “GEMS3K” as well, folder that we will create into “PathToTHAMES/THAMES/src/Resources/include” folder. So:
+6'. alternatively to steps 6. to 12. run into "GEMS3K-standalone" directory the script called "install.sh", after modifying its content according to your OS (comment/uncomment “cmake” lines)
+`./install.sh`
 
-10. create the new GEMS3K folder:
-`mkdir  PathToTHAMES/THAMES/src/Resources/include/GEMS3K`
+(on Linux needs administrator rights to finish its action)
 
->>>>>
-
-11. copy all .h header files from “GEMS3K” folder into the new folder (we are always into “PathToTHAMES/THAMES/src/GEMS3K-standalone/build”):
-`cp ../GEMS3K/*.h PathToTHAMES/THAMES/src/Resources/include/GEMS3K`
 
 
 
@@ -116,7 +111,6 @@ much simpler.
 2. `cmake ..`
 3. `make`
 4. `make install`
-5. `make doc`
 
 This will install the "thames" executable in the “PathToTHAMES/bin” directory, and the
 static libraries in the “PathToTHAMES/lib” directory.
