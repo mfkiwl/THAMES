@@ -42,7 +42,6 @@ doc/InputGuide/*.synctex.gz
 .*.swp
 
 # ignore files that will be created upon complilation
-src/version.h
 src/Doxyfile
 src/Doxyfile$
 src/thameslib/myconfig.h

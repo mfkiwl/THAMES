@@ -2,15 +2,11 @@ cmake_minimum_required(VERSION 3.30)
 
 project (THAMES)
 
-set (THAMES_VERSION 4.0)
-set (THAMES_VERSION_MAJOR 4)
+set (THAMES_VERSION 5.0)
+set (THAMES_VERSION_MAJOR 5)
 set (THAMES_VERSION_MINOR 0)
 
 # configure a header file to pass some CMake settings to source code
-configure_file (
-    "${CMAKE_SOURCE_DIR}/src/version.h.in"
-    "${CMAKE_SOURCE_DIR}/src/version.h"
-    )
 
 configure_file (
     "${CMAKE_SOURCE_DIR}/src/vcctl2thames/vcctl2thames.h.in"
