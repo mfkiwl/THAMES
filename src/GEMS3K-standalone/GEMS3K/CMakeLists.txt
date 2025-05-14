@@ -1,8 +1,12 @@
 # Recursively collect all header files from the current directory
-file(GLOB HEADER_FILES *.h)
+file(GLOB HEADER_FILES *.h
+  ../../thames.h
+  ../../thameslib/*.h)
 
 # Recursively collect all source files from the current directory
-file(GLOB SOURCE_FILES *.cpp)
+file(GLOB SOURCE_FILES *.cpp
+  ../../thames.cc
+  ../../thameslib/*.cc)
 
 # Recursively collect all source files from the current directory
 #file(GLOB SIMDJSON_FILES ${CMAKE_SOURCE_DIR}/simdjson/simdjson.cpp)

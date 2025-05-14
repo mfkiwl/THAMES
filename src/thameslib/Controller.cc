@@ -2062,7 +2062,7 @@ void Controller::parseDoc(const string &docName) {
         tp += frqAttackTime_;
       }
 
-      time_Size = outputTime_.size();
+      int time_Size = outputTime_.size();
       for (i = 0; i < time_Size - 1; i++) {
         for (j = i + 1; j < time_Size; j++) {
           if (outputTime_[i] > outputTime_[j]) {

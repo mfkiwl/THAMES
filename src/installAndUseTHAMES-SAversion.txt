@@ -49,51 +49,54 @@ Go = dCH->G0[ jj+xTP] + strainenergy[jj+xTP];
 
 >>>>>
 
-5. go into “GEMS3K-standalone” folder:
+5. Modify the s_sorpmod.h file to add this line at around line 31:
+#include "m_const.h"
+
+6. go into “GEMS3K-standalone” folder:
 `cd PathToTHAMES/THAMES/src/GEMS3K-standalone/`
 
 >>>>>
 
-	6. create a folder called “build”:
+	7. create a folder called “build”:
 	`mkdir build`
 	
 	>>>>>
 	
-	7. move into “build” folder:
+	8. move into “build” folder:
 	`cd build`
 	
 	>>>>>
 	
-	8. run cmake command:
+	9. run cmake command:
 	`cmake ..`
 	
 	>>>>>
 	
-	9. run make command:
+	10. run make command:
 	`make`
 	
 	running make command will create a new folder called “lib” into “build” folder; this new folder must contains two files – our libraries (libGEMS3K.so & libGEMS3K-static.a)
 	
 	>>>>>
 	
-	10. check the two files creation:
+	11. check the two files creation:
 	`ls lib`
 	
 	these two new files must be copied manually into a new folder called also “lib” that we will 	create into the “PathToTHAMES/THAMES/src/Resources” folder
 	
 	>>>>>
 	
-	11. create the new lib folder:
+	12. create the new lib folder:
 	`mkdir  PathToTHAMES/THAMES/src/Resources/lib`
 	
 	>>>>>
 	
-	12. copy the two libraries into this new create folder (we are into 	PathToTHAMES/THAMES/src/GEMS3K-standalone/build):
+	13. copy the two libraries into this new create folder (we are into 	PathToTHAMES/THAMES/src/GEMS3K-standalone/build):
 	`cp lib/* PathToTHAMES/THAMES/src/Resources/lib`
 
 >>>>>
 
-6'. alternatively to steps 6. to 12. run into "GEMS3K-standalone" directory the script called "install.sh", after modifying its content according to your OS (comment/uncomment “cmake” lines)
+7'. alternatively to steps 7 to 13. run into "GEMS3K-standalone" directory the script called "install.sh", after modifying its content according to your OS (comment/uncomment “cmake” lines)
 `./install.sh`
 
 (on Linux needs administrator rights to finish its action)

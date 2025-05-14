@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 14 17:02 2025 | Getting GEMS3K library to compile with strainenergy added |
 | May 14 16:10 2025 | Merged florinnita_THAMES_SA branch into main |
 | May 11 15:53 2025 | Streamlined JSON input to one file only |
 | May 08 16:20 2025 | Calculate PK SSA, tested surface area scaling, and updated test cases (tested) |

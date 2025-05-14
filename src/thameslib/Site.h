@@ -35,11 +35,10 @@ protected:
   int y_;            /**< y-coordinate in mesh coordinate frame */
   int z_;            /**< y-coordinate in mesh coordinate frame */
   int id_;           /**< Unique id in the 1D array of all sites */
-  uint microPhaseId_; /**< The microstructure phase assignment */
+  int microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
-      *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
-  vector<int>
-      growth_;              /**< Vector of phases that can grow at this site */
+      *chemSys_;       /**< Pointer to simulation's ChemicalSystem object */
+  vector<int> growth_; /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
   double trueVolume_;       /**< Actual volume of site, accounting for stress */
   bool damage_;             /**< True if site is damaged, false otherwise */
@@ -117,8 +116,7 @@ public:
   @param csys is a pointer to the simulation's ChemicalSystem object
   @param verbose is true if verbose output should be produced
   */
-  Site(int xp, int yp, int zp, int xs,
-       int ys, int zs, int neigh,
+  Site(int xp, int yp, int zp, int xs, int ys, int zs, int neigh,
        ChemicalSystem *csys, const bool verbose = false);
 
   void setVisit(int sv) { visit_ = sv; }
@@ -248,7 +246,9 @@ public:
 
   vector<int> getXYZ() {
     vector<int> v(3, 0);
-    v[0] = x_; v[1] = y_; v[2] = z_;
+    v[0] = x_;
+    v[1] = y_;
+    v[2] = z_;
     return v;
   }
 
@@ -373,8 +373,7 @@ public:
       }
     }
     if (found == false) {
-      cout << endl
-           << " stop - void removeGrowthSite(int pid) " << endl;
+      cout << endl << " stop - void removeGrowthSite(int pid) " << endl;
       cout.flush();
       cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
       exit(1);

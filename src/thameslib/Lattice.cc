@@ -4082,7 +4082,7 @@ int Lattice::changeMicrostructure(double time, const int simtype,
   }
 
   int totcount = 0;
-  for (i = 0; i < volNextSize; i++) {
+  for (int i = 0; i < volNextSize; i++) {
     volumeFraction_[i] =
         static_cast<double>(count_[i]) / static_cast<double>(numSites_);
     totcount += count_[i];
@@ -5731,19 +5731,19 @@ void Lattice::writeLatticePNG(double curtime) {
         done = false;
         nd = 0;
         // sitenum = getIndex(i, j, slice);
-        ixx = slice;
+        izz = slice;
         do {
-          sitenum = getIndex(ixx, j, k);
+          sitenum = getIndex(izz, j, k);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
-            ixx++;
-            if (ixx >= xdim_)
-              ixx -= xdim_;
+            izz++;
+            if (izz >= xdim_)
+              izz -= xdim_;
           }
         } while (!done);
-        sitenum = getIndex(ixx, j, k);
+        sitenum = getIndex(izz, j, k);
         image[j][k] = site_[sitenum].getMicroPhaseId();
         dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       } else {
@@ -5878,19 +5878,19 @@ void Lattice::writeDamageLatticePNG(double curtime) {
       done = false;
       nd = 0;
       // sitenum = getIndex(i, j, slice);
-      ixx = slice;
+      izz = slice;
       do {
-        sitenum = getIndex(ixx, j, k);
+        sitenum = getIndex(izz, j, k);
         if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
           done = true;
         } else {
           nd++;
-          ixx++;
-          if (ixx >= xdim_)
-            ixx -= xdim_;
+          izz++;
+          if (izz >= xdim_)
+            izz -= xdim_;
         }
       } while (!done);
-      sitenum = getIndex(ixx, j, k);
+      sitenum = getIndex(izz, j, k);
       if (site_[sitenum].IsDamage()) {
         image[j][k] = 1;
       } else {
@@ -6013,19 +6013,19 @@ void Lattice::makeMovie() {
         done = false;
         nd = 0;
         // sitenum = getIndex(i, j, slice);
-        ixx = slice;
+        izz = slice;
         do {
-          sitenum = getIndex(ixx, j, k);
+          sitenum = getIndex(izz, j, k);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
-            ixx++;
-            if (ixx >= xdim_)
-              ixx -= xdim_;
+            izz++;
+            if (izz >= xdim_)
+              izz -= xdim_;
           }
         } while (!done);
-        sitenum = getIndex(ixx, j, k);
+        sitenum = getIndex(izz, j, k);
         image[j][k] = site_[sitenum].getMicroPhaseId();
         dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
       }
