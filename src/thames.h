@@ -39,7 +39,7 @@ THAMES uses this same modeling philosophy, but adds the extra
 dimension that the microstructure itself is simulated as a function of
 time, using simple nucleation and dissolution/growth rules for each phase.
 The 3-D microstructure is in the form of a digital image (called a
-lattice), with each lattice site assuming a unique unsigned integer
+lattice), with each lattice site assuming a unique integer
 value corresponding to a valid phase.  Data about the phases are stored
 in a database which must also be input at the beginning of a
 simulation.  The microstructure representation used by THAMES is similar to

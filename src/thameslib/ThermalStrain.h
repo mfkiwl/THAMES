@@ -12,7 +12,6 @@ implemented in the AppliedStrain class.
 #define THERMALSTRAIN_H
 
 #include "ElasticModel.h"
-// #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -45,7 +44,7 @@ The problem being solved is the minimization of the elastic energy
     \frac{1}{2} u \cdot A \cdot u + b \cdot u + C + T \cdot u + Y
 @f]
 where <i>A</i> is the Hessian matrix composed of the stiffness matrices
-(`dk`) for each voxel/element, <i>b</i> is a constant vector and and
+(`dk`) for each voxel/element, <i>b</i> is a constant vector and
 <i>C</i> is a scalar constant, both the latter being functions of the strain
 and the periodic boundary conditions.  Up to this point, the energy
 is exactly the same as for any applied strain problem (see the `AppliedStrain`
@@ -164,7 +163,10 @@ protected:
   vector<vector<double>> b5_;    /**< xy component of linear b vector
                                      three terms for each phase, so
                                      b0_[nphase][3] */
-  map<int, vector<int>> exp_;    /**< @todo Find out what this is */
+  map<int, vector<int>> exp_;    /**< @todo Find out what this is :
+                                      list of sites ids and their
+                                     coordinates where local expansion
+                                     occurs */
   vector<vector<double>> eigen_; /**< Six components of the eigenstrain
                                    tensor for each mesh element, so
                                    eigen_[ns][6] */
@@ -177,7 +179,7 @@ protected:
   vector<vector<vector<double>>> ss_; /**< Shear stress tensor components,
                                          one at every element, so the
                                          dimensions are ss_[ns][3][3] */
-
+  int kmax_; /**< the number of relaxation steps for a given elastic computation */
 public:
   /**
   @brief Constructor.
@@ -194,7 +196,9 @@ public:
   @param verbose is true if verbose output should be produced
   @param warning is false if warning messages should be suppressed
   */
-  ThermalStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  // ThermalStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
+  //               const bool verbose, const bool warning);
+  ThermalStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs, int npoints,
                 const bool verbose, const bool warning);
 
   /**
@@ -216,7 +220,8 @@ public:
   @param nphase is the maximum number of phases in the system
   @param nskip is 0 if this is the first cycle, nonzero otherwise
   */
-  void femat(int nx, int ny, int nz, int ns, int nphase, int iskip);
+  // void femat(int nx, int ny, int nz, int ns, int nphase, int iskip);
+  void femat(int iskip);
 
   /**
   @brief Compute gradient of the b vector with respect to the macrostrains.
@@ -238,7 +243,9 @@ public:
   @param eyz is the yz macrostrain
   @param exy is the xy macrostrain
   */
-  void bgrad(int nx, int ny, int nz, int ns, double exx, double eyy, double ezz,
+  // void bgrad(int nx, int ny, int nz, int ns, double exx, double eyy, double ezz,
+  //            double exz, double eyz, double exy);
+  void bgrad(double exx, double eyy, double ezz,
              double exz, double eyz, double exy);
 
   /**
@@ -255,7 +262,8 @@ public:
   @param ny is the number of elements in the y dimension
   @param nz is the number of elements in the z dimension
   */
-  void constfunc(int ns, int nx, int ny, int nz);
+  // void constfunc(int ns, int nx, int ny, int nz);
+  void constfunc(void);
 
   /**
   @brief Conjugate gradient relaxation of the elastic energy of the whole mesh.
@@ -267,7 +275,8 @@ public:
   @param kkk is the number of times the method has been called
   @return the number of conjugate gradient steps used in this call
   */
-  int dembx(int ns, double gg, int ldemb, int kkk);
+  // int dembx(int ns, double gg, int ldemb, int kkk);
+  int dembx(int ldemb, int kkk);
 
   /**
   @brief Conjugate gradient relaxation of the elastic energy of a mesh
@@ -296,7 +305,8 @@ public:
   @param ns is the total number of mesh elements
   @return the computed elastic energy [units, perhaps J]
   */
-  double energy(int nx, int ny, int nz, int ns);
+  // double energy(int nx, int ny, int nz, int ns);
+  double energy(void);
 
   /**
   @brief Compute the stress components for the relaxed system.
@@ -306,7 +316,8 @@ public:
   @param nz is the number of elements in the z dimension
   @param ns is the total number of mesh elements
   */
-  void stress(int nx, int ny, int nz, int ns);
+  // void stress(int nx, int ny, int nz, int ns);
+  void stress();
 
   /**
   @brief Control function for finding the minimum energy state.
@@ -324,7 +335,8 @@ public:
   @param kmax is the maximum number of total conjugate gradient iterations
   allowed
   */
-  void relax(double time, int kmax);
+  // void relax(double time, int kmax);
+  void relax(int kmax);
 
   /**
   @brief Control function for elastic relaxation within a subvolume.
@@ -343,6 +355,9 @@ public:
   @param index is another variable that is not used
   */
   void localRelax(int boxsize, int x, int y, int z, int index);
+
+  void localRelax(int xlo, int xhi, int ylo, int yhi, int zlo, int zhi,
+                  int x, int y, int z, int index);
 
   /**
   @brief Master function for executing the finite element calculation.
@@ -443,7 +458,7 @@ public:
   @param index is the id of the element in the 1D ordering of elements
   @param cor is the (x,y,z) coordinates of that site
   */
-  void setExp(int index, vector<int> cor) {
+  void setExpansionCoord(int index, vector<int> cor) {
     map<int, vector<int>>::iterator p = exp_.find(index);
     if (p != exp_.end()) {
       p->second = cor;
@@ -457,7 +472,7 @@ public:
 
   @note NOT USED.
   */
-  void setExp(void) { exp_.clear(); }
+  void setExpansionCoord(void) { exp_.clear(); }
 
   /**
   @brief Get a component of the the elastic stress at an element.
@@ -483,6 +498,8 @@ public:
       return elestress_[i][j];
     }
   }
+
+  vector<double> getEleStressMod(int i) { return elestress_[i]; }
 
   /**
   @brief Get a component of the the elastic strain at an element.

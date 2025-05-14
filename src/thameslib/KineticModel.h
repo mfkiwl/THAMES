@@ -89,7 +89,7 @@ public:
   /**
   @brief Destructor does nothing.
   */
-  virtual ~KineticModel() {};
+  virtual ~KineticModel() {}
 
   /**
   @brief Get the ChemicalSystem object for the simulation used by the kinetic
@@ -226,7 +226,7 @@ public:
 
   @param sio2
   */
-  virtual void setSio2(const double sio2) { return; }
+  // virtual void setSio2(const double sio2) { return; }
 
   /**
   @brief Get the SiO2 content of pozzolanic materials

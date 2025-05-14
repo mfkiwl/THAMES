@@ -89,7 +89,9 @@ private:
 
   double initScaledCementMass_;
   double hydTimeIni_;
-  // double hyd_time_ini_;
+  double hyd_time_;
+  int waterDCId_; /**< coresp to DCName = "H2O@" */
+  double iniAttackTime_;
 
 public:
   /**
@@ -387,25 +389,25 @@ public:
   @brief Set kinetic model DC moles
 
   */
-  void setKineticDCMoles() {
-    int size = phaseKineticModel_.size();
-    for (int i = 0; i < size; ++i) {
-      phaseKineticModel_[i]->setKineticDCMoles();
-    }
-    return;
-  }
+  // void setKineticDCMoles() {
+  //   int size = phaseKineticModel_.size();
+  //   for (int i = 0; i < size; ++i) {
+  //     phaseKineticModel_[i]->setKineticDCMoles();
+  //   }
+  //   return;
+  // }
 
   /**
   @brief Zero kinetic model DC moles
 
   */
-  void zeroKineticDCMoles() {
-    int size = phaseKineticModel_.size();
-    for (int i = 0; i < size; ++i) {
-      phaseKineticModel_[i]->zeroKineticDCMoles();
-    }
-    return;
-  }
+  // void zeroKineticDCMoles() {
+  //   int size = phaseKineticModel_.size();
+  //   for (int i = 0; i < size; ++i) {
+  //     phaseKineticModel_[i]->zeroKineticDCMoles();
+  //   }
+  //   return;
+  // }
 
   /**
   @brief Set the effect of pozzolans on Parrot-Killoh kinetics
@@ -436,9 +438,9 @@ public:
   @param isFirst is true if this is the first time step of the simulation, false
   otherwise
   */
-  void calculateKineticStep(const double timestep, int cyc);
+  void calculateKineticStep(double time, const double timestep, int cyc);
 
-  double updateKineticStep(int cyc, int pId, double scaledMass);
+  void updateKineticStep(int cyc, int pId, double scaledMass, double timestep);
 
   /**
   @brief Set the verbose flag
@@ -481,6 +483,8 @@ public:
   vector<bool> getIsKinetic(void) { return isKinetic_; }
 
   void setHydTimeIni(double val) { hydTimeIni_ = val; }
+
+  void setIniAttackTime(const double val) { iniAttackTime_ = val; }
 
 }; // End of KineticController class
 

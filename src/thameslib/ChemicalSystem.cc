@@ -14,7 +14,7 @@ string MonosulfMicroName("");
 ChemicalSystem::ChemicalSystem(const string &GEMfilename,
                                const string &jsonFileName, const bool verbose,
                                const bool warning) {
-  unsigned int i, j;
+  int i, j;
   double *amat;
   string exmsg;
   long int gemflag = 0;
@@ -30,6 +30,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   sulfateAttackTime_ = 1.0e10;
   leachTime_ = 1.0e10;
+  iniAttackTime_ = 1.0e10;
 
   ///  The constructor initializes all the members to default values,
   ///  then launches the initial thermodynamic calculation, and sets
@@ -76,8 +77,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   na2o_.clear();
   mgo_.clear();
   so3_.clear();
-  RdICId_.clear();
-  Rd_.clear();
+  // RdICId_.clear();
+  // Rd_.clear();
   GEMPhaseStoich_.clear();
   GEMPhaseDCMembers_.clear();
   microPhaseDCPorosities_.clear();
@@ -111,6 +112,9 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   colorN_.clear(); // used in initColorMap() and output files
   initColorMap();
 
+  elasticModuli_.clear();
+  initElasticModuliMap();
+
   SI_.clear();
 
   node_ = new TNode();
@@ -121,10 +125,11 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   char *cGEMfilename = (char *)GEMfilename.c_str();
-  if (verbose_) {
-    cout << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
-         << cGEMfilename << endl; // *-dat.lst
-  }
+  // if (verbose_) {
+  cout << endl
+       << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
+       << cGEMfilename << endl; // *-dat.lst
+  // }
 
   /// Find out if the input data are in json format or in key-value format
 
@@ -178,10 +183,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// GEM CSD input that was read by GEM-IPM during initialization
   ///
 
-  numICs_ = (unsigned int)((node_->pCSD())->nIC);
-  numDCs_ = (unsigned int)((node_->pCSD())->nDC);
-  numGEMPhases_ = (unsigned int)((node_->pCSD())->nPH);
-  numSolutionPhases_ = (unsigned int)((node_->pCSD())->nPS);
+  numICs_ = (int)((node_->pCSD())->nIC);
+  numDCs_ = (int)((node_->pCSD())->nDC);
+  numGEMPhases_ = (int)((node_->pCSD())->nPH);
+  numSolutionPhases_ = (int)((node_->pCSD())->nPS);
 
   ///
   /// Knowing the dimensions, allocate the memory for all the arrays that
@@ -421,7 +426,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   string string1;
   for (i = 0; i < numICs_; i++) {
     string1 = node_->xCH_to_IC_name(i);
-    if (string1.length() >= maxICnameLength)
+    if ((int)(string1.length()) >= maxICnameLength)
       string1.resize(maxICnameLength);
     if (verbose_) {
       cout << "IC number " << i << " is " << string1 << endl;
@@ -431,7 +436,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   }
   for (i = 0; i < numDCs_; i++) {
     string1 = node_->xCH_to_DC_name(i);
-    if (string1.length() >= maxDCnameLength)
+    if ((int)(string1.length()) >= maxDCnameLength)
       string1.resize(maxDCnameLength);
     if (verbose_) {
       cout << "DC number " << i << " is " << string1 << endl;
@@ -439,9 +444,9 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
     DCName_.push_back(string1);
     DCIdLookup_.insert(make_pair(string1, i));
   }
-  for (i = 0; i < numGEMPhases_; i++) {
+  for (int i = 0; i < numGEMPhases_; i++) {
     string1 = node_->xCH_to_Ph_name(i);
-    if (string1.length() >= maxPHnameLength)
+    if ((int)(string1.length()) >= maxPHnameLength)
       string1.resize(maxPHnameLength);
     if (verbose_) {
       cout << "PH number " << i << " is " << string1 << endl;
@@ -533,7 +538,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   GEMPhaseClassCode_.resize(numGEMPhases_, ' ');
   cc = (node_->pCSD())->ccPH;
-  for (i = 0; i < numGEMPhases_; i++) {
+  for (int i = 0; i < numGEMPhases_; i++) {
     GEMPhaseClassCode_[i] = *cc;
     cc++;
   }
@@ -591,7 +596,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   initMicroVolume_ = 0.0;
   // microPhaseBelongsToCement_.resize(numMicroPhases_,false);
-  for (unsigned int i = 0; i < numMicroPhases_; i++) {
+  for (int i = 0; i < numMicroPhases_; i++) {
     microPhaseToGEMPhase_.insert(
         make_pair(static_cast<int>(i), microPhaseMembers_[i]));
   }
@@ -610,9 +615,18 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   microPhaseSI_.clear();
   microPhaseSI_.resize(numMicroPhases_, 0.0);
 
+  waterDCId_ = getDCId("H2O@");
+  waterMollarMass_ = getDCMolarMass(waterDCId_);
+  waterMollarVol_ = getDCMolarVolume(waterDCId_);
+
+  aliteDCId_ = getDCId(AliteDCName);
+  beliteDCId_ = getDCId(BeliteDCName);
+  aluminateDCId_ = getDCId(AluminateDCName);
+  ferriteDCId_ = getDCId(FerriteDCName);
+
   // for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
   //   cout << endl << "   affinity for i = " << i << endl;
-  //   for (unsigned int j = FIRST_SOLID; j < numMicroPhases_; j++) {
+  //   for (int j = FIRST_SOLID; j < numMicroPhases_; j++) {
   //     cout << "  " << j << "/" << affinity_[i][j] << "/" <<
   //     contactAngle_[i][j];
   //   }
@@ -703,7 +717,7 @@ vector<double> ChemicalSystem::getSolution(void) {
   tempICMoles.clear();
   tempICMoles.resize(numICs_, 0.0);
   cout << endl;
-  for (unsigned int i = 0; i < numDCs_; i++) {
+  for (int i = 0; i < numDCs_; i++) {
     char cc = getDCClassCode(i);
     if (cc == 'S' || cc == 'T' || cc == 'W') {
       // cout << "tempICMoles " << i <<  "    DCName_: " << DCName_[i] << endl;
@@ -715,7 +729,7 @@ vector<double> ChemicalSystem::getSolution(void) {
   cout << endl;
 
   /*
-  for (unsigned int i = 0; i < numDCs_; i++) {
+  for (int i = 0; i < numDCs_; i++) {
     char cc = getDCClassCode(i);
     if (cc == 'S' || cc == 'T') {
       double moles = node_->Get_cDC(i) * waterMass * 1.0e-3;
@@ -841,32 +855,33 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   // Clear the associative map to initialize it
   fixedSolutionComposition_.clear();
   initialSolutionComposition_.clear();
+  attackSolutionComposition_.clear();
 
   string testName, testCondition;
   double testConc;
   int testDCId;
-  bool fixed = false;
 
   json::iterator p = cdi.value()[0].find("DCName");
-  cout << "JSON iterator okay so far" << endl;
-  cout.flush();
-  for (int i = 0; i < cdi.value().size(); ++i) {
+  // cout << "JSON iterator okay so far" << endl;
+  // cout.flush();
+  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
     p = cdi.value()[i].find("DCname");
     // testName = p.value();
     testName = p.value().get<string>();
     testDCId = getDCId(testName);
-    p = cdi.value()[i].find("condition");
-    // testCondition = p.value();
-    testCondition = p.value().get<string>();
-    fixed = (testCondition != "fixed") ? false : true;
-    p = cdi.value()[i].find("concentration");
-    testConc = p.value();
     // Only add the data if this is a solution component
     if (DCClassCode_[testDCId] == 'S' || DCClassCode_[testDCId] == 'T') {
-      if (fixed) {
-        fixedSolutionComposition_.insert(make_pair(testDCId, testConc));
-      } else {
+      p = cdi.value()[i].find("condition");
+      // testCondition = p.value();
+      testCondition = p.value().get<string>();
+      p = cdi.value()[i].find("concentration");
+      testConc = p.value();
+      if (testCondition == "initial") {
         initialSolutionComposition_.insert(make_pair(testDCId, testConc));
+      } else if (testCondition == "fixed") {
+        fixedSolutionComposition_.insert(make_pair(testDCId, testConc));
+      } else if (testCondition == "attack") {
+        attackSolutionComposition_.insert(make_pair(testDCId, testConc));
       }
     }
   }
@@ -901,6 +916,19 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
                         "Fixed electrolyte charge imbalance");
   }
 
+  totcharge = 0.0;
+  it = attackSolutionComposition_.begin();
+  while (it != attackSolutionComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseSolutionComp",
+                        "Attack electrolyte charge imbalance");
+  }
+
   return;
 }
 
@@ -909,29 +937,30 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
 
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
+  attackGasComposition_.clear();
 
   string DCName, testCondition;
   double DCMoles;
   int DCId;
-  bool fixed = false;
 
   json::iterator p = cdi.value().begin();
-  for (int i = 0; i < cdi.value().size(); ++i) {
+  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
     p = cdi.value()[i].find("name");
     DCName = p.value();
     DCId = getDCId(DCName);
-    p = cdi.value()[i].find("condition");
-    testCondition = p.value();
-    fixed = (testCondition != "fixed") ? false : true;
-    p = cdi.value()[i].find("moles");
-    DCMoles = p.value();
     // Only add the data if this is a gas component
     if (DCClassCode_[DCId] == 'G' || DCClassCode_[DCId] == 'V' ||
         DCClassCode_[DCId] == 'H' || DCClassCode_[DCId] == 'N') {
-      if (fixed) {
-        fixedGasComposition_.insert(make_pair(DCId, DCMoles));
-      } else {
+      p = cdi.value()[i].find("condition");
+      testCondition = p.value();
+      p = cdi.value()[i].find("moles");
+      DCMoles = p.value();
+      if (testCondition == "initial") {
         initialGasComposition_.insert(make_pair(DCId, DCMoles));
+      } else if (testCondition == "fixed") {
+        fixedGasComposition_.insert(make_pair(DCId, DCMoles));
+      } else if (testCondition == "attack") {
+        attackGasComposition_.insert(make_pair(DCId, DCMoles));
       }
     }
   }
@@ -966,6 +995,20 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
                         "Fixed gas charge imbalance");
   }
 
+  totcharge = 0.0;
+  it = attackGasComposition_.begin();
+  while (it != attackGasComposition_.end()) {
+    totcharge += ((it->second) * (DCCharge_[it->first]));
+    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // totcharge
+    //      << endl;
+    it++;
+  }
+  if (abs(totcharge) > 1.0e-9) {
+    throw DataException("ChemicalSystem", "parseGasComp",
+                        "Attack gas charge imbalance");
+  }
+
   return;
 }
 
@@ -977,7 +1020,7 @@ void ChemicalSystem::parseMicroPhaseNames(const json::iterator cdi,
   int pid, cemcompval;
   bool cemComp;
 
-  for (int pnum = 0; pnum < cdi.value().size(); ++pnum) {
+  for (int pnum = 0; pnum < (int)(cdi.value().size()); ++pnum) {
     cii = cdi.value()[pnum].find("thamesname");
     pname = cii.value();
     cii = cdi.value()[pnum].find("id");
@@ -1000,7 +1043,7 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
                                       PhaseData &phaseData) {
 
   json::iterator p;
-  for (int i = 0; i < cdi.value().size(); ++i) {
+  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
 
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
@@ -1139,7 +1182,8 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
     // shall have at least one DC with porosity between 0.0 and 1.0
 
     bool done = false;
-    for (int j = 0; j < phaseData.microPhaseDCPorosities.size() && !done; ++j) {
+    for (int j = 0; j < (int)(phaseData.microPhaseDCPorosities.size()) && !done;
+         ++j) {
       if (phaseData.microPhaseDCPorosities[j] > 0.0 &&
           phaseData.microPhaseDCPorosities[j] < 1.0) {
         porousPhaseName_.push_back(phaseData.thamesName);
@@ -1222,7 +1266,7 @@ void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
   phaseData.poreSizeDist.clear();
 
   sum = 0.0;
-  for (int i = 0; i < p.value().size(); ++i) {
+  for (int i = 0; i < (int)(p.value().size()); ++i) {
     pp = p.value()[i].find("diameter");
     if (pp != p.value()[i].end()) {
       datarow.diam = pp.value();
@@ -1266,22 +1310,22 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
   string mypstr;
   phaseData.GEMPhaseDCMembers.clear();
   phaseData.microPhaseDCPorosities.clear();
-  bool scrapeWaterDCs = false;
+  // bool scrapeWaterDCs = false;
 
   json::iterator pp;
 
-  for (int i = 0; i < p.value().size(); ++i) {
+  for (int i = 0; i < (int)(p.value().size()); ++i) {
     pp = p.value()[i].find("gemphasename");
     if (pp != p.value()[i].end()) {
       mypstr = pp.value().get<string>();
       phaseData.GEMPhaseName.push_back(const_cast<char *>(mypstr.c_str()));
       // mypstr = pp.value();
       // phaseData.GEMPhaseName.push_back(mypstr);
-      if (mypstr == WaterGEMName) {
-        scrapeWaterDCs = true;
-      } else {
-        scrapeWaterDCs = false;
-      }
+      // if (mypstr == WaterGEMName) {
+      //   scrapeWaterDCs = true;
+      // } else {
+      //   scrapeWaterDCs = false;
+      // }
       // cout << endl
       //      << "GEM Phase name = " << mypstr // << endl;
       //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
@@ -1296,6 +1340,12 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
       if (mypstr == HydrotalcGEMName) {
         HydrotalcMicroName = phaseData.thamesName;
       }
+      if (mypstr == AFTGEMName) {
+        AFTMicroName = phaseData.thamesName;
+      }
+      // if (mypstr == MonosulfGEMName) {
+      //   AFTMicroName = phaseData.thamesName;
+      // }
       GEMPhaseId = getGEMPhaseId(mypstr);
       phaseData.GEMPhaseId.push_back(GEMPhaseId);
     } else {
@@ -1331,16 +1381,16 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
   phaseData.GEMPhaseDCMembers.clear();
 
   json::iterator ppp = pp.value().begin();
-  for (int i = 0; i < pp.value().size(); ++i) {
+  for (int i = 0; i < (int)(pp.value().size()); ++i) {
     ppp = pp.value()[i].find("gemdcname");
     if (ppp != pp.value()[i].end()) {
       mydcstr = ppp.value().get<string>();
       phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
       // cout << "Phase " << phaseData.thamesName << " found DC " << mydcstr
       //     << endl;
-      if (mydcstr == AFTDCName) {
-        AFTMicroName = phaseData.thamesName;
-      }
+      // if (mydcstr == AFTDCName) {
+      //   AFTMicroName = phaseData.thamesName;
+      // }
       if (mydcstr == MonosulfDCName) {
         MonosulfMicroName = phaseData.thamesName;
       }
@@ -1512,7 +1562,7 @@ void ChemicalSystem::parseAffinityData(const json::iterator pp,
   string mystr("Null");
 
   json::iterator ppp;
-  for (int i = 0; i < pp.value().size(); ++i) {
+  for (int i = 0; i < (int)(pp.value().size()); ++i) {
     ppp = pp.value()[i].find("affinityphase");
     if (ppp != pp.value()[i].end()) {
       mystr = ppp.value();
@@ -1591,8 +1641,8 @@ ChemicalSystem::ChemicalSystem(const ChemicalSystem &obj) {
   na2o_ = obj.getNa2o();
   mgo_ = obj.getMgo();
   so3_ = obj.getSo3();
-  RdICId_ = obj.getRdICId();
-  Rd_ = obj.getRd();
+  // RdICId_ = obj.getRdICId();
+  // Rd_ = obj.getRd();
   grayscale_ = obj.getGrayscale();
   color_ = obj.getColor();
   microPhaseIdLookup_ = obj.getMicroPhaseIdLookup();
@@ -1682,8 +1732,8 @@ ChemicalSystem::~ChemicalSystem(void) {
   na2o_.clear();
   mgo_.clear();
   so3_.clear();
-  RdICId_.clear();
-  Rd_.clear();
+  // RdICId_.clear();
+  // Rd_.clear();
   grayscale_.clear();
   color_.clear();
   ICClassCode_.clear();
@@ -1727,7 +1777,7 @@ void ChemicalSystem::getPGEMPhaseStoich(void) {
   double *arout = new double[numICs_];
   for (int i = 0; i < numGEMPhases_; i++) {
     arout = node_->Ph_BC(i, arout);
-    for (unsigned int j = 0; j < numICs_; j++) {
+    for (int j = 0; j < numICs_; j++) {
       pGEMPhaseStoich_[(i * numICs_) + j] = arout[j];
     }
   }
@@ -1742,7 +1792,7 @@ void ChemicalSystem::getGEMPhaseStoich(void) {
   vplace.resize(numICs_, 0.0);
   GEMPhaseStoich_.resize(numGEMPhases_, vplace);
   int indexval, oval;
-  for (unsigned int i = 0; i < numGEMPhases_; i++) {
+  for (int i = 0; i < numGEMPhases_; i++) {
     if (GEMPhaseName_[i] == "aq_gen") {
 
       ///
@@ -1751,14 +1801,14 @@ void ChemicalSystem::getGEMPhaseStoich(void) {
 
       oval = (i * numICs_) + getICId("O");
       if (pGEMPhaseStoich_[oval] > 0.0) {
-        for (unsigned int j = 0; j < numICs_; j++) {
+        for (int j = 0; j < numICs_; j++) {
           indexval = (i * numICs_) + j;
           GEMPhaseStoich_[i][j] =
               (pGEMPhaseStoich_[indexval] / pGEMPhaseStoich_[oval]);
         }
       }
     } else {
-      for (unsigned int j = 0; j < numICs_; j++) {
+      for (int j = 0; j < numICs_; j++) {
         indexval = (i * numICs_) + j;
         GEMPhaseStoich_[i][j] = (pGEMPhaseStoich_[indexval] / minval);
       }
@@ -1766,6 +1816,7 @@ void ChemicalSystem::getGEMPhaseStoich(void) {
   }
 }
 
+/*
 void ChemicalSystem::writeDb(ostream &stream) {
   unsigned int i;
 
@@ -1792,7 +1843,7 @@ void ChemicalSystem::writeDb(ostream &stream) {
 
 void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
 
-  unsigned int idnum;
+  // unsigned int idnum;
   if (i >= numMicroPhases_) {
     throw EOBException("ChemicalSystem", "writeMember", "microPhaseName_",
                        numMicroPhases_, i);
@@ -1809,9 +1860,10 @@ void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
   stream << "   Porosity = " << microPhasePorosity_[i] << endl;
   stream << "------------------------------------------------------" << endl;
 }
+*/
 
 void ChemicalSystem::writeChemSys(ofstream &out) {
-  unsigned int j;
+  int j;
 
   ///
   /// First we will list details for the ICs
@@ -1822,7 +1874,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
   out << endl << "List of Independent Components :" << endl;
   out << "numICs_ = " << numICs_ << endl;
   out << "IC_Id) ICName_[i] / ICClassCode_[i] / ICMolarMass_[i]" << endl;
-  for (unsigned int i = 0; i < numICs_; i++) {
+  for (int i = 0; i < numICs_; i++) {
     out << i << ") Name: " << ICName_[i] << endl;
     out << "        classcode: " << ICClassCode_[i] << endl;
     out << "       molar mass: " << ICMolarMass_[i] << endl << endl;
@@ -1833,7 +1885,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
   out << "DC_Id) DCName_[i] / DCClassCode_[i] / DCMolarMass_[i] / "
          "node_->DCtoPh_DBR(i)"
       << endl;
-  for (unsigned int i = 0; i < numDCs_; i++) {
+  for (int i = 0; i < numDCs_; i++) {
     out << endl << i << ") Name: " << DCName_[i] << endl;
     out << "        classcode: " << DCClassCode_[i] << endl;
     out << "       molar mass: " << DCMolarMass_[i] << endl;
@@ -1853,7 +1905,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
   out << endl << "List of GEM Phases:" << endl;
   out << "numGEMPhases_ = " << numGEMPhases_ << endl;
   out << "GEMPhase_Id) GEMPhaseName_[i] / GEMPhaseClassCode_[i]" << endl;
-  for (unsigned int i = 0; i < numGEMPhases_; i++) {
+  for (int i = 0; i < numGEMPhases_; i++) {
     out << endl << i << ") Name: " << GEMPhaseName_[i] << endl;
     out << "        classcode: " << GEMPhaseClassCode_[i] << endl;
   }
@@ -1865,11 +1917,11 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
          "randomGrowth_[i] / affinity_[i][j] / growthTemplate_[i][j] / "
          "microPhasePorosity_[i]"
       << endl;
-  for (unsigned int i = 0; i < numMicroPhases_; i++) {
+  for (int i = 0; i < numMicroPhases_; i++) {
     out << endl << i << ") Name: " << microPhaseName_[i] << endl;
     out << "                     id: " << microPhaseId_[i] << endl;
     out << "               affinity: " << endl;
-    for (j = 0; j < affinity_[i].size(); j++) {
+    for (j = 0; j < (int)(affinity_[i].size()); j++) {
       if (affinity_[i][j] != 0) {
         out << "                  affinity to " << j << ": " << affinity_[i][j]
             << "   " << microPhaseName_[j] << endl;
@@ -1880,7 +1932,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
     }
     out << "        growthTemplate:";
     if (growthTemplate_[i].size() != 0) {
-      for (j = 0; j < growthTemplate_[i].size(); j++) {
+      for (j = 0; j < (int)(growthTemplate_[i].size()); j++) {
         out << " " << growthTemplate_[i][j] << "("
             << microPhaseName_[growthTemplate_[i][j]] << ")";
       }
@@ -1897,7 +1949,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
     compDC = getMicroPhaseDCMembers(i);
     out << "        DCs components:";
     if (compDC.size() != 0) {
-      for (j = 0; j < compDC.size(); j++) {
+      for (j = 0; j < (int)(compDC.size()); j++) {
         out << " " << compDC[j] << "(" << DCName_[compDC[j]] << ")";
       }
     } else {
@@ -1907,18 +1959,18 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
   }
 
   out << endl << "        equivalence microPhaseId/DCId/GEMPhaseId:" << endl;
-  for (int i = 0; i < numMicroPhases_; ++i) {
-    if (i >= 1) {
-      string pname = getMicroPhaseName(i);
-      int DCId = getMicroPhaseDCMembers(i, 0);
-      int indDBR = node_->DCtoPh_DBR(DCId);
+  for (int i = ELECTROLYTEID; i < numMicroPhases_; ++i) {
+    // if (i >= 1) {
+    string pname = getMicroPhaseName(i);
+    int DCId = getMicroPhaseDCMembers(i, 0);
+    int indDBR = node_->DCtoPh_DBR(DCId);
 
-      out << endl << "   " << i << "\tpname: " << pname << endl;
-      out << "          GEMPhaseId: " << indDBR
-          << "\tGEMPhaseName_: " << GEMPhaseName_[indDBR] << endl;
-      out << "          DCId      : " << DCId << "\tDCName_: " << DCName_[DCId]
-          << endl;
-    }
+    out << endl << "   " << i << "\tpname: " << pname << endl;
+    out << "          GEMPhaseId: " << indDBR
+        << "\tGEMPhaseName_: " << GEMPhaseName_[indDBR] << endl;
+    out << "          DCId      : " << DCId << "\tDCName_: " << DCName_[DCId]
+        << endl;
+    // }
   }
 
   return;
@@ -1971,6 +2023,7 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
   // Find all the DC ids for this GEM phase
   vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
   // Get the porosities for each DC in the microstructure phase
+  int DClistSize = DClist.size();
 
   vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
 
@@ -1980,7 +2033,7 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     cout << "    This phase's GEM phase id = " << gemphaseid
          << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
     cout << "    The DC members for this GEM phase are:" << endl;
-    for (int ii = 0; ii < DClist.size(); ++ii) {
+    for (int ii = 0; ii < DClistSize; ++ii) {
       cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii]) << ")"
            << endl;
       cout.flush();
@@ -2012,7 +2065,7 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
   // set up for that in all sorts of ways and this is not the
   // biggest of them.
 
-  if (DClist.size() == 1) {
+  if (DClistSize == 1) {
     DCId = DClist[0];
     porosity = DCporosities[0];
     conc = 1.0;
@@ -2028,7 +2081,8 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
       cout.flush();
     }
   } else {
-    for (int i = 0; i < DClist.size(); ++i) {
+    // int DClistSize = DClist.size();
+    for (int i = 0; i < DClistSize; ++i) {
       DCId = DClist[i];
       conc = getDCConcentration(DCId);
       porosity = DCporosities[i];
@@ -2120,9 +2174,47 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// in this case.
   ///
 
+  bool doAttack = (time >= iniAttackTime_) ? true : false;
+
+  // cout << endl << "  ----> ChemicalSystem::calculateState -
+  // time/iniAttackTime_/doAttack : "
+  //      << time << " / " << iniAttackTime_ << " / " << doAttack << endl;
+
   // Check and set chemical conditions on electrolyte and gas phase
-  setElectrolyteComposition(isFirst);
-  setGasComposition(isFirst);
+  setElectrolyteComposition(isFirst, doAttack, cyc);
+  setGasComposition(isFirst, doAttack);
+
+  if (doAttack) {
+    DCLowerLimit_[aliteDCId_] = DCMoles_[aliteDCId_];
+    DCLowerLimit_[beliteDCId_] = DCMoles_[beliteDCId_];
+    DCLowerLimit_[aluminateDCId_] = DCMoles_[aluminateDCId_];
+    DCLowerLimit_[ferriteDCId_] = DCMoles_[ferriteDCId_];
+    // cout << endl
+    //      << "  ----> ChemicalSystem::calculateState -  DCLowerLimit_:"
+    //      << endl;
+    // for (int i = 0; i < numDCs_; i++) {
+    //   cout << "        i/DCLowerLimit_[i]/DCName_[i] -0- : " << i
+    //        << " / " << DCLowerLimit_[i]
+    //        << " / " << DCName_[i] << endl;
+    // }
+
+    /*
+    cout << endl // check!
+         << "  ----> ChemicalSystem::calculateState -  ICMoles_ : " << endl;
+    for (int i = 0; i < numICs_; i++) {
+      cout << "        i/ICMoles_/ICName_[i] -i- : " << i << " / " <<
+    ICMoles_[i]
+           << " / " << ICName_[i] << endl;
+    }
+    checkICMoles();
+    cout;
+    for (int i = 0; i < numICs_; i++) {
+      cout << "        i/ICMoles_/ICName_[i] -f- : " << i << " / " <<
+    ICMoles_[i]
+           << " / " << ICName_[i] << endl;
+    }
+    */
+  }
 
   if (verbose_) {
     cout << endl
@@ -2364,18 +2456,19 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // writePhasemoles();
 
   microVolume_ = 0.0;
-  setPGEMPhaseStoich();   // call getPGEMPhaseStoich() => pGEMPhaseStoich_[i]
-                          // number of moles all ICs in all GEM CSD phases.
-  setGEMPhaseStoich();    // call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]
-  setGEMPhaseMass();      // => GEMPhaseMass_[i]
-  setGEMPhaseVolume();    // => GEMPhaseVolume_[i]
-  setGEMPhaseMolarMass(); // =>GEMPhaseMolarMass_[pidx]
+  setPGEMPhaseStoich(); // call getPGEMPhaseStoich() => pGEMPhaseStoich_[i] //
+                        // check! number of moles all ICs in all GEM CSD phases.
+  setGEMPhaseStoich(); // call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]  //
+                       // check!
+  setGEMPhaseMass();   // => GEMPhaseMass_[i]
+  setGEMPhaseVolume(); // => GEMPhaseVolume_[i]
+  setGEMPhaseMolarMass(); // =>GEMPhaseMolarMass_[pidx]  // check!
 
   if (verbose_) {
     cout << endl
          << "    ~~~~>After calculateState, "
          << "printing microPhaseVolumes" << endl;
-    for (int i = 0; i < microPhaseVolumes.size(); ++i) {
+    for (int i = 0; i < numMicroPhases_; ++i) { // microPhaseVolumes.size()
       cout << "    Phase name " << microPhaseName_[i]
            << ": volume = " << microPhaseVolumes[i] << endl;
       cout.flush();
@@ -2407,7 +2500,8 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   double phi; // local variable to store subvoxel volume fraction of pores of
               // a phase 0 <= phi <= 1
 
-  for (unsigned int i = 1; i < numMicroPhases_; i++) {
+  int microPhaseMembersSize_i;
+  for (int i = 1; i < numMicroPhases_; i++) {
     if (verbose_) {
       cout << "Setting microPhase amounts for " << i << " = "
            << microPhaseName_[i] << endl;
@@ -2419,7 +2513,12 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       // phi = getMicroPhasePorosity(i);
       phi = microPhasePorosity_[i];
       microPhaseMass_[i] = microPhaseVolume_[i] = 0.0;
-      for (unsigned int j = 0; j < microPhaseMembers_[i].size(); j++) {
+      microPhaseMembersSize_i = microPhaseMembers_[i].size();
+
+      // if (i == 1) cout << endl << "microPhaseMembersSize_i for i = 1 is : "
+      //                  <<  microPhaseMembersSize_i << endl;
+
+      for (int j = 0; j < microPhaseMembersSize_i; j++) {
 
         microPhaseMass_[i] += GEMPhaseMass_[microPhaseMembers_[i][j]];
 
@@ -2438,6 +2537,16 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
         if (i == ELECTROLYTEID) {
           microPhaseVolume_[i] += GEMPhaseVolume_[microPhaseMembers_[i][j]];
+          // cout << endl << "   i = " << i << "   j = " << j
+          //      << "   GEMPhaseName_ = " <<
+          //      GEMPhaseName_[microPhaseMembers_[i][j]]
+          //      << "   microPhaseVolume_[i](use GEMPhaseVolume_!!! ) = " <<
+          //      microPhaseVolume_[i]
+          //      << "   numMoles(use waterMollarVol_(waterDCId)!!!) = "
+          //      << microPhaseVolume_[i]/waterMollarVol_ <<  endl;
+          // cout << endl << "   DCMoles_[waterDCId_] = " <<
+          // DCMoles_[waterDCId_]
+          //      << "   waterMollarVol_ = " << waterMollarVol_ << endl;
         } else if (i != VOIDID && phi < 1.0) {
           microPhaseVolume_[i] +=
               (GEMPhaseVolume_[microPhaseMembers_[i][j]] / (1.0 - phi));
@@ -2454,7 +2563,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
              << "ChemicalSystem::calculateState error1 - microPhaseVolume_ < 0 "
                 "for cyc = "
              << cyc << " :" << endl;
-        for (int i = 1; i < numMicroPhases_; i++) {
+        for (int i = ELECTROLYTEID; i < numMicroPhases_; i++) {
           cout << "   " << i
                << " : phName/microPhaseVolume_ : " << microPhaseName_[i]
                << " / " << microPhaseVolume_[i] << endl;
@@ -2488,7 +2597,7 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
              << "ChemicalSystem::calculateState error2 - microPhaseVolume_ < 0 "
                 "for cyc = "
              << cyc << " :" << endl;
-        for (int i = 1; i < numMicroPhases_; i++) {
+        for (int i = ELECTROLYTEID; i < numMicroPhases_; i++) {
           cout << "   " << i
                << " : phName/microPhaseVolume_ : " << microPhaseName_[i]
                << " / " << microPhaseVolume_[i] << endl;
@@ -2512,23 +2621,23 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   }
 
   if (isSaturated_) { // System is saturated
-
     if (initMicroVolume_ > microVolume_) {
-      double water_molarv, water_molesincr;
-      int wDCId = getDCId("H2O@");
-      water_molarv = node_->DC_V0(wDCId, P_, T_);
-      water_molesincr = (initMicroVolume_ - microVolume_) / water_molarv;
+      // double water_molarv;
+      double water_molesincr;
+      // int wDCId = getDCId("H2O@");
+      // water_molarv = node_->DC_V0(wDCId, P_, T_);
+      water_molesincr = (initMicroVolume_ - microVolume_) / waterMollarVol_;
       if (verbose_) {
-        cout << "System is saturated: wDCId = " << wDCId << endl;
-        cout << "    water_molarv = " << water_molarv << endl;
+        cout << "System is saturated: wDCId = " << waterDCId_ << endl;
+        cout << "    water_molarv = " << waterMollarVol_ << endl;
         cout << "    volume increase of water is: "
              << (initMicroVolume_ - microVolume_) << endl;
         cout << "    water_molesincr = " << water_molesincr << endl;
       }
-      DCMoles_[wDCId] += water_molesincr;
+      DCMoles_[waterDCId_] += water_molesincr;
 
-      double waterMolarMass = getDCMolarMass(wDCId);
-      addWaterMassAndVolume(water_molesincr * waterMolarMass,
+      // double waterMolarMass = getDCMolarMass(wDCId);
+      addWaterMassAndVolume(water_molesincr * waterMollarMass_,
                             initMicroVolume_ - microVolume_); // necessary
 
       cout << "  ChemicalSystem::calculateState - cyc = " << cyc
@@ -2536,6 +2645,19 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       // newMicroVolume_ = initMicroVolume_;
     }
   }
+
+  // cout << endl << "ChemicalSystem::calculateState-2 waterVolume_ = "
+  //      << microPhaseVolume_[1] << "   waterMoles_ = " << DCMoles_[waterDCId_]
+  //      << endl;
+  // cout << endl << "ChemicalSystem::calculateState initMicroVolume_ = " <<
+  // initMicroVolume_ << endl; double waterDensity = waterMollarMass_ /
+  // waterMollarVol_ / 1.0e6; // g/cm3 double waterTotMass_0 =
+  // (microPhaseVolume_[1]/initMicroVolume_) * waterDensity * 100 /
+  // initSolidMass_; double waterTotMoles_0 = waterTotMass_0 / waterMollarMass_;
+  // // mol cout << endl << "ChemicalSystem::calculateState waterMolesCalc_M = "
+  // << waterTotMoles_0 << endl; cout << endl << "ChemicalSystem::calculateState
+  // waterMolesCalc_V = " <<
+  //         microPhaseVolume_[1] / waterMollarVol_ << endl;
 
   if (verbose_) {
     cout << "GEM volume change = "
@@ -2557,13 +2679,16 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout.flush();
   }
 
+  setMicroPhaseSI(time);
+
   return timesGEMFailed_;
 }
 
-void ChemicalSystem::setMicroPhaseSI() {
+void ChemicalSystem::setMicroPhaseSI(double time) {
 
   microPhaseSI_.clear();
   microPhaseSI_.resize(numMicroPhases_, 0.0);
+  double sumSI = 0.0;
 
   try {
     double aveSI = 0.0;
@@ -2579,6 +2704,62 @@ void ChemicalSystem::setMicroPhaseSI() {
     //} else {
 
     // setSI();
+
+    //***********
+    // solutPhaseMoles_
+    double totMoles = 0;
+    vector<int> microPhasePhMembers;
+    int sizeMicroPhasePhMembers;
+    int newPhId;
+
+    if (time >= iniAttackTime_) {
+      cout << endl
+           << "          SI calc from GEM phases for mPhId = 15 - mPhName = "
+           << microPhaseName_[15] << " : " << endl;
+    }
+
+    for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
+      pname = microPhaseName_[i];
+      aveSI = totMoles = 0.0;
+      microPhasePhMembers =
+          microPhaseMembers_[i]; // getMicroPhaseMembers(i);
+                                 // //microPhaseMembers_ vs GEMPhaseIdLookup_
+      sizeMicroPhasePhMembers = (int)microPhasePhMembers.size();
+      if ((time >= iniAttackTime_) && (i == 15)) {
+        for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
+          newPhId = microPhaseMembers_[i][ii]; // microPhasePhMembers[i];
+          moles = solutPhaseMoles_[newPhId];
+          cout << "           ii/newPhId/moles/Ph_SatInd/SI/newPhName = " << ii
+               << " / " << newPhId << " / " << moles << " / "
+               << node_->Ph_SatInd(newPhId) << " / "
+               << pow(10, node_->Ph_SatInd(newPhId)) << " / "
+               << GEMPhaseName_[newPhId] << endl;
+        }
+      }
+      for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
+        newPhId = microPhaseMembers_[i][ii]; // microPhasePhMembers[i];
+        moles = solutPhaseMoles_[newPhId];
+        aveSI += (pow(10, node_->Ph_SatInd(newPhId)) * moles);
+        totMoles += moles;
+      }
+      if (totMoles > 0.0) {
+        aveSI = aveSI / totMoles;
+      }
+      microPhaseSI_.at(i) = aveSI;
+    }
+    if (time >= iniAttackTime_)
+      cout << "          aveSI for mPhId = 15 - mPhName = "
+           << microPhaseName_[15] << " : " << microPhaseSI_.at(15) << endl;
+    //***********
+
+    // if (time >= iniAttackTime_) {
+    //   setSI();
+    //   cout << endl << "          SI calc from GEM DCs for mPhId = 15 -
+    //   mPhName = "
+    //        << microPhaseName_[15] << " : " << endl;
+    // }
+
+    /*
     for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
       pname = microPhaseName_[i];
       aveSI = moles = 0.0;
@@ -2587,6 +2768,19 @@ void ChemicalSystem::setMicroPhaseSI() {
       // cout << endl << "   " << i << "\tpname: " << pname
       //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
       //      : " << endl;
+      if ((time >= iniAttackTime_) && (i == 15)) {
+        double *Falp = (node_->ppmm())->Falp;
+        for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
+          newDCId = microPhaseDCMembers.at(ii);
+          tmoles = DCMoles_[newDCId];
+          if (tmoles > 1.e-15) sumSI += node_->DC_a(newDCId);
+          cout << "           ii/newDCId/tmoles/Falp/SI(Falp)/SI(DC_a)/newDCName
+    = "
+               << ii << " / " << newDCId << " / " << tmoles << " / "
+               << Falp[newDCId] <<   " / " << pow(10, Falp[newDCId]) << " / "
+               << node_->DC_a(newDCId) << " / " << DCName_[newDCId] << endl;
+        }
+      }
       for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
         newDCId = microPhaseDCMembers.at(ii);
         tmoles = DCMoles_[newDCId];
@@ -2620,12 +2814,331 @@ void ChemicalSystem::setMicroPhaseSI() {
     }
     //} //if (isFirst) {
     // cout << endl << "ChemicalSystem::setMicroPhaseSI end" << endl; exit(0);
+    */
   } catch (EOBException eex) {
     eex.printException();
     exit(1);
   }
 
+  if (time >= iniAttackTime_)
+    cout << "          aveSI for mPhId = 15 - mPhName = " << microPhaseName_[15]
+         << " : " << microPhaseSI_.at(15) << "   &   sumSI = " << sumSI << endl;
+
   return;
+}
+
+void ChemicalSystem::initElasticModuliMap(void) {
+  // (1): Table 1 from Haecker et al. / Cement and Concrete Research
+  // 35(2005)1948–1960 (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K
+  // + G)) (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
+
+  // struct elMod {
+  //   float K; // bulk modulus    : K(GPa)
+  //   float G; // shear modulus   : G(GPa)
+  //   float E; // Young's modulus : E(GPa)
+  //   float n; // Poisson's ratio
+  //   string altName;
+  // };
+  // map<string, elMod> elasticModuli_;
+
+  // cement chemistry notation :
+  //   C=CaO, S=SiO2,A=Al2O3, F=Fe2O3, H=H2O, K=K2O, N=Na2O, M=MgO
+  //   s=SO3, c=CO2
+
+  elasticModuli_["Void"].K = 0.0;
+  elasticModuli_["Void"].G = 0.0;
+  elasticModuli_["Void"].E = 0.0;
+  elasticModuli_["Void"].n = 0.0;
+  elasticModuli_["Void"].altName = "Empty";
+
+  // (1)
+  elasticModuli_["Electrolyte"].K = 2.2;
+  elasticModuli_["Electrolyte"].G = 0.0;
+  elasticModuli_["Electrolyte"].E = 0.0;
+  elasticModuli_["Electrolyte"].n = 0.5;
+  elasticModuli_["Electrolyte"].altName = "Porosity";
+
+  // (1)
+  elasticModuli_["Alite"].K = 105.2;
+  elasticModuli_["Alite"].G = 44.80;
+  elasticModuli_["Alite"].E = 117.6;
+  elasticModuli_["Alite"].n = 0.314;
+  elasticModuli_["Alite"].altName = "C3S";
+
+  // (1) - same as Alite
+  elasticModuli_["Belite"].K = 105.2;
+  elasticModuli_["Belite"].G = 44.80;
+  elasticModuli_["Belite"].E = 117.6;
+  elasticModuli_["Belite"].n = 0.314;
+  elasticModuli_["Belite"].altName = "C2S";
+
+  // (1) - same as Alite
+  elasticModuli_["Aluminate"].K = 105.2;
+  elasticModuli_["Aluminate"].G = 44.80;
+  elasticModuli_["Aluminate"].E = 117.6;
+  elasticModuli_["Aluminate"].n = 0.314;
+  elasticModuli_["Aluminate"].altName = "C3A";
+
+  // (1) - same as Alite
+  elasticModuli_["Ferrite"].K = 105.2;
+  elasticModuli_["Ferrite"].G = 44.80;
+  elasticModuli_["Ferrite"].E = 117.6;
+  elasticModuli_["Ferrite"].n = 0.314;
+  elasticModuli_["Ferrite"].altName = "C4AF";
+
+  // (1)
+  elasticModuli_["Gypsum"].K = 42.5;
+  elasticModuli_["Gypsum"].G = 15.7;
+  elasticModuli_["Gypsum"].E = 45.7;
+  elasticModuli_["Gypsum"].n = 0.33;
+  elasticModuli_["Gypsum"].altName = "CsH2, CaSO4*2H2O, Dihydrate";
+
+  // (1)
+  elasticModuli_["Bassanite"].K = 52.4;
+  elasticModuli_["Bassanite"].G = 24.2;
+  elasticModuli_["Bassanite"].E = 62.9;
+  elasticModuli_["Bassanite"].n = 0.30;
+  elasticModuli_["Bassanite"].altName = "CsH1/2, CaSO4*0.5H2O, Hemihydrate";
+
+  // (1)
+  elasticModuli_["Anhydrite"].K = 54.90;
+  elasticModuli_["Anhydrite"].G = 29.30;
+  elasticModuli_["Anhydrite"].E = 80.00;
+  elasticModuli_["Anhydrite"].n = 0.275;
+  elasticModuli_["Anhydrite"].altName = "Cs, CaSO4";
+
+  // (1)
+  elasticModuli_["Arcanite"].K = 31.90;
+  elasticModuli_["Arcanite"].G = 17.40;
+  elasticModuli_["Arcanite"].E = 44.20;
+  elasticModuli_["Arcanite"].n = 0.269;
+  elasticModuli_["Arcanite"].altName = "Ks, K2SO4";
+
+  // (1)
+  elasticModuli_["Thenardite"].K = 43.40;
+  elasticModuli_["Thenardite"].G = 22.30;
+  elasticModuli_["Thenardite"].E = 57.10;
+  elasticModuli_["Thenardite"].n = 0.281;
+  elasticModuli_["Thenardite"].altName = "Ns, Na2SO4";
+
+  // (1)
+  elasticModuli_["SilicaAm"].K = 36.50;
+  elasticModuli_["SilicaAm"].G = 31.20;
+  elasticModuli_["SilicaAm"].E = 72.80;
+  elasticModuli_["SilicaAm"].n = 0.167;
+  elasticModuli_["SilicaAm"].altName = "S, SiO2, Silica fume, Amorphous silica";
+
+  // (1)
+  elasticModuli_["Portlandite"].K = 40.00;
+  elasticModuli_["Portlandite"].G = 16.00;
+  elasticModuli_["Portlandite"].E = 42.30;
+  elasticModuli_["Portlandite"].n = 0.324;
+  elasticModuli_["Portlandite"].altName = "CH, Ca(OH)2";
+
+  // (1)
+  elasticModuli_["CSHQ"].K = 14.9;
+  elasticModuli_["CSHQ"].G = 9.00;
+  elasticModuli_["CSHQ"].E = 22.4;
+  elasticModuli_["CSHQ"].n = 0.25;
+  elasticModuli_["CSHQ"].altName = "CSH, C-S-H";
+
+  // (1)
+  elasticModuli_["Calcite"].K = 69.8;
+  elasticModuli_["Calcite"].G = 30.4;
+  elasticModuli_["Calcite"].E = 79.6;
+  elasticModuli_["Calcite"].n = 0.31;
+  elasticModuli_["Calcite"].altName =
+      "Cc, CaCO3, Limestone, Aragonite, Vaterite";
+
+  // (1) - same as CSHQ
+  elasticModuli_["Hydrogarnet"].K = 14.9;
+  elasticModuli_["Hydrogarnet"].G = 9.00;
+  elasticModuli_["Hydrogarnet"].E = 22.4;
+  elasticModuli_["Hydrogarnet"].n = 0.25;
+  elasticModuli_["Hydrogarnet"].altName = "C3AH6, Hydrogarnet";
+
+  // (1) - same as CSHQ
+  elasticModuli_["AFt"].K = 14.9;
+  elasticModuli_["AFt"].G = 9.00;
+  elasticModuli_["AFt"].E = 22.4;
+  elasticModuli_["AFt"].n = 0.25;
+  elasticModuli_["AFt"].altName = "C6As3H32, Ettringite";
+
+  // (1) - same as Portlandite
+  elasticModuli_["AFm"].K = 40.00;
+  elasticModuli_["AFm"].G = 16.00;
+  elasticModuli_["AFm"].E = 42.30;
+  elasticModuli_["AFm"].n = 0.234;
+  elasticModuli_["AFm"].altName = "C4AsH12, AFm";
+
+  // (1) - same as CSHQ
+  elasticModuli_["FH3"].K = 14.9;
+  elasticModuli_["FH3"].G = 9.00;
+  elasticModuli_["FH3"].E = 22.4;
+  elasticModuli_["FH3"].n = 0.25;
+  elasticModuli_["FH3"].altName = "FH3, Iron hydroxide";
+
+  // (1) - same as Portlandite
+  elasticModuli_["CaCl2"].K = 40.00;
+  elasticModuli_["CaCl2"].G = 16.00;
+  elasticModuli_["CaCl2"].E = 42.30;
+  elasticModuli_["CaCl2"].n = 0.324;
+  elasticModuli_["CaCl2"].altName = "Calcium chloride";
+
+  // (1) - same as CSHQ
+  elasticModuli_["Hydrocalumite"].K = 14.9;
+  elasticModuli_["Hydrocalumite"].G = 9.00;
+  elasticModuli_["Hydrocalumite"].E = 22.4;
+  elasticModuli_["Hydrocalumite"].n = 0.25;
+  elasticModuli_["Hydrocalumite"].altName = "C3A(CaCl2)H10, Friedel salt";
+
+  // (1) - same as CSHQ
+  elasticModuli_["Stratlingite"].K = 14.9;
+  elasticModuli_["Stratlingite"].G = 9.00;
+  elasticModuli_["Stratlingite"].E = 22.4;
+  elasticModuli_["Stratlingite"].n = 0.25;
+  elasticModuli_["Stratlingite"].altName = "C2ASH8, Stratlingite";
+
+  // (1) - same as AFm
+  elasticModuli_["AFmc"].K = 40.00;
+  elasticModuli_["AFmc"].G = 16.00;
+  elasticModuli_["AFmc"].E = 42.30;
+  elasticModuli_["AFmc"].n = 0.234;
+  elasticModuli_["AFmc"].altName =
+      "C4AcH11, AFm-c, Monoarbonate, Carboaluminate";
+
+  // elasticModuli_["Monosulfate"].K = ;
+  // elasticModuli_["Monosulfate"].G = ;
+  // elasticModuli_["Monosulfate"].E = ;
+  // elasticModuli_["Monosulfate"].n = ;
+  // elasticModuli_["Monosulfate"].altName = "Sulfoaluminate";
+
+  // gitCheckout375c4798 * - as Portlandite
+  elasticModuli_["Brucite"].K = 40.00;
+  elasticModuli_["Brucite"].G = 16.00;
+  elasticModuli_["Brucite"].E = 42.30; // *
+  elasticModuli_["Brucite"].n = 0.324; // *
+  elasticModuli_["Brucite"].altName = "MH, Mg(OH)2";
+
+  // gitCheckout375c4798 * - as Alite
+  elasticModuli_["CaO"].K = 105.2;
+  elasticModuli_["CaO"].G = 44.80;
+  elasticModuli_["CaO"].E = 117.6; // *
+  elasticModuli_["CaO"].n = 0.314; // *
+  elasticModuli_["CaO"].altName = "C, Free lime";
+
+  // gitCheckout375c4798 * - as CSHQ
+  elasticModuli_["Hydrotalcite"].K = 14.9;
+  elasticModuli_["Hydrotalcite"].G = 9.00;
+  elasticModuli_["Hydrotalcite"].E = 22.4; // *
+  elasticModuli_["Hydrotalcite"].n = 0.25; // *
+  elasticModuli_["Hydrotalcite"].altName = "Hydrotalcite";
+
+  // gitCheckout375c4798 * - as Alite
+  elasticModuli_["Periclase"].K = 105.2;
+  elasticModuli_["Periclase"].G = 44.80;
+  elasticModuli_["Periclase"].E = 117.0; // *
+  elasticModuli_["Periclase"].n = 0.314; // *
+  elasticModuli_["Periclase"].altName = "M, MgO";
+
+  // gitCheckout375c4798 * - as CSHQ
+  elasticModuli_["Damage"].K = 14.9;
+  elasticModuli_["Damage"].G = 9.00;
+  elasticModuli_["Damage"].E = 22.4; // *
+  elasticModuli_["Damage"].n = 0.25; // *
+  elasticModuli_["Damage"].altName = "Damage";
+
+  /*
+  elasticModuli_["C2AS"].K = ;
+  elasticModuli_["C2AS"].G = ;
+  elasticModuli_["C2AS"].E = ;
+  elasticModuli_["C2AS"].n = ;
+  elasticModuli_["C2AS"].altName = "C2AS(am)";
+
+  elasticModuli_["CA2S"].K = ;
+  elasticModuli_["CA2S"].G = ;
+  elasticModuli_["CA2S"].E = ;
+  elasticModuli_["CA2S"].n = ;
+  elasticModuli_["CA2S"].altName = "CA2S(am)";
+
+  elasticModuli_["K6A2S"].K = ;
+  elasticModuli_["K6A2S"].G = ;
+  elasticModuli_["K6A2S"].E = ;
+  elasticModuli_["K6A2S"].n = ;
+  elasticModuli_["K6A2S"].altName = "K6A2S(am)";
+
+  elasticModuli_["Diopside"].K = ;
+  elasticModuli_[""].G = ;
+  elasticModuli_[""].E = ;
+  elasticModuli_[""].n = ;
+  elasticModuli_["Diopside"].altName = "Pyroxene";
+
+  elasticModuli_["Forsterite"].K = ;
+  elasticModuli_["Forsterite"].G = ;
+  elasticModuli_["Forsterite"].E = ;
+  elasticModuli_["Forsterite"].n = ;
+  elasticModuli_["Forsterite"].altName = "Olivine";
+
+  elasticModuli_["Goethite"].K = ;
+  elasticModuli_["Goethite"].G = ;
+  elasticModuli_["Goethite"].E = ;
+  elasticModuli_["Goethite"].n = ;
+  elasticModuli_["Goethite"].altName = "Goethite";
+
+  elasticModuli_["Mullite"].K = ;
+  elasticModuli_["Mullite"].G = ;
+  elasticModuli_["Mullite"].E = ;
+  elasticModuli_["Mullite"].n = ;
+  elasticModuli_["Mullite"].altName = "Mullite";
+
+  elasticModuli_["Pyrite"].K = ;
+  elasticModuli_["Pyrite"].G = ;
+  elasticModuli_["Pyrite"].E = ;
+  elasticModuli_["Pyrite"].n = ;
+  elasticModuli_["Pyrite"].altName = "FeS";
+
+  elasticModuli_["Pyrrhotite"].K = ;
+  elasticModuli_["Pyrrhotite"].G = ;
+  elasticModuli_["Pyrrhotite"].E = ;
+  elasticModuli_["Pyrrhotite"].n = ;
+  elasticModuli_["Pyrrhotite"].altName = "Pyrrhotite";
+
+  elasticModuli_["Quartz"].K = ;
+  elasticModuli_["Quartz"].G = ;
+  elasticModuli_["Quartz"].E = ;
+  elasticModuli_["Quartz"].n = ;
+  elasticModuli_["Quartz"].altName = "Silica";
+
+  elasticModuli_["Sodalite"].K = ;
+  elasticModuli_["Sodalite"].G = ;
+  elasticModuli_["Sodalite"].E = ;
+  elasticModuli_["Sodalite"].n = ;
+  elasticModuli_["Sodalite"].altName = "Sodalite";
+
+  elasticModuli_["Syngenite"].K = ;
+  elasticModuli_["Syngenite"].G = ;
+  elasticModuli_["Syngenite"].E = ;
+  elasticModuli_["Syngenite"].n = ;
+  elasticModuli_["Syngenite"].altName = "Syngenite";
+
+  elasticModuli_["Troilite"].K = ;
+  elasticModuli_["Troilite"].G = ;
+  elasticModuli_["Troilite"].E = ;
+  elasticModuli_["Troilite"].n = ;
+  elasticModuli_["Troilite"].altName = "Troilite";
+
+  elasticModuli_["Zeolite"].K = ;
+  elasticModuli_["Zeolite"].G = ;
+  elasticModuli_["Zeolite"].E = ;
+  elasticModuli_["Zeolite"].n = ;
+  elasticModuli_["Zeolite"].altName = "Zeolite";
+
+  elasticModuli_["Dolomite"].K = ;
+  elasticModuli_["Dolomite"].G = ;
+  elasticModuli_["Dolomite"].E = ;
+  elasticModuli_["Dolomite"].n = ;
+  elasticModuli_["Dolomite"].altName = "Dolomite";
+  */
 }
 
 void ChemicalSystem::initColorMap(void) {
@@ -2895,6 +3408,20 @@ void ChemicalSystem::initColorMap(void) {
   colorN_["Brucite"].rgb.push_back(26);
   colorN_["Brucite"].gray = 83;
 
+  colorN_["Periclase"].colorId = 37;
+  colorN_["Periclase"].altName = "MgO";
+  colorN_["Periclase"].rgb.push_back(255);
+  colorN_["Periclase"].rgb.push_back(128);
+  colorN_["Periclase"].rgb.push_back(128);
+  colorN_["Periclase"].gray = 220; // as Alite
+
+  colorN_["DAMAGE"].colorId = 38; // always last microphase
+  colorN_["DAMAGE"].altName = "DAMAGE";
+  colorN_["DAMAGE"].rgb.push_back(255);
+  colorN_["DAMAGE"].rgb.push_back(0);
+  colorN_["DAMAGE"].rgb.push_back(255);
+  colorN_["DAMAGE"].gray = 255;
+
   map<string, elemColor>::iterator it = colorN_.begin();
 
   while (it != colorN_.end()) {
@@ -3086,26 +3613,88 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
   } else {
     cout << "   - saturated : 0 " << endl;
   }
-  if (initialSolutionComposition_.size() > 0) {
-    cout << "   - simulation with given solution composition :" << endl;
-    cout << "      electrolyte - initial" << endl;
-    map<int, double>::iterator it = initialSolutionComposition_.begin();
-    while (it != initialSolutionComposition_.end()) {
+
+  bool initial = false;
+  bool fixed = false;
+
+  if (initialSolutionComposition_.size() > 0)
+    initial = true;
+  if (fixedSolutionComposition_.size() > 0)
+    fixed = true;
+
+  if (initial || fixed) {
+    if (initial && fixed) {
+      cout << endl << "error : check the chemistry.json file!" << endl;
+      cout << endl
+           << "if \"electrolyte_conditions\" is present, \"condition\" "
+              "can be only one of the next combinations:"
+           << endl;
+      cout << "\"initial\"" << endl;
+      cout << "\"fixed\"" << endl;
+      cout << "\"attack\"" << endl;
+      cout << "\"initial\" & \"attack\"" << endl;
+      cout << "\"fixed\" & \"attack\"" << endl;
+      cout << endl << "stop" << endl;
+      exit(0);
+    } else if (initial) {
+      cout << "   - hydration starts with a given electrolyte composition :"
+           << endl;
+      cout << "      condition - initial" << endl;
+      map<int, double>::iterator it = initialSolutionComposition_.begin();
+      while (it != initialSolutionComposition_.end()) {
+        DCId = it->first;
+        if (DCId != waterDCId_) {
+          DCconc = it->second;
+          cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+               << "   DCconc = " << DCconc << " mol/kgw" << endl;
+        }
+        it++;
+      }
+    } else { // fixed
+      cout << "   - during hydration the electrolyte has a fixed composition :"
+           << endl;
+      cout << "      condition - fixed" << endl;
+      map<int, double>::iterator it = fixedSolutionComposition_.begin();
+      while (it != fixedSolutionComposition_.end()) {
+        DCId = it->first;
+        if (DCId != waterDCId_) {
+          DCconc = it->second;
+          cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+               << "   DCconc = " << DCconc << " mol/kgw" << endl;
+        }
+        it++;
+      }
+    }
+  } else {
+    cout << "   - hydration starts without any dissolved ionic species (pure "
+            "water)"
+         << endl;
+  }
+  if (attackSolutionComposition_.size() > 0) {
+    cout << "   - after hydration, simulation continues with an attack - "
+            "solution composition being :"
+         << endl;
+    cout << "      condition - attack" << endl;
+    map<int, double>::iterator it = attackSolutionComposition_.begin();
+    while (it != attackSolutionComposition_.end()) {
       DCId = it->first;
-      if (DCId != getDCId("H2O@")) {
+      if (DCId != waterDCId_) {
         DCconc = it->second;
         cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
              << "   DCconc = " << DCconc << " mol/kgw" << endl;
       }
       it++;
     }
-  } else if (fixedSolutionComposition_.size() > 0) {
-    cout << "   - simulation with given solution composition :" << endl;
-    cout << "      electrolyte - fixed" << endl;
-    map<int, double>::iterator it = fixedSolutionComposition_.begin();
-    while (it != fixedSolutionComposition_.end()) {
+  }
+
+  /*
+  if (initialSolutionComposition_.size() > 0) {
+    cout << "   - simulation starts with given solution composition :" << endl;
+    cout << "      electrolyte - initial" << endl;
+    map<int, double>::iterator it = initialSolutionComposition_.begin();
+    while (it != initialSolutionComposition_.end()) {
       DCId = it->first;
-      if (DCId != getDCId("H2O@")) {
+      if (DCId != waterDCId_) {
         DCconc = it->second;
         cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
              << "   DCconc = " << DCconc << " mol/kgw" << endl;
@@ -3113,9 +3702,113 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
       it++;
     }
   } else {
-    cout << "   - simulation without given solution composition." << endl;
+    cout << "   - simulation without initial solution composition." << endl;
+  }
+  if (fixedSolutionComposition_.size() > 0) {
+    cout << "   - simulation starts with given solution composition :" << endl;
+    cout << "      electrolyte - fixed" << endl;
+    map<int, double>::iterator it = fixedSolutionComposition_.begin();
+    while (it != fixedSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != waterDCId_) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
+  } else {
+    cout << "   - simulation without fixed solution composition." << endl;
+  }
+  if (attackSolutionComposition_.size() > 0) {
+    cout << "   - simulation continues with attack, solution composition being
+  :" << endl; cout << "      electrolyte - attack" << endl; map<int,
+  double>::iterator it = attackSolutionComposition_.begin(); while (it !=
+  attackSolutionComposition_.end()) { DCId = it->first; if (DCId != waterDCId_)
+  { DCconc = it->second; cout << "        DCId = " << DCId << "   DCName = " <<
+  DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
+  }
+  */
+
+  initial = false;
+  fixed = false;
+  if (initialGasComposition_.size() > 0)
+    initial = true;
+  if (fixedGasComposition_.size() > 0)
+    fixed = true;
+
+  if (initial || fixed) {
+    if (initial && fixed) {
+      cout << endl << "error : check the chemistry.json file!" << endl;
+      cout << endl
+           << "if \"gas_conditions\" is present, \"condition\" "
+              "can be only one of the next combinations:"
+           << endl;
+      cout << "\"initial\"" << endl;
+      cout << "\"fixed\"" << endl;
+      cout << "\"attack\"" << endl;
+      cout << "\"initial\" & \"attack\"" << endl;
+      cout << "\"fixed\" & \"attack\"" << endl;
+      cout << endl << "stop" << endl;
+      exit(0);
+    } else if (initial) {
+      cout << "   - hydration starts in an atmosphere having an initial gas "
+              "composition :"
+           << endl;
+      cout << "      gas - initial" << endl;
+      map<int, double>::iterator it = initialGasComposition_.begin();
+      while (it != initialGasComposition_.end()) {
+        DCId = it->first;
+        DCmoles = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCmoles = " << DCmoles << " mol" << endl;
+        it++;
+      }
+    } else { // fixed
+      cout << "   - during hydration the atmosphere has a fixed gas "
+              "composition :"
+           << endl;
+      cout << "      gas - fixed" << endl;
+      map<int, double>::iterator it = fixedGasComposition_.begin();
+      while (it != fixedGasComposition_.end()) {
+        DCId = it->first;
+        DCmoles = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCmoles = " << DCmoles << " mol" << endl;
+        it++;
+      }
+    }
+  } else {
+    cout << "   - hydration takes place in an inert atmosphere" << endl;
+  }
+  if (attackGasComposition_.size() > 0) {
+    cout << "   - after hydration, simulation continues with gas attack - gas "
+            "composition being :"
+         << endl;
+    cout << "      condition - attack" << endl;
+    map<int, double>::iterator it = attackGasComposition_.begin();
+    while (it != attackGasComposition_.end()) {
+      DCId = it->first;
+      if (DCId != waterDCId_) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
   }
 
+  if (attackSolutionComposition_.size() == 0 &&
+      attackGasComposition_.size() == 0) {
+    cout << "   - after hydration, no attack (electyrolyte/gas) takes place"
+         << endl;
+  }
+
+  /*
   if (initialGasComposition_.size() > 0) {
     cout << "   - simulation with given gas composition :" << endl;
     cout << "      gas - initial" << endl;
@@ -3141,66 +3834,218 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
   } else {
     cout << "   - simulation without given gas composition." << endl;
   }
+  */
 }
 
-void ChemicalSystem::setElectrolyteComposition(const bool isFirst) {
-  if (isFirst && initialSolutionComposition_.size() > 0) {
-    double waterMoles = getDCMoles("H2O@");
-    double waterMass = 0.001 * waterMoles * getDCMolarMass("H2O@"); // in kg
-    map<int, double>::iterator it = initialSolutionComposition_.begin();
-    int DCId;
-    double DCconc; // mol/kgw units
-    while (it != initialSolutionComposition_.end()) {
-      DCId = it->first;
-      if (DCId != getDCId("H2O@")) {
-        DCconc = it->second;
-        setDCMoles(DCId, (DCconc * waterMass));
-      }
-      it++;
-    }
-  }
+void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
+                                               bool doAttack, int cyc) {
+  int DCId;
+  double DCconc; // mol/kgw units
+  double waterMoles = DCMoles_[waterDCId_];
+  double waterMass = 0.001 * waterMoles * waterMollarMass_; // in kg
 
-  if (fixedSolutionComposition_.size() > 0) {
-    double waterMoles = getDCMoles("H2O@");
-    double waterMass = 0.001 * waterMoles * getDCMolarMass("H2O@"); // in kg
-    map<int, double>::iterator it = fixedSolutionComposition_.begin();
-    int DCId;
-    double DCconc; // mol/kgw units
-    while (it != fixedSolutionComposition_.end()) {
-      DCId = it->first;
-      if (DCId != getDCId("H2O@")) {
-        DCconc = it->second;
-        setDCMoles(DCId, (DCconc * waterMass));
+  // cout << "  ----> ChemicalSystem::setElectrolyteComposition -
+  // doAttack/waterMass : "
+  //      << doAttack << " / " << waterMass << endl;
+
+  if (doAttack) {
+    cout << endl
+         << "  ----> ChemicalSystem::setElectrolyteComposition - "
+            "doAttack/waterMass : "
+         << doAttack << " / " << waterMass << endl;
+
+    if (attackSolutionComposition_.size() > 0) {
+      map<int, double>::iterator it = attackSolutionComposition_.begin();
+      while (it != attackSolutionComposition_.end()) {
+        DCId = it->first;
+        if (DCId != waterDCId_) {
+          DCconc = it->second;
+          DCMoles_[DCId] = DCconc * waterMass;
+        }
+        cout << "    ----> ChemicalSystem::setElectrolyteComposition attack - "
+                "waterMass/DCId/DCconc/DCMoles_ : "
+             << waterMass << " / " << DCId << " / " << DCconc << " / "
+             << DCMoles_[DCId] << endl;
+        it++;
       }
-      it++;
+    }
+  } else {
+    if (isFirst && initialSolutionComposition_.size() > 0) {
+      map<int, double>::iterator it = initialSolutionComposition_.begin();
+      while (it != initialSolutionComposition_.end()) {
+        DCId = it->first;
+        if (DCId != waterDCId_) {
+          DCconc = it->second;
+          DCMoles_[DCId] = DCconc * waterMass;
+        }
+        it++;
+      }
+    }
+    if (fixedSolutionComposition_.size() > 0) {
+      map<int, double>::iterator it = fixedSolutionComposition_.begin();
+      while (it != fixedSolutionComposition_.end()) {
+        DCId = it->first;
+        if (DCId != waterDCId_) {
+          DCconc = it->second;
+          DCMoles_[DCId] = DCconc * waterMass;
+        }
+        it++;
+      }
     }
   }
   return;
 }
 
-void ChemicalSystem::setGasComposition(const bool isFirst) {
-  if (isFirst && initialGasComposition_.size() > 0) {
-    map<int, double>::iterator it = initialGasComposition_.begin();
-    int DCId;
-    double DCmoles; // mole units
-    while (it != initialGasComposition_.end()) {
-      DCId = it->first;
-      DCmoles = it->second;
-      setDCMoles(DCId, DCmoles);
-      it++;
+void ChemicalSystem::setGasComposition(const bool isFirst, bool doAttack) {
+  int DCId;
+  double DCmoles; // mole units
+
+  if (doAttack) {
+    if (attackGasComposition_.size() > 0) {
+      map<int, double>::iterator it = attackGasComposition_.begin();
+      while (it != attackGasComposition_.end()) {
+        DCId = it->first;
+        DCmoles = it->second;
+        DCMoles_[DCId] = DCmoles;
+        it++;
+      }
+      // } else {
+      //   cout << endl << "ChemicalSystem::setGasComposition() error for cyc =
+      //   "
+      //        << cyc << "  : " << endl;
+      //   cout << "doAttack is true but atackGasComposition_.size() = "
+      //        << atackGasComposition_.size() << endl;
+      //   cout << endl << "stop program!" << endl;
+      //   exit(0);
     }
-    return;
-  } else if (fixedGasComposition_.size() > 0) {
-    map<int, double>::iterator it = fixedGasComposition_.begin();
-    int DCId;
-    double DCmoles; // mol units
-    while (it != fixedGasComposition_.end()) {
-      DCId = it->first;
-      DCmoles = it->second;
-      setDCMoles(DCId, DCmoles);
-      it++;
+  } else {
+    if (isFirst && initialGasComposition_.size() > 0) {
+      map<int, double>::iterator it = initialGasComposition_.begin();
+      while (it != initialGasComposition_.end()) {
+        DCId = it->first;
+        DCmoles = it->second;
+        DCMoles_[DCId] = DCmoles;
+        it++;
+      }
+    } else if (fixedGasComposition_.size() > 0) {
+      map<int, double>::iterator it = fixedGasComposition_.begin();
+      while (it != fixedGasComposition_.end()) {
+        DCId = it->first;
+        DCmoles = it->second;
+        DCMoles_[DCId] = DCmoles;
+        it++;
+      }
     }
-    return;
   }
   return;
+}
+
+double ChemicalSystem::calculateCrystalStrain(int growPhId, double poreVolFrac,
+                                              double Kp, double Ks) {
+  double crystalStrain = -1; // 0.0;
+
+  /*
+  calculateState(false);
+  */
+
+  ///
+  /// Crystallization pressure only exists if the solution is supersaturated,
+  /// which means that \f$\beta > 1\f$.
+  ///
+
+  if (microPhaseSI_[growPhId] > 1.0) {
+
+    ///
+    /// Estimate the hydrostatic pressure in the pore solution as 1 atmosphere
+    /// Unit of pressure for this calculation is MPa
+    ///
+
+    double pl = 0.101;
+
+    ///
+    /// The assumed largest radius of capillary pores offering entrance
+    /// into gel porosity of C-S-H or other nanoporous component.
+    /// 500 nm is chosen because it is half the size of a typical lattice
+    /// site in THAMES (although the lattice resolution can be varied in
+    /// the future if desired, so we may want to revisit this assumption).
+    /// Unit of length for this calculation is millimeters.
+    ///
+
+    double r = 5.0e-4;
+
+    ///
+    /// Thickness of liquid film separating the crystallizing solid and
+    /// the pore walls, assumed to be 1 nm.
+    /// Unit of length for this calculation is millimeters.
+    ///
+
+    double delta = 1.0e-6;
+
+    ///
+    /// Crystal-liquid surface energy, assumed to be 100 mJ/m<sup>2</sup>.
+    /// Unit of surface energy for this calculation is N/mm.
+    ///
+
+    double gamma = 1.0e-4; // N/mm
+
+    ///
+    /// Stress-free molar volume of the growing crystal
+    /// Units of molar volume for this calcualtion is mm<sup>3</sup>/mol.
+    ///
+    /// @note This could be loaded up directly from the GEM CSD, rather than
+    ///       hardwiring it into the code here.
+    ///
+
+    double Vc = 7.070e5;
+
+    ///
+    /// The ideal gas constant, with units of (N mm)/(mol K)
+    ///
+
+    double Rg = 8.314e3; // gas constant; N.mm/mol.K
+
+    if (verbose_) {
+      cout << "ChemicalSystem::calculateCrystalStrain SI for this phase is: "
+           << microPhaseSI_[growPhId] << endl;
+      cout.flush();
+    }
+
+    ///
+    /// Calculate the crystal mean curvature in equilibrium with the
+    /// solution with this saturation index (Thompson-Freundlich effect)
+    ///
+
+    double kcr = Rg * T_ * log(microPhaseSI_[growPhId]) / (Vc * gamma);
+
+    ///
+    /// If the portion of the crystal near the wall is a hemispherical cap,
+    /// then the mean curvature is 2/r, where r is the radius of curvature
+    /// of the crystal.  Therefore, the smallest pore within which the crystal
+    /// can fit is delta larger than this.
+    ///
+
+    double rcr = (2.0 / kcr) + delta;
+
+    ///
+    /// Crystallization pressure associated with this pore size
+    ///
+
+    double pa = 2.0 * gamma * (1.0 / (rcr - delta) - 1.0 / (r - delta));
+
+    ///
+    /// Strain can be retrieved from the stress via the effeictive elastic
+    /// of the porous medium (poromechanics assumption)
+    ///
+
+    crystalStrain =
+        (1.0 / (3.0 * Kp) - 1.0 / (3.0 * Ks)) * (poreVolFrac * pa + pl);
+
+    if (verbose_) {
+      cout << "ChemicalSystem::calculateCrystalStrain crystalStrain = "
+           << crystalStrain << endl;
+      cout.flush();
+    }
+  }
+
+  return crystalStrain;
 }

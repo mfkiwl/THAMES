@@ -39,6 +39,18 @@ const string YSIZESTRING("#THAMES:Y_Size:");
 // for the THAMES input microstructure file
 const string ZSIZESTRING("#THAMES:Z_Size:");
 
+// String indicating the Alite DC name
+const string AliteDCName("C3S");
+
+// String indicating the Belite DC name
+const string BeliteDCName("C2S");
+
+// String indicating the Aluminate DC name
+const string AluminateDCName("C3A");
+
+// String indicating the Ferrite DC name
+const string FerriteDCName("C4AF");
+
 // String indicating the liquid solution GEM Phase name
 // @todo Make this general somehow
 const string WaterGEMName("aq_gen");
@@ -53,10 +65,20 @@ const string CSHGEMName("CSHQ");
 
 // String indicating the AFt GEM Phase name
 // @todo Make this general somehow
-const string AFTDCName("ettringite");
+// const string AFTDCName("ettringite");
+const string AFTGEMName("ettr");
+
+// String indicating the AFt DC name
+// @todo Make this general somehow
+const string AFTDCName("ettr");
 
 // String indicating the monosulfate GEM Phase name
 // @todo Make this general somehow
+const string MonosulfGEMName("C4AsH14");
+
+// String indicating the monosulfate DC name
+// @todo Make this general somehow
+// const string MonosulfGEMName("C4AsH14");
 const string MonosulfDCName("monosulf14");
 
 // String indicating the monocarboaluminate GEM Phase name
@@ -65,7 +87,8 @@ const string MonocarbGEMName("C4AcH11");
 
 // String indicating the hydrotalcite GEM Phase name
 // @todo Make this general somehow
-const string HydrotalcGEMName("OH-hydrotalcite");
+// const string HydrotalcGEMName("OH-hydrotalcite");
+const string HydrotalcGEMName("hydrotalc-pyro");
 
 // String indicating a generic kinetic model
 const string GenericType("Generic");
@@ -132,9 +155,9 @@ const int NUMCLINKERPHASES = 4;
 const double thrPorosityCSH = 0.0355255;
 
 // The number of face, edge, and corner neighbors to a cubic lattice site
-const unsigned int NUM_NEAREST_NEIGHBORS = 6;
-const unsigned int NUM_SECONDNEAREST_NEIGHBORS = 12;
-const unsigned int NUM_THIRDNEAREST_NEIGHBORS = 8;
+const int NUM_NEAREST_NEIGHBORS = 6;
+const int NUM_SECONDNEAREST_NEIGHBORS = 12;
+const int NUM_THIRDNEAREST_NEIGHBORS = 8;
 
 const int NN_NNN = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
 

@@ -8,10 +8,10 @@
 
 using namespace std;
 
-ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
+ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
                              int npoints, const bool verbose,
                              const bool warning)
-    : ElasticModel(nx, ny, nz, dim, nphase, npoints, verbose, warning) {
+    : ElasticModel(nx, ny, nz, dim, cs, npoints, verbose, warning) {
 
 #ifdef DEBUG
   verbose_ = true;
@@ -25,6 +25,12 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
     cout << "ThermalStrain::ThermalStrain" << endl;
     cout.flush();
   }
+
+  kmax_ = 3; // 40;
+  cout << endl
+       << "ThermalStrain::ThermalStrain - "
+          "the number of relaxation steps for elastic computation :  kmax_ = "
+       << kmax_ << endl;
 
   isFirst_ = true;
 
@@ -77,9 +83,6 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
     T_[n].resize(3, 0.0);
   }
 
-  tstrength_.clear();
-  tstrength_.resize(nphase_, 5.0);
-
   ///
   /// Indexes for CSH, ettringite, and hydrotalcite are hard-wired into
   /// the code.
@@ -88,9 +91,63 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
   /// of phases.
   ///
 
-  tstrength_[12] = 1.0; // CSH
-  tstrength_[15] = 1.0; // ETTR
-  tstrength_[17] = 1.0; // HYDROTALC
+  // write a new method! // check!
+
+  tstrength_.clear();
+  tstrength_.resize(nphase_, 5.0); // [MPa]
+
+  // tstrength_[12] = 1.0; // CSH
+  // tstrength_[15] = 1.0; // ETTR
+  // tstrength_[17] = 1.0; // HYDROTALC
+  int mPhId;
+  mPhId = chemSys_->getMicroPhaseId_SA("CSHQ");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 1.0; // CSHQ [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"CSHQ\") = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("AFt");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 1.0; // AFt [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"AFt\") = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("Hydrotalcite");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 1.0; // Hydrotalcite [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"Hydrotalcite) = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("Alite");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 10.0; // C3S - Alite [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"Alite\") = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("Belite");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 10.0; // C2S - Belite [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"Belite\") = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("Aluminate");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 10.0; // C3A - Aluminate [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"Aluminate\") = -1 !!!" << endl;
+  }
+
+  mPhId = chemSys_->getMicroPhaseId_SA("Ferrite");
+  if (mPhId != -1) {
+    tstrength_[mPhId] = 10.0; // C4AF - Ferrite [MPa]
+  } else {
+    cout << "chemSys_->getMicroPhaseId_SA(\"Ferrite\") = -1 !!!" << endl;
+  }
 
   zcon_.clear();
   zcon_.resize(2);
@@ -114,14 +171,23 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, int nphase,
   }
 }
 
-void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
-                          int iskip) {
+// void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
+//                           int iskip) {
+void ThermalStrain::femat(int iskip) {
   double dndx[8], dndy[8], dndz[8];
   double g[3][3][3];
   double es[6][8][3], delta[8][3];
   int is[8];
   double x, y, z;
-  int nxy = nx * ny;
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int m;
+  double sum = 0;
+  double exx, eyy, ezz, exz, eyz, exy;
 
   ///
   /// Generate dk, zcon, T and Y on first pass. After that they are constant,
@@ -135,7 +201,7 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// Initialize stiffness matrices.
     ///
 
-    for (int m = 0; m < nphase; m++) {
+    for (int m = 0; m < nphase_; m++) {
       for (int l = 0; l < 3; l++) {
         for (int k = 0; k < 3; k++) {
           for (int j = 0; j < 8; j++) {
@@ -168,7 +234,8 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// the bulk modulus K and the shear modulus G.
     ///
 
-    ElasModul(phasemod_fileName_, nphase_);
+    // ElasModul(phasemod_fileName_, nphase_);
+    ElasModul();
 
     ///
     /// Set up Simpson's integration rule weight vector
@@ -196,7 +263,7 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// Simpson's rule quadrature gives exact results.
     ///
 
-    for (int ijk = 0; ijk < nphase; ijk++) {
+    for (int ijk = 0; ijk < nphase_; ijk++) {
       for (int k = 0; k < 3; k++) {
         for (int j = 0; j < 3; j++) {
           for (int i = 0; i < 3; i++) {
@@ -339,10 +406,10 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
       es[5][n][1] = dndx[n];
     }
 
-    for (int mmm = 0; mmm < ns; mmm++) {
+    for (int mmm = 0; mmm < ns_; mmm++) {
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int nm = 0; nm < 6; nm++) {
             for (int n = 0; n < 6; n++) {
               sum += cmod_[pix_[mmm]][n][nm] * es[n][mm][nn] * eigen_[mmm][nm];
@@ -358,7 +425,8 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// `zcon_` is a (2,3) X (2,3) matrix.
     ///
 
-    constfunc(ns_, nx_, ny_, nz_);
+    // constfunc(ns_, nx_, ny_, nz_);
+    constfunc(); // depends on pix_
 
     ///
     /// Set up linear term, T_, for thermal energy. It does not depend on the
@@ -366,7 +434,7 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// macrostrains change. T_ is built up out of the ss_ matrices.
     ///
 
-    int nss = ns + 2;
+    int nss = ns_ + 2;
     for (int m3 = 0; m3 < 3; m3++) {
       for (int m = 0; m < nss; m++) {
         T_[m][m3] = 0.0;
@@ -403,10 +471,10 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     /// by factor of 1/2 out in front of total energy term.
     ///
 
-    for (int k = 0; k < nz; k++) {
-      for (int j = 0; j < ny; j++) {
-        for (int i = 0; i < nx; i++) {
-          int m = nxy * k + nx * j + i;
+    for (int k = 0; k < nz_; k++) {
+      for (int j = 0; j < ny_; j++) {
+        for (int i = 0; i < nx_; i++) {
+          m = nxy_ * k + nx_ * j + i;
           for (int mm = 0; mm < 8; mm++) {
             for (int nn = 0; nn < 3; nn++) {
               T_[ib_[m][is[mm]]][nn] -= ss_[m][mm][nn];
@@ -422,12 +490,12 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
 
     for (int ipp = 0; ipp < 2; ipp++) {
       for (int jpp = 0; jpp < 3; jpp++) {
-        double exx = 0.0;
-        double eyy = 0.0;
-        double ezz = 0.0;
-        double exz = 0.0;
-        double eyz = 0.0;
-        double exy = 0.0;
+        exx = 0.0;
+        eyy = 0.0;
+        ezz = 0.0;
+        exz = 0.0;
+        eyz = 0.0;
+        exy = 0.0;
         if ((ipp == 0) && (jpp == 0))
           exx = 1.0;
         if ((ipp == 0) && (jpp == 1))
@@ -446,18 +514,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 1) || (i8 == 2) || (i8 == 5) || (i8 == 6)) {
-              delta[i8][0] = exx * (double)nx;
-              delta[i8][1] = exy * (double)nx;
-              delta[i8][2] = exz * (double)nx;
+              delta[i8][0] = exx * nx_dbl;
+              delta[i8][1] = exy * nx_dbl;
+              delta[i8][2] = exz * nx_dbl;
             }
           }
         }
-        for (int j = 0; j < (ny - 1); j++) {
-          for (int k = 0; k < (nz - 1); k++) {
-            int m = nxy * k + nx * j + (nx - 1);
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int j = 0; j < ny1; j++) {
+          for (int k = 0; k < nz1; k++) {
+            m = nxy_ * k + nx_ * j + nx1;
             for (int nn = 0; nn < 3; nn++) {
               for (int mm = 0; mm < 8; mm++) {
-                T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+                T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
               }
             }
           }
@@ -468,18 +537,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 2) || (i8 == 3) || (i8 == 6) || (i8 == 7)) {
-              delta[i8][0] = exy * (double)ny;
-              delta[i8][1] = eyy * (double)ny;
-              delta[i8][2] = eyz * (double)ny;
+              delta[i8][0] = exy * ny_dbl;
+              delta[i8][1] = eyy * ny_dbl;
+              delta[i8][2] = eyz * ny_dbl;
             }
           }
         }
-        for (int i = 0; i < (nx - 1); i++) {
-          for (int k = 0; k < (nz - 1); k++) {
-            int m = nxy * k + nx * (ny - 1) + i;
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int i = 0; i < nx1; i++) {
+          for (int k = 0; k < nz1; k++) {
+            m = nx_ * k + nx_ * ny1 + i;
             for (int nn = 0; nn < 3; nn++) {
               for (int mm = 0; mm < 8; mm++) {
-                T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+                T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
               }
             }
           }
@@ -490,18 +560,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 4) || (i8 == 5) || (i8 == 6) || (i8 == 7)) {
-              delta[i8][0] = exz * (double)nz;
-              delta[i8][1] = eyz * (double)nz;
-              delta[i8][2] = ezz * (double)nz;
+              delta[i8][0] = exz * nz_dbl;
+              delta[i8][1] = eyz * nz_dbl;
+              delta[i8][2] = ezz * nz_dbl;
             }
           }
         }
-        for (int i = 0; i < (nx - 1); i++) {
-          for (int j = 0; j < (ny - 1); j++) {
-            int m = nxy * (nz - 1) + nx * j + i;
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int i = 0; i < nx1; i++) {
+          for (int j = 0; j < ny1; j++) {
+            m = nxy_ * nz1 + nx_ * j + i;
             for (int nn = 0; nn < 3; nn++) {
               for (int mm = 0; mm < 8; mm++) {
-                T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+                T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
               }
             }
           }
@@ -512,27 +583,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 1) || (i8 == 5)) {
-              delta[i8][0] = exx * (double)nx;
-              delta[i8][1] = exy * (double)nx;
-              delta[i8][2] = exz * (double)nx;
+              delta[i8][0] = exx * nx_dbl;
+              delta[i8][1] = exy * nx_dbl;
+              delta[i8][2] = exz * nx_dbl;
             }
             if ((i8 == 3) || (i8 == 7)) {
-              delta[i8][0] = exy * (double)ny;
-              delta[i8][1] = eyy * (double)ny;
-              delta[i8][2] = eyz * (double)ny;
+              delta[i8][0] = exy * ny_dbl;
+              delta[i8][1] = eyy * ny_dbl;
+              delta[i8][2] = eyz * ny_dbl;
             }
             if ((i8 == 2) || (i8 == 6)) {
-              delta[i8][0] = exy * (double)ny + exx * (double)nx;
-              delta[i8][1] = eyy * (double)ny + exy * (double)nx;
-              delta[i8][2] = eyz * (double)ny + exz * (double)nx;
+              delta[i8][0] = exy * ny_dbl + exx * nx_dbl;
+              delta[i8][1] = eyy * ny_dbl + exy * nx_dbl;
+              delta[i8][2] = eyz * ny_dbl + exz * nx_dbl;
             }
           }
         }
-        for (int k = 0; k < (nz - 1); k++) {
-          int m = nxy * k + nx * (ny - 1) + (nx - 1);
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int k = 0; k < nz1; k++) {
+          m = nxy_ * k + nx_ * ny1 + nx1;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
-              T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+              T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
             }
           }
         }
@@ -542,27 +614,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 1) || (i8 == 2)) {
-              delta[i8][0] = exx * (double)nx;
-              delta[i8][1] = exy * (double)nx;
-              delta[i8][2] = exz * (double)nx;
+              delta[i8][0] = exx * nx_dbl;
+              delta[i8][1] = exy * nx_dbl;
+              delta[i8][2] = exz * nx_dbl;
             }
             if ((i8 == 4) || (i8 == 7)) {
-              delta[i8][0] = exz * (double)nz;
-              delta[i8][1] = eyz * (double)nz;
-              delta[i8][2] = ezz * (double)nz;
+              delta[i8][0] = exz * nz_dbl;
+              delta[i8][1] = eyz * nz_dbl;
+              delta[i8][2] = ezz * nz_dbl;
             }
             if ((i8 == 5) || (i8 == 6)) {
-              delta[i8][0] = exz * (double)nz + exx * (double)nx;
-              delta[i8][1] = eyz * (double)nz + exy * (double)nx;
-              delta[i8][2] = ezz * (double)nz + exz * (double)nx;
+              delta[i8][0] = exz * nz_dbl + exx * nx_dbl;
+              delta[i8][1] = eyz * nz_dbl + exy * nx_dbl;
+              delta[i8][2] = ezz * nz_dbl + exz * nx_dbl;
             }
           }
         }
-        for (int j = 0; j < (ny - 1); j++) {
-          int m = nxy * (nz - 1) + nx * j + (nx - 1);
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int j = 0; j < ny1; j++) {
+          m = nxy_ * nz1 + nx_ * j + nx1;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
-              T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+              T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
             }
           }
         }
@@ -572,27 +645,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if ((i8 == 4) || (i8 == 5)) {
-              delta[i8][0] = exz * (double)nz;
-              delta[i8][1] = eyz * (double)nz;
-              delta[i8][2] = ezz * (double)nz;
+              delta[i8][0] = exz * nz_dbl;
+              delta[i8][1] = eyz * nz_dbl;
+              delta[i8][2] = ezz * nz_dbl;
             }
             if ((i8 == 2) || (i8 == 3)) {
-              delta[i8][0] = exy * (double)ny;
-              delta[i8][1] = eyy * (double)ny;
-              delta[i8][2] = eyz * (double)ny;
+              delta[i8][0] = exy * ny_dbl;
+              delta[i8][1] = eyy * ny_dbl;
+              delta[i8][2] = eyz * ny_dbl;
             }
             if ((i8 == 6) || (i8 == 7)) {
-              delta[i8][0] = exy * (double)ny + exz * (double)nz;
-              delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-              delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+              delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+              delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+              delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
             }
           }
         }
-        for (int i = 0; i < (nx - 1); i++) {
-          int m = nxy * (nz - 1) + nx * (ny - 1) + i;
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        for (int i = 0; i < nx1; i++) {
+          m = nxy_ * nz1 + nx_ * ny1 + i;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
-              T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+              T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
             }
           }
         }
@@ -602,49 +676,50 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
           for (int i8 = 0; i8 < 8; i8++) {
             delta[i8][i3] = 0.0;
             if (i8 == 1) {
-              delta[i8][0] = exx * (double)nx;
-              delta[i8][1] = exy * (double)nx;
-              delta[i8][2] = exz * (double)nx;
+              delta[i8][0] = exx * nx_dbl;
+              delta[i8][1] = exy * nx_dbl;
+              delta[i8][2] = exz * nx_dbl;
             }
             if (i8 == 3) {
-              delta[i8][0] = exy * (double)ny;
-              delta[i8][1] = eyy * (double)ny;
-              delta[i8][2] = eyz * (double)ny;
+              delta[i8][0] = exy * ny_dbl;
+              delta[i8][1] = eyy * ny_dbl;
+              delta[i8][2] = eyz * ny_dbl;
             }
             if (i8 == 4) {
-              delta[i8][0] = exz * (double)nz;
-              delta[i8][1] = eyz * (double)nz;
-              delta[i8][2] = ezz * (double)nz;
+              delta[i8][0] = exz * nz_dbl;
+              delta[i8][1] = eyz * nz_dbl;
+              delta[i8][2] = ezz * nz_dbl;
             }
             if (i8 == 7) {
-              delta[i8][0] = exy * (double)ny + exz * (double)nz;
-              delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-              delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+              delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+              delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+              delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
             }
             if (i8 == 5) {
-              delta[i8][0] = exx * (double)nx + exz * (double)nz;
-              delta[i8][1] = exy * (double)nx + eyz * (double)nz;
-              delta[i8][2] = exz * (double)nx + ezz * (double)nz;
+              delta[i8][0] = exx * nx_dbl + exz * nz_dbl;
+              delta[i8][1] = exy * nx_dbl + eyz * nz_dbl;
+              delta[i8][2] = exz * nx_dbl + ezz * nz_dbl;
             }
             if (i8 == 2) {
-              delta[i8][0] = exx * (double)nx + exy * (double)ny;
-              delta[i8][1] = exy * (double)nx + eyy * (double)ny;
-              delta[i8][2] = exz * (double)nx + eyz * (double)ny;
+              delta[i8][0] = exx * nx_dbl + exy * ny_dbl;
+              delta[i8][1] = exy * nx_dbl + eyy * ny_dbl;
+              delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
             }
             if (i8 == 6) {
               delta[i8][0] =
-                  exx * (double)nx + exy * (double)ny + exz * (double)nz;
+                  exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
               delta[i8][1] =
-                  exy * (double)nx + eyy * (double)ny + eyz * (double)nz;
+                  exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
               delta[i8][2] =
-                  exz * (double)nx + eyz * (double)ny + ezz * (double)nz;
+                  exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
             }
           }
         }
-        int m = nxy * (nz - 1) + nx * (ny - 1) + (nx - 1);
+        // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+        m = nxy_ * nz1 + nx_ * ny1 + nx1;
         for (int nn = 0; nn < 3; nn++) {
           for (int mm = 0; mm < 8; mm++) {
-            T_[ns + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
+            T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
           }
         }
       }
@@ -657,26 +732,26 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     ///
 
     Y_ = 0.0;
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       for (int n = 0; n < 6; n++) {
         for (int nn = 0; nn < 6; nn++) {
           Y_ += 0.5 * eigen_[m][n] * cmod_[pix_[m]][n][nn] * eigen_[m][nn];
         }
       }
     }
-  }
+  } // if (iskip == 0) {
 
   ///
   /// Use auxiliary variables (exx, etc.) instead of u_[] variable,
   /// for convenience, and to make the following code easier to read.
   ///
 
-  double exx = u_[ns][0];
-  double eyy = u_[ns][1];
-  double ezz = u_[ns][2];
-  double exz = u_[ns + 1][0];
-  double eyz = u_[ns + 1][1];
-  double exy = u_[ns + 1][2];
+  exx = u_[ns_][0];
+  eyy = u_[ns_][1];
+  ezz = u_[ns_][2];
+  exz = u_[ns_ + 1][0];
+  eyz = u_[ns_ + 1][1];
+  exy = u_[ns_ + 1][2];
 
   ///
   /// Set up vector for linear term that comes from periodic boundary
@@ -687,7 +762,7 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
   ///
 
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       b_[m][m3] = 0.0;
     }
   }
@@ -722,18 +797,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2) || (i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
     }
   }
-  for (int j = 0; j < (ny - 1); j++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * j + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int j = 0; j < ny1; j++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * j + nx1;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -750,18 +826,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 2) || (i8 == 3) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * (ny - 1) + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * ny1 + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -778,18 +855,19 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int j = 0; j < (ny - 1); j++) {
-      int m = nxy * (nz - 1) + nx * j + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int j = 0; j < ny1; j++) {
+      m = nxy_ * nz1 + nx_ * j + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -806,27 +884,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 5)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if ((i8 == 3) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if ((i8 == 2) || (i8 == 6)) {
-        delta[i8][0] = exy * (double)ny + exx * (double)nx;
-        delta[i8][1] = eyy * (double)ny + exy * (double)nx;
-        delta[i8][2] = eyz * (double)ny + exz * (double)nx;
+        delta[i8][0] = exy * ny_dbl + exx * nx_dbl;
+        delta[i8][1] = eyy * ny_dbl + exy * nx_dbl;
+        delta[i8][2] = eyz * ny_dbl + exz * nx_dbl;
       }
     }
   }
-  for (int k = 0; k < (nz - 1); k++) {
-    int m = nxy * k + nx * (ny - 1) + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int k = 0; k < nz1; k++) {
+    m = nxy_ * k + nx_ * ny1 + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -842,27 +921,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if ((i8 == 4) || (i8 == 7)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if ((i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exz * (double)nz + exx * (double)nx;
-        delta[i8][1] = eyz * (double)nz + exy * (double)nx;
-        delta[i8][2] = ezz * (double)nz + exz * (double)nx;
+        delta[i8][0] = exz * nz_dbl + exx * nx_dbl;
+        delta[i8][1] = eyz * nz_dbl + exy * nx_dbl;
+        delta[i8][2] = ezz * nz_dbl + exz * nx_dbl;
       }
     }
   }
-  for (int j = 0; j < (ny - 1); j++) {
-    int m = nxy * (nz - 1) + nx * j + (nx - 1);
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int j = 0; j < ny1; j++) {
+    m = nxy_ * nz1 + nx_ * j + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -878,27 +958,28 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if ((i8 == 2) || (i8 == 3)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if ((i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    int m = nxy * (nz - 1) + nx * (ny - 1) + i;
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  for (int i = 0; i < nx1; i++) {
+    m = nxy_ * nz1 + nx_ * ny1 + i;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -914,46 +995,48 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if (i8 == 1) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if (i8 == 3) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if (i8 == 4) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if (i8 == 7) {
-        delta[i8][0] = exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
       }
       if (i8 == 5) {
-        delta[i8][0] = exx * (double)nx + exz * (double)nz;
-        delta[i8][1] = exy * (double)nx + eyz * (double)nz;
-        delta[i8][2] = exz * (double)nx + ezz * (double)nz;
+        delta[i8][0] = exx * nx_dbl + exz * nz_dbl;
+        delta[i8][1] = exy * nx_dbl + eyz * nz_dbl;
+        delta[i8][2] = exz * nx_dbl + ezz * nz_dbl;
       }
       if (i8 == 2) {
-        delta[i8][0] = exx * (double)nx + exy * (double)ny;
-        delta[i8][1] = exy * (double)nx + eyy * (double)ny;
-        delta[i8][2] = exz * (double)nx + eyz * (double)ny;
+        delta[i8][0] = exx * nx_dbl + exy * ny_dbl;
+        delta[i8][1] = exy * nx_dbl + eyy * ny_dbl;
+        delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
       }
       if (i8 == 6) {
-        delta[i8][0] = exx * (double)nx + exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = exy * (double)nx + eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = exz * (double)nx + eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
       }
     }
   }
-  int m = nxy * (nz - 1) + nx * (ny - 1) + (nx - 1);
+
+  // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+  m = nxy_ * nz1 + nx_ * ny1 + nx1;
   for (int nn = 0; nn < 3; nn++) {
     for (int mm = 0; mm < 8; mm++) {
-      double sum = 0.0;
+      sum = 0.0;
       for (int m3 = 0; m3 < 3; m3++) {
         for (int m8 = 0; m8 < 8; m8++) {
           sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -966,12 +1049,21 @@ void ThermalStrain::femat(int nx, int ny, int nz, int ns, int nphase,
   return;
 }
 
-void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
-                          double eyy, double ezz, double exz, double eyz,
-                          double exy) {
+// void ThermalStrain::bgrad(int nx, int ny, int nz, double exx,
+//                           double eyy, double ezz, double exz, double eyz,
+//                           double exy) {
+void ThermalStrain::bgrad(double exx, double eyy, double ezz,
+                          double exz, double eyz, double exy) {
   int is[8];
-  int nxy = nx * ny;
   double delta[8][3];
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int m;
+  double sum;
 
   ///
   /// exx, eyy, ezz, exz, eyz, exy are the artificial macrostrains used to
@@ -995,18 +1087,19 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2) || (i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
     }
   }
-  for (int j = 0; j < (ny - 1); j++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * j + (nx - 1);
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int j = 0; j < ny1; j++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * j + nx1;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1034,18 +1127,19 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 2) || (i8 == 3) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int k = 0; k < (nz - 1); k++) {
-      int m = nxy * k + nx * (ny - 1) + i;
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int k = 0; k < nz1; k++) {
+      m = nxy_ * k + nx_ * ny1 + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1073,18 +1167,19 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5) || (i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    for (int j = 0; j < (ny - 1); j++) {
-      int m = nxy * (nz - 1) + nx * j + i;
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int i = 0; i < nx1; i++) {
+    for (int j = 0; j < ny1; j++) {
+      m = nxy_ * nz1 + nx_ * j + i;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
-          double sum = 0.0;
+          sum = 0.0;
           for (int m3 = 0; m3 < 3; m3++) {
             for (int m8 = 0; m8 < 8; m8++) {
               sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1112,27 +1207,28 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 5)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if ((i8 == 3) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if ((i8 == 2) || (i8 == 6)) {
-        delta[i8][0] = exy * (double)ny + exx * (double)nx;
-        delta[i8][1] = eyy * (double)ny + exy * (double)nx;
-        delta[i8][2] = eyz * (double)ny + exz * (double)nx;
+        delta[i8][0] = exy * ny_dbl + exx * nx_dbl;
+        delta[i8][1] = eyy * ny_dbl + exy * nx_dbl;
+        delta[i8][2] = eyz * ny_dbl + exz * nx_dbl;
       }
     }
   }
-  for (int k = 0; k < (nz - 1); k++) {
-    int m = nxy * k + nx * (ny - 1) + (nx - 1);
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int k = 0; k < nz1; k++) {
+    m = nxy_ * k + nx_ * ny1 + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1159,27 +1255,28 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 1) || (i8 == 2)) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if ((i8 == 4) || (i8 == 7)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if ((i8 == 5) || (i8 == 6)) {
-        delta[i8][0] = exz * (double)nz + exx * (double)nx;
-        delta[i8][1] = eyz * (double)nz + exy * (double)nx;
-        delta[i8][2] = ezz * (double)nz + exz * (double)nx;
+        delta[i8][0] = exz * nz_dbl + exx * nx_dbl;
+        delta[i8][1] = eyz * nz_dbl + exy * nx_dbl;
+        delta[i8][2] = ezz * nz_dbl + exz * nx_dbl;
       }
     }
   }
-  for (int j = 0; j < (ny - 1); j++) {
-    int m = nxy * (nz - 1) + nx * j + (nx - 1);
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int j = 0; j < ny1; j++) {
+    m = nxy_ * nz1 + nx_ * j + nx1;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1206,27 +1303,28 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if ((i8 == 4) || (i8 == 5)) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if ((i8 == 2) || (i8 == 3)) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if ((i8 == 6) || (i8 == 7)) {
-        delta[i8][0] = exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
       }
     }
   }
-  for (int i = 0; i < (nx - 1); i++) {
-    int m = nxy * (nz - 1) + nx * (ny - 1) + i;
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  for (int i = 0; i < nx1; i++) {
+    m = nxy_ * nz1 + nx_ * ny1 + i;
     for (int nn = 0; nn < 3; nn++) {
       for (int mm = 0; mm < 8; mm++) {
-        double sum = 0.0;
+        sum = 0.0;
         for (int m3 = 0; m3 < 3; m3++) {
           for (int m8 = 0; m8 < 8; m8++) {
             sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1253,46 +1351,47 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
     for (int i8 = 0; i8 < 8; i8++) {
       delta[i8][i3] = 0.0;
       if (i8 == 1) {
-        delta[i8][0] = exx * (double)nx;
-        delta[i8][1] = exy * (double)nx;
-        delta[i8][2] = exz * (double)nx;
+        delta[i8][0] = exx * nx_dbl;
+        delta[i8][1] = exy * nx_dbl;
+        delta[i8][2] = exz * nx_dbl;
       }
       if (i8 == 3) {
-        delta[i8][0] = exy * (double)ny;
-        delta[i8][1] = eyy * (double)ny;
-        delta[i8][2] = eyz * (double)ny;
+        delta[i8][0] = exy * ny_dbl;
+        delta[i8][1] = eyy * ny_dbl;
+        delta[i8][2] = eyz * ny_dbl;
       }
       if (i8 == 4) {
-        delta[i8][0] = exz * (double)nz;
-        delta[i8][1] = eyz * (double)nz;
-        delta[i8][2] = ezz * (double)nz;
+        delta[i8][0] = exz * nz_dbl;
+        delta[i8][1] = eyz * nz_dbl;
+        delta[i8][2] = ezz * nz_dbl;
       }
       if (i8 == 7) {
-        delta[i8][0] = exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
       }
       if (i8 == 5) {
-        delta[i8][0] = exx * (double)nx + exz * (double)nz;
-        delta[i8][1] = exy * (double)nx + eyz * (double)nz;
-        delta[i8][2] = exz * (double)nx + ezz * (double)nz;
+        delta[i8][0] = exx * nx_dbl + exz * nz_dbl;
+        delta[i8][1] = exy * nx_dbl + eyz * nz_dbl;
+        delta[i8][2] = exz * nx_dbl + ezz * nz_dbl;
       }
       if (i8 == 2) {
-        delta[i8][0] = exx * (double)nx + exy * (double)ny;
-        delta[i8][1] = exy * (double)nx + eyy * (double)ny;
-        delta[i8][2] = exz * (double)nx + eyz * (double)ny;
+        delta[i8][0] = exx * nx_dbl + exy * ny_dbl;
+        delta[i8][1] = exy * nx_dbl + eyy * ny_dbl;
+        delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
       }
       if (i8 == 6) {
-        delta[i8][0] = exx * (double)nx + exy * (double)ny + exz * (double)nz;
-        delta[i8][1] = exy * (double)nx + eyy * (double)ny + eyz * (double)nz;
-        delta[i8][2] = exz * (double)nx + eyz * (double)ny + ezz * (double)nz;
+        delta[i8][0] = exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
+        delta[i8][1] = exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
+        delta[i8][2] = exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
       }
     }
   }
-  int m = nxy * (nz - 1) + nx * (ny - 1) + (nx - 1);
+  // nx1 = nx_ - 1, ny1 = ny_ - 1, nz1 = nz_ - 1
+  m = nxy_ * nz1 + nx_ * ny1 + nx1;
   for (int nn = 0; nn < 3; nn++) {
     for (int mm = 0; mm < 8; mm++) {
-      double sum = 0.0;
+      sum = 0.0;
       for (int m3 = 0; m3 < 3; m3++) {
         for (int m8 = 0; m8 < 8; m8++) {
           sum += delta[m8][m3] * dk_[pix_[m]][m8][m3][mm][nn];
@@ -1316,10 +1415,11 @@ void ThermalStrain::bgrad(int nx, int ny, int nz, int ns, double exx,
   return;
 }
 
-void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
+// void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
+void ThermalStrain::constfunc() {
   double delta[8][3];
   double pp[6][6], s[6][6];
-  double econ;
+  double econ = 0;
 
   ///
   /// Routine to set up 6 x 6 matrix for energy term involving macrostrains
@@ -1330,7 +1430,13 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
   /// choices, then recombine to get matrix elements by themselves.
   ///
 
-  int nxy = nx * ny;
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int m;
 
   for (int i = 0; i < 6; i++) {
     for (int j = 0; j < 6; j++) {
@@ -1338,12 +1444,13 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
       pp[i][j] = 0.0;
     }
   }
+  
+  double exx = 0, eyy = 0, ezz = 0,
+      exz = 0, eyz = 0, exy = 0;
 
   for (int ii = 0; ii < 6; ii++) {
     for (int jj = ii; jj < 6; jj++) {
       econ = 0.0;
-      double exx, eyy, ezz;
-      double exz, eyz, exy;
       exx = eyy = ezz = 0.0;
       exz = eyz = exy = 0.0;
       if ((ii == 0) && (jj == 0))
@@ -1423,15 +1530,16 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 1) || (i8 == 2) || (i8 == 5) || (i8 == 6)) {
-            delta[i8][0] = exx * (double)nx;
-            delta[i8][1] = exy * (double)nx;
-            delta[i8][2] = exz * (double)nx;
+            delta[i8][0] = exx * nx_dbl;
+            delta[i8][1] = exy * nx_dbl;
+            delta[i8][2] = exz * nx_dbl;
           }
         }
       }
-      for (int j = 0; j < (ny - 1); j++) {
-        for (int k = 0; k < (nz - 1); k++) {
-          int m = nxy * k + nx * j + (nx - 1);
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int j = 0; j < ny1; j++) {
+        for (int k = 0; k < nz1; k++) {
+          m = nxy_ * k + nx_ * j + nx1;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
               for (int m3 = 0; m3 < 3; m3++) {
@@ -1450,15 +1558,16 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 2) || (i8 == 3) || (i8 == 6) || (i8 == 7)) {
-            delta[i8][0] = exy * (double)ny;
-            delta[i8][1] = eyy * (double)ny;
-            delta[i8][2] = eyz * (double)ny;
+            delta[i8][0] = exy * ny_dbl;
+            delta[i8][1] = eyy * ny_dbl;
+            delta[i8][2] = eyz * ny_dbl;
           }
         }
       }
-      for (int i = 0; i < (nx - 1); i++) {
-        for (int k = 0; k < (nz - 1); k++) {
-          int m = nxy * k + nx * (ny - 1) + i;
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int i = 0; i < nx1; i++) {
+        for (int k = 0; k < nz1; k++) {
+          m = nxy_ * k + nx_ * ny1 + i;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
               for (int m3 = 0; m3 < 3; m3++) {
@@ -1477,15 +1586,16 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 4) || (i8 == 5) || (i8 == 6) || (i8 == 7)) {
-            delta[i8][0] = exz * (double)nz;
-            delta[i8][1] = eyz * (double)nz;
-            delta[i8][2] = ezz * (double)nz;
+            delta[i8][0] = exz * nz_dbl;
+            delta[i8][1] = eyz * nz_dbl;
+            delta[i8][2] = ezz * nz_dbl;
           }
         }
       }
-      for (int i = 0; i < (nx - 1); i++) {
-        for (int j = 0; j < (ny - 1); j++) {
-          int m = nxy * (nz - 1) + nx * j + i;
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int i = 0; i < nx1; i++) {
+        for (int j = 0; j < ny1; j++) {
+          m = nxy_ * nz1 + nx_ * j + i;
           for (int nn = 0; nn < 3; nn++) {
             for (int mm = 0; mm < 8; mm++) {
               for (int m3 = 0; m3 < 3; m3++) {
@@ -1504,24 +1614,25 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 1) || (i8 == 5)) {
-            delta[i8][0] = exx * (double)nx;
-            delta[i8][1] = exy * (double)nx;
-            delta[i8][2] = exz * (double)nx;
+            delta[i8][0] = exx * nx_dbl;
+            delta[i8][1] = exy * nx_dbl;
+            delta[i8][2] = exz * nx_dbl;
           }
           if ((i8 == 3) || (i8 == 7)) {
-            delta[i8][0] = exy * (double)ny;
-            delta[i8][1] = eyy * (double)ny;
-            delta[i8][2] = eyz * (double)ny;
+            delta[i8][0] = exy * ny_dbl;
+            delta[i8][1] = eyy * ny_dbl;
+            delta[i8][2] = eyz * ny_dbl;
           }
           if ((i8 == 2) || (i8 == 6)) {
-            delta[i8][0] = exy * (double)ny + exx * (double)nx;
-            delta[i8][1] = eyy * (double)ny + exy * (double)nx;
-            delta[i8][2] = eyz * (double)ny + exz * (double)nx;
+            delta[i8][0] = exy * ny_dbl + exx * nx_dbl;
+            delta[i8][1] = eyy * ny_dbl + exy * nx_dbl;
+            delta[i8][2] = eyz * ny_dbl + exz * nx_dbl;
           }
         }
       }
-      for (int k = 0; k < (nz - 1); k++) {
-        int m = nxy * k + nx * (ny - 1) + (nx - 1);
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int k = 0; k < nz1; k++) {
+        m = nxy_ * k + nx_ * ny1 + nx1;
         for (int nn = 0; nn < 3; nn++) {
           for (int mm = 0; mm < 8; mm++) {
             for (int m3 = 0; m3 < 3; m3++) {
@@ -1539,24 +1650,25 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 1) || (i8 == 2)) {
-            delta[i8][0] = exx * (double)nx;
-            delta[i8][1] = exy * (double)nx;
-            delta[i8][2] = exz * (double)nx;
+            delta[i8][0] = exx * nx_dbl;
+            delta[i8][1] = exy * nx_dbl;
+            delta[i8][2] = exz * nx_dbl;
           }
           if ((i8 == 4) || (i8 == 7)) {
-            delta[i8][0] = exz * (double)nz;
-            delta[i8][1] = eyz * (double)nz;
-            delta[i8][2] = ezz * (double)nz;
+            delta[i8][0] = exz * nz_dbl;
+            delta[i8][1] = eyz * nz_dbl;
+            delta[i8][2] = ezz * nz_dbl;
           }
           if ((i8 == 5) || (i8 == 6)) {
-            delta[i8][0] = exz * (double)nz + exx * (double)nx;
-            delta[i8][1] = eyz * (double)nz + exy * (double)nx;
-            delta[i8][2] = ezz * (double)nz + exz * (double)nx;
+            delta[i8][0] = exz * nz_dbl + exx * nx_dbl;
+            delta[i8][1] = eyz * nz_dbl + exy * nx_dbl;
+            delta[i8][2] = ezz * nz_dbl + exz * nx_dbl;
           }
         }
       }
-      for (int j = 0; j < (ny - 1); j++) {
-        int m = nxy * (nz - 1) + nx * j + (nx - 1);
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int j = 0; j < ny1; j++) {
+        m = nxy_ * nz1 + nx_ * j + nx1;
         for (int nn = 0; nn < 3; nn++) {
           for (int mm = 0; mm < 8; mm++) {
             for (int m3 = 0; m3 < 3; m3++) {
@@ -1574,24 +1686,25 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if ((i8 == 4) || (i8 == 5)) {
-            delta[i8][0] = exz * (double)nz;
-            delta[i8][1] = eyz * (double)nz;
-            delta[i8][2] = ezz * (double)nz;
+            delta[i8][0] = exz * nz_dbl;
+            delta[i8][1] = eyz * nz_dbl;
+            delta[i8][2] = ezz * nz_dbl;
           }
           if ((i8 == 2) || (i8 == 3)) {
-            delta[i8][0] = exy * (double)ny;
-            delta[i8][1] = eyy * (double)ny;
-            delta[i8][2] = eyz * (double)ny;
+            delta[i8][0] = exy * ny_dbl;
+            delta[i8][1] = eyy * ny_dbl;
+            delta[i8][2] = eyz * ny_dbl;
           }
           if ((i8 == 6) || (i8 == 7)) {
-            delta[i8][0] = exy * (double)ny + exz * (double)nz;
-            delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-            delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+            delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+            delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+            delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
           }
         }
       }
-      for (int i = 0; i < (nx - 1); i++) {
-        int m = nxy * (nz - 1) + nx * (ny - 1) + i;
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      for (int i = 0; i < nx1; i++) {
+        m = nxy_ * nz1 + nx_ * ny1 + i;
         for (int nn = 0; nn < 3; nn++) {
           for (int mm = 0; mm < 8; mm++) {
             for (int m3 = 0; m3 < 3; m3++) {
@@ -1609,46 +1722,47 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
         for (int i8 = 0; i8 < 8; i8++) {
           delta[i8][i3] = 0.0;
           if (i8 == 1) {
-            delta[i8][0] = exx * (double)nx;
-            delta[i8][1] = exy * (double)nx;
-            delta[i8][2] = exz * (double)nx;
+            delta[i8][0] = exx * nx_dbl;
+            delta[i8][1] = exy * nx_dbl;
+            delta[i8][2] = exz * nx_dbl;
           }
           if (i8 == 3) {
-            delta[i8][0] = exy * (double)ny;
-            delta[i8][1] = eyy * (double)ny;
-            delta[i8][2] = eyz * (double)ny;
+            delta[i8][0] = exy * ny_dbl;
+            delta[i8][1] = eyy * ny_dbl;
+            delta[i8][2] = eyz * ny_dbl;
           }
           if (i8 == 4) {
-            delta[i8][0] = exz * (double)nz;
-            delta[i8][1] = eyz * (double)nz;
-            delta[i8][2] = ezz * (double)nz;
+            delta[i8][0] = exz * nz_dbl;
+            delta[i8][1] = eyz * nz_dbl;
+            delta[i8][2] = ezz * nz_dbl;
           }
           if (i8 == 7) {
-            delta[i8][0] = exy * (double)ny + exz * (double)nz;
-            delta[i8][1] = eyy * (double)ny + eyz * (double)nz;
-            delta[i8][2] = eyz * (double)ny + ezz * (double)nz;
+            delta[i8][0] = exy * ny_dbl + exz * nz_dbl;
+            delta[i8][1] = eyy * ny_dbl + eyz * nz_dbl;
+            delta[i8][2] = eyz * ny_dbl + ezz * nz_dbl;
           }
           if (i8 == 5) {
-            delta[i8][0] = exx * (double)nx + exz * (double)nz;
-            delta[i8][1] = exy * (double)nx + eyz * (double)nz;
-            delta[i8][2] = exz * (double)nx + ezz * (double)nz;
+            delta[i8][0] = exx * nx_dbl + exz * nz_dbl;
+            delta[i8][1] = exy * nx_dbl + eyz * nz_dbl;
+            delta[i8][2] = exz * nx_dbl + ezz * nz_dbl;
           }
           if (i8 == 2) {
-            delta[i8][0] = exx * (double)nx + exy * (double)ny;
-            delta[i8][1] = exy * (double)nx + eyy * (double)ny;
-            delta[i8][2] = exz * (double)nx + eyz * (double)ny;
+            delta[i8][0] = exx * nx_dbl + exy * ny_dbl;
+            delta[i8][1] = exy * nx_dbl + eyy * ny_dbl;
+            delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
           }
           if (i8 == 6) {
             delta[i8][0] =
-                exx * (double)nx + exy * (double)ny + exz * (double)nz;
+                exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
             delta[i8][1] =
-                exy * (double)nx + eyy * (double)ny + eyz * (double)nz;
+                exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
             delta[i8][2] =
-                exz * (double)nx + eyz * (double)ny + ezz * (double)nz;
+                exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
           }
         }
       }
-      int m = nxy * (nz - 1) + nx * (ny - 1) + (nx - 1);
+      // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
+      m = nxy_ * nz1 + nx_ * ny1 + nx1;
       for (int nn = 0; nn < 3; nn++) {
         for (int mm = 0; mm < 8; mm++) {
           for (int m3 = 0; m3 < 3; m3++) {
@@ -1709,9 +1823,10 @@ void ThermalStrain::constfunc(int ns, int nx, int ny, int nz) {
   return;
 }
 
-double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
-  int nss = ns + 2;
-  double utot;
+double ThermalStrain::energy() {
+  int nss = ns_ + 2;
+  double utot = 0;
+  double sum = 0;
 
   ///
   /// Do global matrix multiply via small stiffness matrices, Ah_ = A * h_
@@ -1727,7 +1842,7 @@ double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
 
   for (int j = 0; j < 3; j++) {
     for (int n = 0; n < 3; n++) {
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         gb_[m][j] += u_[ib_[m][0]][n] * (dk_[pix_[ib_[m][26]]][0][j][3][n] +
                                          dk_[pix_[ib_[m][6]]][1][j][2][n] +
                                          dk_[pix_[ib_[m][24]]][4][j][7][n] +
@@ -1798,7 +1913,7 @@ double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
 
   utot = 0.0;
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < ns; m++) {
+    for (int m = 0; m < ns_; m++) {
       utot += 0.5 * u_[m][m3] * gb_[m][m3] + b_[m][m3] * u_[m][m3];
 
       ///
@@ -1818,7 +1933,7 @@ double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
     for (int j = 0; j < 2; j++) {
       for (int mi = 0; mi < 3; mi++) {
         for (int mj = 0; mj < 3; mj++) {
-          C_ += 0.5 * u_[ns + i][mi] * zcon_[i][mi][j][mj] * u_[ns + j][mj];
+          C_ += 0.5 * u_[ns_ + i][mi] * zcon_[i][mi][j][mj] * u_[ns_ + j][mj];
         }
       }
     }
@@ -1849,13 +1964,13 @@ double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
 
   for (int i = 0; i < 2; i++) {
     for (int mi = 0; mi < 3; mi++) {
-      double sum = 0.0;
+      sum = 0.0;
       for (int j = 0; j < 2; j++) {
         for (int mj = 0; mj < 3; mj++) {
-          sum += zcon_[i][mi][j][mj] * u_[ns + j][mj];
+          sum += zcon_[i][mi][j][mj] * u_[ns_ + j][mj];
         }
       }
-      gb_[ns + i][mi] = sum;
+      gb_[ns_ + i][mi] = sum;
     }
   }
 
@@ -1878,65 +1993,66 @@ double ThermalStrain::energy(int nx, int ny, int nz, int ns) {
   ///
 
   for (int ii = 0; ii < 6; ii++) {
-    double sum = 0.0;
+    sum = 0.0;
     if (ii == 0) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b0_[m][m3];
         }
       }
-      gb_[ns][0] += sum;
+      gb_[ns_][0] += sum;
     }
     if (ii == 1) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b1_[m][m3];
         }
       }
-      gb_[ns][1] += sum;
+      gb_[ns_][1] += sum;
     }
     if (ii == 2) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b2_[m][m3];
         }
       }
-      gb_[ns][2] += sum;
+      gb_[ns_][2] += sum;
     }
     if (ii == 3) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b3_[m][m3];
         }
       }
-      gb_[ns + 1][0] += sum;
+      gb_[ns_ + 1][0] += sum;
     }
     if (ii == 4) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b4_[m][m3];
         }
       }
-      gb_[ns + 1][1] += sum;
+      gb_[ns_ + 1][1] += sum;
     }
     if (ii == 5) {
       for (int m3 = 0; m3 < 3; m3++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           sum += u_[m][m3] * b5_[m][m3];
         }
       }
-      gb_[ns + 1][2] += sum;
+      gb_[ns_ + 1][2] += sum;
     }
   }
 
   return utot;
 }
 
-int ThermalStrain::dembx(int ns, double gg, int ldemb, int kkk) {
+// int ThermalStrain::dembx(int ns, double gg, int ldemb, int kkk) {
+int ThermalStrain::dembx(int ldemb, int kkk) {
   double lambda, gamma;
   double hAh, gglast;
   int Lstep;
-  int nss = ns + 2;
+  int nss = ns_ + 2;
 
   ///
   /// Initialize the conjugate direction vector on first call to dembx only.
@@ -1979,7 +2095,7 @@ int ThermalStrain::dembx(int ns, double gg, int ldemb, int kkk) {
 
     for (int j = 0; j < 3; j++) {
       for (int n = 0; n < 3; n++) {
-        for (int m = 0; m < ns; m++) {
+        for (int m = 0; m < ns_; m++) {
           Ah_[m][j] +=
               h_[ib_[m][0]][n] * (dk_[pix_[ib_[m][26]]][0][j][3][n] +
                                   dk_[pix_[ib_[m][6]]][1][j][2][n] +
@@ -2064,59 +2180,59 @@ int ThermalStrain::dembx(int ns, double gg, int ldemb, int kkk) {
       /// Fill in terms from matrix multiply right hand sides, 1 to ns_.
       ///
 
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         for (int m1 = 0; m1 < 3; m1++) {
           if (ii == 0)
-            Ah_[m][m1] += b0_[m][m1] * h_[ns][0];
+            Ah_[m][m1] += b0_[m][m1] * h_[ns_][0];
           if (ii == 1)
-            Ah_[m][m1] += b1_[m][m1] * h_[ns][1];
+            Ah_[m][m1] += b1_[m][m1] * h_[ns_][1];
           if (ii == 2)
-            Ah_[m][m1] += b2_[m][m1] * h_[ns][2];
+            Ah_[m][m1] += b2_[m][m1] * h_[ns_][2];
           if (ii == 3)
-            Ah_[m][m1] += b3_[m][m1] * h_[ns + 1][0];
+            Ah_[m][m1] += b3_[m][m1] * h_[ns_ + 1][0];
           if (ii == 4)
-            Ah_[m][m1] += b4_[m][m1] * h_[ns + 1][1];
+            Ah_[m][m1] += b4_[m][m1] * h_[ns_ + 1][1];
           if (ii == 5)
-            Ah_[m][m1] += b5_[m][m1] * h_[ns + 1][2];
+            Ah_[m][m1] += b5_[m][m1] * h_[ns_ + 1][2];
         }
       }
 
       // now do across bottom, 1 to ns_.
-      for (int m = 0; m < ns; m++) {
+      for (int m = 0; m < ns_; m++) {
         if (ii == 0)
-          Ah_[ns][0] += b0_[m][0] * h_[m][0] + b0_[m][1] * h_[m][1] +
+          Ah_[ns_][0] += b0_[m][0] * h_[m][0] + b0_[m][1] * h_[m][1] +
                         b0_[m][2] * h_[m][2];
         if (ii == 1)
-          Ah_[ns][1] += b1_[m][0] * h_[m][0] + b1_[m][1] * h_[m][1] +
+          Ah_[ns_][1] += b1_[m][0] * h_[m][0] + b1_[m][1] * h_[m][1] +
                         b1_[m][2] * h_[m][2];
         if (ii == 2)
-          Ah_[ns][2] += b2_[m][0] * h_[m][0] + b2_[m][1] * h_[m][1] +
+          Ah_[ns_][2] += b2_[m][0] * h_[m][0] + b2_[m][1] * h_[m][1] +
                         b2_[m][2] * h_[m][2];
         if (ii == 3)
-          Ah_[ns + 1][0] += b3_[m][0] * h_[m][0] + b3_[m][1] * h_[m][1] +
+          Ah_[ns_ + 1][0] += b3_[m][0] * h_[m][0] + b3_[m][1] * h_[m][1] +
                             b3_[m][2] * h_[m][2];
         if (ii == 4)
-          Ah_[ns + 1][1] += b4_[m][0] * h_[m][0] + b4_[m][1] * h_[m][1] +
+          Ah_[ns_ + 1][1] += b4_[m][0] * h_[m][0] + b4_[m][1] * h_[m][1] +
                             b4_[m][2] * h_[m][2];
         if (ii == 5)
-          Ah_[ns + 1][2] += b5_[m][0] * h_[m][0] + b5_[m][1] * h_[m][1] +
+          Ah_[ns_ + 1][2] += b5_[m][0] * h_[m][0] + b5_[m][1] * h_[m][1] +
                             b5_[m][2] * h_[m][2];
       }
       // now do right hand corner terms, ns to (ns+1).
       for (int m = 0; m < 2; m++) {
         for (int m1 = 0; m1 < 3; m1++) {
           if (ii == 0)
-            Ah_[ns][0] += zcon_[0][0][m][m1] * h_[ns + m][m1];
+            Ah_[ns_][0] += zcon_[0][0][m][m1] * h_[ns_ + m][m1];
           if (ii == 1)
-            Ah_[ns][1] += zcon_[0][1][m][m1] * h_[ns + m][m1];
+            Ah_[ns_][1] += zcon_[0][1][m][m1] * h_[ns_ + m][m1];
           if (ii == 2)
-            Ah_[ns][2] += zcon_[0][2][m][m1] * h_[ns + m][m1];
+            Ah_[ns_][2] += zcon_[0][2][m][m1] * h_[ns_ + m][m1];
           if (ii == 3)
-            Ah_[ns + 1][0] += zcon_[1][0][m][m1] * h_[ns + m][m1];
+            Ah_[ns_ + 1][0] += zcon_[1][0][m][m1] * h_[ns_ + m][m1];
           if (ii == 4)
-            Ah_[ns + 1][1] += zcon_[1][1][m][m1] * h_[ns + m][m1];
+            Ah_[ns_ + 1][1] += zcon_[1][1][m][m1] * h_[ns_ + m][m1];
           if (ii == 5)
-            Ah_[ns + 1][2] += zcon_[1][2][m][m1] * h_[ns + m][m1];
+            Ah_[ns_ + 1][2] += zcon_[1][2][m][m1] * h_[ns_ + m][m1];
         }
       }
     }
@@ -2175,19 +2291,23 @@ int ThermalStrain::dembx(int ns, double gg, int ldemb, int kkk) {
   return Lstep;
 }
 
-void ThermalStrain::relax(double time, int kmax) {
+void ThermalStrain::relax(int kmax) {
   int ldemb = 150, ltot = 0;
-  int iskip;
+  // int iskip;
   double utot;
   int Lstep;
+  int nss = ns_ + 2;
 
-  iskip = 1;
-  femat(nx_, ny_, nz_, ns_, nphase_, iskip);
-  utot = energy(nx_, ny_, nz_, ns_);
+  // iskip = 1;
+  // femat(nx_, ny_, nz_, ns_, nphase_, iskip);
+  femat(1);
+
+  // utot = energy(nx_, ny_, nz_, ns_);
+  utot = energy();
 
   gg_ = 0.0;
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < (ns_ + 2); m++) {
+    for (int m = 0; m < nss; m++) {
       gg_ += gb_[m][m3] * gb_[m][m3];
     }
   }
@@ -2219,7 +2339,8 @@ void ThermalStrain::relax(double time, int kmax) {
     /// Call dembx to implement conjugate gradient routine.
     ///
 
-    Lstep = dembx(ns_, gg_, ldemb, kkk);
+    // Lstep = dembx(ns_, gg_, ldemb, kkk);
+    Lstep = dembx(ldemb, kkk);
     ltot += Lstep;
 
     ///
@@ -2232,9 +2353,12 @@ void ThermalStrain::relax(double time, int kmax) {
     /// macrostrains.
     ///
 
-    iskip = 1;
-    femat(nx_, ny_, nz_, ns_, nphase_, iskip);
-    utot = energy(nx_, ny_, nz_, ns_);
+    // iskip = 1;
+    // femat(nx_, ny_, nz_, ns_, nphase_, iskip);
+    femat(1);
+
+    // utot = energy(nx_, ny_, nz_, ns_);
+    utot = energy();
 
     if (verbose_) {
       cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
@@ -2247,13 +2371,13 @@ void ThermalStrain::relax(double time, int kmax) {
     ///
 
     if (gg_ >= gtest_) {
-
       ///
       /// Output stresses, strains, and macrostrains as an additional aid in
       /// judging how well the relaxation process is proceeding.
       ///
 
-      stress(nx_, ny_, nz_, ns_);
+      // stress(nx_, ny_, nz_, ns_);
+      stress();
 
       if (verbose_) {
         cout << "ThermalStrain::relax stresses: xx, "
@@ -2279,7 +2403,8 @@ void ThermalStrain::relax(double time, int kmax) {
     }
   }
 
-  stress(nx_, ny_, nz_, ns_);
+  // stress(nx_, ny_, nz_, ns_);
+  stress();
 
   if (verbose_) {
     cout << "ThermalStrain::relax stresses: xx, "
@@ -2299,11 +2424,10 @@ void ThermalStrain::relax(double time, int kmax) {
 
   ostringstream ostr2;
   ostr2 << ltot;
-  string step(ostr2.str());
-  /*
-  writeStress(time,step,0);
-  writeStrainEngy(time,step);
-  */
+  // string step(ostr2.str());
+
+  // writeStress(time,step,0);
+  // writeStrainEngy(time,step);
 
   ofstream outstr("macrostrains.dat");
   outstr << u_[ns_][0];
@@ -2312,20 +2436,29 @@ void ThermalStrain::relax(double time, int kmax) {
   return;
 }
 
-void ThermalStrain::stress(int nx, int ny, int nz, int ns) {
+// void ThermalStrain::stress(int nx, int ny, int nz, int ns) {
+void ThermalStrain::stress() {
   double dndx[8], dndy[8], dndz[8];
   double es[6][8][3];
   double uu[8][3];
   double str11, str22, str33, str13, str23, str12;
   double s11, s22, s33, s13, s23, s12;
   double exx, eyy, ezz, exz, eyz, exy;
-  int nxy = nx * ny;
-  exx = u_[ns][0];
-  eyy = u_[ns][1];
-  ezz = u_[ns][2];
-  exz = u_[ns + 1][0];
-  eyz = u_[ns + 1][1];
-  exy = u_[ns + 1][2];
+
+  int nx1 = nx_ - 1;
+  int ny1 = ny_ - 1;
+  int nz1 = nz_ - 1;
+  double nx_dbl = nx_;
+  double ny_dbl = ny_;
+  double nz_dbl = nz_;
+  int m;
+
+  exx = u_[ns_][0];
+  eyy = u_[ns_][1];
+  ezz = u_[ns_][2];
+  exz = u_[ns_ + 1][0];
+  eyz = u_[ns_ + 1][1];
+  exy = u_[ns_ + 1][2];
 
   ///
   /// Set up single element strain matrix.
@@ -2400,7 +2533,7 @@ void ThermalStrain::stress(int nx, int ny, int nz, int ns) {
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < ny_; j++) {
       for (int i = 0; i < nx_; i++) {
-        int m = nxy * k + nx * j + i;
+        m = nxy_ * k + nx_ * j + i;
 
         ///
         /// Load in elements of 8-vector using periodic boundary conditions.
@@ -2423,47 +2556,50 @@ void ThermalStrain::stress(int nx, int ny, int nz, int ns) {
         /// opposite face, need to put in applied strain to correct them.
         ///
 
-        if (i == (nx - 1)) {
-          uu[1][0] += exx * nx;
-          uu[1][1] += exy * nx;
-          uu[1][2] += exz * nx;
-          uu[2][0] += exx * nx;
-          uu[2][1] += exy * nx;
-          uu[2][2] += exz * nx;
-          uu[5][0] += exx * nx;
-          uu[5][1] += exy * nx;
-          uu[5][2] += exz * nx;
-          uu[6][0] += exx * nx;
-          uu[6][1] += exy * nx;
-          uu[6][2] += exz * nx;
+        // nx1 = nx - 1
+        if (i == nx1) {
+          uu[1][0] += exx * nx_dbl;
+          uu[1][1] += exy * nx_dbl;
+          uu[1][2] += exz * nx_dbl;
+          uu[2][0] += exx * nx_dbl;
+          uu[2][1] += exy * nx_dbl;
+          uu[2][2] += exz * nx_dbl;
+          uu[5][0] += exx * nx_dbl;
+          uu[5][1] += exy * nx_dbl;
+          uu[5][2] += exz * nx_dbl;
+          uu[6][0] += exx * nx_dbl;
+          uu[6][1] += exy * nx_dbl;
+          uu[6][2] += exz * nx_dbl;
         }
-        if (j == (ny - 1)) {
-          uu[2][0] += exy * ny;
-          uu[2][1] += eyy * ny;
-          uu[2][2] += eyz * ny;
-          uu[3][0] += exy * ny;
-          uu[3][1] += eyy * ny;
-          uu[3][2] += eyz * ny;
-          uu[6][0] += exy * ny;
-          uu[6][1] += eyy * ny;
-          uu[6][2] += eyz * ny;
-          uu[7][0] += exy * ny;
-          uu[7][1] += eyy * ny;
-          uu[7][2] += eyz * ny;
+        // ny1 = ny - 1
+        if (j == ny1) {
+          uu[2][0] += exy * ny_dbl;
+          uu[2][1] += eyy * ny_dbl;
+          uu[2][2] += eyz * ny_dbl;
+          uu[3][0] += exy * ny_dbl;
+          uu[3][1] += eyy * ny_dbl;
+          uu[3][2] += eyz * ny_dbl;
+          uu[6][0] += exy * ny_dbl;
+          uu[6][1] += eyy * ny_dbl;
+          uu[6][2] += eyz * ny_dbl;
+          uu[7][0] += exy * ny_dbl;
+          uu[7][1] += eyy * ny_dbl;
+          uu[7][2] += eyz * ny_dbl;
         }
-        if (k == (nz - 1)) {
-          uu[4][0] += exz * nz;
-          uu[4][1] += eyz * nz;
-          uu[4][2] += ezz * nz;
-          uu[5][0] += exz * nz;
-          uu[5][1] += eyz * nz;
-          uu[5][2] += ezz * nz;
-          uu[6][0] += exz * nz;
-          uu[6][1] += eyz * nz;
-          uu[6][2] += ezz * nz;
-          uu[7][0] += exz * nz;
-          uu[7][1] += eyz * nz;
-          uu[7][2] += ezz * nz;
+        // nz1 = nz - 1
+        if (k == nz1) {
+          uu[4][0] += exz * nz_dbl;
+          uu[4][1] += eyz * nz_dbl;
+          uu[4][2] += ezz * nz_dbl;
+          uu[5][0] += exz * nz_dbl;
+          uu[5][1] += eyz * nz_dbl;
+          uu[5][2] += ezz * nz_dbl;
+          uu[6][0] += exz * nz_dbl;
+          uu[6][1] += eyz * nz_dbl;
+          uu[6][2] += ezz * nz_dbl;
+          uu[7][0] += exz * nz_dbl;
+          uu[7][1] += eyz * nz_dbl;
+          uu[7][2] += ezz * nz_dbl;
         }
 
         ///
@@ -2575,41 +2711,43 @@ void ThermalStrain::stress(int nx, int ny, int nz, int ns) {
   /// Volume average global stresses and strain.
   ///
 
-  strxx_ = strxx_ / float(ns);
-  stryy_ = stryy_ / float(ns);
-  strzz_ = strzz_ / float(ns);
-  strxz_ = strxz_ / float(ns);
-  stryz_ = stryz_ / float(ns);
-  strxy_ = strxy_ / float(ns);
+  double ns_dbl = ns_;
+  strxx_ = strxx_ / ns_dbl;
+  stryy_ = stryy_ / ns_dbl;
+  strzz_ = strzz_ / ns_dbl;
+  strxz_ = strxz_ / ns_dbl;
+  stryz_ = stryz_ / ns_dbl;
+  strxy_ = strxy_ / ns_dbl;
 
-  sxx_ = sxx_ / float(ns);
-  syy_ = syy_ / float(ns);
-  szz_ = szz_ / float(ns);
-  sxz_ = sxz_ / float(ns);
-  syz_ = syz_ / float(ns);
-  sxy_ = sxy_ / float(ns);
+  sxx_ = sxx_ / ns_dbl;
+  syy_ = syy_ / ns_dbl;
+  szz_ = szz_ / ns_dbl;
+  sxz_ = sxz_ / ns_dbl;
+  syz_ = syz_ / ns_dbl;
+  sxy_ = sxy_ / ns_dbl;
 
   return;
 }
 
 void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
                          double ezz, double exz, double eyz, double exy) {
-  int kmax = 60;
+  int kmax = kmax_; // 60;
   int iskip;
   double utot;
+  int m;
 
   ///
   /// Read in a microstructure in subroutine ppixel, and set up pix_[m] with
   /// the appropriate phase assignments.
   ///
 
-  ppixel(fileName, nphase_);
+  ppixel(fileName);
 
   ///
   /// Count and output the volume fractions of the different phases.
   ///
 
-  assig(ns_, nphase_);
+  assig();
 
 #ifdef DEBUG
   for (int i = 0; i < nphase_; i++) {
@@ -2683,13 +2821,16 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
     for (int k = 0; k < nz_; k++) {
       for (int j = 0; j < ny_; j++) {
         for (int i = 0; i < nx_; i++) {
-          int m = nx_ * ny_ * k + nx_ * j + i;
-          double x = (double)i;
-          double y = (double)j;
-          double z = (double)k;
-          u_[m][0] = x * u_[ns_][0] + y * u_[ns_ + 1][2] + z * u_[ns_ + 1][0];
-          u_[m][1] = x * u_[ns_ + 1][2] + y * u_[ns_][1] + z * u_[ns_ + 1][1];
-          u_[m][2] = x * u_[ns_ + 1][0] + y * u_[ns_ + 1][1] + z * u_[ns_][2];
+          m = nxy_ * k + nx_ * j + i;
+          // double x = (double)i;
+          // double y = (double)j;
+          // double z = (double)k;
+          // u_[m][0] = x * u_[ns_][0] + y * u_[ns_ + 1][2] + z * u_[ns_ + 1][0];
+          // u_[m][1] = x * u_[ns_ + 1][2] + y * u_[ns_][1] + z * u_[ns_ + 1][1];
+          // u_[m][2] = x * u_[ns_ + 1][0] + y * u_[ns_ + 1][1] + z * u_[ns_][2];
+          u_[m][0] = i * u_[ns_][0] + j * u_[ns_ + 1][2] + k * u_[ns_ + 1][0];
+          u_[m][1] = i * u_[ns_ + 1][2] + j * u_[ns_][1] + k * u_[ns_ + 1][1];
+          u_[m][2] = i * u_[ns_ + 1][0] + j * u_[ns_ + 1][1] + k * u_[ns_][2];
         }
       }
     }
@@ -2752,11 +2893,12 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
   ///
 
   iskip = 0;
-  femat(nx_, ny_, nz_, ns_, nphase_, iskip);
-  utot = energy(nx_, ny_, nz_, ns_);
+  femat(iskip);
+  utot = energy();
   gg_ = 0.0;
+  int nss = ns_ + 2;
   for (int m3 = 0; m3 < 3; m3++) {
-    for (int m = 0; m < (ns_ + 2); m++) {
+    for (int m = 0; m < nss; m++) {
       gg_ += gb_[m][m3] * gb_[m][m3];
     }
   }
@@ -2767,7 +2909,7 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 #endif
 
   for (int m1 = 0; m1 < 3; m1++) {
-    for (int m = 0; m < (ns_ + 2); m++) {
+    for (int m = 0; m < nss; m++) {
       b0_[m][m1] = 0.0;
       b1_[m][m1] = 0.0;
       b2_[m][m1] = 0.0;
@@ -2789,27 +2931,27 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
     e13 = e23 = e12 = 0.0;
     if (ii == 0) {
       e11 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
     if (ii == 1) {
       e22 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
     if (ii == 2) {
       e33 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
     if (ii == 3) {
       e13 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
     if (ii == 4) {
       e23 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
     if (ii == 5) {
       e12 = 1.0;
-      bgrad(nx_, ny_, nz_, ns_, e11, e22, e33, e13, e23, e12);
+      bgrad(e11, e22, e33, e13, e23, e12);
     }
   }
 
@@ -2821,7 +2963,7 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
   /// is `kmax * ldemb`.
   ///
 
-  for (int count = 0; count < 0; count++) {
+  for (int count = 0; count < 0; count++) { // check!
 #ifdef DEBUG
     cout << "ThermalStrain::Calc boxsize_ is: " << boxsize_ << endl;
     cout.flush();
@@ -2840,14 +2982,14 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
       int zlo = expcor[2] - halfbox;
       int zhi = expcor[2] + halfbox;
 
-      femat(nx_, ny_, nz_, ns_, nphase_, 1);
+      femat(1);
       double tempenergy = 0.0;
 
       ///
       /// Call energy method to get the global gradient, `gb_`.
       ///
 
-      tempenergy = energy(nx_, ny_, nz_, ns_);
+      tempenergy = energy();
 
       for (int m3 = 0; m3 < 3; m3++) {
         for (int k = zlo; k <= zhi; k++) {
@@ -2883,7 +3025,7 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
       localRelax(boxsize_, expcor[0], expcor[1], expcor[2], expindex);
     }
   }
-  relax(time, kmax);
+  relax(kmax);
 
   string outfilename = "displacement.dat";
   ofstream out(outfilename.c_str());
@@ -2899,33 +3041,6 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
   out << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1] << " " << u_[ns_ + 1][2]
       << endl;
   out.close();
-
-  return;
-}
-
-void ThermalStrain::localRelax(int boxsize, int x, int y, int z, int index) {
-
-#ifdef DEBUG
-  cout << "ThermalStrain::localRelax " << endl;
-  cout << "ThermalStrain::localRelax x, y, z and index are: " << x << " " << y
-       << " " << z << " " << index << endl;
-  cout.flush();
-#endif
-
-  int localldemb = 60, ltot = 0;
-  int iskip;
-  double utot;
-  int Lstep;
-
-  int halfbox = (int)(boxsize / 2);
-
-  Lstep = localDembx(boxsize, x, y, z, localldemb, 0);
-  ltot += Lstep;
-#ifdef DEBUG
-  cout << "ThermalStrain::localRelax localgg_ = " << localgg_
-       << " local relaxation steps ltot = " << ltot << endl;
-  cout.flush();
-#endif
 
   return;
 }

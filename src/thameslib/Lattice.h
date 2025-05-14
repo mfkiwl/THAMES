@@ -81,12 +81,12 @@ private:
   long int numRNGcall_0_, numRNGcallLONGMAX_;
   double lastRNG_;
 
-  unsigned int xdim_;     /**< Number of sites in the x dimension */
-  unsigned int ydim_;     /**< Number of sites in the y dimension */
-  unsigned int zdim_;     /**< Number of sites in the z dimension */
-  double resolution_;     /**< Voxel edge length [micrometers] */
-  vector<Site> site_;     /**< 1D list of Site objects (site = voxel) */
-  unsigned int numSites_; /**< Total number of sites */
+  int xdim_;          /**< Number of sites in the x dimension */
+  int ydim_;          /**< Number of sites in the y dimension */
+  int zdim_;          /**< Number of sites in the z dimension */
+  double resolution_; /**< Voxel edge length [micrometers] */
+  vector<Site> site_; /**< 1D list of Site objects (site = voxel) */
+  int numSites_;      /**< Total number of sites */
   // unsigned int siteNeighbors_; /**< Number of neighbor sites to a given site
   // */
   ChemicalSystem *chemSys_; /**< Pointer to simulation's ChemicalSystem */
@@ -171,6 +171,17 @@ pores in GEM units */
   vector<int> dissolutionInterfaceSize_; /**< dissolution interface size of each
                                             microphase */
 
+  vector<int> growingVectSA_; /**for SULFATE ATTACK */
+  int sizeGrowingVectSA_;
+  vector<vector<int>> shrinking_;
+  vector<vector<double>> volratios_;
+
+  int waterDCId_; /**< coresp to DCName = "H2O@" */
+  double waterMollarMass_;
+  double waterMollarVol_;
+
+  int DAMAGEID_;
+
 public:
   /**
   @brief Constructor without input microstructure file name.
@@ -221,7 +232,7 @@ public:
 
   @param x is the number of sites in the x dimension
   */
-  void setXDim(const unsigned int x) {
+  void setXDim(const int x) {
     xdim_ = x;
     numSites_ = (xdim_ * ydim_ * zdim_);
   }
@@ -231,14 +242,14 @@ public:
 
   @return the number of sites in the x dimension
   */
-  unsigned int getXDim() const { return xdim_; }
+  int getXDim() const { return xdim_; }
 
   /**
   @brief Set the number of sites in the y dimension.
 
   @param y is the number of sites in the y dimension
   */
-  void setYDim(const unsigned int y) {
+  void setYDim(const int y) {
     ydim_ = y;
     numSites_ = (xdim_ * ydim_ * zdim_);
   }
@@ -248,14 +259,14 @@ public:
 
   @return the number of sites in the y dimension
   */
-  unsigned int getYDim() const { return ydim_; }
+  int getYDim() const { return ydim_; }
 
   /**
   @brief Set the number of sites in the z dimension.
 
   @param z is the number of sites in the z dimension
   */
-  void setZDim(const unsigned int z) {
+  void setZDim(const int z) {
     zdim_ = z;
     numSites_ = (xdim_ * ydim_ * zdim_);
   }
@@ -265,7 +276,7 @@ public:
 
   @return the number of sites in the z dimension
   */
-  unsigned int getZDim() const { return zdim_; }
+  int getZDim() const { return zdim_; }
 
   /**
   @brief Get the total number of lattice sites.
@@ -276,7 +287,7 @@ public:
 
   @return the total number of lattice sites
   */
-  unsigned int getNumSites() const { return numSites_; }
+  int getNumSites() const { return numSites_; }
 
   /**
   @brief Set the volume fraction of a given microstructure phase.
@@ -284,14 +295,14 @@ public:
   @param i is the index of the microstructure phase
   @param vfrac is the volume fraction to assign on a total microstructure basis
   */
-  void setVolumeFraction(const int i, const double vfrac) {
-    if (i > -1 && i < volumeFraction_.size()) {
-      volumeFraction_[i] = vfrac;
-    } else {
-      throw EOBException("Lattice", "setVolumeFraction", "volumeFraction_",
-                         volumeFraction_.size(), i);
-    }
-  }
+  // void setVolumeFraction(const unsigned int i, const double vfrac) {
+  //   if (i > -1 && i < volumeFraction_.size()) {
+  //     volumeFraction_[i] = vfrac;
+  //   } else {
+  //     throw EOBException("Lattice", "setVolumeFraction", "volumeFraction_",
+  //                        volumeFraction_.size(), i);
+  //   }
+  // }
 
   /**
   @brief Set the initial volume fraction of a given microstructure phase.
@@ -340,19 +351,7 @@ public:
   @param i is the index of the microstructure phase
   @return the volume fraction of phase i on a total microstructure basis
   */
-  double getVolumeFraction(unsigned int i) { return (volumeFraction_[i]); }
-
-  /**
-  @brief Get the initial volume fraction of a given microstructure phase.
-
-  This is simply the number of sites with a given phase divided by the
-  total number of sites.
-
-  @param i is the index of the microstructure phase
-  @return the initial volume fraction of phase i on a total microstructure basis
-  */
-  // double getInitVolumeFraction(unsigned int i) { return
-  // (initVolumeFraction_[i]); }
+  double getVolumeFraction(int i) { return (volumeFraction_[i]); }
 
   /**
   @brief Calculate the subvoxel pore volume
@@ -526,7 +525,7 @@ public:
   */
   void setJobRoot(string jobname) {
     jobRoot_ = jobname;
-    damageJobRoot_ = jobRoot_ + ".damage";
+    // damageJobRoot_ = jobRoot_ + ".damage";
   }
 
   /**
@@ -539,8 +538,7 @@ public:
   @param yp is the y coordinate of the site to add
   @param zp is the z coordinate of the site to add
   */
-  void addSite(const unsigned int xp, const unsigned int yp,
-               const unsigned int zp);
+  void addSite(const int xp, const int yp, const int zp);
 
   /**
   @brief Get the x coordinate of a site with a given index in the 1D `site_`
@@ -549,7 +547,7 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the x coordinate
   */
-  unsigned int getX(const unsigned int i) const { return (site_[i].getX()); }
+  int getX(const int i) const { return (site_[i].getX()); }
 
   /**
   @brief Get the y coordinate of a site with a given index in the 1D `site_`
@@ -558,7 +556,7 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the y coordinate
   */
-  unsigned int getY(const unsigned int i) const { return (site_[i].getY()); }
+  int getY(const int i) const { return (site_[i].getY()); }
 
   /**
   @brief Get the z coordinate of a site with a given index in the 1D `site_`
@@ -567,7 +565,7 @@ public:
   @param i is the index of the site in the class's `site_` array
   @return the x coordinate
   */
-  unsigned int getZ(const unsigned int i) const { return (site_[i].getZ()); }
+  int getZ(const int i) const { return (site_[i].getZ()); }
 
   /**
   @brief Get a site's index in the 1D `site_` array, given its (x,y,z)
@@ -578,7 +576,7 @@ public:
   @param iz is the x coordinate of the site
   @return the index of the site in the `site_` array
   */
-  unsigned int getIndex(int ix, int iy, int iz) const;
+  int getIndex(int ix, int iy, int iz) const;
 
   /**
   @brief Get the collection of site indices neighboring a given site.
@@ -587,8 +585,7 @@ public:
   @param size is the maximum distance defining the neighborhood [sites]
   @return a list of site indices for all neighbors within the maximum distance
   */
-  vector<unsigned int> getNeighborhood(const unsigned int sitenum,
-                                       const int size);
+  vector<int> getNeighborhood(const int sitenum, const int size);
 
   /**
   @brief Get a pointer to a Site object at a given index in the `site_` array.
@@ -620,6 +617,8 @@ public:
     site_[index].setWmc(site_[index].getWmc() + dwmcval);
   }
 
+  void setWmc0(int index, double dwmcval) { site_[index].setWmc0(dwmcval); }
+
   /**
   @brief Compute normalized initial microstructure phase masses
 
@@ -635,7 +634,7 @@ public:
   @param cementMass is the combined mass of all the cement components
   @param solidMass is the combined mass of all the solids
   */
-  void normalizePhaseMasses(vector<double> microPhaseMass, double solidMass);
+  void normalizePhaseMasses(vector<double> microPhaseMass);
 
   /**
   @brief Master method to locate the interfaces for each phase in the
@@ -720,6 +719,8 @@ public:
   */
   int fillPorosity(int numsites, int cyc);
 
+  double fillAllPorosity(int cyc);
+
   /**
   @brief Count the number of solution sites within a box centered on a given
   site.
@@ -765,7 +766,7 @@ public:
   @param s is a pointer to the Site object
   @param i is the phase index to set at that site
   */
-  void setMicroPhaseId(Site *s, const unsigned int i) {
+  void setMicroPhaseId(Site *s, const int i) {
     count_[s->getMicroPhaseId()]--;
     s->setMicroPhaseId(i);
     count_[i]++;
@@ -777,7 +778,7 @@ public:
   @param sitenum is the index of the site in the `site_` array
   @param i is the phase index to set at that site
   */
-  void setMicroPhaseId(const int sitenum, const unsigned int i) {
+  void setMicroPhaseId(const int sitenum, const int i) {
     count_[site_[sitenum].getMicroPhaseId()]--;
     site_[sitenum].setMicroPhaseId(i);
     count_[i]++;
@@ -801,7 +802,7 @@ public:
   dissolution sites
   @param pid is the microstructure phase id
   */
-  void addDissolutionSite(Site *loc, unsigned int pid);
+  void addDissolutionSite(Site *loc, int pid);
 
   /**
   @brief Add a site to the list of sites where growth of a given phase can
@@ -811,7 +812,7 @@ public:
   growth sites
   @param pid is the microstructure phase id
   */
-  void addGrowthSite(Site *loc, unsigned int pid);
+  void addGrowthSite(Site *loc, int pid);
 
   /**
   @brief Remove a site from the list of sites where dissolution of a given phase
@@ -821,7 +822,7 @@ public:
   potential dissolution sites
   @param pid is the microstructure phase id
   */
-  void removeDissolutionSite(Site *loc, unsigned int pid);
+  void removeDissolutionSite(Site *loc, int pid);
 
   /**
   @brief Remove a site from the list of sites where growth of a given phase can
@@ -831,7 +832,7 @@ public:
   potential growth sites
   @param pid is the microstructure phase id
   */
-  void removeGrowthSite_diss(Site *loc, unsigned int pid);
+  void removeGrowthSite_diss(Site *loc, int pid);
 
   void removeGrowthSite_grow(Site *ste0, int pid);
 
@@ -947,11 +948,15 @@ public:
   */
   void writeLattice(double curtime);
 
+  void writeLatticeH(double curtime);
+
   void writeLatticeXYZ(double curtime);
 
   void appendXYZ(double curtime);
 
   void writeLatticeCFG(double curtime);
+
+  void writeNewLattice(int newZdim);
 
   /**
   @brief Write the 3D microstructure to a file.
@@ -1035,7 +1040,8 @@ public:
       return p->second;
     } else {
       string msg = "Could not find expansion_ match to index provided";
-      throw EOBException("Lattice", "getExpansion", msg, expansion_.size(), 0);
+      throw EOBException("Lattice", "getExpansion", msg, expansion_.size(),
+                         index);
     }
   }
 
@@ -1059,16 +1065,16 @@ public:
   @param index is the index of a site that has crystallization pressure
   @return the (x,y,z) coordinates of the site
   */
-  vector<int> getExpansionCoordin(int index) {
-    map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
-    if (p != expansion_coordin_.end()) {
-      return p->second;
-    } else {
-      string msg = "Could not find expansion_coordin_ match to index provided";
-      throw EOBException("Lattice", "getExpansionCoordin", msg,
-                         expansion_coordin_.size(), 0);
-    }
-  }
+  // vector<int> getExpansionCoordin(int index) {
+  //   map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
+  //   if (p != expansion_coordin_.end()) {
+  //     return p->second;
+  //   } else {
+  //     string msg = "Could not find expansion_coordin_ match to index
+  //     provided"; throw EOBException("Lattice", "getExpansionCoordin", msg,
+  //                        expansion_coordin_.size(), index);
+  //   }
+  // }
 
   /**
   @brief Set the coordinates of local site for calculating expansion stress.
@@ -1085,12 +1091,12 @@ public:
   @param coordin is the (x,y,z) triple of the site's coordinates
   @return the (x,y,z) coordinates of the site
   */
-  void setExpansionCoordin(int index, vector<int> coordin) {
-    map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
-    if (p == expansion_coordin_.end()) {
-      expansion_coordin_.insert(make_pair(index, coordin));
-    }
-  }
+  // void setExpansionCoordin(int index, vector<int> coordin) {
+  //   map<int, vector<int>>::iterator p = expansion_coordin_.find(index);
+  //   if (p == expansion_coordin_.end()) {
+  //     expansion_coordin_.insert(make_pair(index, coordin));
+  //   }
+  // }
 
   /**
   @brief Get the microstructure volume
@@ -1202,7 +1208,7 @@ public:
   @param vol is the volume of each microstructure phase
   @param calc is true only if calculating instead of just returning
   */
-  void calcCapillaryVoidVolume(vector<double> &vol);
+  // void calcCapillaryVoidVolume(void);
 
   /**
   @brief Get the capillary void volume
@@ -1246,11 +1252,11 @@ public:
 
   @param masterporevolume is the pore volume distribution
   */
-  void
-  setMasterPoreVolume(const vector<struct PoreSizeVolume> masterporevolume) {
-    masterPoreVolume_ = masterporevolume;
-    return;
-  }
+  // void
+  // setMasterPoreVolume(const vector<struct PoreSizeVolume> masterporevolume) {
+  //   masterPoreVolume_ = masterporevolume;
+  //   return;
+  // }
 
   /**
   @brief Set the master pore volume distribution of a particular size
@@ -1260,6 +1266,7 @@ public:
   @param volume is the volume of pores this size, in nm3
   @param volfrac is the volume fraction of this size filled with electrolyte
   */
+  /*
   void setMasterPoreVolume(const int idx, const double diam,
                            const double volume, const double volfrac) {
     try {
@@ -1277,12 +1284,14 @@ public:
     }
     return;
   }
+  */
 
   /**
   @brief Get the master pore volume distribution of a particular size
   @param idx is the index to get
   @return the structure holding the pore size distribution data for that element
   */
+  /*
   struct PoreSizeVolume getMasterPoreVolume(const int idx) {
     try {
       if (idx >= masterPoreVolume_.size()) {
@@ -1296,12 +1305,14 @@ public:
     }
     return (masterPoreVolume_[idx]);
   }
+  */
 
   /**
   @brief Get the diameter of the idx element of the pore volume distribution
   @param idx is the index to get
   @return the diameter of that element in the pore size distribution (nm)
   */
+  /*
   double getMasterPoreVolumeDiam(const int idx) {
     try {
       if (idx >= masterPoreVolume_.size()) {
@@ -1315,12 +1326,14 @@ public:
     }
     return (masterPoreVolume_[idx].diam);
   }
+  */
 
   /**
   @brief Get the total volume of the idx element of the pore volume distribution
   @param idx is the index to get
   @return the volume of that element in the pore size distribution (nm3)
   */
+  /*
   double getMasterPoreVolumeVolume(const int idx) {
     try {
       if (idx >= masterPoreVolume_.size()) {
@@ -1334,6 +1347,7 @@ public:
     }
     return (masterPoreVolume_[idx].volume);
   }
+  */
 
   /**
   @brief Get the volume fraction saturated  of the idx element of the pore
@@ -1342,6 +1356,7 @@ public:
   @return the volume fraction saturated of that element in the pore size
   distribution
   */
+  /*
   double getMasterPoreVolumeVolfrac(const int idx) {
     try {
       if (idx >= masterPoreVolume_.size()) {
@@ -1355,6 +1370,7 @@ public:
     }
     return (masterPoreVolume_[idx].volfrac);
   }
+  */
 
   /**
   @brief Get the largest diameter of pores containing electrolyte
@@ -1442,8 +1458,7 @@ public:
   center site
   @return a list of the site indices belonging to the subvolume that was written
   */
-  vector<unsigned int> writeSubVolume(string fileName, Site *centerste,
-                                      int size);
+  vector<int> writeSubVolume(string fileName, Site *centerste, int size);
 
   /**
   @brief Assign isotropic expansion strain at a set of prescribed sites.
@@ -1457,7 +1472,7 @@ public:
   @param alnb is the collection of site indices to which strain will be assigned
   @param exp is the isotropic expansion strain to set
   */
-  void applyExp(vector<unsigned int> alnb, double exp);
+  void applyExpansion(vector<int> alnb, double exp);
 
   /**
   @brief Estimate the surface areas of all solid phases
@@ -1490,10 +1505,10 @@ public:
   @return the estimated surface area [m2 per 100 g of all solid]
   */
   double getSurfaceArea(int phaseid) {
-    if (phaseid > -1 && phaseid < surfaceArea_.size()) {
-      return surfaceArea_[phaseid];
-    }
-    return 0.0;
+    // if (phaseid > -1 && phaseid < surfaceArea_.size()) {
+    return surfaceArea_[phaseid];
+    // }
+    // return 0.0;
   }
 
   /**
@@ -1503,12 +1518,12 @@ public:
   @param phaseid is the id of the microstructure phase
   @return the estimated specific surface area [m2 per g of this phase]
   */
-  double getSpecificSurfaceArea(int phaseid) {
-    if (phaseid > -1 && phaseid < specificSurfaceArea_.size()) {
-      return specificSurfaceArea_[phaseid];
-    }
-    return 0.0;
-  }
+  // double getSpecificSurfaceArea(int phaseid) {
+  //   if (phaseid > -1 && phaseid < specificSurfaceArea_.size()) {
+  //     return specificSurfaceArea_[phaseid];
+  //   }
+  //   return 0.0;
+  // }
 
   /**
   @brief Return the combined specific surface area of cementitious
@@ -1542,12 +1557,14 @@ public:
     // So ssa/cemmass has units of m2 per g of cement
     // Multiply that by 1000.0 to get units of m2/(kg of cement)
     // if (verbose_) {
-    //    cout << "URANIUM all solid mass = " << allsolidmass << " g / (100 g solid)"
+    //    cout << "URANIUM all solid mass = " << allsolidmass << " g / (100 g
+    //    solid)"
     //          << endl;
     //    cout << "URANIUM all surface = " << allsurf << " m2 / (100 g solid)"
     //            << endl;
-    //    cout << "URANIUM cement mass = " << cemmass << " g / (100 g solid)" << endl;
-    //    cout << "URANIUM cement surface = " << cemsurf << " m2 / (100 g solid)"
+    //    cout << "URANIUM cement mass = " << cemmass << " g / (100 g solid)" <<
+    //    endl; cout << "URANIUM cement surface = " << cemsurf << " m2 / (100 g
+    //    solid)"
     //            << endl;
     //    cout.flush();
     // }
@@ -1663,8 +1680,7 @@ public:
 
   int getRNGseed(void) { return latticeRNGseed_; }
 
-  void resetRNG(long int val_0, long int valLONGMAX, double valRNG, int cyc,
-                int whileCount) {
+  void resetRNG(long int val_0, long int valLONGMAX, double valRNG) {
     // latticeRNGseed_ = seed;
     rg_->setSeed(latticeRNGseed_);
     numRNGcall_0_ = val_0;
@@ -1711,21 +1727,22 @@ public:
            << endl;
     }
 
-    vector<unsigned int> growth = site_[stId].getGrowthPhases();
+    vector<int> growth = site_[stId].getGrowthPhases();
     int size = growth.size();
+    int k;
     cout << endl << " growth_.size() : " << size << endl;
-    for (int k = 0; k < size; k++) {
+    for (k = 0; k < size; k++) {
       cout << "       k = " << k << "   growth_[k] = " << growth[k] << endl;
     }
     cout << endl << " inGrowInterfacePos_ : " << endl;
-    for (int k = 0; k < numMicroPhases_; k++) {
+    for (k = 0; k < numMicroPhases_; k++) {
       cout << "       k = " << k << "   site_[stId].getInGrowInterfacePos(k) = "
            << site_[stId].getInGrowInterfacePos(k) << endl;
     }
 
     cout << endl
          << "     in growInterfaces on pos inGrowInterfacePos_ :" << endl;
-    for (int k = 0; k < numMicroPhases_; k++) {
+    for (k = 0; k < numMicroPhases_; k++) {
       cout << "       k_ = " << k << endl;
       cout.flush();
       if (site_[stId].getInGrowInterfacePos(k) > -1) {
@@ -1762,6 +1779,40 @@ public:
   vector<int> chooseNucleationSitesRND(int phaseID, int numLeft);
 
   vector<int> chooseNucleationSitesAFF(int phaseID, int numLeft);
+
+  /**
+  @brief Convert (switch to electrolyte) the prescribed number of
+  sites of each microphase that has to dissolve
+
+  @param dissPhaseIDVect is the vector of microphase IDs that must dissolve
+  @param numSiteDissVect is a vector containing the number of voxels to dissolve
+  for each microphase ID in dissPhaseIDVect
+  @param dissPhNameVect is a vector containing the name of each microphase in
+  dissPhaseIDVect
+  @param numtoadd_D is the number of sites switched by this call
+  @param totalTRC is the total call number of the changeMicrostructure method
+  @return -1 if all requested numbers of voxels in numSiteDissVect have been
+  switched or the ID of the first microphase (in dissPhaseIDVect) for which this
+  was not possible
+  */
+  vector<int>
+  transformPhase(int ettrid, int netsitesEttrid, vector<int> dissPhaseIDVect,
+                 vector<int> numSiteDissVect, vector<string> dissPhNameVect,
+                 vector<double> volumeRatio, int &numadded_D, int totalTRC);
+
+  void createGrowingVectSA(void);
+
+  void transformGrowPhase(Site *ste, int growPhID, int totalTRC);
+
+  void transformChangePhase(Site *ste, int oldPhId, int newPhId, int totalTRC);
+
+  vector<int> getAllSitesPhId(void) {
+    vector<int> allPhId(numSites_, 0);
+    for (int i = 0; i < numSites_; i++) {
+      allPhId[i] = site_[i].getMicroPhaseId();
+    }
+    return allPhId;
+  }
 
 }; // End of Lattice class
 #endif

@@ -23,8 +23,8 @@ using namespace std;
 
 struct RestoreSite {
   // for each site in site_:
-  unsigned int microPhaseId;      // The microstructure phase assignment
-  vector<unsigned int> growth;    // vector of phases that can grow at this site
+  int microPhaseId;      // The microstructure phase assignment
+  vector<int> growth;    // vector of phases that can grow at this site
   vector<int> inGrowInterfacePos; // vector of the site position in each growth
                                   // interface
   int inDissInterfacePos; // site position in the corresponding dissolution
@@ -152,12 +152,21 @@ protected:
 
   int simType_; /**< Hydration, leaching, or sulfate attack for now */
 
+  bool attack_; /**< for sulfate attack */
+  double iniAttackTime_;
+  double endAttackTime_;
+  double frqAttackTime_;
+  vector<int> isParrotKilloh_;
+  int sizePK_;
+  bool notPKPhase = true;
+
 private:
   double sulfateAttackTime_; /**< Simulation time at which to begin sulfate
                                 attack, in hours */
   double leachTime_;         /**< Simulation time at which to begin leaching,
                                       in hours */
-  int damageCount_; /**< Number of pixels in the lattice that are damaged */
+  int oldDamageCount_; /**< Number of pixels in the lattice that are damaged */
+  int allDamageCount_;
 
   bool verbose_; /**< Flag for verbose output */
   bool warning_; /**< Flag for warning output */
@@ -282,7 +291,7 @@ public:
 
   @param simtype is the simulation type
   */
-  void setSimType(const double simtype) { simType_ = simtype; }
+  // void setSimType(const double simtype) { simType_ = simtype; }
 
   /**
   @brief Get the simulation type.

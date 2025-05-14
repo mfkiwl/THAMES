@@ -8,11 +8,15 @@
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
                        const string &jsonFileName, const string &jobname,
-                       const bool verbose, const bool warning, const bool xyz)
-    : lattice_(msh), kineticController_(kc), chemSys_(cs), simType_(simtype),
-      thermalstr_(thmstr), jobRoot_(jobname) {
+                       const bool verbose, const bool warning, const bool xyz) {
 
   xyz_ = xyz;
+  simType_ = simtype;
+  chemSys_ = cs;
+  kineticController_ = kc;
+  lattice_ = msh;
+  thermalstr_ = thmstr;
+  jobRoot_ = jobname;
 
 #ifdef DEBUG
   verbose_ = true;
@@ -34,17 +38,32 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   /// are set to very high values so that they usually won't happen
   ///
 
-  imgFreq_ = 168.0; // hours = 7 days
+  // imgFreq_ = 168.0; // hours = 7 days
+  imgFreq_ = -1;
+
   leachTime_ = 1.0e10;
   sulfateAttackTime_ = 1.0e10;
 
-  damageCount_ = 0;
+  iniAttackTime_ = -1;
+  endAttackTime_ = -1;
+  frqAttackTime_ = -1;
+
+  oldDamageCount_ = 0;
+  allDamageCount_ = 0;
+
+  isParrotKilloh_ = chemSys_->getIsParrotKilloh();
+  sizePK_ = isParrotKilloh_.size();
+
+  numDCs_ = chemSys_->getNumDCs();
+  numICs_ = chemSys_->getNumICs();
+  numMicroPhases_ = chemSys_->getNumMicroPhases();
+  numGEMPhases_ = chemSys_->getNumGEMPhases();
 
   ///
   /// Load up the pointers to the `ChemicalSystem` object and `Lattice` object
   ///
 
-  chemSys_ = lattice_->getChemSys();
+  // chemSys_ = lattice_->getChemSys();
   lattice_->setJobRoot(jobRoot_);
 
   ///
@@ -67,7 +86,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
     char cc;
     outfs << "Time(h)";
-    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+    for (int i = 0; i < numDCs_; i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'S' || cc == 'T' || cc == 'W') {
         outfs << "," << chemSys_->getDCName(i);
@@ -84,7 +103,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
 
     outfs << "Time(h)";
-    for (int i = 0; i < chemSys_->getNumDCs(); i++) {
+    for (int i = 0; i < numDCs_; i++) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
         outfs << "," << chemSys_->getDCName(i) << "(m3/100g)";
@@ -102,7 +121,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 
     outfs << "Time(h)";
     // JWB: Start with micro phase id 1 to avoid the Void phase
-    for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
+    for (int i = 0; i < numMicroPhases_; i++) {
       int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
       cc = chemSys_->getDCClassCode(dcid);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
@@ -192,16 +211,6 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     throw fex;
   }
 
-  numDCs_ = chemSys_->getNumDCs();
-  numICs_ = chemSys_->getNumICs();
-  numMicroPhases_ = chemSys_->getNumMicroPhases();
-  numGEMPhases_ = chemSys_->getNumGEMPhases();
-
-  cout << endl << "***   numGEMPhases_   = " << numGEMPhases_ << endl;
-  cout << "***   numMicroPhases_ = " << numMicroPhases_ << endl;
-  cout << "***   numDCs_         = " << numDCs_ << endl;
-  cout << "***   numICs_         = " << numICs_ << endl;
-
   temperature_ = chemSys_->getTemperature();
   lattice_->setTemperature(temperature_);
   presure_ = chemSys_->getP();
@@ -209,6 +218,39 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   waterMolarMass_ = chemSys_->getDCMolarMass("H2O@");
   numSites_ = lattice_->getNumSites();
   initMicroVolume_ = chemSys_->getInitMicroVolume();
+
+  cout << endl << "Controller::Controller(...) :" << endl;
+
+  cout << endl
+       << "   numGEMPhases_   = " << setw(3) << right << numGEMPhases_ << endl;
+  cout << "   numMicroPhases_ = " << setw(3) << right << numMicroPhases_
+       << endl;
+  cout << "   numDCs_         = " << setw(3) << right << numDCs_ << endl;
+  cout << "   numICs_         = " << setw(3) << right << numICs_ << endl;
+  cout << "   waterDCId_      = " << setw(3) << right << waterDCId_
+       << " (waterDCName = \"" << chemSys_->getDCName(waterDCId_) << "\")"
+       << endl;
+
+  ///
+  /// Output a file that directly links the microstructure ids to their
+  /// rgb color.  This is only for easier image processing after the simulation
+  /// is finished so we don't have to read the xml file
+  ///
+
+  lattice_->writeMicroColors();
+
+  ///
+  /// Write the initial microstructure image and its png image
+  ///
+
+  cout << endl
+       << "Controller::Controller(...) - write initial "
+          "microstructure files (writeLattice(0.0), etc)"
+       << endl;
+  lattice_->writeLattice(0.0);
+  lattice_->writeLatticePNG(0.0);
+  if (xyz_)
+    lattice_->appendXYZ(0.0);
 
   ///
   /// Open and read the Controller parameter file
@@ -240,9 +282,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   int time_Size = time_.size();
   int outputTime_Size = outputTime_.size();
 
-  cout << endl << "Controller::Controller(...) :" << endl;
-
-  if (time_.size() == 0) {
+  if (time_Size == 0) {
     cout << endl
          << endl
          << "Controller::Controller error : a final time and "
@@ -260,8 +300,6 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
         "outtime value must be present into simparams.json file!");
   }
 
-  cout << "   final time_.size()          = " << time_Size << endl;
-
   outfilename = jobRoot_ + "-times_used.json";
   outfs.open(outfilename.c_str());
   if (!outfs) {
@@ -272,7 +310,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   outfs << "{" << endl;
   outfs << "  \"time_parameters\": {" << endl;
   outfs << "    \"calctimes\": [" << endl;
-  // outfs << "        ";
+
   int j = 0;
   for (int i = 0; i < time_Size; i++) {
     j++;
@@ -295,6 +333,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   }
   outfs << "    ]," << endl;
   outfs << "    \"outtimes\": [" << endl;
+
   j = 0;
   for (int i = 0; i < outputTime_Size; i++) {
     j++;
@@ -311,19 +350,60 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
       outfs << outputTime_[i] << endl;
     }
   }
-  outfs << "    ]" << endl;
-  outfs << "  }" << endl;
-  outfs << "}" << endl;
+
+  if (attack_) {
+    outfs << "    ]," << endl;
+    outfs << "    \"iniAttack\": " << iniAttackTime_ << "," << endl;
+    outfs << "    \"endAttack\": " << endAttackTime_ << "," << endl;
+    outfs << "    \"frqAttack\": " << frqAttackTime_ << endl;
+    outfs << "  }" << endl;
+    outfs << "}" << endl;
+  } else {
+    outfs << "    ]," << endl;
+    outfs << "    \"iniAttack\": -1," << endl;
+    outfs << "    \"endAttack\": -1," << endl;
+    outfs << "    \"frqAttack\": -1" << endl;
+    outfs << "  }" << endl;
+    outfs << "}" << endl;
+  }
+
   outfs.close();
 
-  cout << "   => new time values (calctimes & outtimes) have been used and "
-          "saved in the file :"
+  imgFreq_ *= 24.0; // !!!!!
+
+  cout << endl
+       << "   => new time values (calctime & outtime) have been used and "
+          "writen as :"
        << endl;
   cout << "         " << outfilename << endl;
+
+  leachTime_ = iniAttackTime_; // not default leachTime_ = 1.0e10
+  sulfateAttackTime_ =
+      iniAttackTime_; // not default sulfateAttackTime_ = 1.0e10
+
+  chemSys_->setIniAttackTime(sulfateAttackTime_);
+  lattice_->setSulfateAttackTime(sulfateAttackTime_);
+  lattice_->setLeachTime(leachTime_);
+
+  kineticController_->setIniAttackTime(sulfateAttackTime_);
+
+  if (simType_ == SULFATE_ATTACK) {
+    cout << endl << "   => attack = " << attack_ << endl;
+    cout << "   parameters in hours:" << endl;
+    cout << "     -> iniAttack = " << setw(7) << right << (int)iniAttackTime_
+         << endl;
+    cout << "     -> endAttack = " << setw(7) << right << (int)endAttackTime_
+         << endl;
+    cout << "     -> frqAttack = " << setw(7) << right << (int)frqAttackTime_
+         << endl;
+
+    // if (simType_ == SULFATE_ATTACK)
+    lattice_->createGrowingVectSA();
+  }
 }
 
 void Controller::doCycle(double elemTimeInterval) {
-  unsigned int i;
+  int i;
   int time_index;
   RestoreSystem iniLattice;
 
@@ -333,24 +413,8 @@ void Controller::doCycle(double elemTimeInterval) {
   /// time to 100 days if the sulfate attack module is to be run
   ///
   /// @todo Think about generalizing this more, or allowing combinations of more
-  /// than one
+  /// than one (LEACHING/SULFATE_ATTACK/...)
   ///
-
-  if (simType_ == LEACHING) {
-    leachTime_ = 2400.0; // 2400 hours = 100 days
-  } else if (simType_ == SULFATE_ATTACK) {
-    sulfateAttackTime_ = 2400.0; // 2400 hours = 100 days
-  }
-
-  /*
-  kineticController_->setSattack_time(sulfateAttackTime_);
-  kineticController_->setLeach_time(leachTime_);
-  */
-
-  chemSys_->setSulfateAttackTime(sulfateAttackTime_);
-  chemSys_->setLeachTime(leachTime_);
-  lattice_->setSulfateAttackTime(sulfateAttackTime_);
-  lattice_->setLeachTime(leachTime_);
 
   // Initialize the list of all interfaces in the lattice
 
@@ -368,33 +432,17 @@ void Controller::doCycle(double elemTimeInterval) {
   bool capwater = true; // True if some capillary water is available
   time_index = 0;
 
-  ///
-  /// Output a file that directly links the microstructure ids to their
-  /// rgb color.  This is only for easier image processing after the simulation
-  /// is finished so we don't have to read the json file
-  ///
-
-  lattice_->writeMicroColors();
-
-  ///
-  /// Write the initial microstructure image and its png image
-  ///
-
-  lattice_->writeLattice(0.0);
-  lattice_->writeLatticePNG(0.0);
-  if (xyz_)
-    lattice_->appendXYZ(0.0);
   int timesGEMFailed_loc = 0;
 
   // init to 0 all DC moles corresponding to the kinetic controlled microphases
   //      these DCmoles will be updated by
   //      KineticController::calculateKineticStep and passedd to GEM together
   //      the other DC moles in the stystem (ChemicalSystem::calculateState)
-  int numMicPh = chemSys_->getNumMicroPhases();
+  // int numMicPh = chemSys_->getNumMicroPhases();
   // cout << "numMicPh : " << numMicPh << endl;
 
   int DCId;
-  for (int i = FIRST_SOLID; i < numMicPh; i++) {
+  for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
     if (chemSys_->isKinetic(i)) {
       DCId = chemSys_->getMicroPhaseDCMembers(i, 0);
       // chemSys_->setDCMoles(DCId,0.0); //coment if DCLowerLimit in
@@ -403,9 +451,12 @@ void Controller::doCycle(double elemTimeInterval) {
     }
   }
   cout << endl
-       << "***   numGEMPhases_  = " << chemSys_->getNumGEMPhases() << endl;
-  cout << "***   numDCs_        = " << chemSys_->getNumDCs() << endl;
-  cout << "***   numICs_        = " << chemSys_->getNumICs() << endl;
+       << "   numGEMPhases_  = " << setw(3) << right
+       << chemSys_->getNumGEMPhases() << endl;
+  cout << "   numDCs_        = " << setw(3) << right << chemSys_->getNumDCs()
+       << endl;
+  cout << "   numICs_        = " << setw(3) << right << chemSys_->getNumICs()
+       << endl;
 
   // cout << "Starting with a pore solution without dissolved DCs  => all
   // microPhaseSI_ = 0" << endl; init to 0 all microPhaseSI_
@@ -416,9 +467,9 @@ void Controller::doCycle(double elemTimeInterval) {
     writeTxtOutputFiles_onlyICsDCs(0); // to check the total ICs
 
   // variables used in DCLowerLimit computation
-  double volMolDiff, molarMassDiff, vfracDiff, massDissolved;
+  double volMolDiff, molarMassDiff, vfracDiff;
   double microPhaseMassDiff, scaledMassDiff, numMolesDiff;
-  int numDCs = chemSys_->getNumDCs();
+  // int numDCs = chemSys_->getNumDCs();
   int timesGEMFailed_recall;
 
   cout << endl << endl << "     ===== START SIMULATION =====" << endl;
@@ -448,6 +499,8 @@ void Controller::doCycle(double elemTimeInterval) {
   int lastGoodI = 0;
   double lastGoodTime = 0.0;
 
+  double thrTimeToWriteLattice = 0.0167; // threshold ~ 1 minute
+
   // Main computation cycle
   for (i = 0; (i < timeSize) && (capwater); ++i) {
 
@@ -460,43 +513,70 @@ void Controller::doCycle(double elemTimeInterval) {
     cyc++;
 
     // new
-    if (timesGEMFailed_loc > 0) {
-      i--;
-      time_[i] += (0.1 * (time_[i + 1] - time_[i]));
-      timestep = time_[i] - lastGoodTime;
 
+    if (time_[i] < iniAttackTime_) {
+      if (timesGEMFailed_loc > 0) {
+        i--;
+        time_[i] += (0.1 * (time_[i + 1] - time_[i]));
+        timestep = time_[i] - lastGoodTime;
+
+        cout << endl
+             << endl
+             << endl
+             << "##### Controller::doCycle  GEMFailed => add next timestep "
+                "before to START NEW CYCLE   "
+                "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
+             << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
+             << " / " << lastGoodTime << " / " << timestep << " #####" << endl;
+
+      } else {
+
+        timestep = (i > 0) ? (time_[i] - time_[i - 1]) : time_[i];
+        if (i == 0) {
+          lastGoodTime = 0;
+          lastGoodI = 0;
+          cout << endl
+               << endl
+               << endl
+               << "##### Controller::doCycle  START NEW CYCLE   "
+                  "i/cyc/time_[i]/timestep: "
+               << i << " / " << cyc << " / " << time_[i] << " / " << timestep
+               << " (time in hours) #####" << endl;
+        } else {
+          lastGoodTime = time_[i - 1];
+          lastGoodI = i - 1;
+          cout << endl
+               << endl
+               << endl
+               << "##### Controller::doCycle  START NEW CYCLE   "
+                  "i/cyc/time_[i]/time_[i-1]/timestep: "
+               << i << " / " << cyc << " / " << time_[i] << " / "
+               << time_[i - 1] << " / " << timestep << " (time in hours) #####"
+               << endl;
+        }
+      }
+    } else {
+      timestep = time_[i] - time_[i - 1];
       cout << endl
            << endl
            << endl
-           << "##### Controller::doCycle  GEMFailed => add next timestep "
-              "before to START NEW CYCLE   "
-              "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
-           << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
-           << " / " << lastGoodTime << " / " << timestep << " #####" << endl;
+           << "##### Controller::doCycle  START NEW CYCLE - SA   "
+              "i/cyc/time_[i]/time_[i-1]/timestep: "
+           << i << " / " << cyc << " / " << time_[i] << " / " << time_[i - 1]
+           << " / " << timestep << " (time in hours) #####" << endl;
 
-    } else {
-
-      timestep = (i > 0) ? (time_[i] - time_[i - 1]) : time_[i];
-      if (i == 0) {
-        lastGoodTime = 0;
-        lastGoodI = 0;
+      if (timesGEMFailed_loc > 0) {
         cout << endl
-             << endl
-             << endl
-             << "##### Controller::doCycle  START NEW CYCLE   "
-                "i/cyc/time_[i]/timestep: "
-             << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-             << " #####" << endl;
-      } else {
-        lastGoodTime = time_[i - 1];
-        lastGoodI = i - 1;
+             << ">>>>> Controller::doCycle - SA - i/cyc/time_[i] : " << i
+             << " / " << cyc << " / " << time_[i] << endl;
         cout << endl
-             << endl
-             << endl
-             << "##### Controller::doCycle  START NEW CYCLE   "
-                "i/cyc/time_[i]/time_[i-1]/timestep: "
-             << i << " / " << cyc << " / " << time_[i] << " / " << time_[i - 1]
-             << " / " << timestep << " #####" << endl;
+             << ">>>>> \"normal exit\" (for now!) under sulfate attack "
+                "conditions"
+             << endl;
+        // exit(0);
+        bool is_Error = false;
+        throw MicrostructureException(
+            "Controller", "doCycle", "SA - first GEM_run failed (0)", is_Error);
       }
     }
 
@@ -526,94 +606,115 @@ void Controller::doCycle(double elemTimeInterval) {
     /// Otherwise we adjust the time step and try again
     ///
 
-    if (timesGEMFailed_loc > 0) {
-      cout << endl
-           << "  Controller::doCycle first GEM_run failed "
-              "i/cyc/time[i]/getTimesGEMFailed_loc : "
-           << i << " / " << cyc << " / " << time_[i] << " / "
-           << timesGEMFailed_loc << endl;
+    if (time_[i] < iniAttackTime_) {
+      if (timesGEMFailed_loc > 0) {
+        cout << endl
+             << "  Controller::doCycle first GEM_run failed "
+                "i/cyc/time[i]/getTimesGEMFailed_loc : "
+             << i << " / " << cyc << " / " << time_[i] << " / "
+             << timesGEMFailed_loc << endl;
 
-      //**********************
+        //**********************
 
-      cout << endl
-           << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep     "
-              "   : "
-           << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-           << "   =>   WAIT..." << endl;
-      cout.flush();
+        cout << endl
+             << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep   "
+                "  "
+                "   : "
+             << i << " / " << cyc << " / " << time_[i] << " / " << timestep
+             << "   =>   WAIT..." << endl;
+        cout.flush();
 
-      numTotGen = 0;
-      nextTimeStep = time_[i + 1] - time_[i];
-      fracNextTimeStep = nextTimeStep / fracNum;
+        numTotGen = 0;
+        nextTimeStep = time_[i + 1] - time_[i];
+        fracNextTimeStep = nextTimeStep / fracNum;
 
-      for (int indFracNum = 0; indFracNum < fracNum; indFracNum++) {
-        timeZero = time_[i] + (((double)indFracNum) * fracNextTimeStep);
-        minTime = timeZero - deltaTime;
-        numGen = 0;
-        numIntervals = 0;
-        delta2Time = delta2Time_0;
-        while (timesGEMFailed_loc > 0) {
-          if (numGen % numGenMax == 0) {
-            if (numGen > 0) {
-              numIntervals++;
-              delta2Time = delta2Time * 10.0;
-              minTime = timeZero - (0.5 * delta2Time);
+        for (int indFracNum = 0; indFracNum < fracNum; indFracNum++) {
+          timeZero = time_[i] + (((double)indFracNum) * fracNextTimeStep);
+          minTime = timeZero - deltaTime;
+          numGen = 0;
+          numIntervals = 0;
+          delta2Time = delta2Time_0;
+          while (timesGEMFailed_loc > 0) {
+            if (numGen % numGenMax == 0) {
+              if (numGen > 0) {
+                numIntervals++;
+                delta2Time = delta2Time * 10.0;
+                minTime = timeZero - (0.5 * delta2Time);
+              }
+              if (numIntervals == numMaxIntervals) {
+                // cout << "      for
+                // cyc/indFracNum/delta2Time/numGen/timeZero/minTime : " << cyc
+                //      << " / " << indFracNum << " / " << delta2Time << " / "
+                //      << numGen << " / "
+                //      << timeZero << " / " << minTime << endl;
+                // cout << "         =>   numIncreaseInterval = " <<
+                // numMaxIntervals
+                //      << " (max val) => change indFracNum (next timeZero)!!!"
+                //      << endl;
+                // cout.flush();
+                break;
+              }
             }
-            if (numIntervals == numMaxIntervals) {
-              // cout << "      for
-              // cyc/indFracNum/delta2Time/numGen/timeZero/minTime : " << cyc
-              //      << " / " << indFracNum << " / " << delta2Time << " / " <<
-              //      numGen << " / "
-              //      << timeZero << " / " << minTime << endl;
-              // cout << "         =>   numIncreaseInterval = " <<
-              // numMaxIntervals
-              //      << " (max val) => change indFracNum (next timeZero)!!!" <<
-              //      endl;
-              // cout.flush();
+
+            rNum = lattice_->callRNG();
+            numGen++;
+            numTotGen++;
+            timeTemp = minTime + (rNum * delta2Time);
+            timestep = timeTemp - lastGoodTime;
+            chemSys_->initDCLowerLimit(0.0);
+            timesGEMFailed_loc =
+                calculateState(timeTemp, timestep, isFirst, cyc);
+            if (timesGEMFailed_loc == 0) {
+              time_[i] = timeTemp;
+              cout << "  Controller::doCycle - PRBL_0 solved for "
+                      "i/cyc/time_[i]/timestep/numTotGen : "
+                   << i << " / " << cyc << " / " << time_[i] << " / "
+                   << timestep << " / " << numTotGen << endl;
+              cout.flush();
               break;
             }
           }
-
-          rNum = lattice_->callRNG();
-          numGen++;
-          numTotGen++;
-          timeTemp = minTime + (rNum * delta2Time);
-          timestep = timeTemp - lastGoodTime;
-          chemSys_->initDCLowerLimit(0.0);
-          timesGEMFailed_loc = calculateState(timeTemp, timestep, isFirst, cyc);
           if (timesGEMFailed_loc == 0) {
-            time_[i] = timeTemp;
-            cout << "  Controller::doCycle - PRBL_0 solved for "
-                    "i/cyc/time_[i]/timestep/numTotGen : "
-                 << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-                 << " / " << numTotGen << endl;
-            cout.flush();
+            delta2Time = delta2Time_0;
+            numIntervals = 0;
             break;
           }
         }
-        if (timesGEMFailed_loc == 0) {
-          delta2Time = delta2Time_0;
-          numIntervals = 0;
-          break;
+
+        if (timesGEMFailed_loc > 0) {
+          cout << "  Controller::doCycle - PRBL_0 not solved for "
+                  "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
+               << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
+               << " / " << lastGoodTime << " / " << timestep << endl;
+          continue;
         }
-      }
+        //**********************
 
-      if (timesGEMFailed_loc > 0) {
-        cout << "  Controller::doCycle - PRBL_0 not solved for "
-                "i/cyc/time_[i]/lastGoodI/lastGoodTime/timestep: "
-             << i << " / " << cyc << " / " << time_[i] << " / " << lastGoodI
-             << " / " << lastGoodTime << " / " << timestep << endl;
-        continue;
-      }
-      //**********************
+      } else {
 
+        cout << endl
+             << "  Controller::doCycle first GEM_run OK "
+                "i/cyc/time[i]/getTimesGEMFailed_loc: "
+             << i << " / " << cyc << " / " << time_[i] << " / "
+             << timesGEMFailed_loc << endl;
+      }
     } else {
+      if (timesGEMFailed_loc > 0) {
+        cout << endl
+             << "  Controller::doCycle => SA - first GEM_run failed "
+                "i/cyc/time[i]/getTimesGEMFailed_loc : "
+             << i << " / " << cyc << " / " << time_[i] << " / "
+             << timesGEMFailed_loc << endl;
 
-      cout << endl
-           << "  Controller::doCycle first GEM_run OK "
-              "i/cyc/time[i]/getTimesGEMFailed_loc: "
-           << i << " / " << cyc << " / " << time_[i] << " / "
-           << timesGEMFailed_loc << endl;
+        cout << endl
+             << ">>>>> \"normal exit\" (for now!) under sulfate attack "
+                "conditions"
+             << endl;
+        // exit(0);
+        bool is_Error = false;
+        throw MicrostructureException(
+            "Controller", "doCycle", "SA - first GEM_run failed (1)", is_Error);
+      }
     }
 
     if (verbose_) {
@@ -641,27 +742,27 @@ void Controller::doCycle(double elemTimeInterval) {
           lattice_->getDissolutionInterfaceSize();
       iniLattice.site.clear();
       RestoreSite site_l; // only one declaration
-      for (int i = 0; i < numSites_; i++) {
-        site_l.microPhaseId = (lattice_->getSite(i))->getMicroPhaseId();
-        site_l.growth = (lattice_->getSite(i))->getGrowthPhases();
-        site_l.wmc = (lattice_->getSite(i))->getWmc();
-        site_l.wmc0 = (lattice_->getSite(i))->getWmc0();
+      for (int ij = 0; ij < numSites_; ij++) {
+        site_l.microPhaseId = (lattice_->getSite(ij))->getMicroPhaseId();
+        site_l.growth = (lattice_->getSite(ij))->getGrowthPhases();
+        site_l.wmc = (lattice_->getSite(ij))->getWmc();
+        site_l.wmc0 = (lattice_->getSite(ij))->getWmc0();
         site_l.visit = 0;
         site_l.inGrowInterfacePos =
-            (lattice_->getSite(i))->getInGrowInterfacePosVector();
+            (lattice_->getSite(ij))->getInGrowInterfacePosVector();
         site_l.inDissInterfacePos =
-            (lattice_->getSite(i))->getInDissInterfacePos();
+            (lattice_->getSite(ij))->getInDissInterfacePos();
         iniLattice.site.push_back(site_l);
       }
       iniLattice.interface.clear();
       RestoreInterface interface_l; // only one declaration
       int dimLatticeInterface =
           lattice_->getInterfaceSize(); // only one declaration
-      for (int i = 0; i < dimLatticeInterface; i++) {
-        interface_l.microPhaseId = lattice_->getInterface(i).getMicroPhaseId();
-        interface_l.growthSites = lattice_->getInterface(i).getGrowthSites();
+      for (int ij = 0; ij < dimLatticeInterface; ij++) {
+        interface_l.microPhaseId = lattice_->getInterface(ij).getMicroPhaseId();
+        interface_l.growthSites = lattice_->getInterface(ij).getGrowthSites();
         interface_l.dissolutionSites =
-            lattice_->getInterface(i).getDissolutionSites();
+            lattice_->getInterface(ij).getDissolutionSites();
         iniLattice.interface.push_back(interface_l);
       }
       iniLattice.numRNGcall_0 = lattice_->getNumRNGcall_0();
@@ -697,9 +798,10 @@ void Controller::doCycle(double elemTimeInterval) {
       if (changeLattice == 0) {
         timesGEMFailed_recall = -1;
         bool testDiff = true;
+        int numSitesNotAvailableSize;
         while (changeLattice == 0) { // - for many phases!
           whileCount++;
-
+          numSitesNotAvailableSize = numSitesNotAvailable.size();
           cout << endl
                << "  Controller::doCycle - cyc = " << cyc
                << " :  changeLattice = " << changeLattice
@@ -708,53 +810,55 @@ void Controller::doCycle(double elemTimeInterval) {
           while (timesGEMFailed_recall != 0) {
 
             // reset for ChemicalSystem:
-            for (int i = 0; i < numDCs; i++) {
-              chemSys_->setDCMoles(i, iniLattice.DCMoles[i]);
+            for (int ij = 0; ij < numDCs_; ij++) {
+              chemSys_->setDCMoles(ij, iniLattice.DCMoles[ij]);
             }
 
             // reset for Lattice:
             lattice_->setCount(iniLattice.count);
-            for (int i = 0; i < numSites_; i++) {
-              (lattice_->getSite(i))
-                  ->setMicroPhaseId(iniLattice.site[i].microPhaseId);
-              (lattice_->getSite(i))
-                  ->setGrowthPhases(iniLattice.site[i].growth);
-              (lattice_->getSite(i))->setWmc(iniLattice.site[i].wmc);
-              (lattice_->getSite(i))->setWmc0(iniLattice.site[i].wmc0);
-              (lattice_->getSite(i))
-                  ->setVisit(iniLattice.site[i].visit); // or 0!
-              (lattice_->getSite(i))
+            for (int ij = 0; ij < numSites_; ij++) {
+              (lattice_->getSite(ij))
+                  ->setMicroPhaseId(iniLattice.site[ij].microPhaseId);
+              (lattice_->getSite(ij))
+                  ->setGrowthPhases(iniLattice.site[ij].growth);
+              (lattice_->getSite(ij))->setWmc(iniLattice.site[ij].wmc);
+              (lattice_->getSite(ij))->setWmc0(iniLattice.site[ij].wmc0);
+              (lattice_->getSite(ij))
+                  ->setVisit(iniLattice.site[ij].visit); // or 0!
+              (lattice_->getSite(ij))
                   ->setInGrowInterfacePosVector(
-                      iniLattice.site[i].inGrowInterfacePos);
-              (lattice_->getSite(i))
+                      iniLattice.site[ij].inGrowInterfacePos);
+              (lattice_->getSite(ij))
                   ->setInDissInterfacePos(
-                      iniLattice.site[i].inDissInterfacePos);
+                      iniLattice.site[ij].inDissInterfacePos);
             }
-            for (int i = 0; i < dimLatticeInterface; i++) {
+            for (int ij = 0; ij < dimLatticeInterface; ij++) {
               lattice_->setInterfaceMicroPhaseId(
-                  i, iniLattice.interface[i].microPhaseId); // same as before!
-              lattice_->setGrowthSites(i, iniLattice.interface[i].growthSites);
+                  ij, iniLattice.interface[ij].microPhaseId); // same as before!
+              lattice_->setGrowthSites(ij,
+                                       iniLattice.interface[ij].growthSites);
               lattice_->setDissolutionSites(
-                  i, iniLattice.interface[i].dissolutionSites);
+                  ij, iniLattice.interface[ij].dissolutionSites);
             }
             lattice_->setGrowthInterfaceSize(iniLattice.growthInterfaceSize);
             lattice_->setDissolutionInterfaceSize(
                 iniLattice.dissolutionInterfaceSize);
             lattice_->resetRNG(iniLattice.numRNGcall_0,
-                               iniLattice.numRNGcallLONGMAX, iniLattice.lastRNG,
-                               cyc, whileCount);
+                               iniLattice.numRNGcallLONGMAX,
+                               iniLattice.lastRNG);
 
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset system OK & GEM_run recall for "
                     "i/whileCount/numSitesNotAvailable.size() = "
                  << i << " / " << whileCount << " / "
-                 << numSitesNotAvailable.size() << endl;
+                 << numSitesNotAvailableSize << endl;
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset DCLowerLimits :" << endl;
 
-            for (int i = 0; i < numSitesNotAvailable.size(); i++) {
+            chemSys_->initDCLowerLimit(0); // check!
+            for (int ij = 0; ij < numSitesNotAvailableSize; ij++) {
 
-              phId = vectPhIdDiff[i];
+              phId = vectPhIdDiff[ij];
 
               DCId = chemSys_->getMicroPhaseDCMembers(phId, 0);
 
@@ -762,7 +866,7 @@ void Controller::doCycle(double elemTimeInterval) {
               molarMassDiff = chemSys_->getDCMolarMass(DCId); // g/mol
 
               vfracDiff =
-                  ((double)numSitesNotAvailable[i]) / ((double)numSites_);
+                  ((double)numSitesNotAvailable[ij]) / ((double)numSites_);
 
               microPhaseMassDiff =
                   vfracDiff * molarMassDiff / volMolDiff / 1.0e6; // g/cm3
@@ -770,9 +874,9 @@ void Controller::doCycle(double elemTimeInterval) {
               scaledMassDiff =
                   microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
 
-              if (chemSys_->isKinetic(phId)) {
-                massDissolved = kineticController_->updateKineticStep(
-                    cyc, phId, scaledMassDiff);
+              if (chemSys_->isKinetic(phId) && (time_[i] < iniAttackTime_)) {
+                kineticController_->updateKineticStep(cyc, phId, scaledMassDiff,
+                                                      timestep);
               } else {
 
                 cout << "    Controller::doCycle - not a KM phase - for cyc = "
@@ -796,16 +900,16 @@ void Controller::doCycle(double elemTimeInterval) {
                     "phName/phId/count/dissInterfaceSize/numSitesNotAvailable"
                     "/DCId/DCMoles/DCLowerLimit :"
                  << endl;
-            for (int i = 0; i < numSitesNotAvailable.size(); i++) {
-              phId = vectPhIdDiff[i];
+            for (int ij = 0; ij < numSitesNotAvailableSize; ij++) {
+              phId = vectPhIdDiff[ij];
               DCId = chemSys_->getMicroPhaseDCMembers(phId, 0);
               cout << "                        cyc = " << cyc << " :  #"
-                   << setw(3) << right << i << "#/ " << setw(15) << left
-                   << vectPhNameDiff[i] << "   " << setw(5) << right << phId
+                   << setw(3) << right << ij << "#/ " << setw(15) << left
+                   << vectPhNameDiff[ij] << "   " << setw(5) << right << phId
                    << "   " << setw(9) << right << lattice_->getCount(phId)
                    << "   " << setw(9) << right
                    << lattice_->getDissolutionInterfaceSize(phId) << "   "
-                   << setw(9) << right << numSitesNotAvailable[i] << "   "
+                   << setw(9) << right << numSitesNotAvailable[ij] << "   "
                    << setw(5) << right << DCId << "   "
                    << chemSys_->getDCMoles(DCId) << "   "
                    << chemSys_->getDCLowerLimit(DCId) << endl;
@@ -826,7 +930,7 @@ void Controller::doCycle(double elemTimeInterval) {
               cout.flush();
               timesGEMFailed_loc = timesGEMFailed_recall;
               testDiff = false;
-              for (int iii = 0; iii < numSitesNotAvailable.size(); iii++) {
+              for (int iii = 0; iii < numSitesNotAvailableSize; iii++) {
                 phId = vectPhIdDiff[iii];
                 if (lattice_->getCount(phId) > numSitesNotAvailable[iii]) {
                   numSitesNotAvailable[iii]++;
@@ -891,8 +995,9 @@ void Controller::doCycle(double elemTimeInterval) {
         kineticController_->setHydTimeIni(time_[i]);
 
         cout << endl
-             << "Controller::doCycle => normal end - cyc = " << cyc
-             << " (i = " << i << ")" << endl;
+             << "Controller::doCycle - hydration & lattice update => normal "
+                "end - cyc = "
+             << cyc << " (i = " << i << ")" << endl;
       }
 
     } catch (DataException dex) {
@@ -910,11 +1015,21 @@ void Controller::doCycle(double elemTimeInterval) {
         lattice_->appendXYZ(time_[i]);
       throw ex;
     } catch (MicrostructureException mex) {
+      cout << endl
+           << "Controller::doCycle MicroEx from Lattice::changeMicrostructure "
+              "- cyc = "
+           << cyc << endl;
       mex.printException();
       lattice_->writeLattice(time_[i]);
       lattice_->writeLatticePNG(time_[i]);
       if (xyz_)
         lattice_->appendXYZ(time_[i]);
+
+      // write output .txt files
+      writeTxtOutputFiles(time_[i]);
+      if (writeICsDCs)
+        writeTxtOutputFiles_onlyICsDCs(time_[i]);
+
       throw mex;
     }
 
@@ -942,21 +1057,30 @@ void Controller::doCycle(double elemTimeInterval) {
       cout.flush();
     }
 
-    if ((time_[i] >= outputTime_[time_index]) &&
-        (time_index < outputTime_.size())) {
-      if (verbose_) {
-        cout << "Controller::doCycle Writing lattice at time_[" << i
-             << "] = " << time_[i] << ", outputTime_[" << time_index
-             << "] = " << outputTime_[time_index] << endl;
-      }
+    // thrTimeToWriteLattice threshold ~ 1 minute i.e 0.0167 hours
+    if ((time_index < (int)(outputTime_.size())) &&
+        ((time_[i] >= outputTime_[time_index]) ||
+         (abs(time_[i] - outputTime_[time_index]) < thrTimeToWriteLattice))) {
 
-      lattice_->writeLattice(time_[i]);
-      lattice_->writeLatticePNG(time_[i]);
+      double writeTime = time_[i];
+      if (abs(time_[i] - outputTime_[time_index]) < thrTimeToWriteLattice)
+        writeTime = outputTime_[time_index];
+
+      // if (verbose_) {
+      cout << endl
+           << "Controller::doCycle - write microstructure files at time_[" << i
+           << "] = " << time_[i] << ", outputTime_[" << time_index
+           << "] = " << outputTime_[time_index] << ", writeTime = " << writeTime
+           << endl;
+      // }
+
+      lattice_->writeLattice(writeTime);
+      lattice_->writeLatticePNG(writeTime);
 
       if (xyz_)
-        lattice_->appendXYZ(time_[i]);
+        lattice_->appendXYZ(writeTime);
 
-      lattice_->writePoreSizeDistribution(time_[i]);
+      lattice_->writePoreSizeDistribution(writeTime);
 
       time_index++;
     }
@@ -988,12 +1112,11 @@ void Controller::doCycle(double elemTimeInterval) {
 
     if (time_[i] >= sulfateAttackTime_) {
 
-      cout << endl
-           << " Controller::doCycle - for sulfate attack, check conditions for "
-              "addDissolutionSites & coordination sphere "
-           << endl;
-      cout << " program stops " << endl;
-      exit(1);
+      // cout << endl
+      //      << " Controller::doCycle - for sulfate attack, check conditions
+      //      for "
+      //         "addDissolutionSites & coordination sphere "
+      //      << endl;
 
       if (verbose_) {
         cout << "Controller::doCycle Sulfate attack module" << endl;
@@ -1002,13 +1125,18 @@ void Controller::doCycle(double elemTimeInterval) {
       map<int, vector<double>> expansion;
       expansion = lattice_->getExpansion();
 
-      ifstream instopexp("stopexp.dat");
+      ifstream instopexp("stopexp.dat"); // check!
       if (!instopexp) {
-        if (verbose_)
-          cout << "keep expanding." << endl;
+        // if (verbose_)
+        cout << endl
+             << "Controller::doCycle - sulfate attack module : cyc = " << cyc
+             << "   =>   expansion.size() = " << expansion.size() << endl;
       } else {
         expansion.clear();
-        cout << "expansion has been stopped due to the percolation of damage."
+        cout << endl
+             << "Controller::doCycle - sulfate attack module : cyc = " << cyc
+             << "   =>   expansion has been stopped due to the "
+                "percolation of damage"
              << endl;
       }
       cout.flush();
@@ -1021,10 +1149,24 @@ void Controller::doCycle(double elemTimeInterval) {
 
       // expansion.clear();
 
-      if (expansion.size() > 1) {
+      if (expansion.size() > 0) { // check! : expansion.size() > 0 !!!
 
-        damageCount_ = 0;
-        double poreintroduce = 0.5;
+        // double strxx, stryy, strzz;
+        vector<double> locEleStress;
+        double locTstrength;
+
+        // aliId => aliId_ etc
+        // int aliId = chemSys_->getMicroPhaseId_SA("Alite");
+        // int belId = chemSys_->getMicroPhaseId_SA("Belite");
+        // int aluId = chemSys_->getMicroPhaseId_SA("Aluminate");
+        // int ferId = chemSys_->getMicroPhaseId_SA("Ferrite");
+        // vector<int> isParrotKilloh_ = chemSys_->getIsParrotKilloh();
+        // int sizePK_ = isParrotKilloh_.size();
+        bool notPKPhase = true;
+
+        int oldDamageCount = 0;
+        int newDamageCount = 0;
+        // double poreintroduce = 0.5;
 
         if (verbose_) {
           cout << "Controller::doCycle Sulfate attack module writing " << endl;
@@ -1035,17 +1177,55 @@ void Controller::doCycle(double elemTimeInterval) {
           cout.flush();
         }
 
-        lattice_->writeLattice(time_[i]);
-        lattice_->writeLatticePNG(time_[i]);
-        if (xyz_)
-          lattice_->appendXYZ(time_[i]);
+        // lattice_->writeLattice(time_[i]); // *
+        // lattice_->writeLatticePNG(time_[i]); // *
+        // if (xyz_) lattice_->appendXYZ(time_[i]); // *
+
+        // lattice_->writeDamageLattice(time_[i]); // check! ?
+        // lattice_->writeDamageLatticePNG(time_[i]); // check! ?
+
+        // string ofileName(jobRoot_);
+        // ostringstream ostr1, ostr2;
+        // ostr1 << static_cast<int>(time_[i] * 10.0); // tenths of an hour
+        // ostr2 << setprecision(3) << temperature_;
+        // string timestr(ostr1.str());
+        // string tempstr(ostr2.str());
+        // ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
+
+        // string ofileName(jobRoot_);
+        // ostringstream ostr1, ostr2;
+        // ostr1 << setfill('0') << setw(6)
+        //       << static_cast<int>((time_[i] * 60.0) + 0.5); // minutes
+        // ostr2 << setprecision(3) << temperature_;
+        // string timestr(ostr1.str());
+        // string tempstr(ostr2.str());
+        // ofileName = ofileName + "." + timestr + "m." + tempstr + "_SA.img";
+        // cout << "Controller::doCycle ofileName = " << ofileName << endl;
+
         string ofileName(jobRoot_);
-        ostringstream ostr1, ostr2;
-        ostr1 << static_cast<int>(time_[i] * 10.0); // tenths of an hour
-        ostr2 << setprecision(3) << temperature_;
-        string timestr(ostr1.str());
-        string tempstr(ostr2.str());
-        ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
+
+        ostringstream ostrT;
+        ostrT << setprecision(3) << temperature_;
+        string tempstr(ostrT.str());
+
+        int days, hours, mins;
+        double hours_dbl;
+        days = floor(time_[i] / 24);
+        hours_dbl = time_[i] - (days * 24);
+        hours = floor(hours_dbl);
+        mins = floor((hours_dbl - hours) * 60);
+
+        ostringstream ostrD, ostrH, ostrM;
+        ostrD << setfill('0') << setw(4) << days;
+        string timestrD(ostrD.str());
+        ostrH << setfill('0') << setw(2) << hours;
+        string timestrH(ostrH.str());
+        ostrM << setfill('0') << setw(2) << mins;
+        string timestrM(ostrM.str());
+
+        string timeString = timestrD + "d" + timestrH + "h" + timestrM + "m";
+
+        ofileName = ofileName + "." + timeString + "." + tempstr + "_SA.img";
 
         ///
         /// In the sulfate attack algorithm, calculate the stress and strain
@@ -1053,33 +1233,20 @@ void Controller::doCycle(double elemTimeInterval) {
         ///
 
         thermalstr_->setEigen();
+
+        int expindex;
+        vector<double> expanval;
+        vector<int> expcoordin;
         for (map<int, vector<double>>::iterator it = expansion.begin();
              it != expansion.end(); it++) {
 
-          int expindex = it->first;
-          vector<double> expanval = it->second;
-          vector<int> expcoordin = lattice_->getExpansionCoordin(expindex);
+          expindex = it->first;
+          expanval = it->second;
+          // vector<int> expcoordin = lattice_->getExpansionCoordin(expindex);
+          expcoordin = lattice_->getSite(expindex)->getXYZ();
           thermalstr_->setEigen(expindex, expanval[0], expanval[1], expanval[2],
                                 0.0, 0.0, 0.0);
-          thermalstr_->setExp(expindex, expcoordin);
-
-          ///
-          /// Set expansion site to be damaged if there is one, as determined by
-          /// the setEigen function returning every site above damage stress
-          /// threshold
-          ///
-          Site *ste;
-          ste = lattice_->getSite(expindex);
-          /*
-          lattice_->dWaterChange(poreintroduce);
-          */
-
-          double dwmcval = poreintroduce;
-          lattice_->dWmc(expindex, dwmcval);
-          for (int j = 0; j < NN_NNN; j++) { // ste->nbSize(2)
-            Site *stenb = ste->nb(j);
-            stenb->dWmc(dwmcval);
-          }
+          thermalstr_->setExpansionCoord(expindex, expcoordin);
         }
 
         ///
@@ -1091,53 +1258,82 @@ void Controller::doCycle(double elemTimeInterval) {
 
         // thermalstr_ -> writeStress(jobRoot_,time_[i],0); //write strxx
         // thermalstr_ -> writeStrainEngy(jobRoot_,time_[i]);
-        thermalstr_->writeDisp(jobRoot_, time_[i]);
+
+        // thermalstr_->writeDisp(jobRoot_, time_[i]);
+        thermalstr_->writeDisp(jobRoot_, timeString);
 
         ///
         /// Get the true volume of each voxel after FEM calculation
         ///
 
-        double otruevolume = 0.0;
-        double truevolume = 0.0;
-        for (int ii = 0; ii < numSites_; ii++) {
-          Site *ste;
-          ste = lattice_->getSite(i);
-          otruevolume = ste->getTrueVolume();
-          for (int j = 0; j < 3; j++) {
-            truevolume += thermalstr_->getEleStrain(ii, j);
-          }
-          truevolume = otruevolume * (1 + truevolume);
-          ste->setTrueVolume(truevolume);
-        }
+        //// truevolume not used!!!
+        // double otruevolume = 0.0;
+        // double truevolume = 0.0;
+        // for (int ii = 0; ii < numSites_; ii++) {
+        //   Site *ste;
+        //   ste = lattice_->getSite(i); // check! i -> ii !!!
+        //   otruevolume = ste->getTrueVolume();
+        //   for (int j = 0; j < 3; j++) {
+        //     truevolume += thermalstr_->getEleStrain(ii, j);
+        //   }
+        //   truevolume = otruevolume * (1 + truevolume);
+        //   ste->setTrueVolume(truevolume);
+        // }
+
+        // double dwmcval = poreintroduce;
+        double poreincrease = 0.2;
+        double damageexp_0 = 1.0 / 3.0 * poreincrease;
+        vector<double> damageexp(3, damageexp_0);
+        vector<double> damageexpo;
+        Site *ste; // , *stenb;
+        int pid;
 
         for (int index = 0; index < numSites_; index++) {
-          Site *ste;
-          ste = lattice_->getSite(index);
-          int pid = ste->getMicroPhaseId();
 
-          if (ste->IsDamage()) {
-            damageCount_++;
-          }
+          ste = lattice_->getSite(index);
+          pid = ste->getMicroPhaseId();
 
           if ((ste->IsDamage())) {
-            double strxx, stryy, strzz;
-            strxx = stryy = strzz = 0.0;
-            strxx = thermalstr_->getEleStress(index, 0);
-            stryy = thermalstr_->getEleStress(index, 1);
-            strzz = thermalstr_->getEleStress(index, 2);
-            if ((strxx >= 1.0) || (stryy >= 1.0) || (strzz >= 1.0)) {
-              vector<double> damageexp;
-              damageexp.clear();
-              double poreincrease = 0.2;
-              damageexp.resize(3, (1.0 / 3.0 * poreincrease));
-              vector<double> damageexpo;
-              damageexpo.clear();
+
+            oldDamageCount++;
+            // cout << endl << "SA-test: oldDamageCount_ = " << oldDamageCount_
+            //      << "  index = " << index << "  pid = " << pid << endl;
+
+            // double strxx, stryy, strzz;
+            // strxx = stryy = strzz = 0.0;
+            // strxx = thermalstr_->getEleStress(index, 0);
+            // stryy = thermalstr_->getEleStress(index, 1);
+            // strzz = thermalstr_->getEleStress(index, 2);
+            locEleStress = thermalstr_->getEleStressMod(index);
+            // strxx = locEleStress[0];
+            // stryy = locEleStress[1];
+            // strzz = locEleStress[2];
+            // if ((strxx >= 1.0) || (stryy >= 1.0) || (strzz >= 1.0)) {
+            if ((locEleStress[0] >= 1.0) || (locEleStress[1] >= 1.0) ||
+                (locEleStress[2] >= 1.0)) {
               damageexpo = lattice_->getExpansion(index);
-              for (int i = 0; i < 3; i++) {
-                damageexp[i] += damageexpo[i];
-              }
-              lattice_->setExpansion(index, damageexp);
-              lattice_->dWaterChange(poreincrease);
+              damageexpo[0] += damageexp_0;
+              damageexpo[1] += damageexp_0;
+              damageexpo[2] += damageexp_0;
+              lattice_->setExpansion(index, damageexpo);
+
+              ///
+              /// Set expansion site to be damaged if there is one, as
+              /// determined by the setEigen function returning every site above
+              /// damage stress threshold
+              ///
+
+              // lattice_->dWaterChange(poreintroduce);
+
+              // lattice_->setWmc0(index,dwmcval); // *
+              // lattice_->dWmc(index, dwmcval);
+              // for (int j = 0; j < NN_NNN; j++) { //ste->nbSize(2)
+              //   stenb = ste->nb(j);
+              //   stenb->dWmc(dwmcval);
+              // }
+              // need interface update???
+
+              // lattice_->dWaterChange(poreincrease);
               /// JWB: This next line must be from some earlier version
               /// The called method does not exist any longer
               ///
@@ -1147,91 +1343,124 @@ void Controller::doCycle(double elemTimeInterval) {
               // ste->setVolume(VOIDID,(ste->getVolume(VOIDID) + poreincrease));
               //
             }
-          }
+          } else {
 
-          ///
-          /// The next block gets the stress in each voxel that does NOT
-          /// contain a clinker phase (C3S, C2S, C3A, or C4AF), then determine
-          /// if the voxel should be damaged as a result
+            ///
+            /// The next block gets the stress in each voxel that does NOT
+            /// contain a clinker phase (C3S, C2S, C3A, or C4AF), then determine
+            /// if the voxel should be damaged as a result
 
-          /// Prefer to make this independent of whether or not there is C4AF in
-          /// the phase definitions.  What if this is a white cement or
-          /// something?
-          ///
-          /// @note Associating the last clinker phase with id 5 is a kluge
-          /// @todo Give each phase a calcstress property or something like that
-          ///       that can be checked instead of hardwiring phase ids
+            /// Prefer to make this independent of whether or not there is C4AF
+            /// in the phase definitions.  What if this is a white cement or
+            /// something?
+            ///
+            /// @note Associating the last clinker phase with id 5 is a kluge
+            /// @todo Give each phase a calcstress property or something like
+            /// that
+            ///       that can be checked instead of hardwiring phase ids
 
-          if (pid > 5) {
-            double strxx, stryy, strzz;
-            strxx = stryy = strzz = 0.0;
-            strxx = thermalstr_->getEleStress(index, 0);
-            stryy = thermalstr_->getEleStress(index, 1);
-            strzz = thermalstr_->getEleStress(index, 2);
-            if ((strxx >= thermalstr_->getTstrength(index)) ||
-                (stryy >= thermalstr_->getTstrength(index)) ||
-                (strzz >= thermalstr_->getTstrength(index))) {
-              // if (verbose_) cout << "Phase " << pid << " is damaged." <<
-              // endl;
-              if (!ste->IsDamage()) {
-                // if (verbose_) cout << " it has not been damaged before." <<
-                // endl;
+            notPKPhase = true;
+            for (int i = 0; i < sizePK_; i++) {
+              if (pid == isParrotKilloh_[i]) {
+                notPKPhase = false;
+                break;
+              }
+            }
+            if ((pid > ELECTROLYTEID) && notPKPhase &&
+                (chemSys_->isPorous(pid) || chemSys_->isWeak(pid))) {
+              // double strxx, stryy, strzz;
+              // strxx = stryy = strzz = 0.0;
+              // strxx = thermalstr_->getEleStress(index, 0);
+              // stryy = thermalstr_->getEleStress(index, 1);
+              // strzz = thermalstr_->getEleStress(index, 2);
+              locEleStress = thermalstr_->getEleStressMod(index);
+              // strxx = locEleStress[0];
+              // stryy = locEleStress[1];
+              // strzz = locEleStress[2];
+              // if ((strxx >= thermalstr_->getTstrength(index)) ||
+              //     (stryy >= thermalstr_->getTstrength(index)) ||
+              //     (strzz >= thermalstr_->getTstrength(index))) {
+              locTstrength = thermalstr_->getTstrength(index);
+              // if ((strxx >= locTstrength) ||
+              //     (stryy >= locTstrength) ||
+              //     (strzz >= locTstrength)) {
+              if ((locEleStress[0] >= locTstrength) ||
+                  (locEleStress[1] >= locTstrength) ||
+                  (locEleStress[2] >= locTstrength)) {
+
+                newDamageCount++;
                 ste->setDamage();
-                damageCount_++;
+                lattice_->setExpansion(index, damageexp);
                 // lattice_->dWaterChange(poreintroduce);
 
-                double dwmcval = poreintroduce;
-                lattice_->dWmc(index, dwmcval);
-                for (int j = 0; j < NUM_NEAREST_NEIGHBORS; j++) { // NN_NNN?
-                  Site *stenb = ste->nb(j);
-                  stenb->dWmc(dwmcval);
-                  if ((stenb->getWmc() > 0.0) &&
-                      (stenb->getMicroPhaseId() != ELECTROLYTEID) &&
-                      (stenb->getMicroPhaseId() != VOIDID)) {
-                    lattice_->addDissolutionSite(stenb,
-                                                 stenb->getMicroPhaseId());
-                  }
-                }
-                for (int j = ste->nbSize(1); j < ste->nbSize(2); j++) {
-                  Site *stenb = ste->nb(j);
-                  stenb->dWmc(dwmcval);
-                }
+                // lattice_->setWmc0(index,dwmcval); // *
+                // lattice_->dWmc(index, dwmcval);
+                // for (int j = 0; j < NN_NNN; j++) {
+                //   stenb = ste->nb(j);
+                //   stenb->dWmc(dwmcval);
+                //   if ((stenb->getWmc() > 0.0) &&
+                //       (stenb->getMicroPhaseId() > ELECTROLYTEID)) {
+                //     lattice_->addDissolutionSite(stenb,
+                //                                  stenb->getMicroPhaseId());
+                //   }
+                // }
 
-                /*
-                vector<double> damageexp;
-                damageexp.clear();
-                double poreindamage = 0.6;
-                damageexp.resize(3,(1.0 / 3.0 * poreindamage));
-                lattice_->setExpansion(index,damageexp);
-                vector<int> coordin;
-                coordin.clear();
-                coordin.resize(3,0);
-                coordin[0] = ste->getX();
-                coordin[1] = ste->getY();
-                coordin[2] = ste->getZ();
-                lattice_->setExpansionCoordin(index,coordin);
-                lattice_->dWaterChange(poreindamage);
-                ste->setVolume(VOIDID,poreindamage);
-                */
+                // vector<double> damageexp;
+                // damageexp.clear();
+                // double poreindamage = 0.6;
+                // damageexp.resize(3,(1.0 / 3.0 * poreindamage));
+                // lattice_->setExpansion(index,damageexp);
+                // vector<int> coordin;
+                // coordin.clear();
+                // coordin.resize(3,0);
+                // coordin[0] = ste->getX();
+                // coordin[1] = ste->getY();
+                // coordin[2] = ste->getZ();
+                // lattice_->setExpansionCoordin(index,coordin);
+                // lattice_->dWaterChange(poreindamage);
+                // ste->setVolume(VOIDID,poreindamage);
+                // }
               }
             }
           }
-
         } // End of loop over all voxels
+        if (oldDamageCount_ != oldDamageCount) {
+          cout << endl
+               << "Controller::doCycle SA -  error : oldDamageCount_ != "
+                  "oldDamageCount"
+                  " <-> cyc/oldDamageCount_/oldDamageCount = "
+               << cyc << " / " << oldDamageCount_ << " / " << oldDamageCount
+               << endl;
+          cout << endl
+               << "         newDamageCount/allDamageCount_ = " << newDamageCount
+               << " / " << allDamageCount_ << endl;
+          cout << endl << "exit" << endl;
+          exit(0);
+        } else {
+          cout << endl
+               << "Controller::doCycle SA - "
+                  "cyc/newDamageCount_/oldDamageCount_/allDamageCount_ = "
+               << cyc << " / " << newDamageCount << " / " << oldDamageCount_;
 
-        if (verbose_) {
-          cout << "Controller::doCycle sulfate attack module Time = "
-               << time_[i] << " damageCount_ is: " << damageCount_ << endl;
+          allDamageCount_ = newDamageCount + oldDamageCount_;
+          oldDamageCount_ = allDamageCount_;
+
+          cout << " / " << allDamageCount_ << endl;
           cout.flush();
         }
-        ofstream outdamage("damage.dat");
-        outdamage << damageCount_;
-        outdamage.close();
+
+        // ofstream outdamage("damage.dat");
+        // outdamage.close();
 
         lattice_->writeDamageLattice(time_[i]);
         lattice_->writeDamageLatticePNG(time_[i]);
         // to see whether new damage is generated
       }
+
+      cout << endl
+           << "Controller::doCycle - sulfate attack module => normal end - cyc "
+              "= "
+           << cyc << " (i = " << i << ")" << endl;
     }
   }
 
@@ -1242,6 +1471,8 @@ void Controller::doCycle(double elemTimeInterval) {
 
   lattice_->writeLattice(time_[i - 1]);
   lattice_->writeLatticePNG(time_[i - 1]);
+
+  // if (xyz_ && (time_[i - 1] < sattack_time_))... ?
   if (xyz_)
     lattice_->appendXYZ(time_[i - 1]);
 
@@ -1281,9 +1512,31 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
     /// except to prohibit users from defining mixtures of CSD phases
     /// as microstructure phases.
 
-    chemSys_->setMicroPhaseSI();
+    // chemSys_->setMicroPhaseSI();
 
-    kineticController_->calculateKineticStep(dt, cyc);
+    /*
+    if (time >= sattack_time_) {
+      cout << endl << "  ----> Controller::calculateState -
+    cyc/time/iniAttackTime_ : "
+           << cyc << " / " << time << " / " << iniAttackTime_ << endl;
+      int numMicroPhases = chemSys_->getNumMicroPhases();
+      cout << "***   numMicroPhases = " << numMicroPhases << endl;
+
+      for (int i = 0; i < numMicroPhases; i++) {
+        cout << "  " << setw(3) << right << i << " : " << setw(15) << left
+             << chemSys_->getMicroPhaseName(i) << setw(4) << right
+             << " id:" << setw(3) << chemSys_->getMicroPhaseId(i)
+             << "     count_ = " << setw(8) << lattice_->getCount(i)
+             << "     dissolutionInterfaceSize_ =  " << setw(8)
+             << lattice_->getDissolutionInterfaceSize(i)
+             << "     growthInterfaceSize_ =  " << setw(8)
+             << lattice_->getGrowthInterfaceSize()[i] << endl;
+      }
+    }
+    */
+
+    // chemSys_->initDCLowerLimit(0); // check!
+    kineticController_->calculateKineticStep(time, dt, cyc); // check!
 
     // if (time >= sulfateAttackTime_) {// for sulfate attack iterations}
 
@@ -1337,7 +1590,7 @@ void Controller::writeTxtOutputFiles(double time) {
   ///
   // int numICs = chemSys_->getNumICs();
   // int numDCs = chemSys_->getNumDCs();
-  int i, j;
+  int i;
 
   // Output to files the solution composition data, phase data, DC data,
   // microstructure data, pH, and C-S-H composition and Ca/Si ratio
@@ -1686,7 +1939,157 @@ void Controller::parseDoc(const string &docName) {
       outputTime_.push_back(testTime);
     }
 
+    // There may be times associated with chemical attack
+    // Next three blocks search for this
+    cdi = it.value().find("iniAttack");
+    if (cdi != it.value().end()) {
+      iniAttackTime_ = cdi.value();
+      iniAttackTime_ *= (1.0 / DAY_PER_H);
+    }
+
+    // Input times are conventionally in days
+    // Immediately convert to hours within model
+    cdi = it.value().find("endAttack");
+    if (cdi != it.value().end()) {
+      endAttackTime_ = cdi.value();
+      endAttackTime_ *= (1.0 / DAY_PER_H);
+    }
+
+    // Input times are conventionally in days
+    // Immediately convert to hours within model
+    cdi = it.value().find("frqAttack");
+    if (cdi != it.value().end()) {
+      frqAttackTime_ = cdi.value();
+      frqAttackTime_ *= (1.0 / DAY_PER_H);
+    }
+
+    // Done searching for chemical attack times
+    attack_ = false;
+    bool errorAttack = false;
+    if (simType_ == SULFATE_ATTACK || simType_ == LEACHING) {
+      if (iniAttackTime_ >= 0) {
+        if (endAttackTime_ > iniAttackTime_) {
+          if (frqAttackTime_ > 0) {
+            attack_ = true;
+          } else {
+            errorAttack = true;
+          }
+        } else {
+          errorAttack = true;
+        }
+      } else {
+        errorAttack = true;
+      }
+    }
+
+    if (attack_ && errorAttack) {
+      cout << endl << endl << "************" << endl;
+      cout << endl
+           << "=> you decided to simulate a leaching or a sulfate attack "
+              "but your time parameters are not set accordingly!"
+           << endl;
+      cout << endl
+           << "=> to do it, the specific controll parameters "
+              "must fulfill some additional conditions:"
+           << endl;
+      cout << "  -> iniAttack >= 0" << endl;
+      cout << "  -> endAttack > iniAttack" << endl;
+      cout << "  -> frqAttack > 0" << endl;
+
+      cout << endl
+           << "=> by default all these variables are set to -1.0" << endl;
+      cout << endl << "=> for the current simulation their values are:" << endl;
+      cout << "  -> iniAttack = " << iniAttackTime_ << endl;
+      cout << "  -> endAttack = " << endAttackTime_ << endl;
+      cout << "  -> frqAttack = " << frqAttackTime_ << endl;
+
+      cout << endl
+           << "=> before to restart the program, please modify their values "
+              "into parameters.json file)"
+           << endl;
+
+      cout << endl << endl << "STOP" << endl;
+      cout << endl << endl << "************" << endl;
+      throw DataException("Controller", "Controller",
+                          "leaching or sulfate attack time parameters setting");
+
+    } else if (attack_) {
+
+      cout << endl << "   => you decided to simulate a ";
+      if (simType_ == LEACHING) {
+        leachTime_ = iniAttackTime_; // not default leachTime_ = 1.0e10
+        cout << "leaching ";
+      } else if (simType_ == SULFATE_ATTACK) {
+        sulfateAttackTime_ =
+            iniAttackTime_; // not default sulfateAttackTime_ = 1.0e10
+        cout << "sulfate attack ";
+      }
+
+      cout << "using these time parameters (in days):" << endl;
+      cout << "     -> iniAttack = " << setw(5) << right << (int)iniAttackTime_
+           << endl;
+      cout << "     -> endAttack = " << setw(5) << right << (int)endAttackTime_
+           << endl;
+      cout << "     -> frqAttack = " << setw(5) << right << (int)frqAttackTime_
+           << endl;
+
+      double tp = iniAttackTime_;
+      int tempSize;
+      int i, j;
+
+      tempSize = outputTime_.size() - 1;
+      for (i = 0; i < tempSize; i++) {
+        if (outputTime_[i] > tp) {
+          int last = tempSize;
+          outputTime_.erase(outputTime_.begin() + i,
+                            outputTime_.begin() + last);
+          break;
+        }
+      }
+
+      tempSize = time_.size() - 1;
+      for (i = 0; i < tempSize; i++) {
+        if (time_[i] > tp) {
+          int last = tempSize;
+          time_.erase(time_.begin() + i, time_.begin() + last);
+          break;
+        }
+      }
+
+      while (tp <= endAttackTime_) {
+        // time_.push_back(tp);
+        outputTime_.push_back(tp);
+        tp += frqAttackTime_;
+      }
+
+      time_Size = outputTime_.size();
+      for (i = 0; i < time_Size - 1; i++) {
+        for (j = i + 1; j < time_Size; j++) {
+          if (outputTime_[i] > outputTime_[j]) {
+            tp = outputTime_[i];
+            outputTime_[i] = outputTime_[j];
+            outputTime_[j] = tp;
+          }
+        }
+      }
+
+      time_Size = outputTime_.size() - 1;
+      for (i = 0; i < time_Size; i++) {
+        if (abs(outputTime_[i] - outputTime_[i + 1]) <= 1.0e-9) {
+          outputTime_.erase(outputTime_.begin() + i);
+        }
+      }
+
+    } else if (simType_ == HYDRATION) {
+      cout << endl << "   => you decided to simulate a hydration" << endl;
+      iniAttackTime_ = 1.e10;
+      endAttackTime_ = 1.e10;
+      frqAttackTime_ = 1.e10;
+    }
+
+    //
     // Now populate the calculation times on a natural log scale
+    // and fold in the output times in order
     time_.clear();
     testTime = 0.0;
     int j = 0;

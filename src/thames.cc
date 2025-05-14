@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
   // Set up the strainenergy vector.  We allow no more than 156 phases,
   // but this can be changed below.
 
-  strainenergy.clear();
-  strainenergy.resize(156, 0.0);
+  // strainenergy.clear();
+  // strainenergy.resize(156, 0.0);
 
   int simtype;
   string buff = "";
@@ -43,13 +43,21 @@ int main(int argc, char **argv) {
   // Main menu where user decides what kind of simulation this will be.
   //
 
-  cout << "Enter simulation type: " << endl;
+  cout << endl << "<<< THAMES - SA version >>>" << endl;
+
+  cout << endl << "Enter simulation type: " << endl;
   cout << "  " << QUIT_PROGRAM << ") Exit program " << endl;
   cout << "  " << HYDRATION << ") Hydration " << endl;
   cout << "  " << LEACHING << ") Leaching " << endl;
   cout << "  " << SULFATE_ATTACK << ") Sulfate attack " << endl;
   cin >> simtype;
-  cout << endl << "simtype = " << simtype << endl;
+
+  if (simtype > SULFATE_ATTACK) {
+    cout << endl << "simtype = " << simtype << " (Sulfate attack / SA)" << endl;
+  } else {
+    cout << endl << "simtype = " << simtype << endl;
+  }
+
 
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
@@ -71,7 +79,7 @@ int main(int argc, char **argv) {
                                             // hours
   // cin >> elemTimeInterval;
   cout << "The elementary time interval is : elemTimeInterval = "
-       << setprecision(3) << elemTimeInterval << endl;
+       << setprecision(3) << elemTimeInterval << " hours (used in Parrot-Killoh model)"<< endl;
 
   cout << scientific << setprecision(15) << endl;
 
@@ -98,6 +106,35 @@ int main(int argc, char **argv) {
   const string gemInputName(buff);
   cout << "   - gemInputName      :  " << gemInputName << endl;
   cout.flush();
+
+  // Set up the strainenergy vector dimension according to
+  //  GEMS input files (...-dch.dat) - strainenergy is used in THAMES
+  //  only for SA but GEMS has to know about it in any case (any simtype)
+  string dchName(buff);
+  int pos = dchName.find("-dat.lst");
+  //cout << endl << "pos = " << pos << endl;
+  dchName.replace(pos,pos+7,"-dch.dat");
+  cout << endl << "     - dchName = " << dchName << endl;
+  ifstream f(dchName.c_str());
+  int nDC = -1;
+  if (!f.is_open()) {
+    cout << "     - file " << dchName << " not found!" << endl;
+    cout << "exit" << endl;
+    exit(0);
+  } else {
+    cout << "     - file " << dchName << " found => " << endl;
+    string ch;
+    while (nDC == -1) {
+      f >> ch;
+      if (ch == "<nDC>")
+        f >> nDC;
+    }
+  }
+  cout << "            number of dependent components: nDC = " << nDC
+       << endl;
+
+  strainenergy.clear();
+  strainenergy.resize(nDC, 0.0);
 
   //
   // User must provide the name of the file specifying the microstructre
@@ -192,12 +229,15 @@ int main(int argc, char **argv) {
     // constituent phases, and will need to include a finite element solver
     //
 
-    cout << endl << "What is the name of the elastic modulus file?" << endl;
-    buff = "";
-    // cin >> buff;  // C++ >> operator does not allow spaces
-    getline(cin, buff);
-    const string phasemod_fileName(buff);
-    cout << "   - phasemod_fileName :  " << phasemod_fileName << endl;
+    // cout << endl << "What is the name of the elastic modulus file?" << endl;
+    // buff = "";
+    // // cin >> buff;  // C++ >> operator does not allow spaces
+    // getline(cin, buff);
+    // const string phasemod_fileName(buff);
+
+    // cout << endl << "The name of the elastic modulus file is : " << endl;
+    // const string phasemod_fileName = "phasemod.txt";
+    // cout << "   - phasemod_fileName :  " << phasemod_fileName << endl;
 
     //
     // Create the ThermalStrain FE solver, which handles phase transformation
@@ -208,9 +248,9 @@ int main(int argc, char **argv) {
       ThermalStrainSolver =
           new ThermalStrain(Mic->getXDim(), Mic->getYDim(), Mic->getZDim(),
                             (Mic->getNumSites() + 2),
-                            ChemSys->getNumMicroPhases(), 1, VERBOSE, WARNING);
+                            ChemSys, 1, VERBOSE, WARNING);
       cout << "ThermalStrain object creation done... " << endl;
-      ThermalStrainSolver->setPhasemodfileName(phasemod_fileName);
+      // ThermalStrainSolver->setPhasemodfileName(phasemod_fileName);
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in ThermalStrain constructor: "
            << ba.what() << endl;
@@ -239,9 +279,9 @@ int main(int argc, char **argv) {
 
     try {
       AppliedStrainSolver = new AppliedStrain(
-          nx, ny, nz, ns, ChemSys->getNumMicroPhases(), 1, VERBOSE, WARNING);
+          nx, ny, nz, ns, ChemSys, 1, VERBOSE, WARNING);
       cout << "AppliedStrain object creation done... " << endl;
-      AppliedStrainSolver->setPhasemodfileName(phasemod_fileName);
+      // AppliedStrainSolver->setPhasemodfileName(phasemod_fileName);
     } catch (bad_alloc &ba) {
       cout << "Bad memory allocation in AppliedStrain constructor: "
            << ba.what() << endl;
@@ -264,7 +304,9 @@ int main(int argc, char **argv) {
 
   string jobRoot, statFileName;
   if (VERBOSE) {
-    cout << "About to enter KineticController constructor" << endl;
+    cout << endl << "About to enter KineticController constructor" << endl;
+    cout << "exit" << endl;
+    exit(0);
     cout.flush();
   }
 
@@ -350,10 +392,10 @@ int main(int argc, char **argv) {
   // Launch the main controller to run the simulation
   //
 
-  // if (VERBOSE) {
-  cout << endl << "Going into Controller::doCycle" << endl;
-  cout.flush();
-  //}
+  if (VERBOSE) {
+    cout << endl << "Going into Controller::doCycle" << endl;
+    cout.flush();
+  }
 
   try {
 

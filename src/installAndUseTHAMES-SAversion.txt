@@ -1,0 +1,136 @@
+THAMES - SA version:
+- transfer of the configuration (microstructure) from Controller to AppliedStrain/ThermalStrain is done using a lattice output file
+- kmax_ is the number of relaxation steps for a given elastic computation: kmax_ = 3 for both AppliedStrain & ThermalStrain.
+
+# Build and install THAMES with sulfate attack 
+
+## Building on Unix or Linux
+
+### Build GEMS3K libraries
+
+1. go to PathToTHAMES/THAMES/src/GEMS3K-standalone/GEMS3K folder and modify the first two lines of the CmakeList.txt file from :
+
+# Recursively collect all header files from the current directory
+file(GLOB HEADER_FILES *.h)
+
+# Recursively collect all source files from the current directory
+file(GLOB SOURCE_FILES *.cpp)
+
+to:
+
+    # Recursively collect all header files from the current directory
+file(GLOB HEADER_FILES *.h
+  PathToTHAMES/THAMES/src/thames.h
+  PathToTHAMES/THAMES/src/thameslib/*.h)
+
+# Recursively collect all source files from the current directory
+file(GLOB SOURCE_FILES *.cpp
+  PathToTHAMES/THAMES/src/thames.cc
+  PathToTHAMES/THAMES/src/thameslib/*.cc)
+
+>>>>>
+
+2. add to the node.h file header :
+#include "PathToTHAMES/THAMES/src/thameslib/StrainEnergy.h"
+
+>>>>>
+
+3. modify the method Tnode::DC_G0 from the node.cpp file, changing the line:
+G0 = CSD->G0[ jj + xTP ];
+into:
+G0 = CSD->G0[ jj + xTP ] + strainenergy[jj + xTP];
+
+>>>>>
+
+4. modify the method Tmulti::DC_LoadThermodynamicData from the ipm_simplex.cpp file, changing the line:
+Go = dCH->G0[ jj+xTP];
+into:
+Go = dCH->G0[ jj+xTP] + strainenergy[jj+xTP];
+
+>>>>>
+
+5. go into “GEMS3K-standalone” folder:
+`cd PathToTHAMES/THAMES/src/GEMS3K-standalone/`
+
+>>>>>
+
+	6. create a folder called “build”:
+	`mkdir build`
+	
+	>>>>>
+	
+	7. move into “build” folder:
+	`cd build`
+	
+	>>>>>
+	
+	8. run cmake command:
+	`cmake ..`
+	
+	>>>>>
+	
+	9. run make command:
+	`make`
+	
+	running make command will create a new folder called “lib” into “build” folder; this new folder must contains two files – our libraries (libGEMS3K.so & libGEMS3K-static.a)
+	
+	>>>>>
+	
+	10. check the two files creation:
+	`ls lib`
+	
+	these two new files must be copied manually into a new folder called also “lib” that we will 	create into the “PathToTHAMES/THAMES/src/Resources” folder
+	
+	>>>>>
+	
+	11. create the new lib folder:
+	`mkdir  PathToTHAMES/THAMES/src/Resources/lib`
+	
+	>>>>>
+	
+	12. copy the two libraries into this new create folder (we are into 	PathToTHAMES/THAMES/src/GEMS3K-standalone/build):
+	`cp lib/* PathToTHAMES/THAMES/src/Resources/lib`
+
+>>>>>
+
+6'. alternatively to steps 6. to 12. run into "GEMS3K-standalone" directory the script called "install.sh", after modifying its content according to your OS (comment/uncomment “cmake” lines)
+`./install.sh`
+
+(on Linux needs administrator rights to finish its action)
+
+
+
+
+### Build THAMES
+Next, build and install THAMES. The recommended way to configure THAMES is to do an out-of-source
+build, which means that the original files and directories are left untouched.
+Doing this makes the re-compiling and cleaning of the installation files
+much simpler.
+
+1. cd /PathToTHAMES/THAMES/build
+2. `cmake ..`
+3. `make`
+4. `make install`
+
+This will install the "thames" executable in the “PathToTHAMES/bin” directory, and the
+static libraries in the “PathToTHAMES/lib” directory.
+
+#######
+
+To use THAMES - SA version:
+- for sulfate attack, all "iniAttack", "endAttack" and "frqAttack" time parameters must have positive and pertinent values (in days) :
+ 	"iniAttack" = 0,
+	"endAttack"= 100,
+	"frqAttack" = 2
+or:
+	"iniAttack" = 7, 
+	"endAttack"= 150,
+	"frqAttack" = 1
+
+- for hydration, all "iniAttack", "endAttack" and "frqAttack" must equal “-1”:
+	"iniAttack" = -1,
+	"endAttack"= -1,
+	"frqAttack" = -1
+
+
+

@@ -35,7 +35,7 @@ private:
   string classname_;    /**< Name of the class that accessed the array */
   string functionname_; /**< Name of the method that accessed the array */
   int sizelimit_;       /**< Number of elements contained in the array */
-  unsigned int indx_;   /**< Out-of-bounds element number that was queried */
+  int indx_;   /**< Out-of-bounds element number that was queried */
 
 public:
   /**
