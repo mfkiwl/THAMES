@@ -33,7 +33,6 @@
 #include "activities.h"
 #include "kinetics.h"
 
-
 #ifdef IPMGEMPLUGIN
 enum volume_code {  // Codes of volume parameter ???
     VOL_UNDEF, VOL_CALC, VOL_CONSTR
@@ -1185,7 +1184,8 @@ void TMulti::DC_LoadThermodynamicData(TNode* aNa ) // formerly CompG0Load()
       jj =  j * na->gridTP();
       if( xTP >= 0 )
       {
-        Go = dCH->G0[ jj+xTP];
+        Go = dCH->G0[ jj+xTP] + strainenergy[jj+xTP];
+        // Go = dCH->G0[ jj+xTP];
         Vv = dCH->V0[ jj+xTP]*1e5;
         if( dCH->S0 ) S0 = dCH->S0[ jj+xTP];
         if( dCH->H0 ) h0 = dCH->H0[ jj+xTP];

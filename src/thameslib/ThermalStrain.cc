@@ -546,7 +546,7 @@ void ThermalStrain::femat(int iskip) {
         // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
         for (int i = 0; i < nx1; i++) {
           for (int k = 0; k < nz1; k++) {
-            m = nx_ * k + nx_ * ny1 + i;
+            m = nxy_ * k + nx_ * ny1 + i;
             for (int nn = 0; nn < 3; nn++) {
               for (int mm = 0; mm < 8; mm++) {
                 T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];

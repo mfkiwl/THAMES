@@ -576,7 +576,8 @@ long int TNode::Ph_xCH_to_xDB( const long int xCH ) const
     jj =  xCH * gridTP();
 
     if( xTP >= 0 )
-       G0 = CSD->G0[ jj + xTP ];
+      G0 = CSD->G0[ jj + xTP ] + strainenergy[jj + xTP];
+      // G0 = CSD->G0[ jj + xTP ];
     else
        G0 = LagranInterp( CSD->Pval, CSD->TKval, CSD->G0+jj,
                P, TK, CSD->nTp, CSD->nPp, 6 );

@@ -64,6 +64,9 @@
 #include "databr.h"
 #include "activities.h"
 #include "gems3k_impex.h"
+// #include "StrainEnergy.h"
+
+#include "../../thameslib/StrainEnergy.h"
 
 #ifndef IPMGEMPLUGIN
  class QWidget;

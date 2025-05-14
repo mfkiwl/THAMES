@@ -1,8 +1,12 @@
 # Recursively collect all header files from the current directory
-file(GLOB HEADER_FILES *.h)
+file(GLOB HEADER_FILES *.h
+  ../../thames.h
+  ../../thameslib/*.h)
 
 # Recursively collect all source files from the current directory
-file(GLOB SOURCE_FILES *.cpp)
+file(GLOB SOURCE_FILES *.cpp
+  ../../thames.cc
+  ../../thameslib/*.cc)
 
 # Recursively collect all source files from the current directory
 #file(GLOB SIMDJSON_FILES ${CMAKE_SOURCE_DIR}/simdjson/simdjson.cpp)
@@ -26,4 +30,5 @@ install(TARGETS GEMS3K_SHARED DESTINATION "lib" COMPONENT libraries)
 install(DIRECTORY ${GEMS3K_SOURCE_DIR}
     DESTINATION "include" COMPONENT headers
     FILES_MATCHING PATTERN "*.h")
+
 

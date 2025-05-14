@@ -17,21 +17,41 @@ file(GLOB HEADER_FILES *.h)
 file(GLOB SOURCE_FILES *.cpp)
 
 to:
-
-    # Recursively collect all header files from the current directory
+# Recursively collect all header files from the current directory
 file(GLOB HEADER_FILES *.h
   PathToTHAMES/THAMES/src/thames.h
   PathToTHAMES/THAMES/src/thameslib/*.h)
+  
+or to:
+# Recursively collect all header files from the current directory
+file(GLOB HEADER_FILES *.h
+  ../../thames.h
+  ../../thameslib/*.h)  
+  
+  and
+  
+# Recursively collect all source files from the current directory
+file(GLOB SOURCE_FILES *.cpp)
 
+to:  
 # Recursively collect all source files from the current directory
 file(GLOB SOURCE_FILES *.cpp
   PathToTHAMES/THAMES/src/thames.cc
   PathToTHAMES/THAMES/src/thameslib/*.cc)
 
+or to:
+# Recursively collect all source files from the current directory
+file(GLOB SOURCE_FILES *.cpp
+  ../../thames.cc
+  ../../thameslib/*.cc)
+
 >>>>>
 
 2. add to the node.h file header :
 #include "PathToTHAMES/THAMES/src/thameslib/StrainEnergy.h"
+
+or: 
+#include "../../thameslib/StrainEnergy.h"
 
 >>>>>
 
