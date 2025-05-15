@@ -23,8 +23,8 @@ using namespace std;
 
 struct RestoreSite {
   // for each site in site_:
-  int microPhaseId;      // The microstructure phase assignment
-  vector<int> growth;    // vector of phases that can grow at this site
+  int microPhaseId;               // The microstructure phase assignment
+  vector<int> growth;             // vector of phases that can grow at this site
   vector<int> inGrowInterfacePos; // vector of the site position in each growth
                                   // interface
   int inDissInterfacePos; // site position in the corresponding dissolution
@@ -364,6 +364,56 @@ public:
   @param time is the simulation time
   */
   void writeTxtOutputFiles_onlyICsDCs(double time);
+
+  /**
+  @brief Convert time in hours to y,d,h,m format
+
+  @param time is the simulation time in h
+  @return TimeStruct data structure
+  */
+  TimeStruct getResolvedTime(const double curtime) {
+    // Convert curtime (currently in h) into nearest second
+    double curtime_in_s_dbl = curtime * S_PER_H;
+    int curtime_in_s = static_cast<int>(curtime_in_s_dbl + 0.5);
+
+    TimeStruct mytime;
+    mytime.years = mytime.days = mytime.hours = mytime.minutes = 0;
+
+    // How many years is this?
+    mytime.years = static_cast<int>(curtime_in_s / S_PER_Y);
+    curtime_in_s -= (mytime.years * S_PER_Y);
+
+    // Convert remaining time into days
+    mytime.days = static_cast<int>(curtime_in_s / S_PER_DAY);
+    curtime_in_s -= (mytime.days * S_PER_DAY);
+
+    // Convert remaining time into hours
+    mytime.hours = static_cast<int>(curtime_in_s / S_PER_H);
+    curtime_in_s -= (mytime.hours * S_PER_H);
+
+    // Convert remaining time into minutes
+    mytime.minutes = static_cast<int>(curtime_in_s / S_PER_MIN);
+    curtime_in_s -= (mytime.minutes * S_PER_MIN);
+
+    // Round up minutes if curtime_in_s >= 30
+    if (curtime_in_s >= 30) {
+      mytime.minutes += 1;
+      // Propagate this rounding to other time units
+      if (mytime.minutes > static_cast<int>(MIN_PER_H)) {
+        mytime.hours += 1;
+        mytime.minutes -= static_cast<int>(MIN_PER_H);
+        if (mytime.hours > static_cast<int>(H_PER_DAY)) {
+          mytime.days += 1;
+          mytime.hours -= static_cast<int>(H_PER_DAY);
+          if (mytime.days > static_cast<int>(DAY_PER_Y)) {
+            mytime.years += 1;
+            mytime.days -= static_cast<int>(DAY_PER_Y);
+          }
+        }
+      }
+    }
+    return mytime;
+  }
 
 }; // End of Controller class
 #endif

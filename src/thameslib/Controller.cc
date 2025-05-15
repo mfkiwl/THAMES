@@ -119,9 +119,11 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
 
+    cout << "GODZILLA: Controller.cc Line 122" << endl;
+    cout.flush();
     outfs << "Time(h)";
     // JWB: Start with micro phase id 1 to avoid the Void phase
-    for (int i = 0; i < numMicroPhases_; i++) {
+    for (int i = 1; i < numMicroPhases_; i++) {
       int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
       cc = chemSys_->getDCClassCode(dcid);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M') {
@@ -139,6 +141,8 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
 
     outfs << "Time(h)";
+    cout << "GODZILLA: Controller.cc Line 144" << endl;
+    cout.flush();
     // JWB: Start with micro phase id 1 to avoid the Void phase
     for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
       int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
@@ -247,8 +251,10 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
        << "Controller::Controller(...) - write initial "
           "microstructure files (writeLattice(0.0), etc)"
        << endl;
-  lattice_->writeLattice(0.0);
-  lattice_->writeLatticePNG(0.0);
+
+  TimeStruct resolvedTime = getResolvedTime(0.0);
+  lattice_->writeLattice(0.0, resolvedTime);
+  lattice_->writeLatticePNG(0.0, resolvedTime);
   if (xyz_)
     lattice_->appendXYZ(0.0);
 
@@ -441,6 +447,8 @@ void Controller::doCycle(double elemTimeInterval) {
   // int numMicPh = chemSys_->getNumMicroPhases();
   // cout << "numMicPh : " << numMicPh << endl;
 
+  cout << "GODZILLA: Controller.cc Line 448" << endl;
+  cout.flush();
   int DCId;
   for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
     if (chemSys_->isKinetic(i)) {
@@ -504,6 +512,7 @@ void Controller::doCycle(double elemTimeInterval) {
   // Main computation cycle
   for (i = 0; (i < timeSize) && (capwater); ++i) {
 
+    TimeStruct resolvedTime = getResolvedTime(time_[i]);
     ///
     /// Do not advance the time step if GEM_run failed the last time
     ///
@@ -593,8 +602,8 @@ void Controller::doCycle(double elemTimeInterval) {
       timesGEMFailed_loc = calculateState(time_[i], timestep, isFirst, cyc);
 
     } catch (GEMException gex) {
-      lattice_->writeLattice(time_[i]);
-      lattice_->writeLatticePNG(time_[i]);
+      lattice_->writeLattice(time_[i], resolvedTime);
+      lattice_->writeLatticePNG(time_[i], resolvedTime);
       if (xyz_)
         lattice_->appendXYZ(time_[i]);
       throw gex;
@@ -807,6 +816,8 @@ void Controller::doCycle(double elemTimeInterval) {
                << " :  changeLattice = " << changeLattice
                << "  =>  whileCount = " << whileCount << endl;
 
+          cout << "GODZILLA: Controller.cc Line 816" << endl;
+          cout.flush();
           while (timesGEMFailed_recall != 0) {
 
             // reset for ChemicalSystem:
@@ -894,6 +905,8 @@ void Controller::doCycle(double elemTimeInterval) {
               }
             }
 
+            cout << "GODZILLA: Controller.cc Line 905" << endl;
+            cout.flush();
             cout << endl
                  << "  Controller::doCycle - cyc = " << cyc
                  << " :  #  i#/ "
@@ -1002,15 +1015,15 @@ void Controller::doCycle(double elemTimeInterval) {
 
     } catch (DataException dex) {
       dex.printException();
-      lattice_->writeLattice(time_[i]);
-      lattice_->writeLatticePNG(time_[i]);
+      lattice_->writeLattice(time_[i], resolvedTime);
+      lattice_->writeLatticePNG(time_[i], resolvedTime);
       if (xyz_)
         lattice_->appendXYZ(time_[i]);
       throw dex;
     } catch (EOBException ex) {
       ex.printException();
-      lattice_->writeLattice(time_[i]);
-      lattice_->writeLatticePNG(time_[i]);
+      lattice_->writeLattice(time_[i], resolvedTime);
+      lattice_->writeLatticePNG(time_[i], resolvedTime);
       if (xyz_)
         lattice_->appendXYZ(time_[i]);
       throw ex;
@@ -1020,8 +1033,8 @@ void Controller::doCycle(double elemTimeInterval) {
               "- cyc = "
            << cyc << endl;
       mex.printException();
-      lattice_->writeLattice(time_[i]);
-      lattice_->writeLatticePNG(time_[i]);
+      lattice_->writeLattice(time_[i], resolvedTime);
+      lattice_->writeLatticePNG(time_[i], resolvedTime);
       if (xyz_)
         lattice_->appendXYZ(time_[i]);
 
@@ -1066,21 +1079,21 @@ void Controller::doCycle(double elemTimeInterval) {
       if (abs(time_[i] - outputTime_[time_index]) < thrTimeToWriteLattice)
         writeTime = outputTime_[time_index];
 
-      // if (verbose_) {
+      // if (verbose_)
       cout << endl
            << "Controller::doCycle - write microstructure files at time_[" << i
            << "] = " << time_[i] << ", outputTime_[" << time_index
            << "] = " << outputTime_[time_index] << ", writeTime = " << writeTime
            << endl;
-      // }
+      //
 
-      lattice_->writeLattice(writeTime);
-      lattice_->writeLatticePNG(writeTime);
+      lattice_->writeLattice(time_[i], resolvedTime);
+      lattice_->writeLatticePNG(time_[i], resolvedTime);
 
       if (xyz_)
         lattice_->appendXYZ(writeTime);
 
-      lattice_->writePoreSizeDistribution(writeTime);
+      lattice_->writePoreSizeDistribution(time_[i], resolvedTime);
 
       time_index++;
     }
@@ -1176,31 +1189,6 @@ void Controller::doCycle(double elemTimeInterval) {
                << "] = " << outputTime_[time_index] << endl;
           cout.flush();
         }
-
-        // lattice_->writeLattice(time_[i]); // *
-        // lattice_->writeLatticePNG(time_[i]); // *
-        // if (xyz_) lattice_->appendXYZ(time_[i]); // *
-
-        // lattice_->writeDamageLattice(time_[i]); // check! ?
-        // lattice_->writeDamageLatticePNG(time_[i]); // check! ?
-
-        // string ofileName(jobRoot_);
-        // ostringstream ostr1, ostr2;
-        // ostr1 << static_cast<int>(time_[i] * 10.0); // tenths of an hour
-        // ostr2 << setprecision(3) << temperature_;
-        // string timestr(ostr1.str());
-        // string tempstr(ostr2.str());
-        // ofileName = ofileName + "." + timestr + "." + tempstr + ".img";
-
-        // string ofileName(jobRoot_);
-        // ostringstream ostr1, ostr2;
-        // ostr1 << setfill('0') << setw(6)
-        //       << static_cast<int>((time_[i] * 60.0) + 0.5); // minutes
-        // ostr2 << setprecision(3) << temperature_;
-        // string timestr(ostr1.str());
-        // string tempstr(ostr2.str());
-        // ofileName = ofileName + "." + timestr + "m." + tempstr + "_SA.img";
-        // cout << "Controller::doCycle ofileName = " << ofileName << endl;
 
         string ofileName(jobRoot_);
 
@@ -1452,8 +1440,8 @@ void Controller::doCycle(double elemTimeInterval) {
         // ofstream outdamage("damage.dat");
         // outdamage.close();
 
-        lattice_->writeDamageLattice(time_[i]);
-        lattice_->writeDamageLatticePNG(time_[i]);
+        lattice_->writeDamageLattice(time_[i], resolvedTime);
+        lattice_->writeDamageLatticePNG(time_[i], resolvedTime);
         // to see whether new damage is generated
       }
 
@@ -1469,8 +1457,9 @@ void Controller::doCycle(double elemTimeInterval) {
   /// visualization
   ///
 
-  lattice_->writeLattice(time_[i - 1]);
-  lattice_->writeLatticePNG(time_[i - 1]);
+  TimeStruct timebefore = getResolvedTime(time_[i - 1]);
+  lattice_->writeLattice(time_[i - 1], timebefore);
+  lattice_->writeLatticePNG(time_[i - 1], timebefore);
 
   // if (xyz_ && (time_[i - 1] < sattack_time_))... ?
   if (xyz_)
@@ -1653,6 +1642,8 @@ void Controller::writeTxtOutputFiles(double time) {
                         "Could not append");
   }
 
+  cout << "GODZILLA: Controller.cc Line 1670" << endl;
+  cout.flush();
   outfs << setprecision(5) << time;
   outfs01 << setprecision(5) << time;
   // JWB: Start with micro phase id 1 to avoid the Void phase

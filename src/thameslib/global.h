@@ -205,7 +205,24 @@ const double ICTHRESH = 1.0e-9;
 
 const double Pi = 3.14159265359;
 
+const double MIN_PER_S = 0.0166666667;
+const double S_PER_MIN = 60.0;
+const double H_PER_MIN = 0.0166666667;
+const double MIN_PER_H = 60.0;
 const double S_PER_H = 3600.0;
+const double H_PER_DAY = 24.0;
 const double DAY_PER_H = 0.0416666667;
+const double H_PER_S = 0.0002777778;
+const double DAY_PER_Y = 365.0;
+const double Y_PER_DAY = 0.002739726;
+const double S_PER_Y = 3.153600000e7;
+const double S_PER_DAY = 86400.0;
+
+typedef struct {
+  int years;
+  int days;
+  int hours;
+  int minutes;
+} TimeStruct;
 
 #endif // GLOBALH

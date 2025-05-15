@@ -681,12 +681,6 @@ Lattice::Lattice(ChemicalSystem *cs, RanGen *rg, int seedRNG,
   // voxels without contact with electrolyte i.e. voxels having low probability
   // to dissolve in this step
   // findIsolatedClusters();
-
-  // {
-  //   lattice_->writeNewLattice(0, 25);
-  //   cout << endl << " writeNewLattice(0, 10) done => exit" << endl;
-  //   exit(0);
-  // }
 }
 
 Lattice::~Lattice() {
@@ -4589,7 +4583,8 @@ void Lattice::calculatePoreSizeDistribution(void) {
   return;
 }
 
-void Lattice::writePoreSizeDistribution(double curtime) {
+void Lattice::writePoreSizeDistribution(const double curtime,
+                                        const TimeStruct resolvedtime) {
 
   // At this point we have a complete pore volume distribution
   // for the microstructure.  We next need to determine
@@ -4662,40 +4657,23 @@ void Lattice::writePoreSizeDistribution(double curtime) {
       capillaryPoreVolumeFraction_ + subvoxelPoreVolumeFraction_;
 
   string ofileName(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // Add the time in minutes
-  // ostr1 << setfill('0') << setw(6) << static_cast<int>((curtime * 60.0) +
-  // 0.5); ostr2 << setprecision(3) << temperature_; string
-  // timestr(ostr1.str()); string tempstr(ostr2.str()); ofileName =
-  //     ofileName + "_PoreSizeDistribution." + timestr + "." + tempstr +
-  //     ".csv";
 
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileName = ofileName + "_PoreSizeDistribution." + timestrD + "d" +
-                timestrH + "h" + timestrM + "m." + tempstr + "_SA.csv";
-  } else {
-    ofileName = ofileName + "_PoreSizeDistribution." + timestrD + "d" +
-                timestrH + "h" + timestrM + "m." + tempstr + ".csv";
-  }
+  ofileName = ofileName + "_PoreSizeDistribution." + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".csv";
 
   ofstream out(ofileName.c_str());
 
@@ -4810,46 +4788,26 @@ void Lattice::writeMicroColors() {
   return;
 }
 
-void Lattice::writeLattice(double curtime) {
+void Lattice::writeLattice(const double curtime,
+                           const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // if (curtime >= sulfateAttackTime_) {
-  //   ofileName = ofileName + "." + timestr + "m." + tempstr + "_SA.img";
-  // } else {
-  //   ofileName = ofileName + "." + timestr + "m." + tempstr + ".img";
-  // }
 
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + "_SA.img";
-  } else {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + ".img";
-  }
+  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".img";
 
   if (verbose_) {
     cout << endl
@@ -4938,7 +4896,8 @@ void Lattice::writeLattice(double curtime) {
   */
 }
 
-void Lattice::writeLatticeH(double curtime) {
+void Lattice::writeLatticeH(const double curtime,
+                            const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
   // ostringstream ostr1, ostr2;
   // ostr1 << setfill('0') << setw(6)
@@ -4956,28 +4915,18 @@ void Lattice::writeLatticeH(double curtime) {
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + "_SA.H.img";
-  } else {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + ".H.img";
-  }
+  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".H.img";
 
   if (verbose_) {
     cout << endl
@@ -5109,20 +5058,9 @@ void Lattice::writeNewLattice(int newZdim) {
   out.close();
 }
 
-void Lattice::writeLatticeXYZ(double curtime) {
+void Lattice::writeLatticeXYZ(const double curtime,
+                              const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // if (curtime >= sulfateAttackTime_) {
-  //   ofileName = ofileName + "allSites." + timestr + "m." + tempstr +
-  //   "_SA.xyz";
-  // } else {
-  //   ofileName = ofileName + "allSites." + timestr + "m." + tempstr + ".xyz";
-  // }
 
   ostringstream ostr1;
   ostr1 << setfill('0') << setw(6)
@@ -5140,21 +5078,18 @@ void Lattice::writeLatticeXYZ(double curtime) {
   hours = floor(hours_dbl);
   mins = floor((hours_dbl - hours) * 60);
 
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileName = ofileName + "allSites." + timestrD + "d" + timestrH + "h" +
-                timestrM + "m." + tempstr + "_SA.xyz";
-  } else {
-    ofileName = ofileName + "allSites." + timestrD + "d" + timestrH + "h" +
-                timestrM + "m." + tempstr + ".xyz";
-  }
+  ofileName = ofileName + "allSites." + timestrY + "y" + timestrD + "d" +
+              timestrH + "h" + timestrM + "m." + tempstr + ".xyz";
 
   if (verbose_) {
     cout << "    In Lattice::writeLatticeXYZ, curtime = " << curtime
@@ -5248,56 +5183,30 @@ void Lattice::appendXYZ(double curtime) {
   out.close();
 }
 
-void Lattice::writeLatticeCFG(double curtime) {
+void Lattice::writeLatticeCFG(const double curtime,
+                              const TimeStruct resolvedtime) {
 
   string ofileNameCFG(jobRoot_);
   string ofileNameUSR(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // if (curtime >= sulfateAttackTime_) {
-  //   ofileNameCFG = ofileNameCFG + "allSites." + timestr + "m." + tempstr +
-  //   "_SA.cfg"; ofileNameUSR = ofileNameUSR + "allSites." + timestr + "m." +
-  //   tempstr + "_SA.usr";
-  // } else {
-  //   ofileNameCFG = ofileNameCFG + "allSites." + timestr + "m." + tempstr +
-  //   ".cfg"; ofileNameUSR = ofileNameUSR + "allSites." + timestr + "m." +
-  //   tempstr + ".usr";
-  // }
 
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileNameCFG = ofileNameCFG + "." + timestrD + "d" + timestrH + "h" +
-                   timestrM + "m." + tempstr + "_SA.cfg";
-    ofileNameUSR = ofileNameUSR + "." + timestrD + "d" + timestrH + "h" +
-                   timestrM + "m." + tempstr + "_SA.usr";
-  } else {
-    ofileNameCFG = ofileNameCFG + "." + timestrD + "d" + timestrH + "h" +
-                   timestrM + "m." + tempstr + ".cfg";
-    ofileNameUSR = ofileNameUSR + "." + timestrD + "d" + timestrH + "h" +
-                   timestrM + "m." + tempstr + ".usr";
-  }
+  ofileNameCFG = ofileNameCFG + "." + timestrY + "y" + timestrD + "d" +
+                 timestrH + "h" + timestrM + "m." + tempstr + ".cfg";
+  ofileNameUSR = ofileNameUSR + "." + timestrY + "y" + timestrD + "d" +
+                 timestrH + "h" + timestrM + "m." + tempstr + ".usr";
 
   if (verbose_) {
     cout << "    In Lattice::writeLatticeCFG, ofileNameCFG = " << ofileNameCFG
@@ -5376,7 +5285,8 @@ void Lattice::writeLatticeCFG(double curtime) {
   }
 }
 
-void Lattice::writeDamageLattice(double curtime) {
+void Lattice::writeDamageLattice(const double curtime,
+                                 const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
   // ostringstream ostr1, ostr2;
   // ostr1 << setfill('0') << setw(6)
@@ -5390,23 +5300,18 @@ void Lattice::writeDamageLattice(double curtime) {
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-              "m." + tempstr + "_SA.damage.img";
+  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".damage.img";
 
   cout << endl
        << "  Lattice::writeDamageLattice - ofileName = " << ofileName << endl;
@@ -5454,7 +5359,8 @@ void Lattice::writeDamageLattice(double curtime) {
   out.close();
 }
 
-void Lattice::writeLatticePNG(double curtime) {
+void Lattice::writeLatticePNG(const double curtime,
+                              const TimeStruct resolvedtime) {
   int i, j, k;
   string ofileName(jobRoot_);
   string ofpngname(jobRoot_);
@@ -5474,45 +5380,25 @@ void Lattice::writeLatticePNG(double curtime) {
   /// Construct the name of the output file
   ///
 
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // string buff;
-
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
   string buff;
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  if (curtime >= sulfateAttackTime_) {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + "_SA.ppm";
-    ofpngname = ofpngname + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + "_SA.png";
-  } else {
-    ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + ".ppm";
-    ofpngname = ofpngname + "." + timestrD + "d" + timestrH + "h" + timestrM +
-                "m." + tempstr + ".png";
-  }
+  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".ppm";
+  ofpngname = ofpngname + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".png";
 
   ///
   /// Open the output file
@@ -5548,36 +5434,36 @@ void Lattice::writeLatticePNG(double curtime) {
         // sitenum = getIndex(i, j, slice);
         izz = slice;
         do {
-          sitenum = getIndex(izz, j, k);
+          sitenum = getIndex(i, j, izz);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
             izz++;
-            if (izz >= xdim_)
-              izz -= xdim_;
+            if (izz >= zdim_)
+              izz -= zdim_;
           }
         } while (!done);
-        sitenum = getIndex(izz, j, k);
-        image[j][k] = site_[sitenum].getMicroPhaseId();
-        dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
+        sitenum = getIndex(i, j, izz);
+        image[i][j] = site_[sitenum].getMicroPhaseId();
+        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
       } else {
-        sitenum = getIndex(slice, j, k);
-        image[j][k] = site_[sitenum].getMicroPhaseId();
-        dshade[j][k] = 1.0;
+        sitenum = getIndex(i, j, slice);
+        image[i][j] = site_[sitenum].getMicroPhaseId();
+        dshade[i][j] = 1.0;
       }
     }
   }
 
   int red, green, blue;
   vector<int> colors;
-  for (k = 0; k < zdim_; k++) {
-    for (j = 0; j < ydim_; j++) {
+  for (j = 0; j < ydim_; j++) {
+    for (i = 0; i < xdim_; i++) {
       // colors = chemSys_->getColor(image[i][j]);
-      colors = chemSys_->getRGB(image[j][k]);
-      red = dshade[j][k] * colors[0] + 0.5;
-      green = dshade[j][k] * colors[1] + 0.5;
-      blue = dshade[j][k] * colors[2] + 0.5;
+      colors = chemSys_->getRGB(image[i][j]);
+      red = dshade[i][j] * colors[0] + 0.5;
+      green = dshade[i][j] * colors[1] + 0.5;
+      blue = dshade[i][j] * colors[2] + 0.5;
       out << red << " " << green << " " << blue << endl;
     }
   }
@@ -5590,7 +5476,6 @@ void Lattice::writeLatticePNG(double curtime) {
   /// @warning This relies on installation of ImageMagick
   ///
 
-  // buff = "convert " + ofileName + " " + ofpngname;
   buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
@@ -5607,7 +5492,8 @@ void Lattice::writeLatticePNG(double curtime) {
   return;
 }
 
-void Lattice::writeDamageLatticePNG(double curtime) {
+void Lattice::writeDamageLatticePNG(const double curtime,
+                                    const TimeStruct resolvedtime) {
   int i, j, k;
   string ofileName(jobRoot_);
   string ofpngname(jobRoot_);
@@ -5627,40 +5513,25 @@ void Lattice::writeDamageLatticePNG(double curtime) {
   /// Construct the name of the output file
   ///
 
-  // ostringstream ostr1, ostr2;
-  // ostr1 << static_cast<int>((curtime * 60.0) + 0.5); // hundredths of an hour
-  // ostringstream ostr2;
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // string buff;
-  // ofileName = ofileName + "." + timestr + "." + tempstr + "_SA.damage.ppm";
-  // ofpngname = ofpngname + "." + timestr + "." + tempstr + "_SA.damage.png";
-
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
   string buff;
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
-  ostringstream ostrD, ostrH, ostrM;
-  ostrD << setfill('0') << setw(4) << days;
+  ostringstream ostrY, ostrD, ostrH, ostrM;
+  ostrY << setfill('0') << setw(3) << resolvedtime.years;
+  string timestrY(ostrY.str());
+  ostrD << setfill('0') << setw(3) << resolvedtime.days;
   string timestrD(ostrD.str());
-  ostrH << setfill('0') << setw(2) << hours;
+  ostrH << setfill('0') << setw(2) << resolvedtime.hours;
   string timestrH(ostrH.str());
-  ostrM << setfill('0') << setw(2) << mins;
+  ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  ofileName = ofileName + "." + timestrD + "d" + timestrH + "h" + timestrM +
-              "m." + tempstr + "_SA.damage.ppm";
-  ofpngname = ofpngname + "." + timestrD + "d" + timestrH + "h" + timestrM +
-              "m." + tempstr + "_SA.damage.png";
+  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".damage.ppm";
+  ofpngname = ofpngname + "." + timestrY + "y" + timestrD + "d" + timestrH +
+              "h" + timestrM + "m." + tempstr + ".damage.png";
 
   ///
   /// Open the output file
@@ -5695,38 +5566,38 @@ void Lattice::writeDamageLatticePNG(double curtime) {
       // sitenum = getIndex(i, j, slice);
       izz = slice;
       do {
-        sitenum = getIndex(izz, j, k);
+        sitenum = getIndex(i, j, izz);
         if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
           done = true;
         } else {
           nd++;
           izz++;
-          if (izz >= xdim_)
-            izz -= xdim_;
+          if (izz >= zdim_)
+            izz -= zdim_;
         }
       } while (!done);
-      sitenum = getIndex(izz, j, k);
+      sitenum = getIndex(i, j, izz);
       if (site_[sitenum].IsDamage()) {
-        image[j][k] = 1;
+        image[i][j] = 1;
       } else {
-        image[j][k] = 5;
+        image[i][j] = 5;
       }
-      dshade[j][k] = 1.0;
+      dshade[i][j] = 1.0;
       /*
-      dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
+      dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
       */
     }
   }
 
   int red, green, blue;
   vector<int> colors;
-  for (k = 0; k < zdim_; k++) {
-    for (j = 0; j < ydim_; j++) {
+  for (j = 0; j < ydim_; j++) {
+    for (i = 0; i < xdim_; i++) {
       // colors = chemSys_->getColor(image[i][j]);
-      colors = chemSys_->getRGB(image[j][k]);
-      red = dshade[j][k] * colors[0] + 0.5;
-      green = dshade[j][k] * colors[1] + 0.5;
-      blue = dshade[j][k] * colors[2] + 0.5;
+      colors = chemSys_->getRGB(image[i][j]);
+      red = dshade[i][j] * colors[0] + 0.5;
+      green = dshade[i][j] * colors[1] + 0.5;
+      blue = dshade[i][j] * colors[2] + 0.5;
       out << red << " " << green << " " << blue << endl;
     }
   }
@@ -5739,7 +5610,6 @@ void Lattice::writeDamageLatticePNG(double curtime) {
   /// @warning This relies on installation of ImageMagick
   ///
 
-  // buff = "convert " + ofileName + " " + ofpngname;
   buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
@@ -5795,7 +5665,7 @@ void Lattice::makeMovie() {
   /// slice and appending it to the end of the master file.
   ///
 
-  for (i = 10; i < zdim_; i++) {
+  for (k = 10; k < zdim_; k++) {
 
     ///
     /// Open the output file.
@@ -5822,39 +5692,39 @@ void Lattice::makeMovie() {
     out << xdim_ << " " << ydim_ << endl;
     out << COLORSATVAL << endl;
 
-    slice = i;
-    for (k = 0; k < zdim_; k++) {
-      for (j = 0; j < ydim_; j++) {
+    slice = k;
+    for (j = 0; j < ydim_; j++) {
+      for (i = 0; i < xdim_; i++) {
         done = false;
         nd = 0;
         // sitenum = getIndex(i, j, slice);
         izz = slice;
         do {
-          sitenum = getIndex(izz, j, k);
+          sitenum = getIndex(i, j, izz);
           if (nd == 10 || site_[sitenum].getMicroPhaseId() > 1) {
             done = true;
           } else {
             nd++;
             izz++;
-            if (izz >= xdim_)
-              izz -= xdim_;
+            if (izz >= zdim_)
+              izz -= zdim_;
           }
         } while (!done);
-        sitenum = getIndex(izz, j, k);
-        image[j][k] = site_[sitenum].getMicroPhaseId();
-        dshade[j][k] = 0.1 * (10.0 - (static_cast<double>(nd)));
+        sitenum = getIndex(i, j, izz);
+        image[i][j] = site_[sitenum].getMicroPhaseId();
+        dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
       }
     }
 
     int red, green, blue;
     vector<int> colors;
-    for (k = 0; k < zdim_; k++) {
-      for (j = 0; j < ydim_; j++) {
+    for (j = 0; j < ydim_; j++) {
+      for (i = 0; i < xdim_; i++) {
         // colors = chemSys_->getColor(image[i][j]);
-        colors = chemSys_->getRGB(image[j][k]);
-        red = dshade[j][k] * colors[0] + 0.5;
-        green = dshade[j][k] * colors[1] + 0.5;
-        blue = dshade[j][k] * colors[2] + 0.5;
+        colors = chemSys_->getRGB(image[i][j]);
+        red = dshade[i][j] * colors[0] + 0.5;
+        green = dshade[i][j] * colors[1] + 0.5;
+        blue = dshade[i][j] * colors[2] + 0.5;
         out << red << " " << green << " " << blue << endl;
       }
     }
@@ -5866,7 +5736,6 @@ void Lattice::makeMovie() {
     /// @warning This relies on installation of ImageMagick
     ///
 
-    // buff = "convert " + ofileName + " " + ofgifileName;
     buff = ConvertCommand + " " + ofileName + " " + ofgifileName;
     resCallSystem = system(buff.c_str());
     if (resCallSystem == -1) {

@@ -1,9 +1,10 @@
 /**
 @file utils.h
-@brief Define some simple functions for handling strings.
+@brief Define some simple utility functions.
 */
 #ifndef UTILS
 #define UTILS
+#include "global.h"
 #include <sstream>
 #include <string>
 

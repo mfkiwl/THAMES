@@ -32,6 +32,7 @@ exists, hydrates, and possibly deteriorates.
 #include "RanGen.h"
 #include "Site.h"
 #include "global.h"
+#include "utils.h"
 
 /**
 @struct Sitesize
@@ -923,10 +924,12 @@ public:
   @brief Write the pore size distribution data to a file
 
   @param curtime is the current time in hours
+  @param resolvedtime is the current time resolved into y,d,h,m
   @param simtype is the sumulation tyupe
   @param root is the root name of the output file to create
   */
-  void writePoreSizeDistribution(double curtime);
+  void writePoreSizeDistribution(const double curtime,
+                                 const TimeStruct resolvedTime);
 
   /**
   @brief Write the microstructure colors to a file
@@ -944,17 +947,18 @@ public:
   The microstructure output file will indicate the phase id at each site.
 
   @param curtime is the current time in hours
+  @param resolvedtime is the current time resolved into y,d,h,m
   @param root is the root name of the output file to create
   */
-  void writeLattice(double curtime);
+  void writeLattice(const double curtime, const TimeStruct resolvedtime);
 
-  void writeLatticeH(double curtime);
+  void writeLatticeH(const double curtime, const TimeStruct resolvedtime);
 
-  void writeLatticeXYZ(double curtime);
+  void writeLatticeXYZ(const double curtime, const TimeStruct resolvedtime);
 
   void appendXYZ(double curtime);
 
-  void writeLatticeCFG(double curtime);
+  void writeLatticeCFG(const double curtime, const TimeStruct resolvedtime);
 
   void writeNewLattice(int newZdim);
 
@@ -964,18 +968,20 @@ public:
   The damage output file is binary, each site either being damaged or not.
 
   @param curtime is the current time in hours
+  @param resolvedtime is the current time resolved into y,d,h,m
   @param root is the root name of the output file to create
   */
-  void writeDamageLattice(double curtime);
+  void writeDamageLattice(const double curtime, const TimeStruct resolvedtime);
 
   /**
   @brief Write the 3D microstructure to a png file that can be immediately
   rendered.
 
   @param curtime is the current time in hours
+  @param resolvedtime is the current time resolved into y,d,h,m
   @param root is the root name of the png output file to create
   */
-  void writeLatticePNG(double curtime);
+  void writeLatticePNG(const double curtime, const TimeStruct resolvedtime);
 
   /**
   @brief Write the 3D microstructure to a png file that can be immediately
@@ -984,9 +990,11 @@ public:
   The damage output file is binary, each site either being damaged or not.
 
   @param curtime is the current time in hours
+  @param resolvedtime is the current time resolved into y,d,h,m
   @param root is the root name of the png output file to create
   */
-  void writeDamageLatticePNG(double curtime);
+  void writeDamageLatticePNG(const double curtime,
+                             const TimeStruct resolvedtime);
 
   /**
   @brief Create files of sequential slices of the microstructure in the x
