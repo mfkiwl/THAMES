@@ -2358,7 +2358,7 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
   int i, ii, jj;
 
   Site *ste, *stenb;
-  int pid;
+  int pid = 0;
   int isitePos, phaseID;
   int stId, nbid, nbpid;
   int posVect, posnb;
@@ -2387,24 +2387,6 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
     cout << "stop program" << endl;
     exit(0);
   }
-
-  /*
-  if (trc_d >= 120) { // check!
-    int countErrorVect = 0;
-    int countErrorInt = 0;
-    for (int i = 0; i < numSites_; i++) {
-      if (site_[i].getInDissolutionVectorPos() > -1) countErrorVect++;
-      if (site_[i].getInDissInterfacePos() > -1) {
-        if (i !=
-  interface_[site_[i].getMicroPhaseId()].getDissolutionSitesId(site_[i].getInDissInterfacePos()))
-          countErrorInt++;
-      }
-    }
-    cout << endl << endl << ">>>>> INI trc_d/countErrorVect/countErrorInt = " <<
-  trc_d
-          << " / " << countErrorVect << " / " << countErrorInt << endl << endl;
-  }
-  */
 
   // dissolution probabilities based on wmc
   vector<structDissVect> dissolutionVector;
@@ -2466,83 +2448,6 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
 
   int callGEM = -1;
 
-  /*
-    if (trc_d == 10) {
-      //dissolution
-      for (int i = 0; i < numMicroPhases_; i++) {
-        int sizeIntLatt = dissolutionInterfaceSize_[i];
-        if (sizeIntLatt > 0) {
-          int sizeIntInte = interface_[i].getDissolutionSize();
-          int intSiteId, intPhId, posSite;
-          cout << endl << endl
-               << "   Lattice::dissolvePhase PhId/sizeIntLatt/sizeIntInte : " <<
-    i << " / "
-               << sizeIntLatt << " / " << sizeIntInte << endl
-               << endl;
-
-          for (int jj = 0; jj < sizeIntLatt; jj++) {
-            intSiteId = interface_[i].getDissolutionSitesId(jj);
-            intPhId = site_[intSiteId].getMicroPhaseId();
-            posSite = site_[intSiteId].getInDissInterfacePos();
-            if (jj == posSite) {
-              cout << "      " << jj << "     intSiteId : " << intSiteId
-                   << "     posSite : " << posSite << "     intPhId : " <<
-    intPhId << endl; } else { cout << "      " << jj << "     intSiteId : " <<
-    intSiteId
-                   << "     posSite : " << posSite << "     intPhId : " <<
-    intPhId << "   +++"
-                   << endl;
-            }
-          }
-        }
-      }
-      cout << endl << endl << "   *** Lattice::dissolvePhase - ini trc_d " <<
-    trc_d << " => exit " << endl; exit(0);
-    }
-
-    if (trc_d == 10) {
-      //growth
-      for (int i = 0; i < numMicroPhases_; i++) {
-        int sizeIntLatt = growthInterfaceSize_[i];
-        if (sizeIntLatt > 0) {
-          int sizeIntInte = interface_[i].getGrowthSize();
-          int intSiteId, intPhId, posSite;
-          cout << endl << endl
-               << "   Lattice::dissolvePhase - ini for growth
-    trc_d/PhId/sizeIntLatt/sizeIntInte : " << trc_d <<  " / " << i << " / "
-               << sizeIntLatt << " / " << sizeIntInte << endl
-               << endl;
-
-          for (int jj = 0; jj < sizeIntLatt; jj++) {
-            intSiteId = interface_[i].getGrowthSitesId(jj);
-            intPhId = site_[intSiteId].getMicroPhaseId();
-            posSite = site_[intSiteId].getInGrowInterfacePos(i);
-            if (jj == posSite) {
-              cout << "      " << jj << "     intSiteId : " << intSiteId
-                   << "     posSite : " << posSite << "     intPhId : " <<
-    intPhId << endl; } else { cout << "      " << jj << "     intSiteId : " <<
-    intSiteId
-                   << "     posSite : " << posSite << "     intPhId : " <<
-    intPhId << "   +++"
-                   << endl;
-            }
-          }
-        }
-      }
-      cout << endl << endl << "   *** Lattice::dissolvePhase - ini for growth
-    trc_d " << trc_d << " => exit " << endl; exit(0);
-    }
-  */
-
-  // for tests // check!
-  double sum_0 = 0;
-  double probRNG_0;
-  double totProb_0 = 0;
-  double totProb = 0;
-  int isitePos_0;
-  double sumWmcT1 = 0;
-  // for tests
-
   while ((numLeftTot > 0) && (dissolutionVectorSize >= 1)) {
     try {
       bcl++;
@@ -2564,78 +2469,6 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
             break;
         }
       }
-
-      /*
-      if (trc_d >= 128) { // check!
-        sumWmcT1 = 0.;
-        for (int i = 0; i < dissolutionVectorSize; i++) {
-          sumWmcT1 +=  dissolutionVector[i].wmc;
-        }
-        if (abs(sumWmcT1 - sumWmc) > 1.e-6) {
-          cout << scientific << setprecision(30);
-          cout << endl
-               << "%%%%%%%%%%%%%%%%%%    Lattice::dissolvePhase 0 => trc_d = "
-      << trc_d << "    &    bcl = " << bcl << endl; cout << "
-      dissolutionVectorSize = " << dissolutionVectorSize << "  &  dV.size() = "
-      << dissolutionVector.size() << endl; cout << endl << "
-      Lattice::dissolvePhase sumWmcT1 = " << sumWmcT1 << "   &   sumWmc = " <<
-      sumWmc<< " !!!" << endl; cout << endl << "      Lattice::dissolvePhase
-      sumWmcT1 - sumWmc = " << sumWmcT1 - sumWmc << " !!!" << endl; cout << endl
-      << "<><><><>  exit" << endl; exit(0);
-        }
-      }
-      */
-
-      /*
-      if (trc_d == 128 && bcl == 1045) { // check!
-        sum_0 = 0;
-        totProb = totProb_0 = 0;
-        for (int i = 0; i < dissolutionVectorSize; i++) {
-          sum_0 += dissolutionVector[i].wmc;
-        }
-        for (int i = 0; i < dissolutionVectorSize; i++) {
-          totProb += (dissolutionVector[i].wmc / sumWmc);
-          totProb_0 += (dissolutionVector[i].wmc / sum_0);
-        }
-
-        probRNG_0 = dissolutionVector[0].wmc / sum_0;
-        if (rng <= probRNG_0) {
-          isitePos_0 = 0;
-        } else {
-          for (isitePos_0 = 1; isitePos_0 < dissolutionVectorSize; isitePos_0++)
-      { probRNG_0 += (dissolutionVector[isitePos_0].wmc / sum_0); if (rng <=
-      probRNG_0) break;
-          }
-        }
-      }
-      */
-
-      /*
-      if (trc_d == 129) { // check!
-        cout << endl
-             << "%%%%%%%%%%%%%%%%%%    Lattice::dissolvePhase trc_d = " << trc_d
-      << "    &    bcl = " << bcl << endl; cout << "      dissolutionVectorSize
-      = " << dissolutionVectorSize << "  &  dV.size() = " <<
-      dissolutionVector.size() << endl; int countErrorInt = 0; for (int i = 0; i
-      < numSites_; i++) { if (site_[i].getInDissInterfacePos() > -1) { if (i !=
-      interface_[site_[i].getMicroPhaseId()].getDissolutionSitesId(site_[i].getInDissInterfacePos()))
-              countErrorInt++;
-          }
-        }
-        cout << ">>>>> countErrorInt = " << countErrorInt << endl << endl;
-        cout << endl << "<><><><>  exit" << endl;
-        exit(0);
-      }
-      */
-
-      // if (isitePos == dissolutionVectorSize) {
-      //   isitePosError++;
-      //   cout << endl << "     *** isitePosError: bcl/isitePos/rng/probRNG = "
-      //   << bcl
-      //        << " / " << isitePos << " / " << rng << " / " << probRNG <<
-      //        endl;
-      //   cout << endl << "    exit" << endl; exit(1);
-      // }
 
       ste = &site_[dissolutionVector[isitePos].id];
       pid = ste->getMicroPhaseId(); // intrebare pid diff phaseid ???
@@ -2812,25 +2645,6 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
 
       numLeft[posVect]--;
       numChange[posVect]++;
-
-      /*
-      sumWmcT1 = 0.; // check!
-      for (int i = 0; i < dissolutionVectorSize; i++) {
-        sumWmcT1 +=  dissolutionVector[i].wmc;
-      }
-      if (abs(sumWmcT1 - sumWmc) > 1.e-6) {
-        cout << scientific << setprecision(30);
-        cout << endl
-             << "%%%%%%%%%%%%%%%%%%    Lattice::dissolvePhase trc_d = " << trc_d
-      << "    &    bcl = " << bcl << endl; cout << "      dissolutionVectorSize
-      = " << dissolutionVectorSize << "  &  dV.size() = " <<
-      dissolutionVector.size() << endl; cout << endl << " Lattice::dissolvePhase
-      sumWmcT1 = " << sumWmcT1 << "   &   sumWmc = " << sumWmc<< " !!!" << endl;
-        cout << endl << "      Lattice::dissolvePhase sumWmcT1 - sumWmc = " <<
-      sumWmcT1 - sumWmc << " !!!" << endl; cout << endl << "<><><><>  exit" <<
-      endl; exit(0);
-      }
-      */
 
     } catch (out_of_range &oor) {
       EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), i);
@@ -3417,7 +3231,7 @@ int Lattice::changeMicrostructure(double time, const int simtype,
   int cursites, newsites;
   int wcursites, wnewsites;
   // double td, tvol, tmass;
-  int needRecallGEM;
+  int needRecallGEM = 0;
   vector<double> vol_next, vfrac_next;
   vector<int> netsites(numMicroPhases_, 0);
   vector<string> phasenames;
@@ -3659,17 +3473,17 @@ int Lattice::changeMicrostructure(double time, const int simtype,
            << "  Lattice::changeMicrostructure SA: sizeGrowingVectSA_ = "
            << sizeGrowingVectSA_ << endl;
       for (int i = 0; i < sizeGrowingVectSA_; ++i) {
+        shrinkingSize = static_cast<int>(shrinking_[i].size());
         growPhId = growingVectSA_[i]; // AFt mPhId
         cout << "     i/growPhId/growPhName/shrinkingSize : " << i << " / "
              << growPhId << " / " << phasenames[growPhId] << " / "
              << shrinking_[i].size() << endl;
-        for (int j = 0; j < shrinking_[i].size(); j++) {
+        for (int j = 0; j < shrinkingSize; j++) {
           shrinkid = shrinking_[i][j]; // C4ASH12 mPhId
           cout << "        j/shrinkId/shrinkName : " << j << " / " << shrinkid
                << " / " << phasenames[shrinkid] << endl;
         }
         if (netsites[growPhId] > 0) {
-          shrinkingSize = shrinking_[i].size(); // shrinkingSize = 1 !!!
           for (int j = 0; j < shrinkingSize; j++) {
             shrinkid = shrinking_[i][j]; // C4ASH12 mPhId
             if (netsites[shrinkid] < 0) {
@@ -4521,6 +4335,7 @@ void Lattice::calculatePoreSizeDistribution(void) {
   double cumulative_volume = 0.0;
   double cumulative_volfrac = 0.0;
   struct PoreSizeVolume dpsv;
+  dpsv.diam = dpsv.volfrac = dpsv.volume = 0.0;
 
   for (int i = 0; i < porevolumeSize; ++i) { //
     if (i > ELECTROLYTEID) {

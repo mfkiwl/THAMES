@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 14 21:43 2025 | Removed compile time warnings in thameslib; still runtime errors |
 | May 14 17:02 2025 | Getting GEMS3K library to compile with strainenergy added |
 | May 14 16:10 2025 | Merged florinnita_THAMES_SA branch into main |
 | May 11 15:53 2025 | Streamlined JSON input to one file only |

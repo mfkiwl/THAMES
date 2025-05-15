@@ -1532,11 +1532,9 @@ public:
   @return the estimated specific surface area [m2 per kg of all cement]
   */
   double getCementSpecificSurfaceArea(void) {
-    double ssa = 0.0;
     double cemmass = 0.0;
     double allsurf = 0.0;
     double cemsurf = 0.0;
-    double cemssa = 0.0;
     double allsolidmass = 0.0;
     double thismass, thisssa;
     for (int i = 0; i < numMicroPhases_; ++i) {

@@ -8,9 +8,9 @@
 
 using namespace std;
 
-ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
-                             int npoints, const bool verbose,
-                             const bool warning)
+ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim,
+                             ChemicalSystem *cs, int npoints,
+                             const bool verbose, const bool warning)
     : ElasticModel(nx, ny, nz, dim, cs, npoints, verbose, warning) {
 
 #ifdef DEBUG
@@ -706,12 +706,9 @@ void ThermalStrain::femat(int iskip) {
               delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
             }
             if (i8 == 6) {
-              delta[i8][0] =
-                  exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
-              delta[i8][1] =
-                  exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
-              delta[i8][2] =
-                  exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
+              delta[i8][0] = exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
+              delta[i8][1] = exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
+              delta[i8][2] = exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
             }
           }
         }
@@ -1052,8 +1049,8 @@ void ThermalStrain::femat(int iskip) {
 // void ThermalStrain::bgrad(int nx, int ny, int nz, double exx,
 //                           double eyy, double ezz, double exz, double eyz,
 //                           double exy) {
-void ThermalStrain::bgrad(double exx, double eyy, double ezz,
-                          double exz, double eyz, double exy) {
+void ThermalStrain::bgrad(double exx, double eyy, double ezz, double exz,
+                          double eyz, double exy) {
   int is[8];
   double delta[8][3];
   int nx1 = nx_ - 1;
@@ -1444,9 +1441,8 @@ void ThermalStrain::constfunc() {
       pp[i][j] = 0.0;
     }
   }
-  
-  double exx = 0, eyy = 0, ezz = 0,
-      exz = 0, eyz = 0, exy = 0;
+
+  double exx = 0, eyy = 0, ezz = 0, exz = 0, eyz = 0, exy = 0;
 
   for (int ii = 0; ii < 6; ii++) {
     for (int jj = ii; jj < 6; jj++) {
@@ -1752,12 +1748,9 @@ void ThermalStrain::constfunc() {
             delta[i8][2] = exz * nx_dbl + eyz * ny_dbl;
           }
           if (i8 == 6) {
-            delta[i8][0] =
-                exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
-            delta[i8][1] =
-                exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
-            delta[i8][2] =
-                exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
+            delta[i8][0] = exx * nx_dbl + exy * ny_dbl + exz * nz_dbl;
+            delta[i8][1] = exy * nx_dbl + eyy * ny_dbl + eyz * nz_dbl;
+            delta[i8][2] = exz * nx_dbl + eyz * ny_dbl + ezz * nz_dbl;
           }
         }
       }
@@ -2201,22 +2194,22 @@ int ThermalStrain::dembx(int ldemb, int kkk) {
       for (int m = 0; m < ns_; m++) {
         if (ii == 0)
           Ah_[ns_][0] += b0_[m][0] * h_[m][0] + b0_[m][1] * h_[m][1] +
-                        b0_[m][2] * h_[m][2];
+                         b0_[m][2] * h_[m][2];
         if (ii == 1)
           Ah_[ns_][1] += b1_[m][0] * h_[m][0] + b1_[m][1] * h_[m][1] +
-                        b1_[m][2] * h_[m][2];
+                         b1_[m][2] * h_[m][2];
         if (ii == 2)
           Ah_[ns_][2] += b2_[m][0] * h_[m][0] + b2_[m][1] * h_[m][1] +
-                        b2_[m][2] * h_[m][2];
+                         b2_[m][2] * h_[m][2];
         if (ii == 3)
           Ah_[ns_ + 1][0] += b3_[m][0] * h_[m][0] + b3_[m][1] * h_[m][1] +
-                            b3_[m][2] * h_[m][2];
+                             b3_[m][2] * h_[m][2];
         if (ii == 4)
           Ah_[ns_ + 1][1] += b4_[m][0] * h_[m][0] + b4_[m][1] * h_[m][1] +
-                            b4_[m][2] * h_[m][2];
+                             b4_[m][2] * h_[m][2];
         if (ii == 5)
           Ah_[ns_ + 1][2] += b5_[m][0] * h_[m][0] + b5_[m][1] * h_[m][1] +
-                            b5_[m][2] * h_[m][2];
+                             b5_[m][2] * h_[m][2];
       }
       // now do right hand corner terms, ns to (ns+1).
       for (int m = 0; m < 2; m++) {
@@ -2733,7 +2726,6 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
                          double ezz, double exz, double eyz, double exy) {
   int kmax = kmax_; // 60;
   int iskip;
-  double utot;
   int m;
 
   ///
@@ -2760,13 +2752,11 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
          << prob_[i] << endl;
   }
   cout.flush();
-#endif
 
   ///
   /// Output thermal strains for each phase.
   ///
 
-  /*
   cout << "Thermal Strains" << endl;
   for (int i = 0; i < ns_; i++) {
     bool flag = false;
@@ -2776,12 +2766,11 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
     }
     if (flag)
       cout << "eigen of site[" << i << "]: " << eigen_[i][0] << "   "
-           << eigen_[i][1] << "   " << eigen_[i][2] << "   "
-           << eigen_[i][3] << "   " << eigen_[i][4] << "   "
-           << eigen_[i][5] << "   " << "phase is: "
-           << pix_[i] << endl;
+           << eigen_[i][1] << "   " << eigen_[i][2] << "   " << eigen_[i][3]
+           << "   " << eigen_[i][4] << "   " << eigen_[i][5] << "   "
+           << "phase is: " << pix_[i] << endl;
   }
-  */
+#endif
 
   if (isFirst_) {
 #ifdef DEBUG
@@ -2825,9 +2814,10 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
           // double x = (double)i;
           // double y = (double)j;
           // double z = (double)k;
-          // u_[m][0] = x * u_[ns_][0] + y * u_[ns_ + 1][2] + z * u_[ns_ + 1][0];
-          // u_[m][1] = x * u_[ns_ + 1][2] + y * u_[ns_][1] + z * u_[ns_ + 1][1];
-          // u_[m][2] = x * u_[ns_ + 1][0] + y * u_[ns_ + 1][1] + z * u_[ns_][2];
+          // u_[m][0] = x * u_[ns_][0] + y * u_[ns_ + 1][2] + z * u_[ns_ +
+          // 1][0]; u_[m][1] = x * u_[ns_ + 1][2] + y * u_[ns_][1] + z * u_[ns_
+          // + 1][1]; u_[m][2] = x * u_[ns_ + 1][0] + y * u_[ns_ + 1][1] + z *
+          // u_[ns_][2];
           u_[m][0] = i * u_[ns_][0] + j * u_[ns_ + 1][2] + k * u_[ns_ + 1][0];
           u_[m][1] = i * u_[ns_ + 1][2] + j * u_[ns_][1] + k * u_[ns_ + 1][1];
           u_[m][2] = i * u_[ns_ + 1][0] + j * u_[ns_ + 1][1] + k * u_[ns_][2];
@@ -2894,7 +2884,7 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 
   iskip = 0;
   femat(iskip);
-  utot = energy();
+  double utot = energy();
   gg_ = 0.0;
   int nss = ns_ + 2;
   for (int m3 = 0; m3 < 3; m3++) {
@@ -2983,13 +2973,11 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
       int zhi = expcor[2] + halfbox;
 
       femat(1);
-      double tempenergy = 0.0;
 
-      ///
-      /// Call energy method to get the global gradient, `gb_`.
-      ///
+      /// Note: variable tempenergy is not used anywhere, but
+      /// we needed to call energy() to get the global gradient `gb_`.
 
-      tempenergy = energy();
+      double tempenergy = energy();
 
       for (int m3 = 0; m3 < 3; m3++) {
         for (int k = zlo; k <= zhi; k++) {

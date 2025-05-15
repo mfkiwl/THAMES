@@ -31,17 +31,17 @@ number.
 class Site {
 
 protected:
-  int x_;            /**< x-coordinate in mesh coordinate frame */
-  int y_;            /**< y-coordinate in mesh coordinate frame */
-  int z_;            /**< y-coordinate in mesh coordinate frame */
-  int id_;           /**< Unique id in the 1D array of all sites */
-  int microPhaseId_; /**< The microstructure phase assignment */
+  int x_ = 0;            /**< x-coordinate in mesh coordinate frame */
+  int y_ = 0;            /**< y-coordinate in mesh coordinate frame */
+  int z_ = 0;            /**< y-coordinate in mesh coordinate frame */
+  int id_ = 0;           /**< Unique id in the 1D array of all sites */
+  int microPhaseId_ = 0; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_;       /**< Pointer to simulation's ChemicalSystem object */
   vector<int> growth_; /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
   double trueVolume_;       /**< Actual volume of site, accounting for stress */
-  bool damage_;             /**< True if site is damaged, false otherwise */
+  bool damage_ = false;     /**< True if site is damaged, false otherwise */
   vector<Site *> nb_; /**< List of site ids that are neighbors to this site */
 
   /**

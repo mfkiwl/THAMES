@@ -2458,10 +2458,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   microVolume_ = 0.0;
   setPGEMPhaseStoich(); // call getPGEMPhaseStoich() => pGEMPhaseStoich_[i] //
                         // check! number of moles all ICs in all GEM CSD phases.
-  setGEMPhaseStoich(); // call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]  //
-                       // check!
-  setGEMPhaseMass();   // => GEMPhaseMass_[i]
-  setGEMPhaseVolume(); // => GEMPhaseVolume_[i]
+  setGEMPhaseStoich();  // call getGEMPhaseStoich() => GEMPhaseStoich_[i][j]  //
+                        // check!
+  setGEMPhaseMass();    // => GEMPhaseMass_[i]
+  setGEMPhaseVolume();  // => GEMPhaseVolume_[i]
   setGEMPhaseMolarMass(); // =>GEMPhaseMolarMass_[pidx]  // check!
 
   if (verbose_) {
@@ -2693,11 +2693,8 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
   try {
     double aveSI = 0.0;
     double moles = 0.0;
-    double tmoles = 0.0;
     vector<int> microPhaseDCMembers;
-    int sizeMicroPhaseDCMembers;
     string pname;
-    int newDCId;
 
     // Query CSD node to set the SI of every microPhase
     // if (isFirst) {
@@ -3840,7 +3837,7 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
 void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
                                                bool doAttack, int cyc) {
   int DCId;
-  double DCconc; // mol/kgw units
+  double DCconc = 0.0; // mol/kgw units
   double waterMoles = DCMoles_[waterDCId_];
   double waterMass = 0.001 * waterMoles * waterMollarMass_; // in kg
 

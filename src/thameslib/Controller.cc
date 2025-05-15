@@ -273,7 +273,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     throw fex;
   }
 
-  for (int i = 0; i < time_.size() - 1; i++) {
+  for (int i = 0; i < static_cast<int>(time_.size() - 1); i++) {
     if (abs(time_[i] - time_[i + 1]) <= 1.0e-6) {
       time_.erase(time_.begin() + i);
     }
@@ -2094,11 +2094,12 @@ void Controller::parseDoc(const string &docName) {
     testTime = 0.0;
     int j = 0;
     bool done = false;
+    int outputTimeSize = static_cast<int>(outputTime_.size());
     while (testTime < finalTime) {
       testTime += (0.1 * (testTime + 0.024));
       done = false;
-      if (j < outputTime_.size()) {
-        while (j < outputTime_.size() && !done) {
+      if (j < outputTimeSize) {
+        while (j < outputTimeSize && !done) {
           if (testTime >= outputTime_[j]) {
             time_.push_back(outputTime_[j]);
             j++;
