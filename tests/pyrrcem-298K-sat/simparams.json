@@ -4,55 +4,21 @@
     "reftemperature": 298.15,
     "saturated": 1,
     "electrolyte_conditions": [
-      {
-        "DCname": "Ca(CO3)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "AlO2H@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "CaSiO3@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "Fe(CO3)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "MgSiO3@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "KOH@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "Ca(SO4)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "Na+",
-        "condition": "initial",
-        "concentration": 0.1
-      },
-      {
-        "DCname": "HCO3-",
-        "condition": "initial",
-        "concentration": 0.1
-      }
+      { "DCname": "Ca(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "AlO2H@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "CaSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Fe(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "KOH@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Ca(SO4)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "K+", "condition": "initial", "concentration": 2.0e-6 },
+      { "DCname": "SO4-2", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Na+", "condition": "initial", "concentration": 0.672 },
+      { "DCname": "ClO-", "condition": "initial", "concentration": 0.672 }
     ]
   },
   "microstructure": {
-    "numentries": 22,
+    "numentries": 23,
     "phases": [
       {
         "thamesname": "Void",
@@ -144,7 +110,7 @@
         "thamesname": "Alite",
         "id": 2,
         "cement_component": 1,
-        "interface_data": "",
+        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "Alite",
@@ -266,54 +232,19 @@
         "kinetic_data": {
           "type": "Standard",
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 5.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
+          "dissolutionRateConst": 1.0e-5,
+          "diffusionRateConstEarly": 5.0e-5,
+          "diffusionRateConstLate": 5.0e-5,
           "dissolvedUnits": 2,
           "siexp": 1.0,
-          "dfexp": 1.0,
+          "dfexp": 1.1,
           "dorexp": 0.5,
           "loi": 0.0
-        },
-        "display_data": {
-          "red": 255.0,
-          "green": 0.0,
-          "blue": 0.0,
-          "gray": 100.0
-        }
-      },
-      {
-        "thamesname": "Thenardite",
-        "id": 7,
-        "cement_component": 1,
-        "gemphase_data": [
-          {
-            "gemphasename": "thenardite",
-            "gemdc": [{ "gemdcname": "Na2SO4" }]
-          }
-        ],
-        "kinetic_data": {
-          "type": "Standard",
-          "activationEnergy": 40000.0,
-          "dissolutionRateConst": 5.0e-6,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
-          "dissolvedUnits": 2,
-          "siexp": 1.0,
-          "dfexp": 1.0,
-          "dorexp": 0.5,
-          "loi": 0.0
-        },
-        "display_data": {
-          "red": 255.0,
-          "green": 20.0,
-          "blue": 0.0,
-          "gray": 100.0
         }
       },
       {
         "thamesname": "Gypsum",
-        "id": 8,
+        "id": 7,
         "cement_component": 1,
         "gemphase_data": [
           {
@@ -336,9 +267,8 @@
       },
       {
         "thamesname": "Bassanite",
-        "id": 9,
+        "id": 8,
         "cement_component": 1,
-        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "hemihydrate",
@@ -359,72 +289,61 @@
         }
       },
       {
-        "thamesname": "Anhydrite",
-        "id": 10,
-        "cement_component": 1,
-        "interface_data": {},
+        "thamesname": "Calcite",
+        "id": 9,
+        "cement_component": 0,
         "gemphase_data": [
           {
-            "gemphasename": "Anhydrite",
-            "gemdc": [{ "gemdcname": "Anh" }]
+            "gemphasename": "Calcite",
+            "gemdc": [{ "gemdcname": "Cal" }]
           }
         ],
         "kinetic_data": {
           "type": "Standard",
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 5.0e-7,
-          "diffusionRateConstEarly": 5.0e-6,
-          "diffusionRateConstLate": 5.0e-6,
+          "dissolutionRateConst": 2.0e-7,
+          "diffusionRateConstEarly": 5.0e-7,
+          "diffusionRateConstLate": 5.0e-7,
           "dissolvedUnits": 2,
           "siexp": 1.0,
           "dfexp": 1.1,
           "dorexp": 0.5,
           "loi": 0.0
-        },
-        "display_data": {
-          "red": 255.0,
-          "green": 255.0,
-          "blue": 128.0,
-          "gray": 140.0
         }
       },
       {
-        "thamesname": "Forsterite",
-        "id": 11,
+        "thamesname": "Pyrrhotite",
+        "id": 10,
         "cement_component": 0,
         "gemphase_data": [
           {
-            "gemphasename": "Forsterite",
-            "gemdc": [{ "gemdcname": "Forsterite" }]
+            "gemphasename": "Pyrrhotite",
+            "gemdc": [{ "gemdcname": "Pyrrhotite" }]
           }
         ],
         "kinetic_data": {
           "type": "Standard",
           "activationEnergy": 40000.0,
-          "dissolutionRateConst": 1.0e-9,
-          "diffusionRateConstEarly": 5.0e-8,
-          "diffusionRateConstLate": 5.0e-8,
+          "dissolutionRateConst": 1.4e-9,
+          "diffusionRateConstEarly": 2.8e-11,
+          "diffusionRateConstLate": 2.8e-11,
           "dissolvedUnits": 2,
           "siexp": 1.0,
           "dfexp": 1.0,
           "dorexp": 0.5,
           "loi": 0.0
-        },
-        "display_data": {
-          "red": 244.0,
-          "green": 70.0,
-          "blue": 203.0,
-          "gray": 100.0
         }
       },
       {
         "thamesname": "CSHQ",
-        "id": 12,
+        "id": 11,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Alite", "contactanglevalue": 10.0 },
-            { "affinityphase": "Belite", "contactanglevalue": 10.0 }
+            { "affinityphase": "Alite", "contactanglevalue": 30 },
+            { "affinityphase": "Belite", "contactanglevalue": 30 },
+            { "affinityphase": "Calcite", "contactanglevalue": 30 },
+            { "affinityphase": "Portlandite", "contactanglevalue": 0 }
           ]
         },
         "gemphase_data": [
@@ -515,12 +434,13 @@
       },
       {
         "thamesname": "Portlandite",
-        "id": 13,
+        "id": 12,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Alite", "contactanglevalue": 180.0 },
-            { "affinityphase": "Belite", "contactanglevalue": 180.0 }
+            { "affinityphase": "CSHQ", "contactanglevalue": 0 },
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
           ]
         },
         "gemphase_data": [
@@ -532,17 +452,12 @@
       },
       {
         "thamesname": "AFm",
-        "id": 14,
+        "id": 13,
         "cement_component": 0,
-        "interface_data": {},
         "gemphase_data": [
           {
             "gemphasename": "C3AH6",
             "gemdc": [{ "gemdcname": "C3AH6" }]
-          },
-          {
-            "gemphasename": "C3FH6",
-            "gemdc": [{ "gemdcname": "C3FH6" }]
           },
           {
             "gemphasename": "C4AH11",
@@ -560,12 +475,14 @@
       },
       {
         "thamesname": "AFmc",
-        "id": 15,
+        "id": 14,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Aluminate", "contactanglevalue": 90.0 },
-            { "affinityphase": "AFm", "contactanglevalue": 90.0 }
+            { "affinityphase": "AFm", "contactanglevalue": 0 },
+            { "affinityphase": "AFt", "contactanglevalue": 0 },
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
           ]
         },
         "gemphase_data": [
@@ -588,24 +505,18 @@
           {
             "gemphasename": "C4AcH9",
             "gemdc": [{ "gemdcname": "monocarb9" }]
-          },
-          {
-            "gemphasename": "C4Fc05H10",
-            "gemdc": [{ "gemdcname": "Fe-hemicarb" }]
-          },
-          {
-            "gemphasename": "C4FcH12",
-            "gemdc": [{ "gemdcname": "Femonocarb" }]
           }
         ]
       },
       {
         "thamesname": "AFt",
-        "id": 16,
+        "id": 15,
         "cement_component": 0,
         "interface_data": {
           "affinity": [
-            { "affinityphase": "Aluminate", "contactanglevalue": 90.0 }
+            { "affinityphase": "Monosulfate", "contactanglevalue": 0 },
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
           ]
         },
         "gemphase_data": [
@@ -636,10 +547,14 @@
       },
       {
         "thamesname": "Monosulfate",
-        "id": 17,
+        "id": 16,
         "cement_component": 0,
         "interface_data": {
-          "affinity": [{ "affinityphase": "AFt", "contactanglevalue": 90.0 }]
+          "affinity": [
+            { "affinityphase": "AFt", "contactanglevalue": 0 },
+            { "affinityphase": "Alite", "contactanglevalue": 180 },
+            { "affinityphase": "Belite", "contactanglevalue": 180 }
+          ]
         },
         "gemphase_data": [
           {
@@ -647,8 +562,16 @@
             "gemdc": [{ "gemdcname": "monosulf10.5" }]
           },
           {
+            "gemphasename": "C4AsH12",
+            "gemdc": [{ "gemdcname": "monosulf12" }]
+          },
+          {
             "gemphasename": "C4AsH14",
             "gemdc": [{ "gemdcname": "monosulf14" }]
+          },
+          {
+            "gemphasename": "C4AsH16",
+            "gemdc": [{ "gemdcname": "monosulf16" }]
           },
           {
             "gemphasename": "C4AsH9",
@@ -665,7 +588,7 @@
       },
       {
         "thamesname": "Hydrotalcite",
-        "id": 18,
+        "id": 17,
         "cement_component": 0,
         "gemphase_data": [
           {
@@ -678,55 +601,85 @@
         ]
       },
       {
-        "thamesname": "Calcite",
-        "id": 19,
-        "cement_component": 0,
-        "gemphase_data": [
-          {
-            "gemphasename": "Calcite",
-            "gemdc": [{ "gemdcname": "Cal" }]
-          }
-        ]
-      },
-      {
         "thamesname": "Goethite",
-        "id": 20,
+        "id": 18,
         "cement_component": 0,
         "gemphase_data": [
           {
             "gemphasename": "Goethite",
             "gemdc": [{ "gemdcname": "Gt" }]
           }
-        ],
-        "display_data": {
-          "red": 72.0,
-          "green": 25.0,
-          "blue": 5.0,
-          "gray": 72.0
-        }
+        ]
       },
       {
-        "thamesname": "Syngenite",
-        "id": 21,
+        "thamesname": "Troilite",
+        "id": 19,
         "cement_component": 0,
         "gemphase_data": [
           {
-            "gemphasename": "syngenite",
-            "gemdc": [{ "gemdcname": "syngenite" }]
+            "gemphasename": "Troilite",
+            "gemdc": [{ "gemdcname": "Tro" }]
           }
-        ],
+        ]
+      },
+      {
+        "thamesname": "Friedels",
+        "id": 20,
+        "cement_component": 0,
         "display_data": {
-          "red": 255.0,
-          "green": 192.0,
-          "blue": 203.0,
-          "gray": 200.0
-        }
+          "red": 102.0,
+          "green": 153.0,
+          "blue": 255.0,
+          "gray": 102.0
+        },
+        "gemphase_data": [
+          {
+            "gemphasename": "Friedels",
+            "gemdc": [{ "gemdcname": "C4AClH10" }]
+          }
+        ]
+      },
+      {
+        "thamesname": "Kuzels",
+        "id": 21,
+        "cement_component": 0,
+        "display_data": {
+          "red": 102.0,
+          "green": 204.0,
+          "blue": 255.0,
+          "gray": 102.0
+        },
+        "gemphase_data": [
+          {
+            "gemphasename": "Kuzels",
+            "gemdc": [{ "gemdcname": "C4AsClH12" }]
+          }
+        ]
+      },
+      {
+        "thamesname": "Thaumasite",
+        "id": 22,
+        "cement_component": 0,
+        "display_data": {
+          "red": 102.0,
+          "green": 204.0,
+          "blue": 153.0,
+          "gray": 204.0
+        },
+        "gemphase_data": [
+          {
+            "gemphasename": "thaumasite",
+            "gemdc": [{ "gemdcname": "thaumasite" }]
+          }
+        ]
       }
     ]
   },
   "time_parameters": {
-    "finaltime": 56.0,
-    "outtimes": [0.01, 0.1, 0.25, 0.5, 1, 3, 7, 14, 21, 28, 35, 42, 48, 54],
+    "finaltime": 102.0,
+    "outtimes": [
+      0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 14.0, 28.0, 56.0, 102.0
+    ],
     "beginattacktime": -1,
     "endattacktime": -1,
     "attacktimeinterval": -1

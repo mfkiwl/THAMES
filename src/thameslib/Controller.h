@@ -153,9 +153,9 @@ protected:
   int simType_; /**< Hydration, leaching, or sulfate attack for now */
 
   bool attack_; /**< for sulfate attack */
-  double iniAttackTime_;
+  double beginAttackTime_;
   double endAttackTime_;
-  double frqAttackTime_;
+  double attackTimeInterval_;
   vector<int> isParrotKilloh_;
   int sizePK_;
   bool notPKPhase = true;

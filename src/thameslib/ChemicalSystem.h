@@ -580,7 +580,7 @@ class ChemicalSystem {
   int waterDCId_; /**< coresp to DCName = "H2O@" */
   double waterMollarMass_;
   double waterMollarVol_;
-  double iniAttackTime_;
+  double beginAttackTime_;
   map<string, elMod> elasticModuli_;
   int aliteDCId_;
   int beliteDCId_;
@@ -6357,7 +6357,7 @@ public:
   double calculateCrystalStrain(int growPhId, double poreVolFrac, double Kp,
                                 double Ks);
 
-  void setIniAttackTime(const double val) { iniAttackTime_ = val; }
+  void setIniAttackTime(const double val) { beginAttackTime_ = val; }
 
   void initElasticModuliMap(void);
 

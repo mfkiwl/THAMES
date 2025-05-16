@@ -44,9 +44,9 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   leachTime_ = 1.0e10;
   sulfateAttackTime_ = 1.0e10;
 
-  iniAttackTime_ = -1;
-  endAttackTime_ = -1;
-  frqAttackTime_ = -1;
+  beginAttackTime_ = -1.0;
+  endAttackTime_ = -1.0;
+  attackTimeInterval_ = -1.0;
 
   oldDamageCount_ = 0;
   allDamageCount_ = 0;
@@ -119,8 +119,6 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
 
-    cout << "GODZILLA: Controller.cc Line 122" << endl;
-    cout.flush();
     outfs << "Time(h)";
     // JWB: Start with micro phase id 1 to avoid the Void phase
     for (int i = 1; i < numMicroPhases_; i++) {
@@ -141,8 +139,6 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
     }
 
     outfs << "Time(h)";
-    cout << "GODZILLA: Controller.cc Line 144" << endl;
-    cout.flush();
     // JWB: Start with micro phase id 1 to avoid the Void phase
     for (int i = 1; i < chemSys_->getNumMicroPhases(); i++) {
       int dcid = chemSys_->getMicroPhaseDCMembers(i, 0);
@@ -359,16 +355,16 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
 
   if (attack_) {
     outfs << "    ]," << endl;
-    outfs << "    \"iniAttack\": " << iniAttackTime_ << "," << endl;
-    outfs << "    \"endAttack\": " << endAttackTime_ << "," << endl;
-    outfs << "    \"frqAttack\": " << frqAttackTime_ << endl;
+    outfs << "    \"beginattacktime\": " << beginAttackTime_ << "," << endl;
+    outfs << "    \"endattacktime\": " << endAttackTime_ << "," << endl;
+    outfs << "    \"attacktimeinterval\": " << attackTimeInterval_ << endl;
     outfs << "  }" << endl;
     outfs << "}" << endl;
   } else {
     outfs << "    ]," << endl;
-    outfs << "    \"iniAttack\": -1," << endl;
-    outfs << "    \"endAttack\": -1," << endl;
-    outfs << "    \"frqAttack\": -1" << endl;
+    outfs << "    \"beginattacktime\": -1," << endl;
+    outfs << "    \"endattacktime\": -1," << endl;
+    outfs << "    \"attacktimeinterval\": -1" << endl;
     outfs << "  }" << endl;
     outfs << "}" << endl;
   }
@@ -383,9 +379,9 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
        << endl;
   cout << "         " << outfilename << endl;
 
-  leachTime_ = iniAttackTime_; // not default leachTime_ = 1.0e10
+  leachTime_ = beginAttackTime_; // not default leachTime_ = 1.0e10
   sulfateAttackTime_ =
-      iniAttackTime_; // not default sulfateAttackTime_ = 1.0e10
+      beginAttackTime_; // not default sulfateAttackTime_ = 1.0e10
 
   chemSys_->setIniAttackTime(sulfateAttackTime_);
   lattice_->setSulfateAttackTime(sulfateAttackTime_);
@@ -396,12 +392,12 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   if (simType_ == SULFATE_ATTACK) {
     cout << endl << "   => attack = " << attack_ << endl;
     cout << "   parameters in hours:" << endl;
-    cout << "     -> iniAttack = " << setw(7) << right << (int)iniAttackTime_
-         << endl;
-    cout << "     -> endAttack = " << setw(7) << right << (int)endAttackTime_
-         << endl;
-    cout << "     -> frqAttack = " << setw(7) << right << (int)frqAttackTime_
-         << endl;
+    cout << "     -> beginattacktime = " << setw(7) << right
+         << (int)beginAttackTime_ << endl;
+    cout << "     -> endattacktime = " << setw(7) << right
+         << (int)endAttackTime_ << endl;
+    cout << "     -> attacktimeinterval = " << setw(7) << right
+         << (int)attackTimeInterval_ << endl;
 
     // if (simType_ == SULFATE_ATTACK)
     lattice_->createGrowingVectSA();
@@ -447,8 +443,6 @@ void Controller::doCycle(double elemTimeInterval) {
   // int numMicPh = chemSys_->getNumMicroPhases();
   // cout << "numMicPh : " << numMicPh << endl;
 
-  cout << "GODZILLA: Controller.cc Line 448" << endl;
-  cout.flush();
   int DCId;
   for (int i = FIRST_SOLID; i < numMicroPhases_; i++) {
     if (chemSys_->isKinetic(i)) {
@@ -523,7 +517,7 @@ void Controller::doCycle(double elemTimeInterval) {
 
     // new
 
-    if (time_[i] < iniAttackTime_) {
+    if (time_[i] < beginAttackTime_) {
       if (timesGEMFailed_loc > 0) {
         i--;
         time_[i] += (0.1 * (time_[i + 1] - time_[i]));
@@ -615,7 +609,7 @@ void Controller::doCycle(double elemTimeInterval) {
     /// Otherwise we adjust the time step and try again
     ///
 
-    if (time_[i] < iniAttackTime_) {
+    if (time_[i] < beginAttackTime_) {
       if (timesGEMFailed_loc > 0) {
         cout << endl
              << "  Controller::doCycle first GEM_run failed "
@@ -816,8 +810,6 @@ void Controller::doCycle(double elemTimeInterval) {
                << " :  changeLattice = " << changeLattice
                << "  =>  whileCount = " << whileCount << endl;
 
-          cout << "GODZILLA: Controller.cc Line 816" << endl;
-          cout.flush();
           while (timesGEMFailed_recall != 0) {
 
             // reset for ChemicalSystem:
@@ -885,7 +877,7 @@ void Controller::doCycle(double elemTimeInterval) {
               scaledMassDiff =
                   microPhaseMassDiff * 100.0 / lattice_->getInitSolidMass();
 
-              if (chemSys_->isKinetic(phId) && (time_[i] < iniAttackTime_)) {
+              if (chemSys_->isKinetic(phId) && (time_[i] < beginAttackTime_)) {
                 kineticController_->updateKineticStep(cyc, phId, scaledMassDiff,
                                                       timestep);
               } else {
@@ -905,8 +897,6 @@ void Controller::doCycle(double elemTimeInterval) {
               }
             }
 
-            cout << "GODZILLA: Controller.cc Line 905" << endl;
-            cout.flush();
             cout << endl
                  << "  Controller::doCycle - cyc = " << cyc
                  << " :  #  i#/ "
@@ -1503,27 +1493,6 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
 
     // chemSys_->setMicroPhaseSI();
 
-    /*
-    if (time >= sattack_time_) {
-      cout << endl << "  ----> Controller::calculateState -
-    cyc/time/iniAttackTime_ : "
-           << cyc << " / " << time << " / " << iniAttackTime_ << endl;
-      int numMicroPhases = chemSys_->getNumMicroPhases();
-      cout << "***   numMicroPhases = " << numMicroPhases << endl;
-
-      for (int i = 0; i < numMicroPhases; i++) {
-        cout << "  " << setw(3) << right << i << " : " << setw(15) << left
-             << chemSys_->getMicroPhaseName(i) << setw(4) << right
-             << " id:" << setw(3) << chemSys_->getMicroPhaseId(i)
-             << "     count_ = " << setw(8) << lattice_->getCount(i)
-             << "     dissolutionInterfaceSize_ =  " << setw(8)
-             << lattice_->getDissolutionInterfaceSize(i)
-             << "     growthInterfaceSize_ =  " << setw(8)
-             << lattice_->getGrowthInterfaceSize()[i] << endl;
-      }
-    }
-    */
-
     // chemSys_->initDCLowerLimit(0); // check!
     kineticController_->calculateKineticStep(time, dt, cyc); // check!
 
@@ -1642,8 +1611,6 @@ void Controller::writeTxtOutputFiles(double time) {
                         "Could not append");
   }
 
-  cout << "GODZILLA: Controller.cc Line 1670" << endl;
-  cout.flush();
   outfs << setprecision(5) << time;
   outfs01 << setprecision(5) << time;
   // JWB: Start with micro phase id 1 to avoid the Void phase
@@ -1932,15 +1899,15 @@ void Controller::parseDoc(const string &docName) {
 
     // There may be times associated with chemical attack
     // Next three blocks search for this
-    cdi = it.value().find("iniAttack");
+    cdi = it.value().find("beginttacktime");
     if (cdi != it.value().end()) {
-      iniAttackTime_ = cdi.value();
-      iniAttackTime_ *= (1.0 / DAY_PER_H);
+      beginAttackTime_ = cdi.value();
+      beginAttackTime_ *= (1.0 / DAY_PER_H);
     }
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
-    cdi = it.value().find("endAttack");
+    cdi = it.value().find("endattacktime");
     if (cdi != it.value().end()) {
       endAttackTime_ = cdi.value();
       endAttackTime_ *= (1.0 / DAY_PER_H);
@@ -1948,19 +1915,19 @@ void Controller::parseDoc(const string &docName) {
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
-    cdi = it.value().find("frqAttack");
+    cdi = it.value().find("attacktimeinterval");
     if (cdi != it.value().end()) {
-      frqAttackTime_ = cdi.value();
-      frqAttackTime_ *= (1.0 / DAY_PER_H);
+      attackTimeInterval_ = cdi.value();
+      attackTimeInterval_ *= (1.0 / DAY_PER_H);
     }
 
     // Done searching for chemical attack times
     attack_ = false;
     bool errorAttack = false;
     if (simType_ == SULFATE_ATTACK || simType_ == LEACHING) {
-      if (iniAttackTime_ >= 0) {
-        if (endAttackTime_ > iniAttackTime_) {
-          if (frqAttackTime_ > 0) {
+      if (beginAttackTime_ >= 0) {
+        if (endAttackTime_ > beginAttackTime_) {
+          if (attackTimeInterval_ > 0) {
             attack_ = true;
           } else {
             errorAttack = true;
@@ -1983,16 +1950,16 @@ void Controller::parseDoc(const string &docName) {
            << "=> to do it, the specific controll parameters "
               "must fulfill some additional conditions:"
            << endl;
-      cout << "  -> iniAttack >= 0" << endl;
-      cout << "  -> endAttack > iniAttack" << endl;
-      cout << "  -> frqAttack > 0" << endl;
+      cout << "  -> beginattacktime >= 0" << endl;
+      cout << "  -> endattacktime > beginattacktime" << endl;
+      cout << "  -> attacktimeinterval > 0" << endl;
 
       cout << endl
            << "=> by default all these variables are set to -1.0" << endl;
       cout << endl << "=> for the current simulation their values are:" << endl;
-      cout << "  -> iniAttack = " << iniAttackTime_ << endl;
-      cout << "  -> endAttack = " << endAttackTime_ << endl;
-      cout << "  -> frqAttack = " << frqAttackTime_ << endl;
+      cout << "  -> beginattacktime = " << beginAttackTime_ << endl;
+      cout << "  -> endattacktime = " << endAttackTime_ << endl;
+      cout << "  -> attacktimeinterval = " << attackTimeInterval_ << endl;
 
       cout << endl
            << "=> before to restart the program, please modify their values "
@@ -2008,23 +1975,23 @@ void Controller::parseDoc(const string &docName) {
 
       cout << endl << "   => you decided to simulate a ";
       if (simType_ == LEACHING) {
-        leachTime_ = iniAttackTime_; // not default leachTime_ = 1.0e10
+        leachTime_ = beginAttackTime_; // not default leachTime_ = 1.0e10
         cout << "leaching ";
       } else if (simType_ == SULFATE_ATTACK) {
         sulfateAttackTime_ =
-            iniAttackTime_; // not default sulfateAttackTime_ = 1.0e10
+            beginAttackTime_; // not default sulfateAttackTime_ = 1.0e10
         cout << "sulfate attack ";
       }
 
       cout << "using these time parameters (in days):" << endl;
-      cout << "     -> iniAttack = " << setw(5) << right << (int)iniAttackTime_
-           << endl;
-      cout << "     -> endAttack = " << setw(5) << right << (int)endAttackTime_
-           << endl;
-      cout << "     -> frqAttack = " << setw(5) << right << (int)frqAttackTime_
-           << endl;
+      cout << "     -> beginattacktime = " << setw(5) << right
+           << (int)beginAttackTime_ << endl;
+      cout << "     -> endattacktime = " << setw(5) << right
+           << (int)endAttackTime_ << endl;
+      cout << "     -> attacktimeinterval = " << setw(5) << right
+           << (int)attackTimeInterval_ << endl;
 
-      double tp = iniAttackTime_;
+      double tp = beginAttackTime_;
       int tempSize;
       int i, j;
 
@@ -2050,7 +2017,7 @@ void Controller::parseDoc(const string &docName) {
       while (tp <= endAttackTime_) {
         // time_.push_back(tp);
         outputTime_.push_back(tp);
-        tp += frqAttackTime_;
+        tp += attackTimeInterval_;
       }
 
       int time_Size = outputTime_.size();
@@ -2073,9 +2040,9 @@ void Controller::parseDoc(const string &docName) {
 
     } else if (simType_ == HYDRATION) {
       cout << endl << "   => you decided to simulate a hydration" << endl;
-      iniAttackTime_ = 1.e10;
+      beginAttackTime_ = 1.e10;
       endAttackTime_ = 1.e10;
-      frqAttackTime_ = 1.e10;
+      attackTimeInterval_ = 1.e10;
     }
 
     //

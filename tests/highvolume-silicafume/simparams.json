@@ -4,16 +4,51 @@
     "reftemperature": 298.15,
     "saturated": 1,
     "electrolyte_conditions": [
-      { "DCname": "Ca(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "AlO2H@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "CaSiO3@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "Fe(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "KOH@", "condition": "fixed", "concentration": 1.0e-6 },
-      { "DCname": "Ca(SO4)@", "condition": "fixed", "concentration": 1.0e-6 },
-      { "DCname": "K+", "condition": "fixed", "concentration": 1.0e-6 },
-      { "DCname": "Na+", "condition": "fixed", "concentration": 1.0e-6 },
-      { "DCname": "SO4-2", "condition": "fixed", "concentration": 1.0e-6 }
+      {
+        "DCname": "Ca(CO3)@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "AlO2H@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "CaSiO3@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "Fe(CO3)@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "MgSiO3@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "KOH@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "Ca(SO4)@",
+        "condition": "initial",
+        "concentration": 0.000001
+      },
+      {
+        "DCname": "K+",
+        "condition": "initial",
+        "concentration": 0.000002
+      },
+      {
+        "DCname": "SO4-2",
+        "condition": "initial",
+        "concentration": 0.000001
+      }
     ]
   },
   "microstructure": {
@@ -581,6 +616,9 @@
   },
   "time_parameters": {
     "finaltime": 56.0,
-    "outtimes": [0.01, 0.1, 0.5, 1, 3, 7, 14, 28]
+    "outtimes": [0.01, 0.1, 0.5, 1, 3, 7, 14, 28],
+    "beginttacktime": -1,
+    "endattacktime": -1,
+    "attacktimeinterval": -1
   }
 }

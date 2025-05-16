@@ -91,7 +91,7 @@ private:
   double hydTimeIni_;
   double hyd_time_;
   int waterDCId_; /**< coresp to DCName = "H2O@" */
-  double iniAttackTime_;
+  double beginAttackTime_;
 
 public:
   /**
@@ -484,7 +484,7 @@ public:
 
   void setHydTimeIni(double val) { hydTimeIni_ = val; }
 
-  void setIniAttackTime(const double val) { iniAttackTime_ = val; }
+  void setIniAttackTime(const double val) { beginAttackTime_ = val; }
 
 }; // End of KineticController class
 

@@ -1,6 +1,6 @@
 {
   "environment": {
-    "temperature": 298.15,
+    "temperature": 296.15,
     "reftemperature": 298.15,
     "saturated": 0,
     "electrolyte_conditions": [
@@ -601,6 +601,9 @@
   },
   "time_parameters": {
     "finaltime": 56.0,
-    "outtimes": [0.01, 0.1, 0.5, 1.0, 3.0, 7.0, 14.0, 28.0]
+    "outtimes": [0.01, 0.1, 0.5, 1.0, 3.0, 7.0, 14.0, 28.0],
+    "beginattacktime": -1,
+    "endattacktime": -1,
+    "attacktimeinterval": -1
   }
 }

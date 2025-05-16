@@ -30,7 +30,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
 
   sulfateAttackTime_ = 1.0e10;
   leachTime_ = 1.0e10;
-  iniAttackTime_ = 1.0e10;
+  beginAttackTime_ = 1.0e10;
 
   ///  The constructor initializes all the members to default values,
   ///  then launches the initial thermodynamic calculation, and sets
@@ -2174,11 +2174,11 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// in this case.
   ///
 
-  bool doAttack = (time >= iniAttackTime_) ? true : false;
+  bool doAttack = (time >= beginAttackTime_) ? true : false;
 
   // cout << endl << "  ----> ChemicalSystem::calculateState -
-  // time/iniAttackTime_/doAttack : "
-  //      << time << " / " << iniAttackTime_ << " / " << doAttack << endl;
+  // time/beginAttackTime_/doAttack : "
+  //      << time << " / " << beginAttackTime_ << " / " << doAttack << endl;
 
   // Check and set chemical conditions on electrolyte and gas phase
   setElectrolyteComposition(isFirst, doAttack, cyc);
@@ -2709,7 +2709,7 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
     int sizeMicroPhasePhMembers;
     int newPhId;
 
-    if (time >= iniAttackTime_) {
+    if (time >= beginAttackTime_) {
       cout << endl
            << "          SI calc from GEM phases for mPhId = 15 - mPhName = "
            << microPhaseName_[15] << " : " << endl;
@@ -2722,7 +2722,7 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
           microPhaseMembers_[i]; // getMicroPhaseMembers(i);
                                  // //microPhaseMembers_ vs GEMPhaseIdLookup_
       sizeMicroPhasePhMembers = (int)microPhasePhMembers.size();
-      if ((time >= iniAttackTime_) && (i == 15)) {
+      if ((time >= beginAttackTime_) && (i == 15)) {
         for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
           newPhId = microPhaseMembers_[i][ii]; // microPhasePhMembers[i];
           moles = solutPhaseMoles_[newPhId];
@@ -2744,12 +2744,12 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       }
       microPhaseSI_.at(i) = aveSI;
     }
-    if (time >= iniAttackTime_)
+    if (time >= beginAttackTime_)
       cout << "          aveSI for mPhId = 15 - mPhName = "
            << microPhaseName_[15] << " : " << microPhaseSI_.at(15) << endl;
     //***********
 
-    // if (time >= iniAttackTime_) {
+    // if (time >= beginAttackTime_) {
     //   setSI();
     //   cout << endl << "          SI calc from GEM DCs for mPhId = 15 -
     //   mPhName = "
@@ -2765,7 +2765,7 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       // cout << endl << "   " << i << "\tpname: " << pname
       //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
       //      : " << endl;
-      if ((time >= iniAttackTime_) && (i == 15)) {
+      if ((time >= beginAttackTime_) && (i == 15)) {
         double *Falp = (node_->ppmm())->Falp;
         for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
           newDCId = microPhaseDCMembers.at(ii);
@@ -2817,7 +2817,7 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
     exit(1);
   }
 
-  if (time >= iniAttackTime_)
+  if (time >= beginAttackTime_)
     cout << "          aveSI for mPhId = 15 - mPhName = " << microPhaseName_[15]
          << " : " << microPhaseSI_.at(15) << "   &   sumSI = " << sumSI << endl;
 

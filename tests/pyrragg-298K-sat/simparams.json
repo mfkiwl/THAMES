@@ -450,6 +450,9 @@
     "finaltime": 730,
     "outtimes": [
       0.01, 0.1, 0.5, 1.0, 3.0, 7.0, 14.0, 28.0, 56.0, 90.0, 180.0, 360.0, 720.0
-    ]
+    ],
+    "beginattacktime": -1,
+    "endattacktime": -1,
+    "attacktimeinterval": -1
   }
 }

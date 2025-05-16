@@ -4672,8 +4672,8 @@ void Lattice::writePoreSizeDistribution(const double curtime,
   ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  ofileName = ofileName + "_PoreSizeDistribution." + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".csv";
+  ofileName = ofileName + "_PoreSizeDistribution." + timestrY + "y" + timestrD +
+              "d" + timestrH + "h" + timestrM + "m." + tempstr + ".csv";
 
   ofstream out(ofileName.c_str());
 
