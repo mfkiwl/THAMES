@@ -11,9 +11,8 @@
       { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
       { "DCname": "KOH@", "condition": "initial", "concentration": 1.0e-6 },
       { "DCname": "Ca(SO4)@", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "K+", "condition": "initial", "concentration": 2.0e-6 },
-      { "DCname": "SO4-2", "condition": "initial", "concentration": 1.0e-6 },
-      { "DCname": "CO2@", "condition": "fixed", "concentration": 0.01 }
+      { "DCname": "Na+", "condition": "fixed", "concentration": 0.1 },
+      { "DCname": "HCO3-", "condition": "fixed", "concentration": 0.1 }
     ]
   },
   "microstructure": {

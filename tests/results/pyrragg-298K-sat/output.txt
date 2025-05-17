@@ -1,4 +1,4 @@
-Output folder: pyrragg-298K-sat
+Output folder: Result
 Enter simulation type: 
   1) Exit program 
   2) Hydration 
@@ -10,7 +10,7 @@ simtype = 2
 The RNG seed is                 : seedRNG = -25943
 The elementary time interval is : elemTimeInterval = 2.400e-06
 
-Sun May 11 15:38:02 2025
+Sat May 17 15:30:56 2025
 
 What is the name of the GEM input file? 
    - gemInputName      :  thames-dat.lst
@@ -38,9 +38,9 @@ ChemicalSystem::writeSatElectrolyteGasConditions
 What is the name of the MICROSTRUCTURE file? 
    - initMicName       :  Agg-I-Block-01-300-Stack.thames.img
 
-Lattice::Lattice - Agg-I-Block-01-300-Stack.thames.img input file generated using THAMES Version : 4.0
+Lattice::Lattice - Agg-I-Block-01-300-Stack.thames.img input file generated using THAMES Version : 5.0
 
-Lattice::Lattice - .img output files generated using THAMES Version: 4.0.0
+Lattice::Lattice - .img output files generated using THAMES Version: 5.0.0
 
 Lattice::normalizePhaseMasses - normalized masses:
     1 : Electrolyte    8.782408862842220e+01 g
@@ -75,8 +75,8 @@ KineticController::KineticController - only these phases (controlled by the Parr
 
 What shall be the root name of all output files?
    - files root name   :  pyrrhotite
-   - jobRoot           :  pyrragg-298K-sat/pyrrhotite
-     => All input files have been copied into pyrragg-298K-sat folder
+   - jobRoot           :  Result/pyrrhotite
+     => All input files have been copied into Result folder
 
 ***   numGEMPhases_   = 92
 ***   numMicroPhases_ = 13
@@ -86,7 +86,7 @@ What shall be the root name of all output files?
 Controller::Controller(...) :
    final time_.size()          = 154
    => new time values (calctimes & outtimes) have been used and saved in the file :
-         pyrragg-298K-sat/pyrrhotite-times_used.json
+         Result/pyrrhotite-times_used.json
 
 Going into Controller::doCycle
 
@@ -111,7 +111,6 @@ Controller::doCycle(...) Entering Lattice::findInterfaces()
    12 : Troilite        id: 12     count_ =        0     dissolutionInterfaceSize_ =         0     growthInterfaceSize_ =         0     porosity : 0.000000000000000e+00     templates : 12 
 
 Controller::doCycle(...) Entering Main time loop
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.000000m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 ***   numGEMPhases_  = 92
 ***   numDCs_        = 180
@@ -609,14 +608,14 @@ Controller::doCycle => normal end - cyc = 25 (i = 24)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 25 / 26 / 2.399999998080000e-01 / 2.360329426413209e-01 / 3.967057166679083e-03 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 25 / 26 / 2.400000000000000e-01 / 2.360329426413209e-01 / 3.967057358679082e-03 #####
 
-  KineticController::calculateKineticStep - cyc = 26 :  hyd_time = 2.399999998080000e-01   hydTimeIni_ = 2.360329426413209e-01   timestep = 3.967057166679083e-03
+  KineticController::calculateKineticStep - cyc = 26 :  hyd_time = 2.400000000000000e-01   hydTimeIni_ = 2.360329426413209e-01   timestep = 3.967057358679082e-03
   KineticController::calculateKineticStep - cyc = 26 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 26 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 26 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808039803e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 25 / 26 / 2.399999998080000e-01 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 25 / 26 / 2.400000000000000e-01 / 0
 
   Lattice::changeMicrostructure - cyc = 26  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 26 :   0
@@ -625,13 +624,12 @@ Controller::doCycle => normal end - cyc = 25 (i = 24)
   Lattice::changeMicrostructure - cyc = 26 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 26 (i = 25)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.000014m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 26 / 27 / 2.620362369054530e-01 / 2.399999998080000e-01 / 2.203623709745303e-02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 26 / 27 / 2.620362369054530e-01 / 2.400000000000000e-01 / 2.203623690545303e-02 #####
 
-  KineticController::calculateKineticStep - cyc = 27 :  hyd_time = 2.620362369054530e-01   hydTimeIni_ = 2.399999998080000e-01   timestep = 2.203623709745303e-02
+  KineticController::calculateKineticStep - cyc = 27 :  hyd_time = 2.620362369054530e-01   hydTimeIni_ = 2.400000000000000e-01   timestep = 2.203623690545303e-02
   KineticController::calculateKineticStep - cyc = 27 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 27 : OK & GEM_run has failed 0 consecutive times before to find this solution
   ChemicalSystem::calculateState - cyc = 27 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808038042e-04
@@ -1066,14 +1064,14 @@ Controller::doCycle => normal end - cyc = 49 (i = 48)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 49 / 50 / 2.399999998080000e+00 / 2.304413610836932e+00 / 9.558638724306778e-02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 49 / 50 / 2.400000000000000e+00 / 2.304413610836932e+00 / 9.558638916306839e-02 #####
 
-  KineticController::calculateKineticStep - cyc = 50 :  hyd_time = 2.399999998080000e+00   hydTimeIni_ = 2.304413610836932e+00   timestep = 9.558638724306778e-02
+  KineticController::calculateKineticStep - cyc = 50 :  hyd_time = 2.400000000000000e+00   hydTimeIni_ = 2.304413610836932e+00   timestep = 9.558638916306839e-02
   KineticController::calculateKineticStep - cyc = 50 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 50 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 50 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808802962e-04
+  ChemicalSystem::calculateState - cyc = 50 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811350449e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 49 / 50 / 2.399999998080000e+00 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 49 / 50 / 2.400000000000000e+00 / 0
 
   Lattice::changeMicrostructure - cyc = 50  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 50 :   0
@@ -1082,16 +1080,15 @@ Controller::doCycle => normal end - cyc = 49 (i = 48)
   Lattice::changeMicrostructure - cyc = 50 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 50 (i = 49)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.000144m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 50 / 51 / 2.537254971920625e+00 / 2.399999998080000e+00 / 1.372549738406255e-01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 50 / 51 / 2.537254971920625e+00 / 2.400000000000000e+00 / 1.372549719206249e-01 #####
 
-  KineticController::calculateKineticStep - cyc = 51 :  hyd_time = 2.537254971920625e+00   hydTimeIni_ = 2.399999998080000e+00   timestep = 1.372549738406255e-01
+  KineticController::calculateKineticStep - cyc = 51 :  hyd_time = 2.537254971920625e+00   hydTimeIni_ = 2.400000000000000e+00   timestep = 1.372549719206249e-01
   KineticController::calculateKineticStep - cyc = 51 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 51 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 51 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808553638e-04
+  ChemicalSystem::calculateState - cyc = 51 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808424603e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 50 / 51 / 2.537254971920625e+00 / 0
 
@@ -1110,7 +1107,7 @@ Controller::doCycle => normal end - cyc = 51 (i = 50)
   KineticController::calculateKineticStep - cyc = 52 :  hyd_time = 2.793380469112688e+00   hydTimeIni_ = 2.537254971920625e+00   timestep = 2.561254971920626e-01
   KineticController::calculateKineticStep - cyc = 52 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 52 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 52 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811449288e-04
+  ChemicalSystem::calculateState - cyc = 52 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808685653e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 51 / 52 / 2.793380469112688e+00 / 0
 
@@ -1129,7 +1126,7 @@ Controller::doCycle => normal end - cyc = 52 (i = 51)
   KineticController::calculateKineticStep - cyc = 53 :  hyd_time = 3.075118516023957e+00   hydTimeIni_ = 2.793380469112688e+00   timestep = 2.817380469112689e-01
   KineticController::calculateKineticStep - cyc = 53 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 53 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 53 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808929215e-04
+  ChemicalSystem::calculateState - cyc = 53 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818855988e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 52 / 53 / 3.075118516023957e+00 / 0
 
@@ -1148,7 +1145,7 @@ Controller::doCycle => normal end - cyc = 53 (i = 52)
   KineticController::calculateKineticStep - cyc = 54 :  hyd_time = 3.385030367626352e+00   hydTimeIni_ = 3.075118516023957e+00   timestep = 3.099118516023958e-01
   KineticController::calculateKineticStep - cyc = 54 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 54 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 54 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808956933e-04
+  ChemicalSystem::calculateState - cyc = 54 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811702849e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 53 / 54 / 3.385030367626352e+00 / 0
 
@@ -1167,7 +1164,7 @@ Controller::doCycle => normal end - cyc = 54 (i = 53)
   KineticController::calculateKineticStep - cyc = 55 :  hyd_time = 3.725933404388988e+00   hydTimeIni_ = 3.385030367626352e+00   timestep = 3.409030367626351e-01
   KineticController::calculateKineticStep - cyc = 55 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 55 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 55 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811585747e-04
+  ChemicalSystem::calculateState - cyc = 55 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808713427e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 54 / 55 / 3.725933404388988e+00 / 0
 
@@ -1186,7 +1183,7 @@ Controller::doCycle => normal end - cyc = 55 (i = 54)
   KineticController::calculateKineticStep - cyc = 56 :  hyd_time = 4.100926744827887e+00   hydTimeIni_ = 3.725933404388988e+00   timestep = 3.749933404388992e-01
   KineticController::calculateKineticStep - cyc = 56 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 56 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 56 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809040441e-04
+  ChemicalSystem::calculateState - cyc = 56 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809361341e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 55 / 56 / 4.100926744827887e+00 / 0
 
@@ -1205,7 +1202,7 @@ Controller::doCycle => normal end - cyc = 56 (i = 55)
   KineticController::calculateKineticStep - cyc = 57 :  hyd_time = 4.513419419310676e+00   hydTimeIni_ = 4.100926744827887e+00   timestep = 4.124926744827890e-01
   KineticController::calculateKineticStep - cyc = 57 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 57 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 57 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811736592e-04
+  ChemicalSystem::calculateState - cyc = 57 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809133776e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 56 / 57 / 4.513419419310676e+00 / 0
 
@@ -1224,7 +1221,7 @@ Controller::doCycle => normal end - cyc = 57 (i = 56)
   KineticController::calculateKineticStep - cyc = 58 :  hyd_time = 4.967161361241743e+00   hydTimeIni_ = 4.513419419310676e+00   timestep = 4.537419419310673e-01
   KineticController::calculateKineticStep - cyc = 58 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 58 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 58 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808944016e-04
+  ChemicalSystem::calculateState - cyc = 58 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811963925e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 57 / 58 / 4.967161361241743e+00 / 0
 
@@ -1243,7 +1240,7 @@ Controller::doCycle => normal end - cyc = 58 (i = 57)
   KineticController::calculateKineticStep - cyc = 59 :  hyd_time = 5.466277497365917e+00   hydTimeIni_ = 4.967161361241743e+00   timestep = 4.991161361241740e-01
   KineticController::calculateKineticStep - cyc = 59 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 59 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 59 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275810103614e-04
+  ChemicalSystem::calculateState - cyc = 59 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809026472e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 58 / 59 / 5.466277497365917e+00 / 0
 
@@ -1262,7 +1259,7 @@ Controller::doCycle => normal end - cyc = 59 (i = 58)
   KineticController::calculateKineticStep - cyc = 60 :  hyd_time = 6.015305247102509e+00   hydTimeIni_ = 5.466277497365917e+00   timestep = 5.490277497365916e-01
   KineticController::calculateKineticStep - cyc = 60 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 60 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 60 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809437877e-04
+  ChemicalSystem::calculateState - cyc = 60 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275810264599e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 59 / 60 / 6.015305247102509e+00 / 0
 
@@ -1281,7 +1278,7 @@ Controller::doCycle => normal end - cyc = 60 (i = 59)
   KineticController::calculateKineticStep - cyc = 61 :  hyd_time = 6.619235771812760e+00   hydTimeIni_ = 6.015305247102509e+00   timestep = 6.039305247102513e-01
   KineticController::calculateKineticStep - cyc = 61 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 61 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 61 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812033226e-04
+  ChemicalSystem::calculateState - cyc = 61 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809258332e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 60 / 61 / 6.619235771812760e+00 / 0
 
@@ -1300,7 +1297,7 @@ Controller::doCycle => normal end - cyc = 61 (i = 60)
   KineticController::calculateKineticStep - cyc = 62 :  hyd_time = 7.283559348994036e+00   hydTimeIni_ = 6.619235771812760e+00   timestep = 6.643235771812757e-01
   KineticController::calculateKineticStep - cyc = 62 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 62 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 62 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809902740e-04
+  ChemicalSystem::calculateState - cyc = 62 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811896576e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 61 / 62 / 7.283559348994036e+00 / 0
 
@@ -1319,7 +1316,7 @@ Controller::doCycle => normal end - cyc = 62 (i = 61)
   KineticController::calculateKineticStep - cyc = 63 :  hyd_time = 8.014315283893440e+00   hydTimeIni_ = 7.283559348994036e+00   timestep = 7.307559348994044e-01
   KineticController::calculateKineticStep - cyc = 63 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 63 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 63 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809877469e-04
+  ChemicalSystem::calculateState - cyc = 63 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812647223e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 62 / 63 / 8.014315283893440e+00 / 0
 
@@ -1338,7 +1335,7 @@ Controller::doCycle => normal end - cyc = 63 (i = 62)
   KineticController::calculateKineticStep - cyc = 64 :  hyd_time = 8.818146812282784e+00   hydTimeIni_ = 8.014315283893440e+00   timestep = 8.038315283893436e-01
   KineticController::calculateKineticStep - cyc = 64 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 64 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 64 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812817906e-04
+  ChemicalSystem::calculateState - cyc = 64 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812721740e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 63 / 64 / 8.818146812282784e+00 / 0
 
@@ -1357,7 +1354,7 @@ Controller::doCycle => normal end - cyc = 64 (i = 63)
   KineticController::calculateKineticStep - cyc = 65 :  hyd_time = 9.702361493511063e+00   hydTimeIni_ = 8.818146812282784e+00   timestep = 8.842146812282792e-01
   KineticController::calculateKineticStep - cyc = 65 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 65 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 65 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275809810515e-04
+  ChemicalSystem::calculateState - cyc = 65 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812421704e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 64 / 65 / 9.702361493511063e+00 / 0
 
@@ -1376,7 +1373,7 @@ Controller::doCycle => normal end - cyc = 65 (i = 64)
   KineticController::calculateKineticStep - cyc = 66 :  hyd_time = 1.067499764286217e+01   hydTimeIni_ = 9.702361493511063e+00   timestep = 9.726361493511071e-01
   KineticController::calculateKineticStep - cyc = 66 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 66 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 66 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275798000902e-04
+  ChemicalSystem::calculateState - cyc = 66 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812735653e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 65 / 66 / 1.067499764286217e+01 / 0
 
@@ -1395,7 +1392,7 @@ Controller::doCycle => normal end - cyc = 66 (i = 65)
   KineticController::calculateKineticStep - cyc = 67 :  hyd_time = 1.174489740714839e+01   hydTimeIni_ = 1.067499764286217e+01   timestep = 1.069899764286218e+00
   KineticController::calculateKineticStep - cyc = 67 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 67 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 67 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275788303059e-04
+  ChemicalSystem::calculateState - cyc = 67 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813081973e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 66 / 67 / 1.174489740714839e+01 / 0
 
@@ -1409,14 +1406,14 @@ Controller::doCycle => normal end - cyc = 67 (i = 66)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 67 / 68 / 1.199999999040000e+01 / 1.174489740714839e+01 / 2.551025832516114e-01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 67 / 68 / 1.200000000000000e+01 / 1.174489740714839e+01 / 2.551025928516122e-01 #####
 
-  KineticController::calculateKineticStep - cyc = 68 :  hyd_time = 1.199999999040000e+01   hydTimeIni_ = 1.174489740714839e+01   timestep = 2.551025832516114e-01
+  KineticController::calculateKineticStep - cyc = 68 :  hyd_time = 1.200000000000000e+01   hydTimeIni_ = 1.174489740714839e+01   timestep = 2.551025928516122e-01
   KineticController::calculateKineticStep - cyc = 68 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 68 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 68 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813009721e-04
+  ChemicalSystem::calculateState - cyc = 68 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275782313228e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 67 / 68 / 1.199999999040000e+01 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 67 / 68 / 1.200000000000000e+01 / 0
 
   Lattice::changeMicrostructure - cyc = 68  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 68 :   0
@@ -1425,16 +1422,15 @@ Controller::doCycle => normal end - cyc = 67 (i = 66)
   Lattice::changeMicrostructure - cyc = 68 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 68 (i = 67)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.000720m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 68 / 69 / 1.292178714786323e+01 / 1.199999999040000e+01 / 9.217871574632266e-01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 68 / 69 / 1.292178714786323e+01 / 1.200000000000000e+01 / 9.217871478632258e-01 #####
 
-  KineticController::calculateKineticStep - cyc = 69 :  hyd_time = 1.292178714786323e+01   hydTimeIni_ = 1.199999999040000e+01   timestep = 9.217871574632266e-01
+  KineticController::calculateKineticStep - cyc = 69 :  hyd_time = 1.292178714786323e+01   hydTimeIni_ = 1.200000000000000e+01   timestep = 9.217871478632258e-01
   KineticController::calculateKineticStep - cyc = 69 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 69 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 69 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275782624010e-04
+  ChemicalSystem::calculateState - cyc = 69 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813491646e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 68 / 69 / 1.292178714786323e+01 / 0
 
@@ -1453,7 +1449,7 @@ Controller::doCycle => normal end - cyc = 69 (i = 68)
   KineticController::calculateKineticStep - cyc = 70 :  hyd_time = 1.421636586264955e+01   hydTimeIni_ = 1.292178714786323e+01   timestep = 1.294578714786322e+00
   KineticController::calculateKineticStep - cyc = 70 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 70 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 70 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813590134e-04
+  ChemicalSystem::calculateState - cyc = 70 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813570968e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 69 / 70 / 1.421636586264955e+01 / 0
 
@@ -1472,7 +1468,7 @@ Controller::doCycle => normal end - cyc = 70 (i = 69)
   KineticController::calculateKineticStep - cyc = 71 :  hyd_time = 1.564040244891450e+01   hydTimeIni_ = 1.421636586264955e+01   timestep = 1.424036586264954e+00
   KineticController::calculateKineticStep - cyc = 71 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 71 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 71 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813873492e-04
+  ChemicalSystem::calculateState - cyc = 71 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275814205049e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 70 / 71 / 1.564040244891450e+01 / 0
 
@@ -1491,7 +1487,7 @@ Controller::doCycle => normal end - cyc = 71 (i = 70)
   KineticController::calculateKineticStep - cyc = 72 :  hyd_time = 1.720684269380595e+01   hydTimeIni_ = 1.564040244891450e+01   timestep = 1.566440244891451e+00
   KineticController::calculateKineticStep - cyc = 72 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 72 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 72 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813485869e-04
+  ChemicalSystem::calculateState - cyc = 72 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275793044769e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 71 / 72 / 1.720684269380595e+01 / 0
 
@@ -1510,7 +1506,7 @@ Controller::doCycle => normal end - cyc = 72 (i = 71)
   KineticController::calculateKineticStep - cyc = 73 :  hyd_time = 1.892992696318655e+01   hydTimeIni_ = 1.720684269380595e+01   timestep = 1.723084269380596e+00
   KineticController::calculateKineticStep - cyc = 73 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 73 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 73 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275822443984e-04
+  ChemicalSystem::calculateState - cyc = 73 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275792956712e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 72 / 73 / 1.892992696318655e+01 / 0
 
@@ -1529,7 +1525,7 @@ Controller::doCycle => normal end - cyc = 73 (i = 72)
   KineticController::calculateKineticStep - cyc = 74 :  hyd_time = 2.082531965950520e+01   hydTimeIni_ = 1.892992696318655e+01   timestep = 1.895392696318655e+00
   KineticController::calculateKineticStep - cyc = 74 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 74 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 74 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275811131275e-04
+  ChemicalSystem::calculateState - cyc = 74 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812190897e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 73 / 74 / 2.082531965950520e+01 / 0
 
@@ -1548,7 +1544,7 @@ Controller::doCycle => normal end - cyc = 74 (i = 73)
   KineticController::calculateKineticStep - cyc = 75 :  hyd_time = 2.291025162545573e+01   hydTimeIni_ = 2.082531965950520e+01   timestep = 2.084931965950521e+00
   KineticController::calculateKineticStep - cyc = 75 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 75 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 75 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812451852e-04
+  ChemicalSystem::calculateState - cyc = 75 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275796282819e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 74 / 75 / 2.291025162545573e+01 / 0
 
@@ -1562,14 +1558,14 @@ Controller::doCycle => normal end - cyc = 75 (i = 74)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 75 / 76 / 2.399999998080000e+01 / 2.291025162545573e+01 / 1.089748355344273e+00 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 75 / 76 / 2.400000000000000e+01 / 2.291025162545573e+01 / 1.089748374544275e+00 #####
 
-  KineticController::calculateKineticStep - cyc = 76 :  hyd_time = 2.399999998080000e+01   hydTimeIni_ = 2.291025162545573e+01   timestep = 1.089748355344273e+00
+  KineticController::calculateKineticStep - cyc = 76 :  hyd_time = 2.400000000000000e+01   hydTimeIni_ = 2.291025162545573e+01   timestep = 1.089748374544275e+00
   KineticController::calculateKineticStep - cyc = 76 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 76 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 76 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275814167568e-04
+  ChemicalSystem::calculateState - cyc = 76 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275812707162e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 75 / 76 / 2.399999998080000e+01 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 75 / 76 / 2.400000000000000e+01 / 0
 
   Lattice::changeMicrostructure - cyc = 76  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 76 :   0
@@ -1578,16 +1574,15 @@ Controller::doCycle => normal end - cyc = 75 (i = 74)
   Lattice::changeMicrostructure - cyc = 76 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 76 (i = 75)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.001440m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 76 / 77 / 2.520367678800130e+01 / 2.399999998080000e+01 / 1.203676807201301e+00 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 76 / 77 / 2.520367678800130e+01 / 2.400000000000000e+01 / 1.203676788001300e+00 #####
 
-  KineticController::calculateKineticStep - cyc = 77 :  hyd_time = 2.520367678800130e+01   hydTimeIni_ = 2.399999998080000e+01   timestep = 1.203676807201301e+00
+  KineticController::calculateKineticStep - cyc = 77 :  hyd_time = 2.520367678800130e+01   hydTimeIni_ = 2.400000000000000e+01   timestep = 1.203676788001300e+00
   KineticController::calculateKineticStep - cyc = 77 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 77 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 77 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275789839291e-04
+  ChemicalSystem::calculateState - cyc = 77 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275810897580e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 76 / 77 / 2.520367678800130e+01 / 0
 
@@ -1606,7 +1601,7 @@ Controller::doCycle => normal end - cyc = 77 (i = 76)
   KineticController::calculateKineticStep - cyc = 78 :  hyd_time = 2.772644446680143e+01   hydTimeIni_ = 2.520367678800130e+01   timestep = 2.522767678800129e+00
   KineticController::calculateKineticStep - cyc = 78 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 78 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 78 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813587636e-04
+  ChemicalSystem::calculateState - cyc = 78 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275790511861e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 77 / 78 / 2.772644446680143e+01 / 0
 
@@ -1625,7 +1620,7 @@ Controller::doCycle => normal end - cyc = 78 (i = 77)
   KineticController::calculateKineticStep - cyc = 79 :  hyd_time = 3.050148891348157e+01   hydTimeIni_ = 2.772644446680143e+01   timestep = 2.775044446680145e+00
   KineticController::calculateKineticStep - cyc = 79 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 79 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 79 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275790996032e-04
+  ChemicalSystem::calculateState - cyc = 79 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275815740000e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 78 / 79 / 3.050148891348157e+01 / 0
 
@@ -1644,7 +1639,7 @@ Controller::doCycle => normal end - cyc = 79 (i = 78)
   KineticController::calculateKineticStep - cyc = 80 :  hyd_time = 3.355403780482973e+01   hydTimeIni_ = 3.050148891348157e+01   timestep = 3.052548891348160e+00
   KineticController::calculateKineticStep - cyc = 80 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 80 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 80 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275814562411e-04
+  ChemicalSystem::calculateState - cyc = 80 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275791411328e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 79 / 80 / 3.355403780482973e+01 / 0
 
@@ -1663,7 +1658,7 @@ Controller::doCycle => normal end - cyc = 80 (i = 79)
   KineticController::calculateKineticStep - cyc = 81 :  hyd_time = 3.691184158531271e+01   hydTimeIni_ = 3.355403780482973e+01   timestep = 3.357803780482975e+00
   KineticController::calculateKineticStep - cyc = 81 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 81 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 81 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275816581536e-04
+  ChemicalSystem::calculateState - cyc = 81 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275813138337e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 80 / 81 / 3.691184158531271e+01 / 0
 
@@ -1682,7 +1677,7 @@ Controller::doCycle => normal end - cyc = 81 (i = 80)
   KineticController::calculateKineticStep - cyc = 82 :  hyd_time = 4.060542574384398e+01   hydTimeIni_ = 3.691184158531271e+01   timestep = 3.693584158531273e+00
   KineticController::calculateKineticStep - cyc = 82 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 82 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 82 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275817218868e-04
+  ChemicalSystem::calculateState - cyc = 82 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275817078352e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 81 / 82 / 4.060542574384398e+01 / 0
 
@@ -1701,7 +1696,7 @@ Controller::doCycle => normal end - cyc = 82 (i = 81)
   KineticController::calculateKineticStep - cyc = 83 :  hyd_time = 4.466836831822838e+01   hydTimeIni_ = 4.060542574384398e+01   timestep = 4.062942574384401e+00
   KineticController::calculateKineticStep - cyc = 83 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 83 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 83 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818156514e-04
+  ChemicalSystem::calculateState - cyc = 83 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275817857052e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 82 / 83 / 4.466836831822838e+01 / 0
 
@@ -1720,7 +1715,7 @@ Controller::doCycle => normal end - cyc = 83 (i = 82)
   KineticController::calculateKineticStep - cyc = 84 :  hyd_time = 4.913760515005122e+01   hydTimeIni_ = 4.466836831822838e+01   timestep = 4.469236831822840e+00
   KineticController::calculateKineticStep - cyc = 84 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 84 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 84 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818689725e-04
+  ChemicalSystem::calculateState - cyc = 84 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818728917e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 83 / 84 / 4.913760515005122e+01 / 0
 
@@ -1739,7 +1734,7 @@ Controller::doCycle => normal end - cyc = 84 (i = 83)
   KineticController::calculateKineticStep - cyc = 85 :  hyd_time = 5.405376566505635e+01   hydTimeIni_ = 4.913760515005122e+01   timestep = 4.916160515005124e+00
   KineticController::calculateKineticStep - cyc = 85 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 85 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 85 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275820024767e-04
+  ChemicalSystem::calculateState - cyc = 85 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275819682236e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 84 / 85 / 5.405376566505635e+01 / 0
 
@@ -1758,7 +1753,7 @@ Controller::doCycle => normal end - cyc = 85 (i = 84)
   KineticController::calculateKineticStep - cyc = 86 :  hyd_time = 5.946154223156198e+01   hydTimeIni_ = 5.405376566505635e+01   timestep = 5.407776566505632e+00
   KineticController::calculateKineticStep - cyc = 86 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 86 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 86 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275817445659e-04
+  ChemicalSystem::calculateState - cyc = 86 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275814807793e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 85 / 86 / 5.946154223156198e+01 / 0
 
@@ -1777,7 +1772,7 @@ Controller::doCycle => normal end - cyc = 86 (i = 85)
   KineticController::calculateKineticStep - cyc = 87 :  hyd_time = 6.541009645471817e+01   hydTimeIni_ = 5.946154223156198e+01   timestep = 5.948554223156194e+00
   KineticController::calculateKineticStep - cyc = 87 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 87 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 87 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275808981100e-04
+  ChemicalSystem::calculateState - cyc = 87 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275817385320e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 86 / 87 / 6.541009645471817e+01 / 0
 
@@ -1796,7 +1791,7 @@ Controller::doCycle => normal end - cyc = 87 (i = 86)
   KineticController::calculateKineticStep - cyc = 88 :  hyd_time = 7.195350610018998e+01   hydTimeIni_ = 6.541009645471817e+01   timestep = 6.543409645471812e+00
   KineticController::calculateKineticStep - cyc = 88 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 88 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 88 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818732585e-04
+  ChemicalSystem::calculateState - cyc = 88 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818730936e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 87 / 88 / 7.195350610018998e+01 / 0
 
@@ -1810,14 +1805,14 @@ Controller::doCycle => normal end - cyc = 88 (i = 87)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 88 / 89 / 7.199999994240000e+01 / 7.195350610018998e+01 / 4.649384221001185e-02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 88 / 89 / 7.200000000000000e+01 / 7.195350610018998e+01 / 4.649389981001661e-02 #####
 
-  KineticController::calculateKineticStep - cyc = 89 :  hyd_time = 7.199999994240000e+01   hydTimeIni_ = 7.195350610018998e+01   timestep = 4.649384221001185e-02
+  KineticController::calculateKineticStep - cyc = 89 :  hyd_time = 7.200000000000000e+01   hydTimeIni_ = 7.195350610018998e+01   timestep = 4.649389981001661e-02
   KineticController::calculateKineticStep - cyc = 89 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 89 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 89 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275818387281e-04
+  ChemicalSystem::calculateState - cyc = 89 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275819131915e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 88 / 89 / 7.199999994240000e+01 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 88 / 89 / 7.200000000000000e+01 / 0
 
   Lattice::changeMicrostructure - cyc = 89  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 89 :   0
@@ -1826,16 +1821,15 @@ Controller::doCycle => normal end - cyc = 88 (i = 87)
   Lattice::changeMicrostructure - cyc = 89 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 89 (i = 88)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.004320m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 89 / 90 / 7.915125671020898e+01 / 7.199999994240000e+01 / 7.151256767808988e+00 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 89 / 90 / 7.915125671020898e+01 / 7.200000000000000e+01 / 7.151256710208983e+00 #####
 
-  KineticController::calculateKineticStep - cyc = 90 :  hyd_time = 7.915125671020898e+01   hydTimeIni_ = 7.199999994240000e+01   timestep = 7.151256767808988e+00
+  KineticController::calculateKineticStep - cyc = 90 :  hyd_time = 7.915125671020898e+01   hydTimeIni_ = 7.200000000000000e+01   timestep = 7.151256710208983e+00
   KineticController::calculateKineticStep - cyc = 90 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 90 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 90 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275820595521e-04
+  ChemicalSystem::calculateState - cyc = 90 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275820191577e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 89 / 90 / 7.915125671020898e+01 / 0
 
@@ -1854,7 +1848,7 @@ Controller::doCycle => normal end - cyc = 90 (i = 89)
   KineticController::calculateKineticStep - cyc = 91 :  hyd_time = 8.706878238122988e+01   hydTimeIni_ = 7.915125671020898e+01   timestep = 7.917525671020897e+00
   KineticController::calculateKineticStep - cyc = 91 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 91 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 91 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275823732453e-04
+  ChemicalSystem::calculateState - cyc = 91 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275823725934e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 90 / 91 / 8.706878238122988e+01 / 0
 
@@ -1873,7 +1867,7 @@ Controller::doCycle => normal end - cyc = 91 (i = 90)
   KineticController::calculateKineticStep - cyc = 92 :  hyd_time = 9.577806061935287e+01   hydTimeIni_ = 8.706878238122988e+01   timestep = 8.709278238122991e+00
   KineticController::calculateKineticStep - cyc = 92 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 92 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 92 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275824674618e-04
+  ChemicalSystem::calculateState - cyc = 92 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275825676403e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 91 / 92 / 9.577806061935287e+01 / 0
 
@@ -1892,7 +1886,7 @@ Controller::doCycle => normal end - cyc = 92 (i = 91)
   KineticController::calculateKineticStep - cyc = 93 :  hyd_time = 1.053582666812882e+02   hydTimeIni_ = 9.577806061935287e+01   timestep = 9.580206061935286e+00
   KineticController::calculateKineticStep - cyc = 93 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 93 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 93 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275826927417e-04
+  ChemicalSystem::calculateState - cyc = 93 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275827973339e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 92 / 93 / 1.053582666812882e+02 / 0
 
@@ -1911,7 +1905,7 @@ Controller::doCycle => normal end - cyc = 93 (i = 92)
   KineticController::calculateKineticStep - cyc = 94 :  hyd_time = 1.158964933494170e+02   hydTimeIni_ = 1.053582666812882e+02   timestep = 1.053822666812881e+01
   KineticController::calculateKineticStep - cyc = 94 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 94 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 94 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275828956874e-04
+  ChemicalSystem::calculateState - cyc = 94 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275828994398e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 93 / 94 / 1.158964933494170e+02 / 0
 
@@ -1930,7 +1924,7 @@ Controller::doCycle => normal end - cyc = 94 (i = 93)
   KineticController::calculateKineticStep - cyc = 95 :  hyd_time = 1.274885426843587e+02   hydTimeIni_ = 1.158964933494170e+02   timestep = 1.159204933494169e+01
   KineticController::calculateKineticStep - cyc = 95 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 95 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 95 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275829976070e-04
+  ChemicalSystem::calculateState - cyc = 95 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275829991714e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 94 / 95 / 1.274885426843587e+02 / 0
 
@@ -1949,7 +1943,7 @@ Controller::doCycle => normal end - cyc = 95 (i = 94)
   KineticController::calculateKineticStep - cyc = 96 :  hyd_time = 1.402397969527945e+02   hydTimeIni_ = 1.274885426843587e+02   timestep = 1.275125426843587e+01
   KineticController::calculateKineticStep - cyc = 96 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 96 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 96 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275832689289e-04
+  ChemicalSystem::calculateState - cyc = 96 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275827673493e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 95 / 96 / 1.402397969527945e+02 / 0
 
@@ -1968,7 +1962,7 @@ Controller::doCycle => normal end - cyc = 96 (i = 95)
   KineticController::calculateKineticStep - cyc = 97 :  hyd_time = 1.542661766480740e+02   hydTimeIni_ = 1.402397969527945e+02   timestep = 1.402637969527945e+01
   KineticController::calculateKineticStep - cyc = 97 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 97 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 97 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275836626567e-04
+  ChemicalSystem::calculateState - cyc = 97 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275836420435e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 96 / 97 / 1.542661766480740e+02 / 0
 
@@ -1982,14 +1976,14 @@ Controller::doCycle => normal end - cyc = 97 (i = 96)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 97 / 98 / 1.679999998656000e+02 / 1.542661766480740e+02 / 1.373382321752601e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 97 / 98 / 1.680000000000000e+02 / 1.542661766480740e+02 / 1.373382335192602e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 98 :  hyd_time = 1.679999998656000e+02   hydTimeIni_ = 1.542661766480740e+02   timestep = 1.373382321752601e+01
+  KineticController::calculateKineticStep - cyc = 98 :  hyd_time = 1.680000000000000e+02   hydTimeIni_ = 1.542661766480740e+02   timestep = 1.373382335192602e+01
   KineticController::calculateKineticStep - cyc = 98 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 98 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 98 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275839650091e-04
+  ChemicalSystem::calculateState - cyc = 98 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275829707048e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 97 / 98 / 1.679999998656000e+02 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 97 / 98 / 1.680000000000000e+02 / 0
 
   Lattice::changeMicrostructure - cyc = 98  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 98 :   0
@@ -1998,16 +1992,15 @@ Controller::doCycle => normal end - cyc = 97 (i = 96)
   Lattice::changeMicrostructure - cyc = 98 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 98 (i = 97)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.010080m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 98 / 99 / 1.696951943128814e+02 / 1.679999998656000e+02 / 1.695194447281381e+00 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 98 / 99 / 1.696951943128814e+02 / 1.680000000000000e+02 / 1.695194312881370e+00 #####
 
-  KineticController::calculateKineticStep - cyc = 99 :  hyd_time = 1.696951943128814e+02   hydTimeIni_ = 1.679999998656000e+02   timestep = 1.695194447281381e+00
+  KineticController::calculateKineticStep - cyc = 99 :  hyd_time = 1.696951943128814e+02   hydTimeIni_ = 1.680000000000000e+02   timestep = 1.695194312881370e+00
   KineticController::calculateKineticStep - cyc = 99 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 99 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 99 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275838542642e-04
+  ChemicalSystem::calculateState - cyc = 99 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275838546180e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 98 / 99 / 1.696951943128814e+02 / 0
 
@@ -2026,7 +2019,7 @@ Controller::doCycle => normal end - cyc = 99 (i = 98)
   KineticController::calculateKineticStep - cyc = 100 :  hyd_time = 1.866671137441695e+02   hydTimeIni_ = 1.696951943128814e+02   timestep = 1.697191943128814e+01
   KineticController::calculateKineticStep - cyc = 100 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 100 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 100 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275843925680e-04
+  ChemicalSystem::calculateState - cyc = 100 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275843107776e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 99 / 100 / 1.866671137441695e+02 / 0
 
@@ -2045,7 +2038,7 @@ Controller::doCycle => normal end - cyc = 100 (i = 99)
   KineticController::calculateKineticStep - cyc = 101 :  hyd_time = 2.053362251185865e+02   hydTimeIni_ = 1.866671137441695e+02   timestep = 1.866911137441696e+01
   KineticController::calculateKineticStep - cyc = 101 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 101 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 101 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275847492899e-04
+  ChemicalSystem::calculateState - cyc = 101 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275846743820e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 100 / 101 / 2.053362251185865e+02 / 0
 
@@ -2064,7 +2057,7 @@ Controller::doCycle => normal end - cyc = 101 (i = 100)
   KineticController::calculateKineticStep - cyc = 102 :  hyd_time = 2.258722476304451e+02   hydTimeIni_ = 2.053362251185865e+02   timestep = 2.053602251185865e+01
   KineticController::calculateKineticStep - cyc = 102 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 102 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 102 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275849898416e-04
+  ChemicalSystem::calculateState - cyc = 102 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275842618554e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 101 / 102 / 2.258722476304451e+02 / 0
 
@@ -2083,7 +2076,7 @@ Controller::doCycle => normal end - cyc = 102 (i = 101)
   KineticController::calculateKineticStep - cyc = 103 :  hyd_time = 2.484618723934896e+02   hydTimeIni_ = 2.258722476304451e+02   timestep = 2.258962476304453e+01
   KineticController::calculateKineticStep - cyc = 103 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 103 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 103 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275856356268e-04
+  ChemicalSystem::calculateState - cyc = 103 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275847074295e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 102 / 103 / 2.484618723934896e+02 / 0
 
@@ -2102,7 +2095,7 @@ Controller::doCycle => normal end - cyc = 103 (i = 102)
   KineticController::calculateKineticStep - cyc = 104 :  hyd_time = 2.733104596328386e+02   hydTimeIni_ = 2.484618723934896e+02   timestep = 2.484858723934897e+01
   KineticController::calculateKineticStep - cyc = 104 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 104 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 104 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275861176997e-04
+  ChemicalSystem::calculateState - cyc = 104 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275859502193e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 103 / 104 / 2.733104596328386e+02 / 0
 
@@ -2121,7 +2114,7 @@ Controller::doCycle => normal end - cyc = 104 (i = 103)
   KineticController::calculateKineticStep - cyc = 105 :  hyd_time = 3.006439055961225e+02   hydTimeIni_ = 2.733104596328386e+02   timestep = 2.733344596328385e+01
   KineticController::calculateKineticStep - cyc = 105 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 105 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 105 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275865796313e-04
+  ChemicalSystem::calculateState - cyc = 105 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275865462922e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 104 / 105 / 3.006439055961225e+02 / 0
 
@@ -2140,12 +2133,12 @@ Controller::doCycle => normal end - cyc = 105 (i = 104)
   KineticController::calculateKineticStep - cyc = 106 :  hyd_time = 3.307106961557347e+02   hydTimeIni_ = 3.006439055961225e+02   timestep = 3.006679055961223e+01
   KineticController::calculateKineticStep - cyc = 106 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 106 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 106 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275884019482e-04
+  ChemicalSystem::calculateState - cyc = 106 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275873945480e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 105 / 106 / 3.307106961557347e+02 / 0
 
   Lattice::changeMicrostructure - cyc = 106  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7714   vfrac_next[i]: 1.713999531468504e-03   netsites in this state:        -1   cursites:      7714   newsites:      7713   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7714   vfrac_next[i]: 1.713999531468513e-03   netsites in this state:        -1   cursites:      7714   newsites:      7713   -> phaseID:   2
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 106 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 106 :   0
 
@@ -2159,14 +2152,14 @@ Controller::doCycle => normal end - cyc = 106 (i = 105)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 106 / 107 / 3.359999997312000e+02 / 3.307106961557347e+02 / 5.289303575465283e+00 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 106 / 107 / 3.360000000000000e+02 / 3.307106961557347e+02 / 5.289303844265305e+00 #####
 
-  KineticController::calculateKineticStep - cyc = 107 :  hyd_time = 3.359999997312000e+02   hydTimeIni_ = 3.307106961557347e+02   timestep = 5.289303575465283e+00
+  KineticController::calculateKineticStep - cyc = 107 :  hyd_time = 3.360000000000000e+02   hydTimeIni_ = 3.307106961557347e+02   timestep = 5.289303844265305e+00
   KineticController::calculateKineticStep - cyc = 107 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 107 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 107 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275873708449e-04
+  ChemicalSystem::calculateState - cyc = 107 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275874550711e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 106 / 107 / 3.359999997312000e+02 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 106 / 107 / 3.360000000000000e+02 / 0
 
   Lattice::changeMicrostructure - cyc = 107  =>  initial values for count_[0]/count_[1] = 0 / 3149537
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 107 :   0
@@ -2175,16 +2168,15 @@ Controller::doCycle => normal end - cyc = 106 (i = 105)
   Lattice::changeMicrostructure - cyc = 107 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149537
 
 Controller::doCycle => normal end - cyc = 107 (i = 106)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.020160m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 107 / 108 / 3.637841657713082e+02 / 3.359999997312000e+02 / 2.778416604010818e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 107 / 108 / 3.637841657713082e+02 / 3.360000000000000e+02 / 2.778416577130815e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 108 :  hyd_time = 3.637841657713082e+02   hydTimeIni_ = 3.359999997312000e+02   timestep = 2.778416604010818e+01
+  KineticController::calculateKineticStep - cyc = 108 :  hyd_time = 3.637841657713082e+02   hydTimeIni_ = 3.360000000000000e+02   timestep = 2.778416577130815e+01
   KineticController::calculateKineticStep - cyc = 108 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 108 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 108 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275879044520e-04
+  ChemicalSystem::calculateState - cyc = 108 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275864924899e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 107 / 108 / 3.637841657713082e+02 / 0
 
@@ -2203,7 +2195,7 @@ Controller::doCycle => normal end - cyc = 108 (i = 107)
   KineticController::calculateKineticStep - cyc = 109 :  hyd_time = 4.001649823484390e+02   hydTimeIni_ = 3.637841657713082e+02   timestep = 3.638081657713082e+01
   KineticController::calculateKineticStep - cyc = 109 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 109 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 109 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275890098629e-04
+  ChemicalSystem::calculateState - cyc = 109 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275890602459e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 108 / 109 / 4.001649823484390e+02 / 0
 
@@ -2222,7 +2214,7 @@ Controller::doCycle => normal end - cyc = 109 (i = 108)
   KineticController::calculateKineticStep - cyc = 110 :  hyd_time = 4.401838805832829e+02   hydTimeIni_ = 4.001649823484390e+02   timestep = 4.001889823484390e+01
   KineticController::calculateKineticStep - cyc = 110 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 110 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 110 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275894386057e-04
+  ChemicalSystem::calculateState - cyc = 110 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275894582840e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 109 / 110 / 4.401838805832829e+02 / 0
 
@@ -2241,7 +2233,7 @@ Controller::doCycle => normal end - cyc = 110 (i = 109)
   KineticController::calculateKineticStep - cyc = 111 :  hyd_time = 4.842046686416111e+02   hydTimeIni_ = 4.401838805832829e+02   timestep = 4.402078805832826e+01
   KineticController::calculateKineticStep - cyc = 111 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 111 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 111 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275903337167e-04
+  ChemicalSystem::calculateState - cyc = 111 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275903216060e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 110 / 111 / 4.842046686416111e+02 / 0
 
@@ -2260,7 +2252,7 @@ Controller::doCycle => normal end - cyc = 111 (i = 110)
   KineticController::calculateKineticStep - cyc = 112 :  hyd_time = 5.326275355057722e+02   hydTimeIni_ = 4.842046686416111e+02   timestep = 4.842286686416111e+01
   KineticController::calculateKineticStep - cyc = 112 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 112 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 112 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275916670688e-04
+  ChemicalSystem::calculateState - cyc = 112 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275914158783e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 111 / 112 / 5.326275355057722e+02 / 0
 
@@ -2279,7 +2271,7 @@ Controller::doCycle => normal end - cyc = 112 (i = 111)
   KineticController::calculateKineticStep - cyc = 113 :  hyd_time = 5.858926890563495e+02   hydTimeIni_ = 5.326275355057722e+02   timestep = 5.326515355057722e+01
   KineticController::calculateKineticStep - cyc = 113 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 113 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 113 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275904430300e-04
+  ChemicalSystem::calculateState - cyc = 113 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275923772370e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 112 / 113 / 5.858926890563495e+02 / 0
 
@@ -2298,7 +2290,7 @@ Controller::doCycle => normal end - cyc = 113 (i = 112)
   KineticController::calculateKineticStep - cyc = 114 :  hyd_time = 6.444843579619844e+02   hydTimeIni_ = 5.858926890563495e+02   timestep = 5.859166890563495e+01
   KineticController::calculateKineticStep - cyc = 114 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 114 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 114 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275940051805e-04
+  ChemicalSystem::calculateState - cyc = 114 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275941065769e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 113 / 114 / 6.444843579619844e+02 / 0
 
@@ -2312,14 +2304,14 @@ Controller::doCycle => normal end - cyc = 114 (i = 113)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 114 / 115 / 6.719999994624000e+02 / 6.444843579619844e+02 / 2.751564150041554e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 114 / 115 / 6.720000000000000e+02 / 6.444843579619844e+02 / 2.751564203801559e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 115 :  hyd_time = 6.719999994624000e+02   hydTimeIni_ = 6.444843579619844e+02   timestep = 2.751564150041554e+01
+  KineticController::calculateKineticStep - cyc = 115 :  hyd_time = 6.720000000000000e+02   hydTimeIni_ = 6.444843579619844e+02   timestep = 2.751564203801559e+01
   KineticController::calculateKineticStep - cyc = 115 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 115 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 115 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275952167570e-04
+  ChemicalSystem::calculateState - cyc = 115 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275950175047e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 114 / 115 / 6.719999994624000e+02 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 114 / 115 / 6.720000000000000e+02 / 0
 
   Lattice::changeMicrostructure - cyc = 115  =>  initial values for count_[0]/count_[1] = 0 / 3149537
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 115 :   0
@@ -2328,16 +2320,15 @@ Controller::doCycle => normal end - cyc = 114 (i = 113)
   Lattice::changeMicrostructure - cyc = 115 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149537
 
 Controller::doCycle => normal end - cyc = 115 (i = 114)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.040320m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 115 / 116 / 7.089351937581829e+02 / 6.719999994624000e+02 / 3.693519429578294e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 115 / 116 / 7.089351937581829e+02 / 6.720000000000000e+02 / 3.693519375818289e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 116 :  hyd_time = 7.089351937581829e+02   hydTimeIni_ = 6.719999994624000e+02   timestep = 3.693519429578294e+01
+  KineticController::calculateKineticStep - cyc = 116 :  hyd_time = 7.089351937581829e+02   hydTimeIni_ = 6.720000000000000e+02   timestep = 3.693519375818289e+01
   KineticController::calculateKineticStep - cyc = 116 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 116 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 116 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275929832022e-04
+  ChemicalSystem::calculateState - cyc = 116 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275929843357e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 115 / 116 / 7.089351937581829e+02 / 0
 
@@ -2356,7 +2347,7 @@ Controller::doCycle => normal end - cyc = 116 (i = 115)
   KineticController::calculateKineticStep - cyc = 117 :  hyd_time = 7.798311131340012e+02   hydTimeIni_ = 7.089351937581829e+02   timestep = 7.089591937581827e+01
   KineticController::calculateKineticStep - cyc = 117 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 117 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 117 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275970530180e-04
+  ChemicalSystem::calculateState - cyc = 117 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275963427064e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 116 / 117 / 7.798311131340012e+02 / 0
 
@@ -2375,7 +2366,7 @@ Controller::doCycle => normal end - cyc = 117 (i = 116)
   KineticController::calculateKineticStep - cyc = 118 :  hyd_time = 8.578166244474013e+02   hydTimeIni_ = 7.798311131340012e+02   timestep = 7.798551131340014e+01
   KineticController::calculateKineticStep - cyc = 118 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 118 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 118 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275992970368e-04
+  ChemicalSystem::calculateState - cyc = 118 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275981670707e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 117 / 118 / 8.578166244474013e+02 / 0
 
@@ -2394,7 +2385,7 @@ Controller::doCycle => normal end - cyc = 118 (i = 117)
   KineticController::calculateKineticStep - cyc = 119 :  hyd_time = 9.436006868921414e+02   hydTimeIni_ = 8.578166244474013e+02   timestep = 8.578406244474013e+01
   KineticController::calculateKineticStep - cyc = 119 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 119 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 119 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275987176312e-04
+  ChemicalSystem::calculateState - cyc = 119 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258275987064583e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 118 / 119 / 9.436006868921414e+02 / 0
 
@@ -2413,12 +2404,12 @@ Controller::doCycle => normal end - cyc = 119 (i = 118)
   KineticController::calculateKineticStep - cyc = 120 :  hyd_time = 1.037963155581356e+03   hydTimeIni_ = 9.436006868921414e+02   timestep = 9.436246868921410e+01
   KineticController::calculateKineticStep - cyc = 120 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 120 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 120 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276037871123e-04
+  ChemicalSystem::calculateState - cyc = 120 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276037274086e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 119 / 120 / 1.037963155581356e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 120  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        1   vfrac_next[i]: 2.369501912772601e-07   netsites in this state:         1   cursites:         1   newsites:         2   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        1   vfrac_next[i]: 2.369501908248919e-07   netsites in this state:         1   cursites:         1   newsites:         2   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 120 :   0
   Lattice::changeMicrostructure number of phases to grow     - cyc = 120 :   1
 
@@ -2437,7 +2428,7 @@ Controller::doCycle => normal end - cyc = 120 (i = 119)
   KineticController::calculateKineticStep - cyc = 121 :  hyd_time = 1.141761871139491e+03   hydTimeIni_ = 1.037963155581356e+03   timestep = 1.037987155581357e+02
   KineticController::calculateKineticStep - cyc = 121 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 121 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 121 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276028720724e-04
+  ChemicalSystem::calculateState - cyc = 121 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276027607898e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 120 / 121 / 1.141761871139491e+03 / 0
 
@@ -2456,7 +2447,7 @@ Controller::doCycle => normal end - cyc = 121 (i = 120)
   KineticController::calculateKineticStep - cyc = 122 :  hyd_time = 1.255940458253440e+03   hydTimeIni_ = 1.141761871139491e+03   timestep = 1.141785871139491e+02
   KineticController::calculateKineticStep - cyc = 122 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 122 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 122 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276051252678e-04
+  ChemicalSystem::calculateState - cyc = 122 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276051652882e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 121 / 122 / 1.255940458253440e+03 / 0
 
@@ -2470,14 +2461,14 @@ Controller::doCycle => normal end - cyc = 122 (i = 121)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 122 / 123 / 1.343999998924800e+03 / 1.255940458253440e+03 / 8.805954067135963e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 122 / 123 / 1.344000000000000e+03 / 1.255940458253440e+03 / 8.805954174655972e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 123 :  hyd_time = 1.343999998924800e+03   hydTimeIni_ = 1.255940458253440e+03   timestep = 8.805954067135963e+01
+  KineticController::calculateKineticStep - cyc = 123 :  hyd_time = 1.344000000000000e+03   hydTimeIni_ = 1.255940458253440e+03   timestep = 8.805954174655972e+01
   KineticController::calculateKineticStep - cyc = 123 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 123 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 123 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276088246920e-04
+  ChemicalSystem::calculateState - cyc = 123 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276088111125e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 122 / 123 / 1.343999998924800e+03 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 122 / 123 / 1.344000000000000e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 123  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 123 :   0
@@ -2486,16 +2477,15 @@ Controller::doCycle => normal end - cyc = 122 (i = 121)
   Lattice::changeMicrostructure - cyc = 123 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 123 (i = 122)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.080640m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 123 / 124 / 1.381536904078784e+03 / 1.343999998924800e+03 / 3.753690515398443e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 123 / 124 / 1.381536904078784e+03 / 1.344000000000000e+03 / 3.753690407878435e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 124 :  hyd_time = 1.381536904078784e+03   hydTimeIni_ = 1.343999998924800e+03   timestep = 3.753690515398443e+01
+  KineticController::calculateKineticStep - cyc = 124 :  hyd_time = 1.381536904078784e+03   hydTimeIni_ = 1.344000000000000e+03   timestep = 3.753690407878435e+01
   KineticController::calculateKineticStep - cyc = 124 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 124 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 124 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276106610257e-04
+  ChemicalSystem::calculateState - cyc = 124 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276110429781e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 123 / 124 / 1.381536904078784e+03 / 0
 
@@ -2514,12 +2504,12 @@ Controller::doCycle => normal end - cyc = 124 (i = 123)
   KineticController::calculateKineticStep - cyc = 125 :  hyd_time = 1.519692994486663e+03   hydTimeIni_ = 1.381536904078784e+03   timestep = 1.381560904078785e+02
   KineticController::calculateKineticStep - cyc = 125 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 125 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 125 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276111268162e-04
+  ChemicalSystem::calculateState - cyc = 125 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276111704211e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 124 / 125 / 1.519692994486663e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 125  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7713   vfrac_next[i]: 1.713769941723898e-03   netsites in this state:        -1   cursites:      7713   newsites:      7712   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7713   vfrac_next[i]: 1.713769941724395e-03   netsites in this state:        -1   cursites:      7713   newsites:      7712   -> phaseID:   2
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 125 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 125 :   0
 
@@ -2538,7 +2528,7 @@ Controller::doCycle => normal end - cyc = 125 (i = 124)
   KineticController::calculateKineticStep - cyc = 126 :  hyd_time = 1.671664693935329e+03   hydTimeIni_ = 1.519692994486663e+03   timestep = 1.519716994486662e+02
   KineticController::calculateKineticStep - cyc = 126 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 126 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 126 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276147903382e-04
+  ChemicalSystem::calculateState - cyc = 126 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276148031446e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 125 / 126 / 1.671664693935329e+03 / 0
 
@@ -2557,7 +2547,7 @@ Controller::doCycle => normal end - cyc = 126 (i = 125)
   KineticController::calculateKineticStep - cyc = 127 :  hyd_time = 1.838833563328862e+03   hydTimeIni_ = 1.671664693935329e+03   timestep = 1.671688693935330e+02
   KineticController::calculateKineticStep - cyc = 127 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 127 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 127 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276179563303e-04
+  ChemicalSystem::calculateState - cyc = 127 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276179587517e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 126 / 127 / 1.838833563328862e+03 / 0
 
@@ -2576,12 +2566,12 @@ Controller::doCycle => normal end - cyc = 127 (i = 126)
   KineticController::calculateKineticStep - cyc = 128 :  hyd_time = 2.022719319661748e+03   hydTimeIni_ = 1.838833563328862e+03   timestep = 1.838857563328861e+02
   KineticController::calculateKineticStep - cyc = 128 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 128 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 128 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276222343930e-04
+  ChemicalSystem::calculateState - cyc = 128 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276262079934e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 127 / 128 / 2.022719319661748e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 128  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        2   vfrac_next[i]: 4.483976278812860e-07   netsites in this state:         1   cursites:         2   newsites:         3   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        2   vfrac_next[i]: 4.483976252544801e-07   netsites in this state:         1   cursites:         2   newsites:         3   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 128 :   0
   Lattice::changeMicrostructure number of phases to grow     - cyc = 128 :   1
 
@@ -2595,14 +2585,14 @@ Controller::doCycle => normal end - cyc = 128 (i = 127)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 128 / 129 / 2.159999998272000e+03 / 2.022719319661748e+03 / 1.372806786102519e+02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 128 / 129 / 2.160000000000000e+03 / 2.022719319661748e+03 / 1.372806803382518e+02 #####
 
-  KineticController::calculateKineticStep - cyc = 129 :  hyd_time = 2.159999998272000e+03   hydTimeIni_ = 2.022719319661748e+03   timestep = 1.372806786102519e+02
+  KineticController::calculateKineticStep - cyc = 129 :  hyd_time = 2.160000000000000e+03   hydTimeIni_ = 2.022719319661748e+03   timestep = 1.372806803382518e+02
   KineticController::calculateKineticStep - cyc = 129 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 129 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 129 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276280058634e-04
+  ChemicalSystem::calculateState - cyc = 129 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276281445590e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 128 / 129 / 2.159999998272000e+03 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 128 / 129 / 2.160000000000000e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 129  =>  initial values for count_[0]/count_[1] = 0 / 3149536
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 129 :   0
@@ -2611,16 +2601,15 @@ Controller::doCycle => normal end - cyc = 128 (i = 127)
   Lattice::changeMicrostructure - cyc = 129 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 129 (i = 128)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.129600m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 129 / 130 / 2.224993651627923e+03 / 2.159999998272000e+03 / 6.499365335592302e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 129 / 130 / 2.224993651627923e+03 / 2.160000000000000e+03 / 6.499365162792310e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 130 :  hyd_time = 2.224993651627923e+03   hydTimeIni_ = 2.159999998272000e+03   timestep = 6.499365335592302e+01
+  KineticController::calculateKineticStep - cyc = 130 :  hyd_time = 2.224993651627923e+03   hydTimeIni_ = 2.160000000000000e+03   timestep = 6.499365162792310e+01
   KineticController::calculateKineticStep - cyc = 130 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 130 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 130 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276284341364e-04
+  ChemicalSystem::calculateState - cyc = 130 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276307110105e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 129 / 130 / 2.224993651627923e+03 / 0
 
@@ -2639,7 +2628,7 @@ Controller::doCycle => normal end - cyc = 130 (i = 129)
   KineticController::calculateKineticStep - cyc = 131 :  hyd_time = 2.447495416790715e+03   hydTimeIni_ = 2.224993651627923e+03   timestep = 2.225017651627923e+02
   KineticController::calculateKineticStep - cyc = 131 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 131 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 131 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276327603357e-04
+  ChemicalSystem::calculateState - cyc = 131 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276328885898e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 130 / 131 / 2.447495416790715e+03 / 0
 
@@ -2658,12 +2647,12 @@ Controller::doCycle => normal end - cyc = 131 (i = 130)
   KineticController::calculateKineticStep - cyc = 132 :  hyd_time = 2.692247358469787e+03   hydTimeIni_ = 2.447495416790715e+03   timestep = 2.447519416790715e+02
   KineticController::calculateKineticStep - cyc = 132 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 132 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 132 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276397260684e-04
+  ChemicalSystem::calculateState - cyc = 132 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276388665035e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 131 / 132 / 2.692247358469787e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 132  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7712   vfrac_next[i]: 1.713542836943284e-03   netsites in this state:        -1   cursites:      7712   newsites:      7711   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7712   vfrac_next[i]: 1.713542836944537e-03   netsites in this state:        -1   cursites:      7712   newsites:      7711   -> phaseID:   2
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 132 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 132 :   0
 
@@ -2682,7 +2671,7 @@ Controller::doCycle => normal end - cyc = 132 (i = 131)
   KineticController::calculateKineticStep - cyc = 133 :  hyd_time = 2.961474494316766e+03   hydTimeIni_ = 2.692247358469787e+03   timestep = 2.692271358469789e+02
   KineticController::calculateKineticStep - cyc = 133 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 133 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 133 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276502931612e-04
+  ChemicalSystem::calculateState - cyc = 133 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276484005312e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 132 / 133 / 2.961474494316766e+03 / 0
 
@@ -2701,12 +2690,12 @@ Controller::doCycle => normal end - cyc = 133 (i = 132)
   KineticController::calculateKineticStep - cyc = 134 :  hyd_time = 3.257624343748442e+03   hydTimeIni_ = 2.961474494316766e+03   timestep = 2.961498494316766e+02
   KineticController::calculateKineticStep - cyc = 134 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 134 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 134 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276554859439e-04
+  ChemicalSystem::calculateState - cyc = 134 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276545867622e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 133 / 134 / 3.257624343748442e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 134  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        3   vfrac_next[i]: 7.138245442948818e-07   netsites in this state:         1   cursites:         3   newsites:         4   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        3   vfrac_next[i]: 7.138245467825595e-07   netsites in this state:         1   cursites:         3   newsites:         4   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 134 :   0
   Lattice::changeMicrostructure number of phases to grow     - cyc = 134 :   1
 
@@ -2725,7 +2714,7 @@ Controller::doCycle => normal end - cyc = 134 (i = 133)
   KineticController::calculateKineticStep - cyc = 135 :  hyd_time = 3.583389178123286e+03   hydTimeIni_ = 3.257624343748442e+03   timestep = 3.257648343748442e+02
   KineticController::calculateKineticStep - cyc = 135 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 135 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 135 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276626540683e-04
+  ChemicalSystem::calculateState - cyc = 135 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276627355924e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 134 / 135 / 3.583389178123286e+03 / 0
 
@@ -2744,12 +2733,12 @@ Controller::doCycle => normal end - cyc = 135 (i = 134)
   KineticController::calculateKineticStep - cyc = 136 :  hyd_time = 3.941730495935615e+03   hydTimeIni_ = 3.583389178123286e+03   timestep = 3.583413178123287e+02
   KineticController::calculateKineticStep - cyc = 136 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 136 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 136 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276751166165e-04
+  ChemicalSystem::calculateState - cyc = 136 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276751164161e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 135 / 136 / 3.941730495935615e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 136  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7711   vfrac_next[i]: 1.713301204990516e-03   netsites in this state:        -1   cursites:      7711   newsites:      7710   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7711   vfrac_next[i]: 1.713301204993162e-03   netsites in this state:        -1   cursites:      7711   newsites:      7710   -> phaseID:   2
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 136 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 136 :   0
 
@@ -2763,17 +2752,17 @@ Controller::doCycle => normal end - cyc = 136 (i = 135)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 136 / 137 / 4.319999996544000e+03 / 3.941730495935615e+03 / 3.782695006083850e+02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 136 / 137 / 4.320000000000000e+03 / 3.941730495935615e+03 / 3.782695040643848e+02 #####
 
-  KineticController::calculateKineticStep - cyc = 137 :  hyd_time = 4.319999996544000e+03   hydTimeIni_ = 3.941730495935615e+03   timestep = 3.782695006083850e+02
+  KineticController::calculateKineticStep - cyc = 137 :  hyd_time = 4.320000000000000e+03   hydTimeIni_ = 3.941730495935615e+03   timestep = 3.782695040643848e+02
   KineticController::calculateKineticStep - cyc = 137 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 137 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 137 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276847233563e-04
+  ChemicalSystem::calculateState - cyc = 137 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276847237339e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 136 / 137 / 4.319999996544000e+03 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 136 / 137 / 4.320000000000000e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 137  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        4   vfrac_next[i]: 9.414954877699027e-07   netsites in this state:         1   cursites:         4   newsites:         5   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        4   vfrac_next[i]: 9.414954850163709e-07   netsites in this state:         1   cursites:         4   newsites:         5   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 137 :   0
   Lattice::changeMicrostructure number of phases to grow     - cyc = 137 :   1
 
@@ -2784,16 +2773,15 @@ Controller::doCycle => normal end - cyc = 136 (i = 135)
   Lattice::changeMicrostructure - cyc = 137 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149536
 
 Controller::doCycle => normal end - cyc = 137 (i = 136)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.259200m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 137 / 138 / 4.335905945529176e+03 / 4.319999996544000e+03 / 1.590594898517611e+01 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 137 / 138 / 4.335905945529176e+03 / 4.320000000000000e+03 / 1.590594552917628e+01 #####
 
-  KineticController::calculateKineticStep - cyc = 138 :  hyd_time = 4.335905945529176e+03   hydTimeIni_ = 4.319999996544000e+03   timestep = 1.590594898517611e+01
+  KineticController::calculateKineticStep - cyc = 138 :  hyd_time = 4.335905945529176e+03   hydTimeIni_ = 4.320000000000000e+03   timestep = 1.590594552917628e+01
   KineticController::calculateKineticStep - cyc = 138 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 138 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 138 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276851243419e-04
+  ChemicalSystem::calculateState - cyc = 138 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276851246817e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 137 / 138 / 4.335905945529176e+03 / 0
 
@@ -2812,7 +2800,7 @@ Controller::doCycle => normal end - cyc = 138 (i = 137)
   KineticController::calculateKineticStep - cyc = 139 :  hyd_time = 4.769498940082094e+03   hydTimeIni_ = 4.335905945529176e+03   timestep = 4.335929945529178e+02
   KineticController::calculateKineticStep - cyc = 139 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 139 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 139 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276962016647e-04
+  ChemicalSystem::calculateState - cyc = 139 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258276962069998e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 138 / 139 / 4.769498940082094e+03 / 0
 
@@ -2831,13 +2819,13 @@ Controller::doCycle => normal end - cyc = 139 (i = 138)
   KineticController::calculateKineticStep - cyc = 140 :  hyd_time = 5.246451234090304e+03   hydTimeIni_ = 4.769498940082094e+03   timestep = 4.769522940082097e+02
   KineticController::calculateKineticStep - cyc = 140 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 140 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 140 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277083011502e-04
+  ChemicalSystem::calculateState - cyc = 140 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277082992672e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 139 / 140 / 5.246451234090304e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 140  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7710   vfrac_next[i]: 1.713050081344403e-03   netsites in this state:        -1   cursites:      7710   newsites:      7709   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        5   vfrac_next[i]: 1.139245042387231e-06   netsites in this state:         1   cursites:         5   newsites:         6   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7710   vfrac_next[i]: 1.713050081348982e-03   netsites in this state:        -1   cursites:      7710   newsites:      7709   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        5   vfrac_next[i]: 1.139245037307941e-06   netsites in this state:         1   cursites:         5   newsites:         6   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 140 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 140 :   1
 
@@ -2860,12 +2848,12 @@ Controller::doCycle => normal end - cyc = 140 (i = 139)
   KineticController::calculateKineticStep - cyc = 141 :  hyd_time = 5.771098757499334e+03   hydTimeIni_ = 5.246451234090304e+03   timestep = 5.246475234090303e+02
   KineticController::calculateKineticStep - cyc = 141 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 141 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 141 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277214485269e-04
+  ChemicalSystem::calculateState - cyc = 141 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277214491594e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 140 / 141 / 5.771098757499334e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 141  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Portlandite     => i:   5   count_[i]:     4744   vfrac_next[i]: 1.053993459047655e-03   netsites in this state:        -1   cursites:      4744   newsites:      4743   -> phaseID:   5
+  Lattice::changeMicrostructure ***for Portlandite     => i:   5   count_[i]:     4744   vfrac_next[i]: 1.053993462221815e-03   netsites in this state:        -1   cursites:      4744   newsites:      4743   -> phaseID:   5
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 141 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 141 :   0
 
@@ -2884,13 +2872,13 @@ Controller::doCycle => normal end - cyc = 141 (i = 140)
   KineticController::calculateKineticStep - cyc = 142 :  hyd_time = 6.348211033249268e+03   hydTimeIni_ = 5.771098757499334e+03   timestep = 5.771122757499334e+02
   KineticController::calculateKineticStep - cyc = 142 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 142 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 142 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277358635925e-04
+  ChemicalSystem::calculateState - cyc = 142 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277358643843e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 141 / 142 / 6.348211033249268e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 142  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7709   vfrac_next[i]: 1.712839039068442e-03   netsites in this state:        -1   cursites:      7709   newsites:      7708   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        6   vfrac_next[i]: 1.373516960209702e-06   netsites in this state:         1   cursites:         6   newsites:         7   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7709   vfrac_next[i]: 1.712839039074525e-03   netsites in this state:        -1   cursites:      7709   newsites:      7708   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        6   vfrac_next[i]: 1.373516953455973e-06   netsites in this state:         1   cursites:         6   newsites:         7   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 142 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 142 :   1
 
@@ -2913,7 +2901,7 @@ Controller::doCycle => normal end - cyc = 142 (i = 141)
   KineticController::calculateKineticStep - cyc = 143 :  hyd_time = 6.983034536574194e+03   hydTimeIni_ = 6.348211033249268e+03   timestep = 6.348235033249266e+02
   KineticController::calculateKineticStep - cyc = 143 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 143 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 143 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277517604864e-04
+  ChemicalSystem::calculateState - cyc = 143 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277517609411e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 142 / 143 / 6.983034536574194e+03 / 0
 
@@ -2932,13 +2920,13 @@ Controller::doCycle => normal end - cyc = 143 (i = 142)
   KineticController::calculateKineticStep - cyc = 144 :  hyd_time = 7.681340390231614e+03   hydTimeIni_ = 6.983034536574194e+03   timestep = 6.983058536574199e+02
   KineticController::calculateKineticStep - cyc = 144 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 144 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 144 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277687266871e-04
+  ChemicalSystem::calculateState - cyc = 144 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277687264954e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 143 / 144 / 7.681340390231614e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 144  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7708   vfrac_next[i]: 1.712586840251134e-03   netsites in this state:        -1   cursites:      7708   newsites:      7707   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        7   vfrac_next[i]: 1.653475564517872e-06   netsites in this state:         1   cursites:         7   newsites:         8   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7708   vfrac_next[i]: 1.712586840259275e-03   netsites in this state:        -1   cursites:      7708   newsites:      7707   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        7   vfrac_next[i]: 1.653475555486118e-06   netsites in this state:         1   cursites:         7   newsites:         8   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 144 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 144 :   1
 
@@ -2961,13 +2949,13 @@ Controller::doCycle => normal end - cyc = 144 (i = 143)
   KineticController::calculateKineticStep - cyc = 145 :  hyd_time = 8.449476829254776e+03   hydTimeIni_ = 7.681340390231614e+03   timestep = 7.681364390231620e+02
   KineticController::calculateKineticStep - cyc = 145 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 145 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 145 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277872183025e-04
+  ChemicalSystem::calculateState - cyc = 145 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277872174101e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 144 / 145 / 8.449476829254776e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 145  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7707   vfrac_next[i]: 1.712442469415353e-03   netsites in this state:        -1   cursites:      7707   newsites:      7706   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        8   vfrac_next[i]: 1.813737449860974e-06   netsites in this state:         1   cursites:         8   newsites:         9   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7707   vfrac_next[i]: 1.712442469424031e-03   netsites in this state:        -1   cursites:      7707   newsites:      7706   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        8   vfrac_next[i]: 1.813737440236987e-06   netsites in this state:         1   cursites:         8   newsites:         9   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 145 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 145 :   1
 
@@ -2985,14 +2973,14 @@ Controller::doCycle => normal end - cyc = 145 (i = 144)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 145 / 146 / 8.639999993088000e+03 / 8.449476829254776e+03 / 1.905231638332243e+02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 145 / 146 / 8.640000000000000e+03 / 8.449476829254776e+03 / 1.905231707452240e+02 #####
 
-  KineticController::calculateKineticStep - cyc = 146 :  hyd_time = 8.639999993088000e+03   hydTimeIni_ = 8.449476829254776e+03   timestep = 1.905231638332243e+02
+  KineticController::calculateKineticStep - cyc = 146 :  hyd_time = 8.640000000000000e+03   hydTimeIni_ = 8.449476829254776e+03   timestep = 1.905231707452240e+02
   KineticController::calculateKineticStep - cyc = 146 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 146 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 146 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277922362257e-04
+  ChemicalSystem::calculateState - cyc = 146 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258277922375396e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 145 / 146 / 8.639999993088000e+03 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 145 / 146 / 8.640000000000000e+03 / 0
 
   Lattice::changeMicrostructure - cyc = 146  =>  initial values for count_[0]/count_[1] = 0 / 3149537
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 146 :   0
@@ -3001,16 +2989,15 @@ Controller::doCycle => normal end - cyc = 145 (i = 144)
   Lattice::changeMicrostructure - cyc = 146 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149537
 
 Controller::doCycle => normal end - cyc = 146 (i = 145)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.518400m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 146 / 147 / 9.294426912180254e+03 / 8.639999993088000e+03 / 6.544269190922532e+02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 146 / 147 / 9.294426912180254e+03 / 8.640000000000000e+03 / 6.544269121802536e+02 #####
 
-  KineticController::calculateKineticStep - cyc = 147 :  hyd_time = 9.294426912180254e+03   hydTimeIni_ = 8.639999993088000e+03   timestep = 6.544269190922532e+02
+  KineticController::calculateKineticStep - cyc = 147 :  hyd_time = 9.294426912180254e+03   hydTimeIni_ = 8.640000000000000e+03   timestep = 6.544269121802536e+02
   KineticController::calculateKineticStep - cyc = 147 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 147 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 147 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278082870341e-04
+  ChemicalSystem::calculateState - cyc = 147 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278082858579e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 146 / 147 / 9.294426912180254e+03 / 0
 
@@ -3029,13 +3016,13 @@ Controller::doCycle => normal end - cyc = 147 (i = 146)
   KineticController::calculateKineticStep - cyc = 148 :  hyd_time = 1.022387200339828e+04   hydTimeIni_ = 9.294426912180254e+03   timestep = 9.294450912180255e+02
   KineticController::calculateKineticStep - cyc = 148 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 148 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 148 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278314650701e-04
+  ChemicalSystem::calculateState - cyc = 148 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278314666337e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 147 / 148 / 1.022387200339828e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 148  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7706   vfrac_next[i]: 1.712110737219019e-03   netsites in this state:        -1   cursites:      7706   newsites:      7705   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        9   vfrac_next[i]: 2.181983765207352e-06   netsites in this state:         1   cursites:         9   newsites:        10   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7706   vfrac_next[i]: 1.712110737229294e-03   netsites in this state:        -1   cursites:      7706   newsites:      7705   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:        9   vfrac_next[i]: 2.181983753804168e-06   netsites in this state:         1   cursites:         9   newsites:        10   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 148 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 148 :   1
 
@@ -3058,13 +3045,13 @@ Controller::doCycle => normal end - cyc = 148 (i = 147)
   KineticController::calculateKineticStep - cyc = 149 :  hyd_time = 1.124626160373811e+04   hydTimeIni_ = 1.022387200339828e+04   timestep = 1.022389600339828e+03
   KineticController::calculateKineticStep - cyc = 149 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 149 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 149 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278555743562e-04
+  ChemicalSystem::calculateState - cyc = 149 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278558704027e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 148 / 149 / 1.124626160373811e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 149  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7705   vfrac_next[i]: 1.711921336023842e-03   netsites in this state:        -1   cursites:      7705   newsites:      7704   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       10   vfrac_next[i]: 2.392232552183981e-06   netsites in this state:         1   cursites:        10   newsites:        11   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7705   vfrac_next[i]: 1.711921336035937e-03   netsites in this state:        -1   cursites:      7705   newsites:      7704   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       10   vfrac_next[i]: 2.392232538732110e-06   netsites in this state:         1   cursites:        10   newsites:        11   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 149 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 149 :   1
 
@@ -3087,13 +3074,13 @@ Controller::doCycle => normal end - cyc = 149 (i = 148)
   KineticController::calculateKineticStep - cyc = 150 :  hyd_time = 1.237089016411192e+04   hydTimeIni_ = 1.124626160373811e+04   timestep = 1.124628560373811e+03
   KineticController::calculateKineticStep - cyc = 150 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 150 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 150 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278826501898e-04
+  ChemicalSystem::calculateState - cyc = 150 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258278826492919e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 149 / 150 / 1.237089016411192e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 150  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7704   vfrac_next[i]: 1.711714598568327e-03   netsites in this state:        -1   cursites:      7704   newsites:      7703   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       11   vfrac_next[i]: 2.621725820741588e-06   netsites in this state:         1   cursites:        11   newsites:        12   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7704   vfrac_next[i]: 1.711714598667316e-03   netsites in this state:        -1   cursites:      7704   newsites:      7703   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       11   vfrac_next[i]: 2.621725710861024e-06   netsites in this state:         1   cursites:        11   newsites:        12   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 150 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 150 :   1
 
@@ -3116,13 +3103,13 @@ Controller::doCycle => normal end - cyc = 150 (i = 149)
   KineticController::calculateKineticStep - cyc = 151 :  hyd_time = 1.360798158052311e+04   hydTimeIni_ = 1.237089016411192e+04   timestep = 1.237091416411191e+03
   KineticController::calculateKineticStep - cyc = 151 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 151 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 151 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279111820389e-04
+  ChemicalSystem::calculateState - cyc = 151 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279111820202e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 150 / 151 / 1.360798158052311e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 151  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7703   vfrac_next[i]: 1.711488782051852e-03   netsites in this state:        -1   cursites:      7703   newsites:      7702   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       12   vfrac_next[i]: 2.872398203742144e-06   netsites in this state:         1   cursites:        12   newsites:        13   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7703   vfrac_next[i]: 1.711488782144462e-03   netsites in this state:        -1   cursites:      7703   newsites:      7702   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       12   vfrac_next[i]: 2.872398100941903e-06   netsites in this state:         1   cursites:        12   newsites:        13   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 151 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 151 :   1
 
@@ -3145,13 +3132,13 @@ Controller::doCycle => normal end - cyc = 151 (i = 150)
   KineticController::calculateKineticStep - cyc = 152 :  hyd_time = 1.496878213857542e+04   hydTimeIni_ = 1.360798158052311e+04   timestep = 1.360800558052311e+03
   KineticController::calculateKineticStep - cyc = 152 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 152 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 152 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279433144288e-04
+  ChemicalSystem::calculateState - cyc = 152 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279433384136e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 151 / 152 / 1.496878213857542e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 152  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7702   vfrac_next[i]: 1.711242429246302e-03   netsites in this state:        -1   cursites:      7702   newsites:      7701   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       13   vfrac_next[i]: 3.145867320942456e-06   netsites in this state:         2   cursites:        13   newsites:        15   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7702   vfrac_next[i]: 1.711242429339333e-03   netsites in this state:        -1   cursites:      7702   newsites:      7701   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       13   vfrac_next[i]: 3.145867217747497e-06   netsites in this state:         2   cursites:        13   newsites:        15   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 152 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 152 :   1
 
@@ -3174,14 +3161,14 @@ Controller::doCycle => normal end - cyc = 152 (i = 151)
   KineticController::calculateKineticStep - cyc = 153 :  hyd_time = 1.646566275243296e+04   hydTimeIni_ = 1.496878213857542e+04   timestep = 1.496880613857544e+03
   KineticController::calculateKineticStep - cyc = 153 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 153 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 153 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279765350600e-04
+  ChemicalSystem::calculateState - cyc = 153 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279765838929e-04
 
   Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 152 / 153 / 1.646566275243296e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 153  =>  initial values for count_[0]/count_[1] = 0 / 3149536
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7701   vfrac_next[i]: 1.710974559994492e-03   netsites in this state:        -1   cursites:      7701   newsites:      7700   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Portlandite     => i:   5   count_[i]:     4743   vfrac_next[i]: 1.053735738807924e-03   netsites in this state:        -1   cursites:      4743   newsites:      4742   -> phaseID:   5
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       15   vfrac_next[i]: 3.443221237156721e-06   netsites in this state:         1   cursites:        15   newsites:        16   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7701   vfrac_next[i]: 1.710974559658781e-03   netsites in this state:        -1   cursites:      7701   newsites:      7700   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Portlandite     => i:   5   count_[i]:     4743   vfrac_next[i]: 1.053735977037544e-03   netsites in this state:        -1   cursites:      4743   newsites:      4742   -> phaseID:   5
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       15   vfrac_next[i]: 3.443221609826319e-06   netsites in this state:         1   cursites:        15   newsites:        16   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 153 :   2
   Lattice::changeMicrostructure number of phases to grow     - cyc = 153 :   1
 
@@ -3200,18 +3187,18 @@ Controller::doCycle => normal end - cyc = 153 (i = 152)
 
 
 
-##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 153 / 154 / 1.727999998617600e+04 / 1.646566275243296e+04 / 8.143372337430374e+02 #####
+##### Controller::doCycle  START NEW CYCLE   i/cyc/time_[i]/time_[i-1]/timestep: 153 / 154 / 1.728000000000000e+04 / 1.646566275243296e+04 / 8.143372475670367e+02 #####
 
-  KineticController::calculateKineticStep - cyc = 154 :  hyd_time = 1.727999998617600e+04   hydTimeIni_ = 1.646566275243296e+04   timestep = 8.143372337430374e+02
+  KineticController::calculateKineticStep - cyc = 154 :  hyd_time = 1.728000000000000e+04   hydTimeIni_ = 1.646566275243296e+04   timestep = 8.143372475670367e+02
   KineticController::calculateKineticStep - cyc = 154 :  scaledCementMass = 0.000000000000000e+00   totalDOR = 0.000000000000000e+00
   ChemicalSystem::calculateState - cyc = 154 : OK & GEM_run has failed 0 consecutive times before to find this solution
-  ChemicalSystem::calculateState - cyc = 154 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279950770008e-04
+  ChemicalSystem::calculateState - cyc = 154 => initMicroVolume_ < microVolume_ : 1.256619299846983e-04 < 1.258279950800407e-04
 
-  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 153 / 154 / 1.727999998617600e+04 / 0
+  Controller::doCycle first GEM_run OK i/cyc/time[i]/getTimesGEMFailed_loc: 153 / 154 / 1.728000000000000e+04 / 0
 
   Lattice::changeMicrostructure - cyc = 154  =>  initial values for count_[0]/count_[1] = 0 / 3149537
-  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7700   vfrac_next[i]: 1.710830694020735e-03   netsites in this state:        -1   cursites:      7700   newsites:      7699   -> phaseID:   2
-  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       16   vfrac_next[i]: 3.602922694116774e-06   netsites in this state:         1   cursites:        16   newsites:        17   -> phaseID:  11
+  Lattice::changeMicrostructure ***for Pyrrhotite      => i:   2   count_[i]:     7700   vfrac_next[i]: 1.710830693675358e-03   netsites in this state:        -1   cursites:      7700   newsites:      7699   -> phaseID:   2
+  Lattice::changeMicrostructure ***for Goethite        => i:  11   count_[i]:       16   vfrac_next[i]: 3.602923077513061e-06   netsites in this state:         1   cursites:        16   newsites:        17   -> phaseID:  11
   Lattice::changeMicrostructure number of phases to dissolve - cyc = 154 :   1
   Lattice::changeMicrostructure number of phases to grow     - cyc = 154 :   1
 
@@ -3226,15 +3213,13 @@ Controller::doCycle => normal end - cyc = 153 (i = 152)
   Lattice::changeMicrostructure - cyc = 154 :  numEmptyFill = 0   count_[0]/count_[1] = 0 / 3149537
 
 Controller::doCycle => normal end - cyc = 154 (i = 153)
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.1036800m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
-magick: unable to read image data `pyrragg-298K-sat/pyrrhotite.1036800m.298.ppm' @ error/pnm.c/ReadPNMImage/1591.
 
-=> IPM_dump.txt & ipmlog.txt are into pyrragg-298K-sat folder
+=> IPM_dump.txt & ipmlog.txt are into Result folder
 
 STOP Program
 
-Sun May 11 15:40:45 2025
+Sat May 17 15:33:32 2025
 
-Total time = 1.630000000000000e+02 seconds
+Total time = 1.560000000000000e+02 seconds
 
-Total time with clock = 1.614160150000000e+02 seconds
+Total time with clock = 1.541288040000000e+02 seconds

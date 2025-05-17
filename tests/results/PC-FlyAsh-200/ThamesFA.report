@@ -1,13 +1,13 @@
-THAMES simulation PC-FlyAsh-200/ThamesFA initialized on Sat May 10 16:49:05 2025
+THAMES simulation Result/ThamesFA initialized on Fri May 16 23:36:36 2025
 
 
 INPUT FILES USED:
-              Microstructure file name: ThamesFA-200.img.thames
+              Microstructure file name: ThamesFA-200.thames.img
    Microstructure definition file name: simparams.json
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: PC-FlyAsh-200/ThamesFA.stats
+                Global phase fractions: Result/ThamesFA.stats
 
 ----------------------------------------------------------
 

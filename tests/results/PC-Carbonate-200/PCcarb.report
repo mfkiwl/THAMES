@@ -1,13 +1,13 @@
-THAMES simulation PC-Carbonate-200/PCcarb initialized on Sat May 10 16:04:12 2025
+THAMES simulation Result/PCcarb initialized on Sat May 17 10:55:58 2025
 
 
 INPUT FILES USED:
-              Microstructure file name: PC-Forsterite.img.thames
+              Microstructure file name: PC-Forsterite.thames.img
    Microstructure definition file name: simparams.json
                    GEM input file name: PC-Carb-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: PC-Carbonate-200/PCcarb.stats
+                Global phase fractions: Result/PCcarb.stats
 
 ----------------------------------------------------------
 

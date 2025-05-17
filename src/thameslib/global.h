@@ -182,7 +182,11 @@ const double ICTHRESH = 1.0e-9;
 
 const double Pi = 3.14159265359;
 
+const double S_PER_MINUTE = 60.0;
 const double S_PER_H = 3600.0;
-const double DAY_PER_H = 0.0416666667;
+const double S_PER_DAY = 86400.0;
+const double S_PER_YEAR = 3.15360000e7;
+const double H_PER_DAY = 24.0;
+const double DAY_PER_YEAR = 365.0;
 
 #endif // GLOBALH

@@ -1,4 +1,4 @@
-THAMES simulation highvolume-silicafume/hvsf initialized on Sat May 10 15:59:35 2025
+THAMES simulation Result/hvsf initialized on Fri May 16 23:35:17 2025
 
 
 INPUT FILES USED:
@@ -7,7 +7,7 @@ INPUT FILES USED:
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: highvolume-silicafume/hvsf.stats
+                Global phase fractions: Result/hvsf.stats
 
 ----------------------------------------------------------
 

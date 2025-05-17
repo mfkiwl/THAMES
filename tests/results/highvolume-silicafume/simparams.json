@@ -1,6 +1,6 @@
 {
   "environment": {
-    "temperature": 298.15,
+    "temperature": 296.15,
     "reftemperature": 298.15,
     "saturated": 1,
     "electrolyte_conditions": [

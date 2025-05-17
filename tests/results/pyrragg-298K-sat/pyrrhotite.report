@@ -1,4 +1,4 @@
-THAMES simulation pyrragg-298K-sat/pyrrhotite initialized on Sun May 11 15:38:02 2025
+THAMES simulation Result/pyrrhotite initialized on Sat May 17 15:30:56 2025
 
 
 INPUT FILES USED:
@@ -7,7 +7,7 @@ INPUT FILES USED:
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: pyrragg-298K-sat/pyrrhotite.stats
+                Global phase fractions: Result/pyrrhotite.stats
 
 ----------------------------------------------------------
 

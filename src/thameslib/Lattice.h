@@ -60,6 +60,13 @@ struct structDissVect {
   double wmc;
 };
 
+typedef struct {
+  int years;
+  int days;
+  int hours;
+  int minutes;
+} TimeStruct;
+
 using namespace std;
 
 /**
@@ -1542,12 +1549,14 @@ public:
     // So ssa/cemmass has units of m2 per g of cement
     // Multiply that by 1000.0 to get units of m2/(kg of cement)
     // if (verbose_) {
-    //    cout << "URANIUM all solid mass = " << allsolidmass << " g / (100 g solid)"
+    //    cout << "URANIUM all solid mass = " << allsolidmass << " g / (100 g
+    //    solid)"
     //          << endl;
     //    cout << "URANIUM all surface = " << allsurf << " m2 / (100 g solid)"
     //            << endl;
-    //    cout << "URANIUM cement mass = " << cemmass << " g / (100 g solid)" << endl;
-    //    cout << "URANIUM cement surface = " << cemsurf << " m2 / (100 g solid)"
+    //    cout << "URANIUM cement mass = " << cemmass << " g / (100 g solid)" <<
+    //    endl; cout << "URANIUM cement surface = " << cemsurf << " m2 / (100 g
+    //    solid)"
     //            << endl;
     //    cout.flush();
     // }
@@ -1762,6 +1771,53 @@ public:
   vector<int> chooseNucleationSitesRND(int phaseID, int numLeft);
 
   vector<int> chooseNucleationSitesAFF(int phaseID, int numLeft);
+
+  /**
+  @brief Convert time in hours to year,day,hour,minute format
+  second.
+
+  @param curtime is the time in hours
+  @return time structure (TimeStruct)
+  */
+  TimeStruct getResolvedTime(const double curtime) {
+
+    int s_per_h = static_cast<int>(S_PER_H);
+    int s_per_year = static_cast<int>(S_PER_YEAR);
+    int s_per_day = static_cast<int>(S_PER_DAY);
+    int s_per_minute = static_cast<int>(S_PER_MINUTE);
+
+    TimeStruct mytime;
+    mytime.years = mytime.days = mytime.hours = mytime.minutes = 0;
+
+    // Convert curtime from hours to seconds
+    double curtime_s_dbl = curtime * (S_PER_H);
+    // Convert to nearest second integer
+    int curtime_s = static_cast<int>(curtime_s_dbl + 0.5);
+    mytime.years = curtime_s / s_per_year;
+    curtime_s -= (mytime.years * s_per_year);
+    mytime.days = curtime_s / s_per_day;
+    curtime_s -= (mytime.days * s_per_day);
+    mytime.hours = curtime_s / s_per_h;
+    curtime_s -= (mytime.hours * s_per_h);
+    mytime.minutes = curtime_s / s_per_minute;
+    curtime_s -= (mytime.minutes * s_per_minute);
+    if (curtime_s >= 30) {
+      mytime.minutes += 1;
+      if (mytime.minutes >= 60) {
+        mytime.hours += 1;
+        mytime.minutes -= 60;
+        if (mytime.hours >= 24) {
+          mytime.days += 1;
+          mytime.hours -= 24;
+          if (mytime.days >= 365) {
+            mytime.years += 1;
+            mytime.days -= 365;
+          }
+        }
+      }
+    }
+    return mytime;
+  }
 
 }; // End of Lattice class
 #endif
