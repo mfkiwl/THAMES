@@ -138,7 +138,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
     outfs << "Time(h)";
-    for (int i = 0; i < numICs_; i++) {
+    for (int i = 0; i < chemSys_->getNumICs(); i++) {
       outfs << "," << chemSys_->getICName(i);
     }
     outfs << ",Ca/Si" << endl;

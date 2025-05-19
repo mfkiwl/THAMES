@@ -4350,7 +4350,7 @@ void Lattice::writePoreSizeDistribution(double curtime) {
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "_PoreSizeDistribution." + timestrY + "y" + timestrD +
-              "d" + timestrH + "h" + timestrM + "m." + tempstr + ".csv";
+              "d" + timestrH + "h" + timestrM + "m." + tempstr + "K.csv";
 
   ofstream out(ofileName.c_str());
 
@@ -4482,7 +4482,7 @@ void Lattice::writeLattice(double curtime) {
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".img";
+              "h" + timestrM + "m." + tempstr + "K.img";
 
   ofstream out(ofileName.c_str());
   try {
@@ -4587,7 +4587,7 @@ void Lattice::writeLatticeXYZ(double curtime) {
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "allSites." + timestrY + "y" + timestrD + "d" +
-              timestrH + "h" + timestrM + "m." + tempstr + ".xyz";
+              timestrH + "h" + timestrM + "m." + tempstr + "K.xyz";
 
   ofstream out(ofileName.c_str());
 
@@ -4695,9 +4695,9 @@ void Lattice::writeLatticeCFG(double curtime) {
   string timestrM(ostrM.str());
 
   ofileNameCFG = ofileNameCFG + "allSites." + timestrY + "y" + timestrD + "d" +
-                 timestrH + "h" + timestrM + "m." + tempstr + ".cfg";
+                 timestrH + "h" + timestrM + "m." + tempstr + "K.cfg";
   ofileNameUSR = ofileNameUSR + "allSites." + timestrY + "y" + timestrD + "d" +
-                 timestrH + "h" + timestrM + "m." + tempstr + ".usr";
+                 timestrH + "h" + timestrM + "m." + tempstr + "K.usr";
 
   ofstream outCFG(ofileNameCFG.c_str());
   ofstream outUSR(ofileNameUSR.c_str());
@@ -4789,7 +4789,7 @@ void Lattice::writeDamageLattice(double curtime) {
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".img";
+              "h" + timestrM + "m." + tempstr + "K.img";
 
   ofstream out(ofileName.c_str());
   try {
@@ -4857,9 +4857,9 @@ void Lattice::writeLatticePNG(double curtime) {
   string timestrM(ostrM.str());
 
   oppmName = oppmName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
-             timestrM + "m." + tempstr + ".ppm";
+             timestrM + "m." + tempstr + "K.ppm";
   opngName = opngName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
-             timestrM + "m." + tempstr + ".png";
+             timestrM + "m." + tempstr + "K.png";
 
   ///
   /// Open the output file
@@ -4990,9 +4990,9 @@ void Lattice::writeDamageLatticePNG(double curtime) {
   string timestrM(ostrM.str());
 
   oppmName = oppmName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
-             timestrM + "m." + tempstr + ".ppm";
+             timestrM + "m." + tempstr + "K.ppm";
   opngName = opngName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
-             timestrM + "m." + tempstr + ".png";
+             timestrM + "m." + tempstr + "K.png";
 
   ///
   /// Open the output file
@@ -5138,9 +5138,9 @@ void Lattice::makeMovie() {
     ostr3 << static_cast<int>(k); // x slice number
     string kstr(ostr3.str());
     ofileName =
-        ofbasename + "." + timestr + "." + tempstr + "." + kstr + ".ppm";
+        ofbasename + "." + timestr + "." + tempstr + "K." + kstr + ".ppm";
     ofgifileName =
-        ofgifbasename + "." + timestr + "." + tempstr + "." + kstr + ".gif";
+        ofgifbasename + "." + timestr + "." + tempstr + "K." + kstr + ".gif";
 
     ofstream out(ofileName.c_str());
     if (!out.is_open()) {
