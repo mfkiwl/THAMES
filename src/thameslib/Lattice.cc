@@ -1088,7 +1088,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to grow " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   if ((numLeftTot > 0) && (growthVectorSize == 0)) {
@@ -2435,7 +2435,7 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to dissolve " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   // int isitePosError = 0;
@@ -5972,7 +5972,7 @@ vector<int> Lattice::transformPhase(int growPhId, int netsites_growPhId,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to transforme " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   // int isitePosError = 0;

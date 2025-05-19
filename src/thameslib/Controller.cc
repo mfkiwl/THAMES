@@ -624,7 +624,7 @@ void Controller::doCycle(double elemTimeInterval) {
                 "  "
                 "   : "
              << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-             << "   =>   WAIT..." << endl;
+             << "   =>   searching for a new dissolution time : WAIT..." << endl;
         cout.flush();
 
         numTotGen = 0;
@@ -858,7 +858,6 @@ void Controller::doCycle(double elemTimeInterval) {
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset DCLowerLimits :" << endl;
 
-            chemSys_->initDCLowerLimit(0); // check!
             for (int ij = 0; ij < numSitesNotAvailableSize; ij++) {
 
               phId = vectPhIdDiff[ij];

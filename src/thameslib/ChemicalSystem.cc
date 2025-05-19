@@ -2679,9 +2679,78 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout.flush();
   }
 
-  setMicroPhaseSI(time);
+  // setMicroPhaseSI(time);
+  setMicroPhaseSI();
 
   return timesGEMFailed_;
+}
+
+void ChemicalSystem::setMicroPhaseSI() {
+
+  microPhaseSI_.clear();
+  microPhaseSI_.resize(numMicroPhases_, 0.0);
+
+  try {
+    double aveSI = 0.0;
+    double moles = 0.0;
+    double tmoles = 0.0;
+    vector<int> microPhaseDCMembers;
+    int sizeMicroPhaseDCMembers;
+    string pname;
+    int newDCId;
+
+    // Query CSD node to set the SI of every microPhase
+    // if (isFirst) {
+    //} else {
+
+    // setSI();
+    for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
+      pname = microPhaseName_[i];
+      aveSI = moles = 0.0;
+      microPhaseDCMembers = getMicroPhaseDCMembers(i);
+      sizeMicroPhaseDCMembers = microPhaseDCMembers.size();
+      // cout << endl << "   " << i << "\tpname: " << pname
+      //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
+      //      : " << endl;
+      for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
+        newDCId = microPhaseDCMembers.at(ii);
+        tmoles = DCMoles_[newDCId];
+        // if ( microPhaseDCMembers.size() == 1) {
+        //   vector<int> microPhaseMembers = getMicroPhaseMembers(i);
+        //   int newGEMPhaseId = microPhaseMembers.at(0);
+        //   cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
+        //        << newDCId << "\tnewDCName: " << DCName_[newDCId]
+        //        << "\ttmoles: " << tmoles
+        //        << "\tDC_a: " << node_->DC_a(newDCId)
+        //        << "\tmono -> newGEMPhaseId: " << newGEMPhaseId
+        //        << "\tSI_: " << SI_[newGEMPhaseId] << endl;
+        // } else {
+        //   cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
+        //        << newDCId << "\tnewDCName: " << DCName_[newDCId]
+        //        << "\ttmoles: " << tmoles
+        //        << "\tDC_a: " << node_->DC_a(newDCId) << endl;
+        // }
+
+        aveSI += (node_->DC_a(newDCId) * tmoles);
+        moles += tmoles;
+      }
+      // cout << "          aveSI: " << aveSI << "\tmoles: " << moles << endl;
+      if (moles > 0.0) {
+        aveSI = aveSI / moles;
+      }
+      microPhaseSI_.at(i) = aveSI;
+      // cout << "          pname = " << pname << "  =>     microPhaseSI_(cyc
+      // = " << cyc
+      //      << ") = " << microPhaseSI_[i] << "\tmoles: " << moles << endl;
+    }
+    //} //if (isFirst) {
+    // cout << endl << "ChemicalSystem::setMicroPhaseSI end" << endl; exit(0);
+  } catch (EOBException eex) {
+    eex.printException();
+    exit(1);
+  }
+
+  return;
 }
 
 void ChemicalSystem::setMicroPhaseSI(double time) {
