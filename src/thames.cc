@@ -58,7 +58,6 @@ int main(int argc, char **argv) {
     cout << endl << "simtype = " << simtype << endl;
   }
 
-
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
   // endl; cout << "epsilon for float : \t" << numeric_limits<float>::epsilon()

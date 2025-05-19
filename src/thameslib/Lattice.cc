@@ -1093,7 +1093,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to grow " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   if ((numLeftTot > 0) && (growthVectorSize == 0)) {
@@ -2448,7 +2448,7 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to dissolve " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   // int isitePosError = 0;
@@ -4194,7 +4194,6 @@ void Lattice::adjustMicrostructureVolumes(vector<double> &vol, int volSize,
   if (voidVolume_ < 0.0)
     waterVolume_ = nonSolidVolume_;
 
-
   capillaryWaterVolume_ = waterVolume_ - subvoxelPoreVolume_;
   if (capillaryWaterVolume_ < 0.0) {
     subvoxelWaterVolume_ = waterVolume_;
@@ -5092,7 +5091,6 @@ void Lattice::writeLattice(double curtime) {
   */
 }
 
-
 void Lattice::writeLatticeH(double curtime) {
   string ofileName(jobRoot_);
   // ostringstream ostr1, ostr2;
@@ -5219,8 +5217,6 @@ void Lattice::writeLatticeH(double curtime) {
   } // The above block is implemented only if we are dealing with sulfate attack
   */
 }
-
-
 
 void Lattice::writeNewLattice(int newZdim) {
   string ofileName("newInputImg");
@@ -6257,7 +6253,7 @@ vector<int> Lattice::transformPhase(int growPhId, int netsites_growPhId,
          << "   " << setw(8) << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   "
          << setw(8) << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to transforme " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   //int isitePosError = 0;

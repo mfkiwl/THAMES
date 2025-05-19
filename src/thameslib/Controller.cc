@@ -786,7 +786,7 @@ void Controller::doCycle(double elemTimeInterval) {
              << "  Controller::doCycle - PRBL_0      i/cyc/time_[i]/timestep     "
                 "   : "
              << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-             << "   =>   WAIT..." << endl;
+             << "   =>   searching for a new dissolution time : WAIT..." << endl;
         cout.flush();
 
         numTotGen = 0;
@@ -1017,7 +1017,6 @@ void Controller::doCycle(double elemTimeInterval) {
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset DCLowerLimits :" << endl;
 
-            chemSys_->initDCLowerLimit(0); // check!
             for (int ij = 0; ij < numSitesNotAvailableSize; ij++) {
 
               phId = vectPhIdDiff[ij];
@@ -1437,7 +1436,6 @@ void Controller::doCycle(double elemTimeInterval) {
         //   truevolume = otruevolume * (1 + truevolume);
         //   ste->setTrueVolume(truevolume);
         // }
-
 
         // double dwmcval = poreintroduce;
         double poreincrease = 0.2;

@@ -35,7 +35,7 @@ protected:
   int y_;            /**< y-coordinate in mesh coordinate frame */
   int z_;            /**< y-coordinate in mesh coordinate frame */
   int id_;           /**< Unique id in the 1D array of all sites */
-  uint microPhaseId_; /**< The microstructure phase assignment */
+  int microPhaseId_; /**< The microstructure phase assignment */
   ChemicalSystem
       *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
   vector<int>
