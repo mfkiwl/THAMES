@@ -506,6 +506,8 @@ class ChemicalSystem {
   long int nodeStatus_; /**< integer flag used to identify node's status */
   long int iterDone_;   /**< number of iterations performed in the most
                                 recent GEM calculation on the node */
+  int timesGEMWarned_;  /**< tracks total number of times that the
+                                GEM_run calculation warned  */
   int timesGEMFailed_;  /**< tracks number of times in a row that the
                                 GEM_run calculation failed */
   int maxGEMFails_;     /**< maximum number of times GEM_run is allowed

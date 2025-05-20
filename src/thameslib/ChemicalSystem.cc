@@ -26,6 +26,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   nodeHandle_ = 0;
   iterDone_ = 0;
   timesGEMFailed_ = 0;
+  timesGEMWarned_ = 0;
   maxGEMFails_ = 100000000; // 1000; // = 3;
 
   sulfateAttackTime_ = 1.0e10;
@@ -2144,14 +2145,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   // } else if (iniNodeStatus == 5) {
   //   iniStrNodeStatus = "NEED_GEM_SIA";
   // }
-  // ALL ICs/DCs in the system are set to zero in Lattice constructor before
-  // to call normalizePhaseMasses() DCs are updated in
-  // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
-  // after the first call of calculateKineticStep(...) are set to 10^-9
-
-  if (isFirst) {
-    checkICMoles();
-  }
 
   //  cout << endl << "chemSys after checkICMoles for cyc = " << cyc << " :
   //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
@@ -2174,11 +2167,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
   /// in this case.
   ///
 
-  bool doAttack = (time >= beginAttackTime_) ? true : false;
+  bool doAttack = (time >= iniAttackTime_) ? true : false;
 
-  // cout << endl << "  ----> ChemicalSystem::calculateState -
-  // time/beginAttackTime_/doAttack : "
-  //      << time << " / " << beginAttackTime_ << " / " << doAttack << endl;
+  // cout << endl << "  ----> ChemicalSystem::calculateState - time/iniAttackTime_/doAttack : "
+  //      << time << " / " << iniAttackTime_ << " / " << doAttack << endl;
 
   // Check and set chemical conditions on electrolyte and gas phase
   setElectrolyteComposition(isFirst, doAttack, cyc);
@@ -2202,19 +2194,24 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout << endl // check!
          << "  ----> ChemicalSystem::calculateState -  ICMoles_ : " << endl;
     for (int i = 0; i < numICs_; i++) {
-      cout << "        i/ICMoles_/ICName_[i] -i- : " << i << " / " <<
-    ICMoles_[i]
+      cout << "        i/ICMoles_/ICName_[i] -i- : " << i << " / " << ICMoles_[i]
            << " / " << ICName_[i] << endl;
     }
     checkICMoles();
     cout;
     for (int i = 0; i < numICs_; i++) {
-      cout << "        i/ICMoles_/ICName_[i] -f- : " << i << " / " <<
-    ICMoles_[i]
+      cout << "        i/ICMoles_/ICName_[i] -f- : " << i << " / " << ICMoles_[i]
            << " / " << ICName_[i] << endl;
     }
     */
   }
+
+  // All the ICMoles_ that are less than 10^-9 are set to 10^-9
+  if (isFirst) {
+    checkICMoles();
+  }
+
+  // setDCMoles(getDCId("O2"),1.0e-3); // added by Jeff for LoRes-prj
 
   if (verbose_) {
     cout << endl
@@ -2222,15 +2219,15 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
          << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
-      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << " mol, ["
-           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "] mol" << endl;
+      cout << "    " << i << "   " << DCName_[i] << ": " << DCMoles_[i] << ", ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
     }
     cout.flush();
-    // cout << "ICMoles:" << endl;
-    // for (int i = 0; i < numICs_; ++i) {
-    //   cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
-    // }
-    // cout.flush();
+    cout << "ICMoles:" << endl;
+    for (int i = 0; i < numICs_; ++i) {
+      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    }
+    cout.flush();
   }
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
@@ -2302,11 +2299,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   nodeStatus_ = node_->GEM_run(true);
 
-  if (verbose_) {
-    cout << "Done!  nodeStatus is " << nodeStatus_ << endl;
-    cout.flush();
-  }
-
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
     if (verbose_) {
@@ -2321,8 +2313,19 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case BAD_GEM_AIA:
-      msg = "    Untrustworthy result with auto initial approx (AIA)",
-      cerr << msg << endl;
+      timesGEMWarned_++;
+      cout << "  ChemicalSystem::calculateState - cyc = " << cyc
+           << " : GEM_run OK  ->  GEM_run has failed " << timesGEMFailed_
+           << " consecutive times before to find this solution "
+              "(timesGEMWarned_ = " << timesGEMWarned_ << ")"
+           << endl;
+
+      timesGEMFailed_ = 0;
+
+      if (verbose_) {
+        msg = "    Untrustworthy result with auto initial approx (AIA)";
+        cerr << msg << endl;
+      }
       dothrow = false;
       break;
     case ERR_GEM_AIA:
@@ -2383,8 +2386,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     // " << nodeStatus_ << " [" << finStrNodeStatus << "]" << endl;
 
     cout << "  ChemicalSystem::calculateState - cyc = " << cyc
-         << " : OK & GEM_run has failed " << timesGEMFailed_
-         << " consecutive times before to find this solution" << endl;
+         << " : GEM_run OK  ->  GEM_run has failed " << timesGEMFailed_
+         << " consecutive times before to find this solution "
+            "(timesGEMWarned_ = " << timesGEMWarned_ << ")"
+         << endl;
 
     // cout << "    ChemicalSystem::calculateState - solution for kinetic
     // controlled phases:" << endl; for (int i = 0; i < numMicroPhases_; i++) {
