@@ -1,54 +1,18 @@
 {
   "environment": {
-    "temperature": 298.15,
+    "temperature": 296.15,
     "reftemperature": 298.15,
     "saturated": 0,
     "electrolyte_conditions": [
-      {
-        "DCname": "Ca(CO3)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "AlO2H@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "CaSiO3@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "Fe(CO3)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "MgSiO3@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "KOH@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "Ca(SO4)@",
-        "condition": "initial",
-        "concentration": 0.000001
-      },
-      {
-        "DCname": "K+",
-        "condition": "initial",
-        "concentration": 0.000002
-      },
-      {
-        "DCname": "SO4-2",
-        "condition": "initial",
-        "concentration": 0.000001
-      }
+      { "DCname": "Ca(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "AlO2H@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "CaSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Fe(CO3)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "MgSiO3@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "KOH@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "Ca(SO4)@", "condition": "initial", "concentration": 1.0e-6 },
+      { "DCname": "K+", "condition": "initial", "concentration": 2.0e-6 },
+      { "DCname": "SO4-2", "condition": "initial", "concentration": 1.0e-6 }
     ]
   },
   "microstructure": {

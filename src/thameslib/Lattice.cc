@@ -4513,34 +4513,6 @@ void Lattice::calculatePoreSizeDistribution(void) {
   // double pore_volfrac =
   //     capillaryporevolumeFraction_ + subvoxelporevolumeFraction_;
 
-  //  cout << "Lattice::calculatePoreSizeDistribution:" << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  "
-  //       << "==== water_volume = " << water_volume << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  "
-  //       << "======== microstructurevolume = " << microstructureVolume_ <<
-  //       endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  "
-  //       << "==== initmicrostructurevolume = "
-  //        << initialMicrostructureVolume_ << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  === "
-  //       << "water_volfrac = " << water_volfrac << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  ==== "
-  //       << "pore_volfrac = " << pore_volfrac << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  "
-  //       << "====== (cap = " << capillaryporevolumeFraction_
-  //       << ", subvox = " << subvoxelporevolumeFraction_
-  //       << ")" << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  ====== "
-  //       << "void fraction = " << volumeFraction_[VOIDID] << endl;
-  //  cout << "Lattice::calculatePoreSizeDistribution  ====== "
-  //       << "is fully saturated? ";
-  //  if (isfullysaturated) {
-  //      cout << " YES" << endl;
-  //  } else {
-  //      cout << " NO" << endl;
-  //  }
-  //  cout.flush();
-
   // Only worry about unsaturated subvoxel pores if the capillary
   // pores are completely empty of water
 
@@ -4673,7 +4645,7 @@ void Lattice::writePoreSizeDistribution(const double curtime,
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "_PoreSizeDistribution." + timestrY + "y" + timestrD +
-              "d" + timestrH + "h" + timestrM + "m." + tempstr + ".csv";
+              "d" + timestrH + "h" + timestrM + "m." + tempstr + "K.csv";
 
   ofstream out(ofileName.c_str());
 
@@ -4807,7 +4779,7 @@ void Lattice::writeLattice(const double curtime,
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".img";
+              "h" + timestrM + "m." + tempstr + "K.img";
 
   if (verbose_) {
     cout << endl
@@ -4899,17 +4871,6 @@ void Lattice::writeLattice(const double curtime,
 void Lattice::writeLatticeH(const double curtime,
                             const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // if (curtime >= sulfateAttackTime_) {
-  //   ofileName = ofileName + "." + timestr + "m." + tempstr + "_SA.img";
-  // } else {
-  //   ofileName = ofileName + "." + timestr + "m." + tempstr + ".img";
-  // }
 
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
@@ -4926,7 +4887,7 @@ void Lattice::writeLatticeH(const double curtime,
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".H.img";
+              "h" + timestrM + "m." + tempstr + "K.H.img";
 
   if (verbose_) {
     cout << endl
@@ -4954,15 +4915,6 @@ void Lattice::writeLatticeH(const double curtime,
   out << ZSIZESTRING << " " << zdim_ << endl;
   out << IMGRESSTRING << " " << resolution_ << endl;
 
-  // int index;
-  // for (int k = 0; k < zdim_; k++) {
-  //   for (int j = 0; j < ydim_; j++) {
-  //     for (int i = 0; i < xdim_; i++) {
-  //       index = getIndex(i, j, k);
-  //       out << site_[index].getMicroPhaseId() << endl;
-  //     }
-  //   }
-  // }
   for (int i = 0; i < numSites_; i++) {
     out << site_[i].getMicroPhaseId() << endl;
   }
@@ -5041,15 +4993,6 @@ void Lattice::writeNewLattice(int newZdim) {
   out << ZSIZESTRING << " " << newZdim << endl;
   out << IMGRESSTRING << " " << 1 << endl;
 
-  // int index;
-  // for (int k = 0; k < newZdim; k++) {
-  //   for (int j = 0; j < ydim_; j++) {
-  //     for (int i = 0; i < xdim_; i++) {
-  //       index = getIndex(i, j, k);
-  //       out << site_[index].getMicroPhaseId() << endl;
-  //     }
-  //   }
-  // }
   int numSites = xdim_ * ydim_ * newZdim;
   for (int i = 0; i < numSites; i++) {
     out << site_[i].getMicroPhaseId() << endl;
@@ -5071,13 +5014,6 @@ void Lattice::writeLatticeXYZ(const double curtime,
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
 
-  int days, hours, mins;
-  double hours_dbl;
-  days = floor(curtime / 24);
-  hours_dbl = curtime - (days * 24);
-  hours = floor(hours_dbl);
-  mins = floor((hours_dbl - hours) * 60);
-
   ostringstream ostrY, ostrD, ostrH, ostrM;
   ostrY << setfill('0') << setw(3) << resolvedtime.years;
   string timestrY(ostrY.str());
@@ -5089,7 +5025,7 @@ void Lattice::writeLatticeXYZ(const double curtime,
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "allSites." + timestrY + "y" + timestrD + "d" +
-              timestrH + "h" + timestrM + "m." + tempstr + ".xyz";
+              timestrH + "h" + timestrM + "m." + tempstr + "K.xyz";
 
   if (verbose_) {
     cout << "    In Lattice::writeLatticeXYZ, curtime = " << curtime
@@ -5098,8 +5034,6 @@ void Lattice::writeLatticeXYZ(const double curtime,
   }
 
   ofstream out(ofileName.c_str());
-
-  // int numvox = xdim_ * ydim_ * zdim_;
 
   // Write the file headers
   out << numSites_ << endl; // Number of voxels to visualize
@@ -5150,8 +5084,6 @@ void Lattice::appendXYZ(double curtime) {
     // File should already exist so append to it
     out.open(ofileName.c_str(), ios::app);
   }
-
-  // int numvox = xdim_ * ydim_ * zdim_;
 
   // Write the file headers
   out << numSites_ << endl; // Number of voxels to visualize
@@ -5204,9 +5136,9 @@ void Lattice::writeLatticeCFG(const double curtime,
   string timestrM(ostrM.str());
 
   ofileNameCFG = ofileNameCFG + "." + timestrY + "y" + timestrD + "d" +
-                 timestrH + "h" + timestrM + "m." + tempstr + ".cfg";
+                 timestrH + "h" + timestrM + "m." + tempstr + "K.cfg";
   ofileNameUSR = ofileNameUSR + "." + timestrY + "y" + timestrD + "d" +
-                 timestrH + "h" + timestrM + "m." + tempstr + ".usr";
+                 timestrH + "h" + timestrM + "m." + tempstr + "K.usr";
 
   if (verbose_) {
     cout << "    In Lattice::writeLatticeCFG, ofileNameCFG = " << ofileNameCFG
@@ -5227,7 +5159,6 @@ void Lattice::writeLatticeCFG(const double curtime,
   bool mPhNotExist;
 
   int numPart = numSites_;
-  // numPart = numSites_ - count_[0] - count_[1];
 
   // write cfg header
   outCFG << "Number of particles = " << numPart << endl;
@@ -5288,14 +5219,6 @@ void Lattice::writeLatticeCFG(const double curtime,
 void Lattice::writeDamageLattice(const double curtime,
                                  const TimeStruct resolvedtime) {
   string ofileName(jobRoot_);
-  // ostringstream ostr1, ostr2;
-  // ostr1 << setfill('0') << setw(6)
-  //       << static_cast<int>((curtime * 60.0) + 0.5); // minutes
-  // ostr2 << setprecision(3) << temperature_;
-  // string timestr(ostr1.str());
-  // string tempstr(ostr2.str());
-  // ofileName = ofileName + "." + timestr + "m." + tempstr + "_SA.damage.img";
-
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
@@ -5311,7 +5234,7 @@ void Lattice::writeDamageLattice(const double curtime,
   string timestrM(ostrM.str());
 
   ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".damage.img";
+              "h" + timestrM + "m." + tempstr + "K.damage.img";
 
   cout << endl
        << "  Lattice::writeDamageLattice - ofileName = " << ofileName << endl;
@@ -5335,19 +5258,6 @@ void Lattice::writeDamageLattice(const double curtime,
   out << ZSIZESTRING << " " << zdim_ << endl;
   out << IMGRESSTRING << " " << resolution_ << endl;
 
-  // int index;
-  // for (int k = 0; k < zdim_; k++) {
-  //   for (int j = 0; j < ydim_; j++) {
-  //     for (int i = 0; i < xdim_; i++) {
-  //       index = getIndex(i, j, k);
-  //       if (site_[index].IsDamage()) {
-  //         out << "1" << endl;
-  //       } else {
-  //         out << "0" << endl;
-  //       }
-  //     }
-  //   }
-  // }
   for (int i = 0; i < numSites_; i++) {
     if (site_[i].IsDamage()) {
       out << "1" << endl;
@@ -5362,8 +5272,8 @@ void Lattice::writeDamageLattice(const double curtime,
 void Lattice::writeLatticePNG(const double curtime,
                               const TimeStruct resolvedtime) {
   int i, j, k;
-  string ofileName(jobRoot_);
-  string ofpngname(jobRoot_);
+  string oppmName(jobRoot_);
+  string opngname(jobRoot_);
 
   vector<double> dumvec;
   vector<int> idumvec;
@@ -5395,19 +5305,19 @@ void Lattice::writeLatticePNG(const double curtime,
   ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".ppm";
-  ofpngname = ofpngname + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".png";
+  oppmName = oppmName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
+             timestrM + "m." + tempstr + "K.ppm";
+  opngName = opngName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
+             timestrM + "m." + tempstr + "K.png";
 
   ///
   /// Open the output file
   ///
 
-  ofstream out(ofileName.c_str());
+  ofstream out(oppmName.c_str());
   try {
     if (!out.is_open()) {
-      throw FileException("Lattice", "writeLatticePNG", ofileName,
+      throw FileException("Lattice", "writeLatticePNG", oppmName,
                           "Could not open");
     }
   } catch (FileException fex) {
@@ -5431,7 +5341,6 @@ void Lattice::writeLatticePNG(const double curtime,
       if (depthEffect_) {
         done = false;
         nd = 0;
-        // sitenum = getIndex(i, j, slice);
         izz = slice;
         do {
           sitenum = getIndex(i, j, izz);
@@ -5459,7 +5368,6 @@ void Lattice::writeLatticePNG(const double curtime,
   vector<int> colors;
   for (j = 0; j < ydim_; j++) {
     for (i = 0; i < xdim_; i++) {
-      // colors = chemSys_->getColor(image[i][j]);
       colors = chemSys_->getRGB(image[i][j]);
       red = dshade[i][j] * colors[0] + 0.5;
       green = dshade[i][j] * colors[1] + 0.5;
@@ -5476,7 +5384,8 @@ void Lattice::writeLatticePNG(const double curtime,
   /// @warning This relies on installation of ImageMagick
   ///
 
-  buff = ConvertCommand + " " + ofileName + " " + ofpngname;
+  string buff;
+  buff = ConvertCommand + " " + oppmName + " " + opngName;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     // handle the error;
@@ -5495,8 +5404,8 @@ void Lattice::writeLatticePNG(const double curtime,
 void Lattice::writeDamageLatticePNG(const double curtime,
                                     const TimeStruct resolvedtime) {
   int i, j, k;
-  string ofileName(jobRoot_);
-  string ofpngname(jobRoot_);
+  string oppmName(jobRoot_);
+  string opngName(jobRoot_);
 
   vector<double> dumvec;
   vector<unsigned int> idumvec;
@@ -5528,19 +5437,19 @@ void Lattice::writeDamageLatticePNG(const double curtime,
   ostrM << setfill('0') << setw(2) << resolvedtime.minutes;
   string timestrM(ostrM.str());
 
-  ofileName = ofileName + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".damage.ppm";
-  ofpngname = ofpngname + "." + timestrY + "y" + timestrD + "d" + timestrH +
-              "h" + timestrM + "m." + tempstr + ".damage.png";
+  oppmName = oppmName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
+             timestrM + "m." + tempstr + "K.ppm";
+  opngName = opngName + "." + timestrY + "y" + timestrD + "d" + timestrH + "h" +
+             timestrM + "m." + tempstr + "K.png";
 
   ///
   /// Open the output file
   ///
 
-  ofstream out(ofileName.c_str());
+  ofstream out(oppmName.c_str());
   try {
     if (!out.is_open()) {
-      throw FileException("Lattice", "writeLatticePNG", ofileName,
+      throw FileException("Lattice", "writeLatticePNG", oppmName,
                           "Could not open");
     }
   } catch (FileException fex) {
@@ -5563,7 +5472,6 @@ void Lattice::writeDamageLatticePNG(const double curtime,
     for (i = 0; i < xdim_; i++) {
       done = false;
       nd = 0;
-      // sitenum = getIndex(i, j, slice);
       izz = slice;
       do {
         sitenum = getIndex(i, j, izz);
@@ -5583,9 +5491,6 @@ void Lattice::writeDamageLatticePNG(const double curtime,
         image[i][j] = 5;
       }
       dshade[i][j] = 1.0;
-      /*
-      dshade[i][j] = 0.1 * (10.0 - (static_cast<double>(nd)));
-      */
     }
   }
 
@@ -5593,7 +5498,6 @@ void Lattice::writeDamageLatticePNG(const double curtime,
   vector<int> colors;
   for (j = 0; j < ydim_; j++) {
     for (i = 0; i < xdim_; i++) {
-      // colors = chemSys_->getColor(image[i][j]);
       colors = chemSys_->getRGB(image[i][j]);
       red = dshade[i][j] * colors[0] + 0.5;
       green = dshade[i][j] * colors[1] + 0.5;
@@ -5610,7 +5514,7 @@ void Lattice::writeDamageLatticePNG(const double curtime,
   /// @warning This relies on installation of ImageMagick
   ///
 
-  buff = ConvertCommand + " " + ofileName + " " + ofpngname;
+  buff = ConvertCommand + " " + oppmName + " " + opngName;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     // handle the error;
@@ -5672,12 +5576,12 @@ void Lattice::makeMovie() {
     ///
 
     ostr3.clear();
-    ostr3 << static_cast<int>(i); // x slice number
-    string istr(ostr3.str());
+    ostr3 << static_cast<int>(k); // x slice number
+    string kstr(ostr3.str());
     ofileName =
-        ofbasename + "." + timestr + "." + tempstr + "." + istr + ".ppm";
+        ofbasename + "." + timestr + "." + tempstr + "K." + kstr + ".ppm";
     ofgifileName =
-        ofgifbasename + "." + timestr + "." + tempstr + "." + istr + ".gif";
+        ofgifbasename + "." + timestr + "." + tempstr + "K." + kstr + ".gif";
 
     ofstream out(ofileName.c_str());
     if (!out.is_open()) {

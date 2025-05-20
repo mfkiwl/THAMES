@@ -61,6 +61,13 @@ struct structDissVect {
   double wmc;
 };
 
+typedef struct {
+  int years;
+  int days;
+  int hours;
+  int minutes;
+} TimeStruct;
+
 using namespace std;
 
 /**

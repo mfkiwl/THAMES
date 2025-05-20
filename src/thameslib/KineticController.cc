@@ -398,21 +398,18 @@ void KineticController::parseKineticDataForParrotKilloh(
   // Immediately convert to units of g per h within model
   json::iterator pp = p.value().find("k1");
   kineticData.k1 = pp.value();
-  // kineticData.k1 *= DAY_PER_H;
 
   // Parrot-Killoh k2 parameter
   // Conventionally given in units of g per day
   // Immediately convert to units of g per h within model
   pp = p.value().find("k2");
   kineticData.k2 = pp.value();
-  // kineticData.k2 *= DAY_PER_H;
 
   // Parrot-Killoh k3 parameter
   // Conventionally given in units of g per day
   // Immediately convert to units of g per h within model
   pp = p.value().find("k3");
   kineticData.k3 = pp.value();
-  // kineticData.k3 *= DAY_PER_H;
 
   // Parrot-Killoh n1 parameter
   pp = p.value().find("n1");

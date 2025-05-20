@@ -1,0 +1,1816 @@
+THAMES simulation Result/pyrrhotite initialized on Sat May 17 15:30:56 2025
+
+
+INPUT FILES USED:
+              Microstructure file name: Agg-I-Block-01-300-Stack.thames.img
+   Microstructure definition file name: simparams.json
+                   GEM input file name: thames-dat.lst
+
+OUTPUT FILES GENERATED:
+                Global phase fractions: Result/pyrrhotite.stats
+
+----------------------------------------------------------
+
+Report on the Material Database
+-------------- ChemicalSystem -----------------
+
+
+List of Independent Components :
+numICs_ = 13
+IC_Id) ICName_[i] / ICClassCode_[i] / ICMolarMass_[i]
+0) Name: Al
+        classcode: e
+       molar mass: 26.9815
+
+1) Name: C
+        classcode: e
+       molar mass: 12.0108
+
+2) Name: Ca
+        classcode: e
+       molar mass: 40.078
+
+3) Name: Fe
+        classcode: e
+       molar mass: 55.845
+
+4) Name: H
+        classcode: h
+       molar mass: 1.00795
+
+5) Name: K
+        classcode: e
+       molar mass: 39.0983
+
+6) Name: Mg
+        classcode: e
+       molar mass: 24.305
+
+7) Name: Na
+        classcode: e
+       molar mass: 22.9898
+
+8) Name: Nit
+        classcode: a
+       molar mass: 14.0067
+
+9) Name: O
+        classcode: o
+       molar mass: 15.9994
+
+10) Name: S
+        classcode: e
+       molar mass: 32.067
+
+11) Name: Si
+        classcode: e
+       molar mass: 28.0855
+
+12) Name: Zz
+        classcode: z
+       molar mass: 0
+
+
+List of Dependent Components:
+numDCs_ = 180
+DC_Id) DCName_[i] / DCClassCode_[i] / DCMolarMass_[i] / node_->DCtoPh_DBR(i)
+
+0) Name: Al(SO4)+
+        classcode: S
+       molar mass: 123.046
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+1) Name: Al(SO4)2-
+        classcode: S
+       molar mass: 219.111
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+2) Name: Al+3
+        classcode: S
+       molar mass: 26.9815
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+3) Name: AlO+
+        classcode: S
+       molar mass: 42.9809
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+4) Name: AlO2-
+        classcode: S
+       molar mass: 58.9803
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+5) Name: AlO2H@
+        classcode: S
+       molar mass: 59.9883
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+6) Name: AlOH+2
+        classcode: S
+       molar mass: 43.9889
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+7) Name: AlHSiO3+2
+        classcode: S
+       molar mass: 104.073
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+8) Name: AlSiO5-3
+        classcode: S
+       molar mass: 135.064
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+9) Name: Ca(CO3)@
+        classcode: S
+       molar mass: 100.087
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+10) Name: Ca(HCO3)+
+        classcode: S
+       molar mass: 101.095
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+11) Name: Ca(SO4)@
+        classcode: S
+       molar mass: 136.143
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+12) Name: Ca+2
+        classcode: S
+       molar mass: 40.078
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+13) Name: CaOH+
+        classcode: S
+       molar mass: 57.0853
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+14) Name: Ca(HSiO3)+
+        classcode: S
+       molar mass: 117.17
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+15) Name: CaSiO3@
+        classcode: S
+       molar mass: 116.162
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+16) Name: Fe(CO3)@
+        classcode: S
+       molar mass: 115.854
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+17) Name: Fe(HCO3)+
+        classcode: S
+       molar mass: 116.862
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+18) Name: Fe(HSO4)+
+        classcode: S
+       molar mass: 152.918
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+19) Name: Fe(SO4)@
+        classcode: S
+       molar mass: 151.91
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+20) Name: Fe+2
+        classcode: S
+       molar mass: 55.845
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+21) Name: FeOH+
+        classcode: S
+       molar mass: 72.8524
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+22) Name: Fe(HSO4)+2
+        classcode: S
+       molar mass: 152.918
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+23) Name: Fe(SO4)+
+        classcode: S
+       molar mass: 151.91
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+24) Name: Fe(SO4)2-
+        classcode: S
+       molar mass: 247.974
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+25) Name: Fe+3
+        classcode: S
+       molar mass: 55.845
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+26) Name: Fe2(OH)2+4
+        classcode: S
+       molar mass: 145.705
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+27) Name: Fe3(OH)4+5
+        classcode: S
+       molar mass: 235.564
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+28) Name: FeO+
+        classcode: S
+       molar mass: 71.8444
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+29) Name: FeO2-
+        classcode: S
+       molar mass: 87.8438
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+30) Name: FeO2H@
+        classcode: S
+       molar mass: 88.8518
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+31) Name: FeOH+2
+        classcode: S
+       molar mass: 72.8524
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+32) Name: FeHSiO3+2
+        classcode: S
+       molar mass: 132.937
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+33) Name: K(SO4)-
+        classcode: S
+       molar mass: 135.163
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+34) Name: K+
+        classcode: S
+       molar mass: 39.0983
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+35) Name: KOH@
+        classcode: S
+       molar mass: 56.1057
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+36) Name: Mg(CO3)@
+        classcode: S
+       molar mass: 84.314
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+37) Name: Mg(HCO3)+
+        classcode: S
+       molar mass: 85.322
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+38) Name: Mg+2
+        classcode: S
+       molar mass: 24.305
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+39) Name: MgOH+
+        classcode: S
+       molar mass: 41.3124
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+40) Name: MgSO4@
+        classcode: S
+       molar mass: 120.37
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+41) Name: Mg(HSiO3)+
+        classcode: S
+       molar mass: 101.397
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+42) Name: MgSiO3@
+        classcode: S
+       molar mass: 100.389
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+43) Name: Na(CO3)-
+        classcode: S
+       molar mass: 82.9988
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+44) Name: Na(HCO3)@
+        classcode: S
+       molar mass: 84.0068
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+45) Name: Na(SO4)-
+        classcode: S
+       molar mass: 119.054
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+46) Name: Na+
+        classcode: S
+       molar mass: 22.9898
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+47) Name: NaOH@
+        classcode: S
+       molar mass: 39.9971
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+48) Name: HSiO3-
+        classcode: S
+       molar mass: 77.0917
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+49) Name: SiO2@
+        classcode: S
+       molar mass: 60.0843
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+50) Name: SiO3-2
+        classcode: S
+       molar mass: 76.0837
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+51) Name: CO2@
+        classcode: S
+       molar mass: 44.0096
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+52) Name: CO3-2
+        classcode: S
+       molar mass: 60.009
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+53) Name: HCO3-
+        classcode: S
+       molar mass: 61.017
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+54) Name: CH4@
+        classcode: S
+       molar mass: 16.0426
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+55) Name: H2@
+        classcode: S
+       molar mass: 2.0159
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+56) Name: N2@
+        classcode: S
+       molar mass: 28.0134
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+57) Name: O2@
+        classcode: S
+       molar mass: 31.9988
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+58) Name: S2O3-2
+        classcode: S
+       molar mass: 112.132
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+59) Name: HSO3-
+        classcode: S
+       molar mass: 81.0732
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+60) Name: SO3-2
+        classcode: S
+       molar mass: 80.0652
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+61) Name: HSO4-
+        classcode: S
+       molar mass: 97.0726
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+62) Name: SO4-2
+        classcode: S
+       molar mass: 96.0646
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+63) Name: H2S@
+        classcode: S
+       molar mass: 34.0829
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+64) Name: HS-
+        classcode: S
+       molar mass: 33.075
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+65) Name: S-2
+        classcode: S
+       molar mass: 32.067
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+66) Name: OH-
+        classcode: S
+       molar mass: 17.0074
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+67) Name: H+
+        classcode: T
+       molar mass: 1.00795
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+68) Name: H2O@
+        classcode: W
+       molar mass: 18.0153
+        DBR index: 0	(GEM Phase : aq_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+69) Name: CO2
+        classcode: G
+       molar mass: 44.0096
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+70) Name: CH4
+        classcode: G
+       molar mass: 16.0426
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+71) Name: H2
+        classcode: G
+       molar mass: 2.0159
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+72) Name: N2
+        classcode: G
+       molar mass: 28.0134
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+73) Name: O2
+        classcode: G
+       molar mass: 31.9988
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+74) Name: H2S
+        classcode: G
+       molar mass: 34.0829
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+75) Name: SO3
+        classcode: G
+       molar mass: 80.0652
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+76) Name: H2O
+        classcode: G
+       molar mass: 18.0153
+        DBR index: 1	(GEM Phase : gas_gen)
+     microPhaseId: -1	- no THAMES Phase
+
+77) Name: C3AFS0.84H4.32
+        classcode: I
+       molar mass: 427.354
+        DBR index: 2	(GEM Phase : C3(AF)S0.84H)
+     microPhaseId: -1	- no THAMES Phase
+
+78) Name: C3FS0.84H4.32
+        classcode: I
+       molar mass: 456.217
+        DBR index: 2	(GEM Phase : C3(AF)S0.84H)
+     microPhaseId: -1	- no THAMES Phase
+
+79) Name: CSHQ-JenD
+        classcode: I
+       molar mass: 169.213
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: 4	(THAMES Phase : CSHQ)
+
+80) Name: CSHQ-JenH
+        classcode: I
+       molar mass: 173.886
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: -1	- no THAMES Phase
+
+81) Name: CSHQ-TobD
+        classcode: I
+       molar mass: 119.821
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: -1	- no THAMES Phase
+
+82) Name: CSHQ-TobH
+        classcode: I
+       molar mass: 124.494
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: -1	- no THAMES Phase
+
+83) Name: KSiOH
+        classcode: I
+       molar mass: 43.6727
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: -1	- no THAMES Phase
+
+84) Name: NaSiOH
+        classcode: I
+       molar mass: 35.6185
+        DBR index: 3	(GEM Phase : CSHQ)
+     microPhaseId: -1	- no THAMES Phase
+
+85) Name: ettr05
+        classcode: M
+       molar mass: 627.555
+        DBR index: 4	(GEM Phase : ettr-AlFe)
+     microPhaseId: -1	- no THAMES Phase
+
+86) Name: Fe-ettr05
+        classcode: J
+       molar mass: 656.419
+        DBR index: 4	(GEM Phase : ettr-AlFe)
+     microPhaseId: -1	- no THAMES Phase
+
+87) Name: monosulf1205
+        classcode: M
+       molar mass: 311.26
+        DBR index: 5	(GEM Phase : monosulf-AlFe)
+     microPhaseId: -1	- no THAMES Phase
+
+88) Name: Fe-monosulf05
+        classcode: J
+       molar mass: 340.123
+        DBR index: 5	(GEM Phase : monosulf-AlFe)
+     microPhaseId: -1	- no THAMES Phase
+
+89) Name: straet
+        classcode: I
+       molar mass: 418.323
+        DBR index: 6	(GEM Phase : straet)
+     microPhaseId: -1	- no THAMES Phase
+
+90) Name: straet7
+        classcode: I
+       molar mass: 400.307
+        DBR index: 6	(GEM Phase : straet)
+     microPhaseId: -1	- no THAMES Phase
+
+91) Name: ettr
+        classcode: I
+       molar mass: 1255.11
+        DBR index: 7	(GEM Phase : ettr)
+     microPhaseId: -1	- no THAMES Phase
+
+92) Name: ettr30
+        classcode: I
+       molar mass: 1219.08
+        DBR index: 7	(GEM Phase : ettr)
+     microPhaseId: -1	- no THAMES Phase
+
+93) Name: tricarb03
+        classcode: J
+       molar mass: 382.315
+        DBR index: 8	(GEM Phase : SO4_CO3_AFt)
+     microPhaseId: -1	- no THAMES Phase
+
+94) Name: ettr03_ss
+        classcode: M
+       molar mass: 418.37
+        DBR index: 8	(GEM Phase : SO4_CO3_AFt)
+     microPhaseId: -1	- no THAMES Phase
+
+95) Name: Mg3AlC0.5OH
+        classcode: I
+       molar mass: 310.998
+        DBR index: 9	(GEM Phase : hydrotalc-pyro)
+     microPhaseId: 10	(THAMES Phase : Hydrotalcite)
+
+96) Name: Mg3FeC0.5OH
+        classcode: I
+       molar mass: 339.862
+        DBR index: 9	(GEM Phase : hydrotalc-pyro)
+     microPhaseId: -1	- no THAMES Phase
+
+97) Name: M075SH
+        classcode: I
+       molar mass: 225.663
+        DBR index: 10	(GEM Phase : MSH)
+     microPhaseId: -1	- no THAMES Phase
+
+98) Name: M15SH
+        classcode: I
+       molar mass: 165.579
+        DBR index: 10	(GEM Phase : MSH)
+     microPhaseId: -1	- no THAMES Phase
+
+99) Name: AlOHam
+        classcode: O
+       molar mass: 78.0036
+        DBR index: 11	(GEM Phase : Al(OH)3am)
+     microPhaseId: -1	- no THAMES Phase
+
+100) Name: AlOHmic
+        classcode: O
+       molar mass: 78.0036
+        DBR index: 12	(GEM Phase : Al(OH)3mic)
+     microPhaseId: -1	- no THAMES Phase
+
+101) Name: Gbs
+        classcode: O
+       molar mass: 78.0036
+        DBR index: 13	(GEM Phase : Gibbsite)
+     microPhaseId: -1	- no THAMES Phase
+
+102) Name: Mul
+        classcode: O
+       molar mass: 426.052
+        DBR index: 14	(GEM Phase : Mullite)
+     microPhaseId: -1	- no THAMES Phase
+
+103) Name: Kln
+        classcode: O
+       molar mass: 258.16
+        DBR index: 15	(GEM Phase : Kaolinite)
+     microPhaseId: -1	- no THAMES Phase
+
+104) Name: Gr
+        classcode: O
+       molar mass: 12.0108
+        DBR index: 16	(GEM Phase : Graphite)
+     microPhaseId: -1	- no THAMES Phase
+
+105) Name: C12A7
+        classcode: O
+       molar mass: 1386.66
+        DBR index: 17	(GEM Phase : Mayenite)
+     microPhaseId: -1	- no THAMES Phase
+
+106) Name: C2S
+        classcode: O
+       molar mass: 172.239
+        DBR index: 18	(GEM Phase : Belite)
+     microPhaseId: -1	- no THAMES Phase
+
+107) Name: C3A
+        classcode: O
+       molar mass: 270.193
+        DBR index: 19	(GEM Phase : Aluminate)
+     microPhaseId: -1	- no THAMES Phase
+
+108) Name: C3S
+        classcode: O
+       molar mass: 228.316
+        DBR index: 20	(GEM Phase : Alite)
+     microPhaseId: -1	- no THAMES Phase
+
+109) Name: C4AF
+        classcode: O
+       molar mass: 485.959
+        DBR index: 21	(GEM Phase : Ferrite)
+     microPhaseId: -1	- no THAMES Phase
+
+110) Name: C2AH7.5
+        classcode: O
+       molar mass: 349.231
+        DBR index: 22	(GEM Phase : C2AH75)
+     microPhaseId: -1	- no THAMES Phase
+
+111) Name: C3AH6
+        classcode: O
+       molar mass: 378.285
+        DBR index: 23	(GEM Phase : C3AH6)
+     microPhaseId: 6	(THAMES Phase : AFm)
+
+112) Name: C4AH11
+        classcode: O
+       molar mass: 524.439
+        DBR index: 24	(GEM Phase : C4AH11)
+     microPhaseId: -1	- no THAMES Phase
+
+113) Name: C4AH13
+        classcode: O
+       molar mass: 560.47
+        DBR index: 25	(GEM Phase : C4AH13)
+     microPhaseId: -1	- no THAMES Phase
+
+114) Name: C4AH19
+        classcode: O
+       molar mass: 668.562
+        DBR index: 26	(GEM Phase : C4AH19)
+     microPhaseId: -1	- no THAMES Phase
+
+115) Name: CAH10
+        classcode: O
+       molar mass: 338.192
+        DBR index: 27	(GEM Phase : CAH10)
+     microPhaseId: -1	- no THAMES Phase
+
+116) Name: monosulf10.5
+        classcode: O
+       molar mass: 595.497
+        DBR index: 28	(GEM Phase : C4AsH105)
+     microPhaseId: 9	(THAMES Phase : Monosulfate)
+
+117) Name: monosulf12
+        classcode: O
+       molar mass: 622.52
+        DBR index: 29	(GEM Phase : C4AsH12)
+     microPhaseId: -1	- no THAMES Phase
+
+118) Name: monosulf14
+        classcode: O
+       molar mass: 658.55
+        DBR index: 30	(GEM Phase : C4AsH14)
+     microPhaseId: -1	- no THAMES Phase
+
+119) Name: monosulf16
+        classcode: O
+       molar mass: 694.581
+        DBR index: 31	(GEM Phase : C4AsH16)
+     microPhaseId: -1	- no THAMES Phase
+
+120) Name: monosulf9
+        classcode: O
+       molar mass: 568.474
+        DBR index: 32	(GEM Phase : C4AsH9)
+     microPhaseId: -1	- no THAMES Phase
+
+121) Name: chabazite
+        classcode: O
+       molar mass: 506.468
+        DBR index: 33	(GEM Phase : Chabazite)
+     microPhaseId: -1	- no THAMES Phase
+
+122) Name: zeoliteP_Ca
+        classcode: O
+       molar mass: 359.276
+        DBR index: 34	(GEM Phase : ZeoliteP)
+     microPhaseId: -1	- no THAMES Phase
+
+123) Name: straet5.5
+        classcode: O
+       molar mass: 373.285
+        DBR index: 35	(GEM Phase : C2ASH55)
+     microPhaseId: -1	- no THAMES Phase
+
+124) Name: monocarb9
+        classcode: O
+       molar mass: 532.418
+        DBR index: 36	(GEM Phase : C4AcH9)
+     microPhaseId: -1	- no THAMES Phase
+
+125) Name: hemicarb10.5
+        classcode: O
+       molar mass: 537.436
+        DBR index: 37	(GEM Phase : C4Ac0.5H105)
+     microPhaseId: 7	(THAMES Phase : AFmc)
+
+126) Name: hemicarb
+        classcode: O
+       molar mass: 564.459
+        DBR index: 38	(GEM Phase : C4Ac0.5H12)
+     microPhaseId: -1	- no THAMES Phase
+
+127) Name: hemicarb9
+        classcode: O
+       molar mass: 510.413
+        DBR index: 39	(GEM Phase : C4Ac0.5H9)
+     microPhaseId: -1	- no THAMES Phase
+
+128) Name: monocarb
+        classcode: O
+       molar mass: 568.449
+        DBR index: 40	(GEM Phase : C4AcH11)
+     microPhaseId: -1	- no THAMES Phase
+
+129) Name: ettr13
+        classcode: O
+       molar mass: 912.82
+        DBR index: 41	(GEM Phase : C6AsH13)
+     microPhaseId: 8	(THAMES Phase : AFt)
+
+130) Name: ettr9
+        classcode: O
+       molar mass: 840.759
+        DBR index: 42	(GEM Phase : C6AsH9)
+     microPhaseId: -1	- no THAMES Phase
+
+131) Name: Arg
+        classcode: O
+       molar mass: 100.087
+        DBR index: 43	(GEM Phase : Aragonite)
+     microPhaseId: -1	- no THAMES Phase
+
+132) Name: Cal
+        classcode: O
+       molar mass: 100.087
+        DBR index: 44	(GEM Phase : Calcite)
+     microPhaseId: -1	- no THAMES Phase
+
+133) Name: C3FH6
+        classcode: O
+       molar mass: 436.012
+        DBR index: 45	(GEM Phase : C3FH6)
+     microPhaseId: -1	- no THAMES Phase
+
+134) Name: C4FH13
+        classcode: O
+       molar mass: 618.197
+        DBR index: 46	(GEM Phase : C4FH13)
+     microPhaseId: -1	- no THAMES Phase
+
+135) Name: C3FS0.84H4.32
+        classcode: O
+       molar mass: 456.217
+        DBR index: 47	(GEM Phase : C3FS0.84H4.32)
+     microPhaseId: -1	- no THAMES Phase
+
+136) Name: C3FS1.34H3.32
+        classcode: O
+       molar mass: 468.244
+        DBR index: 48	(GEM Phase : C3FS1.34H3.32)
+     microPhaseId: -1	- no THAMES Phase
+
+137) Name: Fe-hemicarb
+        classcode: O
+       molar mass: 586.156
+        DBR index: 49	(GEM Phase : C4Fc05H10)
+     microPhaseId: -1	- no THAMES Phase
+
+138) Name: Femonocarb
+        classcode: O
+       molar mass: 644.191
+        DBR index: 50	(GEM Phase : C4FcH12)
+     microPhaseId: -1	- no THAMES Phase
+
+139) Name: Dis-Dol
+        classcode: O
+       molar mass: 184.401
+        DBR index: 51	(GEM Phase : Dolomite-dis)
+     microPhaseId: -1	- no THAMES Phase
+
+140) Name: Ord-Dol
+        classcode: O
+       molar mass: 184.401
+        DBR index: 52	(GEM Phase : Dolomite-ord)
+     microPhaseId: -1	- no THAMES Phase
+
+141) Name: Lim
+        classcode: O
+       molar mass: 56.0774
+        DBR index: 53	(GEM Phase : lime)
+     microPhaseId: -1	- no THAMES Phase
+
+142) Name: Portlandite
+        classcode: O
+       molar mass: 74.0927
+        DBR index: 54	(GEM Phase : Portlandite)
+     microPhaseId: 5	(THAMES Phase : Portlandite)
+
+143) Name: Anh
+        classcode: O
+       molar mass: 136.143
+        DBR index: 55	(GEM Phase : Anhydrite)
+     microPhaseId: -1	- no THAMES Phase
+
+144) Name: Gp
+        classcode: O
+       molar mass: 172.173
+        DBR index: 56	(GEM Phase : Gypsum)
+     microPhaseId: -1	- no THAMES Phase
+
+145) Name: hemihydrate
+        classcode: O
+       molar mass: 145.15
+        DBR index: 57	(GEM Phase : hemihydrate)
+     microPhaseId: -1	- no THAMES Phase
+
+146) Name: thaumasite
+        classcode: O
+       molar mass: 622.621
+        DBR index: 58	(GEM Phase : thaumasite)
+     microPhaseId: -1	- no THAMES Phase
+
+147) Name: Fe
+        classcode: O
+       molar mass: 55.845
+        DBR index: 59	(GEM Phase : Iron)
+     microPhaseId: -1	- no THAMES Phase
+
+148) Name: FeCO3(pr)
+        classcode: O
+       molar mass: 115.854
+        DBR index: 60	(GEM Phase : Fe-carbonate)
+     microPhaseId: -1	- no THAMES Phase
+
+149) Name: Sd
+        classcode: O
+       molar mass: 115.854
+        DBR index: 61	(GEM Phase : Siderite)
+     microPhaseId: -1	- no THAMES Phase
+
+150) Name: Hem
+        classcode: O
+       molar mass: 159.688
+        DBR index: 62	(GEM Phase : Hematite)
+     microPhaseId: -1	- no THAMES Phase
+
+151) Name: Mag
+        classcode: O
+       molar mass: 231.533
+        DBR index: 63	(GEM Phase : Magnetite)
+     microPhaseId: -1	- no THAMES Phase
+
+152) Name: Fe(OH)3(am)
+        classcode: O
+       molar mass: 106.867
+        DBR index: 64	(GEM Phase : Ferrihyd-am)
+     microPhaseId: -1	- no THAMES Phase
+
+153) Name: FeOOHmic
+        classcode: O
+       molar mass: 88.8518
+        DBR index: 65	(GEM Phase : Ferrihyd-mc)
+     microPhaseId: -1	- no THAMES Phase
+
+154) Name: Gt
+        classcode: O
+       molar mass: 88.8518
+        DBR index: 66	(GEM Phase : Goethite)
+     microPhaseId: 11	(THAMES Phase : Goethite)
+
+155) Name: Pyrrhotite
+        classcode: O
+       molar mass: 82.3275
+        DBR index: 67	(GEM Phase : Pyrrhotite)
+     microPhaseId: 2	(THAMES Phase : Pyrrhotite)
+
+156) Name: Tro
+        classcode: O
+       molar mass: 87.912
+        DBR index: 68	(GEM Phase : Troilite)
+     microPhaseId: 12	(THAMES Phase : Troilite)
+
+157) Name: Melanterite
+        classcode: O
+       molar mass: 278.017
+        DBR index: 69	(GEM Phase : Melanterite)
+     microPhaseId: -1	- no THAMES Phase
+
+158) Name: C2AS
+        classcode: O
+       molar mass: 274.2
+        DBR index: 70	(GEM Phase : C2AS(am))
+     microPhaseId: -1	- no THAMES Phase
+
+159) Name: CA
+        classcode: O
+       molar mass: 158.039
+        DBR index: 71	(GEM Phase : CA)
+     microPhaseId: -1	- no THAMES Phase
+
+160) Name: CA2
+        classcode: O
+       molar mass: 260
+        DBR index: 72	(GEM Phase : CA2)
+     microPhaseId: -1	- no THAMES Phase
+
+161) Name: CA2S
+        classcode: O
+       molar mass: 320.084
+        DBR index: 73	(GEM Phase : CA2S(am))
+     microPhaseId: -1	- no THAMES Phase
+
+162) Name: CAS
+        classcode: O
+       molar mass: 218.123
+        DBR index: 74	(GEM Phase : CAS(am))
+     microPhaseId: -1	- no THAMES Phase
+
+163) Name: CAS2
+        classcode: O
+       molar mass: 278.207
+        DBR index: 75	(GEM Phase : CAS2(am))
+     microPhaseId: -1	- no THAMES Phase
+
+164) Name: K6A2S
+        classcode: O
+       molar mass: 829.183
+        DBR index: 76	(GEM Phase : K6A2S(am))
+     microPhaseId: -1	- no THAMES Phase
+
+165) Name: K2SO4
+        classcode: O
+       molar mass: 174.261
+        DBR index: 77	(GEM Phase : arcanite)
+     microPhaseId: -1	- no THAMES Phase
+
+166) Name: syngenite
+        classcode: O
+       molar mass: 328.419
+        DBR index: 78	(GEM Phase : syngenite)
+     microPhaseId: -1	- no THAMES Phase
+
+167) Name: K2O
+        classcode: O
+       molar mass: 94.196
+        DBR index: 79	(GEM Phase : K-oxide)
+     microPhaseId: -1	- no THAMES Phase
+
+168) Name: Mgs
+        classcode: O
+       molar mass: 84.314
+        DBR index: 80	(GEM Phase : Magnesite)
+     microPhaseId: -1	- no THAMES Phase
+
+169) Name: Per
+        classcode: O
+       molar mass: 40.3044
+        DBR index: 81	(GEM Phase : periclase)
+     microPhaseId: -1	- no THAMES Phase
+
+170) Name: Brc
+        classcode: O
+       molar mass: 58.3197
+        DBR index: 82	(GEM Phase : Brucite)
+     microPhaseId: -1	- no THAMES Phase
+
+171) Name: Na2SO4
+        classcode: O
+       molar mass: 142.044
+        DBR index: 83	(GEM Phase : thenardite)
+     microPhaseId: -1	- no THAMES Phase
+
+172) Name: natrolite
+        classcode: O
+       molar mass: 380.224
+        DBR index: 84	(GEM Phase : Natrolite)
+     microPhaseId: -1	- no THAMES Phase
+
+173) Name: zeoliteX
+        classcode: O
+       molar mass: 425.846
+        DBR index: 85	(GEM Phase : ZeoliteX)
+     microPhaseId: -1	- no THAMES Phase
+
+174) Name: zeoliteY
+        classcode: O
+       molar mass: 548.4
+        DBR index: 86	(GEM Phase : ZeoliteY)
+     microPhaseId: -1	- no THAMES Phase
+
+175) Name: Na2O
+        classcode: O
+       molar mass: 61.979
+        DBR index: 87	(GEM Phase : Na-oxide)
+     microPhaseId: -1	- no THAMES Phase
+
+176) Name: Sulfur
+        classcode: O
+       molar mass: 32.067
+        DBR index: 88	(GEM Phase : Sulphur)
+     microPhaseId: -1	- no THAMES Phase
+
+177) Name: Qtz
+        classcode: O
+       molar mass: 60.0843
+        DBR index: 89	(GEM Phase : Quartz)
+     microPhaseId: 3	(THAMES Phase : Aggregate)
+
+178) Name: Amor-Sl
+        classcode: O
+       molar mass: 60.0843
+        DBR index: 90	(GEM Phase : Silica-amorph)
+     microPhaseId: -1	- no THAMES Phase
+
+179) Name: Sfume
+        classcode: O
+       molar mass: 60.0843
+        DBR index: 91	(GEM Phase : Sfume)
+     microPhaseId: -1	- no THAMES Phase
+
+List of GEM Phases:
+numGEMPhases_ = 92
+GEMPhase_Id) GEMPhaseName_[i] / GEMPhaseClassCode_[i]
+
+0) Name: aq_gen
+        classcode: a
+
+1) Name: gas_gen
+        classcode: g
+
+2) Name: C3(AF)S0.84H
+        classcode: s
+
+3) Name: CSHQ
+        classcode: s
+
+4) Name: ettr-AlFe
+        classcode: s
+
+5) Name: monosulf-AlFe
+        classcode: s
+
+6) Name: straet
+        classcode: s
+
+7) Name: ettr
+        classcode: s
+
+8) Name: SO4_CO3_AFt
+        classcode: s
+
+9) Name: hydrotalc-pyro
+        classcode: s
+
+10) Name: MSH
+        classcode: s
+
+11) Name: Al(OH)3am
+        classcode: s
+
+12) Name: Al(OH)3mic
+        classcode: s
+
+13) Name: Gibbsite
+        classcode: s
+
+14) Name: Mullite
+        classcode: s
+
+15) Name: Kaolinite
+        classcode: s
+
+16) Name: Graphite
+        classcode: s
+
+17) Name: Mayenite
+        classcode: s
+
+18) Name: Belite
+        classcode: s
+
+19) Name: Aluminate
+        classcode: s
+
+20) Name: Alite
+        classcode: s
+
+21) Name: Ferrite
+        classcode: s
+
+22) Name: C2AH75
+        classcode: s
+
+23) Name: C3AH6
+        classcode: s
+
+24) Name: C4AH11
+        classcode: s
+
+25) Name: C4AH13
+        classcode: s
+
+26) Name: C4AH19
+        classcode: s
+
+27) Name: CAH10
+        classcode: s
+
+28) Name: C4AsH105
+        classcode: s
+
+29) Name: C4AsH12
+        classcode: s
+
+30) Name: C4AsH14
+        classcode: s
+
+31) Name: C4AsH16
+        classcode: s
+
+32) Name: C4AsH9
+        classcode: s
+
+33) Name: Chabazite
+        classcode: s
+
+34) Name: ZeoliteP
+        classcode: s
+
+35) Name: C2ASH55
+        classcode: s
+
+36) Name: C4AcH9
+        classcode: s
+
+37) Name: C4Ac0.5H105
+        classcode: s
+
+38) Name: C4Ac0.5H12
+        classcode: s
+
+39) Name: C4Ac0.5H9
+        classcode: s
+
+40) Name: C4AcH11
+        classcode: s
+
+41) Name: C6AsH13
+        classcode: s
+
+42) Name: C6AsH9
+        classcode: s
+
+43) Name: Aragonite
+        classcode: s
+
+44) Name: Calcite
+        classcode: s
+
+45) Name: C3FH6
+        classcode: s
+
+46) Name: C4FH13
+        classcode: s
+
+47) Name: C3FS0.84H4.32
+        classcode: s
+
+48) Name: C3FS1.34H3.32
+        classcode: s
+
+49) Name: C4Fc05H10
+        classcode: s
+
+50) Name: C4FcH12
+        classcode: s
+
+51) Name: Dolomite-dis
+        classcode: s
+
+52) Name: Dolomite-ord
+        classcode: s
+
+53) Name: lime
+        classcode: s
+
+54) Name: Portlandite
+        classcode: s
+
+55) Name: Anhydrite
+        classcode: s
+
+56) Name: Gypsum
+        classcode: s
+
+57) Name: hemihydrate
+        classcode: s
+
+58) Name: thaumasite
+        classcode: s
+
+59) Name: Iron
+        classcode: s
+
+60) Name: Fe-carbonate
+        classcode: s
+
+61) Name: Siderite
+        classcode: s
+
+62) Name: Hematite
+        classcode: s
+
+63) Name: Magnetite
+        classcode: s
+
+64) Name: Ferrihyd-am
+        classcode: s
+
+65) Name: Ferrihyd-mc
+        classcode: s
+
+66) Name: Goethite
+        classcode: s
+
+67) Name: Pyrrhotite
+        classcode: s
+
+68) Name: Troilite
+        classcode: s
+
+69) Name: Melanterite
+        classcode: s
+
+70) Name: C2AS(am)
+        classcode: s
+
+71) Name: CA
+        classcode: s
+
+72) Name: CA2
+        classcode: s
+
+73) Name: CA2S(am)
+        classcode: s
+
+74) Name: CAS(am)
+        classcode: s
+
+75) Name: CAS2(am)
+        classcode: s
+
+76) Name: K6A2S(am)
+        classcode: s
+
+77) Name: arcanite
+        classcode: s
+
+78) Name: syngenite
+        classcode: s
+
+79) Name: K-oxide
+        classcode: s
+
+80) Name: Magnesite
+        classcode: s
+
+81) Name: periclase
+        classcode: s
+
+82) Name: Brucite
+        classcode: s
+
+83) Name: thenardite
+        classcode: s
+
+84) Name: Natrolite
+        classcode: s
+
+85) Name: ZeoliteX
+        classcode: s
+
+86) Name: ZeoliteY
+        classcode: s
+
+87) Name: Na-oxide
+        classcode: s
+
+88) Name: Sulphur
+        classcode: s
+
+89) Name: Quartz
+        classcode: s
+
+90) Name: Silica-amorph
+        classcode: s
+
+91) Name: Sfume
+        classcode: s
+
+List of Microstructure Phases (THAMES Phases):
+numMicroPhases_ = 13
+microPhase_Id) microPhaseName_[i] / microPhaseId_[i] / randomGrowth_[i] / affinity_[i][j] / growthTemplate_[i][j] / microPhasePorosity_[i]
+
+0) Name: Void
+                     id: 0
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate:  - no templates
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components:  - no DC components
+
+1) Name: Electrolyte
+                     id: 1
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate:  - no templates
+              porosity: 1
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 0(Al(SO4)+) 1(Al(SO4)2-) 2(Al+3) 3(AlO+) 4(AlO2-) 5(AlO2H@) 6(AlOH+2) 7(AlHSiO3+2) 8(AlSiO5-3) 9(Ca(CO3)@) 10(Ca(HCO3)+) 11(Ca(SO4)@) 12(Ca+2) 13(CaOH+) 15(CaSiO3@) 16(Fe(CO3)@) 17(Fe(HCO3)+) 18(Fe(HSO4)+) 19(Fe(SO4)@) 20(Fe+2) 21(FeOH+) 22(Fe(HSO4)+2) 23(Fe(SO4)+) 24(Fe(SO4)2-) 25(Fe+3) 26(Fe2(OH)2+4) 27(Fe3(OH)4+5) 28(FeO+) 29(FeO2-) 30(FeO2H@) 31(FeOH+2) 32(FeHSiO3+2) 33(K(SO4)-) 34(K+) 35(KOH@) 36(Mg(CO3)@) 37(Mg(HCO3)+) 38(Mg+2) 39(MgOH+) 40(MgSO4@) 41(Mg(HSiO3)+) 42(MgSiO3@) 43(Na(CO3)-) 44(Na(HCO3)@) 45(Na(SO4)-) 46(Na+) 47(NaOH@) 48(HSiO3-) 49(SiO2@) 50(SiO3-2) 51(CO2@) 52(CO3-2) 53(HCO3-) 54(CH4@) 55(H2@) 56(N2@) 57(O2@) 58(S2O3-2) 59(HSO3-) 60(SO3-2) 61(HSO4-) 62(SO4-2) 63(H2S@) 64(HS-) 65(S-2) 66(OH-) 67(H+) 68(H2O@)
+
+2) Name: Pyrrhotite
+                     id: 2
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2: 1   Pyrrhotite
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 2(Pyrrhotite)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 155(Pyrrhotite)
+
+3) Name: Aggregate
+                     id: 3
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3: 1   Aggregate
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 3(Aggregate)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 177(Qtz)
+
+4) Name: CSHQ
+                     id: 4
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3: 1   Aggregate
+                  affinity to 4: 1   CSHQ
+                  affinity to 5: 1   Portlandite
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 3(Aggregate) 4(CSHQ) 5(Portlandite)
+              porosity: 0.426817
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 79(CSHQ-JenD) 80(CSHQ-JenH) 81(CSHQ-TobD) 82(CSHQ-TobH) 83(KSiOH) 84(NaSiOH)
+
+5) Name: Portlandite
+                     id: 5
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3: 1   Aggregate
+                  affinity to 4: 1   CSHQ
+                  affinity to 5: 1   Portlandite
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 3(Aggregate) 4(CSHQ) 5(Portlandite)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 142(Portlandite)
+
+6) Name: AFm
+                     id: 6
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6: 1   AFm
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 6(AFm)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 111(C3AH6) 112(C4AH11) 113(C4AH13) 114(C4AH19)
+
+7) Name: AFmc
+                     id: 7
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6: 1   AFm
+                  affinity to 7: 1   AFmc
+                  affinity to 8: 1   AFt
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 6(AFm) 7(AFmc) 8(AFt)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 125(hemicarb10.5) 126(hemicarb) 127(hemicarb9) 128(monocarb) 124(monocarb9)
+
+8) Name: AFt
+                     id: 8
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8: 1   AFt
+                  affinity to 9: 1   Monosulfate
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 8(AFt) 9(Monosulfate)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 129(ettr13) 130(ettr9) 93(tricarb03) 94(ettr03_ss) 91(ettr) 92(ettr30) 85(ettr05) 86(Fe-ettr05)
+
+9) Name: Monosulfate
+                     id: 9
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8: 1   AFt
+                  affinity to 9: 1   Monosulfate
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 8(AFt) 9(Monosulfate)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 116(monosulf10.5) 117(monosulf12) 118(monosulf14) 119(monosulf16) 120(monosulf9) 87(monosulf1205) 88(Fe-monosulf05)
+
+10) Name: Hydrotalcite
+                     id: 10
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10: 1   Hydrotalcite
+                  affinity to 11t: 0
+                  affinity to 12t: 0
+        growthTemplate: 10(Hydrotalcite)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 95(Mg3AlC0.5OH) 96(Mg3FeC0.5OH)
+
+11) Name: Goethite
+                     id: 11
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3: 1   Aggregate
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11: 1   Goethite
+                  affinity to 12t: 0
+        growthTemplate: 3(Aggregate) 11(Goethite)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 154(Gt)
+
+12) Name: Troilite
+                     id: 12
+               affinity: 
+                  affinity to 0t: 0
+                  affinity to 1t: 0
+                  affinity to 2t: 0
+                  affinity to 3t: 0
+                  affinity to 4t: 0
+                  affinity to 5t: 0
+                  affinity to 6t: 0
+                  affinity to 7t: 0
+                  affinity to 8t: 0
+                  affinity to 9t: 0
+                  affinity to 10t: 0
+                  affinity to 11t: 0
+                  affinity to 12: 1   Troilite
+        growthTemplate: 12(Troilite)
+              porosity: 0
+            impurities: 
+                  k2o_[i]: 0
+                 na2o_[i]: 0
+                  mgo_[i]: 0
+                  so3_[i]: 0
+        DCs components: 156(Tro)
+
+        equivalence microPhaseId/DCId/GEMPhaseId:
+
+   1	pname: Electrolyte
+          GEMPhaseId: 0	GEMPhaseName_: aq_gen
+          DCId      : 0	DCName_: Al(SO4)+
+
+   2	pname: Pyrrhotite
+          GEMPhaseId: 67	GEMPhaseName_: Pyrrhotite
+          DCId      : 155	DCName_: Pyrrhotite
+
+   3	pname: Aggregate
+          GEMPhaseId: 89	GEMPhaseName_: Quartz
+          DCId      : 177	DCName_: Qtz
+
+   4	pname: CSHQ
+          GEMPhaseId: 3	GEMPhaseName_: CSHQ
+          DCId      : 79	DCName_: CSHQ-JenD
+
+   5	pname: Portlandite
+          GEMPhaseId: 54	GEMPhaseName_: Portlandite
+          DCId      : 142	DCName_: Portlandite
+
+   6	pname: AFm
+          GEMPhaseId: 23	GEMPhaseName_: C3AH6
+          DCId      : 111	DCName_: C3AH6
+
+   7	pname: AFmc
+          GEMPhaseId: 37	GEMPhaseName_: C4Ac0.5H105
+          DCId      : 125	DCName_: hemicarb10.5
+
+   8	pname: AFt
+          GEMPhaseId: 41	GEMPhaseName_: C6AsH13
+          DCId      : 129	DCName_: ettr13
+
+   9	pname: Monosulfate
+          GEMPhaseId: 28	GEMPhaseName_: C4AsH105
+          DCId      : 116	DCName_: monosulf10.5
+
+   10	pname: Hydrotalcite
+          GEMPhaseId: 9	GEMPhaseName_: hydrotalc-pyro
+          DCId      : 95	DCName_: Mg3AlC0.5OH
+
+   11	pname: Goethite
+          GEMPhaseId: 66	GEMPhaseName_: Goethite
+          DCId      : 154	DCName_: Gt
+
+   12	pname: Troilite
+          GEMPhaseId: 68	GEMPhaseName_: Troilite
+          DCId      : 156	DCName_: Tro
+

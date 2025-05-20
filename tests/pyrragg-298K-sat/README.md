@@ -1,4 +1,4 @@
-## pyrragg-298K-sat_v3.0.0
+## pyrragg-298K-sat
 
 The input files in this directory will simulate the redox reactions for an
 aggregate particle containing some pyrrhotite under saturated conditions at

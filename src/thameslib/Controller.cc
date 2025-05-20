@@ -157,7 +157,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                           "Could not append");
     }
     outfs << "Time(h)";
-    for (int i = 0; i < numICs_; i++) {
+    for (int i = 0; i < chemSys_->getNumICs(); i++) {
       outfs << "," << chemSys_->getICName(i);
     }
     outfs << ",Ca/Si" << endl;
@@ -1884,7 +1884,7 @@ void Controller::parseDoc(const string &docName) {
     // Input times are conventionally in days
     // Immediately convert to hours within model
     double finalTime = cdi.value();
-    finalTime *= (1.0 / DAY_PER_H);
+    finalTime *= (H_PER_DAY);
 
     // Input times are conventionally in days
     // Immediately convert to hours within model
@@ -1893,7 +1893,7 @@ void Controller::parseDoc(const string &docName) {
     int outtimenum = cdi.value().size();
     for (int i = 0; i < outtimenum; ++i) {
       testTime = cdi.value()[i];
-      testTime *= (1.0 / DAY_PER_H);
+      testTime *= (H_PER_DAY);
       outputTime_.push_back(testTime);
     }
 

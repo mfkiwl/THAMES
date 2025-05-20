@@ -1,8 +1,8 @@
-## pyrrcem-296K-sat
+## pyrrcem-298K-sat
 
-The input files in this directory will simulate the hydration of a w/c = 0.45 paste
-of cement CCRL 140 at 296 K under saturated conditions with 1.2 % by volume fine-grained
-pyrrhotite replacing the cement.
+The input files in this directory will simulate the hydration and redox
+reactions for a portland cement paste with 10% by mass replacement with
+pyrrhotite at 298 K under saturated conditions.
 
 The system is 100 x 100 x 100 voxels, with each voxel being 1 micrometer in
 dimension.

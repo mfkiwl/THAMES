@@ -270,7 +270,7 @@ void ParrotKillohModel::calculateKineticStep(const double timestep,
 
       // double rate_ini = rate;
 
-      rate *= (pfk_ * rhFactor_ * arrhenius_ * DAY_PER_H); // rate is R @ t-1
+      rate *= (pfk_ * rhFactor_ * arrhenius_ / H_PER_DAY); // rate is R @ t-1
 
       double prod = rate * timestep;
 
