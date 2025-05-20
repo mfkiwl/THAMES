@@ -5271,9 +5271,9 @@ void Lattice::writeDamageLattice(const double curtime,
 
 void Lattice::writeLatticePNG(const double curtime,
                               const TimeStruct resolvedtime) {
-  int i, j, k;
+  int i, j;
   string oppmName(jobRoot_);
-  string opngname(jobRoot_);
+  string opngName(jobRoot_);
 
   vector<double> dumvec;
   vector<int> idumvec;
@@ -5293,7 +5293,6 @@ void Lattice::writeLatticePNG(const double curtime,
   ostringstream ostrT;
   ostrT << setprecision(3) << temperature_;
   string tempstr(ostrT.str());
-  string buff;
 
   ostringstream ostrY, ostrD, ostrH, ostrM;
   ostrY << setfill('0') << setw(3) << resolvedtime.years;
@@ -5403,7 +5402,7 @@ void Lattice::writeLatticePNG(const double curtime,
 
 void Lattice::writeDamageLatticePNG(const double curtime,
                                     const TimeStruct resolvedtime) {
-  int i, j, k;
+  int i, j;
   string oppmName(jobRoot_);
   string opngName(jobRoot_);
 

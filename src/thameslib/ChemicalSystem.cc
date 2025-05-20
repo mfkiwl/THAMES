@@ -25,7 +25,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   nodeStatus_ = NEED_GEM_AIA;
   nodeHandle_ = 0;
   iterDone_ = 0;
-  timesGEMFailed_ = 0;
+  timesGEMFailed_ = timesGEMWarned_ = 0;
   maxGEMFails_ = 100000000; // 1000; // = 3;
 
   sulfateAttackTime_ = 1.0e10;
@@ -2120,45 +2120,11 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
 
 int ChemicalSystem::calculateState(double time, bool isFirst = false,
                                    int cyc = 0) {
-  // int status = 0;
-  string msg; // , iniStrNodeStatus, endStrNodeStatus;
-
-  // isFirst = true;
-
-  // vector<double> oDCMoles;
-  // oDCMoles.clear();
-  // oDCMoles.resize(numDCs_, 0.0);
-  // for (int i = 0; i < numDCs_; i++) {
-  //   oDCMoles[i] = DCMoles_[i];
-  // }
-
-  // writeICMoles();
-  // writeDCMoles();
+  string msg;
 
   vector<double> microPhaseVolumes = getMicroPhaseVolume();
 
   nodeStatus_ = NEED_GEM_AIA;
-  // int iniNodeStatus = nodeStatus_;
-  // if (iniNodeStatus == 1) {
-  //   iniStrNodeStatus = "NEED_GEM_AIA";
-  // } else if (iniNodeStatus == 5) {
-  //   iniStrNodeStatus = "NEED_GEM_SIA";
-  // }
-  // ALL ICs/DCs in the system are set to zero in Lattice constructor before
-  // to call normalizePhaseMasses() DCs are updated in
-  // Lattice::normalizePhaseMasses only the ICMoles_ that are less than 10^-9
-  // after the first call of calculateKineticStep(...) are set to 10^-9
-
-  if (isFirst) {
-    checkICMoles();
-  }
-
-  //  cout << endl << "chemSys after checkICMoles for cyc = " << cyc << " :
-  //  ICMoles_/ICName_" << endl; for(int i = 0; i < numICs_; i++){
-  //      cout << i << "\t" << ICMoles_[i] << "\t" << ICName_[i] << endl;
-  //  }
-  //  writeDCMoles();
-  //  exit(0);
 
   ///
   /// Next function loads the input data for the THAMES node into the
@@ -2176,10 +2142,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   bool doAttack = (time >= beginAttackTime_) ? true : false;
 
-  // cout << endl << "  ----> ChemicalSystem::calculateState -
-  // time/beginAttackTime_/doAttack : "
-  //      << time << " / " << beginAttackTime_ << " / " << doAttack << endl;
-
   // Check and set chemical conditions on electrolyte and gas phase
   setElectrolyteComposition(isFirst, doAttack, cyc);
   setGasComposition(isFirst, doAttack);
@@ -2189,17 +2151,9 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     DCLowerLimit_[beliteDCId_] = DCMoles_[beliteDCId_];
     DCLowerLimit_[aluminateDCId_] = DCMoles_[aluminateDCId_];
     DCLowerLimit_[ferriteDCId_] = DCMoles_[ferriteDCId_];
-    // cout << endl
-    //      << "  ----> ChemicalSystem::calculateState -  DCLowerLimit_:"
-    //      << endl;
-    // for (int i = 0; i < numDCs_; i++) {
-    //   cout << "        i/DCLowerLimit_[i]/DCName_[i] -0- : " << i
-    //        << " / " << DCLowerLimit_[i]
-    //        << " / " << DCName_[i] << endl;
-    // }
 
-    /*
-    cout << endl // check!
+    /* check!
+    cout << endl
          << "  ----> ChemicalSystem::calculateState -  ICMoles_ : " << endl;
     for (int i = 0; i < numICs_; i++) {
       cout << "        i/ICMoles_/ICName_[i] -i- : " << i << " / " <<
@@ -2216,21 +2170,26 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     */
   }
 
+  // All the ICMoles_ that are less than 10^-9 are set to 10^-9
+  if (isFirst) {
+    checkICMoles();
+  }
+
   if (verbose_) {
     cout << endl
          << "ChemicalSystem::calculateState Entering GEM_from_MT cyc = " << cyc
          << endl;
     cout << "DCMoles:" << endl;
     for (int i = 0; i < numDCs_; ++i) {
-      cout << "    " << DCName_[i] << ": " << DCMoles_[i] << " mol, ["
-           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "] mol" << endl;
+      cout << "    " << i << "   " << DCName_[i] << ": " << DCMoles_[i] << ", ["
+           << DCLowerLimit_[i] << ", " << DCUpperLimit_[i] << "]" << endl;
     }
     cout.flush();
-    // cout << "ICMoles:" << endl;
-    // for (int i = 0; i < numICs_; ++i) {
-    //   cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
-    // }
-    // cout.flush();
+    cout << "ICMoles:" << endl;
+    for (int i = 0; i < numICs_; ++i) {
+      cout << "    " << ICName_[i] << ": " << ICMoles_[i] << endl;
+    }
+    cout.flush();
   }
 
   node_->GEM_from_MT(nodeHandle_, nodeStatus_, T_, P_, Vs_, Ms_, ICMoles_,
@@ -2302,11 +2261,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
 
   nodeStatus_ = node_->GEM_run(true);
 
-  if (verbose_) {
-    cout << "Done!  nodeStatus is " << nodeStatus_ << endl;
-    cout.flush();
-  }
-
   if (!(nodeStatus_ == OK_GEM_AIA || nodeStatus_ == OK_GEM_SIA)) {
     bool dothrow = false;
     if (verbose_) {
@@ -2321,8 +2275,19 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
       dothrow = false;
       break;
     case BAD_GEM_AIA:
-      msg = "    Untrustworthy result with auto initial approx (AIA)",
-      cerr << msg << endl;
+      timesGEMWarned_++;
+      cout << "  ChemicalSystem::calculateState - cyc = " << cyc
+           << " : GEM_run OK  ->  GEM_run has failed " << timesGEMFailed_
+           << " consecutive times before to find this solution "
+              "(timesGEMWarned_ = "
+           << timesGEMWarned_ << ")" << endl;
+
+      timesGEMFailed_ = 0;
+
+      if (verbose_) {
+        msg = "    Untrustworthy result with auto initial approx (AIA)";
+        cerr << msg << endl;
+      }
       dothrow = false;
       break;
     case ERR_GEM_AIA:
@@ -2383,8 +2348,10 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     // " << nodeStatus_ << " [" << finStrNodeStatus << "]" << endl;
 
     cout << "  ChemicalSystem::calculateState - cyc = " << cyc
-         << " : OK & GEM_run has failed " << timesGEMFailed_
-         << " consecutive times before to find this solution" << endl;
+         << " : GEM_run OK  ->  GEM_run has failed " << timesGEMFailed_
+         << " consecutive times before to find this solution "
+            "(timesGEMWarned_ = "
+         << timesGEMWarned_ << ")" << endl;
 
     // cout << "    ChemicalSystem::calculateState - solution for kinetic
     // controlled phases:" << endl; for (int i = 0; i < numMicroPhases_; i++) {
@@ -2646,19 +2613,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     }
   }
 
-  // cout << endl << "ChemicalSystem::calculateState-2 waterVolume_ = "
-  //      << microPhaseVolume_[1] << "   waterMoles_ = " << DCMoles_[waterDCId_]
-  //      << endl;
-  // cout << endl << "ChemicalSystem::calculateState initMicroVolume_ = " <<
-  // initMicroVolume_ << endl; double waterDensity = waterMollarMass_ /
-  // waterMollarVol_ / 1.0e6; // g/cm3 double waterTotMass_0 =
-  // (microPhaseVolume_[1]/initMicroVolume_) * waterDensity * 100 /
-  // initSolidMass_; double waterTotMoles_0 = waterTotMass_0 / waterMollarMass_;
-  // // mol cout << endl << "ChemicalSystem::calculateState waterMolesCalc_M = "
-  // << waterTotMoles_0 << endl; cout << endl << "ChemicalSystem::calculateState
-  // waterMolesCalc_V = " <<
-  //         microPhaseVolume_[1] / waterMollarVol_ << endl;
-
   if (verbose_) {
     cout << "GEM volume change = "
          << 100.0 * (microVolume_ - initMicroVolume_) / (initMicroVolume_)
@@ -2670,8 +2624,6 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout << "  ChemicalSystem::calculateState - cyc = " << cyc
          << " => initMicroVolume_ < microVolume_ : " << initMicroVolume_
          << " < " << microVolume_ << endl;
-    // initMicroVolume_ = microVolume_;
-    // newMicroVolume_ = microVolume_;
   }
 
   if (verbose_) {
@@ -2679,9 +2631,48 @@ int ChemicalSystem::calculateState(double time, bool isFirst = false,
     cout.flush();
   }
 
-  setMicroPhaseSI(time);
+  setMicroPhaseSI();
 
   return timesGEMFailed_;
+}
+
+void ChemicalSystem::setMicroPhaseSI() {
+
+  microPhaseSI_.clear();
+  microPhaseSI_.resize(numMicroPhases_, 0.0);
+
+  try {
+    double aveSI = 0.0;
+    double moles = 0.0;
+    double tmoles = 0.0;
+    vector<int> microPhaseDCMembers;
+    int sizeMicroPhaseDCMembers;
+    string pname;
+    int newDCId;
+
+    for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
+      pname = microPhaseName_[i];
+      aveSI = moles = 0.0;
+      microPhaseDCMembers = getMicroPhaseDCMembers(i);
+      sizeMicroPhaseDCMembers = microPhaseDCMembers.size();
+      for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
+        newDCId = microPhaseDCMembers.at(ii);
+        tmoles = DCMoles_[newDCId];
+
+        aveSI += (node_->DC_a(newDCId) * tmoles);
+        moles += tmoles;
+      }
+      if (moles > 0.0) {
+        aveSI = aveSI / moles;
+      }
+      microPhaseSI_.at(i) = aveSI;
+    }
+  } catch (EOBException eex) {
+    eex.printException();
+    exit(1);
+  }
+
+  return;
 }
 
 void ChemicalSystem::setMicroPhaseSI(double time) {
@@ -3619,54 +3610,42 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
   if (fixedSolutionComposition_.size() > 0)
     fixed = true;
 
-  if (initial || fixed) {
-    if (initial && fixed) {
-      cout << endl << "error : check the chemistry.json file!" << endl;
-      cout << endl
-           << "if \"electrolyte_conditions\" is present, \"condition\" "
-              "can be only one of the next combinations:"
-           << endl;
-      cout << "\"initial\"" << endl;
-      cout << "\"fixed\"" << endl;
-      cout << "\"attack\"" << endl;
-      cout << "\"initial\" & \"attack\"" << endl;
-      cout << "\"fixed\" & \"attack\"" << endl;
-      cout << endl << "stop" << endl;
-      exit(0);
-    } else if (initial) {
-      cout << "   - hydration starts with a given electrolyte composition :"
-           << endl;
-      cout << "      condition - initial" << endl;
-      map<int, double>::iterator it = initialSolutionComposition_.begin();
-      while (it != initialSolutionComposition_.end()) {
-        DCId = it->first;
-        if (DCId != waterDCId_) {
-          DCconc = it->second;
-          cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-               << "   DCconc = " << DCconc << " mol/kgw" << endl;
-        }
-        it++;
+  if (initial) {
+    cout << "   - hydration starts with a given electrolyte composition :"
+         << endl;
+    cout << "      condition - initial" << endl;
+    map<int, double>::iterator it = initialSolutionComposition_.begin();
+    while (it != initialSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != waterDCId_) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
       }
-    } else { // fixed
-      cout << "   - during hydration the electrolyte has a fixed composition :"
-           << endl;
-      cout << "      condition - fixed" << endl;
-      map<int, double>::iterator it = fixedSolutionComposition_.begin();
-      while (it != fixedSolutionComposition_.end()) {
-        DCId = it->first;
-        if (DCId != waterDCId_) {
-          DCconc = it->second;
-          cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-               << "   DCconc = " << DCconc << " mol/kgw" << endl;
-        }
-        it++;
-      }
+      it++;
     }
-  } else {
+  }
+  if (fixed) {
+    cout << "   - during hydration the electrolyte has a fixed composition :"
+         << endl;
+    cout << "      condition - fixed" << endl;
+    map<int, double>::iterator it = fixedSolutionComposition_.begin();
+    while (it != fixedSolutionComposition_.end()) {
+      DCId = it->first;
+      if (DCId != waterDCId_) {
+        DCconc = it->second;
+        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+             << "   DCconc = " << DCconc << " mol/kgw" << endl;
+      }
+      it++;
+    }
+  }
+  if (!fixed && !initial) {
     cout << "   - hydration starts without any dissolved ionic species (pure "
             "water)"
          << endl;
   }
+
   if (attackSolutionComposition_.size() > 0) {
     cout << "   - after hydration, simulation continues with an attack - "
             "solution composition being :"
@@ -3684,53 +3663,6 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
     }
   }
 
-  /*
-  if (initialSolutionComposition_.size() > 0) {
-    cout << "   - simulation starts with given solution composition :" << endl;
-    cout << "      electrolyte - initial" << endl;
-    map<int, double>::iterator it = initialSolutionComposition_.begin();
-    while (it != initialSolutionComposition_.end()) {
-      DCId = it->first;
-      if (DCId != waterDCId_) {
-        DCconc = it->second;
-        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-             << "   DCconc = " << DCconc << " mol/kgw" << endl;
-      }
-      it++;
-    }
-  } else {
-    cout << "   - simulation without initial solution composition." << endl;
-  }
-  if (fixedSolutionComposition_.size() > 0) {
-    cout << "   - simulation starts with given solution composition :" << endl;
-    cout << "      electrolyte - fixed" << endl;
-    map<int, double>::iterator it = fixedSolutionComposition_.begin();
-    while (it != fixedSolutionComposition_.end()) {
-      DCId = it->first;
-      if (DCId != waterDCId_) {
-        DCconc = it->second;
-        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-             << "   DCconc = " << DCconc << " mol/kgw" << endl;
-      }
-      it++;
-    }
-  } else {
-    cout << "   - simulation without fixed solution composition." << endl;
-  }
-  if (attackSolutionComposition_.size() > 0) {
-    cout << "   - simulation continues with attack, solution composition being
-  :" << endl; cout << "      electrolyte - attack" << endl; map<int,
-  double>::iterator it = attackSolutionComposition_.begin(); while (it !=
-  attackSolutionComposition_.end()) { DCId = it->first; if (DCId != waterDCId_)
-  { DCconc = it->second; cout << "        DCId = " << DCId << "   DCName = " <<
-  DCName_[DCId]
-             << "   DCconc = " << DCconc << " mol/kgw" << endl;
-      }
-      it++;
-    }
-  }
-  */
-
   initial = false;
   fixed = false;
   if (initialGasComposition_.size() > 0)
@@ -3738,48 +3670,35 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
   if (fixedGasComposition_.size() > 0)
     fixed = true;
 
-  if (initial || fixed) {
-    if (initial && fixed) {
-      cout << endl << "error : check the chemistry.json file!" << endl;
-      cout << endl
-           << "if \"gas_conditions\" is present, \"condition\" "
-              "can be only one of the next combinations:"
-           << endl;
-      cout << "\"initial\"" << endl;
-      cout << "\"fixed\"" << endl;
-      cout << "\"attack\"" << endl;
-      cout << "\"initial\" & \"attack\"" << endl;
-      cout << "\"fixed\" & \"attack\"" << endl;
-      cout << endl << "stop" << endl;
-      exit(0);
-    } else if (initial) {
-      cout << "   - hydration starts in an atmosphere having an initial gas "
-              "composition :"
-           << endl;
-      cout << "      gas - initial" << endl;
-      map<int, double>::iterator it = initialGasComposition_.begin();
-      while (it != initialGasComposition_.end()) {
-        DCId = it->first;
-        DCmoles = it->second;
-        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-             << "   DCmoles = " << DCmoles << " mol" << endl;
-        it++;
-      }
-    } else { // fixed
-      cout << "   - during hydration the atmosphere has a fixed gas "
-              "composition :"
-           << endl;
-      cout << "      gas - fixed" << endl;
-      map<int, double>::iterator it = fixedGasComposition_.begin();
-      while (it != fixedGasComposition_.end()) {
-        DCId = it->first;
-        DCmoles = it->second;
-        cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-             << "   DCmoles = " << DCmoles << " mol" << endl;
-        it++;
-      }
+  if (initial) {
+    cout << "   - hydration starts in an atmosphere having an initial gas "
+            "composition :"
+         << endl;
+    cout << "      gas - initial" << endl;
+    map<int, double>::iterator it = initialGasComposition_.begin();
+    while (it != initialGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+           << "   DCmoles = " << DCmoles << " mol" << endl;
+      it++;
     }
-  } else {
+  }
+  if (fixed) {
+    cout << "   - during hydration the atmosphere has a fixed gas "
+            "composition :"
+         << endl;
+    cout << "      gas - fixed" << endl;
+    map<int, double>::iterator it = fixedGasComposition_.begin();
+    while (it != fixedGasComposition_.end()) {
+      DCId = it->first;
+      DCmoles = it->second;
+      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
+           << "   DCmoles = " << DCmoles << " mol" << endl;
+      it++;
+    }
+  }
+  if (!fixed && !initial) {
     cout << "   - hydration takes place in an inert atmosphere" << endl;
   }
   if (attackGasComposition_.size() > 0) {
@@ -3804,34 +3723,7 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
     cout << "   - after hydration, no attack (electyrolyte/gas) takes place"
          << endl;
   }
-
-  /*
-  if (initialGasComposition_.size() > 0) {
-    cout << "   - simulation with given gas composition :" << endl;
-    cout << "      gas - initial" << endl;
-    map<int, double>::iterator it = initialGasComposition_.begin();
-    while (it != initialGasComposition_.end()) {
-      DCId = it->first;
-      DCmoles = it->second;
-      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-           << "   DCmoles = " << DCmoles << " mol" << endl;
-      it++;
-    }
-  } else if (fixedGasComposition_.size() > 0) {
-    cout << "   - simulation with given gas composition :" << endl;
-    cout << "      gas - fixed" << endl;
-    map<int, double>::iterator it = fixedGasComposition_.begin();
-    while (it != fixedGasComposition_.end()) {
-      DCId = it->first;
-      DCmoles = it->second;
-      cout << "        DCId = " << DCId << "   DCName = " << DCName_[DCId]
-           << "   DCmoles = " << DCmoles << " mol" << endl;
-      it++;
-    }
-  } else {
-    cout << "   - simulation without given gas composition." << endl;
-  }
-  */
+  return;
 }
 
 void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
@@ -3840,10 +3732,6 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
   double DCconc = 0.0; // mol/kgw units
   double waterMoles = DCMoles_[waterDCId_];
   double waterMass = 0.001 * waterMoles * waterMollarMass_; // in kg
-
-  // cout << "  ----> ChemicalSystem::setElectrolyteComposition -
-  // doAttack/waterMass : "
-  //      << doAttack << " / " << waterMass << endl;
 
   if (doAttack) {
     cout << endl
@@ -3940,10 +3828,6 @@ void ChemicalSystem::setGasComposition(const bool isFirst, bool doAttack) {
 double ChemicalSystem::calculateCrystalStrain(int growPhId, double poreVolFrac,
                                               double Kp, double Ks) {
   double crystalStrain = -1; // 0.0;
-
-  /*
-  calculateState(false);
-  */
 
   ///
   /// Crystallization pressure only exists if the solution is supersaturated,

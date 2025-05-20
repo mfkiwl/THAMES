@@ -2884,7 +2884,12 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 
   iskip = 0;
   femat(iskip);
-  double utot = energy();
+  /// Note: We need to call the energy function to calculate
+  /// the global gradient `gb_`, but we don't need the return
+  /// value from the function so we can just call it without assigning
+  /// its return value to anything!
+
+  energy();
   gg_ = 0.0;
   int nss = ns_ + 2;
   for (int m3 = 0; m3 < 3; m3++) {
@@ -2974,10 +2979,12 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 
       femat(1);
 
-      /// Note: variable tempenergy is not used anywhere, but
-      /// we needed to call energy() to get the global gradient `gb_`.
+      /// Note: We need to call the energy function to calculate
+      /// the global gradient `gb_`, but we don't need the return
+      /// value from the function so we can just call it without assigning
+      /// its return value to anything!
 
-      double tempenergy = energy();
+      energy();
 
       for (int m3 = 0; m3 < 3; m3++) {
         for (int k = zlo; k <= zhi; k++) {

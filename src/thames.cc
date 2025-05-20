@@ -43,8 +43,6 @@ int main(int argc, char **argv) {
   // Main menu where user decides what kind of simulation this will be.
   //
 
-  cout << endl << "<<< THAMES - SA version >>>" << endl;
-
   cout << endl << "Enter simulation type: " << endl;
   cout << "  " << QUIT_PROGRAM << ") Exit program " << endl;
   cout << "  " << HYDRATION << ") Hydration " << endl;
@@ -57,7 +55,6 @@ int main(int argc, char **argv) {
   } else {
     cout << endl << "simtype = " << simtype << endl;
   }
-
 
   // cout << "epsilon for double : \t" << numeric_limits<double>::epsilon() <<
   // endl; cout << "epsilon for int : \t" << numeric_limits<int>::epsilon() <<
@@ -79,7 +76,8 @@ int main(int argc, char **argv) {
                                             // hours
   // cin >> elemTimeInterval;
   cout << "The elementary time interval is : elemTimeInterval = "
-       << setprecision(3) << elemTimeInterval << " hours (used in Parrot-Killoh model)"<< endl;
+       << setprecision(3) << elemTimeInterval
+       << " hours (used in Parrot-Killoh model)" << endl;
 
   cout << scientific << setprecision(15) << endl;
 
@@ -112,8 +110,8 @@ int main(int argc, char **argv) {
   //  only for SA but GEMS has to know about it in any case (any simtype)
   string dchName(buff);
   int pos = dchName.find("-dat.lst");
-  //cout << endl << "pos = " << pos << endl;
-  dchName.replace(pos,pos+7,"-dch.dat");
+  // cout << endl << "pos = " << pos << endl;
+  dchName.replace(pos, pos + 7, "-dch.dat");
   cout << endl << "     - dchName = " << dchName << endl;
   ifstream f(dchName.c_str());
   int nDC = -1;
@@ -130,8 +128,7 @@ int main(int argc, char **argv) {
         f >> nDC;
     }
   }
-  cout << "            number of dependent components: nDC = " << nDC
-       << endl;
+  cout << "            number of dependent components: nDC = " << nDC << endl;
 
   strainenergy.clear();
   strainenergy.resize(nDC, 0.0);
@@ -245,10 +242,9 @@ int main(int argc, char **argv) {
     //
 
     try {
-      ThermalStrainSolver =
-          new ThermalStrain(Mic->getXDim(), Mic->getYDim(), Mic->getZDim(),
-                            (Mic->getNumSites() + 2),
-                            ChemSys, 1, VERBOSE, WARNING);
+      ThermalStrainSolver = new ThermalStrain(
+          Mic->getXDim(), Mic->getYDim(), Mic->getZDim(),
+          (Mic->getNumSites() + 2), ChemSys, 1, VERBOSE, WARNING);
       cout << "ThermalStrain object creation done... " << endl;
       // ThermalStrainSolver->setPhasemodfileName(phasemod_fileName);
     } catch (bad_alloc &ba) {
@@ -278,8 +274,8 @@ int main(int argc, char **argv) {
     //
 
     try {
-      AppliedStrainSolver = new AppliedStrain(
-          nx, ny, nz, ns, ChemSys, 1, VERBOSE, WARNING);
+      AppliedStrainSolver =
+          new AppliedStrain(nx, ny, nz, ns, ChemSys, 1, VERBOSE, WARNING);
       cout << "AppliedStrain object creation done... " << endl;
       // AppliedStrainSolver->setPhasemodfileName(phasemod_fileName);
     } catch (bad_alloc &ba) {

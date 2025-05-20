@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 20 14:31 2025 | Merged main with branch florinnita_recoverMainAndFixIssues |
 | May 19 16:31 2025 | Fixed header error in _CSH.csv output file |
 | May 17 15:49 2025 | Changed time format for output file names |
 | May 15 13:12 2025 | Removed runtime errors; improved time string formation |

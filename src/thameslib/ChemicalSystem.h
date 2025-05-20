@@ -506,6 +506,8 @@ class ChemicalSystem {
   long int nodeStatus_; /**< integer flag used to identify node's status */
   long int iterDone_;   /**< number of iterations performed in the most
                                 recent GEM calculation on the node */
+  int timesGEMWarned_;  /**< tracks number of times in a row that the
+                                GEM_run calculation issued warning */
   int timesGEMFailed_;  /**< tracks number of times in a row that the
                                 GEM_run calculation failed */
   int maxGEMFails_;     /**< maximum number of times GEM_run is allowed
@@ -5801,13 +5803,6 @@ public:
   */
   void setMicroPhaseSI(void);
   void setMicroPhaseSI(double t);
-
-  /**
-  @brief Set the vector of saturation indices of all microstructure phases.
-
-  @param cyc is the cycle number for time
-  */
-  // void setMicroPhaseSI(int cyc);
 
   /**
   @brief Get the vector of saturation indices of all microstructure phases.

@@ -1902,7 +1902,7 @@ void Controller::parseDoc(const string &docName) {
     cdi = it.value().find("beginttacktime");
     if (cdi != it.value().end()) {
       beginAttackTime_ = cdi.value();
-      beginAttackTime_ *= (1.0 / DAY_PER_H);
+      beginAttackTime_ *= (H_PER_DAY);
     }
 
     // Input times are conventionally in days
@@ -1910,7 +1910,7 @@ void Controller::parseDoc(const string &docName) {
     cdi = it.value().find("endattacktime");
     if (cdi != it.value().end()) {
       endAttackTime_ = cdi.value();
-      endAttackTime_ *= (1.0 / DAY_PER_H);
+      endAttackTime_ *= (H_PER_DAY);
     }
 
     // Input times are conventionally in days
@@ -1918,7 +1918,7 @@ void Controller::parseDoc(const string &docName) {
     cdi = it.value().find("attacktimeinterval");
     if (cdi != it.value().end()) {
       attackTimeInterval_ = cdi.value();
-      attackTimeInterval_ *= (1.0 / DAY_PER_H);
+      attackTimeInterval_ *= (H_PER_DAY);
     }
 
     // Done searching for chemical attack times
