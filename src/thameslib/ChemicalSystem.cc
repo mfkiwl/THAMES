@@ -2711,7 +2711,7 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       aveSI = totMoles = 0.0;
       microPhasePhMembers =
           microPhaseMembers_[i]; // getMicroPhaseMembers(i);
-                                 // //microPhaseMembers_ vs GEMPhaseIdLookup_
+          // microPhaseMembers_ vs GEMPhaseIdLookup_
       sizeMicroPhasePhMembers = (int)microPhasePhMembers.size();
       if ((time >= beginAttackTime_) && (i == 15)) {
         for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
@@ -2816,10 +2816,10 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
 }
 
 void ChemicalSystem::initElasticModuliMap(void) {
-  // (1): Table 1 from Haecker et al. / Cement and Concrete Research
-  // 35(2005)1948–1960 (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K
-  // + G)) (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
-
+  // (1): Table 1 from Haecker et al. / 
+  // Cement and Concrete Research 35(2005)1948–1960
+  // (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K + G))
+  // (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
   // struct elMod {
   //   float K; // bulk modulus    : K(GPa)
   //   float G; // shear modulus   : G(GPa)

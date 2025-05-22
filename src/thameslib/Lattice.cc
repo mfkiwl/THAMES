@@ -1088,7 +1088,7 @@ vector<int> Lattice::growPhase(vector<int> growPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to grow " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   if ((numLeftTot > 0) && (growthVectorSize == 0)) {
@@ -2435,7 +2435,7 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
          << dim_isite[i] << "   " << setw(8) << numLeft[i] << "   " << setw(8)
          << numChange[i] << endl;
   }
-  cout << "        WAIT..." << endl;
+  cout << "        WAIT to dissolve " << numLeftTot << " voxels ..." << endl;
   cout.flush();
 
   // int isitePosError = 0;
@@ -2639,6 +2639,23 @@ vector<int> Lattice::dissolvePhase(vector<int> dissPhaseIDVect,
 
       numLeft[posVect]--;
       numChange[posVect]++;
+
+      /*
+      sumWmcT1 = 0.; // check!
+      for (int i = 0; i < dissolutionVectorSize; i++) {
+        sumWmcT1 +=  dissolutionVector[i].wmc;
+      }
+      if (abs(sumWmcT1 - sumWmc) > 1.e-6) {
+        cout << scientific << setprecision(30);
+        cout << endl
+             << "%%%%%%%%%%%%%%%%%%    Lattice::dissolvePhase trc_d = " << trc_d << "    &    bcl = " << bcl << endl;
+        cout << "      dissolutionVectorSize = " << dissolutionVectorSize << "  &  dV.size() = " << dissolutionVector.size() << endl;
+        cout << endl << "      Lattice::dissolvePhase sumWmcT1 = " << sumWmcT1 << "   &   sumWmc = " << sumWmc<< " !!!" << endl;
+        cout << endl << "      Lattice::dissolvePhase sumWmcT1 - sumWmc = " << sumWmcT1 - sumWmc << " !!!" << endl;
+        cout << endl << "<><><><>  exit" << endl;
+        exit(0);
+      }
+      */
 
     } catch (out_of_range &oor) {
       EOBException ex("Lattice", "dissolvePhase", "site_", site_.size(), i);

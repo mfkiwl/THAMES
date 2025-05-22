@@ -892,6 +892,8 @@ void KineticController::calculateKineticStep(double time, const double timestep,
       DCMoles_[i] = DCMolesIni_[i];
     }
 
+    lattice_->resetSurfaceArea(surfaceAreaIni_);
+
   } else {
 
     // hyd_time = hydTimeIni_ + timestep;
@@ -916,6 +918,7 @@ void KineticController::calculateKineticStep(double time, const double timestep,
       DCMoles_[i] = chemSys_->getDCMoles(i);
       DCMolesIni_[i] = DCMoles_[i];
     }
+    surfaceAreaIni_ = lattice_->getSurfaceArea();
   }
 
   if (hyd_time < beginAttackTime_) {

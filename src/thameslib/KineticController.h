@@ -93,6 +93,8 @@ private:
   int waterDCId_; /**< coresp to DCName = "H2O@" */
   double beginAttackTime_;
 
+  vector<double> surfaceAreaIni_;
+
 public:
   /**
   @brief Default constructor.

@@ -248,8 +248,8 @@
         },
         "gemphase_data": [
           {
-            "gemphasename": "Silica-fume",
-            "gemdc": [{ "gemdcname": "Sil-Fume" }]
+            "gemphasename": "Sfume",
+            "gemdc": [{ "gemdcname": "Sfume" }]
           }
         ],
         "kinetic_data": {
