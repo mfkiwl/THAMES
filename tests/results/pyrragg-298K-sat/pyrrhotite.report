@@ -1,4 +1,4 @@
-THAMES simulation Result/pyrrhotite initialized on Wed May 21 17:03:00 2025
+THAMES simulation pyagg-test/pyrrhotite initialized on Fri May 23 17:40:59 2025
 
 
 INPUT FILES USED:
@@ -7,7 +7,7 @@ INPUT FILES USED:
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: Result/pyrrhotite.stats
+                Global phase fractions: pyagg-test/pyrrhotite.stats
 
 ----------------------------------------------------------
 

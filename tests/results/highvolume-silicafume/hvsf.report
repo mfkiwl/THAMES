@@ -1,4 +1,4 @@
-THAMES simulation Result/hvsf initialized on Wed May 21 17:44:44 2025
+THAMES simulation hvsf-test/hvsf initialized on Fri May 23 13:18:36 2025
 
 
 INPUT FILES USED:
@@ -7,7 +7,7 @@ INPUT FILES USED:
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: Result/hvsf.stats
+                Global phase fractions: hvsf-test/hvsf.stats
 
 ----------------------------------------------------------
 

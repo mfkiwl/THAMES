@@ -1,0 +1,3 @@
+Error Node:0:time:24:dt:1: E05IPM: Mass Balance Refinement: :
+Error Node:0:time:59.4615:dt:1: E07IPM: IPM Main Descent: :
+Error Node:0:time:248.462:dt:1: E05IPM: Mass Balance Refinement: :

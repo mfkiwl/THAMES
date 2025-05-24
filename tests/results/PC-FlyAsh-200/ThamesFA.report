@@ -1,4 +1,4 @@
-THAMES simulation Result/ThamesFA initialized on Wed May 21 17:00:41 2025
+THAMES simulation pcfa-test/ThamesFA initialized on Fri May 23 13:21:24 2025
 
 
 INPUT FILES USED:
@@ -7,7 +7,7 @@ INPUT FILES USED:
                    GEM input file name: thames-dat.lst
 
 OUTPUT FILES GENERATED:
-                Global phase fractions: Result/ThamesFA.stats
+                Global phase fractions: pcfa-test/ThamesFA.stats
 
 ----------------------------------------------------------
 
