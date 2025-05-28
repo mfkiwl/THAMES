@@ -8,8 +8,8 @@ three-dimensional environment within which a cement paste microstructure
 exists, hydrates, and possibly deteriorates.
 */
 
-#ifndef LATTICEH
-#define LATTICEH
+#ifndef SRC_THAMESLIB_LATTICE_H_
+#define SRC_THAMESLIB_LATTICE_H_
 
 #include <algorithm>
 #include <climits>
@@ -1825,7 +1825,7 @@ public:
   }
 
 }; // End of Lattice class
-#endif
+#endif // SRC_THAMESLIB_LATTICE_H_
 
 ///
 /// The functions below are used to aid in comparison of one site to another,
@@ -1865,4 +1865,4 @@ false otherwise
 */
 bool affinitySort(const Isite s1, const Isite s2);
 
-#endif
+#endif // CMPFUNCS

@@ -14,8 +14,8 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 
 */
 
-#ifndef STANDARDKINETICMODELH
-#define STANDARDKINETICMODELH
+#ifndef SRC_THAMESLIB_STANDARDKINETICMODEL_H_
+#define SRC_THAMESLIB_STANDARDKINETICMODEL_H_
 
 #include "ChemicalSystem.h"
 #include "KineticController.h"
@@ -204,4 +204,4 @@ public:
 
 }; // End of StandardKineticModel class
 
-#endif
+#endif // SRC_THAMESLIB_STANDARDKINETICMODEL_H_

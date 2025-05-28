@@ -77,8 +77,8 @@ of portland cement, Cement and Concrete Research 36 (2006) 209--226.
 
 */
 
-#ifndef PARROTKILLOHMODELH
-#define PARROTKILLOHMODELH
+#ifndef SRC_THAMESLIB_PARROTKILLOHMODEL_H_
+#define SRC_THAMESLIB_PARROTKILLOHMODEL_H_
 
 #include "ChemicalSystem.h"
 #include "KineticController.h"
@@ -289,4 +289,4 @@ public:
 
 }; // End of ParrotKillohModel class
 
-#endif
+#endif // SRC_THAMESLIB_PARROTKILLOHMODEL_H_

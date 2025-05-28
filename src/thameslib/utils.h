@@ -2,8 +2,9 @@
 @file utils.h
 @brief Define some simple utility functions.
 */
-#ifndef UTILS
-#define UTILS
+#ifndef SRC_THAMESLIB_UTILS_H_
+#define SRC_THAMESLIB_UTILS_H_
+
 #include "global.h"
 #include <sstream>
 #include <string>
@@ -46,4 +47,4 @@ bool end_with(const std::string &str, const std::string &what);
 
 } // namespace utils
 
-#endif
+#endif // SRC_THAMESLIB_UTILS_H_

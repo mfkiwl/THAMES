@@ -3,8 +3,8 @@
 @brief Declare and assign global variables for THAMES.
 
 */
-#ifndef GLOBALH
-#define GLOBALH
+#ifndef SRC_THAMESLIB_GLOBAL_H_
+#define SRC_THAMESLIB_GLOBAL_H_
 
 // #ifndef DEBUG
 // #define DEBUG
@@ -19,91 +19,91 @@
 using namespace std;
 
 // String indicating THAMES version in the input microstructure file
-const string VERSIONSTRING = "#THAMES:Version:";
+const char VERSIONSTRING[] = "#THAMES:Version:";
 
-const string VERSIONBUGFIX = "0";
+const char VERSIONBUGFIX[] = "0";
 
 // String indicating the voxel resolution in micrometers
 // for the THAMES input microstructure file
-const string IMGRESSTRING("#THAMES:Image_Resolution:");
+const char IMGRESSTRING[] = "#THAMES:Image_Resolution:";
 
 // String indicating the x dimension in voxels
 // for the THAMES input microstructure file
-const string XSIZESTRING("#THAMES:X_Size:");
+const char XSIZESTRING[] = "#THAMES:X_Size:";
 
 // String indicating the y dimension in voxels
 // for the THAMES input microstructure file
-const string YSIZESTRING("#THAMES:Y_Size:");
+const char YSIZESTRING[] = "#THAMES:Y_Size:";
 
 // String indicating the z dimension in voxels
 // for the THAMES input microstructure file
-const string ZSIZESTRING("#THAMES:Z_Size:");
+const char ZSIZESTRING[] = "#THAMES:Z_Size:";
 
 // String indicating the Alite DC name
-const string AliteDCName("C3S");
+const char AliteDCName[] = "C3S";
 
 // String indicating the Belite DC name
-const string BeliteDCName("C2S");
+const char BeliteDCName[] = "C2S";
 
 // String indicating the Aluminate DC name
-const string AluminateDCName("C3A");
+const char AluminateDCName[] = "C3A";
 
 // String indicating the Ferrite DC name
-const string FerriteDCName("C4AF");
+const char FerriteDCName[] = "C4AF";
 
 // String indicating the liquid solution GEM Phase name
 // @todo Make this general somehow
-const string WaterGEMName("aq_gen");
+const char WaterGEMName[] = "aq_gen";
 
 // String indicating the liquid water DC name
 // @todo Make this general somehow
-const string WaterDCName("H2O@");
+const char WaterDCName[] = "H2O@";
 
 // String indicating the CSH GEM Phase name
 // @todo Make this general somehow
-const string CSHGEMName("CSHQ");
+const char CSHGEMName[] = "CSHQ";
 
 // String indicating the AFt GEM Phase name
 // @todo Make this general somehow
-// const string AFTDCName("ettringite");
-const string AFTGEMName("ettr");
+// const char AFTDCName[] = "ettringite";
+const char AFTGEMName[] = "ettr";
 
 // String indicating the AFt DC name
 // @todo Make this general somehow
-const string AFTDCName("ettr");
+const char AFTDCName[] = "ettr";
 
 // String indicating the monosulfate GEM Phase name
 // @todo Make this general somehow
-const string MonosulfGEMName("C4AsH14");
+const char MonosulfGEMName[] = "C4AsH14";
 
 // String indicating the monosulfate DC name
 // @todo Make this general somehow
-// const string MonosulfGEMName("C4AsH14");
-const string MonosulfDCName("monosulf14");
+// const char MonosulfGEMName[] = "C4AsH14";
+const char MonosulfDCName[] = "monosulf14";
 
 // String indicating the monocarboaluminate GEM Phase name
 // @todo Make this general somehow
-const string MonocarbGEMName("C4AcH11");
+const char MonocarbGEMName[] = "C4AcH11";
 
 // String indicating the hydrotalcite GEM Phase name
 // @todo Make this general somehow
-// const string HydrotalcGEMName("OH-hydrotalcite");
-const string HydrotalcGEMName("hydrotalc-pyro");
+// const char HydrotalcGEMName[] = "OH-hydrotalcite";
+const char HydrotalcGEMName[] = "hydrotalc-pyro";
 
 // String indicating a generic kinetic model
-const string GenericType("Generic");
+const char GenericType[] = "Generic";
 
 // String indicating the Parrot Killoh Model
-const string ParrotKillohType("ParrotKilloh");
+const char ParrotKillohType[] = "ParrotKilloh";
 
 // String indicating the Standard Dissolution Model
-const string StandardType("Standard");
+const char StandardType[] = "Standard";
 
 // String indicating the Pozzolanic Reaction Model
-const string PozzolanicType("Pozzolanic");
+const char PozzolanicType[] = "Pozzolanic";
 
 // String for the command to convert between image files (Imagemagick)
-const string ConvertCommand("magick");
+const string ConvertCommand = "magick";
 
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
@@ -219,4 +219,4 @@ const double S_PER_YEAR = 3.15360000e7;
 const double H_PER_DAY = 24.0;
 const double DAY_PER_YEAR = 365.0;
 
-#endif // GLOBALH
+#endif // SRC_THAMESLIB_GLOBAL_H_

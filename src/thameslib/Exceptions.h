@@ -14,8 +14,8 @@ will take on more distinct details later.
 
 */
 
-#ifndef EXCEPTIONSH
-#define EXCEPTIONSH
+#ifndef SRC_THAMESLIB_EXCEPTIONS_H_
+#define SRC_THAMESLIB_EXCEPTIONS_H_
 
 #include <iostream>
 #include <string>
@@ -35,7 +35,7 @@ private:
   string classname_;    /**< Name of the class that accessed the array */
   string functionname_; /**< Name of the method that accessed the array */
   int sizelimit_;       /**< Number of elements contained in the array */
-  int indx_;   /**< Out-of-bounds element number that was queried */
+  int indx_;            /**< Out-of-bounds element number that was queried */
 
 public:
   /**
@@ -676,4 +676,4 @@ public:
 
 }; // End of DataException class
 
-#endif
+#endif // SRC_THAMESLIB_EXCEPTIONS_H_

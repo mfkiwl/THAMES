@@ -8,8 +8,8 @@ form of stress-free strain, rather than an externally applied strain as
 implemented in the AppliedStrain class.
 */
 
-#ifndef THERMALSTRAIN_H
-#define THERMALSTRAIN_H
+#ifndef SRC_THAMESLIB_THERMALSTRAIN_H_
+#define SRC_THAMESLIB_THERMALSTRAIN_H_
 
 #include "ElasticModel.h"
 #include <fstream>
@@ -179,7 +179,8 @@ protected:
   vector<vector<vector<double>>> ss_; /**< Shear stress tensor components,
                                          one at every element, so the
                                          dimensions are ss_[ns][3][3] */
-  int kmax_; /**< the number of relaxation steps for a given elastic computation */
+  int kmax_; /**< the number of relaxation steps for a given elastic computation
+              */
 public:
   /**
   @brief Constructor.
@@ -198,8 +199,8 @@ public:
   */
   // ThermalStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
   //               const bool verbose, const bool warning);
-  ThermalStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs, int npoints,
-                const bool verbose, const bool warning);
+  ThermalStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
+                int npoints, const bool verbose, const bool warning);
 
   /**
   @brief Destructor.
@@ -243,10 +244,11 @@ public:
   @param eyz is the yz macrostrain
   @param exy is the xy macrostrain
   */
-  // void bgrad(int nx, int ny, int nz, int ns, double exx, double eyy, double ezz,
+  // void bgrad(int nx, int ny, int nz, int ns, double exx, double eyy, double
+  // ezz,
   //            double exz, double eyz, double exy);
-  void bgrad(double exx, double eyy, double ezz,
-             double exz, double eyz, double exy);
+  void bgrad(double exx, double eyy, double ezz, double exz, double eyz,
+             double exy);
 
   /**
   @brief Compute the quadratic term in the macrostrains.
@@ -356,8 +358,8 @@ public:
   */
   void localRelax(int boxsize, int x, int y, int z, int index);
 
-  void localRelax(int xlo, int xhi, int ylo, int yhi, int zlo, int zhi,
-                  int x, int y, int z, int index);
+  void localRelax(int xlo, int xhi, int ylo, int yhi, int zlo, int zhi, int x,
+                  int y, int z, int index);
 
   /**
   @brief Master function for executing the finite element calculation.
@@ -546,4 +548,4 @@ public:
 
 }; // End of ThermalStrain class
 
-#endif
+#endif // SRC_THAMESLIB_THERMALSTRAIN_H_

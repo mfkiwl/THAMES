@@ -5,8 +5,8 @@
 Solves the linear elastic state of the finite element mesh.
 */
 
-#ifndef APPLIEDSTRAIN_H
-#define APPLIEDSTRAIN_H
+#ifndef SRC_THAMESLIB_APPLIEDSTRAIN_H_
+#define SRC_THAMESLIB_APPLIEDSTRAIN_H_
 
 #include "ElasticModel.h"
 #include <fstream>
@@ -85,7 +85,8 @@ protected:
   double eyz_; /**< yz off-diagonal component of applied strain */
   double exy_; /**< xy off-diagonal component of applied strain */
 
-  int kmax_; /**< the number of relaxation steps for a given elastic computation */
+  int kmax_; /**< the number of relaxation steps for a given elastic computation
+              */
 
 public:
   /**
@@ -104,9 +105,9 @@ public:
   @param warning is false if we want to suppress warning output
   */
   // AppliedStrain(int nx, int ny, int nz, int dim, int nphase, int npoints,
-  //               const bool verbose, const bool warning);  
-  AppliedStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs, int npoints,
-                const bool verbose, const bool warning);
+  //               const bool verbose, const bool warning);
+  AppliedStrain(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
+                int npoints, const bool verbose, const bool warning);
 
   /**
   @brief Destructor.
@@ -183,7 +184,7 @@ public:
   @param exy is the xy component of the applied strain
   */
   void calc(string fileName, double exx, double eyy, double ezz, double exz,
-             double eyz, double exy);
+            double eyz, double exy);
 
   /**
   @brief Calculates the effective bulk modulus of the relaxed mesh.
@@ -195,4 +196,4 @@ public:
 
 }; // End of AppliedStrain class
 
-#endif
+#endif // SRC_THAMESLIB_APPLIEDSTRAIN_H_

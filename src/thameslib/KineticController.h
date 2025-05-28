@@ -8,8 +8,8 @@ different kinetic models that govern the rate of hydration.
 
 */
 
-#ifndef KINETICCONTROLLERH
-#define KINETICCONTROLLERH
+#ifndef SRC_THAMESLIB_KINETICCONTROLLER_H_
+#define SRC_THAMESLIB_KINETICCONTROLLER_H_
 
 #include "../Resources/include/nlohmann/json.hpp"
 #include "ChemicalSystem.h"
@@ -490,4 +490,4 @@ public:
 
 }; // End of KineticController class
 
-#endif
+#endif // SRC_THAMESLIB_KINETICCONTROLLER_H_

@@ -3,8 +3,8 @@
 @brief Declaration of the Controller class.
 */
 
-#ifndef CONTROLLERH
-#define CONTROLLERH
+#ifndef SRC_THAMESLIB_CONTROLLER_H_
+#define SRC_THAMESLIB_CONTROLLER_H_
 
 #include "KineticController.h"
 #include "Lattice.h"
@@ -422,4 +422,4 @@ public:
   }
 
 }; // End of Controller class
-#endif
+#endif // SRC_THAMESLIB_CONTROLLER_H_

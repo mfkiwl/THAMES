@@ -20,8 +20,8 @@ must be paid to making this class as useful and, at the same time, easy to use
 as possible.
 */
 
-#ifndef CHEMSYSH
-#define CHEMSYSH
+#ifndef SRC_THAMESLIB_CHEMICALSYSTEM_H_
+#define SRC_THAMESLIB_CHEMICALSYSTEM_H_
 
 #include "../GEMS3K-standalone/GEMS3K/node.h"
 #include "../Resources/include/nlohmann/json.hpp"
@@ -6359,4 +6359,4 @@ public:
   elMod getElasticModuliComp(string str) { return elasticModuli_[str]; }
 
 }; // End of ChemicalSystem class
-#endif
+#endif // SRC_THAMESLIB_CHEMICALSYSTEM_H_

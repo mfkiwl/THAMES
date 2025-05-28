@@ -3,8 +3,8 @@
 @brief Declares and defines the random number generator object.
 
 */
-#ifndef RANGENH
-#define RANGENH
+#ifndef SRC_THAMESLIB_RANGEN_H_
+#define SRC_THAMESLIB_RANGEN_H_
 
 #include "Exceptions.h"
 #include "ran2.h"
@@ -19,11 +19,9 @@
 class RanGen {
 
 private:
-
   int *seed_; /**< The random number seed, a negative integer */
 
 public:
-
   /**
   @brief Set the random number seed.
 
@@ -58,21 +56,21 @@ public:
   @param v is a reference ot the vector
   @param ntimes is the number of shuffling iterations to execute
   */
-//  template <class X> static void shuffle(vector<X> &v, int ntimes = 1) {
-//    X tmp;
-//    int j;
-//    int ii;
-//    unsigned int i;
-//
-//    for (ii = 0; ii < ntimes; ii++) {
-//      for (i = 0; i < v.size(); i++) {
-//        j = (int)(Ran3() * v.size());
-//        tmp = v[i];
-//        v[i] = v[j];
-//        v[j] = tmp;
-//      }
-//    }
-//  }
+  //  template <class X> static void shuffle(vector<X> &v, int ntimes = 1) {
+  //    X tmp;
+  //    int j;
+  //    int ii;
+  //    unsigned int i;
+  //
+  //    for (ii = 0; ii < ntimes; ii++) {
+  //      for (i = 0; i < v.size(); i++) {
+  //        j = (int)(Ran3() * v.size());
+  //        tmp = v[i];
+  //        v[i] = v[j];
+  //        v[j] = tmp;
+  //      }
+  //    }
+  //  }
 
   /**
   @brief Default constructor.
@@ -114,4 +112,4 @@ public:
   ~RanGen() { delete seed_; }
 
 }; // End of the RanGen class
-#endif
+#endif // SRC_THAMESLIB_RANGEN_H_

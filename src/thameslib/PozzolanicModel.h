@@ -14,8 +14,8 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 
 */
 
-#ifndef POZZOLANICMODELH
-#define POZZOLANICMODELH
+#ifndef SRC_THAMES_POZZOLANICMODEL_H_
+#define SRC_THAMES_POZZOLANICMODEL_H_
 
 #include "ChemicalSystem.h"
 #include "KineticController.h"
@@ -357,4 +357,4 @@ public:
 
 }; // End of PozzolanicModel class
 
-#endif
+#endif // SRC_THAMES_POZZOLANICMODEL_H_

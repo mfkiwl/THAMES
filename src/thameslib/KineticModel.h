@@ -12,10 +12,13 @@ used.
 
 */
 
-#ifndef KINETICSH
-#define KINETICSH
+#ifndef SRC_THAMESLIB_KINETICMODEL_H_
+#define SRC_THAMESLIB_KINETICMODEL_H_
 
 #include "ChemicalSystem.h"
+#include "KineticData.h"
+#include "Lattice.h"
+#include "global.h"
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -23,9 +26,6 @@ used.
 #include <map>
 #include <string>
 #include <vector>
-#include "KineticData.h"
-#include "Lattice.h"
-#include "global.h"
 
 using namespace std;
 
@@ -375,7 +375,8 @@ public:
 
   @param sattacktime is the simulation time to begin sulfate attack [hours]
   */
-  // void setSulfateAttackTime(double sattacktime) { sulfateAttackTime_ = sattacktime; }
+  // void setSulfateAttackTime(double sattacktime) { sulfateAttackTime_ =
+  // sattacktime; }
 
   /**
   @brief Get the simulation time at which to begin external sulfate attack.
@@ -570,34 +571,12 @@ public:
   void zeroKineticDCMoles();
 
   /**
-  @brief Set the verbose flag
+  @brief Get the model name
 
-  @param isverbose is true if verbose output should be produced
+  @return the model name
   */
-  // void setVerbose(const bool isverbose) { verbose_ = isverbose; }
-
-  /**
-  @brief Get the verbose flag
-
-  @return the verbose flag
-  */
-  // bool getVerbose() const { return verbose_; }
-
-  /**
-  @brief Set the warning flag
-
-  @param iswarning is true if verbose output should be produced
-  */
-  // void setWarning(const bool iswarning) { warning_ = iswarning; }
-
-  /**
-  @brief Get the warning flag
-
-  @return the warning flag
-  */
-  // bool getWarning() const { return warning_; }
 
   string getModelName(void) { return modelName_; }
 }; // End of KineticModel class
 
-#endif
+#endif // SRC_THAMESLIB_KINETICMODEL_H_

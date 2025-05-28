@@ -58,8 +58,8 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 @warning Read the manual before using this program!!!
 */
 
-#ifndef ELASTICMODEL_H
-#define ELASTICMODEL_H
+#ifndef SRC_THAMESLIB_ELASTICMODEL_H_
+#define SRC_THAMESLIB_ELASTICMODEL_H_
 
 #include <fstream>
 #include <iostream>
@@ -67,9 +67,9 @@ http://ciks.cbt.nist.gov/~garbocz/manual/man.html
 #include <string>
 #include <vector>
 
+#include "ChemicalSystem.h"
 #include "StrainEnergy.h"
 #include "global.h"
-#include "ChemicalSystem.h"
 
 using namespace std;
 
@@ -646,4 +646,4 @@ public:
 
 }; // End of ElasticModel class
 
-#endif
+#endif // SRC_THAMESLIB_ELASTICMODEL_H_

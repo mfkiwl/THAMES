@@ -3,8 +3,8 @@
 @brief Declaration of the Site class.
 */
 
-#ifndef SITEH
-#define SITEH
+#ifndef SRC_THAMESLIB_SITE_H_
+#define SRC_THAMESLIB_SITE_H_
 
 #include "ChemicalSystem.h"
 #include "RanGen.h"
@@ -524,4 +524,4 @@ public:
 
 }; // End of the Site class
 
-#endif
+#endif // SRC_THAMESLIB_SITE_H_

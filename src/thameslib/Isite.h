@@ -9,8 +9,8 @@ This class instantiates to objects that have
 variable, similar in some ways to weighted mean curvature of an interface
 */
 
-#ifndef ISITEH
-#define ISITEH
+#ifndef SRC_THAMESLIB_ISITE_H_
+#define SRC_THAMESLIB_ISITE_H_
 
 #include "Site.h"
 
@@ -23,10 +23,11 @@ using namespace std;
 class Isite {
 
 private:
-  int id_; /**< The id of the corresponding Site */
-  double affinity_;    /**< The affinity for growth of a phase at the site */
+  int id_;          /**< The id of the corresponding Site */
+  double affinity_; /**< The affinity for growth of a phase at the site */
   bool verbose_;    /**< Flag for whether to produce verbose output */
-  double prob_;     /**< The growth probability of a phase at this site (computed according the affinity) */
+  double prob_; /**< The growth probability of a phase at this site (computed
+                   according the affinity) */
 
 public:
   /**
@@ -53,7 +54,7 @@ public:
   */
   Isite(const Isite &obj);
 
-  Isite& operator=(const Isite& obj);    // copy assignment operator
+  Isite &operator=(const Isite &obj); // copy assignment operator
 
   /**
   @brief Get the id number of the corresponding Site object.
@@ -107,4 +108,4 @@ public:
   bool getVerbose(void) const { return verbose_; }
 
 }; // End of the Isite class
-#endif
+#endif // SRC_THAMESLIB_ISITE_H_

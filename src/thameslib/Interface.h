@@ -20,8 +20,8 @@ some functions to access or modify that data.
 especially for sorting operations and removing or adding elements to vectors.
 */
 
-#ifndef INTERFACEH
-#define INTERFACEH
+#ifndef SRC_THAMESLIB_INTERFACE_H_
+#define SRC_THAMESLIB_INTERFACE_H_
 
 #include <algorithm>
 #include <typeinfo>
@@ -61,7 +61,7 @@ private:
   vector<Isite>
       dissolutionSites_; /**< The list of sites eligible for self-dissolution */
 
-  bool verbose_;         /**< Flag for verbose output */
+  bool verbose_; /**< Flag for verbose output */
 
 public:
   /**
@@ -91,8 +91,8 @@ public:
   @param pid is the integer id of the phase associated with this interface
   @param verbose is true if verbose output should be produced
   */
-  Interface(ChemicalSystem *csys, vector<Site *> gv,
-            vector<Site *> dv, unsigned int pid, const bool verbose);
+  Interface(ChemicalSystem *csys, vector<Site *> gv, vector<Site *> dv,
+            unsigned int pid, const bool verbose);
 
   /**
   @brief Destructor for the Interface class.
@@ -107,9 +107,7 @@ public:
 
   @return the integer id for the phase associated with this interface
   */
-  int getMicroPhaseId(void) const {
-    return microPhaseId_;
-  }
+  int getMicroPhaseId(void) const { return microPhaseId_; }
 
   void setMicroPhaseId(int mPhId) { microPhaseId_ = mPhId; }
 
@@ -124,9 +122,7 @@ public:
   int getGrowthSize(void) { return growthSites_.size(); }
   int getDissolutionSize(void) { return dissolutionSites_.size(); }
 
-  void setGrowthSites(vector<Isite> vect) {
-    growthSites_ = vect;
-  }
+  void setGrowthSites(vector<Isite> vect) { growthSites_ = vect; }
 
   int getGrowthSitesId(int pos) { return growthSites_[pos].getId(); }
 
@@ -140,9 +136,7 @@ public:
   */
   vector<Isite> getDissolutionSites(void) { return dissolutionSites_; }
 
-  void setDissolutionSites(vector<Isite> vect) {
-    dissolutionSites_ = vect;
-  }
+  void setDissolutionSites(vector<Isite> vect) { dissolutionSites_ = vect; }
 
   /**
   @brief Add a site to the list of sites where growth can occur adjacent to the
@@ -225,9 +219,7 @@ public:
     growthSites_[pos].updateAffinity(afty);
   }
 
-  double getAffinity(int pos) {
-    return growthSites_[pos].getAffinity();
-  }
+  double getAffinity(int pos) { return growthSites_[pos].getAffinity(); }
 
 }; // End of Interface class
 
@@ -271,4 +263,4 @@ false otherwise
 */
 bool affinitySort(const Isite s1, const Isite s2);
 
-#endif
+#endif // SRC_THAMESLIB_INTERFACE_H_
