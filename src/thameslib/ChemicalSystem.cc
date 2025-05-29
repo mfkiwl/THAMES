@@ -5,15 +5,12 @@
 
 #include "ChemicalSystem.h"
 
-string CSHMicroName("");
-string MonocarbMicroName("");
-string HydrotalcMicroName("");
-string AFTMicroName("");
-string MonosulfMicroName("");
+ChemicalSystem::ChemicalSystem(const std::string &GEMfilename,
+                               const std::string &jsonFileName,
+                               const bool verbose, const bool warning) {
 
-ChemicalSystem::ChemicalSystem(const string &GEMfilename,
-                               const string &jsonFileName, const bool verbose,
-                               const bool warning) {
+  using std::string, std::cout, std::cerr, std::endl;
+
   int i, j;
   double *amat;
   string exmsg;
@@ -26,7 +23,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   nodeHandle_ = 0;
   iterDone_ = 0;
   timesGEMFailed_ = timesGEMWarned_ = 0;
-  maxGEMFails_ = 100000000; // 1000; // = 3;
+  maxGEMFails_ = 100000000;
 
   sulfateAttackTime_ = 1.0e10;
   leachTime_ = 1.0e10;
@@ -43,8 +40,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   ///
 
   Eh_ = 0.0;
-  T_ = 298.0;    // Default temperature [K]
-  P_ = 101325.0; // Default pressure in [Pa]
+  // Default temperature [K]
+  T_ = 298.0;
+  // Default pressure in [Pa]
+  P_ = 101325.0;
   Vs_ = 1.0;
   Gs_ = 0.0;
   Ms_ = 0.0;
@@ -109,7 +108,8 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   cementComponent_.clear();
 
   color_.clear();
-  colorN_.clear(); // used in initColorMap() and output files
+  // colorN_ used in initColorMap() and output files
+  colorN_.clear();
   initColorMap();
 
   elasticModuli_.clear();
@@ -124,12 +124,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// in order to initialize GEMPhaseVolume_
   ///
 
-  char *cGEMfilename = (char *)GEMfilename.c_str();
-  // if (verbose_) {
+  char *cGEMfilename = const_cast<char *>(GEMfilename.c_str());
   cout << endl
        << "ChemicalSystem::Going into GEM_init (1) to read CSD file "
        << cGEMfilename << endl; // *-dat.lst
-  // }
 
   /// Find out if the input data are in json format or in key-value format
 
@@ -183,10 +181,10 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   /// GEM CSD input that was read by GEM-IPM during initialization
   ///
 
-  numICs_ = (int)((node_->pCSD())->nIC);
-  numDCs_ = (int)((node_->pCSD())->nDC);
-  numGEMPhases_ = (int)((node_->pCSD())->nPH);
-  numSolutionPhases_ = (int)((node_->pCSD())->nPS);
+  numICs_ = static_cast<int>((node_->pCSD())->nIC);
+  numDCs_ = static_cast<int>((node_->pCSD())->nDC);
+  numGEMPhases_ = static_cast<int>((node_->pCSD())->nPH);
+  numSolutionPhases_ = static_cast<int>((node_->pCSD())->nPS);
 
   ///
   /// Knowing the dimensions, allocate the memory for all the arrays that
@@ -426,7 +424,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   string string1;
   for (i = 0; i < numICs_; i++) {
     string1 = node_->xCH_to_IC_name(i);
-    if ((int)(string1.length()) >= maxICnameLength)
+    if (static_cast<int>(string1.length()) >= maxICnameLength)
       string1.resize(maxICnameLength);
     if (verbose_) {
       cout << "IC number " << i << " is " << string1 << endl;
@@ -436,7 +434,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   }
   for (i = 0; i < numDCs_; i++) {
     string1 = node_->xCH_to_DC_name(i);
-    if ((int)(string1.length()) >= maxDCnameLength)
+    if (static_cast<int>(string1.length()) >= maxDCnameLength)
       string1.resize(maxDCnameLength);
     if (verbose_) {
       cout << "DC number " << i << " is " << string1 << endl;
@@ -446,7 +444,7 @@ ChemicalSystem::ChemicalSystem(const string &GEMfilename,
   }
   for (int i = 0; i < numGEMPhases_; i++) {
     string1 = node_->xCH_to_Ph_name(i);
-    if ((int)(string1.length()) >= maxPHnameLength)
+    if (static_cast<int>(string1.length()) >= maxPHnameLength)
       string1.resize(maxPHnameLength);
     if (verbose_) {
       cout << "PH number " << i << " is " << string1 << endl;
@@ -646,7 +644,7 @@ bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
                         "Could not open");
   }
 
-  string filetypeflag;
+  std::string filetypeflag;
   if (in.peek() != EOF) {
     in >> filetypeflag;
   } else {
@@ -660,15 +658,16 @@ bool ChemicalSystem::isInputFormatJSON(const char *masterFileName) {
   return false;
 }
 
-void ChemicalSystem::getJSONFiles(const char *masterFileName, string &dchName,
-                                  string &ipmName, string &dbrName) {
+void ChemicalSystem::getJSONFiles(const char *masterFileName,
+                                  std::string &dchName, std::string &ipmName,
+                                  std::string &dbrName) {
   ifstream in(masterFileName);
   if (!in) {
     throw FileException("ChemicalSystem", "getJSONFiles", masterFileName,
                         "Could not open");
   }
 
-  string filetypeflag;
+  std::string filetypeflag;
   if (in.peek() != EOF) {
     in >> filetypeflag;
   } else {
@@ -702,7 +701,7 @@ void ChemicalSystem::getJSONFiles(const char *masterFileName, string &dchName,
   dbrName.erase(remove(dbrName.begin(), dbrName.end(), '"'), dbrName.end());
 }
 
-vector<double> ChemicalSystem::getSolution(void) {
+std::vector<double> ChemicalSystem::getSolution(void) {
   ///
   /// Get IC moles for solution, which fully characterizes the
   /// composition of the aqueous solution
@@ -711,22 +710,23 @@ vector<double> ChemicalSystem::getSolution(void) {
   double waterMass = DCMoles_[getDCId("H2O@")] * DCMolarMass_[getDCId("H2O@")];
 
   if (verbose_) {
-    cout << "water mass is: " << waterMass << endl;
+    std::cout << "water mass is: " << waterMass << std::endl;
   }
-  vector<double> tempICMoles;
+  std::vector<double> tempICMoles;
   tempICMoles.clear();
   tempICMoles.resize(numICs_, 0.0);
-  cout << endl;
+  std::cout << std::endl;
   for (int i = 0; i < numDCs_; i++) {
     char cc = getDCClassCode(i);
     if (cc == 'S' || cc == 'T' || cc == 'W') {
-      // cout << "tempICMoles " << i <<  "    DCName_: " << DCName_[i] << endl;
+      // std::cout << "tempICMoles " << i <<  "    DCName_: " << DCName_[i] <<
+      // std::endl;
       for (int j = 0; j < (numICs_ - 1); j++) {
         tempICMoles[j] += DCMoles_[i] * DCStoich_[i][j];
       }
     }
   }
-  cout << endl;
+  std::cout << std::endl;
 
   /*
   for (int i = 0; i < numDCs_; i++) {
@@ -757,6 +757,8 @@ void ChemicalSystem::parseDoc(const string &docName) {
   // Need to open the docName and scan it somehow for
   // phase names and id numbers
 
+  using json = nlohmann::json;
+
   PhaseData phaseData;
 
   /// Test for JSON existence and non-emptiness
@@ -764,7 +766,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
 
   ifstream f(docName.c_str());
   if (!f.is_open()) {
-    cout << "JSON parameter file not found" << endl;
+    std::cout << "JSON parameter file not found" << std::endl;
     throw FileException("Controller", "parseDoc", docName, "File not found");
   }
 
@@ -776,7 +778,7 @@ void ChemicalSystem::parseDoc(const string &docName) {
   json::iterator cdi = it.value().find("numentries");
   cdi = it.value().find("phases");
 
-  map<string, int> phaseids;
+  std::map<std::string, int> phaseids;
   phaseids.clear();
 
   parseMicroPhaseNames(cdi, phaseids);
@@ -791,8 +793,9 @@ void ChemicalSystem::parseDoc(const string &docName) {
   ///
 
   if (verbose_) {
-    cout << "Back to the beginning to mine data from JSON file" << endl;
-    cout.flush();
+    std::cout << "Back to the beginning to mine data from JSON file"
+              << std::endl;
+    std::cout.flush();
   }
 
   // Make "it" a json interator over the environment data object
@@ -823,7 +826,6 @@ void ChemicalSystem::parseDoc(const string &docName) {
     } catch (DataException dex) {
       throw dex;
     }
-  } else {
   }
 
   // Now make "it" a json interator over the "microstructure" object
@@ -841,39 +843,39 @@ void ChemicalSystem::parseDoc(const string &docName) {
   } catch (FileException fex) {
     // fex.printException();
     throw fex;
-    cout << endl;
+    std::cout << std::endl;
   } catch (GEMException gex) {
     gex.printException();
-    cout << endl;
+    std::cout << std::endl;
   }
 
   return;
 }
 
-void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
+void ChemicalSystem::parseSolutionComp(const nlohmann::json::iterator cdi) {
 
   // Clear the associative map to initialize it
   fixedSolutionComposition_.clear();
   initialSolutionComposition_.clear();
   attackSolutionComposition_.clear();
 
-  string testName, testCondition;
+  std::string testName, testCondition;
   double testConc;
   int testDCId;
 
-  json::iterator p = cdi.value()[0].find("DCName");
-  // cout << "JSON iterator okay so far" << endl;
-  // cout.flush();
-  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
+  nlohmann::json::iterator p = cdi.value()[0].find("DCName");
+  // std::cout << "JSON iterator okay so far" << std::endl;
+  // std::cout.flush();
+  for (int i = 0; i < static_cast<int>(cdi.value().size()); ++i) {
     p = cdi.value()[i].find("DCname");
     // testName = p.value();
-    testName = p.value().get<string>();
+    testName = p.value().get<std::string>();
     testDCId = getDCId(testName);
     // Only add the data if this is a solution component
     if (DCClassCode_[testDCId] == 'S' || DCClassCode_[testDCId] == 'T') {
       p = cdi.value()[i].find("condition");
       // testCondition = p.value();
-      testCondition = p.value().get<string>();
+      testCondition = p.value().get<std::string>();
       p = cdi.value()[i].find("concentration");
       testConc = p.value();
       if (testCondition == "initial") {
@@ -890,11 +892,11 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   // Make sure they have charge balance
 
   double totcharge = 0.0;
-  map<int, double>::iterator it = initialSolutionComposition_.begin();
+  std::map<int, double>::iterator it = initialSolutionComposition_.begin();
   while (it != initialSolutionComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    // cout << DCName_[it->first]
-    //      << ": Total initial charge so far = " << totcharge << endl;
+    // std::cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << std::endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -932,19 +934,19 @@ void ChemicalSystem::parseSolutionComp(const json::iterator cdi) {
   return;
 }
 
-void ChemicalSystem::parseGasComp(const json::iterator cdi) {
+void ChemicalSystem::parseGasComp(const nlohmann::json::iterator cdi) {
   // Clear the associative map to initialize it
 
   fixedGasComposition_.clear();
   initialGasComposition_.clear();
   attackGasComposition_.clear();
 
-  string DCName, testCondition;
+  std::string DCName, testCondition;
   double DCMoles;
   int DCId;
 
-  json::iterator p = cdi.value().begin();
-  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
+  nlohmann::json::iterator p = cdi.value().begin();
+  for (int i = 0; i < static_cast<int>(cdi.value().size()); ++i) {
     p = cdi.value()[i].find("name");
     DCName = p.value();
     DCId = getDCId(DCName);
@@ -969,11 +971,11 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   // Make sure they have charge balance
 
   double totcharge = 0.0;
-  map<int, double>::iterator it = initialGasComposition_.begin();
+  std::map<int, double>::iterator it = initialGasComposition_.begin();
   while (it != initialGasComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    // cout << DCName_[it->first]
-    //      << ": Total initial charge so far = " << totcharge << endl;
+    // std::cout << DCName_[it->first]
+    //      << ": Total initial charge so far = " << totcharge << std::endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -985,9 +987,9 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   it = fixedGasComposition_.begin();
   while (it != fixedGasComposition_.end()) {
     totcharge += ((it->second) * (DCCharge_[it->first]));
-    // cout << DCName_[it->first] << ": Total fixed charge so far = " <<
+    // std::cout << DCName_[it->first] << ": Total fixed charge so far = " <<
     // totcharge
-    //      << endl;
+    //      << std::endl;
     it++;
   }
   if (abs(totcharge) > 1.0e-9) {
@@ -1012,22 +1014,23 @@ void ChemicalSystem::parseGasComp(const json::iterator cdi) {
   return;
 }
 
-void ChemicalSystem::parseMicroPhaseNames(const json::iterator cdi,
-                                          map<string, int> &phaseids) {
+void ChemicalSystem::parseMicroPhaseNames(
+    const nlohmann::json::iterator cdi, std::map<std::string, int> &phaseids) {
 
-  json::iterator cii = cdi.value()[0].find("thamesname");
-  string pname;
+  nlohmann::json::iterator cii = cdi.value()[0].find("thamesname");
+  std::string pname;
   int pid, cemcompval;
   bool cemComp;
 
-  for (int pnum = 0; pnum < (int)(cdi.value().size()); ++pnum) {
+  for (int pnum = 0; pnum < static_cast<int>(cdi.value().size()); ++pnum) {
     cii = cdi.value()[pnum].find("thamesname");
     pname = cii.value();
     cii = cdi.value()[pnum].find("id");
     pid = cii.value();
     if (verbose_) {
-      cout << "    Phase name = " << pname << " with id " << pid << endl;
-      cout.flush();
+      std::cout << "    Phase name = " << pname << " with id " << pid
+                << std::endl;
+      std::cout.flush();
     }
     cii = cdi.value()[pnum].find("cement_component");
     cemcompval = cii.value();
@@ -1038,12 +1041,13 @@ void ChemicalSystem::parseMicroPhaseNames(const json::iterator cdi,
   return;
 }
 
-void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
-                                      map<string, int> phaseids,
+void ChemicalSystem::parseMicroPhases(const nlohmann::json::iterator cdi,
+                                      int numEntries,
+                                      std::map<std::string, int> phaseids,
                                       PhaseData &phaseData) {
 
-  json::iterator p;
-  for (int i = 0; i < (int)(cdi.value().size()); ++i) {
+  nlohmann::json::iterator p;
+  for (int i = 0; i < static_cast<int>(cdi.value().size()); ++i) {
 
     phaseData.growthTemplate.clear();
     phaseData.affinity.clear();
@@ -1182,7 +1186,8 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
     // shall have at least one DC with porosity between 0.0 and 1.0
 
     bool done = false;
-    for (int j = 0; j < (int)(phaseData.microPhaseDCPorosities.size()) && !done;
+    for (int j = 0;
+         j < static_cast<int>(phaseData.microPhaseDCPorosities.size()) && !done;
          ++j) {
       if (phaseData.microPhaseDCPorosities[j] > 0.0 &&
           phaseData.microPhaseDCPorosities[j] < 1.0) {
@@ -1221,13 +1226,13 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
 
     poreSizeDistribution_.push_back(phaseData.poreSizeDist);
     if (verbose_) {
-      cout << "Pushed pore size distribution data for phase "
-           << phaseData.thamesName << endl;
-      cout << "This phase distribution has " << phaseData.poreSizeDist.size()
-           << " entries" << endl;
-      cout << "Have now registered " << poreSizeDistribution_.size() << " PSDs"
-           << endl;
-      cout.flush();
+      std::cout << "Pushed pore size distribution data for phase "
+                << phaseData.thamesName << std::endl;
+      std::cout << "This phase distribution has "
+                << phaseData.poreSizeDist.size() << " entries" << std::endl;
+      std::cout << "Have now registered " << poreSizeDistribution_.size()
+                << " PSDs" << std::endl;
+      std::cout.flush();
     }
     phaseData.poreSizeDist.clear();
     grayscale_.push_back(phaseData.gray);
@@ -1244,29 +1249,29 @@ void ChemicalSystem::parseMicroPhases(const json::iterator cdi, int numEntries,
     numMicroPhases_++;
 
     if (verbose_) {
-      cout << "Parsed phase " << phaseData.thamesName << endl;
-      cout.flush();
+      std::cout << "Parsed phase " << phaseData.thamesName << std::endl;
+      std::cout.flush();
     }
   }
   return;
 }
 
-void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
+void ChemicalSystem::parsePoreSizeDistribution(const nlohmann::json::iterator p,
                                                PhaseData &phaseData) {
 
   if (verbose_) {
-    cout << "Reading Pore Size Distribution:" << endl;
-    cout.flush();
+    std::cout << "Reading Pore Size Distribution:" << std::endl;
+    std::cout.flush();
   }
 
   double sum;
   struct PoreSizeVolume datarow;
-  json::iterator pp;
+  nlohmann::json::iterator pp;
 
   phaseData.poreSizeDist.clear();
 
   sum = 0.0;
-  for (int i = 0; i < (int)(p.value().size()); ++i) {
+  for (int i = 0; i < static_cast<int>(p.value().size()); ++i) {
     pp = p.value()[i].find("diameter");
     if (pp != p.value()[i].end()) {
       datarow.diam = pp.value();
@@ -1274,47 +1279,51 @@ void ChemicalSystem::parsePoreSizeDistribution(const json::iterator p,
       if (pp != p.value()[i].end()) {
         datarow.volfrac = pp.value();
       } else {
-        cout << "      WARNING: Malformed data row for pore size distribution "
-             << "(no volume fraction)... assuming zero" << endl;
-        cout.flush();
+        std::cout
+            << "      WARNING: Malformed data row for pore size distribution "
+            << "(no volume fraction)... assuming zero" << std::endl;
+        std::cout.flush();
         datarow.volfrac = 0.0;
       }
       phaseData.poreSizeDist.push_back(datarow);
       sum += datarow.volfrac;
       if (verbose_) {
         // i++;
-        // cout << "---> " << "   i = " << i << "   " << datarow.diam << " , "
-        // << datarow.volfrac << endl; cout.flush();
-        cout << "---> " << datarow.diam << " , " << datarow.volfrac << endl;
-        cout.flush();
+        // std::cout << "---> " << "   i = " << i << "   " << datarow.diam << "
+        // , "
+        // << datarow.volfrac << std::endl; std::cout.flush();
+        std::cout << "---> " << datarow.diam << " , " << datarow.volfrac
+                  << std::endl;
+        std::cout.flush();
       }
     } else {
-      cout << "      WARNING: Malformed data row for pore size distribution "
-           << "(no diameter)... skipping" << endl;
-      cout.flush();
+      std::cout
+          << "      WARNING: Malformed data row for pore size distribution "
+          << "(no diameter)... skipping" << std::endl;
+      std::cout.flush();
     }
   }
 
   if (verbose_) {
-    cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
-         << phaseData.poreSizeDist.size() << endl;
-    cout.flush();
+    std::cout << "<---- sum = " << sum << "   phaseData.poreSizeDist.size() : "
+              << phaseData.poreSizeDist.size() << std::endl;
+    std::cout.flush();
   }
 
   return;
 }
 
-void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
+void ChemicalSystem::parseGEMPhaseData(const nlohmann::json::iterator p,
                                        PhaseData &phaseData) {
   int GEMPhaseId = 0;
-  string mypstr;
+  std::string mypstr;
   phaseData.GEMPhaseDCMembers.clear();
   phaseData.microPhaseDCPorosities.clear();
   // bool scrapeWaterDCs = false;
 
-  json::iterator pp;
+  nlohmann::json::iterator pp;
 
-  for (int i = 0; i < (int)(p.value().size()); ++i) {
+  for (int i = 0; i < static_cast<int>(p.value().size()); ++i) {
     pp = p.value()[i].find("gemphasename");
     if (pp != p.value()[i].end()) {
       mypstr = pp.value().get<string>();
@@ -1326,10 +1335,10 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
       // } else {
       //   scrapeWaterDCs = false;
       // }
-      // cout << endl
-      //      << "GEM Phase name = " << mypstr // << endl;
-      //      << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
-      // cout.flush();
+      // std::cout << std::endl
+      //      << "GEM Phase name = " << mypstr // << std::endl;
+      //      << ", scrapeWaterDCs = " << scrapeWaterDCs << std::endl;
+      // std::cout.flush();
       //  Assign the global microstructure phase name associated with CSH
       if (mypstr == CSHGEMName) {
         CSHMicroName = phaseData.thamesName;
@@ -1370,7 +1379,7 @@ void ChemicalSystem::parseGEMPhaseData(const json::iterator p,
   return;
 }
 
-void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
+void ChemicalSystem::parseGEMPhaseDCData(const nlohmann::json::iterator pp,
                                          PhaseData &phaseData) {
   string mydcstr;
   // char *mydchar = const_cast<char *>(str.c_str());
@@ -1380,14 +1389,15 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
   bool scrapeWaterDCs = false;
   phaseData.GEMPhaseDCMembers.clear();
 
-  json::iterator ppp = pp.value().begin();
-  for (int i = 0; i < (int)(pp.value().size()); ++i) {
+  nlohmann::json::iterator ppp = pp.value().begin();
+  for (int i = 0; i < static_cast<int>(pp.value().size()); ++i) {
     ppp = pp.value()[i].find("gemdcname");
     if (ppp != pp.value()[i].end()) {
       mydcstr = ppp.value().get<string>();
       phaseData.DCName.push_back(const_cast<char *>(mydcstr.c_str()));
-      // cout << "Phase " << phaseData.thamesName << " found DC " << mydcstr
-      //     << endl;
+      // std::cout << "Phase " << phaseData.thamesName << " found DC " <<
+      // mydcstr
+      //     << std::endl;
       // if (mydcstr == AFTDCName) {
       //   AFTMicroName = phaseData.thamesName;
       // }
@@ -1400,8 +1410,8 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
         dcid = getDCId(mydcstr);
         phaseData.DCId.push_back(dcid);
         phaseData.GEMPhaseDCMembers.push_back(dcid);
-        // cout << "    GEM DC id = " << dcid // << endl;
-        //     << ", scrapeWaterDCs = " << scrapeWaterDCs << endl;
+        // std::cout << "    GEM DC id = " << dcid // << std::endl;
+        //     << ", scrapeWaterDCs = " << scrapeWaterDCs << std::endl;
       }
       // Make certain that there will be a porosity associated
       // with this DC
@@ -1429,7 +1439,7 @@ void ChemicalSystem::parseGEMPhaseDCData(const json::iterator pp,
   return;
 }
 
-void ChemicalSystem::parseDisplayData(const json::iterator p,
+void ChemicalSystem::parseDisplayData(const nlohmann::json::iterator p,
                                       PhaseData &phaseData) {
 
   int red, green, blue, gray;
@@ -1437,7 +1447,7 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
   red = green = blue = gray = 0;
   bool rgbBool = false;
 
-  json::iterator pp = p.value().find("red");
+  nlohmann::json::iterator pp = p.value().find("red");
   if (pp != p.value().end()) {
     red = pp.value();
     rgbBool = true;
@@ -1467,7 +1477,8 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
   float rgbfColor;
 
   if (rgbBool) {
-    map<string, elemColor>::iterator it = colorN_.find(phaseData.thamesName);
+    std::map<std::string, elemColor>::iterator it =
+        colorN_.find(phaseData.thamesName);
     if (it != colorN_.end()) {
       colorN_[phaseData.thamesName].rgb[0] = red;
       colorN_[phaseData.thamesName].rgb[1] = green;
@@ -1475,13 +1486,13 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
       colorN_[phaseData.thamesName].gray = gray;
 
       colorN_[phaseData.thamesName].rgbf[0] =
-          (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+          static_cast<float>(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
       colorN_[phaseData.thamesName].rgbf[1] =
-          (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+          static_cast<float>(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
       colorN_[phaseData.thamesName].rgbf[2] =
-          (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+          static_cast<float>(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
       colorN_[phaseData.thamesName].grayf =
-          (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+          static_cast<float>(colorN_[phaseData.thamesName].gray) / 255.0;
 
     } else {
       colorN_[phaseData.thamesName].colorId = colorN_.size();
@@ -1504,22 +1515,22 @@ void ChemicalSystem::parseDisplayData(const json::iterator p,
       colorN_[phaseData.thamesName].grayf = rgbfColor;
     }
     // colorN_[phaseData.thamesName].rgbf[0] =
-    //     (float)(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
+    //     static_cast<float>(colorN_[phaseData.thamesName].rgb[0]) / 255.0;
     // colorN_[phaseData.thamesName].rgbf[1] =
-    //     (float)(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
+    //     static_cast<float>(colorN_[phaseData.thamesName].rgb[1]) / 255.0;
     // colorN_[phaseData.thamesName].rgbf[2] =
-    //     (float)(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
+    //     static_cast<float>(colorN_[phaseData.thamesName].rgb[2]) / 255.0;
     // colorN_[phaseData.thamesName].grayf =
-    //     (float)(colorN_[phaseData.thamesName].gray) / 255.0;
+    //     static_cast<float>(colorN_[phaseData.thamesName].gray) / 255.0;
   }
 
   return;
 }
 
-void ChemicalSystem::parseImpurityData(const json::iterator p,
+void ChemicalSystem::parseImpurityData(const nlohmann::json::iterator p,
                                        PhaseData &phaseData) {
 
-  json::iterator pp = p.value().begin();
+  nlohmann::json::iterator pp = p.value().begin();
   while (pp != p.value().end()) {
     if (pp.key() == "k2ocoeff") {
       phaseData.k2o = pp.value();
@@ -1538,11 +1549,11 @@ void ChemicalSystem::parseImpurityData(const json::iterator p,
   return;
 }
 
-void ChemicalSystem::parseInterfaceData(const json::iterator p,
+void ChemicalSystem::parseInterfaceData(const nlohmann::json::iterator p,
                                         map<string, int> &phaseids,
                                         PhaseData &phaseData) {
 
-  json::iterator pp = p.value().find("affinity");
+  nlohmann::json::iterator pp = p.value().find("affinity");
   if (pp != p.value().end()) {
     try {
       parseAffinityData(pp, phaseids, phaseData);
@@ -1553,20 +1564,20 @@ void ChemicalSystem::parseInterfaceData(const json::iterator p,
   return;
 }
 
-void ChemicalSystem::parseAffinityData(const json::iterator pp,
-                                       map<string, int> &phaseids,
+void ChemicalSystem::parseAffinityData(const nlohmann::json::iterator pp,
+                                       std::map<std::string, int> &phaseids,
                                        PhaseData &phaseData) {
   int testaftyid;
   double testangleval = 90.0;
-  // map<string, int>::iterator it = phaseids.begin();
-  string mystr("Null");
+  // std::map<std::string, int>::iterator it = phaseids.begin();
+  std::string mystr("Null");
 
-  json::iterator ppp;
-  for (int i = 0; i < (int)(pp.value().size()); ++i) {
+  nlohmann::json::iterator ppp;
+  for (int i = 0; i < static_cast<int>(pp.value().size()); ++i) {
     ppp = pp.value()[i].find("affinityphase");
     if (ppp != pp.value()[i].end()) {
       mystr = ppp.value();
-      map<string, int>::iterator it = phaseids.find(mystr);
+      std::map<std::string, int>::iterator it = phaseids.find(mystr);
       if (it != phaseids.end()) {
         testaftyid = it->second;
         ppp = pp.value()[i].find("contactanglevalue");
@@ -1584,15 +1595,15 @@ void ChemicalSystem::parseAffinityData(const json::iterator pp,
   return;
 }
 
-// void ChemicalSystem::parseRdData(const json::iterator p,
+// void ChemicalSystem::parseRdData(const nlohmann::json::iterator p,
 //                                  struct PhaseData &phaseData) {
 //   int RdId;
 //   double RdVal;
 //
-//   json::iterator pp = p.value().begin();
+//   nlohmann::json::iterator pp = p.value().begin();
 //   while (pp != p.value().end()) {
 //     if (pp.key() == "Rdelement") {
-//       string st(pp.value());
+//       std::string st(pp.value());
 //       RdId = getICId(st);
 //       phaseData.RdId.push_back(RdId);
 //     }
@@ -1787,7 +1798,7 @@ void ChemicalSystem::getPGEMPhaseStoich(void) {
 void ChemicalSystem::getGEMPhaseStoich(void) {
   double minval = 0.0;
   GEMPhaseStoich_.clear();
-  vector<double> vplace;
+  std::vector<double> vplace;
   vplace.clear();
   vplace.resize(numICs_, 0.0);
   GEMPhaseStoich_.resize(numGEMPhases_, vplace);
@@ -1816,52 +1827,6 @@ void ChemicalSystem::getGEMPhaseStoich(void) {
   }
 }
 
-/*
-void ChemicalSystem::writeDb(ostream &stream) {
-  unsigned int i;
-
-  ///
-  /// Make the header
-  ///
-
-  stream << "--------------------------------------------------------" << endl;
-  stream << "CONTENTS OF PHASE DATABASE:" << endl;
-  stream << endl;
-
-  ///
-  /// Format one line at a time
-  ///
-
-  for (i = 0; i < numMicroPhases_; i++) {
-    writeMember(i, stream);
-  }
-
-  stream << endl;
-  stream << "--------------------------------------------------------" << endl;
-  stream << endl;
-}
-
-void ChemicalSystem::writeMember(const unsigned int i, ostream &stream) {
-
-  // unsigned int idnum;
-  if (i >= numMicroPhases_) {
-    throw EOBException("ChemicalSystem", "writeMember", "microPhaseName_",
-                       numMicroPhases_, i);
-  }
-
-  ///
-  /// Format the output for one phase
-  ///
-
-  stream << "------------------------------------------------------" << endl;
-  stream << "DATA FOR MATERIAL " << i << ":" << endl;
-  stream << "       Name = " << microPhaseName_[i] << endl;
-  stream << "         Id = " << microPhaseId_[i] << endl;
-  stream << "   Porosity = " << microPhasePorosity_[i] << endl;
-  stream << "------------------------------------------------------" << endl;
-}
-*/
-
 void ChemicalSystem::writeChemSys(ofstream &out) {
   int j;
 
@@ -1869,6 +1834,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
   /// First we will list details for the ICs
   ///
 
+  using std::endl;
   out << "Report on the Material Database" << endl;
   out << "-------------- ChemicalSystem -----------------" << endl << endl;
   out << endl << "List of Independent Components :" << endl;
@@ -1921,7 +1887,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
     out << endl << i << ") Name: " << microPhaseName_[i] << endl;
     out << "                     id: " << microPhaseId_[i] << endl;
     out << "               affinity: " << endl;
-    for (j = 0; j < (int)(affinity_[i].size()); j++) {
+    for (j = 0; j < static_cast<int>(affinity_[i].size()); j++) {
       if (affinity_[i][j] != 0) {
         out << "                  affinity to " << j << ": " << affinity_[i][j]
             << "   " << microPhaseName_[j] << endl;
@@ -1932,7 +1898,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
     }
     out << "        growthTemplate:";
     if (growthTemplate_[i].size() != 0) {
-      for (j = 0; j < (int)(growthTemplate_[i].size()); j++) {
+      for (j = 0; j < static_cast<int>(growthTemplate_[i].size()); j++) {
         out << " " << growthTemplate_[i][j] << "("
             << microPhaseName_[growthTemplate_[i][j]] << ")";
       }
@@ -1949,7 +1915,7 @@ void ChemicalSystem::writeChemSys(ofstream &out) {
     compDC = getMicroPhaseDCMembers(i);
     out << "        DCs components:";
     if (compDC.size() != 0) {
-      for (j = 0; j < (int)(compDC.size()); j++) {
+      for (j = 0; j < static_cast<int>(compDC.size()); j++) {
         out << " " << compDC[j] << "(" << DCName_[compDC[j]] << ")";
       }
     } else {
@@ -2021,22 +1987,23 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
   unsigned int gemphaseid = getMicroPhaseToGEMPhase(idx, 0);
 
   // Find all the DC ids for this GEM phase
-  vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
+  std::vector<int> DClist = getGEMPhaseDCMembers(gemphaseid);
   // Get the porosities for each DC in the microstructure phase
   int DClistSize = DClist.size();
 
-  vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
+  std::vector<double> DCporosities = getMicroPhaseDCPorosities(idx);
 
   if (verbose_) {
-    cout << "ChemicalSystem::calcMicroPhasePorosity for "
-         << getMicroPhaseName(idx) << endl;
-    cout << "    This phase's GEM phase id = " << gemphaseid
-         << " and volume = " << getMicroPhaseVolume(idx) << " m3" << endl;
-    cout << "    The DC members for this GEM phase are:" << endl;
+    std::cout << "ChemicalSystem::calcMicroPhasePorosity for "
+              << getMicroPhaseName(idx) << std::endl;
+    std::cout << "    This phase's GEM phase id = " << gemphaseid
+              << " and volume = " << getMicroPhaseVolume(idx) << " m3"
+              << std::endl;
+    std::cout << "    The DC members for this GEM phase are:" << std::endl;
     for (int ii = 0; ii < DClistSize; ++ii) {
-      cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii]) << ")"
-           << endl;
-      cout.flush();
+      std::cout << "        " << DClist[ii] << " (" << getDCName(DClist[ii])
+                << ")" << std::endl;
+      std::cout.flush();
     }
   }
 
@@ -2071,14 +2038,14 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
     conc = 1.0;
     vol = conc * getDCMolarVolume(DCId);
     if (verbose_) {
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") concentration = " << conc << endl;
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") porosity = " << porosity << endl;
-      cout << "    " << getDCName(DCId) << " (" << DCId
-           << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
-      cout << "****" << endl;
-      cout.flush();
+      std::cout << "    " << getDCName(DCId) << " (" << DCId
+                << ") concentration = " << conc << std::endl;
+      std::cout << "    " << getDCName(DCId) << " (" << DCId
+                << ") porosity = " << porosity << std::endl;
+      std::cout << "    " << getDCName(DCId) << " (" << DCId
+                << ") molarvolume = " << getDCMolarVolume(DCId) << std::endl;
+      std::cout << "****" << std::endl;
+      std::cout.flush();
     }
   } else {
     // int DClistSize = DClist.size();
@@ -2090,14 +2057,14 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
       weightedporosities += (vol * porosity);
       sumvol += vol;
       if (verbose_) {
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") concentration = " << conc << endl;
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") porosity = " << porosity << endl;
-        cout << "    " << getDCName(DCId) << " (" << DCId
-             << ") molarvolume = " << getDCMolarVolume(DCId) << endl;
-        cout << "****" << endl;
-        cout.flush();
+        std::cout << "    " << getDCName(DCId) << " (" << DCId
+                  << ") concentration = " << conc << std::endl;
+        std::cout << "    " << getDCName(DCId) << " (" << DCId
+                  << ") porosity = " << porosity << std::endl;
+        std::cout << "    " << getDCName(DCId) << " (" << DCId
+                  << ") molarvolume = " << getDCMolarVolume(DCId) << std::endl;
+        std::cout << "****" << std::endl;
+        std::cout.flush();
       }
     }
     if (sumvol > 0.0) {
@@ -2106,9 +2073,9 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
       porosity = 0.0;
     }
     if (verbose_) {
-      cout << "    " << getMicroPhaseName(idx)
-           << " subvoxel porosity = " << porosity << endl;
-      cout.flush();
+      std::cout << "    " << getMicroPhaseName(idx)
+                << " subvoxel porosity = " << porosity << std::endl;
+      std::cout.flush();
     }
   }
 
@@ -2120,9 +2087,10 @@ void ChemicalSystem::calcMicroPhasePorosity(const unsigned int idx) {
 
 int ChemicalSystem::calculateState(double time, bool isFirst = false,
                                    int cyc = 0) {
-  string msg;
+  std::string msg;
 
-  vector<double> microPhaseVolumes = getMicroPhaseVolume();
+  std::vector<double> microPhaseVolumes = getMicroPhaseVolume();
+  using std::cout, std::endl;
 
   nodeStatus_ = NEED_GEM_AIA;
 
@@ -2645,9 +2613,9 @@ void ChemicalSystem::setMicroPhaseSI() {
     double aveSI = 0.0;
     double moles = 0.0;
     double tmoles = 0.0;
-    vector<int> microPhaseDCMembers;
+    std::vector<int> microPhaseDCMembers;
     int sizeMicroPhaseDCMembers;
-    string pname;
+    std::string pname;
     int newDCId;
 
     for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
@@ -2684,8 +2652,8 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
   try {
     double aveSI = 0.0;
     double moles = 0.0;
-    vector<int> microPhaseDCMembers;
-    string pname;
+    std::vector<int> microPhaseDCMembers;
+    std::string pname;
 
     // Query CSD node to set the SI of every microPhase
     // if (isFirst) {
@@ -2696,14 +2664,15 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
     //***********
     // solutPhaseMoles_
     double totMoles = 0;
-    vector<int> microPhasePhMembers;
+    std::vector<int> microPhasePhMembers;
     int sizeMicroPhasePhMembers;
     int newPhId;
 
     if (time >= beginAttackTime_) {
-      cout << endl
-           << "          SI calc from GEM phases for mPhId = 15 - mPhName = "
-           << microPhaseName_[15] << " : " << endl;
+      std::cout
+          << std::endl
+          << "          SI calc from GEM phases for mPhId = 15 - mPhName = "
+          << microPhaseName_[15] << " : " << std::endl;
     }
 
     for (int i = FIRST_SOLID; i < numMicroPhases_; ++i) {
@@ -2711,17 +2680,17 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       aveSI = totMoles = 0.0;
       microPhasePhMembers =
           microPhaseMembers_[i]; // getMicroPhaseMembers(i);
-          // microPhaseMembers_ vs GEMPhaseIdLookup_
+                                 // //microPhaseMembers_ vs GEMPhaseIdLookup_
       sizeMicroPhasePhMembers = (int)microPhasePhMembers.size();
       if ((time >= beginAttackTime_) && (i == 15)) {
         for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
           newPhId = microPhaseMembers_[i][ii]; // microPhasePhMembers[i];
           moles = solutPhaseMoles_[newPhId];
-          cout << "           ii/newPhId/moles/Ph_SatInd/SI/newPhName = " << ii
-               << " / " << newPhId << " / " << moles << " / "
-               << node_->Ph_SatInd(newPhId) << " / "
-               << pow(10, node_->Ph_SatInd(newPhId)) << " / "
-               << GEMPhaseName_[newPhId] << endl;
+          std::cout << "           ii/newPhId/moles/Ph_SatInd/SI/newPhName = "
+                    << ii << " / " << newPhId << " / " << moles << " / "
+                    << node_->Ph_SatInd(newPhId) << " / "
+                    << pow(10, node_->Ph_SatInd(newPhId)) << " / "
+                    << GEMPhaseName_[newPhId] << std::endl;
         }
       }
       for (int ii = 0; ii < sizeMicroPhasePhMembers; ++ii) {
@@ -2736,15 +2705,16 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       microPhaseSI_.at(i) = aveSI;
     }
     if (time >= beginAttackTime_)
-      cout << "          aveSI for mPhId = 15 - mPhName = "
-           << microPhaseName_[15] << " : " << microPhaseSI_.at(15) << endl;
+      std::cout << "          aveSI for mPhId = 15 - mPhName = "
+                << microPhaseName_[15] << " : " << microPhaseSI_.at(15)
+                << std::endl;
     //***********
 
     // if (time >= beginAttackTime_) {
     //   setSI();
-    //   cout << endl << "          SI calc from GEM DCs for mPhId = 15 -
-    //   mPhName = "
-    //        << microPhaseName_[15] << " : " << endl;
+    //   std::cout << std::endl << "          SI calc from GEM DCs for mPhId =
+    //   15 - mPhName = "
+    //        << microPhaseName_[15] << " : " << std::endl;
     // }
 
     /*
@@ -2753,20 +2723,20 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
       aveSI = moles = 0.0;
       microPhaseDCMembers = getMicroPhaseDCMembers(i);
       sizeMicroPhaseDCMembers = microPhaseDCMembers.size();
-      // cout << endl << "   " << i << "\tpname: " << pname
+      // std::cout << std::endl << "   " << i << "\tpname: " << pname
       //      << "\tmicroPhaseMembers.size: " << sizeMicroPhaseDCMembers << "
-      //      : " << endl;
+      //      : " << std::endl;
       if ((time >= beginAttackTime_) && (i == 15)) {
         double *Falp = (node_->ppmm())->Falp;
         for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
           newDCId = microPhaseDCMembers.at(ii);
           tmoles = DCMoles_[newDCId];
           if (tmoles > 1.e-15) sumSI += node_->DC_a(newDCId);
-          cout << "           ii/newDCId/tmoles/Falp/SI(Falp)/SI(DC_a)/newDCName
-    = "
+          std::cout << " ii/newDCId/tmoles/Falp/SI(Falp)/SI(DC_a)/newDCName = "
                << ii << " / " << newDCId << " / " << tmoles << " / "
                << Falp[newDCId] <<   " / " << pow(10, Falp[newDCId]) << " / "
-               << node_->DC_a(newDCId) << " / " << DCName_[newDCId] << endl;
+               << node_->DC_a(newDCId) << " / " << DCName_[newDCId] <<
+    std::endl;
         }
       }
       for (int ii = 0; ii < sizeMicroPhaseDCMembers; ++ii) {
@@ -2775,33 +2745,34 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
         // if ( microPhaseDCMembers.size() == 1) {
         //   vector<int> microPhaseMembers = getMicroPhaseMembers(i);
         //   int newGEMPhaseId = microPhaseMembers.at(0);
-        //   cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
+        //   std::cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
         //        << newDCId << "\tnewDCName: " << DCName_[newDCId]
         //        << "\ttmoles: " << tmoles
         //        << "\tDC_a: " << node_->DC_a(newDCId)
         //        << "\tmono -> newGEMPhaseId: " << newGEMPhaseId
-        //        << "\tSI_: " << SI_[newGEMPhaseId] << endl;
+        //        << "\tSI_: " << SI_[newGEMPhaseId] << std::endl;
         // } else {
-        //   cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
+        //   std::cout << "       " << ii << "\tcyc/newDCId: " << cyc << " / "
         //        << newDCId << "\tnewDCName: " << DCName_[newDCId]
         //        << "\ttmoles: " << tmoles
-        //        << "\tDC_a: " << node_->DC_a(newDCId) << endl;
+        //        << "\tDC_a: " << node_->DC_a(newDCId) << std::endl;
         // }
 
         aveSI += (node_->DC_a(newDCId) * tmoles);
         moles += tmoles;
       }
-      // cout << "          aveSI: " << aveSI << "\tmoles: " << moles << endl;
-      if (moles > 0.0) {
-        aveSI = aveSI / moles;
+      // std::cout << "          aveSI: " << aveSI << "\tmoles: " << moles <<
+    std::endl; if (moles > 0.0) { aveSI = aveSI / moles;
       }
       microPhaseSI_.at(i) = aveSI;
-      // cout << "          pname = " << pname << "  =>     microPhaseSI_(cyc
+      // std::cout << "          pname = " << pname << "  => microPhaseSI_(cyc
       // = " << cyc
-      //      << ") = " << microPhaseSI_[i] << "\tmoles: " << moles << endl;
+      //      << ") = " << microPhaseSI_[i] << "\tmoles: " << moles <<
+    std::endl;
     }
     //} //if (isFirst) {
-    // cout << endl << "ChemicalSystem::setMicroPhaseSI end" << endl; exit(0);
+    // std::cout << std::endl << "ChemicalSystem::setMicroPhaseSI end" <<
+    std::endl; exit(0);
     */
   } catch (EOBException eex) {
     eex.printException();
@@ -2809,17 +2780,18 @@ void ChemicalSystem::setMicroPhaseSI(double time) {
   }
 
   if (time >= beginAttackTime_)
-    cout << "          aveSI for mPhId = 15 - mPhName = " << microPhaseName_[15]
-         << " : " << microPhaseSI_.at(15) << "   &   sumSI = " << sumSI << endl;
+    std::cout << "          aveSI for mPhId = 15 - mPhName = "
+              << microPhaseName_[15] << " : " << microPhaseSI_.at(15)
+              << "   &   sumSI = " << sumSI << std::endl;
 
   return;
 }
 
 void ChemicalSystem::initElasticModuliMap(void) {
-  // (1): Table 1 from Haecker et al. / 
-  // Cement and Concrete Research 35(2005)1948–1960
-  // (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K + G))
-  // (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
+  // (1): Table 1 from Haecker et al. / Cement and Concrete Research
+  // 35(2005)1948–1960 (k,G) -> (E,n) : E = 9KG/(3K + G)  &  n = (3K - 2G)/(2(3K
+  // + G)) (E,n) -> (k,G) : K = E/(3(1 - 2n)) &  G = E/(2(1 + n))
+
   // struct elMod {
   //   float K; // bulk modulus    : K(GPa)
   //   float G; // shear modulus   : G(GPa)
@@ -2827,7 +2799,7 @@ void ChemicalSystem::initElasticModuliMap(void) {
   //   float n; // Poisson's ratio
   //   string altName;
   // };
-  // map<string, elMod> elasticModuli_;
+  // std::map<std::string, elMod> elasticModuli_;
 
   // cement chemistry notation :
   //   C=CaO, S=SiO2,A=Al2O3, F=Fe2O3, H=H2O, K=K2O, N=Na2O, M=MgO
@@ -3132,8 +3104,8 @@ void ChemicalSystem::initElasticModuliMap(void) {
 void ChemicalSystem::initColorMap(void) {
   // struct elemColor {
   //   int colorId;
-  //   string altName;
-  //   vector<int> rgb;
+  //   std::string altName;
+  //   std::vector<int> rgb;
   //   int gray;
   // };
 
@@ -3413,8 +3385,8 @@ void ChemicalSystem::initColorMap(void) {
   map<string, elemColor>::iterator it = colorN_.begin();
 
   while (it != colorN_.end()) {
-    // cout << "   " << it->first << " red = " << (it->second).rgb[0] << endl;
-    // cout.flush();
+    // std::cout << "   " << it->first << " red = " << (it->second).rgb[0] <<
+    // std::endl; std::cout.flush();
     (it->second).rgbf.push_back((float)((it->second).rgb[0]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[1]) / 255.0);
     (it->second).rgbf.push_back((float)((it->second).rgb[2]) / 255.0);
@@ -3422,8 +3394,8 @@ void ChemicalSystem::initColorMap(void) {
     ++it;
   }
 
-  // cout << "Made it past iterator" << endl;
-  // cout.flush();
+  // std::cout << "Made it past iterator" << std::endl;
+  // std::cout.flush();
 
   /*
   colorN_[""].colorId = ;
@@ -3440,6 +3412,7 @@ void ChemicalSystem::initColorMap(void) {
 
 void ChemicalSystem::checkChemSys(void) {
   int i, j, size, size_sec;
+  using std::cout, std::endl;
 
   cout << "" << endl;
   cout << "numMicroPhases_ " << numMicroPhases_ << endl;
@@ -3480,7 +3453,7 @@ void ChemicalSystem::checkChemSys(void) {
   cout << " " << endl;
   cout << "****************" << endl;
   cout << "maps" << endl;
-  vector<int> second;
+  std::vector<int> second;
   // map<int,vector<int> > microPhaseMembers_;
   size = microPhaseMembers_.size();
   cout << "microPhaseMembers_.size " << size << endl;
@@ -3575,7 +3548,7 @@ void ChemicalSystem::checkChemSys(void) {
 
   cout << " " << endl;
   cout << "numGEMPhases_ " << numGEMPhases_ << endl;
-  // map<string,int> GEMPhaseIdLookup_
+  // std::map<std::string,int> GEMPhaseIdLookup_
   size = GEMPhaseIdLookup_.size();
   if (size == numGEMPhases_) {
     cout << "GEMPhaseIdLookup_.size() OK! " << size << endl;
@@ -3592,6 +3565,7 @@ void ChemicalSystem::checkChemSys(void) {
 }
 
 void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
+  using std::cout, std::endl;
   int DCId;
   double DCconc;  // mol/kgw units
   double DCmoles; // mol units
@@ -3614,7 +3588,7 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
     cout << "   - hydration starts with a given electrolyte composition :"
          << endl;
     cout << "      condition - initial" << endl;
-    map<int, double>::iterator it = initialSolutionComposition_.begin();
+    std::map<int, double>::iterator it = initialSolutionComposition_.begin();
     while (it != initialSolutionComposition_.end()) {
       DCId = it->first;
       if (DCId != waterDCId_) {
@@ -3629,7 +3603,7 @@ void ChemicalSystem::writeSatElectrolyteGasConditions(void) {
     cout << "   - during hydration the electrolyte has a fixed composition :"
          << endl;
     cout << "      condition - fixed" << endl;
-    map<int, double>::iterator it = fixedSolutionComposition_.begin();
+    std::map<int, double>::iterator it = fixedSolutionComposition_.begin();
     while (it != fixedSolutionComposition_.end()) {
       DCId = it->first;
       if (DCId != waterDCId_) {
@@ -3732,12 +3706,13 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
   double DCconc = 0.0; // mol/kgw units
   double waterMoles = DCMoles_[waterDCId_];
   double waterMass = 0.001 * waterMoles * waterMollarMass_; // in kg
+  using std::map;
 
   if (doAttack) {
-    cout << endl
-         << "  ----> ChemicalSystem::setElectrolyteComposition - "
-            "doAttack/waterMass : "
-         << doAttack << " / " << waterMass << endl;
+    std::cout << std::endl
+              << "  ----> ChemicalSystem::setElectrolyteComposition - "
+                 "doAttack/waterMass : "
+              << doAttack << " / " << waterMass << std::endl;
 
     if (attackSolutionComposition_.size() > 0) {
       map<int, double>::iterator it = attackSolutionComposition_.begin();
@@ -3747,10 +3722,11 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
           DCconc = it->second;
           DCMoles_[DCId] = DCconc * waterMass;
         }
-        cout << "    ----> ChemicalSystem::setElectrolyteComposition attack - "
-                "waterMass/DCId/DCconc/DCMoles_ : "
-             << waterMass << " / " << DCId << " / " << DCconc << " / "
-             << DCMoles_[DCId] << endl;
+        std::cout
+            << "    ----> ChemicalSystem::setElectrolyteComposition attack - "
+               "waterMass/DCId/DCconc/DCMoles_ : "
+            << waterMass << " / " << DCId << " / " << DCconc << " / "
+            << DCMoles_[DCId] << std::endl;
         it++;
       }
     }
@@ -3784,6 +3760,7 @@ void ChemicalSystem::setElectrolyteComposition(const bool isFirst,
 void ChemicalSystem::setGasComposition(const bool isFirst, bool doAttack) {
   int DCId;
   double DCmoles; // mole units
+  using std::map;
 
   if (doAttack) {
     if (attackGasComposition_.size() > 0) {
@@ -3795,12 +3772,13 @@ void ChemicalSystem::setGasComposition(const bool isFirst, bool doAttack) {
         it++;
       }
       // } else {
-      //   cout << endl << "ChemicalSystem::setGasComposition() error for cyc =
+      //   std::cout << std::endl << "ChemicalSystem::setGasComposition() error
+      //   for cyc =
       //   "
-      //        << cyc << "  : " << endl;
-      //   cout << "doAttack is true but atackGasComposition_.size() = "
-      //        << atackGasComposition_.size() << endl;
-      //   cout << endl << "stop program!" << endl;
+      //        << cyc << "  : " << std::endl;
+      //   std::cout << "doAttack is true but atackGasComposition_.size() = "
+      //        << atackGasComposition_.size() << std::endl;
+      //   std::cout << std::endl << "stop program!" << std::endl;
       //   exit(0);
     }
   } else {
@@ -3827,7 +3805,7 @@ void ChemicalSystem::setGasComposition(const bool isFirst, bool doAttack) {
 
 double ChemicalSystem::calculateCrystalStrain(int growPhId, double poreVolFrac,
                                               double Kp, double Ks) {
-  double crystalStrain = -1; // 0.0;
+  double crystalStrain = -1.0; // 0.0;
 
   ///
   /// Crystallization pressure only exists if the solution is supersaturated,
@@ -3886,9 +3864,10 @@ double ChemicalSystem::calculateCrystalStrain(int growPhId, double poreVolFrac,
     double Rg = 8.314e3; // gas constant; N.mm/mol.K
 
     if (verbose_) {
-      cout << "ChemicalSystem::calculateCrystalStrain SI for this phase is: "
-           << microPhaseSI_[growPhId] << endl;
-      cout.flush();
+      std::cout
+          << "ChemicalSystem::calculateCrystalStrain SI for this phase is: "
+          << microPhaseSI_[growPhId] << std::endl;
+      std::cout.flush();
     }
 
     ///
@@ -3922,9 +3901,9 @@ double ChemicalSystem::calculateCrystalStrain(int growPhId, double poreVolFrac,
         (1.0 / (3.0 * Kp) - 1.0 / (3.0 * Ks)) * (poreVolFrac * pa + pl);
 
     if (verbose_) {
-      cout << "ChemicalSystem::calculateCrystalStrain crystalStrain = "
-           << crystalStrain << endl;
-      cout.flush();
+      std::cout << "ChemicalSystem::calculateCrystalStrain crystalStrain = "
+                << crystalStrain << std::endl;
+      std::cout.flush();
     }
   }
 

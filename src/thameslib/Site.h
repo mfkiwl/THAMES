@@ -12,10 +12,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <vector>
-
-using namespace std;
 
 /**
 @class Site
@@ -37,12 +34,13 @@ protected:
   int id_ = 0;           /**< Unique id in the 1D array of all sites */
   int microPhaseId_ = 0; /**< The microstructure phase assignment */
   ChemicalSystem
-      *chemSys_;       /**< Pointer to simulation's ChemicalSystem object */
-  vector<int> growth_; /**< Vector of phases that can grow at this site */
+      *chemSys_; /**< Pointer to simulation's ChemicalSystem object */
+  std::vector<int> growth_; /**< Vector of phases that can grow at this site */
   double stressFreeVolume_; /**< Stress-free volume of the site */
   double trueVolume_;       /**< Actual volume of site, accounting for stress */
   bool damage_ = false;     /**< True if site is damaged, false otherwise */
-  vector<Site *> nb_; /**< List of site ids that are neighbors to this site */
+  std::vector<Site *>
+      nb_; /**< List of site ids that are neighbors to this site */
 
   /**
   @brief Ranking of potential for dissolution if the site is an interface site.
@@ -78,12 +76,12 @@ protected:
 
   bool verbose_; /**< Flag to determine verbose output */
 
-  vector<int> inGrowInterfacePos_; // vector of the site position in each growth
-                                   // interface
+  std::vector<int> inGrowInterfacePos_; // vector of the site position in each
+                                        // growth interface
   int inDissInterfacePos_; // site position in the corresponding dissolution
                            // interface
 
-  vector<int> inGrowthVectorPos_;
+  std::vector<int> inGrowthVectorPos_;
   int inDissolutionVectorPos_;
 
   int visit_;
@@ -125,8 +123,8 @@ public:
   void setInGrowInterfacePos(int i, int val) { inGrowInterfacePos_[i] = val; }
   int getInGrowInterfacePos(int i) { return inGrowInterfacePos_[i]; }
 
-  vector<int> getInGrowInterfacePosVector() { return inGrowInterfacePos_; }
-  void setInGrowInterfacePosVector(vector<int> vect) {
+  std::vector<int> getInGrowInterfacePosVector() { return inGrowInterfacePos_; }
+  void setInGrowInterfacePosVector(std::vector<int> vect) {
     inGrowInterfacePos_ = vect;
   }
 
@@ -196,7 +194,7 @@ public:
     return;
   }
 
-  vector<Site *> getNb() { return nb_; }
+  std::vector<Site *> getNb() { return nb_; }
 
   /**
   @brief Get the index number of the site (position in the 1D Lattice vector).
@@ -244,8 +242,8 @@ public:
   */
   int getZ() const { return z_; }
 
-  vector<int> getXYZ() {
-    vector<int> v(3, 0);
+  std::vector<int> getXYZ() {
+    std::vector<int> v(3, 0);
     v[0] = x_;
     v[1] = y_;
     v[2] = z_;
@@ -341,9 +339,9 @@ public:
   site
   */
   void setGrowthSite(int pid) {
-    vector<int>::iterator start = growth_.begin();
-    vector<int>::iterator end = growth_.end();
-    vector<int>::iterator p = find(start, end, pid);
+    std::vector<int>::iterator start = growth_.begin();
+    std::vector<int>::iterator end = growth_.end();
+    std::vector<int>::iterator p = find(start, end, pid);
     if (p == growth_.end())
       growth_.push_back(pid);
   }
@@ -373,9 +371,11 @@ public:
       }
     }
     if (found == false) {
-      cout << endl << " stop - void removeGrowthSite(int pid) " << endl;
-      cout.flush();
-      cout << endl << "i size pid " << i << " " << size << " " << pid << endl;
+      std::cout << std::endl
+                << " stop - void removeGrowthSite(int pid) " << std::endl;
+      std::cout.flush();
+      std::cout << std::endl
+                << "i size pid " << i << " " << size << " " << pid << std::endl;
       exit(1);
     }
   }
@@ -385,9 +385,9 @@ public:
 
   @return the list of ids of all microstructure phases that can grow at the site
   */
-  vector<int> getGrowthPhases() const { return growth_; }
+  std::vector<int> getGrowthPhases() const { return growth_; }
 
-  void setGrowthPhases(vector<int> vect) {
+  void setGrowthPhases(std::vector<int> vect) {
     growth_.clear();
     growth_ = vect;
   }
@@ -419,12 +419,12 @@ public:
   */
   void setStressFreeVolume(double vol) {
     if (vol < 0) {
-      cout
+      std::cout
           << "in the setStrfreevolume function...volume should not be negative."
-          << endl;
-      cerr
+          << std::endl;
+      std::cerr
           << "in the setStrfreevolume function...volume should not be negative."
-          << endl;
+          << std::endl;
       exit(1);
     } else {
       stressFreeVolume_ = vol;
@@ -458,10 +458,12 @@ public:
   */
   void setTrueVolume(double vol) {
     if (vol < 0) {
-      cout << "in the setTrueVolume function...volume should not be negative."
-           << endl;
-      cerr << "in the setTrueVolume function...volume should not be negative."
-           << endl;
+      std::cout
+          << "in the setTrueVolume function...volume should not be negative."
+          << std::endl;
+      std::cerr
+          << "in the setTrueVolume function...volume should not be negative."
+          << std::endl;
       exit(1);
     } else {
       trueVolume_ = vol;

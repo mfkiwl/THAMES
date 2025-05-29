@@ -90,11 +90,7 @@ of portland cement, Cement and Concrete Research 36 (2006) 209--226.
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <map>
 #include <string>
-#include <vector>
-
-using namespace std;
 
 // Ref specific surface area adjusted downward from
 // 385.0 m2/kg (the published value) to 372.0 m2/kg to
@@ -165,7 +161,7 @@ public:
 
   @return a string indicating the model type
   */
-  string getType() const { return (ParrotKillohType); }
+  std::string getType() const { return (ParrotKillohType); }
 
   /**
   @brief Set the w/s mass ratio of the system for the kinetic model equations.

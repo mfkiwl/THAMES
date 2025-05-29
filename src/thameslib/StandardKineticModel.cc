@@ -212,9 +212,9 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     massDissolved = dissrate * timestep * chemSys_->getDCMolarMass(DCId_);
 
     if (verbose_) {
-      cout << "    StandardKineticModel::calculateKineticStep "
-              "dissrate/massDissolved : "
-           << dissrate << " / " << massDissolved << endl;
+      std::cout << "    StandardKineticModel::calculateKineticStep "
+                   "dissrate/massDissolved : "
+                << dissrate << " / " << massDissolved << std::endl;
     }
 
     scaledMass = scaledMass_ - massDissolved;
@@ -226,24 +226,26 @@ void StandardKineticModel::calculateKineticStep(const double timestep,
     scaledMass_ = scaledMass;
 
     if (verbose_) {
-      cout << "  ****************** SKM_hT = " << timestep
-           << "    cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
-           << "    microPhase = " << name_
-           << "    GEMPhaseIndex = " << GEMPhaseId_ << " ******************"
-           << endl;
-      cout << "   SKM_hT   " << "rhFactor_: " << rhFactor_
-           << "\tarrhenius_: " << arrhenius_
-           << "\tsaturationIndex: " << saturationIndex << "\tarea: " << area
-           << endl;
-      cout << "   SKM_hT   " << "dissrate: " << dissrate << endl;
-      cout << "   SKM_hT   " << "initScaledMass_: " << initScaledMass_
-           << "\tscaledMass_: " << scaledMass_
-           << "\tmassDissolved: " << massDissolved << endl;
-      cout << "   cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
-           << "    microPhaseName = " << name_
-           << "    saturationIndex = " << saturationIndex
-           << "   Dc_a = " << chemSys_->getNode()->DC_a(DCId_) << endl;
-      cout.flush();
+      std::cout << "  ****************** SKM_hT = " << timestep
+                << "    cyc = " << cyc
+                << "    microPhaseId_ = " << microPhaseId_
+                << "    microPhase = " << name_
+                << "    GEMPhaseIndex = " << GEMPhaseId_
+                << " ******************" << std::endl;
+      std::cout << "   SKM_hT   " << "rhFactor_: " << rhFactor_
+                << "\tarrhenius_: " << arrhenius_
+                << "\tsaturationIndex: " << saturationIndex
+                << "\tarea: " << area << std::endl;
+      std::cout << "   SKM_hT   " << "dissrate: " << dissrate << std::endl;
+      std::cout << "   SKM_hT   " << "initScaledMass_: " << initScaledMass_
+                << "\tscaledMass_: " << scaledMass_
+                << "\tmassDissolved: " << massDissolved << std::endl;
+      std::cout << "   cyc = " << cyc << "    microPhaseId_ = " << microPhaseId_
+                << "    microPhaseName = " << name_
+                << "    saturationIndex = " << saturationIndex
+                << "   Dc_a = " << chemSys_->getNode()->DC_a(DCId_)
+                << std::endl;
+      std::cout.flush();
     }
 
   } catch (EOBException eex) {

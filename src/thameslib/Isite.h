@@ -14,8 +14,6 @@ variable, similar in some ways to weighted mean curvature of an interface
 
 #include "Site.h"
 
-using namespace std;
-
 /**
 @class Declaration of the Isite class.
 

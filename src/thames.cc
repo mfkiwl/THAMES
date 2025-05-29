@@ -16,8 +16,11 @@ int main(int argc, char **argv) {
 
   // Check command line arguments
 
+  using std::cout, std::cin, std::string, std::endl;
+
+  string outputFolder;
   cout << scientific << setprecision(15);
-  if (checkArgs(argc, argv)) {
+  if (checkArgs(argc, argv, outputFolder)) {
     exit(0);
   }
 
@@ -166,7 +169,7 @@ int main(int argc, char **argv) {
   if (errorProgram) {
     deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                       AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                      errorProgram);
+                      errorProgram, outputFolder);
   }
 
   //
@@ -215,7 +218,7 @@ int main(int argc, char **argv) {
   if (errorProgram) {
     deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                       AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                      errorProgram);
+                      errorProgram, outputFolder);
   }
 
   if (simtype == SULFATE_ATTACK) {
@@ -261,7 +264,7 @@ int main(int argc, char **argv) {
     if (errorProgram) {
       deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                         AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                        errorProgram);
+                        errorProgram, outputFolder);
     }
 
     int nx, ny, nz;
@@ -292,7 +295,7 @@ int main(int argc, char **argv) {
     if (errorProgram) {
       deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                         AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                        errorProgram);
+                        errorProgram, outputFolder);
     }
 
     Mic->setFEsolver(AppliedStrainSolver);
@@ -333,7 +336,7 @@ int main(int argc, char **argv) {
   if (errorProgram) {
     deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                       AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                      errorProgram);
+                      errorProgram, outputFolder);
   }
 
   if (VERBOSE) {
@@ -374,7 +377,7 @@ int main(int argc, char **argv) {
   if (errorProgram) {
     deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                       AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                      errorProgram);
+                      errorProgram, outputFolder);
   }
 
   //
@@ -413,7 +416,7 @@ int main(int argc, char **argv) {
   if (errorProgram) {
     deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver,
                       AppliedStrainSolver, KController, Ctrl, starttime, lt,
-                      errorProgram);
+                      errorProgram, outputFolder);
   }
 
   //
@@ -421,7 +424,8 @@ int main(int argc, char **argv) {
   //
 
   deleteDynAllocMem(ChemSys, Mic, RNG, ThermalStrainSolver, AppliedStrainSolver,
-                    KController, Ctrl, starttime, lt, errorProgram);
+                    KController, Ctrl, starttime, lt, errorProgram,
+                    outputFolder);
 
   return 0;
 }
@@ -430,9 +434,10 @@ void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
                        ThermalStrain *ThermalStrainSolver,
                        AppliedStrain *AppliedStrainSolver,
                        KineticController *KController, Controller *Ctrl,
-                       clock_t st_time, time_t lt, bool errorProgram) {
+                       clock_t st_time, time_t lt, bool errorProgram,
+                       const std::string &outputFolder) {
 
-  string buff = "";
+  std::string buff = "";
   int resCallSystem;
 
   if (Ctrl) {
@@ -461,7 +466,7 @@ void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
   // Move remaining output files to output folder
   //
 
-  string name = "ipmlog.txt";
+  std::string name = "ipmlog.txt";
   ifstream f(name.c_str());
   if (f.good()) {
     buff = "mv -f ipmlog.txt " + outputFolder + "/.";
@@ -531,7 +536,7 @@ void printHelp(void) {
   return;
 }
 
-int checkArgs(int argc, char **argv) {
+int checkArgs(int argc, char **argv, std::string &outputFolder) {
 
   // Many of the variables here are defined in the getopts.h system header file
   // Can define more options here if we want
@@ -544,6 +549,7 @@ int checkArgs(int argc, char **argv) {
                               {"help", no_argument, nullptr, 'h'},
                               {nullptr, no_argument, nullptr, 0}};
 
+  using std::cout, std::endl;
   VERBOSE = false;
   WARNING = true;
   XYZ = false;
@@ -591,20 +597,21 @@ int checkArgs(int argc, char **argv) {
   return (0);
 }
 
-void prepOutputFolder(const string &outputFolder, string &jobRoot,
-                      const string &gemInputName, string &statFileName,
-                      const string &initMicName, const string &simParamName) {
+void prepOutputFolder(const std::string &outputFolder, std::string &jobRoot,
+                      const std::string &gemInputName,
+                      std::string &statFileName, const std::string &initMicName,
+                      const std::string &simParamName) {
 
   int resCallSystem;
 
-  string buff = "mkdir -p " + outputFolder;
+  std::string buff = "mkdir -p " + outputFolder;
   resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
   }
   jobRoot = outputFolder + "/" + jobRoot;
-  cout << "   - jobRoot           :  " << jobRoot << endl;
-  cout.flush();
+  std::cout << "   - jobRoot           :  " << jobRoot << std::endl;
+  std::cout.flush();
 
   statFileName = jobRoot + ".stats";
 
@@ -612,7 +619,7 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
   // and copy them to the output folder
 
   ifstream in(gemInputName);
-  string buff1;
+  std::string buff1;
   in >> buff1; // discard flag
 
   // DCH file
@@ -671,15 +678,19 @@ void prepOutputFolder(const string &outputFolder, string &jobRoot,
     throw FileException("thames", "prepOutputFolder", buff, "FAILED");
   }
 
-  cout << "     => All input files have been copied into " << outputFolder
-       << " folder" << endl;
+  std::cout << "     => All input files have been copied into " << outputFolder
+            << " folder" << std::endl;
 
   return;
 }
 
-void writeReport(const string &jobRoot, struct tm *itime,
-                 const string &initMicName, const string &simParamName,
-                 const string &csdName, ChemicalSystem *csys) {
+void writeReport(const std::string &jobRoot, struct tm *itime,
+                 const std::string &initMicName,
+                 const std::string &simParamName, const std::string &csdName,
+                 ChemicalSystem *csys) {
+
+  using std::string, std::cout, std::cin, std::endl;
+
   string statName = jobRoot + ".stats";
   string jFileName = jobRoot + ".report";
   ofstream out(jFileName.c_str());

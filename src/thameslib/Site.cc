@@ -1,4 +1,4 @@
-/**
+/*
 @file Site.cc
 @brief Method definitions for the Site class.
 
@@ -16,8 +16,7 @@ Site::Site() {
   expstrain_ = 0.0;
 }
 
-Site::Site(int xp, int yp, int zp, int xs,
-           int ys, int zs, int neigh,
+Site::Site(int xp, int yp, int zp, int xs, int ys, int zs, int neigh,
            ChemicalSystem *csys, const bool verbose) {
   x_ = y_ = z_ = 0;
   id_ = 0;
@@ -53,7 +52,6 @@ Site::Site(int xp, int yp, int zp, int xs,
   inGrowthVectorPos_.clear();
   inGrowthVectorPos_.resize(chemSys_->getNumMicroPhases(), -1);
   inDissolutionVectorPos_ = -1;
-
 }
 
 void Site::calcWmc(void) {

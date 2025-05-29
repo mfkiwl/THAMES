@@ -6,8 +6,8 @@
 #include "ElasticModel.h"
 
 ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
-                           int npoints, const bool verbose,
-                           const bool warning) : chemSys_(cs) {
+                           int npoints, const bool verbose, const bool warning)
+    : chemSys_(cs) {
   ///
   /// Assign the dimensions of the finite element (FE) mesh
   ///
@@ -27,10 +27,10 @@ ElasticModel::ElasticModel(int nx, int ny, int nz, int dim, ChemicalSystem *cs,
   ns_ = nx_ * ny_ * nz_;
 
   if (verbose_) {
-    cout << "ElasticModel::ElasticModel Constructor nx_ = " << nx_
-         << " ny_ = " << ny_ << " nz_ = " << nz_ << " nxy_ = " << nxy_
-         << " ns_ = " << ns_ << endl;
-    cout.flush();
+    std::cout << "ElasticModel::ElasticModel Constructor nx_ = " << nx_
+              << " ny_ = " << ny_ << " nz_ = " << nz_ << " nxy_ = " << nxy_
+              << " ns_ = " << ns_ << std::endl;
+    std::cout.flush();
   }
 
   ///
@@ -282,7 +282,7 @@ void ElasticModel::BuildNeighbor() {
   return;
 }
 
-// void ElasticModel::ElasModul(string phasemod_fileName, int nphase) {
+// void ElasticModel::ElasModul(std::string phasemod_fileName, int nphase) {
 void ElasticModel::ElasModul(void) {
 
   ///
@@ -293,26 +293,27 @@ void ElasticModel::ElasModul(void) {
 
   // ifstream in(phasemod_fileName.c_str());
   // if (!in) {
-  //   cout << "ElasticModel::ElasModul can't open the file: " << phasemod_fileName
-  //        << endl;
-  //  cout.flush();
+  //   std::cout << "ElasticModel::ElasModul can't open the file: " <<
+  //   phasemod_fileName
+  //        << std::endl;
+  //  std::cout.flush();
   //  exit(1);
   // } else {
-    string mPhName;
-    double elModComp = 0.0;
-    for (int i = 0; i < nphase_; i++) {
-      // in >> phaseid;
-      // in >> buff;
-      // in >> elsmodul;
-      // phasemod_[phaseid][0] = elsmodul;
-      // in >> elsmodul;
-      // phasemod_[phaseid][1] = elsmodul;
-      mPhName = chemSys_->getMicroPhaseName(i);
-      elModComp = chemSys_->getElasticModuliComp(mPhName).K; // bulk modulus
-      phasemod_[i][0] = elModComp;
-      elModComp = chemSys_->getElasticModuliComp(mPhName).G; // shear modulus
-      phasemod_[i][0] = elModComp;
-    }
+  std::string mPhName;
+  double elModComp = 0.0;
+  for (int i = 0; i < nphase_; i++) {
+    // in >> phaseid;
+    // in >> buff;
+    // in >> elsmodul;
+    // phasemod_[phaseid][0] = elsmodul;
+    // in >> elsmodul;
+    // phasemod_[phaseid][1] = elsmodul;
+    mPhName = chemSys_->getMicroPhaseName(i);
+    elModComp = chemSys_->getElasticModuliComp(mPhName).K; // bulk modulus
+    phasemod_[i][0] = elModComp;
+    elModComp = chemSys_->getElasticModuliComp(mPhName).G; // shear modulus
+    phasemod_[i][0] = elModComp;
+  }
   // }
 
   ///
@@ -449,11 +450,9 @@ void ElasticModel::initStiffness(void) {
   /// Initialize stiffness matrices dk_
   ///
 
-
   ///
   /// Set up elastic moduli matrices for each kind of element
   ///
-
 
   ///
   /// Set up Simpson's integration rule weight vector
@@ -571,14 +570,14 @@ void ElasticModel::initStiffness(void) {
   }
 }
 
-// void ElasticModel::ppixel(string fileName, int nphase) {
-void ElasticModel::ppixel(string fileName) {
+// void ElasticModel::ppixel(std::string fileName, int nphase) {
+void ElasticModel::ppixel(std::string fileName) {
   ///
   /// If you want to set up a test image inside the program, instead of
   /// reading it in from a file, this should be done inside this method
   ///
 
-  string buff, version;
+  std::string buff, version;
   double resolution;
   int m;
 
@@ -590,8 +589,8 @@ void ElasticModel::ppixel(string fileName) {
 
   if (!in) {
 
-    cout << "can't open the file: " << fileName << endl;
-    cerr << "can't open the file: " << fileName << endl;
+    std::cout << "can't open the file: " << fileName << std::endl;
+    cerr << "can't open the file: " << fileName << std::endl;
     exit(1);
 
   } else {
@@ -655,11 +654,11 @@ void ElasticModel::ppixel(string fileName) {
 
     in.close();
 
-    // cout << endl << "ini ppixel vector (6):" << endl;
+    // std::cout << std::endl << "ini ppixel vector (6):" << std::endl;
     // for (int i = 0; i < ns_; i++) {
-    //   cout << pix_[i] << endl;
+    //   std::cout << pix_[i] << std::endl;
     // }
-    // cout << "end ppixel vector (6):" << endl;
+    // std::cout << "end ppixel vector (6):" << std::endl;
     // exit(0);
 
     ///
@@ -672,9 +671,11 @@ void ElasticModel::ppixel(string fileName) {
 
     // for (int m = 0; m < ns_; m++) {
     //   if (pix_[m] < 0) {
-    //     cout << "Phase label in pix < 0 --- error at " << m << endl;
+    //     std::cout << "Phase label in pix < 0 --- error at " << m <<
+    //     std::endl;
     //   } else if (pix_[m] >= nphase_) {
-    //     cout << "Phase label in pix >= nphase_ --- error at " << m << endl;
+    //     std::cout << "Phase label in pix >= nphase_ --- error at " << m <<
+    //     std::endl;
     //   }
     // }
   }
@@ -682,14 +683,14 @@ void ElasticModel::ppixel(string fileName) {
   return;
 }
 
-// void ElasticModel::ppixel(string fileName, int nphase) {
-void ElasticModel::ppixel(vector<int> vectPhId) {
+// void ElasticModel::ppixel(std::string fileName, int nphase) {
+void ElasticModel::ppixel(std::vector<int> vectPhId) {
 
-    ///
-    /// Each line of the microstructure file contains the phase id
-    /// to assign, and the microstructure file must be written in
-    /// the same order as the finite elements are populated
-    ///
+  ///
+  /// Each line of the microstructure file contains the phase id
+  /// to assign, and the microstructure file must be written in
+  /// the same order as the finite elements are populated
+  ///
 
   int m;
   int kji = -1;
@@ -708,13 +709,13 @@ void ElasticModel::ppixel(vector<int> vectPhId) {
   return;
 }
 
-void ElasticModel::ppixel(vector<int> *p_vectPhId) {
+void ElasticModel::ppixel(std::vector<int> *p_vectPhId) {
 
-    ///
-    /// Each line of the microstructure file contains the phase id
-    /// to assign, and the microstructure file must be written in
-    /// the same order as the finite elements are populated
-    ///
+  ///
+  /// Each line of the microstructure file contains the phase id
+  /// to assign, and the microstructure file must be written in
+  /// the same order as the finite elements are populated
+  ///
 
   /*
   int m;
@@ -736,11 +737,11 @@ void ElasticModel::ppixel(vector<int> *p_vectPhId) {
     pix_[i] = (*p_vectPhId)[i];
   }
 
-  // cout << endl << "ini ppixel vector:" << endl;
+  // std::cout << std::endl << "ini ppixel vector:" << std::endl;
   // for (int i = 0; i < ns_; i++) {
-  //   cout << pix_[i] << endl;
+  //   std::cout << pix_[i] << std::endl;
   // }
-  // cout << "end ppixel vector:" << endl;
+  // std::cout << "end ppixel vector:" << std::endl;
   // exit(0);
 
   return;
@@ -808,7 +809,7 @@ void ElasticModel::getAvgStrainengy() {
   strainenergy.resize(numDCs, 0.0);
 
   double molarVolume;
-  vector<double> convFactDCs;
+  std::vector<double> convFactDCs;
   for (int i = 0; i < numDCs; i++) {
     molarVolume = chemSys_->getDCMolarVolume(i);
     convFactDCs.push_back(molarVolume * 1.e9);
@@ -818,7 +819,7 @@ void ElasticModel::getAvgStrainengy() {
   strainenergy[waterDCId] =
       avgStrainengy_[ELECTROLYTEID] * convFactDCs[waterDCId];
 
-  vector<int> mPhDCcomp;
+  std::vector<int> mPhDCcomp;
   int size;
   int DCId;
   for (int mPhId = FIRST_SOLID; mPhId < nphase_; mPhId++) {
@@ -826,8 +827,7 @@ void ElasticModel::getAvgStrainengy() {
     size = mPhDCcomp.size();
     for (int j = 0; j < size; j++) {
       DCId = mPhDCcomp[j];
-      strainenergy[DCId] =
-          avgStrainengy_[mPhId] * convFactDCs[DCId];
+      strainenergy[DCId] = avgStrainengy_[mPhId] * convFactDCs[DCId];
     }
   }
 
@@ -852,7 +852,7 @@ void ElasticModel::getAvgStrainengy() {
   return;
 }
 
-void ElasticModel::writeStress(string &root, double time, int index) {
+void ElasticModel::writeStress(std::string &root, double time, int index) {
   if (index >= 0 && index < 6) {
     double min, max;
     min = max = 0.0;
@@ -861,7 +861,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     /// Create and initialize the local rgb vector
     ///
 
-    vector<int> color;
+    std::vector<int> color;
     color.clear();
     color.resize(3, 0);
 
@@ -871,9 +871,9 @@ void ElasticModel::writeStress(string &root, double time, int index) {
 
     ostringstream ostr;
     ostr << (int)(time * 60.0);
-    string timestr(ostr.str());
-    string ofileName(root);
-    string ofpngname(root);
+    std::string timestr(ostr.str());
+    std::string ofileName(root);
+    std::string ofpngname(root);
     if (index == 0) {
       ofileName = ofileName + "." + "stress-xx." + timestr + ".ppm";
       ofpngname = ofpngname + "." + "stress-xx." + timestr + ".png";
@@ -895,7 +895,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     }
     ofstream out(ofileName.c_str());
     if (!out.is_open()) {
-      cout << ofileName << "could not open." << endl;
+      std::cout << ofileName << "could not open." << std::endl;
       exit(1);
     }
 
@@ -904,9 +904,9 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     /// Currently only uses cyan of different intensities
     ///
 
-    out << "P3" << endl;
-    out << nx_ << " " << nz_ << endl;
-    out << "255" << endl;
+    out << "P3" << std::endl;
+    out << nx_ << " " << nz_ << std::endl;
+    out << "255" << std::endl;
 
     int slice = nx_ / 2;
     int m;
@@ -921,11 +921,11 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     }
 
     if (verbose_) {
-      cout << "ElasticModel::writeStress minimum stress-" << index
-           << " is: " << min << endl;
-      cout << "ElasticModel::writeStress maximum stress-" << index
-           << " is: " << max << endl;
-      cout.flush();
+      std::cout << "ElasticModel::writeStress minimum stress-" << index
+                << " is: " << min << std::endl;
+      std::cout << "ElasticModel::writeStress maximum stress-" << index
+                << " is: " << max << std::endl;
+      std::cout.flush();
     }
 
     for (int k = 0; k < nz_; k++) {
@@ -933,7 +933,7 @@ void ElasticModel::writeStress(string &root, double time, int index) {
         m = nxy_ * k + nx_ * j + slice;
         color[1] = (int)(((elestress_[m][index] - min) / (max - min)) * 255);
         color[2] = (int)(((elestress_[m][index] - min) / (max - min)) * 255);
-        out << color[0] << " " << color[1] << " " << color[2] << endl;
+        out << color[0] << " " << color[1] << " " << color[2] << std::endl;
       }
     }
 
@@ -944,29 +944,32 @@ void ElasticModel::writeStress(string &root, double time, int index) {
     /// command via a system call (not recommended).
     ///
 
-    // string buff = "convert " + ofileName + " " + ofpngname;
-    string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
+    // std::string buff = "convert " + ofileName + " " + ofpngname;
+    std::string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
     int resCallSystem = system(buff.c_str());
     if (resCallSystem == -1) {
       // handle the error;
-      cout << endl << endl << "    ElasticModel.cc - error in writeStress() : resCallSystem = -1" << endl;
-      cout << endl <<"    STOP program" << endl;
+      std::cout
+          << std::endl
+          << std::endl
+          << "    ElasticModel.cc - error in writeStress() : resCallSystem = -1"
+          << std::endl;
+      std::cout << std::endl << "    STOP program" << std::endl;
       // throw HandleException ("writeStress", "ElasticModel.cc",
       //                "system(buff.c_str())", "resCallSystem = -1");
       exit(1);
-
     }
 
     return;
 
   } else {
 
-    cout << "index out of range. should be between 0 and 6." << endl;
+    std::cout << "index out of range. should be between 0 and 6." << std::endl;
     exit(1);
   }
 }
 
-void ElasticModel::writeStrain(string &root, double time, int index) {
+void ElasticModel::writeStrain(std::string &root, double time, int index) {
   if (index >= 0 && index < 6) {
 
     double min, max;
@@ -976,7 +979,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     /// Create and initialize the local rgb vector
     ///
 
-    vector<int> color;
+    std::vector<int> color;
     color.clear();
     color.resize(3, 0);
 
@@ -986,9 +989,9 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
 
     ostringstream ostr;
     ostr << (int)(time * 60.0);
-    string timestr(ostr.str());
-    string ofileName(root);
-    string ofpngname(root);
+    std::string timestr(ostr.str());
+    std::string ofileName(root);
+    std::string ofpngname(root);
     if (index == 0) {
       ofileName = ofileName + "." + "strain-xx." + timestr + ".ppm";
       ofpngname = ofpngname + "." + "strain-xx." + timestr + ".png";
@@ -1010,7 +1013,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     }
     ofstream out(ofileName.c_str());
     if (!out.is_open()) {
-      cout << ofileName << "could not open." << endl;
+      std::cout << ofileName << "could not open." << std::endl;
       exit(1);
     }
 
@@ -1019,9 +1022,9 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     /// Currently only uses cyan of different intensities
     ///
 
-    out << "P3" << endl;
-    out << nx_ << " " << nz_ << endl;
-    out << "255" << endl;
+    out << "P3" << std::endl;
+    out << nx_ << " " << nz_ << std::endl;
+    out << "255" << std::endl;
 
     int slice = nx_ / 2;
     int m;
@@ -1039,7 +1042,7 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
         m = nxy_ * k + nx_ * j + slice;
         color[1] = (int)(((elestrain_[m][index] - min) / (max - min)) * 255);
         color[2] = (int)(((elestrain_[m][index] - min) / (max - min)) * 255);
-        out << color[0] << " " << color[1] << " " << color[2] << endl;
+        out << color[0] << " " << color[1] << " " << color[2] << std::endl;
       }
     }
 
@@ -1050,13 +1053,17 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
     /// command via a system call (not recommended).
     ///
 
-    // string buff = "convert " + ofileName + " " + ofpngname;
-    string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
+    // std::string buff = "convert " + ofileName + " " + ofpngname;
+    std::string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
     int resCallSystem = system(buff.c_str());
     if (resCallSystem == -1) {
       // handle the error;
-      cout << endl << endl << "    ElasticModel.cc - error in writeStrain() : resCallSystem = -1" << endl;
-      cout << endl <<"    STOP program" << endl;
+      std::cout
+          << std::endl
+          << std::endl
+          << "    ElasticModel.cc - error in writeStrain() : resCallSystem = -1"
+          << std::endl;
+      std::cout << std::endl << "    STOP program" << std::endl;
       // throw HandleException ("writeStrain", "ElasticModel.cc",
       //                "system(buff.c_str())", "resCallSystem = -1");
       exit(1);
@@ -1065,16 +1072,16 @@ void ElasticModel::writeStrain(string &root, double time, int index) {
 
   } else {
 
-    cout << "index out of range. should be between 0 to 5." << endl;
+    std::cout << "index out of range. should be between 0 to 5." << std::endl;
     exit(1);
   }
 }
 
-void ElasticModel::writeDisp(string &root, string timeString) {
+void ElasticModel::writeDisp(std::string &root, std::string timeString) {
 
 #ifdef DEBUG
-  cout << "ElasticModel::writeDisp" << endl;
-  cout.flush();
+  std::cout << "ElasticModel::writeDisp" << std::endl;
+  std::cout.flush();
 #endif
 
   ///
@@ -1083,14 +1090,14 @@ void ElasticModel::writeDisp(string &root, string timeString) {
 
   // ostringstream ostr;
   // ostr << (int)(time * 60.0);
-  // string timestr(ostr.str());
-  string ofileName(root);
+  // std::string timestr(ostr.str());
+  std::string ofileName(root);
   // ofileName = ofileName + "." + "disp." + timestr + ".dat";
   ofileName = ofileName + "." + timeString + ".disp.dat";
   ofstream out(ofileName.c_str());
 
   if (!out.is_open()) {
-    cout << ofileName << "could not open." << endl;
+    std::cout << ofileName << "could not open." << std::endl;
     exit(1);
   }
 
@@ -1099,13 +1106,14 @@ void ElasticModel::writeDisp(string &root, string timeString) {
   //   for (int j = 0; j < ny_; j++) {
   //     for (int i = 0; i < nx_; i++) {
   //       m = nxy_ * k + nx_ * j + i;
-  //       out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << endl;
+  //       out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] <<
+  //       std::endl;
   //     }
   //   }
   // }
 
   for (int m = 0; m < ns_; m++) {
-    out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << endl;
+    out << u_[m][0] << "    " << u_[m][1] << "    " << u_[m][2] << std::endl;
   }
 
   out.close();
@@ -1113,10 +1121,10 @@ void ElasticModel::writeDisp(string &root, string timeString) {
   return;
 }
 
-void ElasticModel::writeStrainEngy(string &root, double time) {
+void ElasticModel::writeStrainEngy(std::string &root, double time) {
 #ifdef DEBUG
-  cout << "ElasticModel::writeStrainEngy" << endl;
-  cout.flush();
+  std::cout << "ElasticModel::writeStrainEngy" << std::endl;
+  std::cout.flush();
 #endif
 
   double min, max;
@@ -1126,7 +1134,7 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   /// Create and initialize the local rgb vector
   ///
 
-  vector<int> color;
+  std::vector<int> color;
   color.clear();
   color.resize(3, 0);
 
@@ -1136,14 +1144,14 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
 
   ostringstream ostr;
   ostr << (int)(time * 60.0);
-  string timestr(ostr.str());
-  string ofileName(root);
-  string ofpngname(root);
+  std::string timestr(ostr.str());
+  std::string ofileName(root);
+  std::string ofpngname(root);
   ofileName = ofileName + "." + "strainengy." + timestr + ".ppm";
   ofpngname = ofpngname + "." + "strainengy." + timestr + ".png";
   ofstream out(ofileName.c_str());
   if (!out.is_open()) {
-    cout << ofileName << "could not open." << endl;
+    std::cout << ofileName << "could not open." << std::endl;
     exit(1);
   }
 
@@ -1152,9 +1160,9 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   /// Currently only uses cyan of different intensities
   ///
 
-  out << "P3" << endl;
-  out << nx_ << " " << nz_ << endl;
-  out << "255" << endl;
+  out << "P3" << std::endl;
+  out << nx_ << " " << nz_ << std::endl;
+  out << "255" << std::endl;
 
   int m;
   int slice = nx_ / 2;
@@ -1173,7 +1181,7 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
       m = nxy_ * k + nx_ * j + slice;
       color[1] = (int)(((strainengy_[m] - min) / (max - min)) * 255);
       color[2] = (int)(((strainengy_[m] - min) / (max - min)) * 255);
-      out << color[0] << " " << color[1] << " " << color[2] << endl;
+      out << color[0] << " " << color[1] << " " << color[2] << std::endl;
     }
   }
 
@@ -1184,15 +1192,19 @@ void ElasticModel::writeStrainEngy(string &root, double time) {
   /// command via a system call (not recommended).
   ///
 
-  // string buff = "convert " + ofileName + " " + ofpngname;
-  string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
+  // std::string buff = "convert " + ofileName + " " + ofpngname;
+  std::string buff = ConvertCommand + " " + ofileName + " " + ofpngname;
   int resCallSystem = system(buff.c_str());
   if (resCallSystem == -1) {
     // handle the error;
-    cout << endl << endl << "    ElasticModel.cc - error in writeStrainEngy() : resCallSystem = -1" << endl;
-    cout << endl <<"    STOP program" << endl;
-    //throw HandleException ("writeStrainEngy", "ElasticModel.cc",
-    //                "system(buff.c_str())", "resCallSystem = -1");
+    std::cout << std::endl
+              << std::endl
+              << "    ElasticModel.cc - error in writeStrainEngy() : "
+                 "resCallSystem = -1"
+              << std::endl;
+    std::cout << std::endl << "    STOP program" << std::endl;
+    // throw HandleException ("writeStrainEngy", "ElasticModel.cc",
+    //                 "system(buff.c_str())", "resCallSystem = -1");
     exit(1);
   }
   return;

@@ -7,8 +7,9 @@
 
 Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
                        ThermalStrain *thmstr, const int simtype,
-                       const string &jsonFileName, const string &jobname,
-                       const bool verbose, const bool warning, const bool xyz) {
+                       const std::string &jsonFileName,
+                       const std::string &jobname, const bool verbose,
+                       const bool warning, const bool xyz) {
 
   xyz_ = xyz;
   simType_ = simtype;
@@ -75,7 +76,7 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   ///
 
   ofstream outfs;
-  string outfilename;
+  std::string outfilename;
 
   try {
     outfilename = jobRoot_ + "_Solution.csv";
@@ -258,13 +259,13 @@ Controller::Controller(Lattice *msh, KineticController *kc, ChemicalSystem *cs,
   /// Open and read the Controller parameter file
   ///
 
-  string jsonext = ".json";
+  std::string jsonext = ".json";
   size_t foundjson;
 
   try {
     foundjson = jsonFileName.find(jsonext);
 
-    if (foundjson != string::npos) {
+    if (foundjson != std::string::npos) {
       parseDoc(jsonFileName);
     } else {
       cout << "Parameter file must be JSON" << endl;
@@ -624,7 +625,7 @@ void Controller::doCycle(double elemTimeInterval) {
                 "  "
                 "   : "
              << i << " / " << cyc << " / " << time_[i] << " / " << timestep
-             << "   =>   searching for a new dissolution time : WAIT..." << endl;
+             << "   =>   WAIT..." << endl;
         cout.flush();
 
         numTotGen = 0;
@@ -776,11 +777,11 @@ void Controller::doCycle(double elemTimeInterval) {
       int changeLattice = -100;
       int whileCount = 0;
 
-      vector<int> numSitesNotAvailable;
+      std::vector<int> numSitesNotAvailable;
       numSitesNotAvailable.clear();
-      vector<int> vectPhIdDiff;
+      std::vector<int> vectPhIdDiff;
       vectPhIdDiff.clear();
-      vector<string> vectPhNameDiff;
+      std::vector<std::string> vectPhNameDiff;
       vectPhNameDiff.clear();
 
       changeLattice = lattice_->changeMicrostructure(
@@ -858,6 +859,7 @@ void Controller::doCycle(double elemTimeInterval) {
             cout << "  Controller::doCycle - cyc = " << cyc
                  << " :  reset DCLowerLimits :" << endl;
 
+            chemSys_->initDCLowerLimit(0); // check!
             for (int ij = 0; ij < numSitesNotAvailableSize; ij++) {
 
               phId = vectPhIdDiff[ij];
@@ -1124,7 +1126,7 @@ void Controller::doCycle(double elemTimeInterval) {
         cout << "Controller::doCycle Sulfate attack module" << endl;
         cout.flush();
       }
-      map<int, vector<double>> expansion;
+      std::map<int, std::vector<double>> expansion;
       expansion = lattice_->getExpansion();
 
       ifstream instopexp("stopexp.dat"); // check!
@@ -1154,7 +1156,7 @@ void Controller::doCycle(double elemTimeInterval) {
       if (expansion.size() > 0) { // check! : expansion.size() > 0 !!!
 
         // double strxx, stryy, strzz;
-        vector<double> locEleStress;
+        std::vector<double> locEleStress;
         double locTstrength;
 
         // aliId => aliId_ etc
@@ -1162,7 +1164,7 @@ void Controller::doCycle(double elemTimeInterval) {
         // int belId = chemSys_->getMicroPhaseId_SA("Belite");
         // int aluId = chemSys_->getMicroPhaseId_SA("Aluminate");
         // int ferId = chemSys_->getMicroPhaseId_SA("Ferrite");
-        // vector<int> isParrotKilloh_ = chemSys_->getIsParrotKilloh();
+        // std::vector<int> isParrotKilloh_ = chemSys_->getIsParrotKilloh();
         // int sizePK_ = isParrotKilloh_.size();
         bool notPKPhase = true;
 
@@ -1179,11 +1181,11 @@ void Controller::doCycle(double elemTimeInterval) {
           cout.flush();
         }
 
-        string ofileName(jobRoot_);
+        std::string ofileName(jobRoot_);
 
         ostringstream ostrT;
         ostrT << setprecision(3) << temperature_;
-        string tempstr(ostrT.str());
+        std::string tempstr(ostrT.str());
 
         int days, hours, mins;
         double hours_dbl;
@@ -1194,13 +1196,14 @@ void Controller::doCycle(double elemTimeInterval) {
 
         ostringstream ostrD, ostrH, ostrM;
         ostrD << setfill('0') << setw(4) << days;
-        string timestrD(ostrD.str());
+        std::string timestrD(ostrD.str());
         ostrH << setfill('0') << setw(2) << hours;
-        string timestrH(ostrH.str());
+        std::string timestrH(ostrH.str());
         ostrM << setfill('0') << setw(2) << mins;
-        string timestrM(ostrM.str());
+        std::string timestrM(ostrM.str());
 
-        string timeString = timestrD + "d" + timestrH + "h" + timestrM + "m";
+        std::string timeString =
+            timestrD + "d" + timestrH + "h" + timestrM + "m";
 
         ofileName = ofileName + "." + timeString + "." + tempstr + "_SA.img";
 
@@ -1212,14 +1215,16 @@ void Controller::doCycle(double elemTimeInterval) {
         thermalstr_->setEigen();
 
         int expindex;
-        vector<double> expanval;
-        vector<int> expcoordin;
-        for (map<int, vector<double>>::iterator it = expansion.begin();
+        std::vector<double> expanval;
+        std::vector<int> expcoordin;
+        for (std::map<int, std::vector<double>>::iterator it =
+                 expansion.begin();
              it != expansion.end(); it++) {
 
           expindex = it->first;
           expanval = it->second;
-          // vector<int> expcoordin = lattice_->getExpansionCoordin(expindex);
+          // std::vector<int> expcoordin =
+          // lattice_->getExpansionCoordin(expindex);
           expcoordin = lattice_->getSite(expindex)->getXYZ();
           thermalstr_->setEigen(expindex, expanval[0], expanval[1], expanval[2],
                                 0.0, 0.0, 0.0);
@@ -1260,8 +1265,8 @@ void Controller::doCycle(double elemTimeInterval) {
         // double dwmcval = poreintroduce;
         double poreincrease = 0.2;
         double damageexp_0 = 1.0 / 3.0 * poreincrease;
-        vector<double> damageexp(3, damageexp_0);
-        vector<double> damageexpo;
+        std::vector<double> damageexp(3, damageexp_0);
+        std::vector<double> damageexpo;
         Site *ste; // , *stenb;
         int pid;
 
@@ -1382,12 +1387,12 @@ void Controller::doCycle(double elemTimeInterval) {
                 //   }
                 // }
 
-                // vector<double> damageexp;
+                // std::vector<double> damageexp;
                 // damageexp.clear();
                 // double poreindamage = 0.6;
                 // damageexp.resize(3,(1.0 / 3.0 * poreindamage));
                 // lattice_->setExpansion(index,damageexp);
-                // vector<int> coordin;
+                // std::vector<int> coordin;
                 // coordin.clear();
                 // coordin.resize(3,0);
                 // coordin[0] = ste->getX();
@@ -1470,7 +1475,7 @@ int Controller::calculateState(double time, double dt, bool isFirst, int cyc) {
     /// still need to be processed afterward.
     ///
 
-    // vector<double> impurityrelease;
+    // std::vector<double> impurityrelease;
     // impurityrelease.clear();
     // impurityrelease.resize(chemSys_->getNumMicroImpurities(), 0.0);
 
@@ -1552,7 +1557,7 @@ void Controller::writeTxtOutputFiles(double time) {
   // Output to files the solution composition data, phase data, DC data,
   // microstructure data, pH, and C-S-H composition and Ca/Si ratio
 
-  string outfilename = jobRoot_ + "_Solution.csv";
+  std::string outfilename = jobRoot_ + "_Solution.csv";
   ofstream outfs(outfilename.c_str(), ios::app);
   if (!outfs) {
     throw FileException("Controller", "calculateState", outfilename,
@@ -1582,13 +1587,13 @@ void Controller::writeTxtOutputFiles(double time) {
     if (chemSys_->getDCMolarMass(i) > 0.0) {
       cc = chemSys_->getDCClassCode(i);
       if (cc == 'O' || cc == 'I' || cc == 'J' || cc == 'M' || cc == 'W') {
-        string dcname = chemSys_->getDCName(i);
+        std::string dcname = chemSys_->getDCName(i);
         double V0 =
             chemSys_->getDCMoles(dcname) * chemSys_->getDCMolarVolume(dcname);
         outfs << "," << V0;
       }
     } else {
-      string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
+      std::string msg = "Divide by zero error for DC " + chemSys_->getDCName(i);
       outfs.close();
       throw FloatException("Controller", "calculateState", msg);
     }
@@ -1739,16 +1744,16 @@ void Controller::writeTxtOutputFiles(double time) {
 void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
 
   int i, j;
-  vector<double> ICMoles;
+  std::vector<double> ICMoles;
   ICMoles.resize(numICs_, 0.0);
-  vector<double> DCMoles;
+  std::vector<double> DCMoles;
   DCMoles.resize(numDCs_, 0.0);
   for (i = 0; i < numDCs_; i++) {
     DCMoles[i] = chemSys_->getDCMoles(i);
   }
 
-  string outfilenameIC = jobRoot_ + "_icmoles.csv";
-  string outfilenameDC = jobRoot_ + "_dcmoles.csv";
+  std::string outfilenameIC = jobRoot_ + "_icmoles.csv";
+  std::string outfilenameDC = jobRoot_ + "_dcmoles.csv";
   ofstream outfs;
   if (time < 1.e-10) {
     outfs.open(outfilenameIC.c_str());
@@ -1776,7 +1781,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
     outfs.close();
   }
 
-  vector<int> impurityDCID;
+  std::vector<int> impurityDCID;
   impurityDCID.clear();
   impurityDCID.push_back(chemSys_->getDCId("K2O"));
   impurityDCID.push_back(chemSys_->getDCId("Na2O"));
@@ -1853,7 +1858,7 @@ void Controller::writeTxtOutputFiles_onlyICsDCs(double time) {
   outfs.close();
 }
 
-void Controller::parseDoc(const string &docName) {
+void Controller::parseDoc(const std::string &docName) {
 
   /// check if the JSON file exists
 

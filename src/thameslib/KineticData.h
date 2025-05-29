@@ -50,11 +50,11 @@ component
     - `critDOR` is the critical degree of reaction used in the equation for
         calculating the influence of w/c ratio.
 */
+#include <string>
 
 #ifndef SRC_THAMESLIB_KINETICDATA_H_
 #define SRC_THAMESLIB_KINETICDATA_H_
 
-#include <string>
 struct KineticData {
   std::string name;  /**< Name of the microstructure phase */
   int microPhaseId;  /**< Integer id of the microstructure phase */

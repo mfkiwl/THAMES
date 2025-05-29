@@ -15,8 +15,6 @@ Solves the linear elastic state of the finite element mesh.
 #include <string>
 #include <vector>
 
-using namespace std;
-
 /**
 @class AppliedStrain
 @brief Solves the linear elastic state of the finite element mesh.
@@ -85,7 +83,7 @@ protected:
   double eyz_; /**< yz off-diagonal component of applied strain */
   double exy_; /**< xy off-diagonal component of applied strain */
 
-  int kmax_; /**< the number of relaxation steps for a given elastic computation
+  int kmax_; /**< number of relaxation steps for an elastic computation
               */
 
 public:

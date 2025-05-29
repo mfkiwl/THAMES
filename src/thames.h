@@ -106,8 +106,8 @@ Department of Commerce, April, 2000.
 
 */
 
-#ifndef THAMESH
-#define THAMESH
+#ifndef SRC_THAMES_H_
+#define SRC_THAMES_H_
 
 #include "thameslib/AppliedStrain.h"
 #include "thameslib/ChemicalSystem.h"
@@ -143,11 +143,6 @@ bool WARNING;
 bool XYZ;
 
 /**
-@brief Name of output folder for simulation results
-*/
-string outputFolder;
-
-/**
 @brief The vector of component elastic energies.
 
 The strainenergy vector is passed to the GEM3K library to modify the
@@ -155,7 +150,7 @@ Gibbs energy of formation of the varioud dependent components (DCs) as
 a result of elastic deformation, either by an applied load or as a result
 of phase transformation misfit strain.
 */
-vector<double> strainenergy;
+std::vector<double> strainenergy;
 
 /**
 @brief Print a help message for invoking the command
@@ -170,9 +165,10 @@ This functions uses the GNU getopt_long functionality
 
 @param argc is the number of command line arguments
 @param argv is the array of the command line arguments
+@param outputFolder is the name of the folder for output data files
 @return 0 if no errors, non-zero if error
 */
-int checkArgs(int argc, char **argv);
+int checkArgs(int argc, char **argv, std::string &outputFolder);
 
 /**
 @brief Create output folder and copy input files to it
@@ -184,9 +180,10 @@ int checkArgs(int argc, char **argv);
 @param initMicName is name of the initial microstructure image file
 @param simParamName is name of the simulation parameter file
 */
-void prepOutputFolder(const string &outputFolder, string &jobRoot,
-                      const string &gemInputName, string &statFileName,
-                      const string &initMicName, const string &simParamName);
+void prepOutputFolder(const std::string &outputFolder, std::string &jobRoot,
+                      const std::string &gemInputName,
+                      std::string &statFileName, const std::string &initMicName,
+                      const std::string &simParamName);
 
 /**
 @brief Write the formatted report file listing job properties and input.
@@ -203,22 +200,40 @@ through its `writeChemSys` method.
 
 If a file is not present, the file name should be given as an empty string.
 */
-void writeReport(const string &jobroot, struct tm *itime,
-                 const string &initMicName, const string &simParamName,
-                 const string &csdName, ChemicalSystem *csys);
+void writeReport(const std::string &jobroot, struct tm *itime,
+                 const std::string &initMicName,
+                 const std::string &simParamName, const std::string &csdName,
+                 ChemicalSystem *csys);
 
 /**
 @brief write the timing data
-@param time_ & lt_ are the start time
+@param time_ is the start time
+@param lt_ is the start time (?)
 */
 void timeCount(clock_t time_, time_t lt_);
 
+/**
+@brief Delete dynamically allocated memory
+
+@param ChemSys is the pointer to the ChemicalSystem object
+@param Lattice is the pointer to the Lattice object
+@param RNG is the pointer to the RanGen object
+@param ThermalStrainSolver is the pointer to the ThermalStrain object
+@param AppliedStrainSolver is the pointer to the AppliedStrain object
+@param KController is the pointer to the KineticController object
+@param Ctrl is the pointer to the Controller object
+@param time_ is the start time
+@param lt_ is the start time (?)
+@param errorProgram is true if the program is exiting due to an error
+@param outputFolder is the name of the folder for output data files
+
+If a file is not present, the file name should be given as an empty string.
+*/
 void deleteDynAllocMem(ChemicalSystem *ChemSys, Lattice *Mic, RanGen *RNG,
                        ThermalStrain *ThermalStrainSolver,
                        AppliedStrain *AppliedStrainSolver,
                        KineticController *KController, Controller *Ctrl,
-                       clock_t st_time, time_t lt, bool errorProgram);
+                       clock_t st_time, time_t lt, bool errorProgram,
+                       const std::string &outputFolder);
 
-using namespace std;
-
-#endif
+#endif // SRC_THAMES_H_

@@ -4,7 +4,6 @@
 */
 #ifndef SRC_THAMESLIB_UTILS_H_
 #define SRC_THAMESLIB_UTILS_H_
-
 #include "global.h"
 #include <sstream>
 #include <string>

@@ -14,9 +14,6 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
-#include <string>
-
-using namespace std;
 
 // String indicating THAMES version in the input microstructure file
 const char VERSIONSTRING[] = "#THAMES:Version:";
@@ -103,7 +100,7 @@ const char StandardType[] = "Standard";
 const char PozzolanicType[] = "Pozzolanic";
 
 // String for the command to convert between image files (Imagemagick)
-const string ConvertCommand = "magick";
+const std::string ConvertCommand = "magick";
 
 // Flag to indicate exiting the program
 const int QUIT_PROGRAM = 1;
@@ -160,9 +157,6 @@ const int NUM_SECONDNEAREST_NEIGHBORS = 12;
 const int NUM_THIRDNEAREST_NEIGHBORS = 8;
 
 const int NN_NNN = NUM_NEAREST_NEIGHBORS + NUM_SECONDNEAREST_NEIGHBORS;
-
-// Maximum allowed std::string length (NOT USED)
-const int MAXSTRING = 128;
 
 // Reference temperature for kinetic calculations [K]
 const double REFTEMP = 298.15;

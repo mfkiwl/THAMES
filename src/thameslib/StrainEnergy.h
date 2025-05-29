@@ -15,8 +15,6 @@ account for elastic strain energy.
 #include <string>
 #include <vector>
 
-using namespace std;
-
-extern vector<double> strainenergy;
+extern std::vector<double> strainenergy;
 
 #endif // SRC_THAMESLIB_STRAINENERGY_H_

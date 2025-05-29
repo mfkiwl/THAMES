@@ -29,9 +29,6 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 #include <iostream>
 #include <map>
 #include <string>
-#include <vector>
-
-using namespace std;
 
 /**
 @class StandardKineticModel
@@ -91,7 +88,7 @@ public:
 
   @return a string indicating the model type
   */
-  string getType() const { return (StandardType); }
+  std::string getType() const { return (StandardType); }
 
   /**
   @brief Set the surface area multiplier

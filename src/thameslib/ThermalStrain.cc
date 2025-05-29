@@ -6,8 +6,6 @@
 #include "ThermalStrain.h"
 #include <iostream>
 
-using namespace std;
-
 ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim,
                              ChemicalSystem *cs, int npoints,
                              const bool verbose, const bool warning)
@@ -22,15 +20,16 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim,
 #endif
 
   if (verbose_) {
-    cout << "ThermalStrain::ThermalStrain" << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::ThermalStrain" << std::endl;
+    std::cout.flush();
   }
 
   kmax_ = 3; // 40;
-  cout << endl
-       << "ThermalStrain::ThermalStrain - "
-          "the number of relaxation steps for elastic computation :  kmax_ = "
-       << kmax_ << endl;
+  std::cout
+      << std::endl
+      << "ThermalStrain::ThermalStrain - "
+         "the number of relaxation steps for elastic computation :  kmax_ = "
+      << kmax_ << std::endl;
 
   isFirst_ = true;
 
@@ -39,13 +38,14 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim,
   localgg_ = 0.0;
 
   boxsize_ = 27;
-  boxnum_ = (int)pow((double)((int)(boxsize_ / 2) * 2 + 1), (double)(3));
+  boxnum_ = static_cast<int>(
+      pow(static_cast<double>(static_cast<int>(boxsize_ / 2) * 2 + 1), 3.0));
   localgtest_ = 1.0e-30 * boxnum_;
 
   if (verbose_) {
-    cout << "ThermslStrain::ThermalStrain localgtest_ is: " << localgtest_
-         << endl;
-    cout.flush();
+    std::cout << "ThermslStrain::ThermalStrain localgtest_ is: " << localgtest_
+              << std::endl;
+    std::cout.flush();
   }
 
   eigen_.clear();
@@ -104,49 +104,54 @@ ThermalStrain::ThermalStrain(int nx, int ny, int nz, int dim,
   if (mPhId != -1) {
     tstrength_[mPhId] = 1.0; // CSHQ [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"CSHQ\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"CSHQ\") = -1 !!!" << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("AFt");
   if (mPhId != -1) {
     tstrength_[mPhId] = 1.0; // AFt [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"AFt\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"AFt\") = -1 !!!" << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("Hydrotalcite");
   if (mPhId != -1) {
     tstrength_[mPhId] = 1.0; // Hydrotalcite [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"Hydrotalcite) = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"Hydrotalcite) = -1 !!!"
+              << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("Alite");
   if (mPhId != -1) {
     tstrength_[mPhId] = 10.0; // C3S - Alite [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"Alite\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"Alite\") = -1 !!!"
+              << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("Belite");
   if (mPhId != -1) {
     tstrength_[mPhId] = 10.0; // C2S - Belite [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"Belite\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"Belite\") = -1 !!!"
+              << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("Aluminate");
   if (mPhId != -1) {
     tstrength_[mPhId] = 10.0; // C3A - Aluminate [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"Aluminate\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"Aluminate\") = -1 !!!"
+              << std::endl;
   }
 
   mPhId = chemSys_->getMicroPhaseId_SA("Ferrite");
   if (mPhId != -1) {
     tstrength_[mPhId] = 10.0; // C4AF - Ferrite [MPa]
   } else {
-    cout << "chemSys_->getMicroPhaseId_SA(\"Ferrite\") = -1 !!!" << endl;
+    std::cout << "chemSys_->getMicroPhaseId_SA(\"Ferrite\") = -1 !!!"
+              << std::endl;
   }
 
   zcon_.clear();
@@ -251,7 +256,7 @@ void ThermalStrain::femat(int iskip) {
             nm++;
           if (k == 1)
             nm++;
-          g[i][j][k] = pow((double)4, (double)nm);
+          g[i][j][k] = pow(4.0, static_cast<double>(nm));
         }
       }
     }
@@ -267,9 +272,9 @@ void ThermalStrain::femat(int iskip) {
       for (int k = 0; k < 3; k++) {
         for (int j = 0; j < 3; j++) {
           for (int i = 0; i < 3; i++) {
-            x = (float)(i) / 2.0;
-            y = (float)(j) / 2.0;
-            z = (float)(k) / 2.0;
+            x = static_cast<float>(i) / 2.0;
+            y = static_cast<float>(j) / 2.0;
+            z = static_cast<float>(k) / 2.0;
 
             ///
             /// dndx means the negative derivative with respect to x, of the
@@ -546,7 +551,7 @@ void ThermalStrain::femat(int iskip) {
         // nx1 = nx - 1, ny1 = ny - 1, nz1 = nz - 1
         for (int i = 0; i < nx1; i++) {
           for (int k = 0; k < nz1; k++) {
-            m = nxy_ * k + nx_ * ny1 + i;
+            m = nx_ * k + nx_ * ny1 + i;
             for (int nn = 0; nn < 3; nn++) {
               for (int mm = 0; mm < 8; mm++) {
                 T_[ns_ + ipp][jpp] -= ss_[m][mm][nn] * delta[mm][nn];
@@ -1804,9 +1809,10 @@ void ThermalStrain::constfunc() {
             jj = j + mj + 2;
           zcon_[i][mi][j][mj] = pp[ii][jj];
           if (verbose_) {
-            cout << "ThermalStrain::constfunc i, mi, j, mj, zcon_[" << i << "]["
-                 << mi << "][" << j << "][" << mj << "]" << i << " " << mi
-                 << " " << j << " " << mj << " " << zcon_[i][mi][j][mj] << endl;
+            std::cout << "ThermalStrain::constfunc i, mi, j, mj, zcon_[" << i
+                      << "][" << mi << "][" << j << "][" << mj << "]" << i
+                      << " " << mi << " " << j << " " << mj << " "
+                      << zcon_[i][mi][j][mj] << std::endl;
           }
         }
       }
@@ -2246,20 +2252,20 @@ int ThermalStrain::dembx(int ldemb, int kkk) {
     }
 
     /*
-    string outfilename = "displacement.dat";
+    std::string outfilename = "displacement.dat";
     ofstream out1(outfilename.c_str(),ios::app);
-    out1 << "after one step of relaxation..." << endl;
+    out1 << "after one step of relaxation..." << std::endl;
     for (int k = 0; k < nz_; k++) {
       int m = nx_ * ny_ * k + nx_ * 50 + 50;
-      out1 << u_[m][0] << endl;
+      out1 << u_[m][0] << std::endl;
     }
-    out1 << "macrostrain:" << endl;
-    out1 << u_[ns_][0] << endl;
-    out1 << u_[ns_][1] << endl;
-    out1 << u_[ns_][2] << endl;
-    out1 << u_[ns_+1][0] << endl;
-    out1 << u_[ns_+1][1] << endl;
-    out1 << u_[ns_+1][2] << endl;
+    out1 << "macrostrain:" << std::endl;
+    out1 << u_[ns_][0] << std::endl;
+    out1 << u_[ns_][1] << std::endl;
+    out1 << u_[ns_][2] << std::endl;
+    out1 << u_[ns_+1][0] << std::endl;
+    out1 << u_[ns_+1][1] << std::endl;
+    out1 << u_[ns_+1][2] << std::endl;
     */
 
     gglast = gg_;
@@ -2306,25 +2312,25 @@ void ThermalStrain::relax(int kmax) {
   }
 
   if (verbose_) {
-    cout << "ThermalStrain::relax gg_ = " << gg_ << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::relax gg_ = " << gg_ << std::endl;
+    std::cout.flush();
   }
 
   /*
-  string outfilename = "displacement.dat";
+  std::string outfilename = "displacement.dat";
   ofstream out(outfilename.c_str(),ios::app);
-  out << "displacement got from previous step:" << endl;
+  out << "displacement got from previous step:" << std::endl;
   for (int k = 0; k < nz_; k++) {
     int m = nx_ * ny_ * k + nx_ * 50 + 50;
-    out << u_[m][0] << endl;
+    out << u_[m][0] << std::endl;
   }
-  out << "macrostrain:" << endl;
-  out << u_[ns_][0] << endl;
-  out << u_[ns_][1] << endl;
-  out << u_[ns_][2] << endl;
-  out << u_[ns_+1][0] << endl;
-  out << u_[ns_+1][1] << endl;
-  out << u_[ns_+1][2] << endl;
+  out << "macrostrain:" << std::endl;
+  out << u_[ns_][0] << std::endl;
+  out << u_[ns_][1] << std::endl;
+  out << u_[ns_][2] << std::endl;
+  out << u_[ns_+1][0] << std::endl;
+  out << u_[ns_+1][1] << std::endl;
+  out << u_[ns_+1][2] << std::endl;
   */
 
   for (int kkk = 0; kkk < kmax; kkk++) {
@@ -2354,9 +2360,9 @@ void ThermalStrain::relax(int kmax) {
     utot = energy();
 
     if (verbose_) {
-      cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
-           << " ltot = " << ltot << endl;
-      cout.flush();
+      std::cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
+                << " ltot = " << ltot << std::endl;
+      std::cout.flush();
     }
 
     ///
@@ -2373,22 +2379,23 @@ void ThermalStrain::relax(int kmax) {
       stress();
 
       if (verbose_) {
-        cout << "ThermalStrain::relax stresses: xx, "
-             << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " "
-             << strzz_ << " " << strxz_ << " " << stryz_ << " " << strxy_
-             << endl;
-        cout << "ThermalStrain::relax strains: xx, "
-             << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_
-             << " " << sxz_ << " " << syz_ << " " << sxy_ << endl;
-        cout << "ThermalStrain::relax macrostrains "
-             << "in same order " << u_[ns_][0] << " " << u_[ns_][1] << " "
-             << u_[ns_][2] << " " << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1]
-             << " " << u_[ns_ + 1][2] << " " << endl;
-        cout << "ThermalStrain::relax avg = "
-             << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
-        cout << "ThermalStrain::relax energy = " << utot << " gg_ = " << gg_
-             << " ltot = " << ltot << endl;
-        cout.flush();
+        std::cout << "ThermalStrain::relax stresses: xx, "
+                  << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " "
+                  << strzz_ << " " << strxz_ << " " << stryz_ << " " << strxy_
+                  << std::endl;
+        std::cout << "ThermalStrain::relax strains: xx, "
+                  << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_
+                  << " " << sxz_ << " " << syz_ << " " << sxy_ << std::endl;
+        std::cout << "ThermalStrain::relax macrostrains "
+                  << "in same order " << u_[ns_][0] << " " << u_[ns_][1] << " "
+                  << u_[ns_][2] << " " << u_[ns_ + 1][0] << " "
+                  << u_[ns_ + 1][1] << " " << u_[ns_ + 1][2] << " "
+                  << std::endl;
+        std::cout << "ThermalStrain::relax avg = "
+                  << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << std::endl;
+        std::cout << "ThermalStrain::relax energy = " << utot
+                  << " gg_ = " << gg_ << " ltot = " << ltot << std::endl;
+        std::cout.flush();
       }
 
     } else {
@@ -2400,24 +2407,26 @@ void ThermalStrain::relax(int kmax) {
   stress();
 
   if (verbose_) {
-    cout << "ThermalStrain::relax stresses: xx, "
-         << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " " << strzz_
-         << " " << strxz_ << " " << stryz_ << " " << strxy_ << endl;
-    cout << "ThermalStrain::relax strains: xx, "
-         << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_ << " "
-         << sxz_ << " " << syz_ << " " << sxy_ << endl;
+    std::cout << "ThermalStrain::relax stresses: xx, "
+              << "yy, zz, xz, yz, xy " << strxx_ << " " << stryy_ << " "
+              << strzz_ << " " << strxz_ << " " << stryz_ << " " << strxy_
+              << std::endl;
+    std::cout << "ThermalStrain::relax strains: xx, "
+              << "yy, zz, xz, yz, xy " << sxx_ << " " << syy_ << " " << szz_
+              << " " << sxz_ << " " << syz_ << " " << sxy_ << std::endl;
 
-    cout << "ThermalStrain::relax macrostrains in same order " << u_[ns_][0]
-         << " " << u_[ns_][1] << " " << u_[ns_][2] << " " << u_[ns_ + 1][0]
-         << " " << u_[ns_ + 1][1] << " " << u_[ns_ + 1][2] << " " << endl;
-    cout << "ThermalStrain::relax avg = "
-         << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::relax macrostrains in same order "
+              << u_[ns_][0] << " " << u_[ns_][1] << " " << u_[ns_][2] << " "
+              << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1] << " "
+              << u_[ns_ + 1][2] << " " << std::endl;
+    std::cout << "ThermalStrain::relax avg = "
+              << (u_[ns_][0] + u_[ns_][1] + u_[ns_][2]) / 3.0 << std::endl;
+    std::cout.flush();
   }
 
   ostringstream ostr2;
   ostr2 << ltot;
-  // string step(ostr2.str());
+  // std::string step(ostr2.str());
 
   // writeStress(time,step,0);
   // writeStrainEngy(time,step);
@@ -2722,8 +2731,9 @@ void ThermalStrain::stress() {
   return;
 }
 
-void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
-                         double ezz, double exz, double eyz, double exy) {
+void ThermalStrain::Calc(double time, std::string fileName, double exx,
+                         double eyy, double ezz, double exz, double eyz,
+                         double exy) {
   int kmax = kmax_; // 60;
   int iskip;
   int m;
@@ -2743,21 +2753,22 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 
 #ifdef DEBUG
   for (int i = 0; i < nphase_; i++) {
-    cout << "ThermalStrain::Calc Phase " << i << " bulk = " << phasemod_[i][0]
-         << " shear = " << phasemod_[i][1] << endl;
+    std::cout << "ThermalStrain::Calc Phase " << i
+              << " bulk = " << phasemod_[i][0] << " shear = " << phasemod_[i][1]
+              << std::endl;
   }
 
   for (int i = 0; i < nphase_; i++) {
-    cout << "ThermalStrain::Calc Volume fraction of phase " << i << "  is "
-         << prob_[i] << endl;
+    std::cout << "ThermalStrain::Calc Volume fraction of phase " << i << "  is "
+              << prob_[i] << std::endl;
   }
-  cout.flush();
+  std::cout.flush();
 
   ///
   /// Output thermal strains for each phase.
   ///
 
-  cout << "Thermal Strains" << endl;
+  std::cout << "Thermal Strains" << std::endl;
   for (int i = 0; i < ns_; i++) {
     bool flag = false;
     for (int j = 0; j < 6; j++) {
@@ -2765,18 +2776,19 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
         flag = true;
     }
     if (flag)
-      cout << "eigen of site[" << i << "]: " << eigen_[i][0] << "   "
-           << eigen_[i][1] << "   " << eigen_[i][2] << "   " << eigen_[i][3]
-           << "   " << eigen_[i][4] << "   " << eigen_[i][5] << "   "
-           << "phase is: " << pix_[i] << endl;
+      std::cout << "eigen of site[" << i << "]: " << eigen_[i][0] << "   "
+                << eigen_[i][1] << "   " << eigen_[i][2] << "   "
+                << eigen_[i][3] << "   " << eigen_[i][4] << "   "
+                << eigen_[i][5] << "   "
+                << "phase is: " << pix_[i] << std::endl;
   }
 #endif
 
   if (isFirst_) {
 #ifdef DEBUG
-    cout << "ThermalStrain::Calc This is the first time "
-         << "Calc to be called, "
-         << "so u_ should be initialized." << endl;
+    std::cout << "ThermalStrain::Calc This is the first time "
+              << "Calc to be called, "
+              << "so u_ should be initialized." << std::endl;
 #endif
 
     ///
@@ -2794,12 +2806,12 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
     u_[ns_ + 1][2] = exy;
 
 #ifdef DEBUG
-    cout << "ThermalStrain::Calc Applied engineering strains" << endl;
-    cout << "ThermalStrain::Calc exx,   eyy,   ezz,   exz,   eyz,   exy"
-         << endl;
-    cout << "ThermalStrain::Calc " << exx << "   " << eyy << "   " << ezz
-         << "   " << exz << "   " << eyz << "   " << exy << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::Calc Applied engineering strains" << std::endl;
+    std::cout << "ThermalStrain::Calc exx,   eyy,   ezz,   exz,   eyz,   exy"
+              << std::endl;
+    std::cout << "ThermalStrain::Calc " << exx << "   " << eyy << "   " << ezz
+              << "   " << exz << "   " << eyz << "   " << exy << std::endl;
+    std::cout.flush();
 #endif
 
     ///
@@ -2811,9 +2823,9 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
       for (int j = 0; j < ny_; j++) {
         for (int i = 0; i < nx_; i++) {
           m = nxy_ * k + nx_ * j + i;
-          // double x = (double)i;
-          // double y = (double)j;
-          // double z = (double)k;
+          // double x = static_cast<double>(i);
+          // double y = static_cast<double>(j);
+          // double z = static_cast<double>(k);
           // u_[m][0] = x * u_[ns_][0] + y * u_[ns_ + 1][2] + z * u_[ns_ +
           // 1][0]; u_[m][1] = x * u_[ns_ + 1][2] + y * u_[ns_][1] + z * u_[ns_
           // + 1][1]; u_[m][2] = x * u_[ns_ + 1][0] + y * u_[ns_ + 1][1] + z *
@@ -2826,17 +2838,17 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
     }
     if (time > 0) {
 #ifdef DEBUG
-      cout << "ThermalStrain::Calc Trying to open "
-           << "displacement.dat file to initialize u_" << endl;
-      cout.flush();
+      std::cout << "ThermalStrain::Calc Trying to open "
+                << "displacement.dat file to initialize u_" << std::endl;
+      std::cout.flush();
 #endif
 
       ifstream in("displacement.dat");
       if (!in) {
 #ifdef DEBUG
-        cout << "ThermalStrain::Calc Cannot find "
-             << "displacement.dat file." << endl;
-        cout.flush();
+        std::cout << "ThermalStrain::Calc Cannot find "
+                  << "displacement.dat file." << std::endl;
+        std::cout.flush();
 #endif
       } else {
         double buff;
@@ -2899,8 +2911,9 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
   }
 
 #ifdef DEBUG
-  cout << "ThermalStrain::Calc energy = " << utot << " gg_ = " << gg_ << endl;
-  cout.flush();
+  std::cout << "ThermalStrain::Calc energy = " << utot << " gg_ = " << gg_
+            << std::endl;
+  std::cout.flush();
 #endif
 
   for (int m1 = 0; m1 < 3; m1++) {
@@ -2960,16 +2973,16 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
 
   for (int count = 0; count < 0; count++) { // check!
 #ifdef DEBUG
-    cout << "ThermalStrain::Calc boxsize_ is: " << boxsize_ << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::Calc boxsize_ is: " << boxsize_ << std::endl;
+    std::cout.flush();
 #endif
 
-    for (map<int, vector<int>>::iterator it = exp_.begin(); it != exp_.end();
-         it++) {
+    for (std::map<int, std::vector<int>>::iterator it = exp_.begin();
+         it != exp_.end(); it++) {
       localgg_ = 0.0;
       int halfbox = boxsize_ / 2;
       int expindex = it->first;
-      vector<int> expcor = it->second;
+      std::vector<int> expcor = it->second;
       int xlo = expcor[0] - halfbox;
       int xhi = expcor[0] + halfbox;
       int ylo = expcor[1] - halfbox;
@@ -3013,8 +3026,8 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
         }
       }
 #ifdef DEBUG
-      cout << "ThermalStrain::Calc localgg_ is: " << localgg_ << endl;
-      cout.flush();
+      std::cout << "ThermalStrain::Calc localgg_ is: " << localgg_ << std::endl;
+      std::cout.flush();
 #endif
 
       localRelax(boxsize_, expcor[0], expcor[1], expcor[2], expindex);
@@ -3022,19 +3035,19 @@ void ThermalStrain::Calc(double time, string fileName, double exx, double eyy,
   }
   relax(kmax);
 
-  string outfilename = "displacement.dat";
+  std::string outfilename = "displacement.dat";
   ofstream out(outfilename.c_str());
   for (int k = 0; k < nz_; k++) {
     for (int j = 0; j < ny_; j++) {
       for (int i = 0; i < nx_; i++) {
         int m = nx_ * ny_ * k + nx_ * j + i;
-        out << u_[m][0] << " " << u_[m][1] << " " << u_[m][2] << endl;
+        out << u_[m][0] << " " << u_[m][1] << " " << u_[m][2] << std::endl;
       }
     }
   }
-  out << u_[ns_][0] << " " << u_[ns_][1] << " " << u_[ns_][2] << endl;
+  out << u_[ns_][0] << " " << u_[ns_][1] << " " << u_[ns_][2] << std::endl;
   out << u_[ns_ + 1][0] << " " << u_[ns_ + 1][1] << " " << u_[ns_ + 1][2]
-      << endl;
+      << std::endl;
   out.close();
 
   return;
@@ -3046,7 +3059,7 @@ int ThermalStrain::localDembx(int boxsize, int x, int y, int z, int localldemb,
   double lambda, gamma;
   double hAh, gglast;
   int Lstep;
-  int halfbox = (int)(boxsize / 2);
+  int halfbox = static_cast<int>(boxsize / 2);
   bool flag =
       false; // determines whether bgrad function needs to be called or not
 
@@ -3416,8 +3429,9 @@ int ThermalStrain::localDembx(int boxsize, int x, int y, int z, int localldemb,
     }
 
 #ifdef DEBUG
-    cout << "ThermalStrain::localDembx localgg_ = " << localgg_ << endl;
-    cout.flush();
+    std::cout << "ThermalStrain::localDembx localgg_ = " << localgg_
+              << std::endl;
+    std::cout.flush();
 #endif
 
     if (localgg_ < localgtest_) {
@@ -3425,8 +3439,8 @@ int ThermalStrain::localDembx(int boxsize, int x, int y, int z, int localldemb,
     } else {
       gamma = localgg_ / gglast;
 #ifdef DEBUG
-      cout << "ThermalStrain::localDembx gamma = " << gamma << endl;
-      cout.flush();
+      std::cout << "ThermalStrain::localDembx gamma = " << gamma << std::endl;
+      std::cout.flush();
 #endif
       for (int m3 = 0; m3 < 3; m3++) {
         for (int k = zlo; k <= zhi; k++) {

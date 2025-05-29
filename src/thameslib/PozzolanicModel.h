@@ -14,8 +14,8 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 
 */
 
-#ifndef SRC_THAMES_POZZOLANICMODEL_H_
-#define SRC_THAMES_POZZOLANICMODEL_H_
+#ifndef SRC_THAMESLIB_POZZOLANICMODEL_H_
+#define SRC_THAMESLIB_POZZOLANICMODEL_H_
 
 #include "ChemicalSystem.h"
 #include "KineticController.h"
@@ -27,11 +27,7 @@ National Academy of Sciences USA, 105 (2008) 9903–9908.
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <map>
 #include <string>
-#include <vector>
-
-using namespace std;
 
 /**
 @class PozzolanicModel
@@ -100,7 +96,7 @@ public:
 
   @return a string indicating the model type
   */
-  string getType() const { return (PozzolanicType); }
+  std::string getType() const { return (PozzolanicType); }
 
   /**
   @brief Set the surface area multiplier
@@ -357,4 +353,4 @@ public:
 
 }; // End of PozzolanicModel class
 
-#endif // SRC_THAMES_POZZOLANICMODEL_H_
+#endif // SRC_THAMESLIB_POZZOLANICMODEL_H_

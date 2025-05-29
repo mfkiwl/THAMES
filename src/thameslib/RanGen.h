@@ -10,7 +10,6 @@
 #include "ran2.h"
 #include "ran3.h"
 #include <stdexcept>
-#include <vector>
 
 /**
 @class RanGen
