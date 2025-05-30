@@ -6689,19 +6689,6 @@ void Lattice::transformGrowPhase(Site *ste, int growPhID, int totalTRC) {
       }
     }
   }
-
-  // if (verbose_) {
-  //   int steId = ste->getId();
-  //   std::cout << std::endl
-  //        << "    Lattice::transformGrowPhase() END totalTRC/trc_gT  "
-  //        << totalTRC << "/" << trc_gT << "  :  steId = "
-  //        << steId << "  => growPhID = " << setw(3) << growPhID
-  //        << "   growPhName = " << setw(15) << left << growPhName
-  //        << "   count_ = " << setw(8) << right << count_[growPhID]
-  //        << "   growthInterfaceSize_ = " << setw(8)
-  //        << growthInterfaceSize_[growPhID] << std::endl;
-  //   std::cout.flush();
-  // }
 }
 
 void Lattice::createGrowingVectSA() {
@@ -6713,13 +6700,6 @@ void Lattice::createGrowingVectSA() {
   idummy.clear();
   std::vector<double> ddummy;
   ddummy.clear();
-
-  // extern std::string CSHMicroName;
-  // extern std::string MonocarbMicroName;
-  // extern std::string HemicarbMicroName;
-  // extern std::string MonosulfMicroName;
-  // extern std::string HydrotalcMicroName;
-  // extern std::string AFTMicroName;
 
   growingVectSA_.push_back(chemSys_->getMicroPhaseId(AFTMicroName));
   sizeGrowingVectSA_ = growingVectSA_.size();
