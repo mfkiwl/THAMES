@@ -4,6 +4,7 @@
 
 | Date                     | Description                         |
 |:-------------------------|:-------------------------------------|
+| May 30 09:48 2025 | Made all global variables inline |
 | May 29 16:32 2025 | Removed namespace directives |
 | May 28 16:16 2025 | Using recommended header guards |
 | May 23 20:08 2025 | Reverted GEM input files (dch,dbr, etc) to avoid infinite loops in GEM_run |

@@ -6714,12 +6714,12 @@ void Lattice::createGrowingVectSA() {
   std::vector<double> ddummy;
   ddummy.clear();
 
-  extern std::string CSHMicroName;
-  extern std::string MonocarbMicroName;
+  // extern std::string CSHMicroName;
+  // extern std::string MonocarbMicroName;
   // extern std::string HemicarbMicroName;
-  extern std::string MonosulfMicroName;
-  extern std::string HydrotalcMicroName;
-  extern std::string AFTMicroName;
+  // extern std::string MonosulfMicroName;
+  // extern std::string HydrotalcMicroName;
+  // extern std::string AFTMicroName;
 
   growingVectSA_.push_back(chemSys_->getMicroPhaseId(AFTMicroName));
   sizeGrowingVectSA_ = growingVectSA_.size();

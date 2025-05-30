@@ -60,9 +60,13 @@ use Homebrew for package management:
 
 * `brew install gcc`
 * `cd /opt/homebrew/bin`
-* `ln -s gcc-13 gcc`
-* `ln -s g++-13 g++`
+* `ln -s gcc-14 gcc`
+* `ln -s g++-14 g++`
 * Edit your path to ensure that `/opt/homebrew/bin` comes before `/usr/bin`
+
+**Note**: You may have a different version of gcc than that shown above. THAMES seems to compile just as well with gcc-13.
+
+**Note for Mac OS**: Pre-built binaries of **gcc-15**, say those provided by Homebrew or MacPorts, seem to be incompatible with the most recent version of Apple's Software Development Kit (SDK), which at the time of this writing is 14.5.  Therefore, either do not use gcc-15 for THAMES, or build gcc-15 from source code rather than installing pre-built binaries. 
 
 ### Build GEMS3K library
 
